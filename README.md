@@ -90,8 +90,8 @@ java -cp "Mandoline/target/mandoline-jar-with-dependencies.jar:Mandoline/target/
 
 
 <b>instrument-mode:</b> Instrumentation mode:
-* m: mandoline, basic block instrumentation, thread id recording and execution time recording
-* as: AndroidSlicer++, statement level instrumentation, thread id recording, field object address recording, and execution time recording
+* m: mandoline, basic block instrumentation, thread id recording, and execution time recording
+* as: AndroidSlicer++, statement level instrumentation, thread id recording, and execution time recording
 
 Add "j" to the end of any mode to print the jimple code instead of producing the instrumented apk. The jimple code is placed in the output directory under "jimple_code".
 
