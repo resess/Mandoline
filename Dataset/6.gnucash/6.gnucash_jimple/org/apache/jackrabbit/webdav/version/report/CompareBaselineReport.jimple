@@ -1,0 +1,450 @@
+org.apache.jackrabbit.webdav.version.report.CompareBaselineReport extends java.lang.Object implements org.apache.jackrabbit.webdav.version.report.Report
+public static final org.apache.jackrabbit.webdav.version.report.ReportType COMPARE_BASELINE
+private static final java.lang.String XML_ADDED_VERSION
+private static final java.lang.String XML_CHANGED_VERSION
+private static final java.lang.String XML_COMPARE_BASELINE
+private static final java.lang.String XML_COMPARE_BASELINE_REPORT
+private static final java.lang.String XML_DELETED_VERSION
+private static org.slf4j.Logger log
+private org.apache.jackrabbit.webdav.version.BaselineResource compareBaseline
+private org.apache.jackrabbit.webdav.version.BaselineResource requestBaseline
+    static void <clinit>()
+    {
+        org.apache.jackrabbit.webdav.xml.Namespace $r0;
+        org.slf4j.Logger $r1;
+        org.apache.jackrabbit.webdav.version.report.ReportType $r2;
+
+        $r1 = staticinvoke <org.slf4j.LoggerFactory: org.slf4j.Logger getLogger(java.lang.Class)>(class "Lorg/apache/jackrabbit/webdav/version/report/CompareBaselineReport;");
+
+        <org.apache.jackrabbit.webdav.version.report.CompareBaselineReport: org.slf4j.Logger log> = $r1;
+
+        $r0 = <org.apache.jackrabbit.webdav.version.DeltaVConstants: org.apache.jackrabbit.webdav.xml.Namespace NAMESPACE>;
+
+        $r2 = staticinvoke <org.apache.jackrabbit.webdav.version.report.ReportType: org.apache.jackrabbit.webdav.version.report.ReportType register(java.lang.String,org.apache.jackrabbit.webdav.xml.Namespace,java.lang.Class)>("compare-baseline", $r0, class "Lorg/apache/jackrabbit/webdav/version/report/CompareBaselineReport;");
+
+        <org.apache.jackrabbit.webdav.version.report.CompareBaselineReport: org.apache.jackrabbit.webdav.version.report.ReportType COMPARE_BASELINE> = $r2;
+
+        return;
+    }
+    public void <init>()
+    {
+        org.apache.jackrabbit.webdav.version.report.CompareBaselineReport r0;
+
+        r0 := @this: org.apache.jackrabbit.webdav.version.report.CompareBaselineReport;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+    private org.apache.jackrabbit.webdav.version.VersionResource findChangedVersion(org.apache.jackrabbit.webdav.version.VersionResource, java.util.List) throws org.apache.jackrabbit.webdav.DavException
+    {
+        org.apache.jackrabbit.webdav.version.report.CompareBaselineReport r0;
+        org.apache.jackrabbit.webdav.version.VersionResource $r1;
+        java.util.List r2;
+        int i0, i1;
+        org.apache.jackrabbit.webdav.version.VersionHistoryResource $r3;
+        org.apache.jackrabbit.webdav.version.VersionResource[] $r4;
+        boolean $z0;
+
+        r0 := @this: org.apache.jackrabbit.webdav.version.report.CompareBaselineReport;
+
+        $r1 := @parameter0: org.apache.jackrabbit.webdav.version.VersionResource;
+
+        r2 := @parameter1: java.util.List;
+
+        $r3 = interfaceinvoke $r1.<org.apache.jackrabbit.webdav.version.VersionResource: org.apache.jackrabbit.webdav.version.VersionHistoryResource getVersionHistory()>();
+
+        $r4 = interfaceinvoke $r3.<org.apache.jackrabbit.webdav.version.VersionHistoryResource: org.apache.jackrabbit.webdav.version.VersionResource[] getVersions()>();
+
+        i0 = lengthof $r4;
+
+        i1 = 0;
+
+     label1:
+        if i1 >= i0 goto label3;
+
+        $r1 = $r4[i1];
+
+        $z0 = interfaceinvoke r2.<java.util.List: boolean remove(java.lang.Object)>($r1);
+
+        if $z0 == 0 goto label2;
+
+        return $r1;
+
+     label2:
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label3:
+        return null;
+    }
+    private void getVersions(org.apache.jackrabbit.webdav.DavResource, java.util.List) throws org.apache.jackrabbit.webdav.DavException
+    {
+        org.apache.jackrabbit.webdav.version.report.CompareBaselineReport r0;
+        org.apache.jackrabbit.webdav.DavResource $r1, $r15;
+        java.util.List r2, $r7;
+        org.apache.jackrabbit.webdav.DavResourceIterator $r3;
+        boolean $z0;
+        org.apache.jackrabbit.webdav.property.HrefProperty $r4;
+        org.apache.jackrabbit.webdav.property.DavPropertyName $r5;
+        org.apache.jackrabbit.webdav.property.DavProperty $r6;
+        java.lang.Object $r8;
+        java.lang.String r9, $r12;
+        org.apache.jackrabbit.webdav.DavResourceLocator $r10;
+        org.apache.jackrabbit.webdav.DavLocatorFactory $r11;
+        org.apache.jackrabbit.webdav.DavResourceFactory $r13;
+        org.apache.jackrabbit.webdav.DavSession $r14;
+        org.apache.jackrabbit.webdav.version.VersionResource r16;
+        org.slf4j.Logger $r17;
+
+        r0 := @this: org.apache.jackrabbit.webdav.version.report.CompareBaselineReport;
+
+        $r1 := @parameter0: org.apache.jackrabbit.webdav.DavResource;
+
+        r2 := @parameter1: java.util.List;
+
+        $r3 = interfaceinvoke $r1.<org.apache.jackrabbit.webdav.DavResource: org.apache.jackrabbit.webdav.DavResourceIterator getMembers()>();
+
+     label1:
+        $z0 = interfaceinvoke $r3.<org.apache.jackrabbit.webdav.DavResourceIterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label4;
+
+        $r1 = interfaceinvoke $r3.<org.apache.jackrabbit.webdav.DavResourceIterator: org.apache.jackrabbit.webdav.DavResource nextResource()>();
+
+        $z0 = $r1 instanceof org.apache.jackrabbit.webdav.version.VersionControlledResource;
+
+        if $z0 == 0 goto label2;
+
+        $r4 = new org.apache.jackrabbit.webdav.property.HrefProperty;
+
+        $r5 = <org.apache.jackrabbit.webdav.version.VersionControlledResource: org.apache.jackrabbit.webdav.property.DavPropertyName CHECKED_IN>;
+
+        $r6 = interfaceinvoke $r1.<org.apache.jackrabbit.webdav.DavResource: org.apache.jackrabbit.webdav.property.DavProperty getProperty(org.apache.jackrabbit.webdav.property.DavPropertyName)>($r5);
+
+        specialinvoke $r4.<org.apache.jackrabbit.webdav.property.HrefProperty: void <init>(org.apache.jackrabbit.webdav.property.DavProperty)>($r6);
+
+        $r7 = virtualinvoke $r4.<org.apache.jackrabbit.webdav.property.HrefProperty: java.util.List getHrefs()>();
+
+        $r8 = interfaceinvoke $r7.<java.util.List: java.lang.Object get(int)>(0);
+
+        r9 = (java.lang.String) $r8;
+
+        $r10 = interfaceinvoke $r1.<org.apache.jackrabbit.webdav.DavResource: org.apache.jackrabbit.webdav.DavResourceLocator getLocator()>();
+
+        $r11 = interfaceinvoke $r10.<org.apache.jackrabbit.webdav.DavResourceLocator: org.apache.jackrabbit.webdav.DavLocatorFactory getFactory()>();
+
+        $r12 = interfaceinvoke $r10.<org.apache.jackrabbit.webdav.DavResourceLocator: java.lang.String getPrefix()>();
+
+        $r10 = interfaceinvoke $r11.<org.apache.jackrabbit.webdav.DavLocatorFactory: org.apache.jackrabbit.webdav.DavResourceLocator createResourceLocator(java.lang.String,java.lang.String)>($r12, r9);
+
+        $r13 = interfaceinvoke $r1.<org.apache.jackrabbit.webdav.DavResource: org.apache.jackrabbit.webdav.DavResourceFactory getFactory()>();
+
+        $r14 = interfaceinvoke $r1.<org.apache.jackrabbit.webdav.DavResource: org.apache.jackrabbit.webdav.DavSession getSession()>();
+
+        $r15 = interfaceinvoke $r13.<org.apache.jackrabbit.webdav.DavResourceFactory: org.apache.jackrabbit.webdav.DavResource createResource(org.apache.jackrabbit.webdav.DavResourceLocator,org.apache.jackrabbit.webdav.DavSession)>($r10, $r14);
+
+        $z0 = $r15 instanceof org.apache.jackrabbit.webdav.version.VersionResource;
+
+        if $z0 == 0 goto label3;
+
+        r16 = (org.apache.jackrabbit.webdav.version.VersionResource) $r15;
+
+        interfaceinvoke r2.<java.util.List: boolean add(java.lang.Object)>(r16);
+
+     label2:
+        $z0 = interfaceinvoke $r1.<org.apache.jackrabbit.webdav.DavResource: boolean isCollection()>();
+
+        if $z0 == 0 goto label1;
+
+        specialinvoke r0.<org.apache.jackrabbit.webdav.version.report.CompareBaselineReport: void getVersions(org.apache.jackrabbit.webdav.DavResource,java.util.List)>($r1, r2);
+
+        goto label1;
+
+     label3:
+        $r17 = <org.apache.jackrabbit.webdav.version.report.CompareBaselineReport: org.slf4j.Logger log>;
+
+        interfaceinvoke $r17.<org.slf4j.Logger: void error(java.lang.String)>("Internal error: DAV:checked-in property must point to a VersionResource.");
+
+        goto label2;
+
+     label4:
+        return;
+    }
+    public org.apache.jackrabbit.webdav.version.report.ReportType getType()
+    {
+        org.apache.jackrabbit.webdav.version.report.CompareBaselineReport r0;
+        org.apache.jackrabbit.webdav.version.report.ReportType r1;
+
+        r0 := @this: org.apache.jackrabbit.webdav.version.report.CompareBaselineReport;
+
+        r1 = <org.apache.jackrabbit.webdav.version.report.CompareBaselineReport: org.apache.jackrabbit.webdav.version.report.ReportType COMPARE_BASELINE>;
+
+        return r1;
+    }
+    public void init(org.apache.jackrabbit.webdav.DavResource, org.apache.jackrabbit.webdav.version.report.ReportInfo) throws org.apache.jackrabbit.webdav.DavException
+    {
+        org.apache.jackrabbit.webdav.version.report.CompareBaselineReport r0;
+        org.apache.jackrabbit.webdav.DavResource $r1;
+        org.apache.jackrabbit.webdav.version.report.ReportInfo $r2;
+        org.apache.jackrabbit.webdav.version.report.ReportType $r3;
+        boolean $z0;
+        org.apache.jackrabbit.webdav.DavException $r4;
+        org.apache.jackrabbit.webdav.version.BaselineResource $r5;
+        org.apache.jackrabbit.webdav.xml.Namespace $r6;
+        org.w3c.dom.Element $r7;
+        java.lang.String $r8, $r11;
+        org.apache.jackrabbit.webdav.DavResourceLocator $r9;
+        org.apache.jackrabbit.webdav.DavLocatorFactory $r10;
+        org.apache.jackrabbit.webdav.DavResourceFactory $r12;
+        org.apache.jackrabbit.webdav.DavSession $r13;
+
+        r0 := @this: org.apache.jackrabbit.webdav.version.report.CompareBaselineReport;
+
+        $r1 := @parameter0: org.apache.jackrabbit.webdav.DavResource;
+
+        $r2 := @parameter1: org.apache.jackrabbit.webdav.version.report.ReportInfo;
+
+        $r3 = virtualinvoke r0.<org.apache.jackrabbit.webdav.version.report.CompareBaselineReport: org.apache.jackrabbit.webdav.version.report.ReportType getType()>();
+
+        $z0 = virtualinvoke $r3.<org.apache.jackrabbit.webdav.version.report.ReportType: boolean isRequestedReportType(org.apache.jackrabbit.webdav.version.report.ReportInfo)>($r2);
+
+        if $z0 != 0 goto label1;
+
+        $r4 = new org.apache.jackrabbit.webdav.DavException;
+
+        specialinvoke $r4.<org.apache.jackrabbit.webdav.DavException: void <init>(int,java.lang.String)>(400, "DAV:compare-baseline element expected.");
+
+        throw $r4;
+
+     label1:
+        if $r1 == null goto label2;
+
+        $z0 = $r1 instanceof org.apache.jackrabbit.webdav.version.BaselineResource;
+
+        if $z0 == 0 goto label2;
+
+        $r5 = (org.apache.jackrabbit.webdav.version.BaselineResource) $r1;
+
+        r0.<org.apache.jackrabbit.webdav.version.report.CompareBaselineReport: org.apache.jackrabbit.webdav.version.BaselineResource requestBaseline> = $r5;
+
+        $r6 = <org.apache.jackrabbit.webdav.DavConstants: org.apache.jackrabbit.webdav.xml.Namespace NAMESPACE>;
+
+        $r7 = virtualinvoke $r2.<org.apache.jackrabbit.webdav.version.report.ReportInfo: org.w3c.dom.Element getContentElement(java.lang.String,org.apache.jackrabbit.webdav.xml.Namespace)>("href", $r6);
+
+        $r8 = staticinvoke <org.apache.jackrabbit.webdav.xml.DomUtil: java.lang.String getText(org.w3c.dom.Element)>($r7);
+
+        $r9 = interfaceinvoke $r1.<org.apache.jackrabbit.webdav.DavResource: org.apache.jackrabbit.webdav.DavResourceLocator getLocator()>();
+
+        $r10 = interfaceinvoke $r9.<org.apache.jackrabbit.webdav.DavResourceLocator: org.apache.jackrabbit.webdav.DavLocatorFactory getFactory()>();
+
+        $r11 = interfaceinvoke $r9.<org.apache.jackrabbit.webdav.DavResourceLocator: java.lang.String getPrefix()>();
+
+        $r9 = interfaceinvoke $r10.<org.apache.jackrabbit.webdav.DavLocatorFactory: org.apache.jackrabbit.webdav.DavResourceLocator createResourceLocator(java.lang.String,java.lang.String)>($r11, $r8);
+
+        $r12 = interfaceinvoke $r1.<org.apache.jackrabbit.webdav.DavResource: org.apache.jackrabbit.webdav.DavResourceFactory getFactory()>();
+
+        $r13 = interfaceinvoke $r1.<org.apache.jackrabbit.webdav.DavResource: org.apache.jackrabbit.webdav.DavSession getSession()>();
+
+        $r1 = interfaceinvoke $r12.<org.apache.jackrabbit.webdav.DavResourceFactory: org.apache.jackrabbit.webdav.DavResource createResource(org.apache.jackrabbit.webdav.DavResourceLocator,org.apache.jackrabbit.webdav.DavSession)>($r9, $r13);
+
+        $z0 = $r1 instanceof org.apache.jackrabbit.webdav.version.BaselineResource;
+
+        if $z0 == 0 goto label3;
+
+        $r5 = (org.apache.jackrabbit.webdav.version.BaselineResource) $r1;
+
+        r0.<org.apache.jackrabbit.webdav.version.report.CompareBaselineReport: org.apache.jackrabbit.webdav.version.BaselineResource compareBaseline> = $r5;
+
+        return;
+
+     label2:
+        $r4 = new org.apache.jackrabbit.webdav.DavException;
+
+        specialinvoke $r4.<org.apache.jackrabbit.webdav.DavException: void <init>(int,java.lang.String)>(400, "DAV:compare-baseline report can only be created for a baseline resource.");
+
+        throw $r4;
+
+     label3:
+        $r4 = new org.apache.jackrabbit.webdav.DavException;
+
+        specialinvoke $r4.<org.apache.jackrabbit.webdav.DavException: void <init>(int,java.lang.String)>(400, "DAV:latest-activity-version report: The DAV:href in the request body MUST identify an activity.");
+
+        throw $r4;
+    }
+    public boolean isMultiStatusReport()
+    {
+        org.apache.jackrabbit.webdav.version.report.CompareBaselineReport r0;
+
+        r0 := @this: org.apache.jackrabbit.webdav.version.report.CompareBaselineReport;
+
+        return 0;
+    }
+    public org.w3c.dom.Element toXml(org.w3c.dom.Document)
+    {
+        org.apache.jackrabbit.webdav.version.report.CompareBaselineReport r0;
+        org.w3c.dom.Document $r1;
+        java.util.ArrayList r2, r4;
+        org.apache.jackrabbit.webdav.DavException r3;
+        org.apache.jackrabbit.webdav.xml.Namespace $r5;
+        org.w3c.dom.Element $r6, $r13, $r15;
+        org.apache.jackrabbit.webdav.version.BaselineResource $r7;
+        org.apache.jackrabbit.webdav.DavResource $r8;
+        java.util.Iterator $r9;
+        boolean $z0;
+        java.lang.Object $r10;
+        org.apache.jackrabbit.webdav.version.VersionResource r11, $r12;
+        java.lang.String $r14;
+        org.slf4j.Logger $r16;
+
+        r0 := @this: org.apache.jackrabbit.webdav.version.report.CompareBaselineReport;
+
+        $r1 := @parameter0: org.w3c.dom.Document;
+
+        $r5 = <org.apache.jackrabbit.webdav.version.DeltaVConstants: org.apache.jackrabbit.webdav.xml.Namespace NAMESPACE>;
+
+        $r6 = staticinvoke <org.apache.jackrabbit.webdav.xml.DomUtil: org.w3c.dom.Element createElement(org.w3c.dom.Document,java.lang.String,org.apache.jackrabbit.webdav.xml.Namespace)>($r1, "compare-baseline-report", $r5);
+
+        r4 = new java.util.ArrayList;
+
+     label01:
+        specialinvoke r4.<java.util.ArrayList: void <init>()>();
+
+     label02:
+        $r7 = r0.<org.apache.jackrabbit.webdav.version.report.CompareBaselineReport: org.apache.jackrabbit.webdav.version.BaselineResource requestBaseline>;
+
+     label03:
+        $r8 = interfaceinvoke $r7.<org.apache.jackrabbit.webdav.version.BaselineResource: org.apache.jackrabbit.webdav.DavResource getBaselineCollection()>();
+
+        specialinvoke r0.<org.apache.jackrabbit.webdav.version.report.CompareBaselineReport: void getVersions(org.apache.jackrabbit.webdav.DavResource,java.util.List)>($r8, r4);
+
+     label04:
+        r2 = new java.util.ArrayList;
+
+     label05:
+        specialinvoke r2.<java.util.ArrayList: void <init>()>();
+
+     label06:
+        $r7 = r0.<org.apache.jackrabbit.webdav.version.report.CompareBaselineReport: org.apache.jackrabbit.webdav.version.BaselineResource compareBaseline>;
+
+     label07:
+        $r8 = interfaceinvoke $r7.<org.apache.jackrabbit.webdav.version.BaselineResource: org.apache.jackrabbit.webdav.DavResource getBaselineCollection()>();
+
+        specialinvoke r0.<org.apache.jackrabbit.webdav.version.report.CompareBaselineReport: void getVersions(org.apache.jackrabbit.webdav.DavResource,java.util.List)>($r8, r2);
+
+        $r9 = interfaceinvoke r4.<java.util.List: java.util.Iterator iterator()>();
+
+     label08:
+        $z0 = interfaceinvoke $r9.<java.util.Iterator: boolean hasNext()>();
+
+     label09:
+        if $z0 == 0 goto label22;
+
+     label10:
+        $r10 = interfaceinvoke $r9.<java.util.Iterator: java.lang.Object next()>();
+
+     label11:
+        r11 = (org.apache.jackrabbit.webdav.version.VersionResource) $r10;
+
+     label12:
+        $z0 = interfaceinvoke r2.<java.util.List: boolean remove(java.lang.Object)>(r11);
+
+     label13:
+        if $z0 != 0 goto label08;
+
+     label14:
+        $r12 = specialinvoke r0.<org.apache.jackrabbit.webdav.version.report.CompareBaselineReport: org.apache.jackrabbit.webdav.version.VersionResource findChangedVersion(org.apache.jackrabbit.webdav.version.VersionResource,java.util.List)>(r11, r2);
+
+     label15:
+        if $r12 == null goto label19;
+
+        $r5 = <org.apache.jackrabbit.webdav.version.DeltaVConstants: org.apache.jackrabbit.webdav.xml.Namespace NAMESPACE>;
+
+     label16:
+        $r13 = staticinvoke <org.apache.jackrabbit.webdav.xml.DomUtil: org.w3c.dom.Element addChildElement(org.w3c.dom.Element,java.lang.String,org.apache.jackrabbit.webdav.xml.Namespace)>($r6, "changed-version", $r5);
+
+        $r14 = interfaceinvoke r11.<org.apache.jackrabbit.webdav.version.VersionResource: java.lang.String getHref()>();
+
+        $r15 = staticinvoke <org.apache.jackrabbit.webdav.xml.DomUtil: org.w3c.dom.Element hrefToXml(java.lang.String,org.w3c.dom.Document)>($r14, $r1);
+
+        interfaceinvoke $r13.<org.w3c.dom.Element: org.w3c.dom.Node appendChild(org.w3c.dom.Node)>($r15);
+
+        $r14 = interfaceinvoke $r12.<org.apache.jackrabbit.webdav.version.VersionResource: java.lang.String getHref()>();
+
+        $r15 = staticinvoke <org.apache.jackrabbit.webdav.xml.DomUtil: org.w3c.dom.Element hrefToXml(java.lang.String,org.w3c.dom.Document)>($r14, $r1);
+
+        interfaceinvoke $r13.<org.w3c.dom.Element: org.w3c.dom.Node appendChild(org.w3c.dom.Node)>($r15);
+
+     label17:
+        goto label08;
+
+     label18:
+        r3 := @caughtexception;
+
+        $r16 = <org.apache.jackrabbit.webdav.version.report.CompareBaselineReport: org.slf4j.Logger log>;
+
+        interfaceinvoke $r16.<org.slf4j.Logger: void error(java.lang.String,java.lang.Throwable)>("Internal error while building report", r3);
+
+        return $r6;
+
+     label19:
+        $r5 = <org.apache.jackrabbit.webdav.version.DeltaVConstants: org.apache.jackrabbit.webdav.xml.Namespace NAMESPACE>;
+
+     label20:
+        $r13 = staticinvoke <org.apache.jackrabbit.webdav.xml.DomUtil: org.w3c.dom.Element addChildElement(org.w3c.dom.Element,java.lang.String,org.apache.jackrabbit.webdav.xml.Namespace)>($r6, "deleted-version", $r5);
+
+        $r14 = interfaceinvoke r11.<org.apache.jackrabbit.webdav.version.VersionResource: java.lang.String getHref()>();
+
+        $r15 = staticinvoke <org.apache.jackrabbit.webdav.xml.DomUtil: org.w3c.dom.Element hrefToXml(java.lang.String,org.w3c.dom.Document)>($r14, $r1);
+
+        interfaceinvoke $r13.<org.w3c.dom.Element: org.w3c.dom.Node appendChild(org.w3c.dom.Node)>($r15);
+
+     label21:
+        goto label08;
+
+     label22:
+        $r9 = interfaceinvoke r2.<java.util.List: java.util.Iterator iterator()>();
+
+     label23:
+        $z0 = interfaceinvoke $r9.<java.util.Iterator: boolean hasNext()>();
+
+     label24:
+        if $z0 == 0 goto label29;
+
+     label25:
+        $r10 = interfaceinvoke $r9.<java.util.Iterator: java.lang.Object next()>();
+
+     label26:
+        r11 = (org.apache.jackrabbit.webdav.version.VersionResource) $r10;
+
+        $r5 = <org.apache.jackrabbit.webdav.version.DeltaVConstants: org.apache.jackrabbit.webdav.xml.Namespace NAMESPACE>;
+
+     label27:
+        $r13 = staticinvoke <org.apache.jackrabbit.webdav.xml.DomUtil: org.w3c.dom.Element addChildElement(org.w3c.dom.Element,java.lang.String,org.apache.jackrabbit.webdav.xml.Namespace)>($r6, "added-version", $r5);
+
+        $r14 = interfaceinvoke r11.<org.apache.jackrabbit.webdav.version.VersionResource: java.lang.String getHref()>();
+
+        $r15 = staticinvoke <org.apache.jackrabbit.webdav.xml.DomUtil: org.w3c.dom.Element hrefToXml(java.lang.String,org.w3c.dom.Document)>($r14, $r1);
+
+        interfaceinvoke $r13.<org.w3c.dom.Element: org.w3c.dom.Node appendChild(org.w3c.dom.Node)>($r15);
+
+     label28:
+        goto label23;
+
+     label29:
+        return $r6;
+
+        catch org.apache.jackrabbit.webdav.DavException from label01 to label02 with label18;
+        catch org.apache.jackrabbit.webdav.DavException from label03 to label04 with label18;
+        catch org.apache.jackrabbit.webdav.DavException from label05 to label06 with label18;
+        catch org.apache.jackrabbit.webdav.DavException from label07 to label09 with label18;
+        catch org.apache.jackrabbit.webdav.DavException from label10 to label11 with label18;
+        catch org.apache.jackrabbit.webdav.DavException from label12 to label13 with label18;
+        catch org.apache.jackrabbit.webdav.DavException from label14 to label15 with label18;
+        catch org.apache.jackrabbit.webdav.DavException from label16 to label17 with label18;
+        catch org.apache.jackrabbit.webdav.DavException from label20 to label21 with label18;
+        catch org.apache.jackrabbit.webdav.DavException from label22 to label24 with label18;
+        catch org.apache.jackrabbit.webdav.DavException from label25 to label26 with label18;
+        catch org.apache.jackrabbit.webdav.DavException from label27 to label28 with label18;
+    }

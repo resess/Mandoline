@@ -1,0 +1,557 @@
+org.jsoup.helper.HttpConnection$Base extends java.lang.Object implements org.jsoup.Connection$Base
+java.util.Map cookies
+java.util.Map headers
+org.jsoup.Connection$Method method
+java.net.URL url
+    private void <init>()
+    {
+        org.jsoup.helper.HttpConnection$Base r0;
+        java.util.LinkedHashMap $r1;
+
+        r0 := @this: org.jsoup.helper.HttpConnection$Base;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r1 = new java.util.LinkedHashMap;
+
+        specialinvoke $r1.<java.util.LinkedHashMap: void <init>()>();
+
+        r0.<org.jsoup.helper.HttpConnection$Base: java.util.Map headers> = $r1;
+
+        $r1 = new java.util.LinkedHashMap;
+
+        specialinvoke $r1.<java.util.LinkedHashMap: void <init>()>();
+
+        r0.<org.jsoup.helper.HttpConnection$Base: java.util.Map cookies> = $r1;
+
+        return;
+    }
+    void <init>(org.jsoup.helper.HttpConnection$1)
+    {
+        org.jsoup.helper.HttpConnection$Base r0;
+        org.jsoup.helper.HttpConnection$1 $r1;
+
+        r0 := @this: org.jsoup.helper.HttpConnection$Base;
+
+        $r1 := @parameter0: org.jsoup.helper.HttpConnection$1;
+
+        specialinvoke r0.<org.jsoup.helper.HttpConnection$Base: void <init>()>();
+
+        return;
+    }
+    private static java.lang.String fixHeaderEncoding(java.lang.String)
+    {
+        java.io.UnsupportedEncodingException r0;
+        java.lang.String r1, $r3;
+        byte[] $r2;
+        boolean $z0;
+
+        r1 := @parameter0: java.lang.String;
+
+     label1:
+        $r2 = virtualinvoke r1.<java.lang.String: byte[] getBytes(java.lang.String)>("ISO-8859-1");
+
+        $z0 = staticinvoke <org.jsoup.helper.HttpConnection$Base: boolean looksLikeUtf8(byte[])>($r2);
+
+     label2:
+        if $z0 != 0 goto label3;
+
+        return r1;
+
+     label3:
+        $r3 = new java.lang.String;
+
+     label4:
+        specialinvoke $r3.<java.lang.String: void <init>(byte[],java.lang.String)>($r2, "UTF-8");
+
+     label5:
+        return $r3;
+
+     label6:
+        r0 := @caughtexception;
+
+        return r1;
+
+        catch java.io.UnsupportedEncodingException from label1 to label2 with label6;
+        catch java.io.UnsupportedEncodingException from label4 to label5 with label6;
+    }
+    private java.lang.String getHeaderCaseInsensitive(java.lang.String)
+    {
+        org.jsoup.helper.HttpConnection$Base r0;
+        java.lang.String $r1, r4;
+        java.util.Map $r2;
+        java.lang.Object $r3;
+        java.util.Map$Entry $r5;
+
+        r0 := @this: org.jsoup.helper.HttpConnection$Base;
+
+        $r1 := @parameter0: java.lang.String;
+
+        staticinvoke <org.jsoup.helper.Validate: void notNull(java.lang.Object,java.lang.String)>($r1, "Header name must not be null");
+
+        $r2 = r0.<org.jsoup.helper.HttpConnection$Base: java.util.Map headers>;
+
+        $r3 = interfaceinvoke $r2.<java.util.Map: java.lang.Object get(java.lang.Object)>($r1);
+
+        r4 = (java.lang.String) $r3;
+
+        if r4 != null goto label1;
+
+        $r2 = r0.<org.jsoup.helper.HttpConnection$Base: java.util.Map headers>;
+
+        r4 = virtualinvoke $r1.<java.lang.String: java.lang.String toLowerCase()>();
+
+        $r3 = interfaceinvoke $r2.<java.util.Map: java.lang.Object get(java.lang.Object)>(r4);
+
+        r4 = (java.lang.String) $r3;
+
+     label1:
+        if r4 != null goto label2;
+
+        $r5 = specialinvoke r0.<org.jsoup.helper.HttpConnection$Base: java.util.Map$Entry scanHeaders(java.lang.String)>($r1);
+
+        if $r5 == null goto label2;
+
+        $r3 = interfaceinvoke $r5.<java.util.Map$Entry: java.lang.Object getValue()>();
+
+        $r1 = (java.lang.String) $r3;
+
+        return $r1;
+
+     label2:
+        return r4;
+    }
+    private static boolean looksLikeUtf8(byte[])
+    {
+        byte[] $r0;
+        int i0, i1, $i4, $i5;
+        byte $b2, $b3;
+
+        $r0 := @parameter0: byte[];
+
+        i1 = 0;
+
+        i0 = lengthof $r0;
+
+        if i0 < 3 goto label03;
+
+        $b2 = $r0[0];
+
+        i0 = $b2 & 255;
+
+        if i0 != 239 goto label03;
+
+        $b2 = $r0[1];
+
+        i0 = $b2 & 255;
+
+        if i0 != 187 goto label06;
+
+        $b2 = 1;
+
+     label01:
+        $b3 = $r0[2];
+
+        i0 = $b3 & 255;
+
+        if i0 != 191 goto label07;
+
+        $b3 = 1;
+
+     label02:
+        i0 = $b2 & $b3;
+
+        if i0 == 0 goto label03;
+
+        i1 = 3;
+
+     label03:
+        i0 = lengthof $r0;
+
+     label04:
+        if i1 >= i0 goto label12;
+
+        $b2 = $r0[i1];
+
+        $i4 = $b2 & 128;
+
+        if $i4 != 0 goto label08;
+
+     label05:
+        i1 = i1 + 1;
+
+        goto label04;
+
+     label06:
+        $b2 = 0;
+
+        goto label01;
+
+     label07:
+        $b3 = 0;
+
+        goto label02;
+
+     label08:
+        $i4 = $b2 & 224;
+
+        if $i4 != 192 goto label10;
+
+        $i4 = i1 + 1;
+
+     label09:
+        if i1 >= $i4 goto label05;
+
+        i1 = i1 + 1;
+
+        $b2 = $r0[i1];
+
+        $i5 = $b2 & 192;
+
+        if $i5 == 128 goto label09;
+
+        return 0;
+
+     label10:
+        $i4 = $b2 & 240;
+
+        if $i4 != 224 goto label11;
+
+        $i4 = i1 + 2;
+
+        goto label09;
+
+     label11:
+        $i4 = $b2 & 248;
+
+        if $i4 != 240 goto label13;
+
+        $i4 = i1 + 3;
+
+        goto label09;
+
+     label12:
+        return 1;
+
+     label13:
+        return 0;
+    }
+    private java.util.Map$Entry scanHeaders(java.lang.String)
+    {
+        org.jsoup.helper.HttpConnection$Base r0;
+        java.lang.String $r1, $r7;
+        java.util.Map $r2;
+        java.util.Set $r3;
+        java.util.Iterator $r4;
+        boolean $z0;
+        java.lang.Object $r5;
+        java.util.Map$Entry r6;
+
+        r0 := @this: org.jsoup.helper.HttpConnection$Base;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r1 = virtualinvoke $r1.<java.lang.String: java.lang.String toLowerCase()>();
+
+        $r2 = r0.<org.jsoup.helper.HttpConnection$Base: java.util.Map headers>;
+
+        $r3 = interfaceinvoke $r2.<java.util.Map: java.util.Set entrySet()>();
+
+        $r4 = interfaceinvoke $r3.<java.util.Set: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r4.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label2;
+
+        $r5 = interfaceinvoke $r4.<java.util.Iterator: java.lang.Object next()>();
+
+        r6 = (java.util.Map$Entry) $r5;
+
+        $r5 = interfaceinvoke r6.<java.util.Map$Entry: java.lang.Object getKey()>();
+
+        $r7 = (java.lang.String) $r5;
+
+        $r7 = virtualinvoke $r7.<java.lang.String: java.lang.String toLowerCase()>();
+
+        $z0 = virtualinvoke $r7.<java.lang.String: boolean equals(java.lang.Object)>($r1);
+
+        if $z0 == 0 goto label1;
+
+        return r6;
+
+     label2:
+        return null;
+    }
+    public java.lang.String cookie(java.lang.String)
+    {
+        org.jsoup.helper.HttpConnection$Base r0;
+        java.lang.String $r1;
+        java.lang.Object $r2;
+        java.util.Map $r3;
+
+        r0 := @this: org.jsoup.helper.HttpConnection$Base;
+
+        $r1 := @parameter0: java.lang.String;
+
+        staticinvoke <org.jsoup.helper.Validate: void notEmpty(java.lang.String,java.lang.String)>($r1, "Cookie name must not be empty");
+
+        $r3 = r0.<org.jsoup.helper.HttpConnection$Base: java.util.Map cookies>;
+
+        $r2 = interfaceinvoke $r3.<java.util.Map: java.lang.Object get(java.lang.Object)>($r1);
+
+        $r1 = (java.lang.String) $r2;
+
+        return $r1;
+    }
+    public org.jsoup.Connection$Base cookie(java.lang.String, java.lang.String)
+    {
+        org.jsoup.helper.HttpConnection$Base r0;
+        java.lang.String $r1, $r2;
+        java.util.Map $r3;
+
+        r0 := @this: org.jsoup.helper.HttpConnection$Base;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.lang.String;
+
+        staticinvoke <org.jsoup.helper.Validate: void notEmpty(java.lang.String,java.lang.String)>($r1, "Cookie name must not be empty");
+
+        staticinvoke <org.jsoup.helper.Validate: void notNull(java.lang.Object,java.lang.String)>($r2, "Cookie value must not be null");
+
+        $r3 = r0.<org.jsoup.helper.HttpConnection$Base: java.util.Map cookies>;
+
+        interfaceinvoke $r3.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r1, $r2);
+
+        return r0;
+    }
+    public java.util.Map cookies()
+    {
+        org.jsoup.helper.HttpConnection$Base r0;
+        java.util.Map r1;
+
+        r0 := @this: org.jsoup.helper.HttpConnection$Base;
+
+        r1 = r0.<org.jsoup.helper.HttpConnection$Base: java.util.Map cookies>;
+
+        return r1;
+    }
+    public boolean hasCookie(java.lang.String)
+    {
+        org.jsoup.helper.HttpConnection$Base r0;
+        java.lang.String $r1;
+        boolean $z0;
+        java.util.Map $r2;
+
+        r0 := @this: org.jsoup.helper.HttpConnection$Base;
+
+        $r1 := @parameter0: java.lang.String;
+
+        staticinvoke <org.jsoup.helper.Validate: void notEmpty(java.lang.String,java.lang.String)>($r1, "Cookie name must not be empty");
+
+        $r2 = r0.<org.jsoup.helper.HttpConnection$Base: java.util.Map cookies>;
+
+        $z0 = interfaceinvoke $r2.<java.util.Map: boolean containsKey(java.lang.Object)>($r1);
+
+        return $z0;
+    }
+    public boolean hasHeader(java.lang.String)
+    {
+        org.jsoup.helper.HttpConnection$Base r0;
+        java.lang.String $r1;
+
+        r0 := @this: org.jsoup.helper.HttpConnection$Base;
+
+        $r1 := @parameter0: java.lang.String;
+
+        staticinvoke <org.jsoup.helper.Validate: void notEmpty(java.lang.String,java.lang.String)>($r1, "Header name must not be empty");
+
+        $r1 = specialinvoke r0.<org.jsoup.helper.HttpConnection$Base: java.lang.String getHeaderCaseInsensitive(java.lang.String)>($r1);
+
+        if $r1 == null goto label1;
+
+        return 1;
+
+     label1:
+        return 0;
+    }
+    public boolean hasHeaderWithValue(java.lang.String, java.lang.String)
+    {
+        org.jsoup.helper.HttpConnection$Base r0;
+        java.lang.String $r1, $r2;
+        boolean $z0;
+
+        r0 := @this: org.jsoup.helper.HttpConnection$Base;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $z0 = virtualinvoke r0.<org.jsoup.helper.HttpConnection$Base: boolean hasHeader(java.lang.String)>($r1);
+
+        if $z0 == 0 goto label1;
+
+        $r1 = virtualinvoke r0.<org.jsoup.helper.HttpConnection$Base: java.lang.String header(java.lang.String)>($r1);
+
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>($r2);
+
+        if $z0 == 0 goto label1;
+
+        return 1;
+
+     label1:
+        return 0;
+    }
+    public java.lang.String header(java.lang.String)
+    {
+        org.jsoup.helper.HttpConnection$Base r0;
+        java.lang.String $r1;
+
+        r0 := @this: org.jsoup.helper.HttpConnection$Base;
+
+        $r1 := @parameter0: java.lang.String;
+
+        staticinvoke <org.jsoup.helper.Validate: void notNull(java.lang.Object,java.lang.String)>($r1, "Header name must not be null");
+
+        $r1 = specialinvoke r0.<org.jsoup.helper.HttpConnection$Base: java.lang.String getHeaderCaseInsensitive(java.lang.String)>($r1);
+
+        if $r1 == null goto label1;
+
+        $r1 = staticinvoke <org.jsoup.helper.HttpConnection$Base: java.lang.String fixHeaderEncoding(java.lang.String)>($r1);
+
+     label1:
+        return $r1;
+    }
+    public org.jsoup.Connection$Base header(java.lang.String, java.lang.String)
+    {
+        org.jsoup.helper.HttpConnection$Base r0;
+        java.lang.String $r1, $r2;
+        java.util.Map $r3;
+
+        r0 := @this: org.jsoup.helper.HttpConnection$Base;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.lang.String;
+
+        staticinvoke <org.jsoup.helper.Validate: void notEmpty(java.lang.String,java.lang.String)>($r1, "Header name must not be empty");
+
+        staticinvoke <org.jsoup.helper.Validate: void notNull(java.lang.Object,java.lang.String)>($r2, "Header value must not be null");
+
+        virtualinvoke r0.<org.jsoup.helper.HttpConnection$Base: org.jsoup.Connection$Base removeHeader(java.lang.String)>($r1);
+
+        $r3 = r0.<org.jsoup.helper.HttpConnection$Base: java.util.Map headers>;
+
+        interfaceinvoke $r3.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r1, $r2);
+
+        return r0;
+    }
+    public java.util.Map headers()
+    {
+        org.jsoup.helper.HttpConnection$Base r0;
+        java.util.Map r1;
+
+        r0 := @this: org.jsoup.helper.HttpConnection$Base;
+
+        r1 = r0.<org.jsoup.helper.HttpConnection$Base: java.util.Map headers>;
+
+        return r1;
+    }
+    public org.jsoup.Connection$Base method(org.jsoup.Connection$Method)
+    {
+        org.jsoup.helper.HttpConnection$Base r0;
+        org.jsoup.Connection$Method $r1;
+
+        r0 := @this: org.jsoup.helper.HttpConnection$Base;
+
+        $r1 := @parameter0: org.jsoup.Connection$Method;
+
+        staticinvoke <org.jsoup.helper.Validate: void notNull(java.lang.Object,java.lang.String)>($r1, "Method must not be null");
+
+        r0.<org.jsoup.helper.HttpConnection$Base: org.jsoup.Connection$Method method> = $r1;
+
+        return r0;
+    }
+    public org.jsoup.Connection$Method method()
+    {
+        org.jsoup.helper.HttpConnection$Base r0;
+        org.jsoup.Connection$Method r1;
+
+        r0 := @this: org.jsoup.helper.HttpConnection$Base;
+
+        r1 = r0.<org.jsoup.helper.HttpConnection$Base: org.jsoup.Connection$Method method>;
+
+        return r1;
+    }
+    public org.jsoup.Connection$Base removeCookie(java.lang.String)
+    {
+        org.jsoup.helper.HttpConnection$Base r0;
+        java.lang.String $r1;
+        java.util.Map $r2;
+
+        r0 := @this: org.jsoup.helper.HttpConnection$Base;
+
+        $r1 := @parameter0: java.lang.String;
+
+        staticinvoke <org.jsoup.helper.Validate: void notEmpty(java.lang.String,java.lang.String)>($r1, "Cookie name must not be empty");
+
+        $r2 = r0.<org.jsoup.helper.HttpConnection$Base: java.util.Map cookies>;
+
+        interfaceinvoke $r2.<java.util.Map: java.lang.Object remove(java.lang.Object)>($r1);
+
+        return r0;
+    }
+    public org.jsoup.Connection$Base removeHeader(java.lang.String)
+    {
+        org.jsoup.helper.HttpConnection$Base r0;
+        java.lang.String $r1;
+        java.util.Map$Entry $r2;
+        java.util.Map $r3;
+        java.lang.Object $r4;
+
+        r0 := @this: org.jsoup.helper.HttpConnection$Base;
+
+        $r1 := @parameter0: java.lang.String;
+
+        staticinvoke <org.jsoup.helper.Validate: void notEmpty(java.lang.String,java.lang.String)>($r1, "Header name must not be empty");
+
+        $r2 = specialinvoke r0.<org.jsoup.helper.HttpConnection$Base: java.util.Map$Entry scanHeaders(java.lang.String)>($r1);
+
+        if $r2 == null goto label1;
+
+        $r3 = r0.<org.jsoup.helper.HttpConnection$Base: java.util.Map headers>;
+
+        $r4 = interfaceinvoke $r2.<java.util.Map$Entry: java.lang.Object getKey()>();
+
+        interfaceinvoke $r3.<java.util.Map: java.lang.Object remove(java.lang.Object)>($r4);
+
+     label1:
+        return r0;
+    }
+    public java.net.URL url()
+    {
+        org.jsoup.helper.HttpConnection$Base r0;
+        java.net.URL r1;
+
+        r0 := @this: org.jsoup.helper.HttpConnection$Base;
+
+        r1 = r0.<org.jsoup.helper.HttpConnection$Base: java.net.URL url>;
+
+        return r1;
+    }
+    public org.jsoup.Connection$Base url(java.net.URL)
+    {
+        org.jsoup.helper.HttpConnection$Base r0;
+        java.net.URL $r1;
+
+        r0 := @this: org.jsoup.helper.HttpConnection$Base;
+
+        $r1 := @parameter0: java.net.URL;
+
+        staticinvoke <org.jsoup.helper.Validate: void notNull(java.lang.Object,java.lang.String)>($r1, "URL must not be null");
+
+        r0.<org.jsoup.helper.HttpConnection$Base: java.net.URL url> = $r1;
+
+        return r0;
+    }

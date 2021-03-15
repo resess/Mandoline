@@ -1,0 +1,1338 @@
+okhttp3.internal.http2.Http2Writer extends java.lang.Object implements java.io.Closeable
+private static final java.util.logging.Logger logger
+private final boolean client
+private boolean closed
+private final okio.Buffer hpackBuffer
+final okhttp3.internal.http2.Hpack$Writer hpackWriter
+private int maxFrameSize
+private final okio.BufferedSink sink
+    static void <clinit>()
+    {
+        java.lang.Class $r0;
+        java.lang.String $r1;
+        java.util.logging.Logger $r2;
+
+        $r0 = class "Lokhttp3/internal/http2/Http2;";
+
+        $r1 = virtualinvoke $r0.<java.lang.Class: java.lang.String getName()>();
+
+        $r2 = staticinvoke <java.util.logging.Logger: java.util.logging.Logger getLogger(java.lang.String)>($r1);
+
+        <okhttp3.internal.http2.Http2Writer: java.util.logging.Logger logger> = $r2;
+
+        return;
+    }
+    void <init>(okio.BufferedSink, boolean)
+    {
+        okhttp3.internal.http2.Http2Writer r0;
+        okio.BufferedSink $r1;
+        boolean $z0;
+        okio.Buffer $r2;
+        okhttp3.internal.http2.Hpack$Writer $r3;
+
+        r0 := @this: okhttp3.internal.http2.Http2Writer;
+
+        $r1 := @parameter0: okio.BufferedSink;
+
+        $z0 := @parameter1: boolean;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<okhttp3.internal.http2.Http2Writer: okio.BufferedSink sink> = $r1;
+
+        r0.<okhttp3.internal.http2.Http2Writer: boolean client> = $z0;
+
+        $r2 = new okio.Buffer;
+
+        specialinvoke $r2.<okio.Buffer: void <init>()>();
+
+        r0.<okhttp3.internal.http2.Http2Writer: okio.Buffer hpackBuffer> = $r2;
+
+        $r3 = new okhttp3.internal.http2.Hpack$Writer;
+
+        $r2 = r0.<okhttp3.internal.http2.Http2Writer: okio.Buffer hpackBuffer>;
+
+        specialinvoke $r3.<okhttp3.internal.http2.Hpack$Writer: void <init>(okio.Buffer)>($r2);
+
+        r0.<okhttp3.internal.http2.Http2Writer: okhttp3.internal.http2.Hpack$Writer hpackWriter> = $r3;
+
+        r0.<okhttp3.internal.http2.Http2Writer: int maxFrameSize> = 16384;
+
+        return;
+    }
+    private void writeContinuationFrames(int, long) throws java.io.IOException
+    {
+        okhttp3.internal.http2.Http2Writer r0;
+        int $i0, i1;
+        long $l2, $l3;
+        byte $b4;
+        okio.BufferedSink $r1;
+        okio.Buffer $r2;
+
+        r0 := @this: okhttp3.internal.http2.Http2Writer;
+
+        $i0 := @parameter0: int;
+
+        $l3 := @parameter1: long;
+
+     label1:
+        $b4 = $l3 cmp 0L;
+
+        if $b4 <= 0 goto label4;
+
+        i1 = r0.<okhttp3.internal.http2.Http2Writer: int maxFrameSize>;
+
+        $l2 = (long) i1;
+
+        $l2 = staticinvoke <java.lang.Math: long min(long,long)>($l2, $l3);
+
+        i1 = (int) $l2;
+
+        $l2 = (long) i1;
+
+        $l3 = $l3 - $l2;
+
+        $b4 = $l3 cmp 0L;
+
+        if $b4 != 0 goto label3;
+
+        $b4 = 4;
+
+     label2:
+        virtualinvoke r0.<okhttp3.internal.http2.Http2Writer: void frameHeader(int,int,byte,byte)>($i0, i1, 9, $b4);
+
+        $r1 = r0.<okhttp3.internal.http2.Http2Writer: okio.BufferedSink sink>;
+
+        $r2 = r0.<okhttp3.internal.http2.Http2Writer: okio.Buffer hpackBuffer>;
+
+        $l2 = (long) i1;
+
+        interfaceinvoke $r1.<okio.BufferedSink: void write(okio.Buffer,long)>($r2, $l2);
+
+        goto label1;
+
+     label3:
+        $b4 = 0;
+
+        goto label2;
+
+     label4:
+        return;
+    }
+    private static void writeMedium(okio.BufferedSink, int) throws java.io.IOException
+    {
+        okio.BufferedSink $r0;
+        int $i0, $i1;
+
+        $r0 := @parameter0: okio.BufferedSink;
+
+        $i0 := @parameter1: int;
+
+        $i1 = $i0 >>> 16;
+
+        $i1 = $i1 & 255;
+
+        interfaceinvoke $r0.<okio.BufferedSink: okio.BufferedSink writeByte(int)>($i1);
+
+        $i1 = $i0 >>> 8;
+
+        $i1 = $i1 & 255;
+
+        interfaceinvoke $r0.<okio.BufferedSink: okio.BufferedSink writeByte(int)>($i1);
+
+        $i0 = $i0 & 255;
+
+        interfaceinvoke $r0.<okio.BufferedSink: okio.BufferedSink writeByte(int)>($i0);
+
+        return;
+    }
+    public void applyAndAckSettings(okhttp3.internal.http2.Settings) throws java.io.IOException
+    {
+        okhttp3.internal.http2.Http2Writer r0;
+        okhttp3.internal.http2.Settings $r1;
+        boolean $z0;
+        java.io.IOException $r2;
+        java.lang.Throwable $r3;
+        int $i0;
+        okhttp3.internal.http2.Hpack$Writer $r4;
+        okio.BufferedSink $r5;
+
+        r0 := @this: okhttp3.internal.http2.Http2Writer;
+
+        $r1 := @parameter0: okhttp3.internal.http2.Settings;
+
+        entermonitor r0;
+
+     label1:
+        $z0 = r0.<okhttp3.internal.http2.Http2Writer: boolean closed>;
+
+        if $z0 == 0 goto label3;
+
+        $r2 = new java.io.IOException;
+
+        specialinvoke $r2.<java.io.IOException: void <init>(java.lang.String)>("closed");
+
+        throw $r2;
+
+     label2:
+        $r3 := @caughtexception;
+
+        exitmonitor r0;
+
+        throw $r3;
+
+     label3:
+        $i0 = r0.<okhttp3.internal.http2.Http2Writer: int maxFrameSize>;
+
+        $i0 = virtualinvoke $r1.<okhttp3.internal.http2.Settings: int getMaxFrameSize(int)>($i0);
+
+        r0.<okhttp3.internal.http2.Http2Writer: int maxFrameSize> = $i0;
+
+        $i0 = virtualinvoke $r1.<okhttp3.internal.http2.Settings: int getHeaderTableSize()>();
+
+        if $i0 == -1 goto label4;
+
+        $r4 = r0.<okhttp3.internal.http2.Http2Writer: okhttp3.internal.http2.Hpack$Writer hpackWriter>;
+
+        $i0 = virtualinvoke $r1.<okhttp3.internal.http2.Settings: int getHeaderTableSize()>();
+
+        virtualinvoke $r4.<okhttp3.internal.http2.Hpack$Writer: void setHeaderTableSizeSetting(int)>($i0);
+
+     label4:
+        virtualinvoke r0.<okhttp3.internal.http2.Http2Writer: void frameHeader(int,int,byte,byte)>(0, 0, 4, 1);
+
+        $r5 = r0.<okhttp3.internal.http2.Http2Writer: okio.BufferedSink sink>;
+
+        interfaceinvoke $r5.<okio.BufferedSink: void flush()>();
+
+     label5:
+        exitmonitor r0;
+
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label2;
+        catch java.lang.Throwable from label3 to label5 with label2;
+    }
+    public void close() throws java.io.IOException
+    {
+        okhttp3.internal.http2.Http2Writer r0;
+        okio.BufferedSink $r1;
+        java.lang.Throwable $r2;
+
+        r0 := @this: okhttp3.internal.http2.Http2Writer;
+
+        entermonitor r0;
+
+     label1:
+        r0.<okhttp3.internal.http2.Http2Writer: boolean closed> = 1;
+
+        $r1 = r0.<okhttp3.internal.http2.Http2Writer: okio.BufferedSink sink>;
+
+        interfaceinvoke $r1.<okio.BufferedSink: void close()>();
+
+     label2:
+        exitmonitor r0;
+
+        return;
+
+     label3:
+        $r2 := @caughtexception;
+
+        exitmonitor r0;
+
+        throw $r2;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+    public void connectionPreface() throws java.io.IOException
+    {
+        okhttp3.internal.http2.Http2Writer r0;
+        boolean $z0;
+        java.io.IOException $r1;
+        java.lang.Throwable $r2;
+        java.util.logging.Logger $r3;
+        java.util.logging.Level $r4;
+        java.lang.Object[] $r5;
+        okio.ByteString $r6;
+        java.lang.String $r7;
+        okio.BufferedSink $r8;
+        byte[] $r9;
+
+        r0 := @this: okhttp3.internal.http2.Http2Writer;
+
+        entermonitor r0;
+
+     label1:
+        $z0 = r0.<okhttp3.internal.http2.Http2Writer: boolean closed>;
+
+        if $z0 == 0 goto label3;
+
+        $r1 = new java.io.IOException;
+
+        specialinvoke $r1.<java.io.IOException: void <init>(java.lang.String)>("closed");
+
+        throw $r1;
+
+     label2:
+        $r2 := @caughtexception;
+
+        exitmonitor r0;
+
+        throw $r2;
+
+     label3:
+        $z0 = r0.<okhttp3.internal.http2.Http2Writer: boolean client>;
+
+     label4:
+        if $z0 != 0 goto label6;
+
+     label5:
+        exitmonitor r0;
+
+        return;
+
+     label6:
+        $r3 = <okhttp3.internal.http2.Http2Writer: java.util.logging.Logger logger>;
+
+        $r4 = <java.util.logging.Level: java.util.logging.Level FINE>;
+
+        $z0 = virtualinvoke $r3.<java.util.logging.Logger: boolean isLoggable(java.util.logging.Level)>($r4);
+
+        if $z0 == 0 goto label7;
+
+        $r3 = <okhttp3.internal.http2.Http2Writer: java.util.logging.Logger logger>;
+
+        $r5 = newarray (java.lang.Object)[1];
+
+        $r6 = <okhttp3.internal.http2.Http2: okio.ByteString CONNECTION_PREFACE>;
+
+        $r7 = virtualinvoke $r6.<okio.ByteString: java.lang.String hex()>();
+
+        $r5[0] = $r7;
+
+        $r7 = staticinvoke <okhttp3.internal.Util: java.lang.String format(java.lang.String,java.lang.Object[])>(">> CONNECTION %s", $r5);
+
+        virtualinvoke $r3.<java.util.logging.Logger: void fine(java.lang.String)>($r7);
+
+     label7:
+        $r8 = r0.<okhttp3.internal.http2.Http2Writer: okio.BufferedSink sink>;
+
+        $r6 = <okhttp3.internal.http2.Http2: okio.ByteString CONNECTION_PREFACE>;
+
+        $r9 = virtualinvoke $r6.<okio.ByteString: byte[] toByteArray()>();
+
+        interfaceinvoke $r8.<okio.BufferedSink: okio.BufferedSink write(byte[])>($r9);
+
+        $r8 = r0.<okhttp3.internal.http2.Http2Writer: okio.BufferedSink sink>;
+
+        interfaceinvoke $r8.<okio.BufferedSink: void flush()>();
+
+     label8:
+        goto label5;
+
+        catch java.lang.Throwable from label1 to label2 with label2;
+        catch java.lang.Throwable from label3 to label4 with label2;
+        catch java.lang.Throwable from label6 to label8 with label2;
+    }
+    public void data(boolean, int, okio.Buffer, int) throws java.io.IOException
+    {
+        okhttp3.internal.http2.Http2Writer r0;
+        boolean $z0, $z1;
+        int $i0, $i1;
+        okio.Buffer $r1;
+        java.io.IOException $r2;
+        java.lang.Throwable $r3;
+        byte b2;
+
+        r0 := @this: okhttp3.internal.http2.Http2Writer;
+
+        $z0 := @parameter0: boolean;
+
+        $i0 := @parameter1: int;
+
+        $r1 := @parameter2: okio.Buffer;
+
+        $i1 := @parameter3: int;
+
+        entermonitor r0;
+
+     label1:
+        $z1 = r0.<okhttp3.internal.http2.Http2Writer: boolean closed>;
+
+        if $z1 == 0 goto label3;
+
+        $r2 = new java.io.IOException;
+
+        specialinvoke $r2.<java.io.IOException: void <init>(java.lang.String)>("closed");
+
+        throw $r2;
+
+     label2:
+        $r3 := @caughtexception;
+
+        exitmonitor r0;
+
+        throw $r3;
+
+     label3:
+        b2 = 0;
+
+        if $z0 == 0 goto label4;
+
+        b2 = (byte) 1;
+
+     label4:
+        virtualinvoke r0.<okhttp3.internal.http2.Http2Writer: void dataFrame(int,byte,okio.Buffer,int)>($i0, b2, $r1, $i1);
+
+     label5:
+        exitmonitor r0;
+
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label2;
+        catch java.lang.Throwable from label4 to label5 with label2;
+    }
+    void dataFrame(int, byte, okio.Buffer, int) throws java.io.IOException
+    {
+        okhttp3.internal.http2.Http2Writer r0;
+        int $i0, $i2;
+        byte $b1;
+        okio.Buffer $r1;
+        okio.BufferedSink $r2;
+        long $l3;
+
+        r0 := @this: okhttp3.internal.http2.Http2Writer;
+
+        $i0 := @parameter0: int;
+
+        $b1 := @parameter1: byte;
+
+        $r1 := @parameter2: okio.Buffer;
+
+        $i2 := @parameter3: int;
+
+        virtualinvoke r0.<okhttp3.internal.http2.Http2Writer: void frameHeader(int,int,byte,byte)>($i0, $i2, 0, $b1);
+
+        if $i2 <= 0 goto label1;
+
+        $r2 = r0.<okhttp3.internal.http2.Http2Writer: okio.BufferedSink sink>;
+
+        $l3 = (long) $i2;
+
+        interfaceinvoke $r2.<okio.BufferedSink: void write(okio.Buffer,long)>($r1, $l3);
+
+     label1:
+        return;
+    }
+    public void flush() throws java.io.IOException
+    {
+        okhttp3.internal.http2.Http2Writer r0;
+        boolean $z0;
+        java.io.IOException $r1;
+        java.lang.Throwable $r2;
+        okio.BufferedSink $r3;
+
+        r0 := @this: okhttp3.internal.http2.Http2Writer;
+
+        entermonitor r0;
+
+     label1:
+        $z0 = r0.<okhttp3.internal.http2.Http2Writer: boolean closed>;
+
+        if $z0 == 0 goto label3;
+
+        $r1 = new java.io.IOException;
+
+        specialinvoke $r1.<java.io.IOException: void <init>(java.lang.String)>("closed");
+
+        throw $r1;
+
+     label2:
+        $r2 := @caughtexception;
+
+        exitmonitor r0;
+
+        throw $r2;
+
+     label3:
+        $r3 = r0.<okhttp3.internal.http2.Http2Writer: okio.BufferedSink sink>;
+
+        interfaceinvoke $r3.<okio.BufferedSink: void flush()>();
+
+     label4:
+        exitmonitor r0;
+
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label2;
+        catch java.lang.Throwable from label3 to label4 with label2;
+    }
+    public void frameHeader(int, int, byte, byte) throws java.io.IOException
+    {
+        okhttp3.internal.http2.Http2Writer r0;
+        int $i0, $i1, $i4;
+        byte $b2, $b3;
+        java.util.logging.Logger $r1;
+        java.util.logging.Level $r2;
+        boolean $z0;
+        java.lang.String $r3;
+        java.lang.Object[] $r4;
+        java.lang.Integer $r5;
+        java.lang.IllegalArgumentException $r6;
+        okio.BufferedSink $r7;
+
+        r0 := @this: okhttp3.internal.http2.Http2Writer;
+
+        $i0 := @parameter0: int;
+
+        $i1 := @parameter1: int;
+
+        $b2 := @parameter2: byte;
+
+        $b3 := @parameter3: byte;
+
+        $r1 = <okhttp3.internal.http2.Http2Writer: java.util.logging.Logger logger>;
+
+        $r2 = <java.util.logging.Level: java.util.logging.Level FINE>;
+
+        $z0 = virtualinvoke $r1.<java.util.logging.Logger: boolean isLoggable(java.util.logging.Level)>($r2);
+
+        if $z0 == 0 goto label1;
+
+        $r1 = <okhttp3.internal.http2.Http2Writer: java.util.logging.Logger logger>;
+
+        $r3 = staticinvoke <okhttp3.internal.http2.Http2: java.lang.String frameLog(boolean,int,int,byte,byte)>(0, $i0, $i1, $b2, $b3);
+
+        virtualinvoke $r1.<java.util.logging.Logger: void fine(java.lang.String)>($r3);
+
+     label1:
+        $i4 = r0.<okhttp3.internal.http2.Http2Writer: int maxFrameSize>;
+
+        if $i1 <= $i4 goto label2;
+
+        $r4 = newarray (java.lang.Object)[2];
+
+        $i0 = r0.<okhttp3.internal.http2.Http2Writer: int maxFrameSize>;
+
+        $r5 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        $r4[0] = $r5;
+
+        $r5 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i1);
+
+        $r4[1] = $r5;
+
+        $r6 = staticinvoke <okhttp3.internal.http2.Http2: java.lang.IllegalArgumentException illegalArgument(java.lang.String,java.lang.Object[])>("FRAME_SIZE_ERROR length > %d: %d", $r4);
+
+        throw $r6;
+
+     label2:
+        $i4 = -2147483648 & $i0;
+
+        if $i4 == 0 goto label3;
+
+        $r4 = newarray (java.lang.Object)[1];
+
+        $r5 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        $r4[0] = $r5;
+
+        $r6 = staticinvoke <okhttp3.internal.http2.Http2: java.lang.IllegalArgumentException illegalArgument(java.lang.String,java.lang.Object[])>("reserved bit set: %s", $r4);
+
+        throw $r6;
+
+     label3:
+        $r7 = r0.<okhttp3.internal.http2.Http2Writer: okio.BufferedSink sink>;
+
+        staticinvoke <okhttp3.internal.http2.Http2Writer: void writeMedium(okio.BufferedSink,int)>($r7, $i1);
+
+        $r7 = r0.<okhttp3.internal.http2.Http2Writer: okio.BufferedSink sink>;
+
+        $i1 = $b2 & 255;
+
+        interfaceinvoke $r7.<okio.BufferedSink: okio.BufferedSink writeByte(int)>($i1);
+
+        $r7 = r0.<okhttp3.internal.http2.Http2Writer: okio.BufferedSink sink>;
+
+        $i1 = $b3 & 255;
+
+        interfaceinvoke $r7.<okio.BufferedSink: okio.BufferedSink writeByte(int)>($i1);
+
+        $r7 = r0.<okhttp3.internal.http2.Http2Writer: okio.BufferedSink sink>;
+
+        $i0 = 2147483647 & $i0;
+
+        interfaceinvoke $r7.<okio.BufferedSink: okio.BufferedSink writeInt(int)>($i0);
+
+        return;
+    }
+    public void goAway(int, okhttp3.internal.http2.ErrorCode, byte[]) throws java.io.IOException
+    {
+        okhttp3.internal.http2.Http2Writer r0;
+        int $i0, i1;
+        okhttp3.internal.http2.ErrorCode $r1;
+        byte[] $r2;
+        java.lang.IllegalArgumentException $r3;
+        boolean $z0;
+        java.io.IOException $r4;
+        java.lang.Throwable $r5;
+        java.lang.Object[] $r6;
+        okio.BufferedSink $r7;
+
+        r0 := @this: okhttp3.internal.http2.Http2Writer;
+
+        $i0 := @parameter0: int;
+
+        $r1 := @parameter1: okhttp3.internal.http2.ErrorCode;
+
+        $r2 := @parameter2: byte[];
+
+        entermonitor r0;
+
+     label1:
+        $z0 = r0.<okhttp3.internal.http2.Http2Writer: boolean closed>;
+
+        if $z0 == 0 goto label3;
+
+        $r4 = new java.io.IOException;
+
+        specialinvoke $r4.<java.io.IOException: void <init>(java.lang.String)>("closed");
+
+        throw $r4;
+
+     label2:
+        $r5 := @caughtexception;
+
+        exitmonitor r0;
+
+        throw $r5;
+
+     label3:
+        i1 = $r1.<okhttp3.internal.http2.ErrorCode: int httpCode>;
+
+        if i1 != -1 goto label4;
+
+        $r6 = newarray (java.lang.Object)[0];
+
+        $r3 = staticinvoke <okhttp3.internal.http2.Http2: java.lang.IllegalArgumentException illegalArgument(java.lang.String,java.lang.Object[])>("errorCode.httpCode == -1", $r6);
+
+        throw $r3;
+
+     label4:
+        i1 = lengthof $r2;
+
+        i1 = i1 + 8;
+
+        virtualinvoke r0.<okhttp3.internal.http2.Http2Writer: void frameHeader(int,int,byte,byte)>(0, i1, 7, 0);
+
+        $r7 = r0.<okhttp3.internal.http2.Http2Writer: okio.BufferedSink sink>;
+
+        interfaceinvoke $r7.<okio.BufferedSink: okio.BufferedSink writeInt(int)>($i0);
+
+        $r7 = r0.<okhttp3.internal.http2.Http2Writer: okio.BufferedSink sink>;
+
+        $i0 = $r1.<okhttp3.internal.http2.ErrorCode: int httpCode>;
+
+        interfaceinvoke $r7.<okio.BufferedSink: okio.BufferedSink writeInt(int)>($i0);
+
+        $i0 = lengthof $r2;
+
+        if $i0 <= 0 goto label5;
+
+        $r7 = r0.<okhttp3.internal.http2.Http2Writer: okio.BufferedSink sink>;
+
+        interfaceinvoke $r7.<okio.BufferedSink: okio.BufferedSink write(byte[])>($r2);
+
+     label5:
+        $r7 = r0.<okhttp3.internal.http2.Http2Writer: okio.BufferedSink sink>;
+
+        interfaceinvoke $r7.<okio.BufferedSink: void flush()>();
+
+     label6:
+        exitmonitor r0;
+
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label2;
+        catch java.lang.Throwable from label3 to label6 with label2;
+    }
+    public void headers(int, java.util.List) throws java.io.IOException
+    {
+        okhttp3.internal.http2.Http2Writer r0;
+        int $i0;
+        java.util.List r1;
+        boolean $z0;
+        java.io.IOException $r2;
+        java.lang.Throwable $r3;
+
+        r0 := @this: okhttp3.internal.http2.Http2Writer;
+
+        $i0 := @parameter0: int;
+
+        r1 := @parameter1: java.util.List;
+
+        entermonitor r0;
+
+     label1:
+        $z0 = r0.<okhttp3.internal.http2.Http2Writer: boolean closed>;
+
+        if $z0 == 0 goto label3;
+
+        $r2 = new java.io.IOException;
+
+        specialinvoke $r2.<java.io.IOException: void <init>(java.lang.String)>("closed");
+
+        throw $r2;
+
+     label2:
+        $r3 := @caughtexception;
+
+        exitmonitor r0;
+
+        throw $r3;
+
+     label3:
+        virtualinvoke r0.<okhttp3.internal.http2.Http2Writer: void headers(boolean,int,java.util.List)>(0, $i0, r1);
+
+     label4:
+        exitmonitor r0;
+
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label2;
+        catch java.lang.Throwable from label3 to label4 with label2;
+    }
+    void headers(boolean, int, java.util.List) throws java.io.IOException
+    {
+        okhttp3.internal.http2.Http2Writer r0;
+        boolean $z0, $z1;
+        int $i0, i1, $i5;
+        java.util.List r1;
+        long $l2, $l3;
+        java.io.IOException $r2;
+        okhttp3.internal.http2.Hpack$Writer $r3;
+        okio.Buffer $r4;
+        byte $b4;
+        okio.BufferedSink $r5;
+
+        r0 := @this: okhttp3.internal.http2.Http2Writer;
+
+        $z0 := @parameter0: boolean;
+
+        $i0 := @parameter1: int;
+
+        r1 := @parameter2: java.util.List;
+
+        $z1 = r0.<okhttp3.internal.http2.Http2Writer: boolean closed>;
+
+        if $z1 == 0 goto label1;
+
+        $r2 = new java.io.IOException;
+
+        specialinvoke $r2.<java.io.IOException: void <init>(java.lang.String)>("closed");
+
+        throw $r2;
+
+     label1:
+        $r3 = r0.<okhttp3.internal.http2.Http2Writer: okhttp3.internal.http2.Hpack$Writer hpackWriter>;
+
+        virtualinvoke $r3.<okhttp3.internal.http2.Hpack$Writer: void writeHeaders(java.util.List)>(r1);
+
+        $r4 = r0.<okhttp3.internal.http2.Http2Writer: okio.Buffer hpackBuffer>;
+
+        $l3 = virtualinvoke $r4.<okio.Buffer: long size()>();
+
+        i1 = r0.<okhttp3.internal.http2.Http2Writer: int maxFrameSize>;
+
+        $l2 = (long) i1;
+
+        $l2 = staticinvoke <java.lang.Math: long min(long,long)>($l2, $l3);
+
+        i1 = (int) $l2;
+
+        $l2 = (long) i1;
+
+        $b4 = $l3 cmp $l2;
+
+        if $b4 != 0 goto label4;
+
+        $b4 = 4;
+
+     label2:
+        if $z0 == 0 goto label3;
+
+        $i5 = $b4 | 1;
+
+        $b4 = (byte) $i5;
+
+     label3:
+        virtualinvoke r0.<okhttp3.internal.http2.Http2Writer: void frameHeader(int,int,byte,byte)>($i0, i1, 1, $b4);
+
+        $r5 = r0.<okhttp3.internal.http2.Http2Writer: okio.BufferedSink sink>;
+
+        $r4 = r0.<okhttp3.internal.http2.Http2Writer: okio.Buffer hpackBuffer>;
+
+        $l2 = (long) i1;
+
+        interfaceinvoke $r5.<okio.BufferedSink: void write(okio.Buffer,long)>($r4, $l2);
+
+        $l2 = (long) i1;
+
+        $b4 = $l3 cmp $l2;
+
+        if $b4 <= 0 goto label5;
+
+        $l2 = (long) i1;
+
+        $l3 = $l3 - $l2;
+
+        specialinvoke r0.<okhttp3.internal.http2.Http2Writer: void writeContinuationFrames(int,long)>($i0, $l3);
+
+        return;
+
+     label4:
+        $b4 = 0;
+
+        goto label2;
+
+     label5:
+        return;
+    }
+    public int maxDataLength()
+    {
+        okhttp3.internal.http2.Http2Writer r0;
+        int i0;
+
+        r0 := @this: okhttp3.internal.http2.Http2Writer;
+
+        i0 = r0.<okhttp3.internal.http2.Http2Writer: int maxFrameSize>;
+
+        return i0;
+    }
+    public void ping(boolean, int, int) throws java.io.IOException
+    {
+        okhttp3.internal.http2.Http2Writer r0;
+        boolean $z0, $z1;
+        int $i0, $i1;
+        java.io.IOException $r1;
+        java.lang.Throwable $r2;
+        byte b2;
+        okio.BufferedSink $r3;
+
+        r0 := @this: okhttp3.internal.http2.Http2Writer;
+
+        $z0 := @parameter0: boolean;
+
+        $i0 := @parameter1: int;
+
+        $i1 := @parameter2: int;
+
+        entermonitor r0;
+
+     label1:
+        $z1 = r0.<okhttp3.internal.http2.Http2Writer: boolean closed>;
+
+        if $z1 == 0 goto label3;
+
+        $r1 = new java.io.IOException;
+
+        specialinvoke $r1.<java.io.IOException: void <init>(java.lang.String)>("closed");
+
+        throw $r1;
+
+     label2:
+        $r2 := @caughtexception;
+
+        exitmonitor r0;
+
+        throw $r2;
+
+     label3:
+        if $z0 == 0 goto label6;
+
+        b2 = 1;
+
+     label4:
+        virtualinvoke r0.<okhttp3.internal.http2.Http2Writer: void frameHeader(int,int,byte,byte)>(0, 8, 6, b2);
+
+        $r3 = r0.<okhttp3.internal.http2.Http2Writer: okio.BufferedSink sink>;
+
+        interfaceinvoke $r3.<okio.BufferedSink: okio.BufferedSink writeInt(int)>($i0);
+
+        $r3 = r0.<okhttp3.internal.http2.Http2Writer: okio.BufferedSink sink>;
+
+        interfaceinvoke $r3.<okio.BufferedSink: okio.BufferedSink writeInt(int)>($i1);
+
+        $r3 = r0.<okhttp3.internal.http2.Http2Writer: okio.BufferedSink sink>;
+
+        interfaceinvoke $r3.<okio.BufferedSink: void flush()>();
+
+     label5:
+        exitmonitor r0;
+
+        return;
+
+     label6:
+        b2 = 0;
+
+        goto label4;
+
+        catch java.lang.Throwable from label1 to label2 with label2;
+        catch java.lang.Throwable from label4 to label5 with label2;
+    }
+    public void pushPromise(int, int, java.util.List) throws java.io.IOException
+    {
+        okhttp3.internal.http2.Http2Writer r0;
+        int $i0, $i1, i2, $i6;
+        java.util.List r1;
+        long $l3, $l4;
+        boolean $z0;
+        java.io.IOException $r2;
+        java.lang.Throwable $r3;
+        okhttp3.internal.http2.Hpack$Writer $r4;
+        okio.Buffer $r5;
+        byte $b5;
+        okio.BufferedSink $r6;
+
+        r0 := @this: okhttp3.internal.http2.Http2Writer;
+
+        $i0 := @parameter0: int;
+
+        $i1 := @parameter1: int;
+
+        r1 := @parameter2: java.util.List;
+
+        entermonitor r0;
+
+     label1:
+        $z0 = r0.<okhttp3.internal.http2.Http2Writer: boolean closed>;
+
+        if $z0 == 0 goto label3;
+
+        $r2 = new java.io.IOException;
+
+        specialinvoke $r2.<java.io.IOException: void <init>(java.lang.String)>("closed");
+
+        throw $r2;
+
+     label2:
+        $r3 := @caughtexception;
+
+        exitmonitor r0;
+
+        throw $r3;
+
+     label3:
+        $r4 = r0.<okhttp3.internal.http2.Http2Writer: okhttp3.internal.http2.Hpack$Writer hpackWriter>;
+
+        virtualinvoke $r4.<okhttp3.internal.http2.Hpack$Writer: void writeHeaders(java.util.List)>(r1);
+
+        $r5 = r0.<okhttp3.internal.http2.Http2Writer: okio.Buffer hpackBuffer>;
+
+        $l4 = virtualinvoke $r5.<okio.Buffer: long size()>();
+
+        i2 = r0.<okhttp3.internal.http2.Http2Writer: int maxFrameSize>;
+
+        i2 = i2 + -4;
+
+        $l3 = (long) i2;
+
+        $l3 = staticinvoke <java.lang.Math: long min(long,long)>($l3, $l4);
+
+        i2 = (int) $l3;
+
+        $l3 = (long) i2;
+
+        $b5 = $l4 cmp $l3;
+
+        if $b5 != 0 goto label6;
+
+        $b5 = 4;
+
+     label4:
+        $i6 = i2 + 4;
+
+        virtualinvoke r0.<okhttp3.internal.http2.Http2Writer: void frameHeader(int,int,byte,byte)>($i0, $i6, 5, $b5);
+
+        $r6 = r0.<okhttp3.internal.http2.Http2Writer: okio.BufferedSink sink>;
+
+        $i1 = 2147483647 & $i1;
+
+        interfaceinvoke $r6.<okio.BufferedSink: okio.BufferedSink writeInt(int)>($i1);
+
+        $r6 = r0.<okhttp3.internal.http2.Http2Writer: okio.BufferedSink sink>;
+
+        $r5 = r0.<okhttp3.internal.http2.Http2Writer: okio.Buffer hpackBuffer>;
+
+        $l3 = (long) i2;
+
+        interfaceinvoke $r6.<okio.BufferedSink: void write(okio.Buffer,long)>($r5, $l3);
+
+        $l3 = (long) i2;
+
+        $b5 = $l4 cmp $l3;
+
+        if $b5 <= 0 goto label5;
+
+        $l3 = (long) i2;
+
+        $l4 = $l4 - $l3;
+
+        specialinvoke r0.<okhttp3.internal.http2.Http2Writer: void writeContinuationFrames(int,long)>($i0, $l4);
+
+     label5:
+        exitmonitor r0;
+
+        return;
+
+     label6:
+        $b5 = 0;
+
+        goto label4;
+
+        catch java.lang.Throwable from label1 to label2 with label2;
+        catch java.lang.Throwable from label3 to label5 with label2;
+    }
+    public void rstStream(int, okhttp3.internal.http2.ErrorCode) throws java.io.IOException
+    {
+        okhttp3.internal.http2.Http2Writer r0;
+        int $i0, $i1;
+        okhttp3.internal.http2.ErrorCode $r1;
+        boolean $z0;
+        java.io.IOException $r2;
+        java.lang.Throwable $r3;
+        java.lang.IllegalArgumentException $r4;
+        okio.BufferedSink $r5;
+
+        r0 := @this: okhttp3.internal.http2.Http2Writer;
+
+        $i0 := @parameter0: int;
+
+        $r1 := @parameter1: okhttp3.internal.http2.ErrorCode;
+
+        entermonitor r0;
+
+     label1:
+        $z0 = r0.<okhttp3.internal.http2.Http2Writer: boolean closed>;
+
+        if $z0 == 0 goto label3;
+
+        $r2 = new java.io.IOException;
+
+        specialinvoke $r2.<java.io.IOException: void <init>(java.lang.String)>("closed");
+
+        throw $r2;
+
+     label2:
+        $r3 := @caughtexception;
+
+        exitmonitor r0;
+
+        throw $r3;
+
+     label3:
+        $i1 = $r1.<okhttp3.internal.http2.ErrorCode: int httpCode>;
+
+        if $i1 != -1 goto label4;
+
+        $r4 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r4.<java.lang.IllegalArgumentException: void <init>()>();
+
+        throw $r4;
+
+     label4:
+        virtualinvoke r0.<okhttp3.internal.http2.Http2Writer: void frameHeader(int,int,byte,byte)>($i0, 4, 3, 0);
+
+        $r5 = r0.<okhttp3.internal.http2.Http2Writer: okio.BufferedSink sink>;
+
+        $i0 = $r1.<okhttp3.internal.http2.ErrorCode: int httpCode>;
+
+        interfaceinvoke $r5.<okio.BufferedSink: okio.BufferedSink writeInt(int)>($i0);
+
+        $r5 = r0.<okhttp3.internal.http2.Http2Writer: okio.BufferedSink sink>;
+
+        interfaceinvoke $r5.<okio.BufferedSink: void flush()>();
+
+     label5:
+        exitmonitor r0;
+
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label2;
+        catch java.lang.Throwable from label3 to label5 with label2;
+    }
+    public void settings(okhttp3.internal.http2.Settings) throws java.io.IOException
+    {
+        okhttp3.internal.http2.Http2Writer r0;
+        okhttp3.internal.http2.Settings $r1;
+        int i0, i1;
+        boolean $z0;
+        java.io.IOException $r2;
+        java.lang.Throwable $r3;
+        okio.BufferedSink $r4;
+
+        r0 := @this: okhttp3.internal.http2.Http2Writer;
+
+        $r1 := @parameter0: okhttp3.internal.http2.Settings;
+
+        entermonitor r0;
+
+     label01:
+        $z0 = r0.<okhttp3.internal.http2.Http2Writer: boolean closed>;
+
+        if $z0 == 0 goto label03;
+
+        $r2 = new java.io.IOException;
+
+        specialinvoke $r2.<java.io.IOException: void <init>(java.lang.String)>("closed");
+
+        throw $r2;
+
+     label02:
+        $r3 := @caughtexception;
+
+        exitmonitor r0;
+
+        throw $r3;
+
+     label03:
+        i0 = virtualinvoke $r1.<okhttp3.internal.http2.Settings: int size()>();
+
+        i0 = i0 * 6;
+
+        virtualinvoke r0.<okhttp3.internal.http2.Http2Writer: void frameHeader(int,int,byte,byte)>(0, i0, 4, 0);
+
+        i0 = 0;
+
+     label04:
+        if i0 >= 10 goto label09;
+
+        $z0 = virtualinvoke $r1.<okhttp3.internal.http2.Settings: boolean isSet(int)>(i0);
+
+        if $z0 != 0 goto label06;
+
+     label05:
+        i0 = i0 + 1;
+
+        goto label04;
+
+     label06:
+        i1 = i0;
+
+        if i0 != 4 goto label08;
+
+        i1 = 3;
+
+     label07:
+        $r4 = r0.<okhttp3.internal.http2.Http2Writer: okio.BufferedSink sink>;
+
+        interfaceinvoke $r4.<okio.BufferedSink: okio.BufferedSink writeShort(int)>(i1);
+
+        $r4 = r0.<okhttp3.internal.http2.Http2Writer: okio.BufferedSink sink>;
+
+        i1 = virtualinvoke $r1.<okhttp3.internal.http2.Settings: int get(int)>(i0);
+
+        interfaceinvoke $r4.<okio.BufferedSink: okio.BufferedSink writeInt(int)>(i1);
+
+        goto label05;
+
+     label08:
+        if i0 != 7 goto label07;
+
+        i1 = 4;
+
+        goto label07;
+
+     label09:
+        $r4 = r0.<okhttp3.internal.http2.Http2Writer: okio.BufferedSink sink>;
+
+        interfaceinvoke $r4.<okio.BufferedSink: void flush()>();
+
+     label10:
+        exitmonitor r0;
+
+        return;
+
+        catch java.lang.Throwable from label01 to label02 with label02;
+        catch java.lang.Throwable from label03 to label10 with label02;
+    }
+    public void synReply(boolean, int, java.util.List) throws java.io.IOException
+    {
+        okhttp3.internal.http2.Http2Writer r0;
+        boolean $z0, $z1;
+        int $i0;
+        java.util.List r1;
+        java.io.IOException $r2;
+        java.lang.Throwable $r3;
+
+        r0 := @this: okhttp3.internal.http2.Http2Writer;
+
+        $z0 := @parameter0: boolean;
+
+        $i0 := @parameter1: int;
+
+        r1 := @parameter2: java.util.List;
+
+        entermonitor r0;
+
+     label1:
+        $z1 = r0.<okhttp3.internal.http2.Http2Writer: boolean closed>;
+
+        if $z1 == 0 goto label3;
+
+        $r2 = new java.io.IOException;
+
+        specialinvoke $r2.<java.io.IOException: void <init>(java.lang.String)>("closed");
+
+        throw $r2;
+
+     label2:
+        $r3 := @caughtexception;
+
+        exitmonitor r0;
+
+        throw $r3;
+
+     label3:
+        virtualinvoke r0.<okhttp3.internal.http2.Http2Writer: void headers(boolean,int,java.util.List)>($z0, $i0, r1);
+
+     label4:
+        exitmonitor r0;
+
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label2;
+        catch java.lang.Throwable from label3 to label4 with label2;
+    }
+    public void synStream(boolean, int, int, java.util.List) throws java.io.IOException
+    {
+        okhttp3.internal.http2.Http2Writer r0;
+        boolean $z0, $z1;
+        int $i0, $i1;
+        java.util.List r1;
+        java.io.IOException $r2;
+        java.lang.Throwable $r3;
+
+        r0 := @this: okhttp3.internal.http2.Http2Writer;
+
+        $z0 := @parameter0: boolean;
+
+        $i0 := @parameter1: int;
+
+        $i1 := @parameter2: int;
+
+        r1 := @parameter3: java.util.List;
+
+        entermonitor r0;
+
+     label1:
+        $z1 = r0.<okhttp3.internal.http2.Http2Writer: boolean closed>;
+
+        if $z1 == 0 goto label3;
+
+        $r2 = new java.io.IOException;
+
+        specialinvoke $r2.<java.io.IOException: void <init>(java.lang.String)>("closed");
+
+        throw $r2;
+
+     label2:
+        $r3 := @caughtexception;
+
+        exitmonitor r0;
+
+        throw $r3;
+
+     label3:
+        virtualinvoke r0.<okhttp3.internal.http2.Http2Writer: void headers(boolean,int,java.util.List)>($z0, $i0, r1);
+
+     label4:
+        exitmonitor r0;
+
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label2;
+        catch java.lang.Throwable from label3 to label4 with label2;
+    }
+    public void windowUpdate(int, long) throws java.io.IOException
+    {
+        okhttp3.internal.http2.Http2Writer r0;
+        int $i0;
+        long $l1;
+        boolean $z0;
+        java.io.IOException $r1;
+        java.lang.Throwable $r2;
+        byte $b2;
+        java.lang.Object[] $r3;
+        java.lang.Long $r4;
+        java.lang.IllegalArgumentException $r5;
+        okio.BufferedSink $r6;
+
+        r0 := @this: okhttp3.internal.http2.Http2Writer;
+
+        $i0 := @parameter0: int;
+
+        $l1 := @parameter1: long;
+
+        entermonitor r0;
+
+     label1:
+        $z0 = r0.<okhttp3.internal.http2.Http2Writer: boolean closed>;
+
+        if $z0 == 0 goto label3;
+
+        $r1 = new java.io.IOException;
+
+        specialinvoke $r1.<java.io.IOException: void <init>(java.lang.String)>("closed");
+
+        throw $r1;
+
+     label2:
+        $r2 := @caughtexception;
+
+        exitmonitor r0;
+
+        throw $r2;
+
+     label3:
+        $b2 = $l1 cmp 0L;
+
+        if $b2 == 0 goto label4;
+
+        $b2 = $l1 cmp 2147483647L;
+
+        if $b2 <= 0 goto label5;
+
+     label4:
+        $r3 = newarray (java.lang.Object)[1];
+
+        $r4 = staticinvoke <java.lang.Long: java.lang.Long valueOf(long)>($l1);
+
+        $r3[0] = $r4;
+
+        $r5 = staticinvoke <okhttp3.internal.http2.Http2: java.lang.IllegalArgumentException illegalArgument(java.lang.String,java.lang.Object[])>("windowSizeIncrement == 0 || windowSizeIncrement > 0x7fffffffL: %s", $r3);
+
+        throw $r5;
+
+     label5:
+        virtualinvoke r0.<okhttp3.internal.http2.Http2Writer: void frameHeader(int,int,byte,byte)>($i0, 4, 8, 0);
+
+        $r6 = r0.<okhttp3.internal.http2.Http2Writer: okio.BufferedSink sink>;
+
+        $i0 = (int) $l1;
+
+        interfaceinvoke $r6.<okio.BufferedSink: okio.BufferedSink writeInt(int)>($i0);
+
+        $r6 = r0.<okhttp3.internal.http2.Http2Writer: okio.BufferedSink sink>;
+
+        interfaceinvoke $r6.<okio.BufferedSink: void flush()>();
+
+     label6:
+        exitmonitor r0;
+
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label2;
+        catch java.lang.Throwable from label4 to label6 with label2;
+    }

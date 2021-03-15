@@ -1,0 +1,149 @@
+io.fabric.sdk.android.services.network.CertificateChainCleaner extends java.lang.Object
+    private void <init>()
+    {
+        io.fabric.sdk.android.services.network.CertificateChainCleaner r0;
+
+        r0 := @this: io.fabric.sdk.android.services.network.CertificateChainCleaner;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+    public static java.security.cert.X509Certificate[] getCleanChain(java.security.cert.X509Certificate[], io.fabric.sdk.android.services.network.SystemKeyStore) throws java.security.cert.CertificateException
+    {
+        java.security.cert.X509Certificate[] $r0;
+        io.fabric.sdk.android.services.network.SystemKeyStore $r1;
+        java.util.LinkedList r2;
+        boolean z0, $z1;
+        java.security.cert.X509Certificate $r3, $r4;
+        int i0, $i1;
+        java.lang.Object[] $r5;
+        java.security.cert.CertificateException $r6;
+
+        $r0 := @parameter0: java.security.cert.X509Certificate[];
+
+        $r1 := @parameter1: io.fabric.sdk.android.services.network.SystemKeyStore;
+
+        r2 = new java.util.LinkedList;
+
+        specialinvoke r2.<java.util.LinkedList: void <init>()>();
+
+        z0 = 0;
+
+        $r3 = $r0[0];
+
+        $z1 = virtualinvoke $r1.<io.fabric.sdk.android.services.network.SystemKeyStore: boolean isTrustRoot(java.security.cert.X509Certificate)>($r3);
+
+        if $z1 == 0 goto label1;
+
+        z0 = 1;
+
+     label1:
+        $r3 = $r0[0];
+
+        virtualinvoke r2.<java.util.LinkedList: boolean add(java.lang.Object)>($r3);
+
+        i0 = 1;
+
+     label2:
+        $i1 = lengthof $r0;
+
+        if i0 >= $i1 goto label4;
+
+        $r3 = $r0[i0];
+
+        $z1 = virtualinvoke $r1.<io.fabric.sdk.android.services.network.SystemKeyStore: boolean isTrustRoot(java.security.cert.X509Certificate)>($r3);
+
+        if $z1 == 0 goto label3;
+
+        z0 = 1;
+
+     label3:
+        $r3 = $r0[i0];
+
+        $i1 = i0 + -1;
+
+        $r4 = $r0[$i1];
+
+        $z1 = staticinvoke <io.fabric.sdk.android.services.network.CertificateChainCleaner: boolean isValidLink(java.security.cert.X509Certificate,java.security.cert.X509Certificate)>($r3, $r4);
+
+        if $z1 == 0 goto label4;
+
+        $r3 = $r0[i0];
+
+        virtualinvoke r2.<java.util.LinkedList: boolean add(java.lang.Object)>($r3);
+
+        i0 = i0 + 1;
+
+        goto label2;
+
+     label4:
+        i0 = i0 + -1;
+
+        $r3 = $r0[i0];
+
+        $r3 = virtualinvoke $r1.<io.fabric.sdk.android.services.network.SystemKeyStore: java.security.cert.X509Certificate getTrustRootFor(java.security.cert.X509Certificate)>($r3);
+
+        if $r3 == null goto label5;
+
+        virtualinvoke r2.<java.util.LinkedList: boolean add(java.lang.Object)>($r3);
+
+        z0 = 1;
+
+     label5:
+        if z0 == 0 goto label6;
+
+        i0 = virtualinvoke r2.<java.util.LinkedList: int size()>();
+
+        $r0 = newarray (java.security.cert.X509Certificate)[i0];
+
+        $r5 = virtualinvoke r2.<java.util.LinkedList: java.lang.Object[] toArray(java.lang.Object[])>($r0);
+
+        $r0 = (java.security.cert.X509Certificate[]) $r5;
+
+        return $r0;
+
+     label6:
+        $r6 = new java.security.cert.CertificateException;
+
+        specialinvoke $r6.<java.security.cert.CertificateException: void <init>(java.lang.String)>("Didn\'t find a trust anchor in chain cleanup!");
+
+        throw $r6;
+    }
+    private static boolean isValidLink(java.security.cert.X509Certificate, java.security.cert.X509Certificate)
+    {
+        java.security.cert.X509Certificate $r0, $r1;
+        java.security.GeneralSecurityException r2;
+        javax.security.auth.x500.X500Principal $r3, $r4;
+        boolean $z0;
+        java.security.PublicKey $r5;
+
+        $r0 := @parameter0: java.security.cert.X509Certificate;
+
+        $r1 := @parameter1: java.security.cert.X509Certificate;
+
+        $r3 = virtualinvoke $r0.<java.security.cert.X509Certificate: javax.security.auth.x500.X500Principal getSubjectX500Principal()>();
+
+        $r4 = virtualinvoke $r1.<java.security.cert.X509Certificate: javax.security.auth.x500.X500Principal getIssuerX500Principal()>();
+
+        $z0 = virtualinvoke $r3.<javax.security.auth.x500.X500Principal: boolean equals(java.lang.Object)>($r4);
+
+        if $z0 != 0 goto label1;
+
+        return 0;
+
+     label1:
+        $r5 = virtualinvoke $r0.<java.security.cert.X509Certificate: java.security.PublicKey getPublicKey()>();
+
+        virtualinvoke $r1.<java.security.cert.X509Certificate: void verify(java.security.PublicKey)>($r5);
+
+     label2:
+        return 1;
+
+     label3:
+        r2 := @caughtexception;
+
+        return 0;
+
+        catch java.security.GeneralSecurityException from label1 to label2 with label3;
+    }

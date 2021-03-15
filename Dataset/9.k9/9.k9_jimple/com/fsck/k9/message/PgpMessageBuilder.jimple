@@ -1,0 +1,959 @@
+com.fsck.k9.message.PgpMessageBuilder extends com.fsck.k9.message.MessageBuilder
+private static final int REQUEST_USER_INTERACTION
+private final com.fsck.k9.autocrypt.AutocryptOpenPgpApiInteractor autocryptOpenPgpApiInteractor
+private final com.fsck.k9.autocrypt.AutocryptOperations autocryptOperations
+private com.fsck.k9.activity.compose.ComposeCryptoStatus cryptoStatus
+private com.fsck.k9.mail.internet.MimeMessage currentProcessedMimeMessage
+private org.openintents.openpgp.util.OpenPgpApi openPgpApi
+    void <init>(android.content.Context, com.fsck.k9.mail.internet.MessageIdGenerator, com.fsck.k9.mail.BoundaryGenerator, com.fsck.k9.autocrypt.AutocryptOperations, com.fsck.k9.autocrypt.AutocryptOpenPgpApiInteractor)
+    {
+        com.fsck.k9.message.PgpMessageBuilder r0;
+        android.content.Context $r1;
+        com.fsck.k9.mail.internet.MessageIdGenerator $r2;
+        com.fsck.k9.mail.BoundaryGenerator $r3;
+        com.fsck.k9.autocrypt.AutocryptOperations $r4;
+        com.fsck.k9.autocrypt.AutocryptOpenPgpApiInteractor $r5;
+
+        r0 := @this: com.fsck.k9.message.PgpMessageBuilder;
+
+        $r1 := @parameter0: android.content.Context;
+
+        $r2 := @parameter1: com.fsck.k9.mail.internet.MessageIdGenerator;
+
+        $r3 := @parameter2: com.fsck.k9.mail.BoundaryGenerator;
+
+        $r4 := @parameter3: com.fsck.k9.autocrypt.AutocryptOperations;
+
+        $r5 := @parameter4: com.fsck.k9.autocrypt.AutocryptOpenPgpApiInteractor;
+
+        specialinvoke r0.<com.fsck.k9.message.MessageBuilder: void <init>(android.content.Context,com.fsck.k9.mail.internet.MessageIdGenerator,com.fsck.k9.mail.BoundaryGenerator)>($r1, $r2, $r3);
+
+        r0.<com.fsck.k9.message.PgpMessageBuilder: com.fsck.k9.autocrypt.AutocryptOperations autocryptOperations> = $r4;
+
+        r0.<com.fsck.k9.message.PgpMessageBuilder: com.fsck.k9.autocrypt.AutocryptOpenPgpApiInteractor autocryptOpenPgpApiInteractor> = $r5;
+
+        return;
+    }
+    private android.content.Intent buildOpenPgpApiIntent(boolean, boolean, boolean)
+    {
+        com.fsck.k9.message.PgpMessageBuilder r0;
+        boolean $z0, $z1, $z2;
+        long[] r1;
+        com.fsck.k9.activity.compose.ComposeCryptoStatus $r2;
+        java.lang.Long $r3;
+        java.lang.IllegalStateException $r4;
+        android.content.Intent r5;
+        long $l0;
+        java.lang.String[] $r6;
+        java.lang.String $r7;
+
+        r0 := @this: com.fsck.k9.message.PgpMessageBuilder;
+
+        $z0 := @parameter0: boolean;
+
+        $z1 := @parameter1: boolean;
+
+        $z2 := @parameter2: boolean;
+
+        $r2 = r0.<com.fsck.k9.message.PgpMessageBuilder: com.fsck.k9.activity.compose.ComposeCryptoStatus cryptoStatus>;
+
+        $r3 = virtualinvoke $r2.<com.fsck.k9.activity.compose.ComposeCryptoStatus: java.lang.Long getOpenPgpKeyId()>();
+
+        if $z1 == 0 goto label4;
+
+        if $z0 != 0 goto label1;
+
+        $r4 = new java.lang.IllegalStateException;
+
+        specialinvoke $r4.<java.lang.IllegalStateException: void <init>(java.lang.String)>("encrypt-only is not supported at this point and should never happen!");
+
+        throw $r4;
+
+     label1:
+        r5 = new android.content.Intent;
+
+        specialinvoke r5.<android.content.Intent: void <init>(java.lang.String)>("org.openintents.openpgp.action.SIGN_AND_ENCRYPT");
+
+        r1 = newarray (long)[1];
+
+        $l0 = virtualinvoke $r3.<java.lang.Long: long longValue()>();
+
+        r1[0] = $l0;
+
+        virtualinvoke r5.<android.content.Intent: android.content.Intent putExtra(java.lang.String,long[])>("key_ids", r1);
+
+        $z1 = virtualinvoke r0.<com.fsck.k9.message.PgpMessageBuilder: boolean isDraft()>();
+
+        if $z1 != 0 goto label2;
+
+        $r2 = r0.<com.fsck.k9.message.PgpMessageBuilder: com.fsck.k9.activity.compose.ComposeCryptoStatus cryptoStatus>;
+
+        $r6 = virtualinvoke $r2.<com.fsck.k9.activity.compose.ComposeCryptoStatus: java.lang.String[] getRecipientAddresses()>();
+
+        virtualinvoke r5.<android.content.Intent: android.content.Intent putExtra(java.lang.String,java.lang.String[])>("user_ids", $r6);
+
+     label2:
+        if $z0 == 0 goto label3;
+
+        virtualinvoke r5.<android.content.Intent: android.content.Intent putExtra(java.lang.String,java.io.Serializable)>("sign_key_id", $r3);
+
+     label3:
+        virtualinvoke r5.<android.content.Intent: android.content.Intent putExtra(java.lang.String,boolean)>("ascii_armor", 1);
+
+        return r5;
+
+     label4:
+        r5 = new android.content.Intent;
+
+        if $z2 == 0 goto label6;
+
+        $r7 = "org.openintents.openpgp.action.SIGN";
+
+     label5:
+        specialinvoke r5.<android.content.Intent: void <init>(java.lang.String)>($r7);
+
+        goto label2;
+
+     label6:
+        $r7 = "org.openintents.openpgp.action.DETACHED_SIGN";
+
+        goto label5;
+    }
+    private org.openintents.openpgp.util.OpenPgpApi$OpenPgpDataSource createOpenPgpDataSourceFromBodyPart(com.fsck.k9.mail.internet.MimeBodyPart, boolean) throws com.fsck.k9.mail.MessagingException
+    {
+        com.fsck.k9.message.PgpMessageBuilder r0;
+        com.fsck.k9.mail.internet.MimeBodyPart $r1;
+        boolean $z0;
+        com.fsck.k9.message.PgpMessageBuilder$1 $r2;
+
+        r0 := @this: com.fsck.k9.message.PgpMessageBuilder;
+
+        $r1 := @parameter0: com.fsck.k9.mail.internet.MimeBodyPart;
+
+        $z0 := @parameter1: boolean;
+
+        $r2 = new com.fsck.k9.message.PgpMessageBuilder$1;
+
+        specialinvoke $r2.<com.fsck.k9.message.PgpMessageBuilder$1: void <init>(com.fsck.k9.message.PgpMessageBuilder,boolean,com.fsck.k9.mail.internet.MimeBodyPart)>(r0, $z0, $r1);
+
+        return $r2;
+    }
+    private android.app.PendingIntent launchOpenPgpApiIntent(android.content.Intent, boolean, boolean, boolean) throws com.fsck.k9.mail.MessagingException
+    {
+        com.fsck.k9.message.PgpMessageBuilder r0;
+        android.content.Intent $r1;
+        boolean $z0, $z1, $z2;
+        com.fsck.k9.mail.filter.EOLConvertingOutputStream r2;
+        com.fsck.k9.mail.internet.BinaryTempFileBody r3;
+        com.fsck.k9.mail.internet.MimeMessage $r4;
+        com.fsck.k9.mail.internet.MimeBodyPart $r5;
+        java.lang.String[] $r6;
+        int $i0;
+        java.lang.String $r7;
+        org.openintents.openpgp.util.OpenPgpApi$OpenPgpDataSource $r8;
+        java.io.OutputStream $r9;
+        org.openintents.openpgp.util.OpenPgpApi $r10;
+        java.lang.IllegalStateException $r11;
+        java.io.IOException r12;
+        com.fsck.k9.mail.MessagingException $r13;
+        android.os.Parcelable $r14;
+        android.app.PendingIntent r15;
+        org.openintents.openpgp.OpenPgpError r16;
+
+        r0 := @this: com.fsck.k9.message.PgpMessageBuilder;
+
+        $r1 := @parameter0: android.content.Intent;
+
+        $z0 := @parameter1: boolean;
+
+        $z1 := @parameter2: boolean;
+
+        $z2 := @parameter3: boolean;
+
+        $r4 = r0.<com.fsck.k9.message.PgpMessageBuilder: com.fsck.k9.mail.internet.MimeMessage currentProcessedMimeMessage>;
+
+        $r5 = virtualinvoke $r4.<com.fsck.k9.mail.internet.MimeMessage: com.fsck.k9.mail.internet.MimeBodyPart toBodyPart()>();
+
+        $r4 = r0.<com.fsck.k9.message.PgpMessageBuilder: com.fsck.k9.mail.internet.MimeMessage currentProcessedMimeMessage>;
+
+        $r6 = virtualinvoke $r4.<com.fsck.k9.mail.internet.MimeMessage: java.lang.String[] getHeader(java.lang.String)>("Content-Type");
+
+        $i0 = lengthof $r6;
+
+        if $i0 <= 0 goto label01;
+
+        $r7 = $r6[0];
+
+        virtualinvoke $r5.<com.fsck.k9.mail.internet.MimeBodyPart: void setHeader(java.lang.String,java.lang.String)>("Content-Type", $r7);
+
+     label01:
+        $r8 = specialinvoke r0.<com.fsck.k9.message.PgpMessageBuilder: org.openintents.openpgp.util.OpenPgpApi$OpenPgpDataSource createOpenPgpDataSourceFromBodyPart(com.fsck.k9.mail.internet.MimeBodyPart,boolean)>($r5, $z2);
+
+        r3 = null;
+
+        r2 = null;
+
+        if $z0 == 0 goto label06;
+
+        r3 = new com.fsck.k9.mail.internet.BinaryTempFileBody;
+
+        if $z1 == 0 goto label08;
+
+        $r7 = "7bit";
+
+     label02:
+        specialinvoke r3.<com.fsck.k9.mail.internet.BinaryTempFileBody: void <init>(java.lang.String)>($r7);
+
+     label03:
+        $r9 = virtualinvoke r3.<com.fsck.k9.mail.internet.BinaryTempFileBody: java.io.OutputStream getOutputStream()>();
+
+     label04:
+        r2 = new com.fsck.k9.mail.filter.EOLConvertingOutputStream;
+
+     label05:
+        specialinvoke r2.<com.fsck.k9.mail.filter.EOLConvertingOutputStream: void <init>(java.io.OutputStream)>($r9);
+
+     label06:
+        $r10 = r0.<com.fsck.k9.message.PgpMessageBuilder: org.openintents.openpgp.util.OpenPgpApi openPgpApi>;
+
+        $r1 = virtualinvoke $r10.<org.openintents.openpgp.util.OpenPgpApi: android.content.Intent executeApi(android.content.Intent,org.openintents.openpgp.util.OpenPgpApi$OpenPgpDataSource,java.io.OutputStream)>($r1, $r8, r2);
+
+        $i0 = virtualinvoke $r1.<android.content.Intent: int getIntExtra(java.lang.String,int)>("result_code", 0);
+
+        lookupswitch($i0)
+        {
+            case 0: goto label13;
+            case 1: goto label11;
+            case 2: goto label12;
+            default: goto label07;
+        };
+
+     label07:
+        $r11 = new java.lang.IllegalStateException;
+
+        specialinvoke $r11.<java.lang.IllegalStateException: void <init>(java.lang.String)>("unreachable code segment reached");
+
+        throw $r11;
+
+     label08:
+        $r7 = "8bit";
+
+        goto label02;
+
+     label09:
+        r12 := @caughtexception;
+
+     label10:
+        $r13 = new com.fsck.k9.mail.MessagingException;
+
+        specialinvoke $r13.<com.fsck.k9.mail.MessagingException: void <init>(java.lang.String,java.lang.Throwable)>("could not allocate temp file for storage!", r12);
+
+        throw $r13;
+
+     label11:
+        specialinvoke r0.<com.fsck.k9.message.PgpMessageBuilder: void mimeBuildMessage(android.content.Intent,com.fsck.k9.mail.internet.MimeBodyPart,com.fsck.k9.mail.internet.BinaryTempFileBody)>($r1, $r5, r3);
+
+        return null;
+
+     label12:
+        $r14 = virtualinvoke $r1.<android.content.Intent: android.os.Parcelable getParcelableExtra(java.lang.String)>("intent");
+
+        r15 = (android.app.PendingIntent) $r14;
+
+        if r15 != null goto label16;
+
+        $r13 = new com.fsck.k9.mail.MessagingException;
+
+        specialinvoke $r13.<com.fsck.k9.mail.MessagingException: void <init>(java.lang.String)>("openpgp api needs user interaction, but returned no pendingintent!");
+
+        throw $r13;
+
+     label13:
+        $r14 = virtualinvoke $r1.<android.content.Intent: android.os.Parcelable getParcelableExtra(java.lang.String)>("error");
+
+        r16 = (org.openintents.openpgp.OpenPgpError) $r14;
+
+        if r16 != null goto label14;
+
+        $r13 = new com.fsck.k9.mail.MessagingException;
+
+        specialinvoke $r13.<com.fsck.k9.mail.MessagingException: void <init>(java.lang.String)>("internal openpgp api error");
+
+        throw $r13;
+
+     label14:
+        $r13 = new com.fsck.k9.mail.MessagingException;
+
+        $r7 = virtualinvoke r16.<org.openintents.openpgp.OpenPgpError: java.lang.String getMessage()>();
+
+        specialinvoke $r13.<com.fsck.k9.mail.MessagingException: void <init>(java.lang.String)>($r7);
+
+        throw $r13;
+
+     label15:
+        r12 := @caughtexception;
+
+        goto label10;
+
+     label16:
+        return r15;
+
+        catch java.io.IOException from label02 to label03 with label09;
+        catch java.io.IOException from label03 to label04 with label15;
+        catch java.io.IOException from label05 to label06 with label15;
+    }
+    private void mimeBuildEncryptedMessage(com.fsck.k9.mail.Body) throws com.fsck.k9.mail.MessagingException
+    {
+        com.fsck.k9.message.PgpMessageBuilder r0;
+        com.fsck.k9.mail.Body $r1;
+        com.fsck.k9.mail.internet.MimeBodyPart r2;
+        com.fsck.k9.activity.compose.ComposeCryptoStatus $r3;
+        boolean $z0;
+        java.lang.IllegalStateException $r4;
+        com.fsck.k9.mail.internet.MimeMultipart $r5;
+        com.fsck.k9.mail.internet.TextBody $r6;
+        com.fsck.k9.mail.internet.MimeMessage $r7;
+        java.lang.Object[] $r8;
+        java.lang.String $r9;
+
+        r0 := @this: com.fsck.k9.message.PgpMessageBuilder;
+
+        $r1 := @parameter0: com.fsck.k9.mail.Body;
+
+        $r3 = r0.<com.fsck.k9.message.PgpMessageBuilder: com.fsck.k9.activity.compose.ComposeCryptoStatus cryptoStatus>;
+
+        $z0 = virtualinvoke $r3.<com.fsck.k9.activity.compose.ComposeCryptoStatus: boolean isEncryptionEnabled()>();
+
+        if $z0 != 0 goto label1;
+
+        $r4 = new java.lang.IllegalStateException;
+
+        specialinvoke $r4.<java.lang.IllegalStateException: void <init>(java.lang.String)>("call to mimeBuildEncryptedMessage while encryption isn\'t enabled!");
+
+        throw $r4;
+
+     label1:
+        $r5 = virtualinvoke r0.<com.fsck.k9.message.PgpMessageBuilder: com.fsck.k9.mail.internet.MimeMultipart createMimeMultipart()>();
+
+        virtualinvoke $r5.<com.fsck.k9.mail.internet.MimeMultipart: void setSubType(java.lang.String)>("encrypted");
+
+        r2 = new com.fsck.k9.mail.internet.MimeBodyPart;
+
+        $r6 = new com.fsck.k9.mail.internet.TextBody;
+
+        specialinvoke $r6.<com.fsck.k9.mail.internet.TextBody: void <init>(java.lang.String)>("Version: 1");
+
+        specialinvoke r2.<com.fsck.k9.mail.internet.MimeBodyPart: void <init>(com.fsck.k9.mail.Body,java.lang.String)>($r6, "application/pgp-encrypted");
+
+        virtualinvoke $r5.<com.fsck.k9.mail.internet.MimeMultipart: void addBodyPart(com.fsck.k9.mail.BodyPart)>(r2);
+
+        r2 = new com.fsck.k9.mail.internet.MimeBodyPart;
+
+        specialinvoke r2.<com.fsck.k9.mail.internet.MimeBodyPart: void <init>(com.fsck.k9.mail.Body,java.lang.String)>($r1, "application/octet-stream; name=\"encrypted.asc\"");
+
+        virtualinvoke r2.<com.fsck.k9.mail.internet.MimeBodyPart: void addHeader(java.lang.String,java.lang.String)>("Content-Disposition", "inline; filename=\"encrypted.asc\"");
+
+        virtualinvoke $r5.<com.fsck.k9.mail.internet.MimeMultipart: void addBodyPart(com.fsck.k9.mail.BodyPart)>(r2);
+
+        $r7 = r0.<com.fsck.k9.message.PgpMessageBuilder: com.fsck.k9.mail.internet.MimeMessage currentProcessedMimeMessage>;
+
+        staticinvoke <com.fsck.k9.mail.internet.MimeMessageHelper: void setBody(com.fsck.k9.mail.Part,com.fsck.k9.mail.Body)>($r7, $r5);
+
+        $r8 = newarray (java.lang.Object)[1];
+
+        $r9 = virtualinvoke $r5.<com.fsck.k9.mail.internet.MimeMultipart: java.lang.String getBoundary()>();
+
+        $r8[0] = $r9;
+
+        $r9 = staticinvoke <java.lang.String: java.lang.String format(java.lang.String,java.lang.Object[])>("multipart/encrypted; boundary=\"%s\";\r\n  protocol=\"application/pgp-encrypted\"", $r8);
+
+        $r7 = r0.<com.fsck.k9.message.PgpMessageBuilder: com.fsck.k9.mail.internet.MimeMessage currentProcessedMimeMessage>;
+
+        virtualinvoke $r7.<com.fsck.k9.mail.internet.MimeMessage: void setHeader(java.lang.String,java.lang.String)>("Content-Type", $r9);
+
+        return;
+    }
+    private void mimeBuildInlineMessage(com.fsck.k9.mail.Body) throws com.fsck.k9.mail.MessagingException
+    {
+        com.fsck.k9.message.PgpMessageBuilder r0;
+        com.fsck.k9.mail.Body $r1;
+        com.fsck.k9.activity.compose.ComposeCryptoStatus $r2;
+        boolean $z0;
+        java.lang.IllegalStateException $r3;
+        com.fsck.k9.mail.internet.MimeMessage $r4;
+
+        r0 := @this: com.fsck.k9.message.PgpMessageBuilder;
+
+        $r1 := @parameter0: com.fsck.k9.mail.Body;
+
+        $r2 = r0.<com.fsck.k9.message.PgpMessageBuilder: com.fsck.k9.activity.compose.ComposeCryptoStatus cryptoStatus>;
+
+        $z0 = virtualinvoke $r2.<com.fsck.k9.activity.compose.ComposeCryptoStatus: boolean isPgpInlineModeEnabled()>();
+
+        if $z0 != 0 goto label1;
+
+        $r3 = new java.lang.IllegalStateException;
+
+        specialinvoke $r3.<java.lang.IllegalStateException: void <init>(java.lang.String)>("call to mimeBuildInlineMessage while pgp/inline isn\'t enabled!");
+
+        throw $r3;
+
+     label1:
+        $r2 = r0.<com.fsck.k9.message.PgpMessageBuilder: com.fsck.k9.activity.compose.ComposeCryptoStatus cryptoStatus>;
+
+        $z0 = virtualinvoke $r2.<com.fsck.k9.activity.compose.ComposeCryptoStatus: boolean isEncryptionEnabled()>();
+
+        if $z0 != 0 goto label4;
+
+        $z0 = 1;
+
+     label2:
+        if $z0 == 0 goto label3;
+
+        interfaceinvoke $r1.<com.fsck.k9.mail.Body: void setEncoding(java.lang.String)>("quoted-printable");
+
+     label3:
+        $r4 = r0.<com.fsck.k9.message.PgpMessageBuilder: com.fsck.k9.mail.internet.MimeMessage currentProcessedMimeMessage>;
+
+        staticinvoke <com.fsck.k9.mail.internet.MimeMessageHelper: void setBody(com.fsck.k9.mail.Part,com.fsck.k9.mail.Body)>($r4, $r1);
+
+        return;
+
+     label4:
+        $z0 = 0;
+
+        goto label2;
+    }
+    private void mimeBuildMessage(android.content.Intent, com.fsck.k9.mail.internet.MimeBodyPart, com.fsck.k9.mail.internet.BinaryTempFileBody) throws com.fsck.k9.mail.MessagingException
+    {
+        com.fsck.k9.message.PgpMessageBuilder r0;
+        android.content.Intent $r1;
+        com.fsck.k9.mail.internet.MimeBodyPart $r2;
+        com.fsck.k9.mail.internet.BinaryTempFileBody $r3;
+        com.fsck.k9.activity.compose.ComposeCryptoStatus $r4;
+        boolean $z0;
+        java.lang.AssertionError $r5;
+
+        r0 := @this: com.fsck.k9.message.PgpMessageBuilder;
+
+        $r1 := @parameter0: android.content.Intent;
+
+        $r2 := @parameter1: com.fsck.k9.mail.internet.MimeBodyPart;
+
+        $r3 := @parameter2: com.fsck.k9.mail.internet.BinaryTempFileBody;
+
+        if $r3 != null goto label5;
+
+        $r4 = r0.<com.fsck.k9.message.PgpMessageBuilder: com.fsck.k9.activity.compose.ComposeCryptoStatus cryptoStatus>;
+
+        $z0 = virtualinvoke $r4.<com.fsck.k9.activity.compose.ComposeCryptoStatus: boolean isPgpInlineModeEnabled()>();
+
+        if $z0 != 0 goto label1;
+
+        $r4 = r0.<com.fsck.k9.message.PgpMessageBuilder: com.fsck.k9.activity.compose.ComposeCryptoStatus cryptoStatus>;
+
+        $z0 = virtualinvoke $r4.<com.fsck.k9.activity.compose.ComposeCryptoStatus: boolean isEncryptionEnabled()>();
+
+        if $z0 == 0 goto label3;
+
+     label1:
+        $z0 = 1;
+
+     label2:
+        if $z0 == 0 goto label4;
+
+        $r5 = new java.lang.AssertionError;
+
+        specialinvoke $r5.<java.lang.AssertionError: void <init>(java.lang.Object)>("encryption or pgp/inline is enabled, but no output part!");
+
+        throw $r5;
+
+     label3:
+        $z0 = 0;
+
+        goto label2;
+
+     label4:
+        specialinvoke r0.<com.fsck.k9.message.PgpMessageBuilder: void mimeBuildSignedMessage(com.fsck.k9.mail.BodyPart,android.content.Intent)>($r2, $r1);
+
+        return;
+
+     label5:
+        $r4 = r0.<com.fsck.k9.message.PgpMessageBuilder: com.fsck.k9.activity.compose.ComposeCryptoStatus cryptoStatus>;
+
+        $z0 = virtualinvoke $r4.<com.fsck.k9.activity.compose.ComposeCryptoStatus: boolean isPgpInlineModeEnabled()>();
+
+        if $z0 == 0 goto label6;
+
+        specialinvoke r0.<com.fsck.k9.message.PgpMessageBuilder: void mimeBuildInlineMessage(com.fsck.k9.mail.Body)>($r3);
+
+        return;
+
+     label6:
+        specialinvoke r0.<com.fsck.k9.message.PgpMessageBuilder: void mimeBuildEncryptedMessage(com.fsck.k9.mail.Body)>($r3);
+
+        return;
+    }
+    private void mimeBuildSignedMessage(com.fsck.k9.mail.BodyPart, android.content.Intent) throws com.fsck.k9.mail.MessagingException
+    {
+        com.fsck.k9.message.PgpMessageBuilder r0;
+        com.fsck.k9.mail.BodyPart $r1;
+        android.content.Intent $r2;
+        com.fsck.k9.activity.compose.ComposeCryptoStatus $r3;
+        boolean $z0;
+        java.lang.IllegalStateException $r4;
+        byte[] $r5;
+        com.fsck.k9.mail.MessagingException $r6;
+        com.fsck.k9.mail.internet.MimeMultipart $r7;
+        com.fsck.k9.mail.internet.MimeBodyPart $r8;
+        com.fsck.k9.mailstore.BinaryMemoryBody $r9;
+        com.fsck.k9.mail.internet.MimeMessage $r10;
+        java.lang.Object[] $r11;
+        java.lang.String $r12, r13;
+        java.lang.StringBuilder $r14;
+
+        r0 := @this: com.fsck.k9.message.PgpMessageBuilder;
+
+        $r1 := @parameter0: com.fsck.k9.mail.BodyPart;
+
+        $r2 := @parameter1: android.content.Intent;
+
+        $r3 = r0.<com.fsck.k9.message.PgpMessageBuilder: com.fsck.k9.activity.compose.ComposeCryptoStatus cryptoStatus>;
+
+        $z0 = virtualinvoke $r3.<com.fsck.k9.activity.compose.ComposeCryptoStatus: boolean isSigningEnabled()>();
+
+        if $z0 != 0 goto label1;
+
+        $r4 = new java.lang.IllegalStateException;
+
+        specialinvoke $r4.<java.lang.IllegalStateException: void <init>(java.lang.String)>("call to mimeBuildSignedMessage while signing isn\'t enabled!");
+
+        throw $r4;
+
+     label1:
+        $r5 = virtualinvoke $r2.<android.content.Intent: byte[] getByteArrayExtra(java.lang.String)>("detached_signature");
+
+        if $r5 != null goto label2;
+
+        $r6 = new com.fsck.k9.mail.MessagingException;
+
+        specialinvoke $r6.<com.fsck.k9.mail.MessagingException: void <init>(java.lang.String)>("didn\'t find expected RESULT_DETACHED_SIGNATURE in api call result");
+
+        throw $r6;
+
+     label2:
+        $r7 = virtualinvoke r0.<com.fsck.k9.message.PgpMessageBuilder: com.fsck.k9.mail.internet.MimeMultipart createMimeMultipart()>();
+
+        virtualinvoke $r7.<com.fsck.k9.mail.internet.MimeMultipart: void setSubType(java.lang.String)>("signed");
+
+        virtualinvoke $r7.<com.fsck.k9.mail.internet.MimeMultipart: void addBodyPart(com.fsck.k9.mail.BodyPart)>($r1);
+
+        $r8 = new com.fsck.k9.mail.internet.MimeBodyPart;
+
+        $r9 = new com.fsck.k9.mailstore.BinaryMemoryBody;
+
+        specialinvoke $r9.<com.fsck.k9.mailstore.BinaryMemoryBody: void <init>(byte[],java.lang.String)>($r5, "7bit");
+
+        specialinvoke $r8.<com.fsck.k9.mail.internet.MimeBodyPart: void <init>(com.fsck.k9.mail.Body,java.lang.String)>($r9, "application/pgp-signature; name=\"signature.asc\"");
+
+        virtualinvoke $r7.<com.fsck.k9.mail.internet.MimeMultipart: void addBodyPart(com.fsck.k9.mail.BodyPart)>($r8);
+
+        $r10 = r0.<com.fsck.k9.message.PgpMessageBuilder: com.fsck.k9.mail.internet.MimeMessage currentProcessedMimeMessage>;
+
+        staticinvoke <com.fsck.k9.mail.internet.MimeMessageHelper: void setBody(com.fsck.k9.mail.Part,com.fsck.k9.mail.Body)>($r10, $r7);
+
+        $r11 = newarray (java.lang.Object)[1];
+
+        $r12 = virtualinvoke $r7.<com.fsck.k9.mail.internet.MimeMultipart: java.lang.String getBoundary()>();
+
+        $r11[0] = $r12;
+
+        $r12 = staticinvoke <java.lang.String: java.lang.String format(java.lang.String,java.lang.Object[])>("multipart/signed; boundary=\"%s\";\r\n  protocol=\"application/pgp-signature\"", $r11);
+
+        r13 = $r12;
+
+        $z0 = virtualinvoke $r2.<android.content.Intent: boolean hasExtra(java.lang.String)>("signature_micalg");
+
+        if $z0 == 0 goto label4;
+
+        r13 = virtualinvoke $r2.<android.content.Intent: java.lang.String getStringExtra(java.lang.String)>("signature_micalg");
+
+        $r14 = new java.lang.StringBuilder;
+
+        specialinvoke $r14.<java.lang.StringBuilder: void <init>()>();
+
+        $r14 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r12);
+
+        $r11 = newarray (java.lang.Object)[1];
+
+        $r11[0] = r13;
+
+        $r12 = staticinvoke <java.lang.String: java.lang.String format(java.lang.String,java.lang.Object[])>("; micalg=\"%s\"", $r11);
+
+        $r14 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r12);
+
+        r13 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label3:
+        $r10 = r0.<com.fsck.k9.message.PgpMessageBuilder: com.fsck.k9.mail.internet.MimeMessage currentProcessedMimeMessage>;
+
+        virtualinvoke $r10.<com.fsck.k9.mail.internet.MimeMessage: void setHeader(java.lang.String,java.lang.String)>("Content-Type", r13);
+
+        return;
+
+     label4:
+        $r11 = newarray (java.lang.Object)[0];
+
+        staticinvoke <timber.log.Timber: void e(java.lang.String,java.lang.Object[])>("missing micalg parameter for pgp multipart/signed!", $r11);
+
+        goto label3;
+    }
+    public static com.fsck.k9.message.PgpMessageBuilder newInstance()
+    {
+        com.fsck.k9.message.PgpMessageBuilder $r0;
+        android.content.Context $r1;
+        com.fsck.k9.mail.internet.MessageIdGenerator $r2;
+        com.fsck.k9.mail.BoundaryGenerator $r3;
+        com.fsck.k9.autocrypt.AutocryptOperations $r4;
+        com.fsck.k9.autocrypt.AutocryptOpenPgpApiInteractor $r5;
+
+        $r1 = staticinvoke <com.fsck.k9.Globals: android.content.Context getContext()>();
+
+        $r2 = staticinvoke <com.fsck.k9.mail.internet.MessageIdGenerator: com.fsck.k9.mail.internet.MessageIdGenerator getInstance()>();
+
+        $r3 = staticinvoke <com.fsck.k9.mail.BoundaryGenerator: com.fsck.k9.mail.BoundaryGenerator getInstance()>();
+
+        $r4 = staticinvoke <com.fsck.k9.autocrypt.AutocryptOperations: com.fsck.k9.autocrypt.AutocryptOperations getInstance()>();
+
+        $r5 = staticinvoke <com.fsck.k9.autocrypt.AutocryptOpenPgpApiInteractor: com.fsck.k9.autocrypt.AutocryptOpenPgpApiInteractor getInstance()>();
+
+        $r0 = new com.fsck.k9.message.PgpMessageBuilder;
+
+        specialinvoke $r0.<com.fsck.k9.message.PgpMessageBuilder: void <init>(android.content.Context,com.fsck.k9.mail.internet.MessageIdGenerator,com.fsck.k9.mail.BoundaryGenerator,com.fsck.k9.autocrypt.AutocryptOperations,com.fsck.k9.autocrypt.AutocryptOpenPgpApiInteractor)>($r1, $r2, $r3, $r4, $r5);
+
+        return $r0;
+    }
+    private void startOrContinueBuildMessage(android.content.Intent)
+    {
+        com.fsck.k9.message.PgpMessageBuilder r0;
+        com.fsck.k9.mail.MessagingException r1;
+        android.content.Intent $r2;
+        boolean $z0, $z1, $z2, $z3, $z4;
+        com.fsck.k9.activity.compose.ComposeCryptoStatus $r3;
+        com.fsck.k9.mail.internet.MimeMessage $r4;
+        java.lang.String $r5;
+        android.app.PendingIntent $r6;
+
+        r0 := @this: com.fsck.k9.message.PgpMessageBuilder;
+
+        $r2 := @parameter0: android.content.Intent;
+
+        $z0 = 0;
+
+        $r3 = r0.<com.fsck.k9.message.PgpMessageBuilder: com.fsck.k9.activity.compose.ComposeCryptoStatus cryptoStatus>;
+
+     label01:
+        $z1 = virtualinvoke $r3.<com.fsck.k9.activity.compose.ComposeCryptoStatus: boolean isSigningEnabled()>();
+
+     label02:
+        $r3 = r0.<com.fsck.k9.message.PgpMessageBuilder: com.fsck.k9.activity.compose.ComposeCryptoStatus cryptoStatus>;
+
+     label03:
+        $z2 = virtualinvoke $r3.<com.fsck.k9.activity.compose.ComposeCryptoStatus: boolean isEncryptionEnabled()>();
+
+     label04:
+        $r3 = r0.<com.fsck.k9.message.PgpMessageBuilder: com.fsck.k9.activity.compose.ComposeCryptoStatus cryptoStatus>;
+
+     label05:
+        $z3 = virtualinvoke $r3.<com.fsck.k9.activity.compose.ComposeCryptoStatus: boolean isPgpInlineModeEnabled()>();
+
+     label06:
+        if $z1 != 0 goto label09;
+
+        if $z2 != 0 goto label09;
+
+        $r4 = r0.<com.fsck.k9.message.PgpMessageBuilder: com.fsck.k9.mail.internet.MimeMessage currentProcessedMimeMessage>;
+
+     label07:
+        virtualinvoke r0.<com.fsck.k9.message.PgpMessageBuilder: void queueMessageBuildSuccess(com.fsck.k9.mail.internet.MimeMessage)>($r4);
+
+     label08:
+        return;
+
+     label09:
+        $r4 = r0.<com.fsck.k9.message.PgpMessageBuilder: com.fsck.k9.mail.internet.MimeMessage currentProcessedMimeMessage>;
+
+     label10:
+        $r5 = virtualinvoke $r4.<com.fsck.k9.mail.internet.MimeMessage: java.lang.String getMimeType()>();
+
+        $z4 = staticinvoke <com.fsck.k9.mail.internet.MimeUtility: boolean isSameMimeType(java.lang.String,java.lang.String)>("text/plain", $r5);
+
+     label11:
+        if $z3 == 0 goto label14;
+
+        if $z4 != 0 goto label14;
+
+        r1 = new com.fsck.k9.mail.MessagingException;
+
+     label12:
+        specialinvoke r1.<com.fsck.k9.mail.MessagingException: void <init>(java.lang.String)>("Attachments are not supported in PGP/INLINE format!");
+
+        throw r1;
+
+     label13:
+        r1 := @caughtexception;
+
+        virtualinvoke r0.<com.fsck.k9.message.PgpMessageBuilder: void queueMessageBuildException(com.fsck.k9.mail.MessagingException)>(r1);
+
+        return;
+
+     label14:
+        if $z2 == 0 goto label18;
+
+        $r3 = r0.<com.fsck.k9.message.PgpMessageBuilder: com.fsck.k9.activity.compose.ComposeCryptoStatus cryptoStatus>;
+
+     label15:
+        $z4 = virtualinvoke $r3.<com.fsck.k9.activity.compose.ComposeCryptoStatus: boolean hasRecipients()>();
+
+     label16:
+        if $z4 != 0 goto label18;
+
+        r1 = new com.fsck.k9.mail.MessagingException;
+
+     label17:
+        specialinvoke r1.<com.fsck.k9.mail.MessagingException: void <init>(java.lang.String)>("Must have recipients to build message!");
+
+        throw r1;
+
+     label18:
+        if $r2 != null goto label20;
+
+     label19:
+        $r2 = specialinvoke r0.<com.fsck.k9.message.PgpMessageBuilder: android.content.Intent buildOpenPgpApiIntent(boolean,boolean,boolean)>($z1, $z2, $z3);
+
+     label20:
+        if $z2 != 0 goto label21;
+
+        if $z3 == 0 goto label28;
+
+     label21:
+        $z1 = 1;
+
+     label22:
+        if $z2 != 0 goto label23;
+
+        if $z3 != 0 goto label24;
+
+     label23:
+        $z0 = 1;
+
+     label24:
+        $r6 = specialinvoke r0.<com.fsck.k9.message.PgpMessageBuilder: android.app.PendingIntent launchOpenPgpApiIntent(android.content.Intent,boolean,boolean,boolean)>($r2, $z1, $z0, $z3);
+
+     label25:
+        if $r6 == null goto label29;
+
+     label26:
+        virtualinvoke r0.<com.fsck.k9.message.PgpMessageBuilder: void queueMessageBuildPendingIntent(android.app.PendingIntent,int)>($r6, 1);
+
+     label27:
+        return;
+
+     label28:
+        $z1 = 0;
+
+        goto label22;
+
+     label29:
+        $r4 = r0.<com.fsck.k9.message.PgpMessageBuilder: com.fsck.k9.mail.internet.MimeMessage currentProcessedMimeMessage>;
+
+     label30:
+        virtualinvoke r0.<com.fsck.k9.message.PgpMessageBuilder: void queueMessageBuildSuccess(com.fsck.k9.mail.internet.MimeMessage)>($r4);
+
+     label31:
+        return;
+
+        catch com.fsck.k9.mail.MessagingException from label01 to label02 with label13;
+        catch com.fsck.k9.mail.MessagingException from label03 to label04 with label13;
+        catch com.fsck.k9.mail.MessagingException from label05 to label06 with label13;
+        catch com.fsck.k9.mail.MessagingException from label07 to label08 with label13;
+        catch com.fsck.k9.mail.MessagingException from label10 to label11 with label13;
+        catch com.fsck.k9.mail.MessagingException from label12 to label13 with label13;
+        catch com.fsck.k9.mail.MessagingException from label15 to label16 with label13;
+        catch com.fsck.k9.mail.MessagingException from label17 to label18 with label13;
+        catch com.fsck.k9.mail.MessagingException from label19 to label20 with label13;
+        catch com.fsck.k9.mail.MessagingException from label24 to label25 with label13;
+        catch com.fsck.k9.mail.MessagingException from label26 to label27 with label13;
+        catch com.fsck.k9.mail.MessagingException from label30 to label31 with label13;
+    }
+    protected void buildMessageInternal()
+    {
+        com.fsck.k9.message.PgpMessageBuilder r0;
+        com.fsck.k9.mail.Address r1;
+        com.fsck.k9.mail.MessagingException r2;
+        com.fsck.k9.mail.internet.MimeMessage $r3;
+        java.lang.IllegalStateException $r4;
+        com.fsck.k9.activity.compose.ComposeCryptoStatus $r5;
+        java.lang.Long $r6;
+        boolean $z0;
+        com.fsck.k9.mail.Address[] $r7;
+        com.fsck.k9.autocrypt.AutocryptOpenPgpApiInteractor $r8;
+        org.openintents.openpgp.util.OpenPgpApi $r9;
+        long $l0;
+        java.lang.String $r10;
+        byte[] $r11;
+        com.fsck.k9.autocrypt.AutocryptOperations $r12;
+
+        r0 := @this: com.fsck.k9.message.PgpMessageBuilder;
+
+        $r3 = r0.<com.fsck.k9.message.PgpMessageBuilder: com.fsck.k9.mail.internet.MimeMessage currentProcessedMimeMessage>;
+
+        if $r3 == null goto label1;
+
+        $r4 = new java.lang.IllegalStateException;
+
+        specialinvoke $r4.<java.lang.IllegalStateException: void <init>(java.lang.String)>("message can only be built once!");
+
+        throw $r4;
+
+     label1:
+        $r5 = r0.<com.fsck.k9.message.PgpMessageBuilder: com.fsck.k9.activity.compose.ComposeCryptoStatus cryptoStatus>;
+
+        if $r5 != null goto label2;
+
+        $r4 = new java.lang.IllegalStateException;
+
+        specialinvoke $r4.<java.lang.IllegalStateException: void <init>(java.lang.String)>("PgpMessageBuilder must have cryptoStatus set before building!");
+
+        throw $r4;
+
+     label2:
+        $r5 = r0.<com.fsck.k9.message.PgpMessageBuilder: com.fsck.k9.activity.compose.ComposeCryptoStatus cryptoStatus>;
+
+        $r6 = virtualinvoke $r5.<com.fsck.k9.activity.compose.ComposeCryptoStatus: java.lang.Long getOpenPgpKeyId()>();
+
+     label3:
+        $r3 = virtualinvoke r0.<com.fsck.k9.message.PgpMessageBuilder: com.fsck.k9.mail.internet.MimeMessage build()>();
+
+     label4:
+        r0.<com.fsck.k9.message.PgpMessageBuilder: com.fsck.k9.mail.internet.MimeMessage currentProcessedMimeMessage> = $r3;
+
+        if $r6 != null goto label6;
+
+        $r3 = r0.<com.fsck.k9.message.PgpMessageBuilder: com.fsck.k9.mail.internet.MimeMessage currentProcessedMimeMessage>;
+
+        virtualinvoke r0.<com.fsck.k9.message.PgpMessageBuilder: void queueMessageBuildSuccess(com.fsck.k9.mail.internet.MimeMessage)>($r3);
+
+        return;
+
+     label5:
+        r2 := @caughtexception;
+
+        virtualinvoke r0.<com.fsck.k9.message.PgpMessageBuilder: void queueMessageBuildException(com.fsck.k9.mail.MessagingException)>(r2);
+
+        return;
+
+     label6:
+        $r5 = r0.<com.fsck.k9.message.PgpMessageBuilder: com.fsck.k9.activity.compose.ComposeCryptoStatus cryptoStatus>;
+
+        $z0 = virtualinvoke $r5.<com.fsck.k9.activity.compose.ComposeCryptoStatus: boolean isProviderStateOk()>();
+
+        if $z0 != 0 goto label7;
+
+        r2 = new com.fsck.k9.mail.MessagingException;
+
+        specialinvoke r2.<com.fsck.k9.mail.MessagingException: void <init>(java.lang.String)>("OpenPGP Provider is not ready!");
+
+        virtualinvoke r0.<com.fsck.k9.message.PgpMessageBuilder: void queueMessageBuildException(com.fsck.k9.mail.MessagingException)>(r2);
+
+        return;
+
+     label7:
+        $r3 = r0.<com.fsck.k9.message.PgpMessageBuilder: com.fsck.k9.mail.internet.MimeMessage currentProcessedMimeMessage>;
+
+        $r7 = virtualinvoke $r3.<com.fsck.k9.mail.internet.MimeMessage: com.fsck.k9.mail.Address[] getFrom()>();
+
+        r1 = $r7[0];
+
+        $r8 = r0.<com.fsck.k9.message.PgpMessageBuilder: com.fsck.k9.autocrypt.AutocryptOpenPgpApiInteractor autocryptOpenPgpApiInteractor>;
+
+        $r9 = r0.<com.fsck.k9.message.PgpMessageBuilder: org.openintents.openpgp.util.OpenPgpApi openPgpApi>;
+
+        $l0 = virtualinvoke $r6.<java.lang.Long: long longValue()>();
+
+        $r10 = virtualinvoke r1.<com.fsck.k9.mail.Address: java.lang.String getAddress()>();
+
+        $r11 = virtualinvoke $r8.<com.fsck.k9.autocrypt.AutocryptOpenPgpApiInteractor: byte[] getKeyMaterialFromApi(org.openintents.openpgp.util.OpenPgpApi,long,java.lang.String)>($r9, $l0, $r10);
+
+        if $r11 == null goto label8;
+
+        $r12 = r0.<com.fsck.k9.message.PgpMessageBuilder: com.fsck.k9.autocrypt.AutocryptOperations autocryptOperations>;
+
+        $r3 = r0.<com.fsck.k9.message.PgpMessageBuilder: com.fsck.k9.mail.internet.MimeMessage currentProcessedMimeMessage>;
+
+        $r10 = virtualinvoke r1.<com.fsck.k9.mail.Address: java.lang.String getAddress()>();
+
+        virtualinvoke $r12.<com.fsck.k9.autocrypt.AutocryptOperations: void addAutocryptHeaderToMessage(com.fsck.k9.mail.Message,byte[],java.lang.String,boolean)>($r3, $r11, $r10, 0);
+
+     label8:
+        specialinvoke r0.<com.fsck.k9.message.PgpMessageBuilder: void startOrContinueBuildMessage(android.content.Intent)>(null);
+
+        return;
+
+        catch com.fsck.k9.mail.MessagingException from label3 to label4 with label5;
+    }
+    public void buildMessageOnActivityResult(int, android.content.Intent)
+    {
+        com.fsck.k9.message.PgpMessageBuilder r0;
+        int $i0;
+        android.content.Intent $r1;
+        com.fsck.k9.mail.internet.MimeMessage $r2;
+        java.lang.AssertionError $r3;
+
+        r0 := @this: com.fsck.k9.message.PgpMessageBuilder;
+
+        $i0 := @parameter0: int;
+
+        $r1 := @parameter1: android.content.Intent;
+
+        $r2 = r0.<com.fsck.k9.message.PgpMessageBuilder: com.fsck.k9.mail.internet.MimeMessage currentProcessedMimeMessage>;
+
+        if $r2 != null goto label1;
+
+        $r3 = new java.lang.AssertionError;
+
+        specialinvoke $r3.<java.lang.AssertionError: void <init>(java.lang.Object)>("build message from activity result must not be called individually");
+
+        throw $r3;
+
+     label1:
+        specialinvoke r0.<com.fsck.k9.message.PgpMessageBuilder: void startOrContinueBuildMessage(android.content.Intent)>($r1);
+
+        return;
+    }
+    public void setCryptoStatus(com.fsck.k9.activity.compose.ComposeCryptoStatus)
+    {
+        com.fsck.k9.message.PgpMessageBuilder r0;
+        com.fsck.k9.activity.compose.ComposeCryptoStatus $r1;
+
+        r0 := @this: com.fsck.k9.message.PgpMessageBuilder;
+
+        $r1 := @parameter0: com.fsck.k9.activity.compose.ComposeCryptoStatus;
+
+        r0.<com.fsck.k9.message.PgpMessageBuilder: com.fsck.k9.activity.compose.ComposeCryptoStatus cryptoStatus> = $r1;
+
+        return;
+    }
+    public void setOpenPgpApi(org.openintents.openpgp.util.OpenPgpApi)
+    {
+        com.fsck.k9.message.PgpMessageBuilder r0;
+        org.openintents.openpgp.util.OpenPgpApi $r1;
+
+        r0 := @this: com.fsck.k9.message.PgpMessageBuilder;
+
+        $r1 := @parameter0: org.openintents.openpgp.util.OpenPgpApi;
+
+        r0.<com.fsck.k9.message.PgpMessageBuilder: org.openintents.openpgp.util.OpenPgpApi openPgpApi> = $r1;
+
+        return;
+    }

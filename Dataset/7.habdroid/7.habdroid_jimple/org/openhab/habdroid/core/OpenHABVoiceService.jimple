@@ -1,0 +1,625 @@
+org.openhab.habdroid.core.OpenHABVoiceService extends org.openhab.habdroid.util.ContinuingIntentService implements org.openhab.habdroid.core.OpenHABTrackerReceiver
+public static final java.lang.String OPENHAB_BASE_URL_EXTRA
+private static final java.lang.String TAG
+private org.openhab.habdroid.util.MyAsyncHttpClient mAsyncHttpClient
+private java.util.Queue mBufferedIntents
+private java.lang.String mOpenHABBaseUrl
+private org.openhab.habdroid.core.OpenHABTracker mOpenHABTracker
+    static void <clinit>()
+    {
+        java.lang.String $r0;
+        java.lang.Class $r1;
+
+        $r1 = class "Lorg/openhab/habdroid/core/OpenHABVoiceService;";
+
+        $r0 = virtualinvoke $r1.<java.lang.Class: java.lang.String getSimpleName()>();
+
+        <org.openhab.habdroid.core.OpenHABVoiceService: java.lang.String TAG> = $r0;
+
+        return;
+    }
+    public void <init>()
+    {
+        org.openhab.habdroid.core.OpenHABVoiceService r0;
+        java.lang.String $r1;
+
+        r0 := @this: org.openhab.habdroid.core.OpenHABVoiceService;
+
+        $r1 = <org.openhab.habdroid.core.OpenHABVoiceService: java.lang.String TAG>;
+
+        specialinvoke r0.<org.openhab.habdroid.util.ContinuingIntentService: void <init>(java.lang.String)>($r1);
+
+        return;
+    }
+    static java.lang.String access$000(org.openhab.habdroid.core.OpenHABVoiceService)
+    {
+        org.openhab.habdroid.core.OpenHABVoiceService $r0;
+        java.lang.String r1;
+
+        $r0 := @parameter0: org.openhab.habdroid.core.OpenHABVoiceService;
+
+        r1 = $r0.<org.openhab.habdroid.core.OpenHABVoiceService: java.lang.String mOpenHABBaseUrl>;
+
+        return r1;
+    }
+    static org.openhab.habdroid.util.MyAsyncHttpClient access$100(org.openhab.habdroid.core.OpenHABVoiceService)
+    {
+        org.openhab.habdroid.core.OpenHABVoiceService $r0;
+        org.openhab.habdroid.util.MyAsyncHttpClient r1;
+
+        $r0 := @parameter0: org.openhab.habdroid.core.OpenHABVoiceService;
+
+        r1 = $r0.<org.openhab.habdroid.core.OpenHABVoiceService: org.openhab.habdroid.util.MyAsyncHttpClient mAsyncHttpClient>;
+
+        return r1;
+    }
+    private void bufferIntent(android.content.Intent)
+    {
+        org.openhab.habdroid.core.OpenHABVoiceService r0;
+        android.content.Intent $r1;
+        java.util.Queue $r2;
+
+        r0 := @this: org.openhab.habdroid.core.OpenHABVoiceService;
+
+        $r1 := @parameter0: android.content.Intent;
+
+        $r2 = r0.<org.openhab.habdroid.core.OpenHABVoiceService: java.util.Queue mBufferedIntents>;
+
+        interfaceinvoke $r2.<java.util.Queue: boolean add(java.lang.Object)>($r1);
+
+        return;
+    }
+    private java.lang.String extractVoiceCommand(android.content.Intent)
+    {
+        org.openhab.habdroid.core.OpenHABVoiceService r0;
+        android.content.Intent $r1;
+        java.lang.String r2, $r5, $r7;
+        java.util.ArrayList $r3;
+        boolean $z0;
+        java.lang.Object $r4;
+        java.lang.StringBuilder $r6;
+        java.lang.Object[] $r8;
+
+        r0 := @this: org.openhab.habdroid.core.OpenHABVoiceService;
+
+        $r1 := @parameter0: android.content.Intent;
+
+        r2 = "";
+
+        $r3 = virtualinvoke $r1.<android.content.Intent: java.util.ArrayList getStringArrayListExtra(java.lang.String)>("android.speech.extra.RESULTS");
+
+        $z0 = interfaceinvoke $r3.<java.util.List: boolean isEmpty()>();
+
+        if $z0 != 0 goto label1;
+
+        $r4 = interfaceinvoke $r3.<java.util.List: java.lang.Object get(int)>(0);
+
+        r2 = (java.lang.String) $r4;
+
+     label1:
+        $r5 = <org.openhab.habdroid.core.OpenHABVoiceService: java.lang.String TAG>;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Recognized text: ");
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r2);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int i(java.lang.String,java.lang.String)>($r5, $r7);
+
+        $r8 = newarray (java.lang.Object)[1];
+
+        $r8[0] = r2;
+
+        $r5 = virtualinvoke r0.<org.openhab.habdroid.core.OpenHABVoiceService: java.lang.String getString(int,java.lang.Object[])>(2131624256, $r8);
+
+        specialinvoke r0.<org.openhab.habdroid.core.OpenHABVoiceService: void showToast(java.lang.String)>($r5);
+
+        return r2;
+    }
+    private void initHttpClient()
+    {
+        org.openhab.habdroid.core.OpenHABVoiceService r0;
+        android.content.SharedPreferences $r1;
+        java.lang.String $r2, $r3;
+        org.openhab.habdroid.util.MyAsyncHttpClient $r4;
+        boolean $z0;
+        java.lang.Boolean $r5, $r6;
+
+        r0 := @this: org.openhab.habdroid.core.OpenHABVoiceService;
+
+        $r1 = staticinvoke <android.preference.PreferenceManager: android.content.SharedPreferences getDefaultSharedPreferences(android.content.Context)>(r0);
+
+        $r2 = interfaceinvoke $r1.<android.content.SharedPreferences: java.lang.String getString(java.lang.String,java.lang.String)>("default_openhab_remote_username", null);
+
+        $r3 = interfaceinvoke $r1.<android.content.SharedPreferences: java.lang.String getString(java.lang.String,java.lang.String)>("default_openhab_remote_password", null);
+
+        $r1 = staticinvoke <android.preference.PreferenceManager: android.content.SharedPreferences getDefaultSharedPreferences(android.content.Context)>(r0);
+
+        $r4 = new org.openhab.habdroid.util.MyAsyncHttpClient;
+
+        $z0 = interfaceinvoke $r1.<android.content.SharedPreferences: boolean getBoolean(java.lang.String,boolean)>("default_openhab_sslhost", 0);
+
+        $r5 = staticinvoke <java.lang.Boolean: java.lang.Boolean valueOf(boolean)>($z0);
+
+        $z0 = interfaceinvoke $r1.<android.content.SharedPreferences: boolean getBoolean(java.lang.String,boolean)>("default_openhab_sslcert", 0);
+
+        $r6 = staticinvoke <java.lang.Boolean: java.lang.Boolean valueOf(boolean)>($z0);
+
+        specialinvoke $r4.<org.openhab.habdroid.util.MyAsyncHttpClient: void <init>(android.content.Context,java.lang.Boolean,java.lang.Boolean)>(r0, $r5, $r6);
+
+        r0.<org.openhab.habdroid.core.OpenHABVoiceService: org.openhab.habdroid.util.MyAsyncHttpClient mAsyncHttpClient> = $r4;
+
+        $r4 = r0.<org.openhab.habdroid.core.OpenHABVoiceService: org.openhab.habdroid.util.MyAsyncHttpClient mAsyncHttpClient>;
+
+        virtualinvoke $r4.<org.openhab.habdroid.util.MyAsyncHttpClient: void setBasicAuth(java.lang.String,java.lang.String)>($r2, $r3);
+
+        return;
+    }
+    private void performHttpPost(java.lang.String, java.lang.String)
+    {
+        org.openhab.habdroid.core.OpenHABVoiceService r0;
+        java.lang.String $r1, $r2;
+        android.os.Handler $r3;
+        android.os.Looper $r4;
+        org.openhab.habdroid.core.OpenHABVoiceService$2 $r5;
+
+        r0 := @this: org.openhab.habdroid.core.OpenHABVoiceService;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $r3 = new android.os.Handler;
+
+        $r4 = staticinvoke <android.os.Looper: android.os.Looper getMainLooper()>();
+
+        specialinvoke $r3.<android.os.Handler: void <init>(android.os.Looper)>($r4);
+
+        $r5 = new org.openhab.habdroid.core.OpenHABVoiceService$2;
+
+        specialinvoke $r5.<org.openhab.habdroid.core.OpenHABVoiceService$2: void <init>(org.openhab.habdroid.core.OpenHABVoiceService,java.lang.String,java.lang.String)>(r0, $r1, $r2);
+
+        virtualinvoke $r3.<android.os.Handler: boolean post(java.lang.Runnable)>($r5);
+
+        return;
+    }
+    private void processVoiceIntent(android.content.Intent)
+    {
+        org.openhab.habdroid.core.OpenHABVoiceService r0;
+        android.content.Intent $r1;
+        java.lang.String $r2, $r3;
+        boolean $z0;
+
+        r0 := @this: org.openhab.habdroid.core.OpenHABVoiceService;
+
+        $r1 := @parameter0: android.content.Intent;
+
+        $r2 = <org.openhab.habdroid.core.OpenHABVoiceService: java.lang.String TAG>;
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>($r2, "processVoiceIntent()");
+
+        $r2 = specialinvoke r0.<org.openhab.habdroid.core.OpenHABVoiceService: java.lang.String extractVoiceCommand(android.content.Intent)>($r1);
+
+        $z0 = virtualinvoke $r2.<java.lang.String: boolean isEmpty()>();
+
+        if $z0 != 0 goto label2;
+
+        $r3 = r0.<org.openhab.habdroid.core.OpenHABVoiceService: java.lang.String mOpenHABBaseUrl>;
+
+        if $r3 == null goto label1;
+
+        specialinvoke r0.<org.openhab.habdroid.core.OpenHABVoiceService: void sendItemCommand(java.lang.String,java.lang.String)>("VoiceCommand", $r2);
+
+        return;
+
+     label1:
+        $r2 = <org.openhab.habdroid.core.OpenHABVoiceService: java.lang.String TAG>;
+
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String)>($r2, "Couldn\'t determine OpenHAB URL");
+
+        $r2 = virtualinvoke r0.<org.openhab.habdroid.core.OpenHABVoiceService: java.lang.String getString(int)>(2131624213);
+
+        specialinvoke r0.<org.openhab.habdroid.core.OpenHABVoiceService: void showToast(java.lang.String)>($r2);
+
+     label2:
+        return;
+    }
+    private void sendItemCommand(java.lang.String, java.lang.String)
+    {
+        org.openhab.habdroid.core.OpenHABVoiceService r0;
+        java.lang.String $r1, $r2, $r4, $r6;
+        java.lang.RuntimeException r3;
+        java.lang.StringBuilder $r5;
+
+        r0 := @this: org.openhab.habdroid.core.OpenHABVoiceService;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $r4 = <org.openhab.habdroid.core.OpenHABVoiceService: java.lang.String TAG>;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("sendItemCommand(): itemName=");
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", command=");
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>($r4, $r6);
+
+     label1:
+        specialinvoke r0.<org.openhab.habdroid.core.OpenHABVoiceService: void performHttpPost(java.lang.String,java.lang.String)>($r1, $r2);
+
+     label2:
+        return;
+
+     label3:
+        r3 := @caughtexception;
+
+        $r1 = <org.openhab.habdroid.core.OpenHABVoiceService: java.lang.String TAG>;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unable to encode command ");
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r2 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String,java.lang.Throwable)>($r1, $r2, r3);
+
+        return;
+
+        catch java.lang.RuntimeException from label1 to label2 with label3;
+    }
+    private void showToast(java.lang.String)
+    {
+        org.openhab.habdroid.core.OpenHABVoiceService r0;
+        java.lang.String $r1;
+        android.os.Handler $r2;
+        android.os.Looper $r3;
+        org.openhab.habdroid.core.OpenHABVoiceService$3 $r4;
+
+        r0 := @this: org.openhab.habdroid.core.OpenHABVoiceService;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = new android.os.Handler;
+
+        $r3 = staticinvoke <android.os.Looper: android.os.Looper getMainLooper()>();
+
+        specialinvoke $r2.<android.os.Handler: void <init>(android.os.Looper)>($r3);
+
+        $r4 = new org.openhab.habdroid.core.OpenHABVoiceService$3;
+
+        specialinvoke $r4.<org.openhab.habdroid.core.OpenHABVoiceService$3: void <init>(org.openhab.habdroid.core.OpenHABVoiceService,java.lang.String)>(r0, $r1);
+
+        virtualinvoke $r2.<android.os.Handler: boolean post(java.lang.Runnable)>($r4);
+
+        return;
+    }
+    public void onBonjourDiscoveryFinished()
+    {
+        org.openhab.habdroid.core.OpenHABVoiceService r0;
+        java.lang.String $r1;
+
+        r0 := @this: org.openhab.habdroid.core.OpenHABVoiceService;
+
+        $r1 = <org.openhab.habdroid.core.OpenHABVoiceService: java.lang.String TAG>;
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>($r1, "onBonjourDiscoveryFinished()");
+
+        return;
+    }
+    public void onBonjourDiscoveryStarted()
+    {
+        org.openhab.habdroid.core.OpenHABVoiceService r0;
+        java.lang.String $r1;
+
+        r0 := @this: org.openhab.habdroid.core.OpenHABVoiceService;
+
+        $r1 = <org.openhab.habdroid.core.OpenHABVoiceService: java.lang.String TAG>;
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>($r1, "onBonjourDiscoveryStarted()");
+
+        return;
+    }
+    public void onCreate()
+    {
+        org.openhab.habdroid.core.OpenHABVoiceService r0;
+        java.lang.String $r1;
+        java.util.LinkedList $r2;
+
+        r0 := @this: org.openhab.habdroid.core.OpenHABVoiceService;
+
+        specialinvoke r0.<org.openhab.habdroid.util.ContinuingIntentService: void onCreate()>();
+
+        $r1 = <org.openhab.habdroid.core.OpenHABVoiceService: java.lang.String TAG>;
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>($r1, "onCreate()");
+
+        $r2 = new java.util.LinkedList;
+
+        specialinvoke $r2.<java.util.LinkedList: void <init>()>();
+
+        r0.<org.openhab.habdroid.core.OpenHABVoiceService: java.util.Queue mBufferedIntents> = $r2;
+
+        specialinvoke r0.<org.openhab.habdroid.core.OpenHABVoiceService: void initHttpClient()>();
+
+        return;
+    }
+    public void onDestroy()
+    {
+        org.openhab.habdroid.core.OpenHABVoiceService r0;
+        java.lang.String $r1;
+        org.openhab.habdroid.core.OpenHABTracker $r2;
+
+        r0 := @this: org.openhab.habdroid.core.OpenHABVoiceService;
+
+        $r1 = <org.openhab.habdroid.core.OpenHABVoiceService: java.lang.String TAG>;
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>($r1, "onDestroy()");
+
+        $r2 = r0.<org.openhab.habdroid.core.OpenHABVoiceService: org.openhab.habdroid.core.OpenHABTracker mOpenHABTracker>;
+
+        if $r2 == null goto label1;
+
+        $r2 = r0.<org.openhab.habdroid.core.OpenHABVoiceService: org.openhab.habdroid.core.OpenHABTracker mOpenHABTracker>;
+
+        virtualinvoke $r2.<org.openhab.habdroid.core.OpenHABTracker: void stop()>();
+
+     label1:
+        specialinvoke r0.<org.openhab.habdroid.util.ContinuingIntentService: void onDestroy()>();
+
+        return;
+    }
+    public void onError(java.lang.String)
+    {
+        org.openhab.habdroid.core.OpenHABVoiceService r0;
+        java.lang.String $r1, $r2;
+        java.lang.StringBuilder $r3;
+
+        r0 := @this: org.openhab.habdroid.core.OpenHABVoiceService;
+
+        $r1 := @parameter0: java.lang.String;
+
+        virtualinvoke r0.<org.openhab.habdroid.core.OpenHABVoiceService: void showMessageToUser(java.lang.String,int,int)>($r1, 1, 5);
+
+        $r2 = <org.openhab.habdroid.core.OpenHABVoiceService: java.lang.String TAG>;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("onError(): ");
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r1 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>($r2, $r1);
+
+        virtualinvoke r0.<org.openhab.habdroid.core.OpenHABVoiceService: void stopSelf()>();
+
+        return;
+    }
+    protected void onHandleIntent(android.content.Intent)
+    {
+        org.openhab.habdroid.core.OpenHABVoiceService r0;
+        android.content.Intent $r1;
+        java.lang.String $r2;
+        boolean $z0;
+        org.openhab.habdroid.core.OpenHABTracker $r3;
+
+        r0 := @this: org.openhab.habdroid.core.OpenHABVoiceService;
+
+        $r1 := @parameter0: android.content.Intent;
+
+        $r2 = <org.openhab.habdroid.core.OpenHABVoiceService: java.lang.String TAG>;
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>($r2, "onHandleIntent()");
+
+        specialinvoke r0.<org.openhab.habdroid.core.OpenHABVoiceService: void bufferIntent(android.content.Intent)>($r1);
+
+        $z0 = virtualinvoke $r1.<android.content.Intent: boolean hasExtra(java.lang.String)>("openHABBaseUrl");
+
+        if $z0 == 0 goto label1;
+
+        $r2 = <org.openhab.habdroid.core.OpenHABVoiceService: java.lang.String TAG>;
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>($r2, "openHABBaseUrl passed as Intent");
+
+        $r2 = virtualinvoke $r1.<android.content.Intent: java.lang.String getStringExtra(java.lang.String)>("openHABBaseUrl");
+
+        virtualinvoke r0.<org.openhab.habdroid.core.OpenHABVoiceService: void onOpenHABTracked(java.lang.String)>($r2);
+
+        return;
+
+     label1:
+        $r3 = r0.<org.openhab.habdroid.core.OpenHABVoiceService: org.openhab.habdroid.core.OpenHABTracker mOpenHABTracker>;
+
+        if $r3 != null goto label2;
+
+        $r2 = <org.openhab.habdroid.core.OpenHABVoiceService: java.lang.String TAG>;
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>($r2, "No openHABBaseUrl passed, starting OpenHABTracker");
+
+        $r3 = new org.openhab.habdroid.core.OpenHABTracker;
+
+        $r2 = virtualinvoke r0.<org.openhab.habdroid.core.OpenHABVoiceService: java.lang.String getString(int)>(2131626378);
+
+        specialinvoke $r3.<org.openhab.habdroid.core.OpenHABTracker: void <init>(android.content.Context,java.lang.String)>(r0, $r2);
+
+        r0.<org.openhab.habdroid.core.OpenHABVoiceService: org.openhab.habdroid.core.OpenHABTracker mOpenHABTracker> = $r3;
+
+        $r3 = r0.<org.openhab.habdroid.core.OpenHABVoiceService: org.openhab.habdroid.core.OpenHABTracker mOpenHABTracker>;
+
+        virtualinvoke $r3.<org.openhab.habdroid.core.OpenHABTracker: void start()>();
+
+     label2:
+        return;
+    }
+    public void onOpenHABTracked(java.lang.String)
+    {
+        org.openhab.habdroid.core.OpenHABVoiceService r0;
+        java.lang.String $r1, $r2, $r4;
+        java.lang.StringBuilder $r3;
+        java.util.Queue $r5;
+        boolean $z0;
+        java.lang.Object $r6;
+        android.content.Intent $r7;
+        int $i0;
+
+        r0 := @this: org.openhab.habdroid.core.OpenHABVoiceService;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = <org.openhab.habdroid.core.OpenHABVoiceService: java.lang.String TAG>;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("onOpenHABTracked(): ");
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>($r2, $r4);
+
+        r0.<org.openhab.habdroid.core.OpenHABVoiceService: java.lang.String mOpenHABBaseUrl> = $r1;
+
+     label1:
+        $r5 = r0.<org.openhab.habdroid.core.OpenHABVoiceService: java.util.Queue mBufferedIntents>;
+
+        $z0 = interfaceinvoke $r5.<java.util.Queue: boolean isEmpty()>();
+
+        if $z0 != 0 goto label2;
+
+        $r5 = r0.<org.openhab.habdroid.core.OpenHABVoiceService: java.util.Queue mBufferedIntents>;
+
+        $r6 = interfaceinvoke $r5.<java.util.Queue: java.lang.Object poll()>();
+
+        $r7 = (android.content.Intent) $r6;
+
+        specialinvoke r0.<org.openhab.habdroid.core.OpenHABVoiceService: void processVoiceIntent(android.content.Intent)>($r7);
+
+        goto label1;
+
+     label2:
+        $r1 = <org.openhab.habdroid.core.OpenHABVoiceService: java.lang.String TAG>;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Stopping service for start ID ");
+
+        $i0 = virtualinvoke r0.<org.openhab.habdroid.core.OpenHABVoiceService: int getLastStartId()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r2 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>($r1, $r2);
+
+        $i0 = virtualinvoke r0.<org.openhab.habdroid.core.OpenHABVoiceService: int getLastStartId()>();
+
+        virtualinvoke r0.<org.openhab.habdroid.core.OpenHABVoiceService: void stopSelf(int)>($i0);
+
+        return;
+    }
+    public void showMessageToUser(java.lang.String, int, int)
+    {
+        org.openhab.habdroid.core.OpenHABVoiceService r0;
+        java.lang.String $r1;
+        int $i0, $i1;
+
+        r0 := @this: org.openhab.habdroid.core.OpenHABVoiceService;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $i0 := @parameter1: int;
+
+        $i1 := @parameter2: int;
+
+        virtualinvoke r0.<org.openhab.habdroid.core.OpenHABVoiceService: void showMessageToUser(java.lang.String,int,int)>($r1, $i0, $i1);
+
+        return;
+    }
+    public void showMessageToUser(java.lang.String, int, int, int, android.view.View$OnClickListener)
+    {
+        org.openhab.habdroid.core.OpenHABVoiceService r0;
+        java.lang.String $r1;
+        int $i0, $i1, $i2;
+        android.view.View$OnClickListener $r2;
+        android.app.AlertDialog$Builder r3, $r6;
+        org.openhab.habdroid.core.OpenHABVoiceService$1 $r4;
+        android.widget.Toast $r5;
+        android.app.AlertDialog $r7;
+
+        r0 := @this: org.openhab.habdroid.core.OpenHABVoiceService;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $i0 := @parameter1: int;
+
+        $i1 := @parameter2: int;
+
+        $i2 := @parameter3: int;
+
+        $r2 := @parameter4: android.view.View$OnClickListener;
+
+        if $r1 != null goto label1;
+
+        return;
+
+     label1:
+        lookupswitch($i0)
+        {
+            case 1: goto label3;
+            default: goto label2;
+        };
+
+     label2:
+        $r5 = staticinvoke <android.widget.Toast: android.widget.Toast makeText(android.content.Context,java.lang.CharSequence,int)>(r0, $r1, 1);
+
+        virtualinvoke $r5.<android.widget.Toast: void show()>();
+
+        return;
+
+     label3:
+        r3 = new android.app.AlertDialog$Builder;
+
+        specialinvoke r3.<android.app.AlertDialog$Builder: void <init>(android.content.Context)>(r0);
+
+        $r6 = virtualinvoke r3.<android.app.AlertDialog$Builder: android.app.AlertDialog$Builder setMessage(java.lang.CharSequence)>($r1);
+
+        $r4 = new org.openhab.habdroid.core.OpenHABVoiceService$1;
+
+        specialinvoke $r4.<org.openhab.habdroid.core.OpenHABVoiceService$1: void <init>(org.openhab.habdroid.core.OpenHABVoiceService)>(r0);
+
+        virtualinvoke $r6.<android.app.AlertDialog$Builder: android.app.AlertDialog$Builder setPositiveButton(java.lang.CharSequence,android.content.DialogInterface$OnClickListener)>("OK", $r4);
+
+        $r7 = virtualinvoke r3.<android.app.AlertDialog$Builder: android.app.AlertDialog create()>();
+
+        virtualinvoke $r7.<android.app.AlertDialog: void show()>();
+
+        return;
+    }

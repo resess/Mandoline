@@ -1,0 +1,224 @@
+org.gnucash.android.util.RecursiveMoveFiles extends java.lang.Object implements java.lang.Runnable
+java.io.File mDestination
+java.io.File mSource
+    public void <init>(java.io.File, java.io.File)
+    {
+        org.gnucash.android.util.RecursiveMoveFiles r0;
+        java.io.File $r1, $r2;
+
+        r0 := @this: org.gnucash.android.util.RecursiveMoveFiles;
+
+        $r1 := @parameter0: java.io.File;
+
+        $r2 := @parameter1: java.io.File;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<org.gnucash.android.util.RecursiveMoveFiles: java.io.File mSource> = $r1;
+
+        r0.<org.gnucash.android.util.RecursiveMoveFiles: java.io.File mDestination> = $r2;
+
+        return;
+    }
+    private boolean copy(java.io.File, java.io.File) throws java.io.IOException
+    {
+        org.gnucash.android.util.RecursiveMoveFiles r0;
+        java.io.File $r1, $r2;
+        java.io.FileInputStream $r3;
+        java.nio.channels.FileChannel $r4, $r6;
+        java.io.FileOutputStream $r5;
+        long $l0, $l1;
+        byte $b2;
+        boolean $z0;
+        java.lang.Throwable $r7;
+
+        r0 := @this: org.gnucash.android.util.RecursiveMoveFiles;
+
+        $r1 := @parameter0: java.io.File;
+
+        $r2 := @parameter1: java.io.File;
+
+        $r3 = new java.io.FileInputStream;
+
+        specialinvoke $r3.<java.io.FileInputStream: void <init>(java.io.File)>($r1);
+
+        $r4 = virtualinvoke $r3.<java.io.FileInputStream: java.nio.channels.FileChannel getChannel()>();
+
+        $r5 = new java.io.FileOutputStream;
+
+        specialinvoke $r5.<java.io.FileOutputStream: void <init>(java.io.File)>($r2);
+
+        $r6 = virtualinvoke $r5.<java.io.FileOutputStream: java.nio.channels.FileChannel getChannel()>();
+
+     label1:
+        $l0 = virtualinvoke $r4.<java.nio.channels.FileChannel: long size()>();
+
+        $l0 = virtualinvoke $r4.<java.nio.channels.FileChannel: long transferTo(long,long,java.nio.channels.WritableByteChannel)>(0L, $l0, $r6);
+
+        $l1 = virtualinvoke $r1.<java.io.File: long length()>();
+
+     label2:
+        $b2 = $l0 cmp $l1;
+
+        if $b2 < 0 goto label5;
+
+        $z0 = 1;
+
+     label3:
+        if $r4 == null goto label4;
+
+        virtualinvoke $r4.<java.nio.channels.FileChannel: void close()>();
+
+     label4:
+        virtualinvoke $r6.<java.nio.channels.FileChannel: void close()>();
+
+        return $z0;
+
+     label5:
+        $z0 = 0;
+
+        goto label3;
+
+     label6:
+        $r7 := @caughtexception;
+
+        if $r4 == null goto label7;
+
+        virtualinvoke $r4.<java.nio.channels.FileChannel: void close()>();
+
+     label7:
+        virtualinvoke $r6.<java.nio.channels.FileChannel: void close()>();
+
+        throw $r7;
+
+        catch java.lang.Throwable from label1 to label2 with label6;
+    }
+    private int recursiveMove(java.io.File, java.io.File)
+    {
+        org.gnucash.android.util.RecursiveMoveFiles r0;
+        java.io.File $r1, $r2, r4, r5;
+        java.io.IOException r3;
+        int i0, $i1, $i2, $i3;
+        boolean $z0;
+        java.io.File[] $r6;
+        java.lang.String $r7;
+        java.lang.Object[] $r8;
+        java.lang.Integer $r9;
+        java.lang.StringBuilder $r10;
+
+        r0 := @this: org.gnucash.android.util.RecursiveMoveFiles;
+
+        $r1 := @parameter0: java.io.File;
+
+        $r2 := @parameter1: java.io.File;
+
+        i0 = 0;
+
+        $z0 = virtualinvoke $r1.<java.io.File: boolean isDirectory()>();
+
+        if $z0 == 0 goto label4;
+
+        $r6 = virtualinvoke $r1.<java.io.File: java.io.File[] listFiles()>();
+
+        if $r6 == null goto label4;
+
+        virtualinvoke $r2.<java.io.File: boolean mkdirs()>();
+
+        $r6 = virtualinvoke $r1.<java.io.File: java.io.File[] listFiles()>();
+
+        $i1 = lengthof $r6;
+
+        $i2 = 0;
+
+     label1:
+        if $i2 >= $i1 goto label2;
+
+        r4 = $r6[$i2];
+
+        r5 = new java.io.File;
+
+        $r7 = virtualinvoke r4.<java.io.File: java.lang.String getName()>();
+
+        specialinvoke r5.<java.io.File: void <init>(java.io.File,java.lang.String)>($r2, $r7);
+
+        $i3 = specialinvoke r0.<org.gnucash.android.util.RecursiveMoveFiles: int recursiveMove(java.io.File,java.io.File)>(r4, r5);
+
+        i0 = i0 + $i3;
+
+        $i2 = $i2 + 1;
+
+        goto label1;
+
+     label2:
+        virtualinvoke $r1.<java.io.File: boolean delete()>();
+
+     label3:
+        $r8 = newarray (java.lang.Object)[3];
+
+        $r9 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(i0);
+
+        $r8[0] = $r9;
+
+        $r7 = virtualinvoke $r1.<java.io.File: java.lang.String getPath()>();
+
+        $r8[1] = $r7;
+
+        $r7 = virtualinvoke $r2.<java.io.File: java.lang.String getPath()>();
+
+        $r8[2] = $r7;
+
+        $r7 = staticinvoke <java.lang.String: java.lang.String format(java.lang.String,java.lang.Object[])>("Moved %d files from %s to %s", $r8);
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("RecursiveMoveFiles", $r7);
+
+        return i0;
+
+     label4:
+        $z0 = specialinvoke r0.<org.gnucash.android.util.RecursiveMoveFiles: boolean copy(java.io.File,java.io.File)>($r1, $r2);
+
+     label5:
+        if $z0 == 0 goto label3;
+
+     label6:
+        virtualinvoke $r1.<java.io.File: boolean delete()>();
+
+     label7:
+        goto label3;
+
+     label8:
+        r3 := @caughtexception;
+
+        $r10 = new java.lang.StringBuilder;
+
+        specialinvoke $r10.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Error moving file: ");
+
+        $r7 = virtualinvoke $r1.<java.io.File: java.lang.String getAbsolutePath()>();
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r7);
+
+        $r7 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("MigrationHelper", $r7);
+
+        goto label3;
+
+        catch java.io.IOException from label4 to label5 with label8;
+        catch java.io.IOException from label6 to label7 with label8;
+    }
+    public void run()
+    {
+        org.gnucash.android.util.RecursiveMoveFiles r0;
+        java.io.File $r1, $r2;
+
+        r0 := @this: org.gnucash.android.util.RecursiveMoveFiles;
+
+        $r1 = r0.<org.gnucash.android.util.RecursiveMoveFiles: java.io.File mSource>;
+
+        $r2 = r0.<org.gnucash.android.util.RecursiveMoveFiles: java.io.File mDestination>;
+
+        specialinvoke r0.<org.gnucash.android.util.RecursiveMoveFiles: int recursiveMove(java.io.File,java.io.File)>($r1, $r2);
+
+        return;
+    }

@@ -1,0 +1,861 @@
+android.support.v4.media.MediaBrowserServiceCompat extends android.app.Service
+static final boolean DEBUG
+private static final float EPSILON
+public static final java.lang.String KEY_MEDIA_ITEM
+public static final java.lang.String KEY_SEARCH_RESULTS
+static final int RESULT_ERROR
+static final int RESULT_FLAG_ON_LOAD_ITEM_NOT_IMPLEMENTED
+static final int RESULT_FLAG_ON_SEARCH_NOT_IMPLEMENTED
+static final int RESULT_FLAG_OPTION_NOT_HANDLED
+static final int RESULT_OK
+static final int RESULT_PROGRESS_UPDATE
+public static final java.lang.String SERVICE_INTERFACE
+static final java.lang.String TAG
+final android.support.v4.util.ArrayMap mConnections
+android.support.v4.media.MediaBrowserServiceCompat$ConnectionRecord mCurConnection
+final android.support.v4.media.MediaBrowserServiceCompat$ServiceHandler mHandler
+private android.support.v4.media.MediaBrowserServiceCompat$MediaBrowserServiceImpl mImpl
+android.support.v4.media.session.MediaSessionCompat$Token mSession
+    static void <clinit>()
+    {
+        boolean $z0;
+
+        $z0 = staticinvoke <android.util.Log: boolean isLoggable(java.lang.String,int)>("MBServiceCompat", 3);
+
+        <android.support.v4.media.MediaBrowserServiceCompat: boolean DEBUG> = $z0;
+
+        return;
+    }
+    public void <init>()
+    {
+        android.support.v4.media.MediaBrowserServiceCompat r0;
+        android.support.v4.util.ArrayMap $r1;
+        android.support.v4.media.MediaBrowserServiceCompat$ServiceHandler $r2;
+
+        r0 := @this: android.support.v4.media.MediaBrowserServiceCompat;
+
+        specialinvoke r0.<android.app.Service: void <init>()>();
+
+        $r1 = new android.support.v4.util.ArrayMap;
+
+        specialinvoke $r1.<android.support.v4.util.ArrayMap: void <init>()>();
+
+        r0.<android.support.v4.media.MediaBrowserServiceCompat: android.support.v4.util.ArrayMap mConnections> = $r1;
+
+        $r2 = new android.support.v4.media.MediaBrowserServiceCompat$ServiceHandler;
+
+        specialinvoke $r2.<android.support.v4.media.MediaBrowserServiceCompat$ServiceHandler: void <init>(android.support.v4.media.MediaBrowserServiceCompat)>(r0);
+
+        r0.<android.support.v4.media.MediaBrowserServiceCompat: android.support.v4.media.MediaBrowserServiceCompat$ServiceHandler mHandler> = $r2;
+
+        return;
+    }
+    void addSubscription(java.lang.String, android.support.v4.media.MediaBrowserServiceCompat$ConnectionRecord, android.os.IBinder, android.os.Bundle)
+    {
+        android.support.v4.media.MediaBrowserServiceCompat r0;
+        java.lang.String $r1;
+        android.support.v4.media.MediaBrowserServiceCompat$ConnectionRecord $r2;
+        android.os.IBinder $r3;
+        android.os.Bundle $r4, $r10;
+        java.util.HashMap $r5;
+        java.lang.Object $r6;
+        java.util.List r7;
+        java.util.Iterator $r8;
+        boolean $z0;
+        android.support.v4.util.Pair r9, $r12;
+        java.util.ArrayList $r11;
+
+        r0 := @this: android.support.v4.media.MediaBrowserServiceCompat;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: android.support.v4.media.MediaBrowserServiceCompat$ConnectionRecord;
+
+        $r3 := @parameter2: android.os.IBinder;
+
+        $r4 := @parameter3: android.os.Bundle;
+
+        $r5 = $r2.<android.support.v4.media.MediaBrowserServiceCompat$ConnectionRecord: java.util.HashMap subscriptions>;
+
+        $r6 = virtualinvoke $r5.<java.util.HashMap: java.lang.Object get(java.lang.Object)>($r1);
+
+        r7 = (java.util.List) $r6;
+
+        if r7 != null goto label1;
+
+        $r11 = new java.util.ArrayList;
+
+        r7 = $r11;
+
+        specialinvoke $r11.<java.util.ArrayList: void <init>()>();
+
+     label1:
+        $r8 = interfaceinvoke r7.<java.util.List: java.util.Iterator iterator()>();
+
+     label2:
+        $z0 = interfaceinvoke $r8.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label3;
+
+        $r6 = interfaceinvoke $r8.<java.util.Iterator: java.lang.Object next()>();
+
+        r9 = (android.support.v4.util.Pair) $r6;
+
+        $r6 = r9.<android.support.v4.util.Pair: java.lang.Object first>;
+
+        if $r3 != $r6 goto label2;
+
+        $r6 = r9.<android.support.v4.util.Pair: java.lang.Object second>;
+
+        $r10 = (android.os.Bundle) $r6;
+
+        $z0 = staticinvoke <android.support.v4.media.MediaBrowserCompatUtils: boolean areSameOptions(android.os.Bundle,android.os.Bundle)>($r4, $r10);
+
+        if $z0 == 0 goto label2;
+
+        return;
+
+     label3:
+        $r12 = new android.support.v4.util.Pair;
+
+        specialinvoke $r12.<android.support.v4.util.Pair: void <init>(java.lang.Object,java.lang.Object)>($r3, $r4);
+
+        interfaceinvoke r7.<java.util.List: boolean add(java.lang.Object)>($r12);
+
+        $r5 = $r2.<android.support.v4.media.MediaBrowserServiceCompat$ConnectionRecord: java.util.HashMap subscriptions>;
+
+        virtualinvoke $r5.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>($r1, r7);
+
+        virtualinvoke r0.<android.support.v4.media.MediaBrowserServiceCompat: void performLoadChildren(java.lang.String,android.support.v4.media.MediaBrowserServiceCompat$ConnectionRecord,android.os.Bundle)>($r1, $r2, $r4);
+
+        return;
+    }
+    java.util.List applyOptions(java.util.List, android.os.Bundle)
+    {
+        android.support.v4.media.MediaBrowserServiceCompat r0;
+        android.os.Bundle $r1;
+        int i0, $i1, $i2, i3;
+        java.util.List r2;
+
+        r0 := @this: android.support.v4.media.MediaBrowserServiceCompat;
+
+        r2 := @parameter0: java.util.List;
+
+        $r1 := @parameter1: android.os.Bundle;
+
+        if r2 != null goto label1;
+
+        return null;
+
+     label1:
+        $i1 = virtualinvoke $r1.<android.os.Bundle: int getInt(java.lang.String,int)>("android.media.browse.extra.PAGE", -1);
+
+        $i2 = virtualinvoke $r1.<android.os.Bundle: int getInt(java.lang.String,int)>("android.media.browse.extra.PAGE_SIZE", -1);
+
+        if $i1 != -1 goto label2;
+
+        if $i2 == -1 goto label6;
+
+     label2:
+        i0 = $i2 * $i1;
+
+        i3 = i0 + $i2;
+
+        if $i1 < 0 goto label3;
+
+        if $i2 < 1 goto label3;
+
+        $i1 = interfaceinvoke r2.<java.util.List: int size()>();
+
+        if i0 < $i1 goto label4;
+
+     label3:
+        r2 = <java.util.Collections: java.util.List EMPTY_LIST>;
+
+        return r2;
+
+     label4:
+        $i1 = interfaceinvoke r2.<java.util.List: int size()>();
+
+        if i3 <= $i1 goto label5;
+
+        i3 = interfaceinvoke r2.<java.util.List: int size()>();
+
+     label5:
+        r2 = interfaceinvoke r2.<java.util.List: java.util.List subList(int,int)>(i0, i3);
+
+     label6:
+        return r2;
+    }
+    public void dump(java.io.FileDescriptor, java.io.PrintWriter, java.lang.String[])
+    {
+        android.support.v4.media.MediaBrowserServiceCompat r0;
+        java.io.FileDescriptor $r1;
+        java.io.PrintWriter $r2;
+        java.lang.String[] $r3;
+
+        r0 := @this: android.support.v4.media.MediaBrowserServiceCompat;
+
+        $r1 := @parameter0: java.io.FileDescriptor;
+
+        $r2 := @parameter1: java.io.PrintWriter;
+
+        $r3 := @parameter2: java.lang.String[];
+
+        return;
+    }
+    public final android.os.Bundle getBrowserRootHints()
+    {
+        android.support.v4.media.MediaBrowserServiceCompat r0;
+        android.os.Bundle $r1;
+        android.support.v4.media.MediaBrowserServiceCompat$MediaBrowserServiceImpl $r2;
+
+        r0 := @this: android.support.v4.media.MediaBrowserServiceCompat;
+
+        $r2 = r0.<android.support.v4.media.MediaBrowserServiceCompat: android.support.v4.media.MediaBrowserServiceCompat$MediaBrowserServiceImpl mImpl>;
+
+        $r1 = interfaceinvoke $r2.<android.support.v4.media.MediaBrowserServiceCompat$MediaBrowserServiceImpl: android.os.Bundle getBrowserRootHints()>();
+
+        return $r1;
+    }
+    public android.support.v4.media.session.MediaSessionCompat$Token getSessionToken()
+    {
+        android.support.v4.media.MediaBrowserServiceCompat r0;
+        android.support.v4.media.session.MediaSessionCompat$Token r1;
+
+        r0 := @this: android.support.v4.media.MediaBrowserServiceCompat;
+
+        r1 = r0.<android.support.v4.media.MediaBrowserServiceCompat: android.support.v4.media.session.MediaSessionCompat$Token mSession>;
+
+        return r1;
+    }
+    boolean isValidPackage(java.lang.String, int)
+    {
+        android.support.v4.media.MediaBrowserServiceCompat r0;
+        java.lang.String $r1, $r4;
+        int $i0, i1;
+        android.content.pm.PackageManager $r2;
+        java.lang.String[] $r3;
+        boolean $z0;
+
+        r0 := @this: android.support.v4.media.MediaBrowserServiceCompat;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $i0 := @parameter1: int;
+
+        if $r1 != null goto label1;
+
+        return 0;
+
+     label1:
+        $r2 = virtualinvoke r0.<android.support.v4.media.MediaBrowserServiceCompat: android.content.pm.PackageManager getPackageManager()>();
+
+        $r3 = virtualinvoke $r2.<android.content.pm.PackageManager: java.lang.String[] getPackagesForUid(int)>($i0);
+
+        $i0 = lengthof $r3;
+
+        i1 = 0;
+
+     label2:
+        if i1 >= $i0 goto label4;
+
+        $r4 = $r3[i1];
+
+        $z0 = virtualinvoke $r4.<java.lang.String: boolean equals(java.lang.Object)>($r1);
+
+        if $z0 == 0 goto label3;
+
+        return 1;
+
+     label3:
+        i1 = i1 + 1;
+
+        goto label2;
+
+     label4:
+        return 0;
+    }
+    public void notifyChildrenChanged(java.lang.String)
+    {
+        android.support.v4.media.MediaBrowserServiceCompat r0;
+        java.lang.String $r1;
+        java.lang.IllegalArgumentException $r2;
+        android.support.v4.media.MediaBrowserServiceCompat$MediaBrowserServiceImpl $r3;
+
+        r0 := @this: android.support.v4.media.MediaBrowserServiceCompat;
+
+        $r1 := @parameter0: java.lang.String;
+
+        if $r1 != null goto label1;
+
+        $r2 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r2.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("parentId cannot be null in notifyChildrenChanged");
+
+        throw $r2;
+
+     label1:
+        $r3 = r0.<android.support.v4.media.MediaBrowserServiceCompat: android.support.v4.media.MediaBrowserServiceCompat$MediaBrowserServiceImpl mImpl>;
+
+        interfaceinvoke $r3.<android.support.v4.media.MediaBrowserServiceCompat$MediaBrowserServiceImpl: void notifyChildrenChanged(java.lang.String,android.os.Bundle)>($r1, null);
+
+        return;
+    }
+    public void notifyChildrenChanged(java.lang.String, android.os.Bundle)
+    {
+        android.support.v4.media.MediaBrowserServiceCompat r0;
+        java.lang.String $r1;
+        android.os.Bundle $r2;
+        java.lang.IllegalArgumentException $r3;
+        android.support.v4.media.MediaBrowserServiceCompat$MediaBrowserServiceImpl $r4;
+
+        r0 := @this: android.support.v4.media.MediaBrowserServiceCompat;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: android.os.Bundle;
+
+        if $r1 != null goto label1;
+
+        $r3 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r3.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("parentId cannot be null in notifyChildrenChanged");
+
+        throw $r3;
+
+     label1:
+        if $r2 != null goto label2;
+
+        $r3 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r3.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("options cannot be null in notifyChildrenChanged");
+
+        throw $r3;
+
+     label2:
+        $r4 = r0.<android.support.v4.media.MediaBrowserServiceCompat: android.support.v4.media.MediaBrowserServiceCompat$MediaBrowserServiceImpl mImpl>;
+
+        interfaceinvoke $r4.<android.support.v4.media.MediaBrowserServiceCompat$MediaBrowserServiceImpl: void notifyChildrenChanged(java.lang.String,android.os.Bundle)>($r1, $r2);
+
+        return;
+    }
+    public android.os.IBinder onBind(android.content.Intent)
+    {
+        android.support.v4.media.MediaBrowserServiceCompat r0;
+        android.content.Intent $r1;
+        android.os.IBinder $r2;
+        android.support.v4.media.MediaBrowserServiceCompat$MediaBrowserServiceImpl $r3;
+
+        r0 := @this: android.support.v4.media.MediaBrowserServiceCompat;
+
+        $r1 := @parameter0: android.content.Intent;
+
+        $r3 = r0.<android.support.v4.media.MediaBrowserServiceCompat: android.support.v4.media.MediaBrowserServiceCompat$MediaBrowserServiceImpl mImpl>;
+
+        $r2 = interfaceinvoke $r3.<android.support.v4.media.MediaBrowserServiceCompat$MediaBrowserServiceImpl: android.os.IBinder onBind(android.content.Intent)>($r1);
+
+        return $r2;
+    }
+    public void onCreate()
+    {
+        android.support.v4.media.MediaBrowserServiceCompat r0;
+        int $i0;
+        android.support.v4.media.MediaBrowserServiceCompat$MediaBrowserServiceImplApi24 $r1;
+        android.support.v4.media.MediaBrowserServiceCompat$MediaBrowserServiceImpl $r2;
+        android.support.v4.media.MediaBrowserServiceCompat$MediaBrowserServiceImplApi23 $r3;
+        android.support.v4.media.MediaBrowserServiceCompat$MediaBrowserServiceImplApi21 $r4;
+        android.support.v4.media.MediaBrowserServiceCompat$MediaBrowserServiceImplBase $r5;
+
+        r0 := @this: android.support.v4.media.MediaBrowserServiceCompat;
+
+        specialinvoke r0.<android.app.Service: void onCreate()>();
+
+        $i0 = <android.os.Build$VERSION: int SDK_INT>;
+
+        if $i0 < 26 goto label2;
+
+        $r1 = new android.support.v4.media.MediaBrowserServiceCompat$MediaBrowserServiceImplApi24;
+
+        specialinvoke $r1.<android.support.v4.media.MediaBrowserServiceCompat$MediaBrowserServiceImplApi24: void <init>(android.support.v4.media.MediaBrowserServiceCompat)>(r0);
+
+        r0.<android.support.v4.media.MediaBrowserServiceCompat: android.support.v4.media.MediaBrowserServiceCompat$MediaBrowserServiceImpl mImpl> = $r1;
+
+     label1:
+        $r2 = r0.<android.support.v4.media.MediaBrowserServiceCompat: android.support.v4.media.MediaBrowserServiceCompat$MediaBrowserServiceImpl mImpl>;
+
+        interfaceinvoke $r2.<android.support.v4.media.MediaBrowserServiceCompat$MediaBrowserServiceImpl: void onCreate()>();
+
+        return;
+
+     label2:
+        $i0 = <android.os.Build$VERSION: int SDK_INT>;
+
+        if $i0 < 23 goto label3;
+
+        $r3 = new android.support.v4.media.MediaBrowserServiceCompat$MediaBrowserServiceImplApi23;
+
+        specialinvoke $r3.<android.support.v4.media.MediaBrowserServiceCompat$MediaBrowserServiceImplApi23: void <init>(android.support.v4.media.MediaBrowserServiceCompat)>(r0);
+
+        r0.<android.support.v4.media.MediaBrowserServiceCompat: android.support.v4.media.MediaBrowserServiceCompat$MediaBrowserServiceImpl mImpl> = $r3;
+
+        goto label1;
+
+     label3:
+        $i0 = <android.os.Build$VERSION: int SDK_INT>;
+
+        if $i0 < 21 goto label4;
+
+        $r4 = new android.support.v4.media.MediaBrowserServiceCompat$MediaBrowserServiceImplApi21;
+
+        specialinvoke $r4.<android.support.v4.media.MediaBrowserServiceCompat$MediaBrowserServiceImplApi21: void <init>(android.support.v4.media.MediaBrowserServiceCompat)>(r0);
+
+        r0.<android.support.v4.media.MediaBrowserServiceCompat: android.support.v4.media.MediaBrowserServiceCompat$MediaBrowserServiceImpl mImpl> = $r4;
+
+        goto label1;
+
+     label4:
+        $r5 = new android.support.v4.media.MediaBrowserServiceCompat$MediaBrowserServiceImplBase;
+
+        specialinvoke $r5.<android.support.v4.media.MediaBrowserServiceCompat$MediaBrowserServiceImplBase: void <init>(android.support.v4.media.MediaBrowserServiceCompat)>(r0);
+
+        r0.<android.support.v4.media.MediaBrowserServiceCompat: android.support.v4.media.MediaBrowserServiceCompat$MediaBrowserServiceImpl mImpl> = $r5;
+
+        goto label1;
+    }
+    public void onCustomAction(java.lang.String, android.os.Bundle, android.support.v4.media.MediaBrowserServiceCompat$Result)
+    {
+        android.support.v4.media.MediaBrowserServiceCompat r0;
+        java.lang.String $r1;
+        android.os.Bundle $r2;
+        android.support.v4.media.MediaBrowserServiceCompat$Result r3;
+
+        r0 := @this: android.support.v4.media.MediaBrowserServiceCompat;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: android.os.Bundle;
+
+        r3 := @parameter2: android.support.v4.media.MediaBrowserServiceCompat$Result;
+
+        virtualinvoke r3.<android.support.v4.media.MediaBrowserServiceCompat$Result: void sendError(android.os.Bundle)>(null);
+
+        return;
+    }
+public abstract android.support.v4.media.MediaBrowserServiceCompat$BrowserRoot onGetRoot(java.lang.String, int, android.os.Bundle) { 
+// no body
+} 
+public abstract void onLoadChildren(java.lang.String, android.support.v4.media.MediaBrowserServiceCompat$Result) { 
+// no body
+} 
+    public void onLoadChildren(java.lang.String, android.support.v4.media.MediaBrowserServiceCompat$Result, android.os.Bundle)
+    {
+        android.support.v4.media.MediaBrowserServiceCompat r0;
+        java.lang.String $r1;
+        android.support.v4.media.MediaBrowserServiceCompat$Result r2;
+        android.os.Bundle $r3;
+
+        r0 := @this: android.support.v4.media.MediaBrowserServiceCompat;
+
+        $r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: android.support.v4.media.MediaBrowserServiceCompat$Result;
+
+        $r3 := @parameter2: android.os.Bundle;
+
+        virtualinvoke r2.<android.support.v4.media.MediaBrowserServiceCompat$Result: void setFlags(int)>(1);
+
+        virtualinvoke r0.<android.support.v4.media.MediaBrowserServiceCompat: void onLoadChildren(java.lang.String,android.support.v4.media.MediaBrowserServiceCompat$Result)>($r1, r2);
+
+        return;
+    }
+    public void onLoadItem(java.lang.String, android.support.v4.media.MediaBrowserServiceCompat$Result)
+    {
+        android.support.v4.media.MediaBrowserServiceCompat r0;
+        java.lang.String $r1;
+        android.support.v4.media.MediaBrowserServiceCompat$Result r2;
+
+        r0 := @this: android.support.v4.media.MediaBrowserServiceCompat;
+
+        $r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: android.support.v4.media.MediaBrowserServiceCompat$Result;
+
+        virtualinvoke r2.<android.support.v4.media.MediaBrowserServiceCompat$Result: void setFlags(int)>(2);
+
+        virtualinvoke r2.<android.support.v4.media.MediaBrowserServiceCompat$Result: void sendResult(java.lang.Object)>(null);
+
+        return;
+    }
+    public void onSearch(java.lang.String, android.os.Bundle, android.support.v4.media.MediaBrowserServiceCompat$Result)
+    {
+        android.support.v4.media.MediaBrowserServiceCompat r0;
+        java.lang.String $r1;
+        android.os.Bundle $r2;
+        android.support.v4.media.MediaBrowserServiceCompat$Result r3;
+
+        r0 := @this: android.support.v4.media.MediaBrowserServiceCompat;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: android.os.Bundle;
+
+        r3 := @parameter2: android.support.v4.media.MediaBrowserServiceCompat$Result;
+
+        virtualinvoke r3.<android.support.v4.media.MediaBrowserServiceCompat$Result: void setFlags(int)>(4);
+
+        virtualinvoke r3.<android.support.v4.media.MediaBrowserServiceCompat$Result: void sendResult(java.lang.Object)>(null);
+
+        return;
+    }
+    void performCustomAction(java.lang.String, android.os.Bundle, android.support.v4.media.MediaBrowserServiceCompat$ConnectionRecord, android.support.v4.os.ResultReceiver)
+    {
+        android.support.v4.media.MediaBrowserServiceCompat r0;
+        java.lang.String $r1;
+        android.os.Bundle $r2;
+        android.support.v4.media.MediaBrowserServiceCompat$ConnectionRecord $r3;
+        android.support.v4.os.ResultReceiver $r4;
+        android.support.v4.media.MediaBrowserServiceCompat$4 r5;
+        boolean $z0;
+        java.lang.IllegalStateException $r6;
+        java.lang.StringBuilder $r7;
+
+        r0 := @this: android.support.v4.media.MediaBrowserServiceCompat;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: android.os.Bundle;
+
+        $r3 := @parameter2: android.support.v4.media.MediaBrowserServiceCompat$ConnectionRecord;
+
+        $r4 := @parameter3: android.support.v4.os.ResultReceiver;
+
+        r5 = new android.support.v4.media.MediaBrowserServiceCompat$4;
+
+        specialinvoke r5.<android.support.v4.media.MediaBrowserServiceCompat$4: void <init>(android.support.v4.media.MediaBrowserServiceCompat,java.lang.Object,android.support.v4.os.ResultReceiver)>(r0, $r1, $r4);
+
+        r0.<android.support.v4.media.MediaBrowserServiceCompat: android.support.v4.media.MediaBrowserServiceCompat$ConnectionRecord mCurConnection> = $r3;
+
+        virtualinvoke r0.<android.support.v4.media.MediaBrowserServiceCompat: void onCustomAction(java.lang.String,android.os.Bundle,android.support.v4.media.MediaBrowserServiceCompat$Result)>($r1, $r2, r5);
+
+        r0.<android.support.v4.media.MediaBrowserServiceCompat: android.support.v4.media.MediaBrowserServiceCompat$ConnectionRecord mCurConnection> = null;
+
+        $z0 = virtualinvoke r5.<android.support.v4.media.MediaBrowserServiceCompat$Result: boolean isDone()>();
+
+        if $z0 != 0 goto label1;
+
+        $r6 = new java.lang.IllegalStateException;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("onCustomAction must call detach() or sendResult() or sendError() before returning for action=");
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" extras=");
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r2);
+
+        $r1 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r6.<java.lang.IllegalStateException: void <init>(java.lang.String)>($r1);
+
+        throw $r6;
+
+     label1:
+        return;
+    }
+    void performLoadChildren(java.lang.String, android.support.v4.media.MediaBrowserServiceCompat$ConnectionRecord, android.os.Bundle)
+    {
+        android.support.v4.media.MediaBrowserServiceCompat r0;
+        java.lang.String $r1, $r7;
+        android.support.v4.media.MediaBrowserServiceCompat$ConnectionRecord $r2;
+        android.os.Bundle $r3;
+        android.support.v4.media.MediaBrowserServiceCompat$1 r4;
+        boolean $z0;
+        java.lang.IllegalStateException $r5;
+        java.lang.StringBuilder $r6;
+
+        r0 := @this: android.support.v4.media.MediaBrowserServiceCompat;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: android.support.v4.media.MediaBrowserServiceCompat$ConnectionRecord;
+
+        $r3 := @parameter2: android.os.Bundle;
+
+        r4 = new android.support.v4.media.MediaBrowserServiceCompat$1;
+
+        specialinvoke r4.<android.support.v4.media.MediaBrowserServiceCompat$1: void <init>(android.support.v4.media.MediaBrowserServiceCompat,java.lang.Object,android.support.v4.media.MediaBrowserServiceCompat$ConnectionRecord,java.lang.String,android.os.Bundle)>(r0, $r1, $r2, $r1, $r3);
+
+        r0.<android.support.v4.media.MediaBrowserServiceCompat: android.support.v4.media.MediaBrowserServiceCompat$ConnectionRecord mCurConnection> = $r2;
+
+        if $r3 != null goto label2;
+
+        virtualinvoke r0.<android.support.v4.media.MediaBrowserServiceCompat: void onLoadChildren(java.lang.String,android.support.v4.media.MediaBrowserServiceCompat$Result)>($r1, r4);
+
+     label1:
+        r0.<android.support.v4.media.MediaBrowserServiceCompat: android.support.v4.media.MediaBrowserServiceCompat$ConnectionRecord mCurConnection> = null;
+
+        $z0 = virtualinvoke r4.<android.support.v4.media.MediaBrowserServiceCompat$Result: boolean isDone()>();
+
+        if $z0 != 0 goto label3;
+
+        $r5 = new java.lang.IllegalStateException;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("onLoadChildren must call detach() or sendResult() before returning for package=");
+
+        $r7 = $r2.<android.support.v4.media.MediaBrowserServiceCompat$ConnectionRecord: java.lang.String pkg>;
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r7);
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" id=");
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r1 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r5.<java.lang.IllegalStateException: void <init>(java.lang.String)>($r1);
+
+        throw $r5;
+
+     label2:
+        virtualinvoke r0.<android.support.v4.media.MediaBrowserServiceCompat: void onLoadChildren(java.lang.String,android.support.v4.media.MediaBrowserServiceCompat$Result,android.os.Bundle)>($r1, r4, $r3);
+
+        goto label1;
+
+     label3:
+        return;
+    }
+    void performLoadItem(java.lang.String, android.support.v4.media.MediaBrowserServiceCompat$ConnectionRecord, android.support.v4.os.ResultReceiver)
+    {
+        android.support.v4.media.MediaBrowserServiceCompat r0;
+        java.lang.String $r1;
+        android.support.v4.media.MediaBrowserServiceCompat$ConnectionRecord $r2;
+        android.support.v4.os.ResultReceiver $r3;
+        android.support.v4.media.MediaBrowserServiceCompat$2 r4;
+        boolean $z0;
+        java.lang.IllegalStateException $r5;
+        java.lang.StringBuilder $r6;
+
+        r0 := @this: android.support.v4.media.MediaBrowserServiceCompat;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: android.support.v4.media.MediaBrowserServiceCompat$ConnectionRecord;
+
+        $r3 := @parameter2: android.support.v4.os.ResultReceiver;
+
+        r4 = new android.support.v4.media.MediaBrowserServiceCompat$2;
+
+        specialinvoke r4.<android.support.v4.media.MediaBrowserServiceCompat$2: void <init>(android.support.v4.media.MediaBrowserServiceCompat,java.lang.Object,android.support.v4.os.ResultReceiver)>(r0, $r1, $r3);
+
+        r0.<android.support.v4.media.MediaBrowserServiceCompat: android.support.v4.media.MediaBrowserServiceCompat$ConnectionRecord mCurConnection> = $r2;
+
+        virtualinvoke r0.<android.support.v4.media.MediaBrowserServiceCompat: void onLoadItem(java.lang.String,android.support.v4.media.MediaBrowserServiceCompat$Result)>($r1, r4);
+
+        r0.<android.support.v4.media.MediaBrowserServiceCompat: android.support.v4.media.MediaBrowserServiceCompat$ConnectionRecord mCurConnection> = null;
+
+        $z0 = virtualinvoke r4.<android.support.v4.media.MediaBrowserServiceCompat$Result: boolean isDone()>();
+
+        if $z0 != 0 goto label1;
+
+        $r5 = new java.lang.IllegalStateException;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("onLoadItem must call detach() or sendResult() before returning for id=");
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r1 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r5.<java.lang.IllegalStateException: void <init>(java.lang.String)>($r1);
+
+        throw $r5;
+
+     label1:
+        return;
+    }
+    void performSearch(java.lang.String, android.os.Bundle, android.support.v4.media.MediaBrowserServiceCompat$ConnectionRecord, android.support.v4.os.ResultReceiver)
+    {
+        android.support.v4.media.MediaBrowserServiceCompat r0;
+        java.lang.String $r1;
+        android.os.Bundle $r2;
+        android.support.v4.media.MediaBrowserServiceCompat$ConnectionRecord $r3;
+        android.support.v4.os.ResultReceiver $r4;
+        android.support.v4.media.MediaBrowserServiceCompat$3 r5;
+        boolean $z0;
+        java.lang.IllegalStateException $r6;
+        java.lang.StringBuilder $r7;
+
+        r0 := @this: android.support.v4.media.MediaBrowserServiceCompat;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: android.os.Bundle;
+
+        $r3 := @parameter2: android.support.v4.media.MediaBrowserServiceCompat$ConnectionRecord;
+
+        $r4 := @parameter3: android.support.v4.os.ResultReceiver;
+
+        r5 = new android.support.v4.media.MediaBrowserServiceCompat$3;
+
+        specialinvoke r5.<android.support.v4.media.MediaBrowserServiceCompat$3: void <init>(android.support.v4.media.MediaBrowserServiceCompat,java.lang.Object,android.support.v4.os.ResultReceiver)>(r0, $r1, $r4);
+
+        r0.<android.support.v4.media.MediaBrowserServiceCompat: android.support.v4.media.MediaBrowserServiceCompat$ConnectionRecord mCurConnection> = $r3;
+
+        virtualinvoke r0.<android.support.v4.media.MediaBrowserServiceCompat: void onSearch(java.lang.String,android.os.Bundle,android.support.v4.media.MediaBrowserServiceCompat$Result)>($r1, $r2, r5);
+
+        r0.<android.support.v4.media.MediaBrowserServiceCompat: android.support.v4.media.MediaBrowserServiceCompat$ConnectionRecord mCurConnection> = null;
+
+        $z0 = virtualinvoke r5.<android.support.v4.media.MediaBrowserServiceCompat$Result: boolean isDone()>();
+
+        if $z0 != 0 goto label1;
+
+        $r6 = new java.lang.IllegalStateException;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("onSearch must call detach() or sendResult() before returning for query=");
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r1 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r6.<java.lang.IllegalStateException: void <init>(java.lang.String)>($r1);
+
+        throw $r6;
+
+     label1:
+        return;
+    }
+    boolean removeSubscription(java.lang.String, android.support.v4.media.MediaBrowserServiceCompat$ConnectionRecord, android.os.IBinder)
+    {
+        android.support.v4.media.MediaBrowserServiceCompat r0;
+        java.lang.String $r1;
+        android.support.v4.media.MediaBrowserServiceCompat$ConnectionRecord $r2;
+        android.os.IBinder $r3;
+        java.util.HashMap $r4;
+        java.lang.Object $r5;
+        boolean z0, $z1;
+        java.util.List r6;
+        java.util.Iterator $r7;
+        android.support.v4.util.Pair $r8;
+        int $i0;
+
+        r0 := @this: android.support.v4.media.MediaBrowserServiceCompat;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: android.support.v4.media.MediaBrowserServiceCompat$ConnectionRecord;
+
+        $r3 := @parameter2: android.os.IBinder;
+
+        if $r3 != null goto label2;
+
+        $r4 = $r2.<android.support.v4.media.MediaBrowserServiceCompat$ConnectionRecord: java.util.HashMap subscriptions>;
+
+        $r5 = virtualinvoke $r4.<java.util.HashMap: java.lang.Object remove(java.lang.Object)>($r1);
+
+        if $r5 == null goto label1;
+
+        return 1;
+
+     label1:
+        return 0;
+
+     label2:
+        z0 = 0;
+
+        $r4 = $r2.<android.support.v4.media.MediaBrowserServiceCompat$ConnectionRecord: java.util.HashMap subscriptions>;
+
+        $r5 = virtualinvoke $r4.<java.util.HashMap: java.lang.Object get(java.lang.Object)>($r1);
+
+        r6 = (java.util.List) $r5;
+
+        if r6 == null goto label5;
+
+        $r7 = interfaceinvoke r6.<java.util.List: java.util.Iterator iterator()>();
+
+     label3:
+        $z1 = interfaceinvoke $r7.<java.util.Iterator: boolean hasNext()>();
+
+        if $z1 == 0 goto label4;
+
+        $r5 = interfaceinvoke $r7.<java.util.Iterator: java.lang.Object next()>();
+
+        $r8 = (android.support.v4.util.Pair) $r5;
+
+        $r5 = $r8.<android.support.v4.util.Pair: java.lang.Object first>;
+
+        if $r3 != $r5 goto label3;
+
+        z0 = 1;
+
+        interfaceinvoke $r7.<java.util.Iterator: void remove()>();
+
+        goto label3;
+
+     label4:
+        $i0 = interfaceinvoke r6.<java.util.List: int size()>();
+
+        if $i0 != 0 goto label5;
+
+        $r4 = $r2.<android.support.v4.media.MediaBrowserServiceCompat$ConnectionRecord: java.util.HashMap subscriptions>;
+
+        virtualinvoke $r4.<java.util.HashMap: java.lang.Object remove(java.lang.Object)>($r1);
+
+     label5:
+        return z0;
+    }
+    public void setSessionToken(android.support.v4.media.session.MediaSessionCompat$Token)
+    {
+        android.support.v4.media.MediaBrowserServiceCompat r0;
+        android.support.v4.media.session.MediaSessionCompat$Token $r1, $r3;
+        java.lang.IllegalArgumentException $r2;
+        java.lang.IllegalStateException $r4;
+        android.support.v4.media.MediaBrowserServiceCompat$MediaBrowserServiceImpl $r5;
+
+        r0 := @this: android.support.v4.media.MediaBrowserServiceCompat;
+
+        $r1 := @parameter0: android.support.v4.media.session.MediaSessionCompat$Token;
+
+        if $r1 != null goto label1;
+
+        $r2 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r2.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Session token may not be null.");
+
+        throw $r2;
+
+     label1:
+        $r3 = r0.<android.support.v4.media.MediaBrowserServiceCompat: android.support.v4.media.session.MediaSessionCompat$Token mSession>;
+
+        if $r3 == null goto label2;
+
+        $r4 = new java.lang.IllegalStateException;
+
+        specialinvoke $r4.<java.lang.IllegalStateException: void <init>(java.lang.String)>("The session token has already been set.");
+
+        throw $r4;
+
+     label2:
+        r0.<android.support.v4.media.MediaBrowserServiceCompat: android.support.v4.media.session.MediaSessionCompat$Token mSession> = $r1;
+
+        $r5 = r0.<android.support.v4.media.MediaBrowserServiceCompat: android.support.v4.media.MediaBrowserServiceCompat$MediaBrowserServiceImpl mImpl>;
+
+        interfaceinvoke $r5.<android.support.v4.media.MediaBrowserServiceCompat$MediaBrowserServiceImpl: void setSessionToken(android.support.v4.media.session.MediaSessionCompat$Token)>($r1);
+
+        return;
+    }

@@ -1,0 +1,6320 @@
+okio.Buffer extends java.lang.Object implements okio.BufferedSource okio.BufferedSink java.lang.Cloneable
+private static final byte[] DIGITS
+static final int REPLACEMENT_CHARACTER
+okio.Segment head
+long size
+    static void <clinit>()
+    {
+        byte[] $r0;
+
+        $r0 = newarray (byte)[16];
+
+        $r0[0] = 48;
+
+        $r0[1] = 49;
+
+        $r0[2] = 50;
+
+        $r0[3] = 51;
+
+        $r0[4] = 52;
+
+        $r0[5] = 53;
+
+        $r0[6] = 54;
+
+        $r0[7] = 55;
+
+        $r0[8] = 56;
+
+        $r0[9] = 57;
+
+        $r0[10] = 97;
+
+        $r0[11] = 98;
+
+        $r0[12] = 99;
+
+        $r0[13] = 100;
+
+        $r0[14] = 101;
+
+        $r0[15] = 102;
+
+        <okio.Buffer: byte[] DIGITS> = $r0;
+
+        return;
+    }
+    public void <init>()
+    {
+        okio.Buffer r0;
+
+        r0 := @this: okio.Buffer;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+    private okio.ByteString digest(java.lang.String)
+    {
+        okio.Buffer r0;
+        java.lang.String $r1;
+        java.security.NoSuchAlgorithmException r2;
+        java.security.MessageDigest $r3;
+        okio.Segment $r4, $r6;
+        byte[] $r5;
+        int $i0, $i1, $i2;
+        okio.ByteString $r7;
+        java.lang.AssertionError $r8;
+
+        r0 := @this: okio.Buffer;
+
+        $r1 := @parameter0: java.lang.String;
+
+     label01:
+        $r3 = staticinvoke <java.security.MessageDigest: java.security.MessageDigest getInstance(java.lang.String)>($r1);
+
+     label02:
+        $r4 = r0.<okio.Buffer: okio.Segment head>;
+
+        if $r4 == null goto label08;
+
+        $r4 = r0.<okio.Buffer: okio.Segment head>;
+
+        $r5 = $r4.<okio.Segment: byte[] data>;
+
+        $r4 = r0.<okio.Buffer: okio.Segment head>;
+
+        $i0 = $r4.<okio.Segment: int pos>;
+
+        $r4 = r0.<okio.Buffer: okio.Segment head>;
+
+        $i1 = $r4.<okio.Segment: int limit>;
+
+        $r4 = r0.<okio.Buffer: okio.Segment head>;
+
+        $i2 = $r4.<okio.Segment: int pos>;
+
+        $i1 = $i1 - $i2;
+
+     label03:
+        virtualinvoke $r3.<java.security.MessageDigest: void update(byte[],int,int)>($r5, $i0, $i1);
+
+     label04:
+        $r4 = r0.<okio.Buffer: okio.Segment head>;
+
+        $r4 = $r4.<okio.Segment: okio.Segment next>;
+
+     label05:
+        $r6 = r0.<okio.Buffer: okio.Segment head>;
+
+        if $r4 == $r6 goto label08;
+
+        $r5 = $r4.<okio.Segment: byte[] data>;
+
+        $i0 = $r4.<okio.Segment: int pos>;
+
+        $i1 = $r4.<okio.Segment: int limit>;
+
+        $i2 = $r4.<okio.Segment: int pos>;
+
+        $i1 = $i1 - $i2;
+
+     label06:
+        virtualinvoke $r3.<java.security.MessageDigest: void update(byte[],int,int)>($r5, $i0, $i1);
+
+     label07:
+        $r4 = $r4.<okio.Segment: okio.Segment next>;
+
+        goto label05;
+
+     label08:
+        $r5 = virtualinvoke $r3.<java.security.MessageDigest: byte[] digest()>();
+
+        $r7 = staticinvoke <okio.ByteString: okio.ByteString of(byte[])>($r5);
+
+     label09:
+        return $r7;
+
+     label10:
+        r2 := @caughtexception;
+
+        $r8 = new java.lang.AssertionError;
+
+        specialinvoke $r8.<java.lang.AssertionError: void <init>()>();
+
+        throw $r8;
+
+        catch java.security.NoSuchAlgorithmException from label01 to label02 with label10;
+        catch java.security.NoSuchAlgorithmException from label03 to label04 with label10;
+        catch java.security.NoSuchAlgorithmException from label06 to label07 with label10;
+        catch java.security.NoSuchAlgorithmException from label08 to label09 with label10;
+    }
+    private okio.ByteString hmac(java.lang.String, okio.ByteString)
+    {
+        okio.Buffer r0;
+        java.lang.String $r1;
+        okio.ByteString $r2;
+        javax.crypto.Mac $r3;
+        javax.crypto.spec.SecretKeySpec $r4;
+        byte[] $r5;
+        okio.Segment $r6, $r7;
+        int $i0, $i1, $i2;
+        java.security.NoSuchAlgorithmException r8;
+        java.lang.AssertionError $r9;
+        java.security.InvalidKeyException r10;
+        java.lang.IllegalArgumentException $r11;
+
+        r0 := @this: okio.Buffer;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: okio.ByteString;
+
+     label01:
+        $r3 = staticinvoke <javax.crypto.Mac: javax.crypto.Mac getInstance(java.lang.String)>($r1);
+
+     label02:
+        $r4 = new javax.crypto.spec.SecretKeySpec;
+
+     label03:
+        $r5 = virtualinvoke $r2.<okio.ByteString: byte[] toByteArray()>();
+
+        specialinvoke $r4.<javax.crypto.spec.SecretKeySpec: void <init>(byte[],java.lang.String)>($r5, $r1);
+
+        virtualinvoke $r3.<javax.crypto.Mac: void init(java.security.Key)>($r4);
+
+     label04:
+        $r6 = r0.<okio.Buffer: okio.Segment head>;
+
+        if $r6 == null goto label10;
+
+        $r6 = r0.<okio.Buffer: okio.Segment head>;
+
+        $r5 = $r6.<okio.Segment: byte[] data>;
+
+        $r6 = r0.<okio.Buffer: okio.Segment head>;
+
+        $i0 = $r6.<okio.Segment: int pos>;
+
+        $r6 = r0.<okio.Buffer: okio.Segment head>;
+
+        $i1 = $r6.<okio.Segment: int limit>;
+
+        $r6 = r0.<okio.Buffer: okio.Segment head>;
+
+        $i2 = $r6.<okio.Segment: int pos>;
+
+        $i1 = $i1 - $i2;
+
+     label05:
+        virtualinvoke $r3.<javax.crypto.Mac: void update(byte[],int,int)>($r5, $i0, $i1);
+
+     label06:
+        $r6 = r0.<okio.Buffer: okio.Segment head>;
+
+        $r6 = $r6.<okio.Segment: okio.Segment next>;
+
+     label07:
+        $r7 = r0.<okio.Buffer: okio.Segment head>;
+
+        if $r6 == $r7 goto label10;
+
+        $r5 = $r6.<okio.Segment: byte[] data>;
+
+        $i0 = $r6.<okio.Segment: int pos>;
+
+        $i1 = $r6.<okio.Segment: int limit>;
+
+        $i2 = $r6.<okio.Segment: int pos>;
+
+        $i1 = $i1 - $i2;
+
+     label08:
+        virtualinvoke $r3.<javax.crypto.Mac: void update(byte[],int,int)>($r5, $i0, $i1);
+
+     label09:
+        $r6 = $r6.<okio.Segment: okio.Segment next>;
+
+        goto label07;
+
+     label10:
+        $r5 = virtualinvoke $r3.<javax.crypto.Mac: byte[] doFinal()>();
+
+        $r2 = staticinvoke <okio.ByteString: okio.ByteString of(byte[])>($r5);
+
+     label11:
+        return $r2;
+
+     label12:
+        r8 := @caughtexception;
+
+        $r9 = new java.lang.AssertionError;
+
+        specialinvoke $r9.<java.lang.AssertionError: void <init>()>();
+
+        throw $r9;
+
+     label13:
+        r10 := @caughtexception;
+
+        $r11 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r11.<java.lang.IllegalArgumentException: void <init>(java.lang.Throwable)>(r10);
+
+        throw $r11;
+
+        catch java.security.NoSuchAlgorithmException from label01 to label02 with label12;
+        catch java.security.NoSuchAlgorithmException from label03 to label04 with label12;
+        catch java.security.NoSuchAlgorithmException from label05 to label06 with label12;
+        catch java.security.NoSuchAlgorithmException from label08 to label09 with label12;
+        catch java.security.NoSuchAlgorithmException from label10 to label11 with label12;
+        catch java.security.InvalidKeyException from label01 to label02 with label13;
+        catch java.security.InvalidKeyException from label03 to label04 with label13;
+        catch java.security.InvalidKeyException from label05 to label06 with label13;
+        catch java.security.InvalidKeyException from label08 to label09 with label13;
+        catch java.security.InvalidKeyException from label10 to label11 with label13;
+    }
+    private boolean rangeEquals(okio.Segment, int, okio.ByteString, int, int)
+    {
+        okio.Buffer r0;
+        okio.ByteString $r1;
+        int $i0, $i1, $i3, i4;
+        byte $b2, $b5;
+        okio.Segment $r2;
+        byte[] r3;
+
+        r0 := @this: okio.Buffer;
+
+        $r2 := @parameter0: okio.Segment;
+
+        $i3 := @parameter1: int;
+
+        $r1 := @parameter2: okio.ByteString;
+
+        $i0 := @parameter3: int;
+
+        $i1 := @parameter4: int;
+
+        i4 = $r2.<okio.Segment: int limit>;
+
+        r3 = $r2.<okio.Segment: byte[] data>;
+
+     label1:
+        if $i0 >= $i1 goto label4;
+
+        if $i3 != i4 goto label2;
+
+        $r2 = $r2.<okio.Segment: okio.Segment next>;
+
+        r3 = $r2.<okio.Segment: byte[] data>;
+
+        $i3 = $r2.<okio.Segment: int pos>;
+
+        i4 = $r2.<okio.Segment: int limit>;
+
+     label2:
+        $b5 = r3[$i3];
+
+        $b2 = virtualinvoke $r1.<okio.ByteString: byte getByte(int)>($i0);
+
+        if $b5 == $b2 goto label3;
+
+        return 0;
+
+     label3:
+        $i3 = $i3 + 1;
+
+        $i0 = $i0 + 1;
+
+        goto label1;
+
+     label4:
+        return 1;
+    }
+    private void readFrom(java.io.InputStream, long, boolean) throws java.io.IOException
+    {
+        okio.Buffer r0;
+        java.io.InputStream $r1;
+        boolean $z0;
+        int i0, $i3;
+        long $l1, $l2, $l4;
+        java.lang.IllegalArgumentException $r2;
+        byte $b5;
+        okio.Segment $r3;
+        byte[] $r4;
+        java.io.EOFException $r5;
+
+        r0 := @this: okio.Buffer;
+
+        $r1 := @parameter0: java.io.InputStream;
+
+        $l2 := @parameter1: long;
+
+        $z0 := @parameter2: boolean;
+
+        if $r1 != null goto label2;
+
+        $r2 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r2.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("in == null");
+
+        throw $r2;
+
+     label1:
+        $i3 = $r3.<okio.Segment: int limit>;
+
+        $i3 = $i3 + i0;
+
+        $r3.<okio.Segment: int limit> = $i3;
+
+        $l4 = r0.<okio.Buffer: long size>;
+
+        $l1 = (long) i0;
+
+        $l1 = $l4 + $l1;
+
+        r0.<okio.Buffer: long size> = $l1;
+
+        $l1 = (long) i0;
+
+        $l2 = $l2 - $l1;
+
+     label2:
+        $b5 = $l2 cmp 0L;
+
+        if $b5 > 0 goto label3;
+
+        if $z0 == 0 goto label5;
+
+     label3:
+        $r3 = virtualinvoke r0.<okio.Buffer: okio.Segment writableSegment(int)>(1);
+
+        i0 = $r3.<okio.Segment: int limit>;
+
+        i0 = 8192 - i0;
+
+        $l1 = (long) i0;
+
+        $l1 = staticinvoke <java.lang.Math: long min(long,long)>($l2, $l1);
+
+        i0 = (int) $l1;
+
+        $r4 = $r3.<okio.Segment: byte[] data>;
+
+        $i3 = $r3.<okio.Segment: int limit>;
+
+        i0 = virtualinvoke $r1.<java.io.InputStream: int read(byte[],int,int)>($r4, $i3, i0);
+
+        if i0 != -1 goto label1;
+
+        if $z0 == 0 goto label4;
+
+        return;
+
+     label4:
+        $r5 = new java.io.EOFException;
+
+        specialinvoke $r5.<java.io.EOFException: void <init>()>();
+
+        throw $r5;
+
+     label5:
+        return;
+    }
+    public okio.Buffer buffer()
+    {
+        okio.Buffer r0;
+
+        r0 := @this: okio.Buffer;
+
+        return r0;
+    }
+    public void clear()
+    {
+        okio.Buffer r0;
+        java.io.EOFException r1;
+        java.lang.AssertionError $r2;
+        long $l0;
+
+        r0 := @this: okio.Buffer;
+
+        $l0 = r0.<okio.Buffer: long size>;
+
+     label1:
+        virtualinvoke r0.<okio.Buffer: void skip(long)>($l0);
+
+     label2:
+        return;
+
+     label3:
+        r1 := @caughtexception;
+
+        $r2 = new java.lang.AssertionError;
+
+        specialinvoke $r2.<java.lang.AssertionError: void <init>(java.lang.Object)>(r1);
+
+        throw $r2;
+
+        catch java.io.EOFException from label1 to label2 with label3;
+    }
+    public volatile java.lang.Object clone() throws java.lang.CloneNotSupportedException
+    {
+        okio.Buffer r0;
+
+        r0 := @this: okio.Buffer;
+
+        r0 = virtualinvoke r0.<okio.Buffer: okio.Buffer clone()>();
+
+        return r0;
+    }
+    public okio.Buffer clone()
+    {
+        okio.Buffer r0, r1;
+        long $l0;
+        byte $b1;
+        okio.Segment $r2, $r3, $r4;
+
+        r0 := @this: okio.Buffer;
+
+        r1 = new okio.Buffer;
+
+        specialinvoke r1.<okio.Buffer: void <init>()>();
+
+        $l0 = r0.<okio.Buffer: long size>;
+
+        $b1 = $l0 cmp 0L;
+
+        if $b1 != 0 goto label1;
+
+        return r1;
+
+     label1:
+        $r2 = new okio.Segment;
+
+        $r3 = r0.<okio.Buffer: okio.Segment head>;
+
+        specialinvoke $r2.<okio.Segment: void <init>(okio.Segment)>($r3);
+
+        r1.<okio.Buffer: okio.Segment head> = $r2;
+
+        $r2 = r1.<okio.Buffer: okio.Segment head>;
+
+        $r3 = r1.<okio.Buffer: okio.Segment head>;
+
+        $r4 = r1.<okio.Buffer: okio.Segment head>;
+
+        $r3.<okio.Segment: okio.Segment prev> = $r4;
+
+        $r2.<okio.Segment: okio.Segment next> = $r4;
+
+        $r2 = r0.<okio.Buffer: okio.Segment head>;
+
+        $r2 = $r2.<okio.Segment: okio.Segment next>;
+
+     label2:
+        $r3 = r0.<okio.Buffer: okio.Segment head>;
+
+        if $r2 == $r3 goto label3;
+
+        $r3 = r1.<okio.Buffer: okio.Segment head>;
+
+        $r3 = $r3.<okio.Segment: okio.Segment prev>;
+
+        $r4 = new okio.Segment;
+
+        specialinvoke $r4.<okio.Segment: void <init>(okio.Segment)>($r2);
+
+        virtualinvoke $r3.<okio.Segment: okio.Segment push(okio.Segment)>($r4);
+
+        $r2 = $r2.<okio.Segment: okio.Segment next>;
+
+        goto label2;
+
+     label3:
+        $l0 = r0.<okio.Buffer: long size>;
+
+        r1.<okio.Buffer: long size> = $l0;
+
+        return r1;
+    }
+    public void close()
+    {
+        okio.Buffer r0;
+
+        r0 := @this: okio.Buffer;
+
+        return;
+    }
+    public long completeSegmentByteCount()
+    {
+        okio.Buffer r0;
+        okio.Segment r1;
+        long l0, $l4;
+        byte $b1;
+        int $i2, $i3;
+        boolean $z0;
+
+        r0 := @this: okio.Buffer;
+
+        l0 = r0.<okio.Buffer: long size>;
+
+        $b1 = l0 cmp 0L;
+
+        if $b1 != 0 goto label1;
+
+        return 0L;
+
+     label1:
+        r1 = r0.<okio.Buffer: okio.Segment head>;
+
+        r1 = r1.<okio.Segment: okio.Segment prev>;
+
+        $i2 = r1.<okio.Segment: int limit>;
+
+        if $i2 >= 8192 goto label2;
+
+        $z0 = r1.<okio.Segment: boolean owner>;
+
+        if $z0 == 0 goto label2;
+
+        $i2 = r1.<okio.Segment: int limit>;
+
+        $i3 = r1.<okio.Segment: int pos>;
+
+        $i2 = $i2 - $i3;
+
+        $l4 = (long) $i2;
+
+        l0 = l0 - $l4;
+
+     label2:
+        return l0;
+    }
+    public okio.Buffer copyTo(java.io.OutputStream) throws java.io.IOException
+    {
+        okio.Buffer r0;
+        java.io.OutputStream $r1;
+        long $l0;
+
+        r0 := @this: okio.Buffer;
+
+        $r1 := @parameter0: java.io.OutputStream;
+
+        $l0 = r0.<okio.Buffer: long size>;
+
+        r0 = virtualinvoke r0.<okio.Buffer: okio.Buffer copyTo(java.io.OutputStream,long,long)>($r1, 0L, $l0);
+
+        return r0;
+    }
+    public okio.Buffer copyTo(java.io.OutputStream, long, long) throws java.io.IOException
+    {
+        okio.Buffer r0;
+        java.io.OutputStream $r1;
+        int i0, i1;
+        long $l2, $l3, $l4;
+        java.lang.IllegalArgumentException $r2;
+        byte $b5;
+        okio.Segment r3;
+        byte[] $r4;
+
+        r0 := @this: okio.Buffer;
+
+        $r1 := @parameter0: java.io.OutputStream;
+
+        $l2 := @parameter1: long;
+
+        $l3 := @parameter2: long;
+
+        if $r1 != null goto label1;
+
+        $r2 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r2.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("out == null");
+
+        throw $r2;
+
+     label1:
+        $l4 = r0.<okio.Buffer: long size>;
+
+        staticinvoke <okio.Util: void checkOffsetAndCount(long,long,long)>($l4, $l2, $l3);
+
+        $b5 = $l3 cmp 0L;
+
+        if $b5 != 0 goto label2;
+
+        return r0;
+
+     label2:
+        r3 = r0.<okio.Buffer: okio.Segment head>;
+
+     label3:
+        i0 = r3.<okio.Segment: int limit>;
+
+        i1 = r3.<okio.Segment: int pos>;
+
+        i0 = i0 - i1;
+
+        $l4 = (long) i0;
+
+        $b5 = $l2 cmp $l4;
+
+        if $b5 < 0 goto label4;
+
+        i0 = r3.<okio.Segment: int limit>;
+
+        i1 = r3.<okio.Segment: int pos>;
+
+        i0 = i0 - i1;
+
+        $l4 = (long) i0;
+
+        $l2 = $l2 - $l4;
+
+        r3 = r3.<okio.Segment: okio.Segment next>;
+
+        goto label3;
+
+     label4:
+        $b5 = $l3 cmp 0L;
+
+        if $b5 <= 0 goto label5;
+
+        i0 = r3.<okio.Segment: int pos>;
+
+        $l4 = (long) i0;
+
+        $l2 = $l4 + $l2;
+
+        i0 = (int) $l2;
+
+        i1 = r3.<okio.Segment: int limit>;
+
+        i1 = i1 - i0;
+
+        $l2 = (long) i1;
+
+        $l2 = staticinvoke <java.lang.Math: long min(long,long)>($l2, $l3);
+
+        i1 = (int) $l2;
+
+        $r4 = r3.<okio.Segment: byte[] data>;
+
+        virtualinvoke $r1.<java.io.OutputStream: void write(byte[],int,int)>($r4, i0, i1);
+
+        $l2 = (long) i1;
+
+        $l3 = $l3 - $l2;
+
+        $l2 = 0L;
+
+        r3 = r3.<okio.Segment: okio.Segment next>;
+
+        goto label4;
+
+     label5:
+        return r0;
+    }
+    public okio.Buffer copyTo(okio.Buffer, long, long)
+    {
+        okio.Buffer r0, $r1;
+        okio.Segment r2, r4, $r5;
+        int $i0, $i5;
+        long $l1, $l2, $l3;
+        java.lang.IllegalArgumentException $r3;
+        byte $b4;
+
+        r0 := @this: okio.Buffer;
+
+        $r1 := @parameter0: okio.Buffer;
+
+        $l1 := @parameter1: long;
+
+        $l2 := @parameter2: long;
+
+        if $r1 != null goto label1;
+
+        $r3 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r3.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("out == null");
+
+        throw $r3;
+
+     label1:
+        $l3 = r0.<okio.Buffer: long size>;
+
+        staticinvoke <okio.Util: void checkOffsetAndCount(long,long,long)>($l3, $l1, $l2);
+
+        $b4 = $l2 cmp 0L;
+
+        if $b4 != 0 goto label2;
+
+        return r0;
+
+     label2:
+        $l3 = $r1.<okio.Buffer: long size>;
+
+        $l3 = $l3 + $l2;
+
+        $r1.<okio.Buffer: long size> = $l3;
+
+        r4 = r0.<okio.Buffer: okio.Segment head>;
+
+     label3:
+        $i0 = r4.<okio.Segment: int limit>;
+
+        $i5 = r4.<okio.Segment: int pos>;
+
+        $i0 = $i0 - $i5;
+
+        $l3 = (long) $i0;
+
+        $b4 = $l1 cmp $l3;
+
+        if $b4 < 0 goto label4;
+
+        $i0 = r4.<okio.Segment: int limit>;
+
+        $i5 = r4.<okio.Segment: int pos>;
+
+        $i0 = $i0 - $i5;
+
+        $l3 = (long) $i0;
+
+        $l1 = $l1 - $l3;
+
+        r4 = r4.<okio.Segment: okio.Segment next>;
+
+        goto label3;
+
+     label4:
+        $b4 = $l2 cmp 0L;
+
+        if $b4 <= 0 goto label7;
+
+        r2 = new okio.Segment;
+
+        specialinvoke r2.<okio.Segment: void <init>(okio.Segment)>(r4);
+
+        $i0 = r2.<okio.Segment: int pos>;
+
+        $l3 = (long) $i0;
+
+        $l1 = $l3 + $l1;
+
+        $i0 = (int) $l1;
+
+        r2.<okio.Segment: int pos> = $i0;
+
+        $i0 = r2.<okio.Segment: int pos>;
+
+        $i5 = (int) $l2;
+
+        $i0 = $i0 + $i5;
+
+        $i5 = r2.<okio.Segment: int limit>;
+
+        $i0 = staticinvoke <java.lang.Math: int min(int,int)>($i0, $i5);
+
+        r2.<okio.Segment: int limit> = $i0;
+
+        $r5 = $r1.<okio.Buffer: okio.Segment head>;
+
+        if $r5 != null goto label6;
+
+        r2.<okio.Segment: okio.Segment prev> = r2;
+
+        r2.<okio.Segment: okio.Segment next> = r2;
+
+        $r1.<okio.Buffer: okio.Segment head> = r2;
+
+     label5:
+        $i0 = r2.<okio.Segment: int limit>;
+
+        $i5 = r2.<okio.Segment: int pos>;
+
+        $i0 = $i0 - $i5;
+
+        $l1 = (long) $i0;
+
+        $l2 = $l2 - $l1;
+
+        $l1 = 0L;
+
+        r4 = r4.<okio.Segment: okio.Segment next>;
+
+        goto label4;
+
+     label6:
+        $r5 = $r1.<okio.Buffer: okio.Segment head>;
+
+        $r5 = $r5.<okio.Segment: okio.Segment prev>;
+
+        virtualinvoke $r5.<okio.Segment: okio.Segment push(okio.Segment)>(r2);
+
+        goto label5;
+
+     label7:
+        return r0;
+    }
+    public okio.BufferedSink emit()
+    {
+        okio.Buffer r0;
+
+        r0 := @this: okio.Buffer;
+
+        return r0;
+    }
+    public okio.Buffer emitCompleteSegments()
+    {
+        okio.Buffer r0;
+
+        r0 := @this: okio.Buffer;
+
+        return r0;
+    }
+    public volatile okio.BufferedSink emitCompleteSegments() throws java.io.IOException
+    {
+        okio.Buffer r0;
+
+        r0 := @this: okio.Buffer;
+
+        r0 = virtualinvoke r0.<okio.Buffer: okio.Buffer emitCompleteSegments()>();
+
+        return r0;
+    }
+    public boolean equals(java.lang.Object)
+    {
+        okio.Buffer r0, r2;
+        java.lang.Object $r1;
+        long l0, $l2, $l7;
+        int $i1, i4, i5, $i6;
+        boolean $z0;
+        byte $b3, $b8;
+        okio.Segment r3, r4;
+        byte[] $r5;
+
+        r0 := @this: okio.Buffer;
+
+        $r1 := @parameter0: java.lang.Object;
+
+        if r0 != $r1 goto label01;
+
+        return 1;
+
+     label01:
+        $z0 = $r1 instanceof okio.Buffer;
+
+        if $z0 != 0 goto label02;
+
+        return 0;
+
+     label02:
+        r2 = (okio.Buffer) $r1;
+
+        $l2 = r0.<okio.Buffer: long size>;
+
+        l0 = r2.<okio.Buffer: long size>;
+
+        $b3 = $l2 cmp l0;
+
+        if $b3 == 0 goto label03;
+
+        return 0;
+
+     label03:
+        $l2 = r0.<okio.Buffer: long size>;
+
+        $b3 = $l2 cmp 0L;
+
+        if $b3 != 0 goto label04;
+
+        return 1;
+
+     label04:
+        r3 = r0.<okio.Buffer: okio.Segment head>;
+
+        r4 = r2.<okio.Buffer: okio.Segment head>;
+
+        i4 = r3.<okio.Segment: int pos>;
+
+        i5 = r4.<okio.Segment: int pos>;
+
+        $l2 = 0L;
+
+     label05:
+        l0 = r0.<okio.Buffer: long size>;
+
+        $b3 = $l2 cmp l0;
+
+        if $b3 >= 0 goto label11;
+
+        $i1 = r3.<okio.Segment: int limit>;
+
+        $i1 = $i1 - i4;
+
+        $i6 = r4.<okio.Segment: int limit>;
+
+        $i6 = $i6 - i5;
+
+        $i1 = staticinvoke <java.lang.Math: int min(int,int)>($i1, $i6);
+
+        l0 = (long) $i1;
+
+        $i1 = 0;
+
+     label06:
+        $l7 = (long) $i1;
+
+        $b3 = $l7 cmp l0;
+
+        if $b3 >= 0 goto label08;
+
+        $r5 = r3.<okio.Segment: byte[] data>;
+
+        $b3 = $r5[i4];
+
+        $r5 = r4.<okio.Segment: byte[] data>;
+
+        $b8 = $r5[i5];
+
+        if $b3 == $b8 goto label07;
+
+        return 0;
+
+     label07:
+        $i1 = $i1 + 1;
+
+        i5 = i5 + 1;
+
+        i4 = i4 + 1;
+
+        goto label06;
+
+     label08:
+        $i1 = r3.<okio.Segment: int limit>;
+
+        if i4 != $i1 goto label13;
+
+        r3 = r3.<okio.Segment: okio.Segment next>;
+
+        i4 = r3.<okio.Segment: int pos>;
+
+     label09:
+        $i1 = r4.<okio.Segment: int limit>;
+
+        if i5 != $i1 goto label12;
+
+        r4 = r4.<okio.Segment: okio.Segment next>;
+
+        i5 = r4.<okio.Segment: int pos>;
+
+     label10:
+        $l2 = $l2 + l0;
+
+        goto label05;
+
+     label11:
+        return 1;
+
+     label12:
+        goto label10;
+
+     label13:
+        goto label09;
+    }
+    public boolean exhausted()
+    {
+        okio.Buffer r0;
+        long $l0;
+        byte $b1;
+
+        r0 := @this: okio.Buffer;
+
+        $l0 = r0.<okio.Buffer: long size>;
+
+        $b1 = $l0 cmp 0L;
+
+        if $b1 != 0 goto label1;
+
+        return 1;
+
+     label1:
+        return 0;
+    }
+    public void flush()
+    {
+        okio.Buffer r0;
+
+        r0 := @this: okio.Buffer;
+
+        return;
+    }
+    public byte getByte(long)
+    {
+        okio.Buffer r0;
+        int i0, $i3;
+        long $l1, $l2;
+        okio.Segment r1;
+        byte $b4;
+        byte[] $r2;
+
+        r0 := @this: okio.Buffer;
+
+        $l1 := @parameter0: long;
+
+        $l2 = r0.<okio.Buffer: long size>;
+
+        staticinvoke <okio.Util: void checkOffsetAndCount(long,long,long)>($l2, $l1, 1L);
+
+        r1 = r0.<okio.Buffer: okio.Segment head>;
+
+     label1:
+        i0 = r1.<okio.Segment: int limit>;
+
+        $i3 = r1.<okio.Segment: int pos>;
+
+        i0 = i0 - $i3;
+
+        $l2 = (long) i0;
+
+        $b4 = $l1 cmp $l2;
+
+        if $b4 >= 0 goto label2;
+
+        $r2 = r1.<okio.Segment: byte[] data>;
+
+        i0 = r1.<okio.Segment: int pos>;
+
+        $i3 = (int) $l1;
+
+        i0 = i0 + $i3;
+
+        $b4 = $r2[i0];
+
+        return $b4;
+
+     label2:
+        $l2 = (long) i0;
+
+        $l1 = $l1 - $l2;
+
+        r1 = r1.<okio.Segment: okio.Segment next>;
+
+        goto label1;
+    }
+    public int hashCode()
+    {
+        okio.Buffer r0;
+        int i0, i1, i2;
+        okio.Segment r1, $r3;
+        byte[] $r2;
+        byte $b3;
+
+        r0 := @this: okio.Buffer;
+
+        r1 = r0.<okio.Buffer: okio.Segment head>;
+
+        if r1 != null goto label1;
+
+        return 0;
+
+     label1:
+        i1 = 1;
+
+     label2:
+        i2 = r1.<okio.Segment: int pos>;
+
+        i0 = r1.<okio.Segment: int limit>;
+
+     label3:
+        if i2 >= i0 goto label4;
+
+        i1 = i1 * 31;
+
+        $r2 = r1.<okio.Segment: byte[] data>;
+
+        $b3 = $r2[i2];
+
+        i1 = i1 + $b3;
+
+        i2 = i2 + 1;
+
+        goto label3;
+
+     label4:
+        r1 = r1.<okio.Segment: okio.Segment next>;
+
+        $r3 = r0.<okio.Buffer: okio.Segment head>;
+
+        if r1 != $r3 goto label2;
+
+        return i1;
+    }
+    public okio.ByteString hmacSha1(okio.ByteString)
+    {
+        okio.Buffer r0;
+        okio.ByteString $r1;
+
+        r0 := @this: okio.Buffer;
+
+        $r1 := @parameter0: okio.ByteString;
+
+        $r1 = specialinvoke r0.<okio.Buffer: okio.ByteString hmac(java.lang.String,okio.ByteString)>("HmacSHA1", $r1);
+
+        return $r1;
+    }
+    public okio.ByteString hmacSha256(okio.ByteString)
+    {
+        okio.Buffer r0;
+        okio.ByteString $r1;
+
+        r0 := @this: okio.Buffer;
+
+        $r1 := @parameter0: okio.ByteString;
+
+        $r1 = specialinvoke r0.<okio.Buffer: okio.ByteString hmac(java.lang.String,okio.ByteString)>("HmacSHA256", $r1);
+
+        return $r1;
+    }
+    public long indexOf(byte)
+    {
+        okio.Buffer r0;
+        byte $b0;
+        long $l1;
+
+        r0 := @this: okio.Buffer;
+
+        $b0 := @parameter0: byte;
+
+        $l1 = virtualinvoke r0.<okio.Buffer: long indexOf(byte,long)>($b0, 0L);
+
+        return $l1;
+    }
+    public long indexOf(byte, long)
+    {
+        okio.Buffer r0;
+        byte $b0, $b4;
+        byte[] r1;
+        int i1, $i6;
+        long l2, $l3, $l5;
+        java.lang.IllegalArgumentException $r2;
+        okio.Segment r3;
+
+        r0 := @this: okio.Buffer;
+
+        $b0 := @parameter0: byte;
+
+        $l3 := @parameter1: long;
+
+        $b4 = $l3 cmp 0L;
+
+        if $b4 >= 0 goto label01;
+
+        $r2 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r2.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("fromIndex < 0");
+
+        throw $r2;
+
+     label01:
+        r3 = r0.<okio.Buffer: okio.Segment head>;
+
+        if r3 != null goto label02;
+
+        return -1L;
+
+     label02:
+        $l5 = r0.<okio.Buffer: long size>;
+
+        $l5 = $l5 - $l3;
+
+        $b4 = $l5 cmp $l3;
+
+        if $b4 >= 0 goto label04;
+
+        $l5 = r0.<okio.Buffer: long size>;
+
+     label03:
+        $b4 = $l5 cmp $l3;
+
+        if $b4 <= 0 goto label07;
+
+        r3 = r3.<okio.Segment: okio.Segment prev>;
+
+        $i6 = r3.<okio.Segment: int limit>;
+
+        i1 = r3.<okio.Segment: int pos>;
+
+        $i6 = $i6 - i1;
+
+        l2 = (long) $i6;
+
+        $l5 = $l5 - l2;
+
+        goto label03;
+
+     label04:
+        $l5 = 0L;
+
+     label05:
+        $i6 = r3.<okio.Segment: int limit>;
+
+        i1 = r3.<okio.Segment: int pos>;
+
+        $i6 = $i6 - i1;
+
+        l2 = (long) $i6;
+
+        l2 = $l5 + l2;
+
+        $b4 = l2 cmp $l3;
+
+        if $b4 >= 0 goto label07;
+
+        r3 = r3.<okio.Segment: okio.Segment next>;
+
+        $l5 = l2;
+
+        goto label05;
+
+     label06:
+        $i6 = r3.<okio.Segment: int limit>;
+
+        i1 = r3.<okio.Segment: int pos>;
+
+        $i6 = $i6 - i1;
+
+        $l3 = (long) $i6;
+
+        $l5 = $l5 + $l3;
+
+        $l3 = $l5;
+
+        r3 = r3.<okio.Segment: okio.Segment next>;
+
+     label07:
+        l2 = r0.<okio.Buffer: long size>;
+
+        $b4 = $l5 cmp l2;
+
+        if $b4 >= 0 goto label10;
+
+        r1 = r3.<okio.Segment: byte[] data>;
+
+        $i6 = r3.<okio.Segment: int pos>;
+
+        l2 = (long) $i6;
+
+        $l3 = l2 + $l3;
+
+        $l3 = $l3 - $l5;
+
+        $i6 = (int) $l3;
+
+        i1 = r3.<okio.Segment: int limit>;
+
+     label08:
+        if $i6 >= i1 goto label06;
+
+        $b4 = r1[$i6];
+
+        if $b4 != $b0 goto label09;
+
+        i1 = r3.<okio.Segment: int pos>;
+
+        $i6 = $i6 - i1;
+
+        $l3 = (long) $i6;
+
+        $l3 = $l3 + $l5;
+
+        return $l3;
+
+     label09:
+        $i6 = $i6 + 1;
+
+        goto label08;
+
+     label10:
+        return -1L;
+    }
+    public long indexOf(okio.ByteString) throws java.io.IOException
+    {
+        okio.Buffer r0;
+        okio.ByteString $r1;
+        long $l0;
+
+        r0 := @this: okio.Buffer;
+
+        $r1 := @parameter0: okio.ByteString;
+
+        $l0 = virtualinvoke r0.<okio.Buffer: long indexOf(okio.ByteString,long)>($r1, 0L);
+
+        return $l0;
+    }
+    public long indexOf(okio.ByteString, long) throws java.io.IOException
+    {
+        okio.Buffer r0;
+        okio.ByteString $r1;
+        byte[] r2;
+        long l0, $l2, $l5, $l6, $l8;
+        int i1, $i3, $i9, $i10;
+        java.lang.IllegalArgumentException $r3;
+        byte $b4, $b7;
+        okio.Segment r4;
+        boolean $z0;
+
+        r0 := @this: okio.Buffer;
+
+        $r1 := @parameter0: okio.ByteString;
+
+        $l2 := @parameter1: long;
+
+        $i3 = virtualinvoke $r1.<okio.ByteString: int size()>();
+
+        if $i3 != 0 goto label01;
+
+        $r3 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r3.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("bytes is empty");
+
+        throw $r3;
+
+     label01:
+        $b4 = $l2 cmp 0L;
+
+        if $b4 >= 0 goto label02;
+
+        $r3 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r3.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("fromIndex < 0");
+
+        throw $r3;
+
+     label02:
+        r4 = r0.<okio.Buffer: okio.Segment head>;
+
+        if r4 != null goto label03;
+
+        return -1L;
+
+     label03:
+        $l5 = r0.<okio.Buffer: long size>;
+
+        $l5 = $l5 - $l2;
+
+        $b4 = $l5 cmp $l2;
+
+        if $b4 >= 0 goto label05;
+
+        $l5 = r0.<okio.Buffer: long size>;
+
+     label04:
+        $b4 = $l5 cmp $l2;
+
+        if $b4 <= 0 goto label07;
+
+        r4 = r4.<okio.Segment: okio.Segment prev>;
+
+        $i3 = r4.<okio.Segment: int limit>;
+
+        i1 = r4.<okio.Segment: int pos>;
+
+        $i3 = $i3 - i1;
+
+        l0 = (long) $i3;
+
+        $l5 = $l5 - l0;
+
+        goto label04;
+
+     label05:
+        $l5 = 0L;
+
+     label06:
+        $i3 = r4.<okio.Segment: int limit>;
+
+        i1 = r4.<okio.Segment: int pos>;
+
+        $i3 = $i3 - i1;
+
+        l0 = (long) $i3;
+
+        l0 = $l5 + l0;
+
+        $b4 = l0 cmp $l2;
+
+        if $b4 >= 0 goto label07;
+
+        r4 = r4.<okio.Segment: okio.Segment next>;
+
+        $l5 = l0;
+
+        goto label06;
+
+     label07:
+        $b4 = virtualinvoke $r1.<okio.ByteString: byte getByte(int)>(0);
+
+        $i3 = virtualinvoke $r1.<okio.ByteString: int size()>();
+
+        l0 = r0.<okio.Buffer: long size>;
+
+        $l6 = (long) $i3;
+
+        l0 = l0 - $l6;
+
+        l0 = l0 + 1L;
+
+     label08:
+        $b7 = $l5 cmp l0;
+
+        if $b7 >= 0 goto label12;
+
+        r2 = r4.<okio.Segment: byte[] data>;
+
+        i1 = r4.<okio.Segment: int limit>;
+
+        $l6 = (long) i1;
+
+        i1 = r4.<okio.Segment: int pos>;
+
+        $l8 = (long) i1;
+
+        $l8 = $l8 + l0;
+
+        $l8 = $l8 - $l5;
+
+        $l6 = staticinvoke <java.lang.Math: long min(long,long)>($l6, $l8);
+
+        i1 = (int) $l6;
+
+        $i9 = r4.<okio.Segment: int pos>;
+
+        $l6 = (long) $i9;
+
+        $l2 = $l6 + $l2;
+
+        $l2 = $l2 - $l5;
+
+        $i9 = (int) $l2;
+
+     label09:
+        if $i9 >= i1 goto label11;
+
+        $b7 = r2[$i9];
+
+        if $b7 != $b4 goto label10;
+
+        $i10 = $i9 + 1;
+
+        $z0 = specialinvoke r0.<okio.Buffer: boolean rangeEquals(okio.Segment,int,okio.ByteString,int,int)>(r4, $i10, $r1, 1, $i3);
+
+        if $z0 == 0 goto label10;
+
+        $i3 = r4.<okio.Segment: int pos>;
+
+        $i3 = $i9 - $i3;
+
+        $l2 = (long) $i3;
+
+        $l2 = $l2 + $l5;
+
+        return $l2;
+
+     label10:
+        $i9 = $i9 + 1;
+
+        goto label09;
+
+     label11:
+        i1 = r4.<okio.Segment: int limit>;
+
+        $i9 = r4.<okio.Segment: int pos>;
+
+        i1 = i1 - $i9;
+
+        $l2 = (long) i1;
+
+        $l5 = $l5 + $l2;
+
+        $l2 = $l5;
+
+        r4 = r4.<okio.Segment: okio.Segment next>;
+
+        goto label08;
+
+     label12:
+        return -1L;
+    }
+    public long indexOfElement(okio.ByteString)
+    {
+        okio.Buffer r0;
+        okio.ByteString $r1;
+        long $l0;
+
+        r0 := @this: okio.Buffer;
+
+        $r1 := @parameter0: okio.ByteString;
+
+        $l0 = virtualinvoke r0.<okio.Buffer: long indexOfElement(okio.ByteString,long)>($r1, 0L);
+
+        return $l0;
+    }
+    public long indexOfElement(okio.ByteString, long)
+    {
+        okio.Buffer r0;
+        okio.ByteString $r1;
+        long l0, $l2, $l3;
+        byte b1, $b6, $b7;
+        java.lang.IllegalArgumentException $r2;
+        okio.Segment r3;
+        int $i4, $i5, $i8, $i9;
+        byte[] r4, r5;
+
+        r0 := @this: okio.Buffer;
+
+        $r1 := @parameter0: okio.ByteString;
+
+        $l2 := @parameter1: long;
+
+        b1 = $l2 cmp 0L;
+
+        if b1 >= 0 goto label01;
+
+        $r2 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r2.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("fromIndex < 0");
+
+        throw $r2;
+
+     label01:
+        r3 = r0.<okio.Buffer: okio.Segment head>;
+
+        if r3 != null goto label02;
+
+        return -1L;
+
+     label02:
+        $l3 = r0.<okio.Buffer: long size>;
+
+        $l3 = $l3 - $l2;
+
+        b1 = $l3 cmp $l2;
+
+        if b1 >= 0 goto label04;
+
+        $l3 = r0.<okio.Buffer: long size>;
+
+     label03:
+        b1 = $l3 cmp $l2;
+
+        if b1 <= 0 goto label06;
+
+        r3 = r3.<okio.Segment: okio.Segment prev>;
+
+        $i4 = r3.<okio.Segment: int limit>;
+
+        $i5 = r3.<okio.Segment: int pos>;
+
+        $i4 = $i4 - $i5;
+
+        l0 = (long) $i4;
+
+        $l3 = $l3 - l0;
+
+        goto label03;
+
+     label04:
+        $l3 = 0L;
+
+     label05:
+        $i4 = r3.<okio.Segment: int limit>;
+
+        $i5 = r3.<okio.Segment: int pos>;
+
+        $i4 = $i4 - $i5;
+
+        l0 = (long) $i4;
+
+        l0 = $l3 + l0;
+
+        b1 = l0 cmp $l2;
+
+        if b1 >= 0 goto label06;
+
+        r3 = r3.<okio.Segment: okio.Segment next>;
+
+        $l3 = l0;
+
+        goto label05;
+
+     label06:
+        $i4 = virtualinvoke $r1.<okio.ByteString: int size()>();
+
+        if $i4 != 2 goto label12;
+
+        b1 = virtualinvoke $r1.<okio.ByteString: byte getByte(int)>(0);
+
+        $b6 = virtualinvoke $r1.<okio.ByteString: byte getByte(int)>(1);
+
+     label07:
+        l0 = r0.<okio.Buffer: long size>;
+
+        $b7 = $l3 cmp l0;
+
+        if $b7 >= 0 goto label19;
+
+        r4 = r3.<okio.Segment: byte[] data>;
+
+        $i4 = r3.<okio.Segment: int pos>;
+
+        l0 = (long) $i4;
+
+        $l2 = l0 + $l2;
+
+        $l2 = $l2 - $l3;
+
+        $i4 = (int) $l2;
+
+        $i5 = r3.<okio.Segment: int limit>;
+
+     label08:
+        if $i4 >= $i5 goto label11;
+
+        $b7 = r4[$i4];
+
+        if $b7 == b1 goto label09;
+
+        if $b7 != $b6 goto label10;
+
+     label09:
+        $i5 = r3.<okio.Segment: int pos>;
+
+        $i4 = $i4 - $i5;
+
+        $l2 = (long) $i4;
+
+        $l2 = $l2 + $l3;
+
+        return $l2;
+
+     label10:
+        $i4 = $i4 + 1;
+
+        goto label08;
+
+     label11:
+        $i4 = r3.<okio.Segment: int limit>;
+
+        $i5 = r3.<okio.Segment: int pos>;
+
+        $i4 = $i4 - $i5;
+
+        $l2 = (long) $i4;
+
+        $l3 = $l3 + $l2;
+
+        $l2 = $l3;
+
+        r3 = r3.<okio.Segment: okio.Segment next>;
+
+        goto label07;
+
+     label12:
+        r4 = virtualinvoke $r1.<okio.ByteString: byte[] internalArray()>();
+
+     label13:
+        l0 = r0.<okio.Buffer: long size>;
+
+        b1 = $l3 cmp l0;
+
+        if b1 >= 0 goto label19;
+
+        r5 = r3.<okio.Segment: byte[] data>;
+
+        $i4 = r3.<okio.Segment: int pos>;
+
+        l0 = (long) $i4;
+
+        $l2 = l0 + $l2;
+
+        $l2 = $l2 - $l3;
+
+        $i4 = (int) $l2;
+
+        $i5 = r3.<okio.Segment: int limit>;
+
+     label14:
+        if $i4 >= $i5 goto label18;
+
+        $b6 = r5[$i4];
+
+        $i8 = lengthof r4;
+
+        $i9 = 0;
+
+     label15:
+        if $i9 >= $i8 goto label17;
+
+        b1 = r4[$i9];
+
+        if $b6 != b1 goto label16;
+
+        $i5 = r3.<okio.Segment: int pos>;
+
+        $i4 = $i4 - $i5;
+
+        $l2 = (long) $i4;
+
+        $l2 = $l2 + $l3;
+
+        return $l2;
+
+     label16:
+        $i9 = $i9 + 1;
+
+        goto label15;
+
+     label17:
+        $i4 = $i4 + 1;
+
+        goto label14;
+
+     label18:
+        $i4 = r3.<okio.Segment: int limit>;
+
+        $i5 = r3.<okio.Segment: int pos>;
+
+        $i4 = $i4 - $i5;
+
+        $l2 = (long) $i4;
+
+        $l3 = $l3 + $l2;
+
+        $l2 = $l3;
+
+        r3 = r3.<okio.Segment: okio.Segment next>;
+
+        goto label13;
+
+     label19:
+        return -1L;
+    }
+    public java.io.InputStream inputStream()
+    {
+        okio.Buffer r0;
+        okio.Buffer$2 $r1;
+
+        r0 := @this: okio.Buffer;
+
+        $r1 = new okio.Buffer$2;
+
+        specialinvoke $r1.<okio.Buffer$2: void <init>(okio.Buffer)>(r0);
+
+        return $r1;
+    }
+    public okio.ByteString md5()
+    {
+        okio.Buffer r0;
+        okio.ByteString $r1;
+
+        r0 := @this: okio.Buffer;
+
+        $r1 = specialinvoke r0.<okio.Buffer: okio.ByteString digest(java.lang.String)>("MD5");
+
+        return $r1;
+    }
+    public java.io.OutputStream outputStream()
+    {
+        okio.Buffer r0;
+        okio.Buffer$1 $r1;
+
+        r0 := @this: okio.Buffer;
+
+        $r1 = new okio.Buffer$1;
+
+        specialinvoke $r1.<okio.Buffer$1: void <init>(okio.Buffer)>(r0);
+
+        return $r1;
+    }
+    public boolean rangeEquals(long, okio.ByteString)
+    {
+        okio.Buffer r0;
+        long $l0;
+        okio.ByteString $r1;
+        int $i1;
+        boolean $z0;
+
+        r0 := @this: okio.Buffer;
+
+        $l0 := @parameter0: long;
+
+        $r1 := @parameter1: okio.ByteString;
+
+        $i1 = virtualinvoke $r1.<okio.ByteString: int size()>();
+
+        $z0 = virtualinvoke r0.<okio.Buffer: boolean rangeEquals(long,okio.ByteString,int,int)>($l0, $r1, 0, $i1);
+
+        return $z0;
+    }
+    public boolean rangeEquals(long, okio.ByteString, int, int)
+    {
+        okio.Buffer r0;
+        long $l0, $l3, $l5;
+        okio.ByteString $r1;
+        int $i1, $i2, $i6, $i7;
+        byte $b4, $b8;
+
+        r0 := @this: okio.Buffer;
+
+        $l0 := @parameter0: long;
+
+        $r1 := @parameter1: okio.ByteString;
+
+        $i1 := @parameter2: int;
+
+        $i2 := @parameter3: int;
+
+        $b4 = $l0 cmp 0L;
+
+        if $b4 < 0 goto label4;
+
+        if $i1 < 0 goto label4;
+
+        if $i2 < 0 goto label4;
+
+        $l3 = r0.<okio.Buffer: long size>;
+
+        $l5 = $l3 - $l0;
+
+        $l3 = (long) $i2;
+
+        $b4 = $l5 cmp $l3;
+
+        if $b4 < 0 goto label4;
+
+        $i6 = virtualinvoke $r1.<okio.ByteString: int size()>();
+
+        $i6 = $i6 - $i1;
+
+        if $i6 >= $i2 goto label1;
+
+        return 0;
+
+     label1:
+        $i6 = 0;
+
+     label2:
+        if $i6 >= $i2 goto label3;
+
+        $l3 = (long) $i6;
+
+        $l3 = $l3 + $l0;
+
+        $b4 = virtualinvoke r0.<okio.Buffer: byte getByte(long)>($l3);
+
+        $i7 = $i1 + $i6;
+
+        $b8 = virtualinvoke $r1.<okio.ByteString: byte getByte(int)>($i7);
+
+        if $b4 != $b8 goto label4;
+
+        $i6 = $i6 + 1;
+
+        goto label2;
+
+     label3:
+        return 1;
+
+     label4:
+        return 0;
+    }
+    public int read(byte[])
+    {
+        okio.Buffer r0;
+        byte[] $r1;
+        int $i0;
+
+        r0 := @this: okio.Buffer;
+
+        $r1 := @parameter0: byte[];
+
+        $i0 = lengthof $r1;
+
+        $i0 = virtualinvoke r0.<okio.Buffer: int read(byte[],int,int)>($r1, 0, $i0);
+
+        return $i0;
+    }
+    public int read(byte[], int, int)
+    {
+        okio.Buffer r0;
+        byte[] $r1, $r3;
+        int $i0, $i1, $i3, $i6;
+        long $l2, $l4, $l5;
+        okio.Segment r2, $r4;
+
+        r0 := @this: okio.Buffer;
+
+        $r1 := @parameter0: byte[];
+
+        $i0 := @parameter1: int;
+
+        $i1 := @parameter2: int;
+
+        $i3 = lengthof $r1;
+
+        $l4 = (long) $i3;
+
+        $l5 = (long) $i0;
+
+        $l2 = (long) $i1;
+
+        staticinvoke <okio.Util: void checkOffsetAndCount(long,long,long)>($l4, $l5, $l2);
+
+        r2 = r0.<okio.Buffer: okio.Segment head>;
+
+        if r2 != null goto label1;
+
+        return -1;
+
+     label1:
+        $i3 = r2.<okio.Segment: int limit>;
+
+        $i6 = r2.<okio.Segment: int pos>;
+
+        $i3 = $i3 - $i6;
+
+        $i1 = staticinvoke <java.lang.Math: int min(int,int)>($i1, $i3);
+
+        $r3 = r2.<okio.Segment: byte[] data>;
+
+        $i3 = r2.<okio.Segment: int pos>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r3, $i3, $r1, $i0, $i1);
+
+        $i0 = r2.<okio.Segment: int pos>;
+
+        $i0 = $i0 + $i1;
+
+        r2.<okio.Segment: int pos> = $i0;
+
+        $l2 = r0.<okio.Buffer: long size>;
+
+        $l4 = (long) $i1;
+
+        $l2 = $l2 - $l4;
+
+        r0.<okio.Buffer: long size> = $l2;
+
+        $i0 = r2.<okio.Segment: int pos>;
+
+        $i3 = r2.<okio.Segment: int limit>;
+
+        if $i0 != $i3 goto label2;
+
+        $r4 = virtualinvoke r2.<okio.Segment: okio.Segment pop()>();
+
+        r0.<okio.Buffer: okio.Segment head> = $r4;
+
+        staticinvoke <okio.SegmentPool: void recycle(okio.Segment)>(r2);
+
+     label2:
+        return $i1;
+    }
+    public long read(okio.Buffer, long)
+    {
+        okio.Buffer r0, $r1;
+        long $l0, $l2;
+        java.lang.IllegalArgumentException $r2;
+        byte $b1;
+        java.lang.StringBuilder $r3;
+        java.lang.String $r4;
+
+        r0 := @this: okio.Buffer;
+
+        $r1 := @parameter0: okio.Buffer;
+
+        $l0 := @parameter1: long;
+
+        if $r1 != null goto label1;
+
+        $r2 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r2.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("sink == null");
+
+        throw $r2;
+
+     label1:
+        $b1 = $l0 cmp 0L;
+
+        if $b1 >= 0 goto label2;
+
+        $r2 = new java.lang.IllegalArgumentException;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("byteCount < 0: ");
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l0);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r2.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r4);
+
+        throw $r2;
+
+     label2:
+        $l2 = r0.<okio.Buffer: long size>;
+
+        $b1 = $l2 cmp 0L;
+
+        if $b1 != 0 goto label3;
+
+        return -1L;
+
+     label3:
+        $l2 = r0.<okio.Buffer: long size>;
+
+        $b1 = $l0 cmp $l2;
+
+        if $b1 <= 0 goto label4;
+
+        $l0 = r0.<okio.Buffer: long size>;
+
+     label4:
+        virtualinvoke $r1.<okio.Buffer: void write(okio.Buffer,long)>(r0, $l0);
+
+        return $l0;
+    }
+    public long readAll(okio.Sink) throws java.io.IOException
+    {
+        okio.Buffer r0;
+        okio.Sink $r1;
+        long l0;
+        byte $b1;
+
+        r0 := @this: okio.Buffer;
+
+        $r1 := @parameter0: okio.Sink;
+
+        l0 = r0.<okio.Buffer: long size>;
+
+        $b1 = l0 cmp 0L;
+
+        if $b1 <= 0 goto label1;
+
+        interfaceinvoke $r1.<okio.Sink: void write(okio.Buffer,long)>(r0, l0);
+
+     label1:
+        return l0;
+    }
+    public byte readByte()
+    {
+        okio.Buffer r0;
+        byte b0;
+        byte[] r1;
+        int i1, i2, i3;
+        okio.Segment r2, $r3;
+        long $l4;
+        java.lang.IllegalStateException $r4;
+
+        r0 := @this: okio.Buffer;
+
+        $l4 = r0.<okio.Buffer: long size>;
+
+        b0 = $l4 cmp 0L;
+
+        if b0 != 0 goto label1;
+
+        $r4 = new java.lang.IllegalStateException;
+
+        specialinvoke $r4.<java.lang.IllegalStateException: void <init>(java.lang.String)>("size == 0");
+
+        throw $r4;
+
+     label1:
+        r2 = r0.<okio.Buffer: okio.Segment head>;
+
+        i2 = r2.<okio.Segment: int pos>;
+
+        i1 = r2.<okio.Segment: int limit>;
+
+        r1 = r2.<okio.Segment: byte[] data>;
+
+        i3 = i2 + 1;
+
+        b0 = r1[i2];
+
+        $l4 = r0.<okio.Buffer: long size>;
+
+        $l4 = $l4 - 1L;
+
+        r0.<okio.Buffer: long size> = $l4;
+
+        if i3 != i1 goto label2;
+
+        $r3 = virtualinvoke r2.<okio.Segment: okio.Segment pop()>();
+
+        r0.<okio.Buffer: okio.Segment head> = $r3;
+
+        staticinvoke <okio.SegmentPool: void recycle(okio.Segment)>(r2);
+
+        return b0;
+
+     label2:
+        r2.<okio.Segment: int pos> = i3;
+
+        return b0;
+    }
+    public byte[] readByteArray()
+    {
+        okio.Buffer r0;
+        java.io.EOFException r1;
+        long $l0;
+        byte[] $r2;
+        java.lang.AssertionError $r3;
+
+        r0 := @this: okio.Buffer;
+
+        $l0 = r0.<okio.Buffer: long size>;
+
+     label1:
+        $r2 = virtualinvoke r0.<okio.Buffer: byte[] readByteArray(long)>($l0);
+
+     label2:
+        return $r2;
+
+     label3:
+        r1 := @caughtexception;
+
+        $r3 = new java.lang.AssertionError;
+
+        specialinvoke $r3.<java.lang.AssertionError: void <init>(java.lang.Object)>(r1);
+
+        throw $r3;
+
+        catch java.io.EOFException from label1 to label2 with label3;
+    }
+    public byte[] readByteArray(long) throws java.io.EOFException
+    {
+        okio.Buffer r0;
+        long $l0, $l1;
+        byte[] r1;
+        byte $b2;
+        java.lang.IllegalArgumentException $r2;
+        java.lang.StringBuilder $r3;
+        java.lang.String $r4;
+        int $i3;
+
+        r0 := @this: okio.Buffer;
+
+        $l0 := @parameter0: long;
+
+        $l1 = r0.<okio.Buffer: long size>;
+
+        staticinvoke <okio.Util: void checkOffsetAndCount(long,long,long)>($l1, 0L, $l0);
+
+        $b2 = $l0 cmp 2147483647L;
+
+        if $b2 <= 0 goto label1;
+
+        $r2 = new java.lang.IllegalArgumentException;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("byteCount > Integer.MAX_VALUE: ");
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l0);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r2.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r4);
+
+        throw $r2;
+
+     label1:
+        $i3 = (int) $l0;
+
+        r1 = newarray (byte)[$i3];
+
+        virtualinvoke r0.<okio.Buffer: void readFully(byte[])>(r1);
+
+        return r1;
+    }
+    public okio.ByteString readByteString()
+    {
+        okio.Buffer r0;
+        okio.ByteString $r1;
+        byte[] $r2;
+
+        r0 := @this: okio.Buffer;
+
+        $r1 = new okio.ByteString;
+
+        $r2 = virtualinvoke r0.<okio.Buffer: byte[] readByteArray()>();
+
+        specialinvoke $r1.<okio.ByteString: void <init>(byte[])>($r2);
+
+        return $r1;
+    }
+    public okio.ByteString readByteString(long) throws java.io.EOFException
+    {
+        okio.Buffer r0;
+        long $l0;
+        okio.ByteString $r1;
+        byte[] $r2;
+
+        r0 := @this: okio.Buffer;
+
+        $l0 := @parameter0: long;
+
+        $r1 = new okio.ByteString;
+
+        $r2 = virtualinvoke r0.<okio.Buffer: byte[] readByteArray(long)>($l0);
+
+        specialinvoke $r1.<okio.ByteString: void <init>(byte[])>($r2);
+
+        return $r1;
+    }
+    public long readDecimalLong()
+    {
+        okio.Buffer r0;
+        byte b0, $b7;
+        byte[] r1;
+        int i1, i2, i4, i6;
+        long $l3, l5, $l8;
+        java.lang.IllegalStateException $r2;
+        boolean z0, z1;
+        okio.Segment $r3, $r7;
+        java.lang.NumberFormatException $r4;
+        java.lang.StringBuilder $r5;
+        java.lang.String $r6;
+
+        r0 := @this: okio.Buffer;
+
+        $l3 = r0.<okio.Buffer: long size>;
+
+        b0 = $l3 cmp 0L;
+
+        if b0 != 0 goto label01;
+
+        $r2 = new java.lang.IllegalStateException;
+
+        specialinvoke $r2.<java.lang.IllegalStateException: void <init>(java.lang.String)>("size == 0");
+
+        throw $r2;
+
+     label01:
+        $l3 = 0L;
+
+        i4 = 0;
+
+        z0 = 0;
+
+        z1 = 0;
+
+        l5 = -7L;
+
+     label02:
+        $r3 = r0.<okio.Buffer: okio.Segment head>;
+
+        r1 = $r3.<okio.Segment: byte[] data>;
+
+        i6 = $r3.<okio.Segment: int pos>;
+
+        i2 = $r3.<okio.Segment: int limit>;
+
+     label03:
+        if i6 >= i2 goto label11;
+
+        b0 = r1[i6];
+
+        if b0 < 48 goto label08;
+
+        if b0 > 57 goto label08;
+
+        i1 = 48 - b0;
+
+        $b7 = $l3 cmp -922337203685477580L;
+
+        if $b7 < 0 goto label04;
+
+        $b7 = $l3 cmp -922337203685477580L;
+
+        if $b7 != 0 goto label06;
+
+        $l8 = (long) i1;
+
+        $b7 = $l8 cmp l5;
+
+        if $b7 >= 0 goto label06;
+
+     label04:
+        r0 = new okio.Buffer;
+
+        specialinvoke r0.<okio.Buffer: void <init>()>();
+
+        r0 = virtualinvoke r0.<okio.Buffer: okio.Buffer writeDecimalLong(long)>($l3);
+
+        r0 = virtualinvoke r0.<okio.Buffer: okio.Buffer writeByte(int)>(b0);
+
+        if z0 != 0 goto label05;
+
+        virtualinvoke r0.<okio.Buffer: byte readByte()>();
+
+     label05:
+        $r4 = new java.lang.NumberFormatException;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Number too large: ");
+
+        $r6 = virtualinvoke r0.<okio.Buffer: java.lang.String readUtf8()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r4.<java.lang.NumberFormatException: void <init>(java.lang.String)>($r6);
+
+        throw $r4;
+
+     label06:
+        $l3 = $l3 * 10L;
+
+        $l8 = (long) i1;
+
+        $l3 = $l3 + $l8;
+
+     label07:
+        i6 = i6 + 1;
+
+        i4 = i4 + 1;
+
+        goto label03;
+
+     label08:
+        if b0 != 45 goto label09;
+
+        if i4 != 0 goto label09;
+
+        z0 = 1;
+
+        l5 = l5 - 1L;
+
+        goto label07;
+
+     label09:
+        if i4 != 0 goto label10;
+
+        $r4 = new java.lang.NumberFormatException;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Expected leading [0-9] or \'-\' character but was 0x");
+
+        $r6 = staticinvoke <java.lang.Integer: java.lang.String toHexString(int)>(b0);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r4.<java.lang.NumberFormatException: void <init>(java.lang.String)>($r6);
+
+        throw $r4;
+
+     label10:
+        z1 = 1;
+
+     label11:
+        if i6 != i2 goto label14;
+
+        $r7 = virtualinvoke $r3.<okio.Segment: okio.Segment pop()>();
+
+        r0.<okio.Buffer: okio.Segment head> = $r7;
+
+        staticinvoke <okio.SegmentPool: void recycle(okio.Segment)>($r3);
+
+     label12:
+        if z1 != 0 goto label13;
+
+        $r3 = r0.<okio.Buffer: okio.Segment head>;
+
+        if $r3 != null goto label02;
+
+     label13:
+        l5 = r0.<okio.Buffer: long size>;
+
+        $l8 = (long) i4;
+
+        l5 = l5 - $l8;
+
+        r0.<okio.Buffer: long size> = l5;
+
+        if z0 == 0 goto label15;
+
+        return $l3;
+
+     label14:
+        $r3.<okio.Segment: int pos> = i6;
+
+        goto label12;
+
+     label15:
+        $l3 = neg $l3;
+
+        return $l3;
+    }
+    public okio.Buffer readFrom(java.io.InputStream) throws java.io.IOException
+    {
+        okio.Buffer r0;
+        java.io.InputStream $r1;
+
+        r0 := @this: okio.Buffer;
+
+        $r1 := @parameter0: java.io.InputStream;
+
+        specialinvoke r0.<okio.Buffer: void readFrom(java.io.InputStream,long,boolean)>($r1, 9223372036854775807L, 1);
+
+        return r0;
+    }
+    public okio.Buffer readFrom(java.io.InputStream, long) throws java.io.IOException
+    {
+        okio.Buffer r0;
+        java.io.InputStream $r1;
+        long $l0;
+        byte $b1;
+        java.lang.IllegalArgumentException $r2;
+        java.lang.StringBuilder $r3;
+        java.lang.String $r4;
+
+        r0 := @this: okio.Buffer;
+
+        $r1 := @parameter0: java.io.InputStream;
+
+        $l0 := @parameter1: long;
+
+        $b1 = $l0 cmp 0L;
+
+        if $b1 >= 0 goto label1;
+
+        $r2 = new java.lang.IllegalArgumentException;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("byteCount < 0: ");
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l0);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r2.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r4);
+
+        throw $r2;
+
+     label1:
+        specialinvoke r0.<okio.Buffer: void readFrom(java.io.InputStream,long,boolean)>($r1, $l0, 0);
+
+        return r0;
+    }
+    public void readFully(okio.Buffer, long) throws java.io.EOFException
+    {
+        okio.Buffer r0, $r1;
+        long $l0, $l1;
+        byte $b2;
+        java.io.EOFException $r2;
+
+        r0 := @this: okio.Buffer;
+
+        $r1 := @parameter0: okio.Buffer;
+
+        $l0 := @parameter1: long;
+
+        $l1 = r0.<okio.Buffer: long size>;
+
+        $b2 = $l1 cmp $l0;
+
+        if $b2 >= 0 goto label1;
+
+        $l0 = r0.<okio.Buffer: long size>;
+
+        virtualinvoke $r1.<okio.Buffer: void write(okio.Buffer,long)>(r0, $l0);
+
+        $r2 = new java.io.EOFException;
+
+        specialinvoke $r2.<java.io.EOFException: void <init>()>();
+
+        throw $r2;
+
+     label1:
+        virtualinvoke $r1.<okio.Buffer: void write(okio.Buffer,long)>(r0, $l0);
+
+        return;
+    }
+    public void readFully(byte[]) throws java.io.EOFException
+    {
+        okio.Buffer r0;
+        byte[] $r1;
+        int $i0, i1;
+        java.io.EOFException $r2;
+
+        r0 := @this: okio.Buffer;
+
+        $r1 := @parameter0: byte[];
+
+        i1 = 0;
+
+     label1:
+        $i0 = lengthof $r1;
+
+        if i1 >= $i0 goto label3;
+
+        $i0 = lengthof $r1;
+
+        $i0 = $i0 - i1;
+
+        $i0 = virtualinvoke r0.<okio.Buffer: int read(byte[],int,int)>($r1, i1, $i0);
+
+        if $i0 != -1 goto label2;
+
+        $r2 = new java.io.EOFException;
+
+        specialinvoke $r2.<java.io.EOFException: void <init>()>();
+
+        throw $r2;
+
+     label2:
+        i1 = i1 + $i0;
+
+        goto label1;
+
+     label3:
+        return;
+    }
+    public long readHexadecimalUnsignedLong()
+    {
+        okio.Buffer r0;
+        byte b0, $b7;
+        byte[] r1;
+        int i1, i3, i4, i5;
+        okio.Segment r2, $r7;
+        long $l2, $l6, $l8;
+        java.lang.IllegalStateException $r3;
+        boolean z0;
+        java.lang.NumberFormatException $r4;
+        java.lang.StringBuilder $r5;
+        java.lang.String $r6;
+
+        r0 := @this: okio.Buffer;
+
+        $l2 = r0.<okio.Buffer: long size>;
+
+        b0 = $l2 cmp 0L;
+
+        if b0 != 0 goto label01;
+
+        $r3 = new java.lang.IllegalStateException;
+
+        specialinvoke $r3.<java.lang.IllegalStateException: void <init>(java.lang.String)>("size == 0");
+
+        throw $r3;
+
+     label01:
+        $l2 = 0L;
+
+        i3 = 0;
+
+        z0 = 0;
+
+     label02:
+        r2 = r0.<okio.Buffer: okio.Segment head>;
+
+        r1 = r2.<okio.Segment: byte[] data>;
+
+        i4 = r2.<okio.Segment: int pos>;
+
+        i1 = r2.<okio.Segment: int limit>;
+
+     label03:
+        if i4 >= i1 goto label09;
+
+        b0 = r1[i4];
+
+        if b0 < 48 goto label05;
+
+        if b0 > 57 goto label05;
+
+        i5 = b0 + -48;
+
+     label04:
+        $l6 = -1152921504606846976L & $l2;
+
+        $b7 = $l6 cmp 0L;
+
+        if $b7 == 0 goto label12;
+
+        r0 = new okio.Buffer;
+
+        specialinvoke r0.<okio.Buffer: void <init>()>();
+
+        r0 = virtualinvoke r0.<okio.Buffer: okio.Buffer writeHexadecimalUnsignedLong(long)>($l2);
+
+        r0 = virtualinvoke r0.<okio.Buffer: okio.Buffer writeByte(int)>(b0);
+
+        $r4 = new java.lang.NumberFormatException;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Number too large: ");
+
+        $r6 = virtualinvoke r0.<okio.Buffer: java.lang.String readUtf8()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r4.<java.lang.NumberFormatException: void <init>(java.lang.String)>($r6);
+
+        throw $r4;
+
+     label05:
+        if b0 < 97 goto label06;
+
+        if b0 > 102 goto label06;
+
+        i5 = b0 + -97;
+
+        i5 = i5 + 10;
+
+        goto label04;
+
+     label06:
+        if b0 < 65 goto label07;
+
+        if b0 > 70 goto label07;
+
+        i5 = b0 + -65;
+
+        i5 = i5 + 10;
+
+        goto label04;
+
+     label07:
+        if i3 != 0 goto label08;
+
+        $r4 = new java.lang.NumberFormatException;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Expected leading [0-9a-fA-F] character but was 0x");
+
+        $r6 = staticinvoke <java.lang.Integer: java.lang.String toHexString(int)>(b0);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r4.<java.lang.NumberFormatException: void <init>(java.lang.String)>($r6);
+
+        throw $r4;
+
+     label08:
+        z0 = 1;
+
+     label09:
+        if i4 != i1 goto label13;
+
+        $r7 = virtualinvoke r2.<okio.Segment: okio.Segment pop()>();
+
+        r0.<okio.Buffer: okio.Segment head> = $r7;
+
+        staticinvoke <okio.SegmentPool: void recycle(okio.Segment)>(r2);
+
+     label10:
+        if z0 != 0 goto label11;
+
+        r2 = r0.<okio.Buffer: okio.Segment head>;
+
+        if r2 != null goto label02;
+
+     label11:
+        $l6 = r0.<okio.Buffer: long size>;
+
+        $l8 = (long) i3;
+
+        $l6 = $l6 - $l8;
+
+        r0.<okio.Buffer: long size> = $l6;
+
+        return $l2;
+
+     label12:
+        $l2 = $l2 << 4;
+
+        $l6 = (long) i5;
+
+        $l2 = $l2 | $l6;
+
+        i4 = i4 + 1;
+
+        i3 = i3 + 1;
+
+        goto label03;
+
+     label13:
+        r2.<okio.Segment: int pos> = i4;
+
+        goto label10;
+    }
+    public int readInt()
+    {
+        okio.Buffer r0;
+        byte[] r1;
+        int i0, i3, $i4, $i5;
+        okio.Segment r2, $r6;
+        long $l1;
+        byte $b2;
+        java.lang.IllegalStateException $r3;
+        java.lang.StringBuilder $r4;
+        java.lang.String $r5;
+
+        r0 := @this: okio.Buffer;
+
+        $l1 = r0.<okio.Buffer: long size>;
+
+        $b2 = $l1 cmp 4L;
+
+        if $b2 >= 0 goto label1;
+
+        $r3 = new java.lang.IllegalStateException;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("size < 4: ");
+
+        $l1 = r0.<okio.Buffer: long size>;
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l1);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r3.<java.lang.IllegalStateException: void <init>(java.lang.String)>($r5);
+
+        throw $r3;
+
+     label1:
+        r2 = r0.<okio.Buffer: okio.Segment head>;
+
+        i3 = r2.<okio.Segment: int pos>;
+
+        i0 = r2.<okio.Segment: int limit>;
+
+        $i4 = i0 - i3;
+
+        if $i4 >= 4 goto label2;
+
+        $b2 = virtualinvoke r0.<okio.Buffer: byte readByte()>();
+
+        i0 = $b2 & 255;
+
+        i0 = i0 << 24;
+
+        $b2 = virtualinvoke r0.<okio.Buffer: byte readByte()>();
+
+        i3 = $b2 & 255;
+
+        i3 = i3 << 16;
+
+        i0 = i0 | i3;
+
+        $b2 = virtualinvoke r0.<okio.Buffer: byte readByte()>();
+
+        i3 = $b2 & 255;
+
+        i3 = i3 << 8;
+
+        i0 = i0 | i3;
+
+        $b2 = virtualinvoke r0.<okio.Buffer: byte readByte()>();
+
+        i3 = $b2 & 255;
+
+        i0 = i0 | i3;
+
+        return i0;
+
+     label2:
+        r1 = r2.<okio.Segment: byte[] data>;
+
+        $i4 = i3 + 1;
+
+        $b2 = r1[i3];
+
+        i3 = $b2 & 255;
+
+        $i5 = i3 << 24;
+
+        i3 = $i4 + 1;
+
+        $b2 = r1[$i4];
+
+        $i4 = $b2 & 255;
+
+        $i4 = $i4 << 16;
+
+        $i5 = $i5 | $i4;
+
+        $i4 = i3 + 1;
+
+        $b2 = r1[i3];
+
+        i3 = $b2 & 255;
+
+        i3 = i3 << 8;
+
+        $i5 = $i5 | i3;
+
+        i3 = $i4 + 1;
+
+        $b2 = r1[$i4];
+
+        $i4 = $b2 & 255;
+
+        $i4 = $i5 | $i4;
+
+        $l1 = r0.<okio.Buffer: long size>;
+
+        $l1 = $l1 - 4L;
+
+        r0.<okio.Buffer: long size> = $l1;
+
+        if i3 != i0 goto label3;
+
+        $r6 = virtualinvoke r2.<okio.Segment: okio.Segment pop()>();
+
+        r0.<okio.Buffer: okio.Segment head> = $r6;
+
+        staticinvoke <okio.SegmentPool: void recycle(okio.Segment)>(r2);
+
+        return $i4;
+
+     label3:
+        r2.<okio.Segment: int pos> = i3;
+
+        return $i4;
+    }
+    public int readIntLe()
+    {
+        okio.Buffer r0;
+        int $i0;
+
+        r0 := @this: okio.Buffer;
+
+        $i0 = virtualinvoke r0.<okio.Buffer: int readInt()>();
+
+        $i0 = staticinvoke <okio.Util: int reverseBytesInt(int)>($i0);
+
+        return $i0;
+    }
+    public long readLong()
+    {
+        okio.Buffer r0;
+        byte[] r1;
+        int i0, i3, $i4;
+        okio.Segment r2, $r6;
+        long $l1, $l5;
+        byte $b2;
+        java.lang.IllegalStateException $r3;
+        java.lang.StringBuilder $r4;
+        java.lang.String $r5;
+
+        r0 := @this: okio.Buffer;
+
+        $l1 = r0.<okio.Buffer: long size>;
+
+        $b2 = $l1 cmp 8L;
+
+        if $b2 >= 0 goto label1;
+
+        $r3 = new java.lang.IllegalStateException;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("size < 8: ");
+
+        $l1 = r0.<okio.Buffer: long size>;
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l1);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r3.<java.lang.IllegalStateException: void <init>(java.lang.String)>($r5);
+
+        throw $r3;
+
+     label1:
+        r2 = r0.<okio.Buffer: okio.Segment head>;
+
+        i3 = r2.<okio.Segment: int pos>;
+
+        i0 = r2.<okio.Segment: int limit>;
+
+        $i4 = i0 - i3;
+
+        if $i4 >= 8 goto label2;
+
+        i0 = virtualinvoke r0.<okio.Buffer: int readInt()>();
+
+        $l1 = (long) i0;
+
+        $l1 = $l1 & 4294967295L;
+
+        $l1 = $l1 << 32;
+
+        i0 = virtualinvoke r0.<okio.Buffer: int readInt()>();
+
+        $l5 = (long) i0;
+
+        $l5 = $l5 & 4294967295L;
+
+        $l1 = $l1 | $l5;
+
+        return $l1;
+
+     label2:
+        r1 = r2.<okio.Segment: byte[] data>;
+
+        $i4 = i3 + 1;
+
+        $b2 = r1[i3];
+
+        $l1 = (long) $b2;
+
+        $l1 = $l1 & 255L;
+
+        $l1 = $l1 << 56;
+
+        i3 = $i4 + 1;
+
+        $b2 = r1[$i4];
+
+        $l5 = (long) $b2;
+
+        $l5 = $l5 & 255L;
+
+        $l5 = $l5 << 48;
+
+        $l1 = $l1 | $l5;
+
+        $i4 = i3 + 1;
+
+        $b2 = r1[i3];
+
+        $l5 = (long) $b2;
+
+        $l5 = $l5 & 255L;
+
+        $l5 = $l5 << 40;
+
+        $l1 = $l1 | $l5;
+
+        i3 = $i4 + 1;
+
+        $b2 = r1[$i4];
+
+        $l5 = (long) $b2;
+
+        $l5 = $l5 & 255L;
+
+        $l5 = $l5 << 32;
+
+        $l1 = $l1 | $l5;
+
+        $i4 = i3 + 1;
+
+        $b2 = r1[i3];
+
+        $l5 = (long) $b2;
+
+        $l5 = $l5 & 255L;
+
+        $l5 = $l5 << 24;
+
+        $l1 = $l1 | $l5;
+
+        i3 = $i4 + 1;
+
+        $b2 = r1[$i4];
+
+        $l5 = (long) $b2;
+
+        $l5 = $l5 & 255L;
+
+        $l5 = $l5 << 16;
+
+        $l1 = $l1 | $l5;
+
+        $i4 = i3 + 1;
+
+        $b2 = r1[i3];
+
+        $l5 = (long) $b2;
+
+        $l5 = $l5 & 255L;
+
+        $l5 = $l5 << 8;
+
+        $l1 = $l1 | $l5;
+
+        i3 = $i4 + 1;
+
+        $b2 = r1[$i4];
+
+        $l5 = (long) $b2;
+
+        $l5 = $l5 & 255L;
+
+        $l1 = $l1 | $l5;
+
+        $l5 = r0.<okio.Buffer: long size>;
+
+        $l5 = $l5 - 8L;
+
+        r0.<okio.Buffer: long size> = $l5;
+
+        if i3 != i0 goto label3;
+
+        $r6 = virtualinvoke r2.<okio.Segment: okio.Segment pop()>();
+
+        r0.<okio.Buffer: okio.Segment head> = $r6;
+
+        staticinvoke <okio.SegmentPool: void recycle(okio.Segment)>(r2);
+
+        return $l1;
+
+     label3:
+        r2.<okio.Segment: int pos> = i3;
+
+        return $l1;
+    }
+    public long readLongLe()
+    {
+        okio.Buffer r0;
+        long $l0;
+
+        r0 := @this: okio.Buffer;
+
+        $l0 = virtualinvoke r0.<okio.Buffer: long readLong()>();
+
+        $l0 = staticinvoke <okio.Util: long reverseBytesLong(long)>($l0);
+
+        return $l0;
+    }
+    public short readShort()
+    {
+        okio.Buffer r0;
+        byte[] r1;
+        int i0, i1, i4, $i6;
+        okio.Segment r2, $r6;
+        long $l2;
+        byte $b3;
+        java.lang.IllegalStateException $r3;
+        java.lang.StringBuilder $r4;
+        java.lang.String $r5;
+        short $s5;
+
+        r0 := @this: okio.Buffer;
+
+        $l2 = r0.<okio.Buffer: long size>;
+
+        $b3 = $l2 cmp 2L;
+
+        if $b3 >= 0 goto label1;
+
+        $r3 = new java.lang.IllegalStateException;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("size < 2: ");
+
+        $l2 = r0.<okio.Buffer: long size>;
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l2);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r3.<java.lang.IllegalStateException: void <init>(java.lang.String)>($r5);
+
+        throw $r3;
+
+     label1:
+        r2 = r0.<okio.Buffer: okio.Segment head>;
+
+        i4 = r2.<okio.Segment: int pos>;
+
+        i0 = r2.<okio.Segment: int limit>;
+
+        i1 = i0 - i4;
+
+        if i1 >= 2 goto label2;
+
+        $b3 = virtualinvoke r0.<okio.Buffer: byte readByte()>();
+
+        i0 = $b3 & 255;
+
+        i0 = i0 << 8;
+
+        $b3 = virtualinvoke r0.<okio.Buffer: byte readByte()>();
+
+        i1 = $b3 & 255;
+
+        i0 = i0 | i1;
+
+        $s5 = (short) i0;
+
+        return $s5;
+
+     label2:
+        r1 = r2.<okio.Segment: byte[] data>;
+
+        i1 = i4 + 1;
+
+        $b3 = r1[i4];
+
+        i4 = $b3 & 255;
+
+        $i6 = i4 << 8;
+
+        i4 = i1 + 1;
+
+        $b3 = r1[i1];
+
+        i1 = $b3 & 255;
+
+        i1 = $i6 | i1;
+
+        $l2 = r0.<okio.Buffer: long size>;
+
+        $l2 = $l2 - 2L;
+
+        r0.<okio.Buffer: long size> = $l2;
+
+        if i4 != i0 goto label4;
+
+        $r6 = virtualinvoke r2.<okio.Segment: okio.Segment pop()>();
+
+        r0.<okio.Buffer: okio.Segment head> = $r6;
+
+        staticinvoke <okio.SegmentPool: void recycle(okio.Segment)>(r2);
+
+     label3:
+        $s5 = (short) i1;
+
+        return $s5;
+
+     label4:
+        r2.<okio.Segment: int pos> = i4;
+
+        goto label3;
+    }
+    public short readShortLe()
+    {
+        okio.Buffer r0;
+        short $s0;
+
+        r0 := @this: okio.Buffer;
+
+        $s0 = virtualinvoke r0.<okio.Buffer: short readShort()>();
+
+        $s0 = staticinvoke <okio.Util: short reverseBytesShort(short)>($s0);
+
+        return $s0;
+    }
+    public java.lang.String readString(long, java.nio.charset.Charset) throws java.io.EOFException
+    {
+        okio.Buffer r0;
+        long $l0, $l1, $l4;
+        java.nio.charset.Charset $r1;
+        okio.Segment r2, $r7;
+        java.lang.IllegalArgumentException $r3;
+        byte $b2;
+        java.lang.StringBuilder $r4;
+        java.lang.String $r5;
+        int $i3, $i5;
+        byte[] $r6;
+
+        r0 := @this: okio.Buffer;
+
+        $l0 := @parameter0: long;
+
+        $r1 := @parameter1: java.nio.charset.Charset;
+
+        $l1 = r0.<okio.Buffer: long size>;
+
+        staticinvoke <okio.Util: void checkOffsetAndCount(long,long,long)>($l1, 0L, $l0);
+
+        if $r1 != null goto label1;
+
+        $r3 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r3.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("charset == null");
+
+        throw $r3;
+
+     label1:
+        $b2 = $l0 cmp 2147483647L;
+
+        if $b2 <= 0 goto label2;
+
+        $r3 = new java.lang.IllegalArgumentException;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("byteCount > Integer.MAX_VALUE: ");
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l0);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r3.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r5);
+
+        throw $r3;
+
+     label2:
+        $b2 = $l0 cmp 0L;
+
+        if $b2 != 0 goto label3;
+
+        return "";
+
+     label3:
+        r2 = r0.<okio.Buffer: okio.Segment head>;
+
+        $i3 = r2.<okio.Segment: int pos>;
+
+        $l1 = (long) $i3;
+
+        $l1 = $l1 + $l0;
+
+        $i3 = r2.<okio.Segment: int limit>;
+
+        $l4 = (long) $i3;
+
+        $b2 = $l1 cmp $l4;
+
+        if $b2 <= 0 goto label4;
+
+        $r5 = new java.lang.String;
+
+        $r6 = virtualinvoke r0.<okio.Buffer: byte[] readByteArray(long)>($l0);
+
+        specialinvoke $r5.<java.lang.String: void <init>(byte[],java.nio.charset.Charset)>($r6, $r1);
+
+        return $r5;
+
+     label4:
+        $r5 = new java.lang.String;
+
+        $r6 = r2.<okio.Segment: byte[] data>;
+
+        $i3 = r2.<okio.Segment: int pos>;
+
+        $i5 = (int) $l0;
+
+        specialinvoke $r5.<java.lang.String: void <init>(byte[],int,int,java.nio.charset.Charset)>($r6, $i3, $i5, $r1);
+
+        $i3 = r2.<okio.Segment: int pos>;
+
+        $l1 = (long) $i3;
+
+        $l1 = $l1 + $l0;
+
+        $i3 = (int) $l1;
+
+        r2.<okio.Segment: int pos> = $i3;
+
+        $l1 = r0.<okio.Buffer: long size>;
+
+        $l0 = $l1 - $l0;
+
+        r0.<okio.Buffer: long size> = $l0;
+
+        $i3 = r2.<okio.Segment: int pos>;
+
+        $i5 = r2.<okio.Segment: int limit>;
+
+        if $i3 != $i5 goto label5;
+
+        $r7 = virtualinvoke r2.<okio.Segment: okio.Segment pop()>();
+
+        r0.<okio.Buffer: okio.Segment head> = $r7;
+
+        staticinvoke <okio.SegmentPool: void recycle(okio.Segment)>(r2);
+
+     label5:
+        return $r5;
+    }
+    public java.lang.String readString(java.nio.charset.Charset)
+    {
+        okio.Buffer r0;
+        java.nio.charset.Charset $r1;
+        java.io.EOFException r2;
+        long $l0;
+        java.lang.String $r3;
+        java.lang.AssertionError $r4;
+
+        r0 := @this: okio.Buffer;
+
+        $r1 := @parameter0: java.nio.charset.Charset;
+
+        $l0 = r0.<okio.Buffer: long size>;
+
+     label1:
+        $r3 = virtualinvoke r0.<okio.Buffer: java.lang.String readString(long,java.nio.charset.Charset)>($l0, $r1);
+
+     label2:
+        return $r3;
+
+     label3:
+        r2 := @caughtexception;
+
+        $r4 = new java.lang.AssertionError;
+
+        specialinvoke $r4.<java.lang.AssertionError: void <init>(java.lang.Object)>(r2);
+
+        throw $r4;
+
+        catch java.io.EOFException from label1 to label2 with label3;
+    }
+    public java.lang.String readUtf8()
+    {
+        okio.Buffer r0;
+        java.io.EOFException r1;
+        long $l0;
+        java.lang.String $r2;
+        java.nio.charset.Charset $r3;
+        java.lang.AssertionError $r4;
+
+        r0 := @this: okio.Buffer;
+
+        $l0 = r0.<okio.Buffer: long size>;
+
+        $r3 = <okio.Util: java.nio.charset.Charset UTF_8>;
+
+     label1:
+        $r2 = virtualinvoke r0.<okio.Buffer: java.lang.String readString(long,java.nio.charset.Charset)>($l0, $r3);
+
+     label2:
+        return $r2;
+
+     label3:
+        r1 := @caughtexception;
+
+        $r4 = new java.lang.AssertionError;
+
+        specialinvoke $r4.<java.lang.AssertionError: void <init>(java.lang.Object)>(r1);
+
+        throw $r4;
+
+        catch java.io.EOFException from label1 to label2 with label3;
+    }
+    public java.lang.String readUtf8(long) throws java.io.EOFException
+    {
+        okio.Buffer r0;
+        long $l0;
+        java.lang.String $r1;
+        java.nio.charset.Charset $r2;
+
+        r0 := @this: okio.Buffer;
+
+        $l0 := @parameter0: long;
+
+        $r2 = <okio.Util: java.nio.charset.Charset UTF_8>;
+
+        $r1 = virtualinvoke r0.<okio.Buffer: java.lang.String readString(long,java.nio.charset.Charset)>($l0, $r2);
+
+        return $r1;
+    }
+    public int readUtf8CodePoint() throws java.io.EOFException
+    {
+        okio.Buffer r0;
+        long $l0, $l5;
+        byte $b1, $b2, $b6;
+        java.io.EOFException $r1;
+        int $i3, i4, i7, $i8;
+        java.lang.StringBuilder $r2;
+        java.lang.String $r3;
+
+        r0 := @this: okio.Buffer;
+
+        $l0 = r0.<okio.Buffer: long size>;
+
+        $b1 = $l0 cmp 0L;
+
+        if $b1 != 0 goto label01;
+
+        $r1 = new java.io.EOFException;
+
+        specialinvoke $r1.<java.io.EOFException: void <init>()>();
+
+        throw $r1;
+
+     label01:
+        $b2 = virtualinvoke r0.<okio.Buffer: byte getByte(long)>(0L);
+
+        $i3 = $b2 & 128;
+
+        if $i3 != 0 goto label03;
+
+        i4 = $b2 & 127;
+
+        $b1 = 1;
+
+        $i3 = 0;
+
+     label02:
+        $l0 = r0.<okio.Buffer: long size>;
+
+        $l5 = (long) $b1;
+
+        $b6 = $l0 cmp $l5;
+
+        if $b6 >= 0 goto label07;
+
+        $r1 = new java.io.EOFException;
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("size < ");
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($b1);
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(": ");
+
+        $l0 = r0.<okio.Buffer: long size>;
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l0);
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" (to read code point prefixed 0x");
+
+        $r3 = staticinvoke <java.lang.Integer: java.lang.String toHexString(int)>($b2);
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(")");
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r1.<java.io.EOFException: void <init>(java.lang.String)>($r3);
+
+        throw $r1;
+
+     label03:
+        $i3 = $b2 & 224;
+
+        if $i3 != 192 goto label04;
+
+        i4 = $b2 & 31;
+
+        $b1 = 2;
+
+        $i3 = 128;
+
+        goto label02;
+
+     label04:
+        $i3 = $b2 & 240;
+
+        if $i3 != 224 goto label05;
+
+        i4 = $b2 & 15;
+
+        $b1 = 3;
+
+        $i3 = 2048;
+
+        goto label02;
+
+     label05:
+        $i3 = $b2 & 248;
+
+        if $i3 != 240 goto label06;
+
+        i4 = $b2 & 7;
+
+        $b1 = 4;
+
+        $i3 = 65536;
+
+        goto label02;
+
+     label06:
+        virtualinvoke r0.<okio.Buffer: void skip(long)>(1L);
+
+        return 65533;
+
+     label07:
+        i7 = 1;
+
+     label08:
+        if i7 >= $b1 goto label10;
+
+        $l0 = (long) i7;
+
+        $b2 = virtualinvoke r0.<okio.Buffer: byte getByte(long)>($l0);
+
+        $i8 = $b2 & 192;
+
+        if $i8 != 128 goto label09;
+
+        i4 = i4 << 6;
+
+        $i8 = $b2 & 63;
+
+        i4 = i4 | $i8;
+
+        i7 = i7 + 1;
+
+        goto label08;
+
+     label09:
+        $l0 = (long) i7;
+
+        virtualinvoke r0.<okio.Buffer: void skip(long)>($l0);
+
+        return 65533;
+
+     label10:
+        $l0 = (long) $b1;
+
+        virtualinvoke r0.<okio.Buffer: void skip(long)>($l0);
+
+        if i4 <= 1114111 goto label11;
+
+        return 65533;
+
+     label11:
+        if i4 < 55296 goto label12;
+
+        if i4 > 57343 goto label12;
+
+        return 65533;
+
+     label12:
+        if i4 >= $i3 goto label13;
+
+        return 65533;
+
+     label13:
+        return i4;
+    }
+    public java.lang.String readUtf8Line() throws java.io.EOFException
+    {
+        okio.Buffer r0;
+        long $l0;
+        byte $b1;
+        java.lang.String $r1;
+
+        r0 := @this: okio.Buffer;
+
+        $l0 = virtualinvoke r0.<okio.Buffer: long indexOf(byte)>(10);
+
+        $b1 = $l0 cmp -1L;
+
+        if $b1 != 0 goto label2;
+
+        $l0 = r0.<okio.Buffer: long size>;
+
+        $b1 = $l0 cmp 0L;
+
+        if $b1 == 0 goto label1;
+
+        $l0 = r0.<okio.Buffer: long size>;
+
+        $r1 = virtualinvoke r0.<okio.Buffer: java.lang.String readUtf8(long)>($l0);
+
+        return $r1;
+
+     label1:
+        return null;
+
+     label2:
+        $r1 = virtualinvoke r0.<okio.Buffer: java.lang.String readUtf8Line(long)>($l0);
+
+        return $r1;
+    }
+    java.lang.String readUtf8Line(long) throws java.io.EOFException
+    {
+        okio.Buffer r0;
+        long $l0, $l2;
+        byte $b1;
+        java.lang.String $r1;
+
+        r0 := @this: okio.Buffer;
+
+        $l0 := @parameter0: long;
+
+        $b1 = $l0 cmp 0L;
+
+        if $b1 <= 0 goto label1;
+
+        $l2 = $l0 - 1L;
+
+        $b1 = virtualinvoke r0.<okio.Buffer: byte getByte(long)>($l2);
+
+        if $b1 != 13 goto label1;
+
+        $l0 = $l0 - 1L;
+
+        $r1 = virtualinvoke r0.<okio.Buffer: java.lang.String readUtf8(long)>($l0);
+
+        virtualinvoke r0.<okio.Buffer: void skip(long)>(2L);
+
+        return $r1;
+
+     label1:
+        $r1 = virtualinvoke r0.<okio.Buffer: java.lang.String readUtf8(long)>($l0);
+
+        virtualinvoke r0.<okio.Buffer: void skip(long)>(1L);
+
+        return $r1;
+    }
+    public java.lang.String readUtf8LineStrict() throws java.io.EOFException
+    {
+        okio.Buffer r0, r1;
+        long $l0;
+        byte $b1;
+        java.io.EOFException $r2;
+        java.lang.StringBuilder $r3;
+        okio.ByteString $r4;
+        java.lang.String $r5;
+
+        r0 := @this: okio.Buffer;
+
+        $l0 = virtualinvoke r0.<okio.Buffer: long indexOf(byte)>(10);
+
+        $b1 = $l0 cmp -1L;
+
+        if $b1 != 0 goto label1;
+
+        r1 = new okio.Buffer;
+
+        specialinvoke r1.<okio.Buffer: void <init>()>();
+
+        $l0 = r0.<okio.Buffer: long size>;
+
+        $l0 = staticinvoke <java.lang.Math: long min(long,long)>(32L, $l0);
+
+        virtualinvoke r0.<okio.Buffer: okio.Buffer copyTo(okio.Buffer,long,long)>(r1, 0L, $l0);
+
+        $r2 = new java.io.EOFException;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\\n not found: size=");
+
+        $l0 = virtualinvoke r0.<okio.Buffer: long size()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l0);
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" content=");
+
+        $r4 = virtualinvoke r1.<okio.Buffer: okio.ByteString readByteString()>();
+
+        $r5 = virtualinvoke $r4.<okio.ByteString: java.lang.String hex()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\u2026");
+
+        $r5 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r2.<java.io.EOFException: void <init>(java.lang.String)>($r5);
+
+        throw $r2;
+
+     label1:
+        $r5 = virtualinvoke r0.<okio.Buffer: java.lang.String readUtf8Line(long)>($l0);
+
+        return $r5;
+    }
+    public boolean request(long)
+    {
+        okio.Buffer r0;
+        long $l0, $l1;
+        byte $b2;
+
+        r0 := @this: okio.Buffer;
+
+        $l0 := @parameter0: long;
+
+        $l1 = r0.<okio.Buffer: long size>;
+
+        $b2 = $l1 cmp $l0;
+
+        if $b2 < 0 goto label1;
+
+        return 1;
+
+     label1:
+        return 0;
+    }
+    public void require(long) throws java.io.EOFException
+    {
+        okio.Buffer r0;
+        long $l0, $l1;
+        byte $b2;
+        java.io.EOFException $r1;
+
+        r0 := @this: okio.Buffer;
+
+        $l0 := @parameter0: long;
+
+        $l1 = r0.<okio.Buffer: long size>;
+
+        $b2 = $l1 cmp $l0;
+
+        if $b2 >= 0 goto label1;
+
+        $r1 = new java.io.EOFException;
+
+        specialinvoke $r1.<java.io.EOFException: void <init>()>();
+
+        throw $r1;
+
+     label1:
+        return;
+    }
+    java.util.List segmentSizes()
+    {
+        okio.Buffer r0;
+        okio.Segment $r1, $r5;
+        java.util.List $r2;
+        java.util.ArrayList r3;
+        int $i0, $i1;
+        java.lang.Integer $r4;
+
+        r0 := @this: okio.Buffer;
+
+        $r1 = r0.<okio.Buffer: okio.Segment head>;
+
+        if $r1 != null goto label1;
+
+        $r2 = staticinvoke <java.util.Collections: java.util.List emptyList()>();
+
+        return $r2;
+
+     label1:
+        r3 = new java.util.ArrayList;
+
+        specialinvoke r3.<java.util.ArrayList: void <init>()>();
+
+        $r1 = r0.<okio.Buffer: okio.Segment head>;
+
+        $i0 = $r1.<okio.Segment: int limit>;
+
+        $r1 = r0.<okio.Buffer: okio.Segment head>;
+
+        $i1 = $r1.<okio.Segment: int pos>;
+
+        $i0 = $i0 - $i1;
+
+        $r4 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        interfaceinvoke r3.<java.util.List: boolean add(java.lang.Object)>($r4);
+
+        $r1 = r0.<okio.Buffer: okio.Segment head>;
+
+        $r1 = $r1.<okio.Segment: okio.Segment next>;
+
+     label2:
+        $r5 = r0.<okio.Buffer: okio.Segment head>;
+
+        if $r1 == $r5 goto label3;
+
+        $i0 = $r1.<okio.Segment: int limit>;
+
+        $i1 = $r1.<okio.Segment: int pos>;
+
+        $i0 = $i0 - $i1;
+
+        $r4 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        interfaceinvoke r3.<java.util.List: boolean add(java.lang.Object)>($r4);
+
+        $r1 = $r1.<okio.Segment: okio.Segment next>;
+
+        goto label2;
+
+     label3:
+        return r3;
+    }
+    public int select(okio.Options)
+    {
+        okio.Buffer r0;
+        okio.Options $r1;
+        okio.Segment r2;
+        int $i0, i1, $i3, $i6;
+        okio.ByteString r3;
+        okio.ByteString[] r4;
+        java.io.EOFException r5;
+        long $l2, $l4;
+        byte $b5;
+        boolean $z0;
+        java.lang.AssertionError $r6;
+
+        r0 := @this: okio.Buffer;
+
+        $r1 := @parameter0: okio.Options;
+
+        r2 = r0.<okio.Buffer: okio.Segment head>;
+
+        if r2 != null goto label1;
+
+        r3 = <okio.ByteString: okio.ByteString EMPTY>;
+
+        $i3 = virtualinvoke $r1.<okio.Options: int indexOf(java.lang.Object)>(r3);
+
+        return $i3;
+
+     label1:
+        r4 = $r1.<okio.Options: okio.ByteString[] byteStrings>;
+
+        $i3 = 0;
+
+        i1 = lengthof r4;
+
+     label2:
+        if $i3 >= i1 goto label9;
+
+        r3 = r4[$i3];
+
+        $l4 = r0.<okio.Buffer: long size>;
+
+        $i0 = virtualinvoke r3.<okio.ByteString: int size()>();
+
+        $l2 = (long) $i0;
+
+        $b5 = $l4 cmp $l2;
+
+        if $b5 < 0 goto label8;
+
+        $i0 = r2.<okio.Segment: int pos>;
+
+        $i6 = virtualinvoke r3.<okio.ByteString: int size()>();
+
+        $z0 = specialinvoke r0.<okio.Buffer: boolean rangeEquals(okio.Segment,int,okio.ByteString,int,int)>(r2, $i0, r3, 0, $i6);
+
+        if $z0 == 0 goto label8;
+
+     label3:
+        i1 = virtualinvoke r3.<okio.ByteString: int size()>();
+
+     label4:
+        $l2 = (long) i1;
+
+     label5:
+        virtualinvoke r0.<okio.Buffer: void skip(long)>($l2);
+
+     label6:
+        return $i3;
+
+     label7:
+        r5 := @caughtexception;
+
+        $r6 = new java.lang.AssertionError;
+
+        specialinvoke $r6.<java.lang.AssertionError: void <init>(java.lang.Object)>(r5);
+
+        throw $r6;
+
+     label8:
+        $i3 = $i3 + 1;
+
+        goto label2;
+
+     label9:
+        return -1;
+
+        catch java.io.EOFException from label3 to label4 with label7;
+        catch java.io.EOFException from label5 to label6 with label7;
+    }
+    int selectPrefix(okio.Options)
+    {
+        okio.Buffer r0;
+        okio.Options $r1;
+        okio.Segment r2;
+        int $i0, i1, i2, i4;
+        okio.ByteString r3;
+        okio.ByteString[] r4;
+        long $l3, $l5;
+        boolean $z0;
+
+        r0 := @this: okio.Buffer;
+
+        $r1 := @parameter0: okio.Options;
+
+        r2 = r0.<okio.Buffer: okio.Segment head>;
+
+        r4 = $r1.<okio.Options: okio.ByteString[] byteStrings>;
+
+        i4 = 0;
+
+        i2 = lengthof r4;
+
+     label1:
+        if i4 >= i2 goto label3;
+
+        r3 = r4[i4];
+
+        $l5 = r0.<okio.Buffer: long size>;
+
+        $i0 = virtualinvoke r3.<okio.ByteString: int size()>();
+
+        $l3 = (long) $i0;
+
+        $l3 = staticinvoke <java.lang.Math: long min(long,long)>($l5, $l3);
+
+        i1 = (int) $l3;
+
+        if i1 == 0 goto label4;
+
+        $i0 = r2.<okio.Segment: int pos>;
+
+        $z0 = specialinvoke r0.<okio.Buffer: boolean rangeEquals(okio.Segment,int,okio.ByteString,int,int)>(r2, $i0, r3, 0, i1);
+
+        if $z0 == 0 goto label2;
+
+        return i4;
+
+     label2:
+        i4 = i4 + 1;
+
+        goto label1;
+
+     label3:
+        return -1;
+
+     label4:
+        return i4;
+    }
+    public okio.ByteString sha1()
+    {
+        okio.Buffer r0;
+        okio.ByteString $r1;
+
+        r0 := @this: okio.Buffer;
+
+        $r1 = specialinvoke r0.<okio.Buffer: okio.ByteString digest(java.lang.String)>("SHA-1");
+
+        return $r1;
+    }
+    public okio.ByteString sha256()
+    {
+        okio.Buffer r0;
+        okio.ByteString $r1;
+
+        r0 := @this: okio.Buffer;
+
+        $r1 = specialinvoke r0.<okio.Buffer: okio.ByteString digest(java.lang.String)>("SHA-256");
+
+        return $r1;
+    }
+    public long size()
+    {
+        okio.Buffer r0;
+        long l0;
+
+        r0 := @this: okio.Buffer;
+
+        l0 = r0.<okio.Buffer: long size>;
+
+        return l0;
+    }
+    public void skip(long) throws java.io.EOFException
+    {
+        okio.Buffer r0;
+        okio.Segment r1, $r3;
+        int i0, $i4;
+        long $l1, $l2, $l5;
+        byte $b3;
+        java.io.EOFException $r2;
+
+        r0 := @this: okio.Buffer;
+
+        $l2 := @parameter0: long;
+
+     label1:
+        $b3 = $l2 cmp 0L;
+
+        if $b3 <= 0 goto label3;
+
+        r1 = r0.<okio.Buffer: okio.Segment head>;
+
+        if r1 != null goto label2;
+
+        $r2 = new java.io.EOFException;
+
+        specialinvoke $r2.<java.io.EOFException: void <init>()>();
+
+        throw $r2;
+
+     label2:
+        r1 = r0.<okio.Buffer: okio.Segment head>;
+
+        i0 = r1.<okio.Segment: int limit>;
+
+        r1 = r0.<okio.Buffer: okio.Segment head>;
+
+        $i4 = r1.<okio.Segment: int pos>;
+
+        i0 = i0 - $i4;
+
+        $l1 = (long) i0;
+
+        $l1 = staticinvoke <java.lang.Math: long min(long,long)>($l2, $l1);
+
+        i0 = (int) $l1;
+
+        $l5 = r0.<okio.Buffer: long size>;
+
+        $l1 = (long) i0;
+
+        $l1 = $l5 - $l1;
+
+        r0.<okio.Buffer: long size> = $l1;
+
+        $l1 = (long) i0;
+
+        $l2 = $l2 - $l1;
+
+        r1 = r0.<okio.Buffer: okio.Segment head>;
+
+        $i4 = r1.<okio.Segment: int pos>;
+
+        i0 = $i4 + i0;
+
+        r1.<okio.Segment: int pos> = i0;
+
+        r1 = r0.<okio.Buffer: okio.Segment head>;
+
+        i0 = r1.<okio.Segment: int pos>;
+
+        r1 = r0.<okio.Buffer: okio.Segment head>;
+
+        $i4 = r1.<okio.Segment: int limit>;
+
+        if i0 != $i4 goto label1;
+
+        r1 = r0.<okio.Buffer: okio.Segment head>;
+
+        $r3 = virtualinvoke r1.<okio.Segment: okio.Segment pop()>();
+
+        r0.<okio.Buffer: okio.Segment head> = $r3;
+
+        staticinvoke <okio.SegmentPool: void recycle(okio.Segment)>(r1);
+
+        goto label1;
+
+     label3:
+        return;
+    }
+    public okio.ByteString snapshot()
+    {
+        okio.Buffer r0;
+        long $l0;
+        byte $b1;
+        java.lang.IllegalArgumentException $r1;
+        java.lang.StringBuilder $r2;
+        java.lang.String $r3;
+        int $i2;
+        okio.ByteString $r4;
+
+        r0 := @this: okio.Buffer;
+
+        $l0 = r0.<okio.Buffer: long size>;
+
+        $b1 = $l0 cmp 2147483647L;
+
+        if $b1 <= 0 goto label1;
+
+        $r1 = new java.lang.IllegalArgumentException;
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("size > Integer.MAX_VALUE: ");
+
+        $l0 = r0.<okio.Buffer: long size>;
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l0);
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r1.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r3);
+
+        throw $r1;
+
+     label1:
+        $l0 = r0.<okio.Buffer: long size>;
+
+        $i2 = (int) $l0;
+
+        $r4 = virtualinvoke r0.<okio.Buffer: okio.ByteString snapshot(int)>($i2);
+
+        return $r4;
+    }
+    public okio.ByteString snapshot(int)
+    {
+        okio.Buffer r0;
+        int $i0;
+        okio.SegmentedByteString $r1;
+        okio.ByteString r2;
+
+        r0 := @this: okio.Buffer;
+
+        $i0 := @parameter0: int;
+
+        if $i0 != 0 goto label1;
+
+        r2 = <okio.ByteString: okio.ByteString EMPTY>;
+
+        return r2;
+
+     label1:
+        $r1 = new okio.SegmentedByteString;
+
+        specialinvoke $r1.<okio.SegmentedByteString: void <init>(okio.Buffer,int)>(r0, $i0);
+
+        return $r1;
+    }
+    public okio.Timeout timeout()
+    {
+        okio.Buffer r0;
+        okio.Timeout r1;
+
+        r0 := @this: okio.Buffer;
+
+        r1 = <okio.Timeout: okio.Timeout NONE>;
+
+        return r1;
+    }
+    public java.lang.String toString()
+    {
+        okio.Buffer r0;
+        okio.ByteString $r1;
+        java.lang.String $r2;
+
+        r0 := @this: okio.Buffer;
+
+        $r1 = virtualinvoke r0.<okio.Buffer: okio.ByteString snapshot()>();
+
+        $r2 = virtualinvoke $r1.<okio.ByteString: java.lang.String toString()>();
+
+        return $r2;
+    }
+    okio.Segment writableSegment(int)
+    {
+        okio.Buffer r0;
+        int $i0, $i1;
+        java.lang.IllegalArgumentException $r1;
+        okio.Segment $r2, $r3, r4;
+        boolean $z0;
+
+        r0 := @this: okio.Buffer;
+
+        $i0 := @parameter0: int;
+
+        if $i0 < 1 goto label1;
+
+        if $i0 <= 8192 goto label2;
+
+     label1:
+        $r1 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r1.<java.lang.IllegalArgumentException: void <init>()>();
+
+        throw $r1;
+
+     label2:
+        $r2 = r0.<okio.Buffer: okio.Segment head>;
+
+        if $r2 != null goto label3;
+
+        $r2 = staticinvoke <okio.SegmentPool: okio.Segment take()>();
+
+        r0.<okio.Buffer: okio.Segment head> = $r2;
+
+        $r2 = r0.<okio.Buffer: okio.Segment head>;
+
+        $r3 = r0.<okio.Buffer: okio.Segment head>;
+
+        r4 = r0.<okio.Buffer: okio.Segment head>;
+
+        $r3.<okio.Segment: okio.Segment prev> = r4;
+
+        $r2.<okio.Segment: okio.Segment next> = r4;
+
+        return r4;
+
+     label3:
+        $r2 = r0.<okio.Buffer: okio.Segment head>;
+
+        $r2 = $r2.<okio.Segment: okio.Segment prev>;
+
+        $i1 = $r2.<okio.Segment: int limit>;
+
+        $i0 = $i1 + $i0;
+
+        if $i0 > 8192 goto label4;
+
+        $z0 = $r2.<okio.Segment: boolean owner>;
+
+        if $z0 != 0 goto label5;
+
+     label4:
+        $r3 = staticinvoke <okio.SegmentPool: okio.Segment take()>();
+
+        $r2 = virtualinvoke $r2.<okio.Segment: okio.Segment push(okio.Segment)>($r3);
+
+     label5:
+        return $r2;
+    }
+    public okio.Buffer write(okio.ByteString)
+    {
+        okio.Buffer r0;
+        okio.ByteString $r1;
+        java.lang.IllegalArgumentException $r2;
+
+        r0 := @this: okio.Buffer;
+
+        $r1 := @parameter0: okio.ByteString;
+
+        if $r1 != null goto label1;
+
+        $r2 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r2.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("byteString == null");
+
+        throw $r2;
+
+     label1:
+        virtualinvoke $r1.<okio.ByteString: void write(okio.Buffer)>(r0);
+
+        return r0;
+    }
+    public okio.Buffer write(byte[])
+    {
+        okio.Buffer r0;
+        byte[] $r1;
+        java.lang.IllegalArgumentException $r2;
+        int $i0;
+
+        r0 := @this: okio.Buffer;
+
+        $r1 := @parameter0: byte[];
+
+        if $r1 != null goto label1;
+
+        $r2 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r2.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("source == null");
+
+        throw $r2;
+
+     label1:
+        $i0 = lengthof $r1;
+
+        r0 = virtualinvoke r0.<okio.Buffer: okio.Buffer write(byte[],int,int)>($r1, 0, $i0);
+
+        return r0;
+    }
+    public okio.Buffer write(byte[], int, int)
+    {
+        okio.Buffer r0;
+        byte[] $r1, $r4;
+        int $i0, i2, $i3, $i6, $i7;
+        long $l1, $l4, $l5;
+        java.lang.IllegalArgumentException $r2;
+        okio.Segment $r3;
+
+        r0 := @this: okio.Buffer;
+
+        $r1 := @parameter0: byte[];
+
+        $i3 := @parameter1: int;
+
+        $i0 := @parameter2: int;
+
+        if $r1 != null goto label1;
+
+        $r2 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r2.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("source == null");
+
+        throw $r2;
+
+     label1:
+        i2 = lengthof $r1;
+
+        $l4 = (long) i2;
+
+        $l5 = (long) $i3;
+
+        $l1 = (long) $i0;
+
+        staticinvoke <okio.Util: void checkOffsetAndCount(long,long,long)>($l4, $l5, $l1);
+
+        i2 = $i3 + $i0;
+
+     label2:
+        if $i3 >= i2 goto label3;
+
+        $r3 = virtualinvoke r0.<okio.Buffer: okio.Segment writableSegment(int)>(1);
+
+        $i6 = i2 - $i3;
+
+        $i7 = $r3.<okio.Segment: int limit>;
+
+        $i7 = 8192 - $i7;
+
+        $i6 = staticinvoke <java.lang.Math: int min(int,int)>($i6, $i7);
+
+        $r4 = $r3.<okio.Segment: byte[] data>;
+
+        $i7 = $r3.<okio.Segment: int limit>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r1, $i3, $r4, $i7, $i6);
+
+        $i3 = $i3 + $i6;
+
+        $i7 = $r3.<okio.Segment: int limit>;
+
+        $i6 = $i7 + $i6;
+
+        $r3.<okio.Segment: int limit> = $i6;
+
+        goto label2;
+
+     label3:
+        $l1 = r0.<okio.Buffer: long size>;
+
+        $l4 = (long) $i0;
+
+        $l1 = $l1 + $l4;
+
+        r0.<okio.Buffer: long size> = $l1;
+
+        return r0;
+    }
+    public volatile okio.BufferedSink write(okio.ByteString) throws java.io.IOException
+    {
+        okio.Buffer r0;
+        okio.ByteString $r1;
+
+        r0 := @this: okio.Buffer;
+
+        $r1 := @parameter0: okio.ByteString;
+
+        r0 = virtualinvoke r0.<okio.Buffer: okio.Buffer write(okio.ByteString)>($r1);
+
+        return r0;
+    }
+    public okio.BufferedSink write(okio.Source, long) throws java.io.IOException
+    {
+        okio.Buffer r0;
+        okio.Source $r1;
+        long $l0, $l1;
+        byte $b2;
+        java.io.EOFException $r2;
+
+        r0 := @this: okio.Buffer;
+
+        $r1 := @parameter0: okio.Source;
+
+        $l1 := @parameter1: long;
+
+     label1:
+        $b2 = $l1 cmp 0L;
+
+        if $b2 <= 0 goto label3;
+
+        $l0 = interfaceinvoke $r1.<okio.Source: long read(okio.Buffer,long)>(r0, $l1);
+
+        $b2 = $l0 cmp -1L;
+
+        if $b2 != 0 goto label2;
+
+        $r2 = new java.io.EOFException;
+
+        specialinvoke $r2.<java.io.EOFException: void <init>()>();
+
+        throw $r2;
+
+     label2:
+        $l1 = $l1 - $l0;
+
+        goto label1;
+
+     label3:
+        return r0;
+    }
+    public volatile okio.BufferedSink write(byte[]) throws java.io.IOException
+    {
+        okio.Buffer r0;
+        byte[] $r1;
+
+        r0 := @this: okio.Buffer;
+
+        $r1 := @parameter0: byte[];
+
+        r0 = virtualinvoke r0.<okio.Buffer: okio.Buffer write(byte[])>($r1);
+
+        return r0;
+    }
+    public volatile okio.BufferedSink write(byte[], int, int) throws java.io.IOException
+    {
+        okio.Buffer r0;
+        byte[] $r1;
+        int $i0, $i1;
+
+        r0 := @this: okio.Buffer;
+
+        $r1 := @parameter0: byte[];
+
+        $i0 := @parameter1: int;
+
+        $i1 := @parameter2: int;
+
+        r0 = virtualinvoke r0.<okio.Buffer: okio.Buffer write(byte[],int,int)>($r1, $i0, $i1);
+
+        return r0;
+    }
+    public void write(okio.Buffer, long)
+    {
+        okio.Buffer r0, $r1;
+        long l0, $l1, $l5;
+        okio.Segment r2, $r4, $r5;
+        java.lang.IllegalArgumentException $r3;
+        byte $b2;
+        int $i3, $i4;
+        boolean $z0;
+
+        r0 := @this: okio.Buffer;
+
+        $r1 := @parameter0: okio.Buffer;
+
+        $l1 := @parameter1: long;
+
+        if $r1 != null goto label01;
+
+        $r3 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r3.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("source == null");
+
+        throw $r3;
+
+     label01:
+        if $r1 != r0 goto label02;
+
+        $r3 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r3.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("source == this");
+
+        throw $r3;
+
+     label02:
+        l0 = $r1.<okio.Buffer: long size>;
+
+        staticinvoke <okio.Util: void checkOffsetAndCount(long,long,long)>(l0, 0L, $l1);
+
+     label03:
+        $b2 = $l1 cmp 0L;
+
+        if $b2 <= 0 goto label12;
+
+        r2 = $r1.<okio.Buffer: okio.Segment head>;
+
+        $i3 = r2.<okio.Segment: int limit>;
+
+        r2 = $r1.<okio.Buffer: okio.Segment head>;
+
+        $i4 = r2.<okio.Segment: int pos>;
+
+        $i3 = $i3 - $i4;
+
+        l0 = (long) $i3;
+
+        $b2 = $l1 cmp l0;
+
+        if $b2 >= 0 goto label09;
+
+        r2 = r0.<okio.Buffer: okio.Segment head>;
+
+        if r2 == null goto label06;
+
+        r2 = r0.<okio.Buffer: okio.Segment head>;
+
+        r2 = r2.<okio.Segment: okio.Segment prev>;
+
+     label04:
+        if r2 == null goto label08;
+
+        $z0 = r2.<okio.Segment: boolean owner>;
+
+        if $z0 == 0 goto label08;
+
+        $i3 = r2.<okio.Segment: int limit>;
+
+        l0 = (long) $i3;
+
+        l0 = $l1 + l0;
+
+        $z0 = r2.<okio.Segment: boolean shared>;
+
+        if $z0 == 0 goto label07;
+
+        $i3 = 0;
+
+     label05:
+        $l5 = (long) $i3;
+
+        l0 = l0 - $l5;
+
+        $b2 = l0 cmp 8192L;
+
+        if $b2 > 0 goto label08;
+
+        $r4 = $r1.<okio.Buffer: okio.Segment head>;
+
+        $i3 = (int) $l1;
+
+        virtualinvoke $r4.<okio.Segment: void writeTo(okio.Segment,int)>(r2, $i3);
+
+        l0 = $r1.<okio.Buffer: long size>;
+
+        l0 = l0 - $l1;
+
+        $r1.<okio.Buffer: long size> = l0;
+
+        l0 = r0.<okio.Buffer: long size>;
+
+        $l1 = l0 + $l1;
+
+        r0.<okio.Buffer: long size> = $l1;
+
+        return;
+
+     label06:
+        r2 = null;
+
+        goto label04;
+
+     label07:
+        $i3 = r2.<okio.Segment: int pos>;
+
+        goto label05;
+
+     label08:
+        r2 = $r1.<okio.Buffer: okio.Segment head>;
+
+        $i3 = (int) $l1;
+
+        r2 = virtualinvoke r2.<okio.Segment: okio.Segment split(int)>($i3);
+
+        $r1.<okio.Buffer: okio.Segment head> = r2;
+
+     label09:
+        r2 = $r1.<okio.Buffer: okio.Segment head>;
+
+        $i3 = r2.<okio.Segment: int limit>;
+
+        $i4 = r2.<okio.Segment: int pos>;
+
+        $i3 = $i3 - $i4;
+
+        l0 = (long) $i3;
+
+        $r4 = virtualinvoke r2.<okio.Segment: okio.Segment pop()>();
+
+        $r1.<okio.Buffer: okio.Segment head> = $r4;
+
+        $r4 = r0.<okio.Buffer: okio.Segment head>;
+
+        if $r4 != null goto label11;
+
+        r0.<okio.Buffer: okio.Segment head> = r2;
+
+        r2 = r0.<okio.Buffer: okio.Segment head>;
+
+        $r4 = r0.<okio.Buffer: okio.Segment head>;
+
+        $r5 = r0.<okio.Buffer: okio.Segment head>;
+
+        $r4.<okio.Segment: okio.Segment prev> = $r5;
+
+        r2.<okio.Segment: okio.Segment next> = $r5;
+
+     label10:
+        $l5 = $r1.<okio.Buffer: long size>;
+
+        $l5 = $l5 - l0;
+
+        $r1.<okio.Buffer: long size> = $l5;
+
+        $l5 = r0.<okio.Buffer: long size>;
+
+        $l5 = $l5 + l0;
+
+        r0.<okio.Buffer: long size> = $l5;
+
+        $l1 = $l1 - l0;
+
+        goto label03;
+
+     label11:
+        $r4 = r0.<okio.Buffer: okio.Segment head>;
+
+        $r4 = $r4.<okio.Segment: okio.Segment prev>;
+
+        r2 = virtualinvoke $r4.<okio.Segment: okio.Segment push(okio.Segment)>(r2);
+
+        virtualinvoke r2.<okio.Segment: void compact()>();
+
+        goto label10;
+
+     label12:
+        return;
+    }
+    public long writeAll(okio.Source) throws java.io.IOException
+    {
+        okio.Buffer r0;
+        okio.Source $r1;
+        long $l0, l1;
+        java.lang.IllegalArgumentException $r2;
+        byte $b2;
+
+        r0 := @this: okio.Buffer;
+
+        $r1 := @parameter0: okio.Source;
+
+        if $r1 != null goto label1;
+
+        $r2 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r2.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("source == null");
+
+        throw $r2;
+
+     label1:
+        l1 = 0L;
+
+     label2:
+        $l0 = interfaceinvoke $r1.<okio.Source: long read(okio.Buffer,long)>(r0, 8192L);
+
+        $b2 = $l0 cmp -1L;
+
+        if $b2 == 0 goto label3;
+
+        l1 = l1 + $l0;
+
+        goto label2;
+
+     label3:
+        return l1;
+    }
+    public okio.Buffer writeByte(int)
+    {
+        okio.Buffer r0;
+        int $i0, $i1, $i2;
+        okio.Segment $r1;
+        byte[] $r2;
+        byte $b3;
+        long $l4;
+
+        r0 := @this: okio.Buffer;
+
+        $i0 := @parameter0: int;
+
+        $r1 = virtualinvoke r0.<okio.Buffer: okio.Segment writableSegment(int)>(1);
+
+        $r2 = $r1.<okio.Segment: byte[] data>;
+
+        $i1 = $r1.<okio.Segment: int limit>;
+
+        $i2 = $i1 + 1;
+
+        $r1.<okio.Segment: int limit> = $i2;
+
+        $b3 = (byte) $i0;
+
+        $r2[$i1] = $b3;
+
+        $l4 = r0.<okio.Buffer: long size>;
+
+        $l4 = $l4 + 1L;
+
+        r0.<okio.Buffer: long size> = $l4;
+
+        return r0;
+    }
+    public volatile okio.BufferedSink writeByte(int) throws java.io.IOException
+    {
+        okio.Buffer r0;
+        int $i0;
+
+        r0 := @this: okio.Buffer;
+
+        $i0 := @parameter0: int;
+
+        r0 = virtualinvoke r0.<okio.Buffer: okio.Buffer writeByte(int)>($i0);
+
+        return r0;
+    }
+    public okio.Buffer writeDecimalLong(long)
+    {
+        byte[] r0, $r3;
+        int i0, i3, i4;
+        okio.Buffer r1;
+        long $l1, $l5;
+        byte $b2;
+        boolean z0;
+        okio.Segment $r2;
+
+        r1 := @this: okio.Buffer;
+
+        $l1 := @parameter0: long;
+
+        $b2 = $l1 cmp 0L;
+
+        if $b2 != 0 goto label01;
+
+        r1 = virtualinvoke r1.<okio.Buffer: okio.Buffer writeByte(int)>(48);
+
+        return r1;
+
+     label01:
+        z0 = 0;
+
+        $b2 = $l1 cmp 0L;
+
+        if $b2 >= 0 goto label03;
+
+        $l1 = neg $l1;
+
+        $b2 = $l1 cmp 0L;
+
+        if $b2 >= 0 goto label02;
+
+        r1 = virtualinvoke r1.<okio.Buffer: okio.Buffer writeUtf8(java.lang.String)>("-9223372036854775808");
+
+        return r1;
+
+     label02:
+        z0 = 1;
+
+     label03:
+        $b2 = $l1 cmp 100000000L;
+
+        if $b2 >= 0 goto label14;
+
+        $b2 = $l1 cmp 10000L;
+
+        if $b2 >= 0 goto label10;
+
+        $b2 = $l1 cmp 100L;
+
+        if $b2 >= 0 goto label08;
+
+        $b2 = $l1 cmp 10L;
+
+        if $b2 >= 0 goto label07;
+
+        i3 = 1;
+
+     label04:
+        if z0 == 0 goto label05;
+
+        i3 = i3 + 1;
+
+     label05:
+        $r2 = virtualinvoke r1.<okio.Buffer: okio.Segment writableSegment(int)>(i3);
+
+        r0 = $r2.<okio.Segment: byte[] data>;
+
+        i0 = $r2.<okio.Segment: int limit>;
+
+        i4 = i0 + i3;
+
+     label06:
+        $b2 = $l1 cmp 0L;
+
+        if $b2 == 0 goto label25;
+
+        $l5 = $l1 % 10L;
+
+        i0 = (int) $l5;
+
+        i4 = i4 + -1;
+
+        $r3 = <okio.Buffer: byte[] DIGITS>;
+
+        $b2 = $r3[i0];
+
+        r0[i4] = $b2;
+
+        $l1 = $l1 / 10L;
+
+        goto label06;
+
+     label07:
+        i3 = 2;
+
+        goto label04;
+
+     label08:
+        $b2 = $l1 cmp 1000L;
+
+        if $b2 >= 0 goto label09;
+
+        i3 = 3;
+
+        goto label04;
+
+     label09:
+        i3 = 4;
+
+        goto label04;
+
+     label10:
+        $b2 = $l1 cmp 1000000L;
+
+        if $b2 >= 0 goto label12;
+
+        $b2 = $l1 cmp 100000L;
+
+        if $b2 >= 0 goto label11;
+
+        i3 = 5;
+
+        goto label04;
+
+     label11:
+        i3 = 6;
+
+        goto label04;
+
+     label12:
+        $b2 = $l1 cmp 10000000L;
+
+        if $b2 >= 0 goto label13;
+
+        i3 = 7;
+
+        goto label04;
+
+     label13:
+        i3 = 8;
+
+        goto label04;
+
+     label14:
+        $b2 = $l1 cmp 1000000000000L;
+
+        if $b2 >= 0 goto label18;
+
+        $b2 = $l1 cmp 10000000000L;
+
+        if $b2 >= 0 goto label16;
+
+        $b2 = $l1 cmp 1000000000L;
+
+        if $b2 >= 0 goto label15;
+
+        i3 = 9;
+
+        goto label04;
+
+     label15:
+        i3 = 10;
+
+        goto label04;
+
+     label16:
+        $b2 = $l1 cmp 100000000000L;
+
+        if $b2 >= 0 goto label17;
+
+        i3 = 11;
+
+        goto label04;
+
+     label17:
+        i3 = 12;
+
+        goto label04;
+
+     label18:
+        $b2 = $l1 cmp 1000000000000000L;
+
+        if $b2 >= 0 goto label21;
+
+        $b2 = $l1 cmp 10000000000000L;
+
+        if $b2 >= 0 goto label19;
+
+        i3 = 13;
+
+        goto label04;
+
+     label19:
+        $b2 = $l1 cmp 100000000000000L;
+
+        if $b2 >= 0 goto label20;
+
+        i3 = 14;
+
+        goto label04;
+
+     label20:
+        i3 = 15;
+
+        goto label04;
+
+     label21:
+        $b2 = $l1 cmp 100000000000000000L;
+
+        if $b2 >= 0 goto label23;
+
+        $b2 = $l1 cmp 10000000000000000L;
+
+        if $b2 >= 0 goto label22;
+
+        i3 = 16;
+
+        goto label04;
+
+     label22:
+        i3 = 17;
+
+        goto label04;
+
+     label23:
+        $b2 = $l1 cmp 1000000000000000000L;
+
+        if $b2 >= 0 goto label24;
+
+        i3 = 18;
+
+        goto label04;
+
+     label24:
+        i3 = 19;
+
+        goto label04;
+
+     label25:
+        if z0 == 0 goto label26;
+
+        i0 = i4 + -1;
+
+        r0[i0] = 45;
+
+     label26:
+        i0 = $r2.<okio.Segment: int limit>;
+
+        i0 = i0 + i3;
+
+        $r2.<okio.Segment: int limit> = i0;
+
+        $l1 = r1.<okio.Buffer: long size>;
+
+        $l5 = (long) i3;
+
+        $l1 = $l1 + $l5;
+
+        r1.<okio.Buffer: long size> = $l1;
+
+        return r1;
+    }
+    public volatile okio.BufferedSink writeDecimalLong(long) throws java.io.IOException
+    {
+        okio.Buffer r0;
+        long $l0;
+
+        r0 := @this: okio.Buffer;
+
+        $l0 := @parameter0: long;
+
+        r0 = virtualinvoke r0.<okio.Buffer: okio.Buffer writeDecimalLong(long)>($l0);
+
+        return r0;
+    }
+    public okio.Buffer writeHexadecimalUnsignedLong(long)
+    {
+        byte[] r0, $r3;
+        int i0, i1, i5, $i6;
+        long $l2, $l4;
+        okio.Buffer r1;
+        byte $b3;
+        okio.Segment $r2;
+
+        r1 := @this: okio.Buffer;
+
+        $l2 := @parameter0: long;
+
+        $b3 = $l2 cmp 0L;
+
+        if $b3 != 0 goto label1;
+
+        r1 = virtualinvoke r1.<okio.Buffer: okio.Buffer writeByte(int)>(48);
+
+        return r1;
+
+     label1:
+        $l4 = staticinvoke <java.lang.Long: long highestOneBit(long)>($l2);
+
+        i1 = staticinvoke <java.lang.Long: int numberOfTrailingZeros(long)>($l4);
+
+        i1 = i1 / 4;
+
+        i1 = i1 + 1;
+
+        $r2 = virtualinvoke r1.<okio.Buffer: okio.Segment writableSegment(int)>(i1);
+
+        r0 = $r2.<okio.Segment: byte[] data>;
+
+        i0 = $r2.<okio.Segment: int limit>;
+
+        i0 = i0 + i1;
+
+        i5 = i0 + -1;
+
+        i0 = $r2.<okio.Segment: int limit>;
+
+     label2:
+        if i5 < i0 goto label3;
+
+        $r3 = <okio.Buffer: byte[] DIGITS>;
+
+        $l4 = 15L & $l2;
+
+        $i6 = (int) $l4;
+
+        $b3 = $r3[$i6];
+
+        r0[i5] = $b3;
+
+        $l2 = $l2 >>> 4;
+
+        i5 = i5 + -1;
+
+        goto label2;
+
+     label3:
+        i0 = $r2.<okio.Segment: int limit>;
+
+        i0 = i0 + i1;
+
+        $r2.<okio.Segment: int limit> = i0;
+
+        $l4 = r1.<okio.Buffer: long size>;
+
+        $l2 = (long) i1;
+
+        $l2 = $l4 + $l2;
+
+        r1.<okio.Buffer: long size> = $l2;
+
+        return r1;
+    }
+    public volatile okio.BufferedSink writeHexadecimalUnsignedLong(long) throws java.io.IOException
+    {
+        okio.Buffer r0;
+        long $l0;
+
+        r0 := @this: okio.Buffer;
+
+        $l0 := @parameter0: long;
+
+        r0 = virtualinvoke r0.<okio.Buffer: okio.Buffer writeHexadecimalUnsignedLong(long)>($l0);
+
+        return r0;
+    }
+    public okio.Buffer writeInt(int)
+    {
+        okio.Buffer r0;
+        int $i0, i1, i2, $i3;
+        byte[] r1;
+        okio.Segment $r2;
+        byte $b4;
+        long $l5;
+
+        r0 := @this: okio.Buffer;
+
+        $i0 := @parameter0: int;
+
+        $r2 = virtualinvoke r0.<okio.Buffer: okio.Segment writableSegment(int)>(4);
+
+        r1 = $r2.<okio.Segment: byte[] data>;
+
+        i1 = $r2.<okio.Segment: int limit>;
+
+        i2 = i1 + 1;
+
+        $i3 = $i0 >>> 24;
+
+        $i3 = $i3 & 255;
+
+        $b4 = (byte) $i3;
+
+        r1[i1] = $b4;
+
+        i1 = i2 + 1;
+
+        $i3 = $i0 >>> 16;
+
+        $i3 = $i3 & 255;
+
+        $b4 = (byte) $i3;
+
+        r1[i2] = $b4;
+
+        i2 = i1 + 1;
+
+        $i3 = $i0 >>> 8;
+
+        $i3 = $i3 & 255;
+
+        $b4 = (byte) $i3;
+
+        r1[i1] = $b4;
+
+        i1 = i2 + 1;
+
+        $i0 = $i0 & 255;
+
+        $b4 = (byte) $i0;
+
+        r1[i2] = $b4;
+
+        $r2.<okio.Segment: int limit> = i1;
+
+        $l5 = r0.<okio.Buffer: long size>;
+
+        $l5 = $l5 + 4L;
+
+        r0.<okio.Buffer: long size> = $l5;
+
+        return r0;
+    }
+    public volatile okio.BufferedSink writeInt(int) throws java.io.IOException
+    {
+        okio.Buffer r0;
+        int $i0;
+
+        r0 := @this: okio.Buffer;
+
+        $i0 := @parameter0: int;
+
+        r0 = virtualinvoke r0.<okio.Buffer: okio.Buffer writeInt(int)>($i0);
+
+        return r0;
+    }
+    public okio.Buffer writeIntLe(int)
+    {
+        okio.Buffer r0;
+        int $i0;
+
+        r0 := @this: okio.Buffer;
+
+        $i0 := @parameter0: int;
+
+        $i0 = staticinvoke <okio.Util: int reverseBytesInt(int)>($i0);
+
+        r0 = virtualinvoke r0.<okio.Buffer: okio.Buffer writeInt(int)>($i0);
+
+        return r0;
+    }
+    public volatile okio.BufferedSink writeIntLe(int) throws java.io.IOException
+    {
+        okio.Buffer r0;
+        int $i0;
+
+        r0 := @this: okio.Buffer;
+
+        $i0 := @parameter0: int;
+
+        r0 = virtualinvoke r0.<okio.Buffer: okio.Buffer writeIntLe(int)>($i0);
+
+        return r0;
+    }
+    public okio.Buffer writeLong(long)
+    {
+        okio.Buffer r0;
+        long $l0, $l3;
+        byte[] r1;
+        okio.Segment $r2;
+        int i1, i2, $i4;
+        byte $b5;
+
+        r0 := @this: okio.Buffer;
+
+        $l0 := @parameter0: long;
+
+        $r2 = virtualinvoke r0.<okio.Buffer: okio.Segment writableSegment(int)>(8);
+
+        r1 = $r2.<okio.Segment: byte[] data>;
+
+        i1 = $r2.<okio.Segment: int limit>;
+
+        i2 = i1 + 1;
+
+        $l3 = $l0 >>> 56;
+
+        $l3 = $l3 & 255L;
+
+        $i4 = (int) $l3;
+
+        $b5 = (byte) $i4;
+
+        r1[i1] = $b5;
+
+        i1 = i2 + 1;
+
+        $l3 = $l0 >>> 48;
+
+        $l3 = $l3 & 255L;
+
+        $i4 = (int) $l3;
+
+        $b5 = (byte) $i4;
+
+        r1[i2] = $b5;
+
+        i2 = i1 + 1;
+
+        $l3 = $l0 >>> 40;
+
+        $l3 = $l3 & 255L;
+
+        $i4 = (int) $l3;
+
+        $b5 = (byte) $i4;
+
+        r1[i1] = $b5;
+
+        i1 = i2 + 1;
+
+        $l3 = $l0 >>> 32;
+
+        $l3 = $l3 & 255L;
+
+        $i4 = (int) $l3;
+
+        $b5 = (byte) $i4;
+
+        r1[i2] = $b5;
+
+        i2 = i1 + 1;
+
+        $l3 = $l0 >>> 24;
+
+        $l3 = $l3 & 255L;
+
+        $i4 = (int) $l3;
+
+        $b5 = (byte) $i4;
+
+        r1[i1] = $b5;
+
+        i1 = i2 + 1;
+
+        $l3 = $l0 >>> 16;
+
+        $l3 = $l3 & 255L;
+
+        $i4 = (int) $l3;
+
+        $b5 = (byte) $i4;
+
+        r1[i2] = $b5;
+
+        i2 = i1 + 1;
+
+        $l3 = $l0 >>> 8;
+
+        $l3 = $l3 & 255L;
+
+        $i4 = (int) $l3;
+
+        $b5 = (byte) $i4;
+
+        r1[i1] = $b5;
+
+        i1 = i2 + 1;
+
+        $l0 = $l0 & 255L;
+
+        $i4 = (int) $l0;
+
+        $b5 = (byte) $i4;
+
+        r1[i2] = $b5;
+
+        $r2.<okio.Segment: int limit> = i1;
+
+        $l0 = r0.<okio.Buffer: long size>;
+
+        $l0 = $l0 + 8L;
+
+        r0.<okio.Buffer: long size> = $l0;
+
+        return r0;
+    }
+    public volatile okio.BufferedSink writeLong(long) throws java.io.IOException
+    {
+        okio.Buffer r0;
+        long $l0;
+
+        r0 := @this: okio.Buffer;
+
+        $l0 := @parameter0: long;
+
+        r0 = virtualinvoke r0.<okio.Buffer: okio.Buffer writeLong(long)>($l0);
+
+        return r0;
+    }
+    public okio.Buffer writeLongLe(long)
+    {
+        okio.Buffer r0;
+        long $l0;
+
+        r0 := @this: okio.Buffer;
+
+        $l0 := @parameter0: long;
+
+        $l0 = staticinvoke <okio.Util: long reverseBytesLong(long)>($l0);
+
+        r0 = virtualinvoke r0.<okio.Buffer: okio.Buffer writeLong(long)>($l0);
+
+        return r0;
+    }
+    public volatile okio.BufferedSink writeLongLe(long) throws java.io.IOException
+    {
+        okio.Buffer r0;
+        long $l0;
+
+        r0 := @this: okio.Buffer;
+
+        $l0 := @parameter0: long;
+
+        r0 = virtualinvoke r0.<okio.Buffer: okio.Buffer writeLongLe(long)>($l0);
+
+        return r0;
+    }
+    public okio.Buffer writeShort(int)
+    {
+        okio.Buffer r0;
+        int $i0, i1, i2, $i3;
+        byte[] r1;
+        okio.Segment $r2;
+        byte $b4;
+        long $l5;
+
+        r0 := @this: okio.Buffer;
+
+        $i0 := @parameter0: int;
+
+        $r2 = virtualinvoke r0.<okio.Buffer: okio.Segment writableSegment(int)>(2);
+
+        r1 = $r2.<okio.Segment: byte[] data>;
+
+        i2 = $r2.<okio.Segment: int limit>;
+
+        i1 = i2 + 1;
+
+        $i3 = $i0 >>> 8;
+
+        $i3 = $i3 & 255;
+
+        $b4 = (byte) $i3;
+
+        r1[i2] = $b4;
+
+        i2 = i1 + 1;
+
+        $i0 = $i0 & 255;
+
+        $b4 = (byte) $i0;
+
+        r1[i1] = $b4;
+
+        $r2.<okio.Segment: int limit> = i2;
+
+        $l5 = r0.<okio.Buffer: long size>;
+
+        $l5 = $l5 + 2L;
+
+        r0.<okio.Buffer: long size> = $l5;
+
+        return r0;
+    }
+    public volatile okio.BufferedSink writeShort(int) throws java.io.IOException
+    {
+        okio.Buffer r0;
+        int $i0;
+
+        r0 := @this: okio.Buffer;
+
+        $i0 := @parameter0: int;
+
+        r0 = virtualinvoke r0.<okio.Buffer: okio.Buffer writeShort(int)>($i0);
+
+        return r0;
+    }
+    public okio.Buffer writeShortLe(int)
+    {
+        okio.Buffer r0;
+        int $i0;
+        short $s1;
+
+        r0 := @this: okio.Buffer;
+
+        $i0 := @parameter0: int;
+
+        $s1 = (short) $i0;
+
+        $s1 = staticinvoke <okio.Util: short reverseBytesShort(short)>($s1);
+
+        r0 = virtualinvoke r0.<okio.Buffer: okio.Buffer writeShort(int)>($s1);
+
+        return r0;
+    }
+    public volatile okio.BufferedSink writeShortLe(int) throws java.io.IOException
+    {
+        okio.Buffer r0;
+        int $i0;
+
+        r0 := @this: okio.Buffer;
+
+        $i0 := @parameter0: int;
+
+        r0 = virtualinvoke r0.<okio.Buffer: okio.Buffer writeShortLe(int)>($i0);
+
+        return r0;
+    }
+    public okio.Buffer writeString(java.lang.String, int, int, java.nio.charset.Charset)
+    {
+        okio.Buffer r0;
+        java.lang.String $r1;
+        int $i0, $i1, $i2;
+        java.nio.charset.Charset $r2, $r6;
+        java.lang.IllegalArgumentException $r3;
+        java.lang.IllegalAccessError $r4;
+        java.lang.StringBuilder $r5;
+        boolean $z0;
+        byte[] $r7;
+
+        r0 := @this: okio.Buffer;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $i0 := @parameter1: int;
+
+        $i1 := @parameter2: int;
+
+        $r2 := @parameter3: java.nio.charset.Charset;
+
+        if $r1 != null goto label1;
+
+        $r3 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r3.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("string == null");
+
+        throw $r3;
+
+     label1:
+        if $i0 >= 0 goto label2;
+
+        $r4 = new java.lang.IllegalAccessError;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("beginIndex < 0: ");
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r1 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r4.<java.lang.IllegalAccessError: void <init>(java.lang.String)>($r1);
+
+        throw $r4;
+
+     label2:
+        if $i1 >= $i0 goto label3;
+
+        $r3 = new java.lang.IllegalArgumentException;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("endIndex < beginIndex: ");
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i1);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" < ");
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r1 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r3.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r1);
+
+        throw $r3;
+
+     label3:
+        $i2 = virtualinvoke $r1.<java.lang.String: int length()>();
+
+        if $i1 <= $i2 goto label4;
+
+        $r3 = new java.lang.IllegalArgumentException;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("endIndex > string.length: ");
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i1);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" > ");
+
+        $i0 = virtualinvoke $r1.<java.lang.String: int length()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r1 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r3.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r1);
+
+        throw $r3;
+
+     label4:
+        if $r2 != null goto label5;
+
+        $r3 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r3.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("charset == null");
+
+        throw $r3;
+
+     label5:
+        $r6 = <okio.Util: java.nio.charset.Charset UTF_8>;
+
+        $z0 = virtualinvoke $r2.<java.nio.charset.Charset: boolean equals(java.lang.Object)>($r6);
+
+        if $z0 == 0 goto label6;
+
+        r0 = virtualinvoke r0.<okio.Buffer: okio.Buffer writeUtf8(java.lang.String,int,int)>($r1, $i0, $i1);
+
+        return r0;
+
+     label6:
+        $r1 = virtualinvoke $r1.<java.lang.String: java.lang.String substring(int,int)>($i0, $i1);
+
+        $r7 = virtualinvoke $r1.<java.lang.String: byte[] getBytes(java.nio.charset.Charset)>($r2);
+
+        $i0 = lengthof $r7;
+
+        r0 = virtualinvoke r0.<okio.Buffer: okio.Buffer write(byte[],int,int)>($r7, 0, $i0);
+
+        return r0;
+    }
+    public okio.Buffer writeString(java.lang.String, java.nio.charset.Charset)
+    {
+        okio.Buffer r0;
+        java.lang.String $r1;
+        java.nio.charset.Charset $r2;
+        int $i0;
+
+        r0 := @this: okio.Buffer;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.nio.charset.Charset;
+
+        $i0 = virtualinvoke $r1.<java.lang.String: int length()>();
+
+        r0 = virtualinvoke r0.<okio.Buffer: okio.Buffer writeString(java.lang.String,int,int,java.nio.charset.Charset)>($r1, 0, $i0, $r2);
+
+        return r0;
+    }
+    public volatile okio.BufferedSink writeString(java.lang.String, int, int, java.nio.charset.Charset) throws java.io.IOException
+    {
+        okio.Buffer r0;
+        java.lang.String $r1;
+        int $i0, $i1;
+        java.nio.charset.Charset $r2;
+
+        r0 := @this: okio.Buffer;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $i0 := @parameter1: int;
+
+        $i1 := @parameter2: int;
+
+        $r2 := @parameter3: java.nio.charset.Charset;
+
+        r0 = virtualinvoke r0.<okio.Buffer: okio.Buffer writeString(java.lang.String,int,int,java.nio.charset.Charset)>($r1, $i0, $i1, $r2);
+
+        return r0;
+    }
+    public volatile okio.BufferedSink writeString(java.lang.String, java.nio.charset.Charset) throws java.io.IOException
+    {
+        okio.Buffer r0;
+        java.lang.String $r1;
+        java.nio.charset.Charset $r2;
+
+        r0 := @this: okio.Buffer;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.nio.charset.Charset;
+
+        r0 = virtualinvoke r0.<okio.Buffer: okio.Buffer writeString(java.lang.String,java.nio.charset.Charset)>($r1, $r2);
+
+        return r0;
+    }
+    public okio.Buffer writeTo(java.io.OutputStream) throws java.io.IOException
+    {
+        okio.Buffer r0;
+        java.io.OutputStream $r1;
+        long $l0;
+
+        r0 := @this: okio.Buffer;
+
+        $r1 := @parameter0: java.io.OutputStream;
+
+        $l0 = r0.<okio.Buffer: long size>;
+
+        r0 = virtualinvoke r0.<okio.Buffer: okio.Buffer writeTo(java.io.OutputStream,long)>($r1, $l0);
+
+        return r0;
+    }
+    public okio.Buffer writeTo(java.io.OutputStream, long) throws java.io.IOException
+    {
+        okio.Buffer r0;
+        java.io.OutputStream $r1;
+        int i0, $i4;
+        okio.Segment r2, r4, $r6;
+        long $l1, $l2, $l5;
+        java.lang.IllegalArgumentException $r3;
+        byte $b3;
+        byte[] $r5;
+
+        r0 := @this: okio.Buffer;
+
+        $r1 := @parameter0: java.io.OutputStream;
+
+        $l1 := @parameter1: long;
+
+        if $r1 != null goto label1;
+
+        $r3 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r3.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("out == null");
+
+        throw $r3;
+
+     label1:
+        $l2 = r0.<okio.Buffer: long size>;
+
+        staticinvoke <okio.Util: void checkOffsetAndCount(long,long,long)>($l2, 0L, $l1);
+
+        r4 = r0.<okio.Buffer: okio.Segment head>;
+
+     label2:
+        $b3 = $l1 cmp 0L;
+
+        if $b3 <= 0 goto label3;
+
+        i0 = r4.<okio.Segment: int limit>;
+
+        $i4 = r4.<okio.Segment: int pos>;
+
+        i0 = i0 - $i4;
+
+        $l2 = (long) i0;
+
+        $l2 = staticinvoke <java.lang.Math: long min(long,long)>($l1, $l2);
+
+        i0 = (int) $l2;
+
+        $r5 = r4.<okio.Segment: byte[] data>;
+
+        $i4 = r4.<okio.Segment: int pos>;
+
+        virtualinvoke $r1.<java.io.OutputStream: void write(byte[],int,int)>($r5, $i4, i0);
+
+        $i4 = r4.<okio.Segment: int pos>;
+
+        $i4 = $i4 + i0;
+
+        r4.<okio.Segment: int pos> = $i4;
+
+        $l2 = r0.<okio.Buffer: long size>;
+
+        $l5 = (long) i0;
+
+        $l2 = $l2 - $l5;
+
+        r0.<okio.Buffer: long size> = $l2;
+
+        $l2 = (long) i0;
+
+        $l1 = $l1 - $l2;
+
+        i0 = r4.<okio.Segment: int pos>;
+
+        $i4 = r4.<okio.Segment: int limit>;
+
+        if i0 != $i4 goto label2;
+
+        r2 = r4;
+
+        $r6 = virtualinvoke r4.<okio.Segment: okio.Segment pop()>();
+
+        r4 = $r6;
+
+        r0.<okio.Buffer: okio.Segment head> = $r6;
+
+        staticinvoke <okio.SegmentPool: void recycle(okio.Segment)>(r2);
+
+        goto label2;
+
+     label3:
+        return r0;
+    }
+    public okio.Buffer writeUtf8(java.lang.String)
+    {
+        okio.Buffer r0;
+        java.lang.String $r1;
+        int $i0;
+
+        r0 := @this: okio.Buffer;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $i0 = virtualinvoke $r1.<java.lang.String: int length()>();
+
+        r0 = virtualinvoke r0.<okio.Buffer: okio.Buffer writeUtf8(java.lang.String,int,int)>($r1, 0, $i0);
+
+        return r0;
+    }
+    public okio.Buffer writeUtf8(java.lang.String, int, int)
+    {
+        okio.Buffer r0;
+        java.lang.String $r1;
+        int $i0, $i1, i2, $i4, i5;
+        byte[] r2;
+        java.lang.IllegalArgumentException $r3;
+        java.lang.IllegalAccessError $r4;
+        java.lang.StringBuilder $r5;
+        char $c3, $c9;
+        okio.Segment $r6;
+        byte $b6;
+        long $l7, $l8;
+
+        r0 := @this: okio.Buffer;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $i0 := @parameter1: int;
+
+        $i1 := @parameter2: int;
+
+        if $r1 != null goto label01;
+
+        $r3 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r3.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("string == null");
+
+        throw $r3;
+
+     label01:
+        if $i0 >= 0 goto label02;
+
+        $r4 = new java.lang.IllegalAccessError;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("beginIndex < 0: ");
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r1 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r4.<java.lang.IllegalAccessError: void <init>(java.lang.String)>($r1);
+
+        throw $r4;
+
+     label02:
+        if $i1 >= $i0 goto label03;
+
+        $r3 = new java.lang.IllegalArgumentException;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("endIndex < beginIndex: ");
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i1);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" < ");
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r1 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r3.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r1);
+
+        throw $r3;
+
+     label03:
+        i2 = virtualinvoke $r1.<java.lang.String: int length()>();
+
+        if $i1 <= i2 goto label04;
+
+        $r3 = new java.lang.IllegalArgumentException;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("endIndex > string.length: ");
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i1);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" > ");
+
+        $i0 = virtualinvoke $r1.<java.lang.String: int length()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r1 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r3.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r1);
+
+        throw $r3;
+
+     label04:
+        if $i0 >= $i1 goto label17;
+
+        $c3 = virtualinvoke $r1.<java.lang.String: char charAt(int)>($i0);
+
+        if $c3 >= 128 goto label09;
+
+        $r6 = virtualinvoke r0.<okio.Buffer: okio.Segment writableSegment(int)>(1);
+
+        r2 = $r6.<okio.Segment: byte[] data>;
+
+        i2 = $r6.<okio.Segment: int limit>;
+
+        i2 = i2 - $i0;
+
+        $i4 = 8192 - i2;
+
+        $i4 = staticinvoke <java.lang.Math: int min(int,int)>($i1, $i4);
+
+        i5 = $i0 + 1;
+
+        $i0 = i2 + $i0;
+
+        $b6 = (byte) $c3;
+
+        r2[$i0] = $b6;
+
+        $i0 = i5;
+
+     label05:
+        if $i0 >= $i4 goto label06;
+
+        $c3 = virtualinvoke $r1.<java.lang.String: char charAt(int)>($i0);
+
+        if $c3 < 128 goto label08;
+
+     label06:
+        i2 = $i0 + i2;
+
+        $i4 = $r6.<okio.Segment: int limit>;
+
+        i2 = i2 - $i4;
+
+        $i4 = $r6.<okio.Segment: int limit>;
+
+        $i4 = $i4 + i2;
+
+        $r6.<okio.Segment: int limit> = $i4;
+
+        $l7 = r0.<okio.Buffer: long size>;
+
+        $l8 = (long) i2;
+
+        $l7 = $l7 + $l8;
+
+        r0.<okio.Buffer: long size> = $l7;
+
+     label07:
+        goto label04;
+
+     label08:
+        i5 = $i0 + 1;
+
+        $i0 = i2 + $i0;
+
+        $b6 = (byte) $c3;
+
+        r2[$i0] = $b6;
+
+        $i0 = i5;
+
+        goto label05;
+
+     label09:
+        if $c3 >= 2048 goto label10;
+
+        i2 = $c3 >> 6;
+
+        i2 = i2 | 192;
+
+        virtualinvoke r0.<okio.Buffer: okio.Buffer writeByte(int)>(i2);
+
+        i2 = $c3 & 63;
+
+        i2 = i2 | 128;
+
+        virtualinvoke r0.<okio.Buffer: okio.Buffer writeByte(int)>(i2);
+
+        $i0 = $i0 + 1;
+
+        goto label07;
+
+     label10:
+        if $c3 < 55296 goto label11;
+
+        if $c3 <= 57343 goto label12;
+
+     label11:
+        i2 = $c3 >> 12;
+
+        i2 = i2 | 224;
+
+        virtualinvoke r0.<okio.Buffer: okio.Buffer writeByte(int)>(i2);
+
+        i2 = $c3 >> 6;
+
+        i2 = i2 & 63;
+
+        i2 = i2 | 128;
+
+        virtualinvoke r0.<okio.Buffer: okio.Buffer writeByte(int)>(i2);
+
+        i2 = $c3 & 63;
+
+        i2 = i2 | 128;
+
+        virtualinvoke r0.<okio.Buffer: okio.Buffer writeByte(int)>(i2);
+
+        $i0 = $i0 + 1;
+
+        goto label07;
+
+     label12:
+        i2 = $i0 + 1;
+
+        if i2 >= $i1 goto label15;
+
+        i2 = $i0 + 1;
+
+        $c9 = virtualinvoke $r1.<java.lang.String: char charAt(int)>(i2);
+
+     label13:
+        if $c3 > 56319 goto label14;
+
+        if $c9 < 56320 goto label14;
+
+        if $c9 <= 57343 goto label16;
+
+     label14:
+        virtualinvoke r0.<okio.Buffer: okio.Buffer writeByte(int)>(63);
+
+        $i0 = $i0 + 1;
+
+        goto label04;
+
+     label15:
+        $c9 = 0;
+
+        goto label13;
+
+     label16:
+        i2 = -55297 & $c3;
+
+        i2 = i2 << 10;
+
+        $i4 = -56321 & $c9;
+
+        i2 = i2 | $i4;
+
+        i2 = 65536 + i2;
+
+        $i4 = i2 >> 18;
+
+        $i4 = $i4 | 240;
+
+        virtualinvoke r0.<okio.Buffer: okio.Buffer writeByte(int)>($i4);
+
+        $i4 = i2 >> 12;
+
+        $i4 = $i4 & 63;
+
+        $i4 = $i4 | 128;
+
+        virtualinvoke r0.<okio.Buffer: okio.Buffer writeByte(int)>($i4);
+
+        $i4 = i2 >> 6;
+
+        $i4 = $i4 & 63;
+
+        $i4 = $i4 | 128;
+
+        virtualinvoke r0.<okio.Buffer: okio.Buffer writeByte(int)>($i4);
+
+        i2 = i2 & 63;
+
+        i2 = i2 | 128;
+
+        virtualinvoke r0.<okio.Buffer: okio.Buffer writeByte(int)>(i2);
+
+        $i0 = $i0 + 2;
+
+        goto label07;
+
+     label17:
+        return r0;
+    }
+    public volatile okio.BufferedSink writeUtf8(java.lang.String) throws java.io.IOException
+    {
+        okio.Buffer r0;
+        java.lang.String $r1;
+
+        r0 := @this: okio.Buffer;
+
+        $r1 := @parameter0: java.lang.String;
+
+        r0 = virtualinvoke r0.<okio.Buffer: okio.Buffer writeUtf8(java.lang.String)>($r1);
+
+        return r0;
+    }
+    public volatile okio.BufferedSink writeUtf8(java.lang.String, int, int) throws java.io.IOException
+    {
+        okio.Buffer r0;
+        java.lang.String $r1;
+        int $i0, $i1;
+
+        r0 := @this: okio.Buffer;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $i0 := @parameter1: int;
+
+        $i1 := @parameter2: int;
+
+        r0 = virtualinvoke r0.<okio.Buffer: okio.Buffer writeUtf8(java.lang.String,int,int)>($r1, $i0, $i1);
+
+        return r0;
+    }
+    public okio.Buffer writeUtf8CodePoint(int)
+    {
+        okio.Buffer r0;
+        int $i0, $i1;
+        java.lang.IllegalArgumentException $r1;
+        java.lang.StringBuilder $r2;
+        java.lang.String $r3;
+
+        r0 := @this: okio.Buffer;
+
+        $i0 := @parameter0: int;
+
+        if $i0 >= 128 goto label1;
+
+        virtualinvoke r0.<okio.Buffer: okio.Buffer writeByte(int)>($i0);
+
+        return r0;
+
+     label1:
+        if $i0 >= 2048 goto label2;
+
+        $i1 = $i0 >> 6;
+
+        $i1 = $i1 | 192;
+
+        virtualinvoke r0.<okio.Buffer: okio.Buffer writeByte(int)>($i1);
+
+        $i0 = $i0 & 63;
+
+        $i0 = $i0 | 128;
+
+        virtualinvoke r0.<okio.Buffer: okio.Buffer writeByte(int)>($i0);
+
+        return r0;
+
+     label2:
+        if $i0 >= 65536 goto label4;
+
+        if $i0 < 55296 goto label3;
+
+        if $i0 > 57343 goto label3;
+
+        $r1 = new java.lang.IllegalArgumentException;
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unexpected code point: ");
+
+        $r3 = staticinvoke <java.lang.Integer: java.lang.String toHexString(int)>($i0);
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r1.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r3);
+
+        throw $r1;
+
+     label3:
+        $i1 = $i0 >> 12;
+
+        $i1 = $i1 | 224;
+
+        virtualinvoke r0.<okio.Buffer: okio.Buffer writeByte(int)>($i1);
+
+        $i1 = $i0 >> 6;
+
+        $i1 = $i1 & 63;
+
+        $i1 = $i1 | 128;
+
+        virtualinvoke r0.<okio.Buffer: okio.Buffer writeByte(int)>($i1);
+
+        $i0 = $i0 & 63;
+
+        $i0 = $i0 | 128;
+
+        virtualinvoke r0.<okio.Buffer: okio.Buffer writeByte(int)>($i0);
+
+        return r0;
+
+     label4:
+        if $i0 > 1114111 goto label5;
+
+        $i1 = $i0 >> 18;
+
+        $i1 = $i1 | 240;
+
+        virtualinvoke r0.<okio.Buffer: okio.Buffer writeByte(int)>($i1);
+
+        $i1 = $i0 >> 12;
+
+        $i1 = $i1 & 63;
+
+        $i1 = $i1 | 128;
+
+        virtualinvoke r0.<okio.Buffer: okio.Buffer writeByte(int)>($i1);
+
+        $i1 = $i0 >> 6;
+
+        $i1 = $i1 & 63;
+
+        $i1 = $i1 | 128;
+
+        virtualinvoke r0.<okio.Buffer: okio.Buffer writeByte(int)>($i1);
+
+        $i0 = $i0 & 63;
+
+        $i0 = $i0 | 128;
+
+        virtualinvoke r0.<okio.Buffer: okio.Buffer writeByte(int)>($i0);
+
+        return r0;
+
+     label5:
+        $r1 = new java.lang.IllegalArgumentException;
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unexpected code point: ");
+
+        $r3 = staticinvoke <java.lang.Integer: java.lang.String toHexString(int)>($i0);
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r1.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r3);
+
+        throw $r1;
+    }
+    public volatile okio.BufferedSink writeUtf8CodePoint(int) throws java.io.IOException
+    {
+        okio.Buffer r0;
+        int $i0;
+
+        r0 := @this: okio.Buffer;
+
+        $i0 := @parameter0: int;
+
+        r0 = virtualinvoke r0.<okio.Buffer: okio.Buffer writeUtf8CodePoint(int)>($i0);
+
+        return r0;
+    }

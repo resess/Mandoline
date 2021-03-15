@@ -1,0 +1,503 @@
+org.apache.jackrabbit.webdav.client.methods.DavMethodBase extends org.apache.commons.httpclient.methods.EntityEnclosingMethod implements org.apache.jackrabbit.webdav.client.methods.DavMethod org.apache.jackrabbit.webdav.DavConstants
+private static org.slf4j.Logger log
+private org.apache.jackrabbit.webdav.MultiStatus multiStatus
+private org.w3c.dom.Document responseDocument
+private boolean success
+    static void <clinit>()
+    {
+        org.slf4j.Logger $r0;
+
+        $r0 = staticinvoke <org.slf4j.LoggerFactory: org.slf4j.Logger getLogger(java.lang.Class)>(class "Lorg/apache/jackrabbit/webdav/client/methods/DavMethodBase;");
+
+        <org.apache.jackrabbit.webdav.client.methods.DavMethodBase: org.slf4j.Logger log> = $r0;
+
+        return;
+    }
+    public void <init>(java.lang.String)
+    {
+        org.apache.jackrabbit.webdav.client.methods.DavMethodBase r0;
+        java.lang.String $r1;
+
+        r0 := @this: org.apache.jackrabbit.webdav.client.methods.DavMethodBase;
+
+        $r1 := @parameter0: java.lang.String;
+
+        specialinvoke r0.<org.apache.commons.httpclient.methods.EntityEnclosingMethod: void <init>(java.lang.String)>($r1);
+
+        return;
+    }
+    public void addRequestHeader(org.apache.jackrabbit.webdav.header.Header)
+    {
+        org.apache.jackrabbit.webdav.client.methods.DavMethodBase r0;
+        org.apache.jackrabbit.webdav.header.Header $r1;
+        java.lang.String $r2, $r3;
+
+        r0 := @this: org.apache.jackrabbit.webdav.client.methods.DavMethodBase;
+
+        $r1 := @parameter0: org.apache.jackrabbit.webdav.header.Header;
+
+        $r2 = interfaceinvoke $r1.<org.apache.jackrabbit.webdav.header.Header: java.lang.String getHeaderName()>();
+
+        $r3 = interfaceinvoke $r1.<org.apache.jackrabbit.webdav.header.Header: java.lang.String getHeaderValue()>();
+
+        virtualinvoke r0.<org.apache.jackrabbit.webdav.client.methods.DavMethodBase: void addRequestHeader(java.lang.String,java.lang.String)>($r2, $r3);
+
+        return;
+    }
+    public void checkSuccess() throws org.apache.jackrabbit.webdav.DavException, java.io.IOException
+    {
+        org.apache.jackrabbit.webdav.client.methods.DavMethodBase r0;
+        boolean $z0;
+        org.apache.jackrabbit.webdav.DavException $r1;
+
+        r0 := @this: org.apache.jackrabbit.webdav.client.methods.DavMethodBase;
+
+        $z0 = virtualinvoke r0.<org.apache.jackrabbit.webdav.client.methods.DavMethodBase: boolean succeeded()>();
+
+        if $z0 != 0 goto label1;
+
+        $r1 = virtualinvoke r0.<org.apache.jackrabbit.webdav.client.methods.DavMethodBase: org.apache.jackrabbit.webdav.DavException getResponseException()>();
+
+        throw $r1;
+
+     label1:
+        return;
+    }
+public abstract java.lang.String getName() { 
+// no body
+} 
+    public org.w3c.dom.Document getResponseBodyAsDocument() throws java.io.IOException
+    {
+        org.apache.jackrabbit.webdav.client.methods.DavMethodBase r0;
+        org.w3c.dom.Document $r1;
+        java.io.InputStream $r2;
+        javax.xml.parsers.ParserConfigurationException r3;
+        java.io.IOException r4;
+        java.lang.Throwable $r5;
+        org.xml.sax.SAXException r6;
+
+        r0 := @this: org.apache.jackrabbit.webdav.client.methods.DavMethodBase;
+
+        $r1 = r0.<org.apache.jackrabbit.webdav.client.methods.DavMethodBase: org.w3c.dom.Document responseDocument>;
+
+        if $r1 == null goto label1;
+
+        $r1 = r0.<org.apache.jackrabbit.webdav.client.methods.DavMethodBase: org.w3c.dom.Document responseDocument>;
+
+        return $r1;
+
+     label1:
+        $r2 = virtualinvoke r0.<org.apache.jackrabbit.webdav.client.methods.DavMethodBase: java.io.InputStream getResponseBodyAsStream()>();
+
+        if $r2 == null goto label9;
+
+     label2:
+        $r1 = staticinvoke <org.apache.jackrabbit.webdav.xml.DomUtil: org.w3c.dom.Document parseDocument(java.io.InputStream)>($r2);
+
+     label3:
+        virtualinvoke $r2.<java.io.InputStream: void close()>();
+
+        return $r1;
+
+     label4:
+        r3 := @caughtexception;
+
+     label5:
+        r4 = new java.io.IOException;
+
+        specialinvoke r4.<java.io.IOException: void <init>(java.lang.String)>("XML parser configuration error");
+
+        virtualinvoke r4.<java.io.IOException: java.lang.Throwable initCause(java.lang.Throwable)>(r3);
+
+        throw r4;
+
+     label6:
+        $r5 := @caughtexception;
+
+        virtualinvoke $r2.<java.io.InputStream: void close()>();
+
+        throw $r5;
+
+     label7:
+        r6 := @caughtexception;
+
+     label8:
+        r4 = new java.io.IOException;
+
+        specialinvoke r4.<java.io.IOException: void <init>(java.lang.String)>("XML parsing error");
+
+        virtualinvoke r4.<java.io.IOException: java.lang.Throwable initCause(java.lang.Throwable)>(r6);
+
+        throw r4;
+
+     label9:
+        return null;
+
+        catch javax.xml.parsers.ParserConfigurationException from label2 to label3 with label4;
+        catch org.xml.sax.SAXException from label2 to label3 with label7;
+        catch java.lang.Throwable from label2 to label3 with label6;
+        catch java.lang.Throwable from label5 to label6 with label6;
+        catch java.lang.Throwable from label8 to label9 with label6;
+    }
+    public org.apache.jackrabbit.webdav.MultiStatus getResponseBodyAsMultiStatus() throws java.io.IOException, org.apache.jackrabbit.webdav.DavException
+    {
+        org.apache.jackrabbit.webdav.client.methods.DavMethodBase r0;
+        org.apache.jackrabbit.webdav.MultiStatus $r1;
+        org.apache.jackrabbit.webdav.DavException $r2;
+        int $i0;
+        java.lang.StringBuilder $r3;
+        java.lang.String $r4;
+        org.apache.commons.httpclient.StatusLine $r5;
+
+        r0 := @this: org.apache.jackrabbit.webdav.client.methods.DavMethodBase;
+
+        virtualinvoke r0.<org.apache.jackrabbit.webdav.client.methods.DavMethodBase: void checkUsed()>();
+
+        $r1 = r0.<org.apache.jackrabbit.webdav.client.methods.DavMethodBase: org.apache.jackrabbit.webdav.MultiStatus multiStatus>;
+
+        if $r1 == null goto label1;
+
+        $r1 = r0.<org.apache.jackrabbit.webdav.client.methods.DavMethodBase: org.apache.jackrabbit.webdav.MultiStatus multiStatus>;
+
+        return $r1;
+
+     label1:
+        $r2 = virtualinvoke r0.<org.apache.jackrabbit.webdav.client.methods.DavMethodBase: org.apache.jackrabbit.webdav.DavException getResponseException()>();
+
+        if $r2 == null goto label2;
+
+        throw $r2;
+
+     label2:
+        $r2 = new org.apache.jackrabbit.webdav.DavException;
+
+        $i0 = virtualinvoke r0.<org.apache.jackrabbit.webdav.client.methods.DavMethodBase: int getStatusCode()>();
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke r0.<org.apache.jackrabbit.webdav.client.methods.DavMethodBase: java.lang.String getName()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" resulted with unexpected status: ");
+
+        $r5 = virtualinvoke r0.<org.apache.jackrabbit.webdav.client.methods.DavMethodBase: org.apache.commons.httpclient.StatusLine getStatusLine()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r5);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r2.<org.apache.jackrabbit.webdav.DavException: void <init>(int,java.lang.String)>($i0, $r4);
+
+        throw $r2;
+    }
+    public org.apache.jackrabbit.webdav.DavException getResponseException() throws java.io.IOException
+    {
+        org.apache.jackrabbit.webdav.client.methods.DavMethodBase r0;
+        boolean $z0;
+        org.slf4j.Logger $r1;
+        java.lang.IllegalStateException $r2;
+        org.w3c.dom.Element r3, $r4;
+        org.apache.jackrabbit.webdav.DavException $r5;
+        int $i0;
+        java.lang.String $r6;
+        java.io.IOException $r7;
+
+        r0 := @this: org.apache.jackrabbit.webdav.client.methods.DavMethodBase;
+
+        virtualinvoke r0.<org.apache.jackrabbit.webdav.client.methods.DavMethodBase: void checkUsed()>();
+
+        $z0 = r0.<org.apache.jackrabbit.webdav.client.methods.DavMethodBase: boolean success>;
+
+        if $z0 == 0 goto label1;
+
+        $r1 = <org.apache.jackrabbit.webdav.client.methods.DavMethodBase: org.slf4j.Logger log>;
+
+        interfaceinvoke $r1.<org.slf4j.Logger: void warn(java.lang.String)>("Cannot retrieve exception from successful response.");
+
+        $r2 = new java.lang.IllegalStateException;
+
+        specialinvoke $r2.<java.lang.IllegalStateException: void <init>(java.lang.String)>("Cannot retrieve exception from successful response.");
+
+        throw $r2;
+
+     label1:
+        r3 = null;
+
+     label2:
+        $r4 = virtualinvoke r0.<org.apache.jackrabbit.webdav.client.methods.DavMethodBase: org.w3c.dom.Element getRootElement()>();
+
+     label3:
+        r3 = $r4;
+
+     label4:
+        if r3 == null goto label5;
+
+        $r5 = new org.apache.jackrabbit.webdav.DavException;
+
+        $i0 = virtualinvoke r0.<org.apache.jackrabbit.webdav.client.methods.DavMethodBase: int getStatusCode()>();
+
+        $r6 = virtualinvoke r0.<org.apache.jackrabbit.webdav.client.methods.DavMethodBase: java.lang.String getStatusText()>();
+
+        specialinvoke $r5.<org.apache.jackrabbit.webdav.DavException: void <init>(int,java.lang.String,java.lang.Throwable,org.w3c.dom.Element)>($i0, $r6, null, r3);
+
+        return $r5;
+
+     label5:
+        $r5 = new org.apache.jackrabbit.webdav.DavException;
+
+        $i0 = virtualinvoke r0.<org.apache.jackrabbit.webdav.client.methods.DavMethodBase: int getStatusCode()>();
+
+        $r6 = virtualinvoke r0.<org.apache.jackrabbit.webdav.client.methods.DavMethodBase: java.lang.String getStatusText()>();
+
+        specialinvoke $r5.<org.apache.jackrabbit.webdav.DavException: void <init>(int,java.lang.String)>($i0, $r6);
+
+        return $r5;
+
+     label6:
+        $r7 := @caughtexception;
+
+        goto label4;
+
+        catch java.io.IOException from label2 to label3 with label6;
+    }
+    org.w3c.dom.Element getRootElement() throws java.io.IOException
+    {
+        org.apache.jackrabbit.webdav.client.methods.DavMethodBase r0;
+        org.w3c.dom.Document $r1;
+        org.w3c.dom.Element $r2;
+
+        r0 := @this: org.apache.jackrabbit.webdav.client.methods.DavMethodBase;
+
+        $r1 = virtualinvoke r0.<org.apache.jackrabbit.webdav.client.methods.DavMethodBase: org.w3c.dom.Document getResponseBodyAsDocument()>();
+
+        if $r1 == null goto label1;
+
+        $r2 = interfaceinvoke $r1.<org.w3c.dom.Document: org.w3c.dom.Element getDocumentElement()>();
+
+        return $r2;
+
+     label1:
+        return null;
+    }
+    protected boolean getSuccess()
+    {
+        org.apache.jackrabbit.webdav.client.methods.DavMethodBase r0;
+        boolean z0;
+
+        r0 := @this: org.apache.jackrabbit.webdav.client.methods.DavMethodBase;
+
+        z0 = r0.<org.apache.jackrabbit.webdav.client.methods.DavMethodBase: boolean success>;
+
+        return z0;
+    }
+protected abstract boolean isSuccess(int) { 
+// no body
+} 
+    protected void processMultiStatusBody(org.apache.jackrabbit.webdav.MultiStatus, org.apache.commons.httpclient.HttpState, org.apache.commons.httpclient.HttpConnection)
+    {
+        org.apache.jackrabbit.webdav.client.methods.DavMethodBase r0;
+        org.apache.jackrabbit.webdav.MultiStatus $r1;
+        org.apache.commons.httpclient.HttpState $r2;
+        org.apache.commons.httpclient.HttpConnection $r3;
+
+        r0 := @this: org.apache.jackrabbit.webdav.client.methods.DavMethodBase;
+
+        $r1 := @parameter0: org.apache.jackrabbit.webdav.MultiStatus;
+
+        $r2 := @parameter1: org.apache.commons.httpclient.HttpState;
+
+        $r3 := @parameter2: org.apache.commons.httpclient.HttpConnection;
+
+        return;
+    }
+    protected void processResponseBody(org.apache.commons.httpclient.HttpState, org.apache.commons.httpclient.HttpConnection)
+    {
+        org.apache.jackrabbit.webdav.client.methods.DavMethodBase r0;
+        org.apache.commons.httpclient.HttpState $r1;
+        org.apache.commons.httpclient.HttpConnection $r2;
+        java.io.IOException r3;
+        int $i0;
+        org.w3c.dom.Element $r4;
+        org.apache.jackrabbit.webdav.MultiStatus $r5;
+        org.slf4j.Logger $r6;
+        java.lang.StringBuilder $r7;
+        java.lang.String $r8;
+
+        r0 := @this: org.apache.jackrabbit.webdav.client.methods.DavMethodBase;
+
+        $r1 := @parameter0: org.apache.commons.httpclient.HttpState;
+
+        $r2 := @parameter1: org.apache.commons.httpclient.HttpConnection;
+
+        $i0 = virtualinvoke r0.<org.apache.jackrabbit.webdav.client.methods.DavMethodBase: int getStatusCode()>();
+
+        if $i0 != 207 goto label6;
+
+     label1:
+        $r4 = virtualinvoke r0.<org.apache.jackrabbit.webdav.client.methods.DavMethodBase: org.w3c.dom.Element getRootElement()>();
+
+        $r5 = staticinvoke <org.apache.jackrabbit.webdav.MultiStatus: org.apache.jackrabbit.webdav.MultiStatus createFromXml(org.w3c.dom.Element)>($r4);
+
+     label2:
+        r0.<org.apache.jackrabbit.webdav.client.methods.DavMethodBase: org.apache.jackrabbit.webdav.MultiStatus multiStatus> = $r5;
+
+        $r5 = r0.<org.apache.jackrabbit.webdav.client.methods.DavMethodBase: org.apache.jackrabbit.webdav.MultiStatus multiStatus>;
+
+     label3:
+        virtualinvoke r0.<org.apache.jackrabbit.webdav.client.methods.DavMethodBase: void processMultiStatusBody(org.apache.jackrabbit.webdav.MultiStatus,org.apache.commons.httpclient.HttpState,org.apache.commons.httpclient.HttpConnection)>($r5, $r1, $r2);
+
+     label4:
+        return;
+
+     label5:
+        r3 := @caughtexception;
+
+        $r6 = <org.apache.jackrabbit.webdav.client.methods.DavMethodBase: org.slf4j.Logger log>;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Error while parsing multistatus response: ");
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r3);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        interfaceinvoke $r6.<org.slf4j.Logger: void error(java.lang.String)>($r8);
+
+        r0.<org.apache.jackrabbit.webdav.client.methods.DavMethodBase: boolean success> = 0;
+
+     label6:
+        return;
+
+        catch java.io.IOException from label1 to label2 with label5;
+        catch java.io.IOException from label3 to label4 with label5;
+    }
+    protected void processStatusLine(org.apache.commons.httpclient.HttpState, org.apache.commons.httpclient.HttpConnection)
+    {
+        org.apache.jackrabbit.webdav.client.methods.DavMethodBase r0;
+        org.apache.commons.httpclient.HttpState $r1;
+        org.apache.commons.httpclient.HttpConnection $r2;
+        int $i0;
+        boolean $z0;
+
+        r0 := @this: org.apache.jackrabbit.webdav.client.methods.DavMethodBase;
+
+        $r1 := @parameter0: org.apache.commons.httpclient.HttpState;
+
+        $r2 := @parameter1: org.apache.commons.httpclient.HttpConnection;
+
+        specialinvoke r0.<org.apache.commons.httpclient.methods.EntityEnclosingMethod: void processStatusLine(org.apache.commons.httpclient.HttpState,org.apache.commons.httpclient.HttpConnection)>($r1, $r2);
+
+        $i0 = virtualinvoke r0.<org.apache.jackrabbit.webdav.client.methods.DavMethodBase: int getStatusCode()>();
+
+        $z0 = virtualinvoke r0.<org.apache.jackrabbit.webdav.client.methods.DavMethodBase: boolean isSuccess(int)>($i0);
+
+        r0.<org.apache.jackrabbit.webdav.client.methods.DavMethodBase: boolean success> = $z0;
+
+        return;
+    }
+    public void setRequestBody(org.apache.jackrabbit.webdav.xml.XmlSerializable) throws java.io.IOException
+    {
+        org.apache.jackrabbit.webdav.client.methods.DavMethodBase r0;
+        org.apache.jackrabbit.webdav.xml.XmlSerializable $r1;
+        javax.xml.parsers.ParserConfigurationException r2;
+        java.io.IOException r3;
+        org.w3c.dom.Document $r4;
+        org.w3c.dom.Element $r5;
+
+        r0 := @this: org.apache.jackrabbit.webdav.client.methods.DavMethodBase;
+
+        $r1 := @parameter0: org.apache.jackrabbit.webdav.xml.XmlSerializable;
+
+     label1:
+        $r4 = staticinvoke <org.apache.jackrabbit.webdav.xml.DomUtil: org.w3c.dom.Document createDocument()>();
+
+        $r5 = interfaceinvoke $r1.<org.apache.jackrabbit.webdav.xml.XmlSerializable: org.w3c.dom.Element toXml(org.w3c.dom.Document)>($r4);
+
+        interfaceinvoke $r4.<org.w3c.dom.Document: org.w3c.dom.Node appendChild(org.w3c.dom.Node)>($r5);
+
+        virtualinvoke r0.<org.apache.jackrabbit.webdav.client.methods.DavMethodBase: void setRequestBody(org.w3c.dom.Document)>($r4);
+
+     label2:
+        return;
+
+     label3:
+        r2 := @caughtexception;
+
+        r3 = new java.io.IOException;
+
+        specialinvoke r3.<java.io.IOException: void <init>(java.lang.String)>("XML parser configuration error");
+
+        virtualinvoke r3.<java.io.IOException: java.lang.Throwable initCause(java.lang.Throwable)>(r2);
+
+        throw r3;
+
+        catch javax.xml.parsers.ParserConfigurationException from label1 to label2 with label3;
+    }
+    public void setRequestBody(org.w3c.dom.Document) throws java.io.IOException
+    {
+        org.apache.jackrabbit.webdav.client.methods.DavMethodBase r0;
+        org.w3c.dom.Document $r1;
+        org.apache.jackrabbit.webdav.client.methods.XmlRequestEntity $r2;
+
+        r0 := @this: org.apache.jackrabbit.webdav.client.methods.DavMethodBase;
+
+        $r1 := @parameter0: org.w3c.dom.Document;
+
+        $r2 = new org.apache.jackrabbit.webdav.client.methods.XmlRequestEntity;
+
+        specialinvoke $r2.<org.apache.jackrabbit.webdav.client.methods.XmlRequestEntity: void <init>(org.w3c.dom.Document)>($r1);
+
+        virtualinvoke r0.<org.apache.jackrabbit.webdav.client.methods.DavMethodBase: void setRequestEntity(org.apache.commons.httpclient.methods.RequestEntity)>($r2);
+
+        return;
+    }
+    public void setRequestHeader(org.apache.jackrabbit.webdav.header.Header)
+    {
+        org.apache.jackrabbit.webdav.client.methods.DavMethodBase r0;
+        org.apache.jackrabbit.webdav.header.Header $r1;
+        java.lang.String $r2, $r3;
+
+        r0 := @this: org.apache.jackrabbit.webdav.client.methods.DavMethodBase;
+
+        $r1 := @parameter0: org.apache.jackrabbit.webdav.header.Header;
+
+        $r2 = interfaceinvoke $r1.<org.apache.jackrabbit.webdav.header.Header: java.lang.String getHeaderName()>();
+
+        $r3 = interfaceinvoke $r1.<org.apache.jackrabbit.webdav.header.Header: java.lang.String getHeaderValue()>();
+
+        virtualinvoke r0.<org.apache.jackrabbit.webdav.client.methods.DavMethodBase: void setRequestHeader(java.lang.String,java.lang.String)>($r2, $r3);
+
+        return;
+    }
+    protected void setSuccess(boolean)
+    {
+        org.apache.jackrabbit.webdav.client.methods.DavMethodBase r0;
+        boolean $z0;
+
+        r0 := @this: org.apache.jackrabbit.webdav.client.methods.DavMethodBase;
+
+        $z0 := @parameter0: boolean;
+
+        r0.<org.apache.jackrabbit.webdav.client.methods.DavMethodBase: boolean success> = $z0;
+
+        return;
+    }
+    public boolean succeeded()
+    {
+        org.apache.jackrabbit.webdav.client.methods.DavMethodBase r0;
+        boolean z0;
+
+        r0 := @this: org.apache.jackrabbit.webdav.client.methods.DavMethodBase;
+
+        virtualinvoke r0.<org.apache.jackrabbit.webdav.client.methods.DavMethodBase: void checkUsed()>();
+
+        z0 = r0.<org.apache.jackrabbit.webdav.client.methods.DavMethodBase: boolean success>;
+
+        return z0;
+    }

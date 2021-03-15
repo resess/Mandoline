@@ -1,0 +1,567 @@
+com.ichi2.anki.multimediacard.fields.BasicImageFieldController extends com.ichi2.anki.multimediacard.fields.FieldControllerBase implements com.ichi2.anki.multimediacard.fields.IFieldController
+protected static final int ACTIVITY_SELECT_IMAGE
+protected static final int ACTIVITY_TAKE_PICTURE
+protected static final int IMAGE_PREVIEW_MAX_WIDTH
+private static final int IMAGE_SAVE_MAX_WIDTH
+protected android.widget.Button mBtnCamera
+protected android.widget.Button mBtnGallery
+protected android.widget.ImageView mImagePreview
+private android.util.DisplayMetrics mMetrics
+protected java.lang.String mTempCameraImagePath
+    public void <init>()
+    {
+        com.ichi2.anki.multimediacard.fields.BasicImageFieldController r0;
+
+        r0 := @this: com.ichi2.anki.multimediacard.fields.BasicImageFieldController;
+
+        specialinvoke r0.<com.ichi2.anki.multimediacard.fields.FieldControllerBase: void <init>()>();
+
+        r0.<com.ichi2.anki.multimediacard.fields.BasicImageFieldController: android.util.DisplayMetrics mMetrics> = null;
+
+        return;
+    }
+    private int getMaxImageSize()
+    {
+        com.ichi2.anki.multimediacard.fields.BasicImageFieldController r0;
+        int i0, i1;
+        android.util.DisplayMetrics $r1;
+        double $d0, $d1;
+
+        r0 := @this: com.ichi2.anki.multimediacard.fields.BasicImageFieldController;
+
+        $r1 = virtualinvoke r0.<com.ichi2.anki.multimediacard.fields.BasicImageFieldController: android.util.DisplayMetrics getDisplayMetrics()>();
+
+        i0 = $r1.<android.util.DisplayMetrics: int heightPixels>;
+
+        i1 = $r1.<android.util.DisplayMetrics: int widthPixels>;
+
+        $d0 = (double) i0;
+
+        $d0 = $d0 * 0.4;
+
+        $d1 = (double) i1;
+
+        $d1 = $d1 * 0.6;
+
+        $d0 = staticinvoke <java.lang.Math: double min(double,double)>($d0, $d1);
+
+        i0 = (int) $d0;
+
+        return i0;
+    }
+    private java.lang.String gtxt(int)
+    {
+        com.ichi2.anki.multimediacard.fields.BasicImageFieldController r0;
+        int $i0;
+        com.ichi2.anki.multimediacard.activity.MultimediaEditFieldActivity $r1;
+        java.lang.CharSequence $r2;
+        java.lang.String $r3;
+
+        r0 := @this: com.ichi2.anki.multimediacard.fields.BasicImageFieldController;
+
+        $i0 := @parameter0: int;
+
+        $r1 = r0.<com.ichi2.anki.multimediacard.fields.BasicImageFieldController: com.ichi2.anki.multimediacard.activity.MultimediaEditFieldActivity mActivity>;
+
+        $r2 = virtualinvoke $r1.<com.ichi2.anki.multimediacard.activity.MultimediaEditFieldActivity: java.lang.CharSequence getText(int)>($i0);
+
+        $r3 = interfaceinvoke $r2.<java.lang.CharSequence: java.lang.String toString()>();
+
+        return $r3;
+    }
+    private java.lang.String rotateAndCompress(java.lang.String)
+    {
+        com.ichi2.anki.multimediacard.fields.BasicImageFieldController r0;
+        java.lang.String $r1, $r5;
+        java.io.File r2;
+        java.io.FileOutputStream r3, r7;
+        java.lang.StringBuilder $r4;
+        int $i0;
+        android.graphics.Bitmap $r6;
+        android.graphics.Bitmap$CompressFormat $r8;
+        java.io.IOException r9, r12, r14;
+        java.io.FileNotFoundException r10;
+        java.lang.Object[] $r11;
+        java.lang.Throwable $r13;
+
+        r0 := @this: com.ichi2.anki.multimediacard.fields.BasicImageFieldController;
+
+        $r1 := @parameter0: java.lang.String;
+
+        r2 = new java.io.File;
+
+        specialinvoke r2.<java.io.File: void <init>(java.lang.String)>($r1);
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $i0 = virtualinvoke $r1.<java.lang.String: int lastIndexOf(java.lang.String)>(".");
+
+        $r5 = virtualinvoke $r1.<java.lang.String: java.lang.String substring(int,int)>(0, $i0);
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".png");
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r6 = staticinvoke <com.ichi2.utils.BitmapUtil: android.graphics.Bitmap decodeFile(java.io.File,int)>(r2, 1920);
+
+        r7 = null;
+
+     label01:
+        r3 = new java.io.FileOutputStream;
+
+     label02:
+        specialinvoke r3.<java.io.FileOutputStream: void <init>(java.lang.String)>($r5);
+
+     label03:
+        $r6 = staticinvoke <com.ichi2.utils.ExifUtil: android.graphics.Bitmap rotateFromCamera(java.io.File,android.graphics.Bitmap)>(r2, $r6);
+
+     label04:
+        $r8 = <android.graphics.Bitmap$CompressFormat: android.graphics.Bitmap$CompressFormat PNG>;
+
+     label05:
+        virtualinvoke $r6.<android.graphics.Bitmap: boolean compress(android.graphics.Bitmap$CompressFormat,int,java.io.OutputStream)>($r8, 90, r3);
+
+        virtualinvoke r2.<java.io.File: boolean delete()>();
+
+     label06:
+        if r3 == null goto label08;
+
+     label07:
+        virtualinvoke r3.<java.io.FileOutputStream: void close()>();
+
+     label08:
+        return $r5;
+
+     label09:
+        r9 := @caughtexception;
+
+        virtualinvoke r9.<java.io.IOException: void printStackTrace()>();
+
+        goto label08;
+
+     label10:
+        r10 := @caughtexception;
+
+     label11:
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Error in BasicImageFieldController.rotateAndCompress() : ");
+
+        $r5 = virtualinvoke r10.<java.io.FileNotFoundException: java.lang.String getMessage()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r11 = newarray (java.lang.Object)[0];
+
+        staticinvoke <timber.log.Timber: void e(java.lang.String,java.lang.Object[])>($r5, $r11);
+
+     label12:
+        if r7 == null goto label14;
+
+     label13:
+        virtualinvoke r7.<java.io.FileOutputStream: void close()>();
+
+     label14:
+        return $r1;
+
+     label15:
+        r12 := @caughtexception;
+
+        virtualinvoke r12.<java.io.IOException: void printStackTrace()>();
+
+        goto label14;
+
+     label16:
+        $r13 := @caughtexception;
+
+     label17:
+        if r7 == null goto label19;
+
+     label18:
+        virtualinvoke r7.<java.io.FileOutputStream: void close()>();
+
+     label19:
+        throw $r13;
+
+     label20:
+        r14 := @caughtexception;
+
+        virtualinvoke r14.<java.io.IOException: void printStackTrace()>();
+
+        goto label19;
+
+     label21:
+        $r13 := @caughtexception;
+
+        r7 = r3;
+
+        goto label17;
+
+     label22:
+        r10 := @caughtexception;
+
+        r7 = r3;
+
+        goto label11;
+
+        catch java.io.FileNotFoundException from label02 to label03 with label10;
+        catch java.lang.Throwable from label01 to label03 with label16;
+        catch java.io.FileNotFoundException from label03 to label04 with label22;
+        catch java.io.FileNotFoundException from label05 to label06 with label22;
+        catch java.lang.Throwable from label03 to label06 with label21;
+        catch java.io.IOException from label07 to label08 with label09;
+        catch java.lang.Throwable from label11 to label12 with label16;
+        catch java.io.IOException from label13 to label14 with label15;
+        catch java.io.IOException from label18 to label19 with label20;
+    }
+    public void createUI(android.content.Context, android.widget.LinearLayout)
+    {
+        com.ichi2.anki.multimediacard.fields.BasicImageFieldController r0;
+        android.content.Context $r1;
+        android.widget.LinearLayout $r2;
+        int i0, i1, $i2;
+        android.widget.LinearLayout$LayoutParams r3;
+        android.widget.ImageView $r4;
+        com.ichi2.anki.multimediacard.activity.MultimediaEditFieldActivity $r5;
+        android.util.DisplayMetrics $r6;
+        com.ichi2.anki.multimediacard.fields.IField $r7;
+        java.lang.String $r8;
+        android.widget.ImageView$ScaleType $r9;
+        double $d0;
+        long $l3;
+        android.widget.Button $r10;
+        com.ichi2.anki.multimediacard.fields.BasicImageFieldController$1 $r11;
+        com.ichi2.anki.multimediacard.fields.BasicImageFieldController$2 $r12;
+        boolean $z0;
+
+        r0 := @this: com.ichi2.anki.multimediacard.fields.BasicImageFieldController;
+
+        $r1 := @parameter0: android.content.Context;
+
+        $r2 := @parameter1: android.widget.LinearLayout;
+
+        $r4 = new android.widget.ImageView;
+
+        $r5 = r0.<com.ichi2.anki.multimediacard.fields.BasicImageFieldController: com.ichi2.anki.multimediacard.activity.MultimediaEditFieldActivity mActivity>;
+
+        specialinvoke $r4.<android.widget.ImageView: void <init>(android.content.Context)>($r5);
+
+        r0.<com.ichi2.anki.multimediacard.fields.BasicImageFieldController: android.widget.ImageView mImagePreview> = $r4;
+
+        $r6 = virtualinvoke r0.<com.ichi2.anki.multimediacard.fields.BasicImageFieldController: android.util.DisplayMetrics getDisplayMetrics()>();
+
+        i0 = $r6.<android.util.DisplayMetrics: int heightPixels>;
+
+        i1 = $r6.<android.util.DisplayMetrics: int widthPixels>;
+
+        r3 = new android.widget.LinearLayout$LayoutParams;
+
+        specialinvoke r3.<android.widget.LinearLayout$LayoutParams: void <init>(int,int)>(-1, -2);
+
+        $r7 = r0.<com.ichi2.anki.multimediacard.fields.BasicImageFieldController: com.ichi2.anki.multimediacard.fields.IField mField>;
+
+        $r8 = interfaceinvoke $r7.<com.ichi2.anki.multimediacard.fields.IField: java.lang.String getImagePath()>();
+
+        $i2 = specialinvoke r0.<com.ichi2.anki.multimediacard.fields.BasicImageFieldController: int getMaxImageSize()>();
+
+        virtualinvoke r0.<com.ichi2.anki.multimediacard.fields.BasicImageFieldController: void setPreviewImage(java.lang.String,int)>($r8, $i2);
+
+        $r4 = r0.<com.ichi2.anki.multimediacard.fields.BasicImageFieldController: android.widget.ImageView mImagePreview>;
+
+        $r9 = <android.widget.ImageView$ScaleType: android.widget.ImageView$ScaleType CENTER_INSIDE>;
+
+        virtualinvoke $r4.<android.widget.ImageView: void setScaleType(android.widget.ImageView$ScaleType)>($r9);
+
+        $r4 = r0.<com.ichi2.anki.multimediacard.fields.BasicImageFieldController: android.widget.ImageView mImagePreview>;
+
+        virtualinvoke $r4.<android.widget.ImageView: void setAdjustViewBounds(boolean)>(1);
+
+        $r4 = r0.<com.ichi2.anki.multimediacard.fields.BasicImageFieldController: android.widget.ImageView mImagePreview>;
+
+        $d0 = (double) i0;
+
+        $d0 = $d0 * 0.4;
+
+        $l3 = staticinvoke <java.lang.Math: long round(double)>($d0);
+
+        i0 = (int) $l3;
+
+        virtualinvoke $r4.<android.widget.ImageView: void setMaxHeight(int)>(i0);
+
+        $r4 = r0.<com.ichi2.anki.multimediacard.fields.BasicImageFieldController: android.widget.ImageView mImagePreview>;
+
+        $d0 = (double) i1;
+
+        $d0 = $d0 * 0.6;
+
+        $l3 = staticinvoke <java.lang.Math: long round(double)>($d0);
+
+        i1 = (int) $l3;
+
+        virtualinvoke $r4.<android.widget.ImageView: void setMaxWidth(int)>(i1);
+
+        $r10 = new android.widget.Button;
+
+        $r5 = r0.<com.ichi2.anki.multimediacard.fields.BasicImageFieldController: com.ichi2.anki.multimediacard.activity.MultimediaEditFieldActivity mActivity>;
+
+        specialinvoke $r10.<android.widget.Button: void <init>(android.content.Context)>($r5);
+
+        r0.<com.ichi2.anki.multimediacard.fields.BasicImageFieldController: android.widget.Button mBtnGallery> = $r10;
+
+        $r10 = r0.<com.ichi2.anki.multimediacard.fields.BasicImageFieldController: android.widget.Button mBtnGallery>;
+
+        $r8 = specialinvoke r0.<com.ichi2.anki.multimediacard.fields.BasicImageFieldController: java.lang.String gtxt(int)>(2131231160);
+
+        virtualinvoke $r10.<android.widget.Button: void setText(java.lang.CharSequence)>($r8);
+
+        $r10 = r0.<com.ichi2.anki.multimediacard.fields.BasicImageFieldController: android.widget.Button mBtnGallery>;
+
+        $r11 = new com.ichi2.anki.multimediacard.fields.BasicImageFieldController$1;
+
+        specialinvoke $r11.<com.ichi2.anki.multimediacard.fields.BasicImageFieldController$1: void <init>(com.ichi2.anki.multimediacard.fields.BasicImageFieldController)>(r0);
+
+        virtualinvoke $r10.<android.widget.Button: void setOnClickListener(android.view.View$OnClickListener)>($r11);
+
+        $r10 = new android.widget.Button;
+
+        $r5 = r0.<com.ichi2.anki.multimediacard.fields.BasicImageFieldController: com.ichi2.anki.multimediacard.activity.MultimediaEditFieldActivity mActivity>;
+
+        specialinvoke $r10.<android.widget.Button: void <init>(android.content.Context)>($r5);
+
+        r0.<com.ichi2.anki.multimediacard.fields.BasicImageFieldController: android.widget.Button mBtnCamera> = $r10;
+
+        $r10 = r0.<com.ichi2.anki.multimediacard.fields.BasicImageFieldController: android.widget.Button mBtnCamera>;
+
+        $r8 = specialinvoke r0.<com.ichi2.anki.multimediacard.fields.BasicImageFieldController: java.lang.String gtxt(int)>(2131231161);
+
+        virtualinvoke $r10.<android.widget.Button: void setText(java.lang.CharSequence)>($r8);
+
+        $r10 = r0.<com.ichi2.anki.multimediacard.fields.BasicImageFieldController: android.widget.Button mBtnCamera>;
+
+        $r12 = new com.ichi2.anki.multimediacard.fields.BasicImageFieldController$2;
+
+        specialinvoke $r12.<com.ichi2.anki.multimediacard.fields.BasicImageFieldController$2: void <init>(com.ichi2.anki.multimediacard.fields.BasicImageFieldController)>(r0);
+
+        virtualinvoke $r10.<android.widget.Button: void setOnClickListener(android.view.View$OnClickListener)>($r12);
+
+        $z0 = staticinvoke <com.ichi2.compat.CompatHelper: boolean isChromebook()>();
+
+        if $z0 == 0 goto label1;
+
+        $r10 = r0.<com.ichi2.anki.multimediacard.fields.BasicImageFieldController: android.widget.Button mBtnCamera>;
+
+        virtualinvoke $r10.<android.widget.Button: void setVisibility(int)>(4);
+
+     label1:
+        $r4 = r0.<com.ichi2.anki.multimediacard.fields.BasicImageFieldController: android.widget.ImageView mImagePreview>;
+
+        virtualinvoke $r2.<android.widget.LinearLayout: void addView(android.view.View,int,android.view.ViewGroup$LayoutParams)>($r4, -1, r3);
+
+        $r10 = r0.<com.ichi2.anki.multimediacard.fields.BasicImageFieldController: android.widget.Button mBtnGallery>;
+
+        virtualinvoke $r2.<android.widget.LinearLayout: void addView(android.view.View,int)>($r10, -1);
+
+        $r10 = r0.<com.ichi2.anki.multimediacard.fields.BasicImageFieldController: android.widget.Button mBtnCamera>;
+
+        virtualinvoke $r2.<android.widget.LinearLayout: void addView(android.view.View,int)>($r10, -1);
+
+        return;
+    }
+    protected android.util.DisplayMetrics getDisplayMetrics()
+    {
+        com.ichi2.anki.multimediacard.fields.BasicImageFieldController r0;
+        android.util.DisplayMetrics $r1;
+        com.ichi2.anki.multimediacard.activity.MultimediaEditFieldActivity $r2;
+        android.view.WindowManager $r3;
+        android.view.Display $r4;
+
+        r0 := @this: com.ichi2.anki.multimediacard.fields.BasicImageFieldController;
+
+        $r1 = r0.<com.ichi2.anki.multimediacard.fields.BasicImageFieldController: android.util.DisplayMetrics mMetrics>;
+
+        if $r1 != null goto label1;
+
+        $r1 = new android.util.DisplayMetrics;
+
+        specialinvoke $r1.<android.util.DisplayMetrics: void <init>()>();
+
+        r0.<com.ichi2.anki.multimediacard.fields.BasicImageFieldController: android.util.DisplayMetrics mMetrics> = $r1;
+
+        $r2 = r0.<com.ichi2.anki.multimediacard.fields.BasicImageFieldController: com.ichi2.anki.multimediacard.activity.MultimediaEditFieldActivity mActivity>;
+
+        $r3 = virtualinvoke $r2.<com.ichi2.anki.multimediacard.activity.MultimediaEditFieldActivity: android.view.WindowManager getWindowManager()>();
+
+        $r4 = interfaceinvoke $r3.<android.view.WindowManager: android.view.Display getDefaultDisplay()>();
+
+        $r1 = r0.<com.ichi2.anki.multimediacard.fields.BasicImageFieldController: android.util.DisplayMetrics mMetrics>;
+
+        virtualinvoke $r4.<android.view.Display: void getMetrics(android.util.DisplayMetrics)>($r1);
+
+     label1:
+        $r1 = r0.<com.ichi2.anki.multimediacard.fields.BasicImageFieldController: android.util.DisplayMetrics mMetrics>;
+
+        return $r1;
+    }
+    public void onActivityResult(int, int, android.content.Intent)
+    {
+        com.ichi2.anki.multimediacard.fields.BasicImageFieldController r0;
+        int $i0, $i1;
+        android.content.Intent $r1;
+        java.lang.String[] r2;
+        com.ichi2.anki.multimediacard.fields.IField $r3;
+        java.lang.String $r4;
+        android.net.Uri $r5;
+        com.ichi2.anki.multimediacard.activity.MultimediaEditFieldActivity $r6;
+        android.content.ContentResolver $r7;
+        android.database.Cursor $r8;
+
+        r0 := @this: com.ichi2.anki.multimediacard.fields.BasicImageFieldController;
+
+        $i0 := @parameter0: int;
+
+        $i1 := @parameter1: int;
+
+        $r1 := @parameter2: android.content.Intent;
+
+        if $i1 != 0 goto label2;
+
+     label1:
+        $r3 = r0.<com.ichi2.anki.multimediacard.fields.BasicImageFieldController: com.ichi2.anki.multimediacard.fields.IField mField>;
+
+        $r4 = interfaceinvoke $r3.<com.ichi2.anki.multimediacard.fields.IField: java.lang.String getImagePath()>();
+
+        $i0 = specialinvoke r0.<com.ichi2.anki.multimediacard.fields.BasicImageFieldController: int getMaxImageSize()>();
+
+        virtualinvoke r0.<com.ichi2.anki.multimediacard.fields.BasicImageFieldController: void setPreviewImage(java.lang.String,int)>($r4, $i0);
+
+        return;
+
+     label2:
+        if $i0 != 1 goto label3;
+
+        $r5 = virtualinvoke $r1.<android.content.Intent: android.net.Uri getData()>();
+
+        r2 = newarray (java.lang.String)[1];
+
+        r2[0] = "_data";
+
+        $r6 = r0.<com.ichi2.anki.multimediacard.fields.BasicImageFieldController: com.ichi2.anki.multimediacard.activity.MultimediaEditFieldActivity mActivity>;
+
+        $r7 = virtualinvoke $r6.<com.ichi2.anki.multimediacard.activity.MultimediaEditFieldActivity: android.content.ContentResolver getContentResolver()>();
+
+        $r8 = virtualinvoke $r7.<android.content.ContentResolver: android.database.Cursor query(android.net.Uri,java.lang.String[],java.lang.String,java.lang.String[],java.lang.String)>($r5, r2, null, null, null);
+
+        interfaceinvoke $r8.<android.database.Cursor: boolean moveToFirst()>();
+
+        $r4 = r2[0];
+
+        $i0 = interfaceinvoke $r8.<android.database.Cursor: int getColumnIndex(java.lang.String)>($r4);
+
+        $r4 = interfaceinvoke $r8.<android.database.Cursor: java.lang.String getString(int)>($i0);
+
+        interfaceinvoke $r8.<android.database.Cursor: void close()>();
+
+        $r3 = r0.<com.ichi2.anki.multimediacard.fields.BasicImageFieldController: com.ichi2.anki.multimediacard.fields.IField mField>;
+
+        interfaceinvoke $r3.<com.ichi2.anki.multimediacard.fields.IField: boolean setImagePath(java.lang.String)>($r4);
+
+        goto label1;
+
+     label3:
+        if $i0 != 2 goto label1;
+
+        $r4 = r0.<com.ichi2.anki.multimediacard.fields.BasicImageFieldController: java.lang.String mTempCameraImagePath>;
+
+        $r4 = specialinvoke r0.<com.ichi2.anki.multimediacard.fields.BasicImageFieldController: java.lang.String rotateAndCompress(java.lang.String)>($r4);
+
+        $r3 = r0.<com.ichi2.anki.multimediacard.fields.BasicImageFieldController: com.ichi2.anki.multimediacard.fields.IField mField>;
+
+        interfaceinvoke $r3.<com.ichi2.anki.multimediacard.fields.IField: boolean setImagePath(java.lang.String)>($r4);
+
+        $r3 = r0.<com.ichi2.anki.multimediacard.fields.BasicImageFieldController: com.ichi2.anki.multimediacard.fields.IField mField>;
+
+        interfaceinvoke $r3.<com.ichi2.anki.multimediacard.fields.IField: void setHasTemporaryMedia(boolean)>(1);
+
+        goto label1;
+    }
+    public void onDestroy()
+    {
+        com.ichi2.anki.multimediacard.fields.BasicImageFieldController r0;
+        android.widget.ImageView r1;
+
+        r0 := @this: com.ichi2.anki.multimediacard.fields.BasicImageFieldController;
+
+        r1 = r0.<com.ichi2.anki.multimediacard.fields.BasicImageFieldController: android.widget.ImageView mImagePreview>;
+
+        staticinvoke <com.ichi2.utils.BitmapUtil: void freeImageView(android.widget.ImageView)>(r1);
+
+        return;
+    }
+    public void onDone()
+    {
+        com.ichi2.anki.multimediacard.fields.BasicImageFieldController r0;
+
+        r0 := @this: com.ichi2.anki.multimediacard.fields.BasicImageFieldController;
+
+        return;
+    }
+    public void onFocusLost()
+    {
+        com.ichi2.anki.multimediacard.fields.BasicImageFieldController r0;
+
+        r0 := @this: com.ichi2.anki.multimediacard.fields.BasicImageFieldController;
+
+        return;
+    }
+    protected void setPreviewImage(java.lang.String, int)
+    {
+        com.ichi2.anki.multimediacard.fields.BasicImageFieldController r0;
+        java.lang.String $r1;
+        int $i0;
+        java.io.File r2;
+        boolean $z0;
+        android.graphics.Bitmap $r3, r4;
+        android.widget.ImageView $r5;
+
+        r0 := @this: com.ichi2.anki.multimediacard.fields.BasicImageFieldController;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $i0 := @parameter1: int;
+
+        if $r1 == null goto label2;
+
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean equals(java.lang.Object)>("");
+
+        if $z0 != 0 goto label2;
+
+        r2 = new java.io.File;
+
+        specialinvoke r2.<java.io.File: void <init>(java.lang.String)>($r1);
+
+        $r3 = staticinvoke <com.ichi2.utils.BitmapUtil: android.graphics.Bitmap decodeFile(java.io.File,int)>(r2, $i0);
+
+        r4 = $r3;
+
+        $i0 = <android.os.Build$VERSION: int SDK_INT>;
+
+        if $i0 < 5 goto label1;
+
+        r4 = staticinvoke <com.ichi2.utils.ExifUtil: android.graphics.Bitmap rotateFromCamera(java.io.File,android.graphics.Bitmap)>(r2, $r3);
+
+     label1:
+        $r5 = r0.<com.ichi2.anki.multimediacard.fields.BasicImageFieldController: android.widget.ImageView mImagePreview>;
+
+        virtualinvoke $r5.<android.widget.ImageView: void setImageBitmap(android.graphics.Bitmap)>(r4);
+
+     label2:
+        return;
+    }

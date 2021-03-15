@@ -1,0 +1,523 @@
+io.fabric.sdk.android.services.events.EventsFilesManager extends java.lang.Object
+public static final int MAX_BYTE_SIZE_PER_FILE
+public static final int MAX_FILES_IN_BATCH
+public static final int MAX_FILES_TO_KEEP
+public static final java.lang.String ROLL_OVER_FILE_NAME_SEPARATOR
+protected final android.content.Context context
+protected final io.fabric.sdk.android.services.common.CurrentTimeProvider currentTimeProvider
+private final int defaultMaxFilesToKeep
+protected final io.fabric.sdk.android.services.events.EventsStorage eventStorage
+protected volatile long lastRollOverTime
+protected final java.util.List rollOverListeners
+protected final io.fabric.sdk.android.services.events.EventTransform transform
+    public void <init>(android.content.Context, io.fabric.sdk.android.services.events.EventTransform, io.fabric.sdk.android.services.common.CurrentTimeProvider, io.fabric.sdk.android.services.events.EventsStorage, int) throws java.io.IOException
+    {
+        io.fabric.sdk.android.services.events.EventsFilesManager r0;
+        android.content.Context $r1;
+        io.fabric.sdk.android.services.events.EventTransform r2;
+        io.fabric.sdk.android.services.common.CurrentTimeProvider $r3;
+        io.fabric.sdk.android.services.events.EventsStorage $r4;
+        int $i0;
+        java.util.concurrent.CopyOnWriteArrayList $r5;
+        long $l1;
+
+        r0 := @this: io.fabric.sdk.android.services.events.EventsFilesManager;
+
+        $r1 := @parameter0: android.content.Context;
+
+        r2 := @parameter1: io.fabric.sdk.android.services.events.EventTransform;
+
+        $r3 := @parameter2: io.fabric.sdk.android.services.common.CurrentTimeProvider;
+
+        $r4 := @parameter3: io.fabric.sdk.android.services.events.EventsStorage;
+
+        $i0 := @parameter4: int;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r5 = new java.util.concurrent.CopyOnWriteArrayList;
+
+        specialinvoke $r5.<java.util.concurrent.CopyOnWriteArrayList: void <init>()>();
+
+        r0.<io.fabric.sdk.android.services.events.EventsFilesManager: java.util.List rollOverListeners> = $r5;
+
+        $r1 = virtualinvoke $r1.<android.content.Context: android.content.Context getApplicationContext()>();
+
+        r0.<io.fabric.sdk.android.services.events.EventsFilesManager: android.content.Context context> = $r1;
+
+        r0.<io.fabric.sdk.android.services.events.EventsFilesManager: io.fabric.sdk.android.services.events.EventTransform transform> = r2;
+
+        r0.<io.fabric.sdk.android.services.events.EventsFilesManager: io.fabric.sdk.android.services.events.EventsStorage eventStorage> = $r4;
+
+        r0.<io.fabric.sdk.android.services.events.EventsFilesManager: io.fabric.sdk.android.services.common.CurrentTimeProvider currentTimeProvider> = $r3;
+
+        $r3 = r0.<io.fabric.sdk.android.services.events.EventsFilesManager: io.fabric.sdk.android.services.common.CurrentTimeProvider currentTimeProvider>;
+
+        $l1 = interfaceinvoke $r3.<io.fabric.sdk.android.services.common.CurrentTimeProvider: long getCurrentTimeMillis()>();
+
+        r0.<io.fabric.sdk.android.services.events.EventsFilesManager: long lastRollOverTime> = $l1;
+
+        r0.<io.fabric.sdk.android.services.events.EventsFilesManager: int defaultMaxFilesToKeep> = $i0;
+
+        return;
+    }
+    private void rollFileOverIfNeeded(int) throws java.io.IOException
+    {
+        io.fabric.sdk.android.services.events.EventsFilesManager r0;
+        int $i0, $i1;
+        io.fabric.sdk.android.services.events.EventsStorage $r1;
+        boolean $z0;
+        java.util.Locale $r2;
+        java.lang.Object[] $r3;
+        java.lang.Integer $r4;
+        java.lang.String $r5;
+        android.content.Context $r6;
+
+        r0 := @this: io.fabric.sdk.android.services.events.EventsFilesManager;
+
+        $i0 := @parameter0: int;
+
+        $r1 = r0.<io.fabric.sdk.android.services.events.EventsFilesManager: io.fabric.sdk.android.services.events.EventsStorage eventStorage>;
+
+        $i1 = virtualinvoke r0.<io.fabric.sdk.android.services.events.EventsFilesManager: int getMaxByteSizePerFile()>();
+
+        $z0 = interfaceinvoke $r1.<io.fabric.sdk.android.services.events.EventsStorage: boolean canWorkingFileStore(int,int)>($i0, $i1);
+
+        if $z0 != 0 goto label1;
+
+        $r2 = <java.util.Locale: java.util.Locale US>;
+
+        $r3 = newarray (java.lang.Object)[3];
+
+        $r1 = r0.<io.fabric.sdk.android.services.events.EventsFilesManager: io.fabric.sdk.android.services.events.EventsStorage eventStorage>;
+
+        $i1 = interfaceinvoke $r1.<io.fabric.sdk.android.services.events.EventsStorage: int getWorkingFileUsedSizeInBytes()>();
+
+        $r4 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i1);
+
+        $r3[0] = $r4;
+
+        $r4 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        $r3[1] = $r4;
+
+        $i0 = virtualinvoke r0.<io.fabric.sdk.android.services.events.EventsFilesManager: int getMaxByteSizePerFile()>();
+
+        $r4 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        $r3[2] = $r4;
+
+        $r5 = staticinvoke <java.lang.String: java.lang.String format(java.util.Locale,java.lang.String,java.lang.Object[])>($r2, "session analytics events file is %d bytes, new event is %d bytes, this is over flush limit of %d, rolling it over", $r3);
+
+        $r6 = r0.<io.fabric.sdk.android.services.events.EventsFilesManager: android.content.Context context>;
+
+        staticinvoke <io.fabric.sdk.android.services.common.CommonUtils: void logControlled(android.content.Context,int,java.lang.String,java.lang.String)>($r6, 4, "Fabric", $r5);
+
+        virtualinvoke r0.<io.fabric.sdk.android.services.events.EventsFilesManager: boolean rollFileOver()>();
+
+     label1:
+        return;
+    }
+    private void triggerRollOverOnListeners(java.lang.String)
+    {
+        io.fabric.sdk.android.services.events.EventsFilesManager r0;
+        java.lang.String $r1;
+        java.lang.Exception r2;
+        java.util.List $r3;
+        java.util.Iterator $r4;
+        boolean $z0;
+        java.lang.Object $r5;
+        io.fabric.sdk.android.services.events.EventsStorageListener r6;
+        android.content.Context $r7;
+
+        r0 := @this: io.fabric.sdk.android.services.events.EventsFilesManager;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r3 = r0.<io.fabric.sdk.android.services.events.EventsFilesManager: java.util.List rollOverListeners>;
+
+        $r4 = interfaceinvoke $r3.<java.util.List: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r4.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label5;
+
+        $r5 = interfaceinvoke $r4.<java.util.Iterator: java.lang.Object next()>();
+
+        r6 = (io.fabric.sdk.android.services.events.EventsStorageListener) $r5;
+
+     label2:
+        interfaceinvoke r6.<io.fabric.sdk.android.services.events.EventsStorageListener: void onRollOver(java.lang.String)>($r1);
+
+     label3:
+        goto label1;
+
+     label4:
+        r2 := @caughtexception;
+
+        $r7 = r0.<io.fabric.sdk.android.services.events.EventsFilesManager: android.content.Context context>;
+
+        staticinvoke <io.fabric.sdk.android.services.common.CommonUtils: void logControlledError(android.content.Context,java.lang.String,java.lang.Throwable)>($r7, "One of the roll over listeners threw an exception", r2);
+
+        goto label1;
+
+     label5:
+        return;
+
+        catch java.lang.Exception from label2 to label3 with label4;
+    }
+    public void deleteAllEventsFiles()
+    {
+        io.fabric.sdk.android.services.events.EventsFilesManager r0;
+        java.util.List $r1;
+        io.fabric.sdk.android.services.events.EventsStorage $r2, $r3;
+
+        r0 := @this: io.fabric.sdk.android.services.events.EventsFilesManager;
+
+        $r2 = r0.<io.fabric.sdk.android.services.events.EventsFilesManager: io.fabric.sdk.android.services.events.EventsStorage eventStorage>;
+
+        $r3 = r0.<io.fabric.sdk.android.services.events.EventsFilesManager: io.fabric.sdk.android.services.events.EventsStorage eventStorage>;
+
+        $r1 = interfaceinvoke $r3.<io.fabric.sdk.android.services.events.EventsStorage: java.util.List getAllFilesInRollOverDirectory()>();
+
+        interfaceinvoke $r2.<io.fabric.sdk.android.services.events.EventsStorage: void deleteFilesInRollOverDirectory(java.util.List)>($r1);
+
+        $r2 = r0.<io.fabric.sdk.android.services.events.EventsFilesManager: io.fabric.sdk.android.services.events.EventsStorage eventStorage>;
+
+        interfaceinvoke $r2.<io.fabric.sdk.android.services.events.EventsStorage: void deleteWorkingFile()>();
+
+        return;
+    }
+    public void deleteOldestInRollOverIfOverMax()
+    {
+        io.fabric.sdk.android.services.events.EventsFilesManager r0;
+        int i0, $i1, $i2;
+        java.util.TreeSet r1;
+        java.util.ArrayList r2;
+        io.fabric.sdk.android.services.events.EventsStorage $r3;
+        java.util.List $r4;
+        android.content.Context $r5;
+        java.util.Locale $r6;
+        java.lang.Object[] $r7;
+        java.lang.Integer $r8;
+        java.lang.String $r9;
+        io.fabric.sdk.android.services.events.EventsFilesManager$1 $r10;
+        java.util.Iterator $r11;
+        boolean $z0;
+        java.lang.Object $r12;
+        java.io.File r13;
+        long $l3;
+        io.fabric.sdk.android.services.events.EventsFilesManager$FileWithTimestamp $r14;
+
+        r0 := @this: io.fabric.sdk.android.services.events.EventsFilesManager;
+
+        $r3 = r0.<io.fabric.sdk.android.services.events.EventsFilesManager: io.fabric.sdk.android.services.events.EventsStorage eventStorage>;
+
+        $r4 = interfaceinvoke $r3.<io.fabric.sdk.android.services.events.EventsStorage: java.util.List getAllFilesInRollOverDirectory()>();
+
+        $i1 = virtualinvoke r0.<io.fabric.sdk.android.services.events.EventsFilesManager: int getMaxFilesToKeep()>();
+
+        i0 = interfaceinvoke $r4.<java.util.List: int size()>();
+
+        if i0 > $i1 goto label1;
+
+        return;
+
+     label1:
+        i0 = interfaceinvoke $r4.<java.util.List: int size()>();
+
+        i0 = i0 - $i1;
+
+        $r5 = r0.<io.fabric.sdk.android.services.events.EventsFilesManager: android.content.Context context>;
+
+        $r6 = <java.util.Locale: java.util.Locale US>;
+
+        $r7 = newarray (java.lang.Object)[3];
+
+        $i2 = interfaceinvoke $r4.<java.util.List: int size()>();
+
+        $r8 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i2);
+
+        $r7[0] = $r8;
+
+        $r8 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i1);
+
+        $r7[1] = $r8;
+
+        $r8 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(i0);
+
+        $r7[2] = $r8;
+
+        $r9 = staticinvoke <java.lang.String: java.lang.String format(java.util.Locale,java.lang.String,java.lang.Object[])>($r6, "Found %d files in  roll over directory, this is greater than %d, deleting %d oldest files", $r7);
+
+        staticinvoke <io.fabric.sdk.android.services.common.CommonUtils: void logControlled(android.content.Context,java.lang.String)>($r5, $r9);
+
+        r1 = new java.util.TreeSet;
+
+        $r10 = new io.fabric.sdk.android.services.events.EventsFilesManager$1;
+
+        specialinvoke $r10.<io.fabric.sdk.android.services.events.EventsFilesManager$1: void <init>(io.fabric.sdk.android.services.events.EventsFilesManager)>(r0);
+
+        specialinvoke r1.<java.util.TreeSet: void <init>(java.util.Comparator)>($r10);
+
+        $r11 = interfaceinvoke $r4.<java.util.List: java.util.Iterator iterator()>();
+
+     label2:
+        $z0 = interfaceinvoke $r11.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label3;
+
+        $r12 = interfaceinvoke $r11.<java.util.Iterator: java.lang.Object next()>();
+
+        r13 = (java.io.File) $r12;
+
+        $r9 = virtualinvoke r13.<java.io.File: java.lang.String getName()>();
+
+        $l3 = virtualinvoke r0.<io.fabric.sdk.android.services.events.EventsFilesManager: long parseCreationTimestampFromFileName(java.lang.String)>($r9);
+
+        $r14 = new io.fabric.sdk.android.services.events.EventsFilesManager$FileWithTimestamp;
+
+        specialinvoke $r14.<io.fabric.sdk.android.services.events.EventsFilesManager$FileWithTimestamp: void <init>(java.io.File,long)>(r13, $l3);
+
+        virtualinvoke r1.<java.util.TreeSet: boolean add(java.lang.Object)>($r14);
+
+        goto label2;
+
+     label3:
+        r2 = new java.util.ArrayList;
+
+        specialinvoke r2.<java.util.ArrayList: void <init>()>();
+
+        $r11 = virtualinvoke r1.<java.util.TreeSet: java.util.Iterator iterator()>();
+
+     label4:
+        $z0 = interfaceinvoke $r11.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label5;
+
+        $r12 = interfaceinvoke $r11.<java.util.Iterator: java.lang.Object next()>();
+
+        $r14 = (io.fabric.sdk.android.services.events.EventsFilesManager$FileWithTimestamp) $r12;
+
+        r13 = $r14.<io.fabric.sdk.android.services.events.EventsFilesManager$FileWithTimestamp: java.io.File file>;
+
+        virtualinvoke r2.<java.util.ArrayList: boolean add(java.lang.Object)>(r13);
+
+        $i1 = virtualinvoke r2.<java.util.ArrayList: int size()>();
+
+        if $i1 != i0 goto label4;
+
+     label5:
+        $r3 = r0.<io.fabric.sdk.android.services.events.EventsFilesManager: io.fabric.sdk.android.services.events.EventsStorage eventStorage>;
+
+        interfaceinvoke $r3.<io.fabric.sdk.android.services.events.EventsStorage: void deleteFilesInRollOverDirectory(java.util.List)>(r2);
+
+        return;
+    }
+    public void deleteSentFiles(java.util.List)
+    {
+        io.fabric.sdk.android.services.events.EventsFilesManager r0;
+        java.util.List r1;
+        io.fabric.sdk.android.services.events.EventsStorage $r2;
+
+        r0 := @this: io.fabric.sdk.android.services.events.EventsFilesManager;
+
+        r1 := @parameter0: java.util.List;
+
+        $r2 = r0.<io.fabric.sdk.android.services.events.EventsFilesManager: io.fabric.sdk.android.services.events.EventsStorage eventStorage>;
+
+        interfaceinvoke $r2.<io.fabric.sdk.android.services.events.EventsStorage: void deleteFilesInRollOverDirectory(java.util.List)>(r1);
+
+        return;
+    }
+protected abstract java.lang.String generateUniqueRollOverFileName() { 
+// no body
+} 
+    public java.util.List getBatchOfFilesToSend()
+    {
+        io.fabric.sdk.android.services.events.EventsFilesManager r0;
+        java.util.List $r1;
+        io.fabric.sdk.android.services.events.EventsStorage $r2;
+
+        r0 := @this: io.fabric.sdk.android.services.events.EventsFilesManager;
+
+        $r2 = r0.<io.fabric.sdk.android.services.events.EventsFilesManager: io.fabric.sdk.android.services.events.EventsStorage eventStorage>;
+
+        $r1 = interfaceinvoke $r2.<io.fabric.sdk.android.services.events.EventsStorage: java.util.List getBatchOfFilesToSend(int)>(1);
+
+        return $r1;
+    }
+    public long getLastRollOverTime()
+    {
+        io.fabric.sdk.android.services.events.EventsFilesManager r0;
+        long l0;
+
+        r0 := @this: io.fabric.sdk.android.services.events.EventsFilesManager;
+
+        l0 = r0.<io.fabric.sdk.android.services.events.EventsFilesManager: long lastRollOverTime>;
+
+        return l0;
+    }
+    protected int getMaxByteSizePerFile()
+    {
+        io.fabric.sdk.android.services.events.EventsFilesManager r0;
+
+        r0 := @this: io.fabric.sdk.android.services.events.EventsFilesManager;
+
+        return 8000;
+    }
+    protected int getMaxFilesToKeep()
+    {
+        io.fabric.sdk.android.services.events.EventsFilesManager r0;
+        int i0;
+
+        r0 := @this: io.fabric.sdk.android.services.events.EventsFilesManager;
+
+        i0 = r0.<io.fabric.sdk.android.services.events.EventsFilesManager: int defaultMaxFilesToKeep>;
+
+        return i0;
+    }
+    public long parseCreationTimestampFromFileName(java.lang.String)
+    {
+        io.fabric.sdk.android.services.events.EventsFilesManager r0;
+        java.lang.String $r1;
+        java.lang.NumberFormatException r2;
+        java.lang.String[] $r3;
+        int $i0;
+        java.lang.Long $r4;
+        long $l1;
+
+        r0 := @this: io.fabric.sdk.android.services.events.EventsFilesManager;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r3 = virtualinvoke $r1.<java.lang.String: java.lang.String[] split(java.lang.String)>("_");
+
+        $i0 = lengthof $r3;
+
+        if $i0 == 3 goto label1;
+
+        return 0L;
+
+     label1:
+        $r1 = $r3[2];
+
+     label2:
+        $r4 = staticinvoke <java.lang.Long: java.lang.Long valueOf(java.lang.String)>($r1);
+
+        $l1 = virtualinvoke $r4.<java.lang.Long: long longValue()>();
+
+     label3:
+        return $l1;
+
+     label4:
+        r2 := @caughtexception;
+
+        return 0L;
+
+        catch java.lang.NumberFormatException from label2 to label3 with label4;
+    }
+    public void registerRollOverListener(io.fabric.sdk.android.services.events.EventsStorageListener)
+    {
+        io.fabric.sdk.android.services.events.EventsFilesManager r0;
+        io.fabric.sdk.android.services.events.EventsStorageListener $r1;
+        java.util.List $r2;
+
+        r0 := @this: io.fabric.sdk.android.services.events.EventsFilesManager;
+
+        $r1 := @parameter0: io.fabric.sdk.android.services.events.EventsStorageListener;
+
+        if $r1 == null goto label1;
+
+        $r2 = r0.<io.fabric.sdk.android.services.events.EventsFilesManager: java.util.List rollOverListeners>;
+
+        interfaceinvoke $r2.<java.util.List: boolean add(java.lang.Object)>($r1);
+
+     label1:
+        return;
+    }
+    public boolean rollFileOver() throws java.io.IOException
+    {
+        io.fabric.sdk.android.services.events.EventsFilesManager r0;
+        boolean z0, $z1;
+        java.lang.String r1, $r3;
+        io.fabric.sdk.android.services.events.EventsStorage $r2;
+        android.content.Context $r4;
+        java.util.Locale $r5;
+        java.lang.Object[] $r6;
+        io.fabric.sdk.android.services.common.CurrentTimeProvider $r7;
+        long $l0;
+
+        r0 := @this: io.fabric.sdk.android.services.events.EventsFilesManager;
+
+        z0 = 0;
+
+        r1 = null;
+
+        $r2 = r0.<io.fabric.sdk.android.services.events.EventsFilesManager: io.fabric.sdk.android.services.events.EventsStorage eventStorage>;
+
+        $z1 = interfaceinvoke $r2.<io.fabric.sdk.android.services.events.EventsStorage: boolean isWorkingFileEmpty()>();
+
+        if $z1 != 0 goto label1;
+
+        $r3 = virtualinvoke r0.<io.fabric.sdk.android.services.events.EventsFilesManager: java.lang.String generateUniqueRollOverFileName()>();
+
+        r1 = $r3;
+
+        $r2 = r0.<io.fabric.sdk.android.services.events.EventsFilesManager: io.fabric.sdk.android.services.events.EventsStorage eventStorage>;
+
+        interfaceinvoke $r2.<io.fabric.sdk.android.services.events.EventsStorage: void rollOver(java.lang.String)>($r3);
+
+        $r4 = r0.<io.fabric.sdk.android.services.events.EventsFilesManager: android.content.Context context>;
+
+        $r5 = <java.util.Locale: java.util.Locale US>;
+
+        $r6 = newarray (java.lang.Object)[1];
+
+        $r6[0] = $r3;
+
+        $r3 = staticinvoke <java.lang.String: java.lang.String format(java.util.Locale,java.lang.String,java.lang.Object[])>($r5, "generated new file %s", $r6);
+
+        staticinvoke <io.fabric.sdk.android.services.common.CommonUtils: void logControlled(android.content.Context,int,java.lang.String,java.lang.String)>($r4, 4, "Fabric", $r3);
+
+        $r7 = r0.<io.fabric.sdk.android.services.events.EventsFilesManager: io.fabric.sdk.android.services.common.CurrentTimeProvider currentTimeProvider>;
+
+        $l0 = interfaceinvoke $r7.<io.fabric.sdk.android.services.common.CurrentTimeProvider: long getCurrentTimeMillis()>();
+
+        r0.<io.fabric.sdk.android.services.events.EventsFilesManager: long lastRollOverTime> = $l0;
+
+        z0 = 1;
+
+     label1:
+        specialinvoke r0.<io.fabric.sdk.android.services.events.EventsFilesManager: void triggerRollOverOnListeners(java.lang.String)>(r1);
+
+        return z0;
+    }
+    public void writeEvent(java.lang.Object) throws java.io.IOException
+    {
+        io.fabric.sdk.android.services.events.EventsFilesManager r0;
+        java.lang.Object r1;
+        byte[] $r2;
+        io.fabric.sdk.android.services.events.EventTransform $r3;
+        int $i0;
+        io.fabric.sdk.android.services.events.EventsStorage $r4;
+
+        r0 := @this: io.fabric.sdk.android.services.events.EventsFilesManager;
+
+        r1 := @parameter0: java.lang.Object;
+
+        $r3 = r0.<io.fabric.sdk.android.services.events.EventsFilesManager: io.fabric.sdk.android.services.events.EventTransform transform>;
+
+        $r2 = interfaceinvoke $r3.<io.fabric.sdk.android.services.events.EventTransform: byte[] toBytes(java.lang.Object)>(r1);
+
+        $i0 = lengthof $r2;
+
+        specialinvoke r0.<io.fabric.sdk.android.services.events.EventsFilesManager: void rollFileOverIfNeeded(int)>($i0);
+
+        $r4 = r0.<io.fabric.sdk.android.services.events.EventsFilesManager: io.fabric.sdk.android.services.events.EventsStorage eventStorage>;
+
+        interfaceinvoke $r4.<io.fabric.sdk.android.services.events.EventsStorage: void add(byte[])>($r2);
+
+        return;
+    }

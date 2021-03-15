@@ -1,0 +1,215 @@
+com.facebook.stetho.server.LeakyBufferedInputStream extends java.io.BufferedInputStream
+private boolean mLeaked
+private boolean mMarked
+    public void <init>(java.io.InputStream, int)
+    {
+        com.facebook.stetho.server.LeakyBufferedInputStream r0;
+        java.io.InputStream $r1;
+        int $i0;
+
+        r0 := @this: com.facebook.stetho.server.LeakyBufferedInputStream;
+
+        $r1 := @parameter0: java.io.InputStream;
+
+        $i0 := @parameter1: int;
+
+        specialinvoke r0.<java.io.BufferedInputStream: void <init>(java.io.InputStream,int)>($r1, $i0);
+
+        return;
+    }
+    private byte[] clearBufferLocked()
+    {
+        com.facebook.stetho.server.LeakyBufferedInputStream r0;
+        byte[] r1, $r2;
+        int $i0, $i1;
+
+        r0 := @this: com.facebook.stetho.server.LeakyBufferedInputStream;
+
+        $i0 = r0.<com.facebook.stetho.server.LeakyBufferedInputStream: int count>;
+
+        $i1 = r0.<com.facebook.stetho.server.LeakyBufferedInputStream: int pos>;
+
+        $i0 = $i0 - $i1;
+
+        r1 = newarray (byte)[$i0];
+
+        $r2 = r0.<com.facebook.stetho.server.LeakyBufferedInputStream: byte[] buf>;
+
+        $i1 = r0.<com.facebook.stetho.server.LeakyBufferedInputStream: int pos>;
+
+        $i0 = lengthof r1;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r2, $i1, r1, 0, $i0);
+
+        r0.<com.facebook.stetho.server.LeakyBufferedInputStream: int pos> = 0;
+
+        r0.<com.facebook.stetho.server.LeakyBufferedInputStream: int count> = 0;
+
+        return r1;
+    }
+    private void throwIfLeaked()
+    {
+        com.facebook.stetho.server.LeakyBufferedInputStream r0;
+        boolean $z0;
+        java.lang.IllegalStateException $r1;
+
+        r0 := @this: com.facebook.stetho.server.LeakyBufferedInputStream;
+
+        $z0 = r0.<com.facebook.stetho.server.LeakyBufferedInputStream: boolean mLeaked>;
+
+        if $z0 == 0 goto label1;
+
+        $r1 = new java.lang.IllegalStateException;
+
+        specialinvoke $r1.<java.lang.IllegalStateException: void <init>()>();
+
+        throw $r1;
+
+     label1:
+        return;
+    }
+    private void throwIfMarked()
+    {
+        com.facebook.stetho.server.LeakyBufferedInputStream r0;
+        boolean $z0;
+        java.lang.IllegalStateException $r1;
+
+        r0 := @this: com.facebook.stetho.server.LeakyBufferedInputStream;
+
+        $z0 = r0.<com.facebook.stetho.server.LeakyBufferedInputStream: boolean mMarked>;
+
+        if $z0 == 0 goto label1;
+
+        $r1 = new java.lang.IllegalStateException;
+
+        specialinvoke $r1.<java.lang.IllegalStateException: void <init>()>();
+
+        throw $r1;
+
+     label1:
+        return;
+    }
+    public java.io.InputStream leakBufferAndStream()
+    {
+        com.facebook.stetho.server.LeakyBufferedInputStream r0;
+        byte[] $r1;
+        com.facebook.stetho.server.CompositeInputStream $r2;
+        java.io.InputStream[] $r3;
+        java.io.ByteArrayInputStream $r4;
+        java.io.InputStream $r5;
+        java.lang.Throwable $r6;
+
+        r0 := @this: com.facebook.stetho.server.LeakyBufferedInputStream;
+
+        entermonitor r0;
+
+     label1:
+        specialinvoke r0.<com.facebook.stetho.server.LeakyBufferedInputStream: void throwIfLeaked()>();
+
+        specialinvoke r0.<com.facebook.stetho.server.LeakyBufferedInputStream: void throwIfMarked()>();
+
+        r0.<com.facebook.stetho.server.LeakyBufferedInputStream: boolean mLeaked> = 1;
+
+        $r2 = new com.facebook.stetho.server.CompositeInputStream;
+
+        $r3 = newarray (java.io.InputStream)[2];
+
+        $r4 = new java.io.ByteArrayInputStream;
+
+        $r1 = specialinvoke r0.<com.facebook.stetho.server.LeakyBufferedInputStream: byte[] clearBufferLocked()>();
+
+        specialinvoke $r4.<java.io.ByteArrayInputStream: void <init>(byte[])>($r1);
+
+        $r3[0] = $r4;
+
+        $r5 = r0.<com.facebook.stetho.server.LeakyBufferedInputStream: java.io.InputStream in>;
+
+        $r3[1] = $r5;
+
+        specialinvoke $r2.<com.facebook.stetho.server.CompositeInputStream: void <init>(java.io.InputStream[])>($r3);
+
+     label2:
+        exitmonitor r0;
+
+        return $r2;
+
+     label3:
+        $r6 := @caughtexception;
+
+        exitmonitor r0;
+
+        throw $r6;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+    public void mark(int)
+    {
+        com.facebook.stetho.server.LeakyBufferedInputStream r0;
+        int $i0;
+        java.lang.Throwable $r1;
+
+        r0 := @this: com.facebook.stetho.server.LeakyBufferedInputStream;
+
+        $i0 := @parameter0: int;
+
+        entermonitor r0;
+
+     label1:
+        specialinvoke r0.<com.facebook.stetho.server.LeakyBufferedInputStream: void throwIfLeaked()>();
+
+        r0.<com.facebook.stetho.server.LeakyBufferedInputStream: boolean mMarked> = 1;
+
+        specialinvoke r0.<java.io.BufferedInputStream: void mark(int)>($i0);
+
+     label2:
+        exitmonitor r0;
+
+        return;
+
+     label3:
+        $r1 := @caughtexception;
+
+        exitmonitor r0;
+
+        throw $r1;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+    public boolean markSupported()
+    {
+        com.facebook.stetho.server.LeakyBufferedInputStream r0;
+
+        r0 := @this: com.facebook.stetho.server.LeakyBufferedInputStream;
+
+        return 1;
+    }
+    public void reset() throws java.io.IOException
+    {
+        com.facebook.stetho.server.LeakyBufferedInputStream r0;
+        java.lang.Throwable $r1;
+
+        r0 := @this: com.facebook.stetho.server.LeakyBufferedInputStream;
+
+        entermonitor r0;
+
+     label1:
+        specialinvoke r0.<com.facebook.stetho.server.LeakyBufferedInputStream: void throwIfLeaked()>();
+
+        r0.<com.facebook.stetho.server.LeakyBufferedInputStream: boolean mMarked> = 0;
+
+        specialinvoke r0.<java.io.BufferedInputStream: void reset()>();
+
+     label2:
+        exitmonitor r0;
+
+        return;
+
+     label3:
+        $r1 := @caughtexception;
+
+        exitmonitor r0;
+
+        throw $r1;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }

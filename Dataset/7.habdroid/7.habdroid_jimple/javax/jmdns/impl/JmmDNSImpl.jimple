@@ -1,0 +1,2089 @@
+javax.jmdns.impl.JmmDNSImpl extends java.lang.Object implements javax.jmdns.JmmDNS javax.jmdns.NetworkTopologyListener javax.jmdns.impl.ServiceInfoImpl$Delegate
+private static org.slf4j.Logger logger
+private final java.util.concurrent.atomic.AtomicBoolean _closed
+private final java.util.concurrent.atomic.AtomicBoolean _isClosing
+private final java.util.concurrent.ExecutorService _jmDNSExecutor
+private final java.util.concurrent.ConcurrentMap _knownMDNS
+private final java.util.concurrent.ExecutorService _listenerExecutor
+private final java.util.Set _networkListeners
+private final java.util.concurrent.ConcurrentMap _serviceListeners
+private final java.util.Set _serviceTypes
+private final java.util.concurrent.ConcurrentMap _services
+private final java.util.Timer _timer
+private final java.util.Set _typeListeners
+    static void <clinit>()
+    {
+        java.lang.Class $r0;
+        java.lang.String $r1;
+        org.slf4j.Logger $r2;
+
+        $r0 = class "Ljavax/jmdns/impl/JmmDNSImpl;";
+
+        $r1 = virtualinvoke $r0.<java.lang.Class: java.lang.String getName()>();
+
+        $r2 = staticinvoke <org.slf4j.LoggerFactory: org.slf4j.Logger getLogger(java.lang.String)>($r1);
+
+        <javax.jmdns.impl.JmmDNSImpl: org.slf4j.Logger logger> = $r2;
+
+        return;
+    }
+    public void <init>()
+    {
+        javax.jmdns.impl.JmmDNSImpl r0;
+        java.util.HashSet $r1;
+        java.util.Set $r2;
+        java.util.concurrent.ConcurrentHashMap $r3;
+        javax.jmdns.impl.util.NamedThreadFactory $r4;
+        java.util.concurrent.ExecutorService $r5;
+        java.util.Timer $r6;
+        javax.jmdns.impl.JmmDNSImpl$NetworkChecker $r7;
+        javax.jmdns.NetworkTopologyDiscovery $r8;
+        java.util.concurrent.atomic.AtomicBoolean $r9;
+
+        r0 := @this: javax.jmdns.impl.JmmDNSImpl;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r1 = new java.util.HashSet;
+
+        specialinvoke $r1.<java.util.HashSet: void <init>()>();
+
+        $r2 = staticinvoke <java.util.Collections: java.util.Set synchronizedSet(java.util.Set)>($r1);
+
+        r0.<javax.jmdns.impl.JmmDNSImpl: java.util.Set _networkListeners> = $r2;
+
+        $r3 = new java.util.concurrent.ConcurrentHashMap;
+
+        specialinvoke $r3.<java.util.concurrent.ConcurrentHashMap: void <init>()>();
+
+        r0.<javax.jmdns.impl.JmmDNSImpl: java.util.concurrent.ConcurrentMap _knownMDNS> = $r3;
+
+        $r3 = new java.util.concurrent.ConcurrentHashMap;
+
+        specialinvoke $r3.<java.util.concurrent.ConcurrentHashMap: void <init>(int)>(20);
+
+        r0.<javax.jmdns.impl.JmmDNSImpl: java.util.concurrent.ConcurrentMap _services> = $r3;
+
+        $r4 = new javax.jmdns.impl.util.NamedThreadFactory;
+
+        specialinvoke $r4.<javax.jmdns.impl.util.NamedThreadFactory: void <init>(java.lang.String)>("JmmDNS Listeners");
+
+        $r5 = staticinvoke <java.util.concurrent.Executors: java.util.concurrent.ExecutorService newSingleThreadExecutor(java.util.concurrent.ThreadFactory)>($r4);
+
+        r0.<javax.jmdns.impl.JmmDNSImpl: java.util.concurrent.ExecutorService _listenerExecutor> = $r5;
+
+        $r4 = new javax.jmdns.impl.util.NamedThreadFactory;
+
+        specialinvoke $r4.<javax.jmdns.impl.util.NamedThreadFactory: void <init>(java.lang.String)>("JmmDNS");
+
+        $r5 = staticinvoke <java.util.concurrent.Executors: java.util.concurrent.ExecutorService newCachedThreadPool(java.util.concurrent.ThreadFactory)>($r4);
+
+        r0.<javax.jmdns.impl.JmmDNSImpl: java.util.concurrent.ExecutorService _jmDNSExecutor> = $r5;
+
+        $r6 = new java.util.Timer;
+
+        specialinvoke $r6.<java.util.Timer: void <init>(java.lang.String,boolean)>("Multihomed mDNS.Timer", 1);
+
+        r0.<javax.jmdns.impl.JmmDNSImpl: java.util.Timer _timer> = $r6;
+
+        $r3 = new java.util.concurrent.ConcurrentHashMap;
+
+        specialinvoke $r3.<java.util.concurrent.ConcurrentHashMap: void <init>()>();
+
+        r0.<javax.jmdns.impl.JmmDNSImpl: java.util.concurrent.ConcurrentMap _serviceListeners> = $r3;
+
+        $r1 = new java.util.HashSet;
+
+        specialinvoke $r1.<java.util.HashSet: void <init>()>();
+
+        $r2 = staticinvoke <java.util.Collections: java.util.Set synchronizedSet(java.util.Set)>($r1);
+
+        r0.<javax.jmdns.impl.JmmDNSImpl: java.util.Set _typeListeners> = $r2;
+
+        $r1 = new java.util.HashSet;
+
+        specialinvoke $r1.<java.util.HashSet: void <init>()>();
+
+        $r2 = staticinvoke <java.util.Collections: java.util.Set synchronizedSet(java.util.Set)>($r1);
+
+        r0.<javax.jmdns.impl.JmmDNSImpl: java.util.Set _serviceTypes> = $r2;
+
+        $r7 = new javax.jmdns.impl.JmmDNSImpl$NetworkChecker;
+
+        $r8 = staticinvoke <javax.jmdns.NetworkTopologyDiscovery$Factory: javax.jmdns.NetworkTopologyDiscovery getInstance()>();
+
+        specialinvoke $r7.<javax.jmdns.impl.JmmDNSImpl$NetworkChecker: void <init>(javax.jmdns.NetworkTopologyListener,javax.jmdns.NetworkTopologyDiscovery)>(r0, $r8);
+
+        $r6 = r0.<javax.jmdns.impl.JmmDNSImpl: java.util.Timer _timer>;
+
+        virtualinvoke $r7.<javax.jmdns.impl.JmmDNSImpl$NetworkChecker: void start(java.util.Timer)>($r6);
+
+        $r9 = new java.util.concurrent.atomic.AtomicBoolean;
+
+        specialinvoke $r9.<java.util.concurrent.atomic.AtomicBoolean: void <init>(boolean)>(0);
+
+        r0.<javax.jmdns.impl.JmmDNSImpl: java.util.concurrent.atomic.AtomicBoolean _isClosing> = $r9;
+
+        $r9 = new java.util.concurrent.atomic.AtomicBoolean;
+
+        specialinvoke $r9.<java.util.concurrent.atomic.AtomicBoolean: void <init>(boolean)>(0);
+
+        r0.<javax.jmdns.impl.JmmDNSImpl: java.util.concurrent.atomic.AtomicBoolean _closed> = $r9;
+
+        return;
+    }
+    public void addNetworkTopologyListener(javax.jmdns.NetworkTopologyListener)
+    {
+        javax.jmdns.impl.JmmDNSImpl r0;
+        javax.jmdns.NetworkTopologyListener $r1;
+        java.util.Set $r2;
+
+        r0 := @this: javax.jmdns.impl.JmmDNSImpl;
+
+        $r1 := @parameter0: javax.jmdns.NetworkTopologyListener;
+
+        $r2 = r0.<javax.jmdns.impl.JmmDNSImpl: java.util.Set _networkListeners>;
+
+        interfaceinvoke $r2.<java.util.Set: boolean add(java.lang.Object)>($r1);
+
+        return;
+    }
+    public void addServiceListener(java.lang.String, javax.jmdns.ServiceListener)
+    {
+        javax.jmdns.impl.JmmDNSImpl r0;
+        java.lang.String $r1, $r5;
+        javax.jmdns.ServiceListener $r2;
+        int i0, i1;
+        javax.jmdns.JmDNS r3;
+        java.util.LinkedList $r4;
+        java.util.concurrent.ConcurrentMap $r6;
+        java.lang.Object $r7;
+        java.util.List r8;
+        boolean $z0;
+        javax.jmdns.JmDNS[] $r9;
+        java.lang.Throwable $r10;
+
+        r0 := @this: javax.jmdns.impl.JmmDNSImpl;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: javax.jmdns.ServiceListener;
+
+        $r5 = virtualinvoke $r1.<java.lang.String: java.lang.String toLowerCase()>();
+
+        $r6 = r0.<javax.jmdns.impl.JmmDNSImpl: java.util.concurrent.ConcurrentMap _serviceListeners>;
+
+        $r7 = interfaceinvoke $r6.<java.util.concurrent.ConcurrentMap: java.lang.Object get(java.lang.Object)>($r5);
+
+        r8 = (java.util.List) $r7;
+
+        if r8 != null goto label1;
+
+        $r6 = r0.<javax.jmdns.impl.JmmDNSImpl: java.util.concurrent.ConcurrentMap _serviceListeners>;
+
+        $r4 = new java.util.LinkedList;
+
+        specialinvoke $r4.<java.util.LinkedList: void <init>()>();
+
+        interfaceinvoke $r6.<java.util.concurrent.ConcurrentMap: java.lang.Object putIfAbsent(java.lang.Object,java.lang.Object)>($r5, $r4);
+
+        $r6 = r0.<javax.jmdns.impl.JmmDNSImpl: java.util.concurrent.ConcurrentMap _serviceListeners>;
+
+        $r7 = interfaceinvoke $r6.<java.util.concurrent.ConcurrentMap: java.lang.Object get(java.lang.Object)>($r5);
+
+        r8 = (java.util.List) $r7;
+
+     label1:
+        if r8 == null goto label4;
+
+        entermonitor r8;
+
+     label2:
+        $z0 = interfaceinvoke r8.<java.util.List: boolean contains(java.lang.Object)>($r2);
+
+        if $z0 != 0 goto label3;
+
+        interfaceinvoke r8.<java.util.List: boolean add(java.lang.Object)>($r2);
+
+     label3:
+        exitmonitor r8;
+
+     label4:
+        $r9 = virtualinvoke r0.<javax.jmdns.impl.JmmDNSImpl: javax.jmdns.JmDNS[] getDNS()>();
+
+        i0 = lengthof $r9;
+
+        i1 = 0;
+
+     label5:
+        if i1 >= i0 goto label9;
+
+        r3 = $r9[i1];
+
+        virtualinvoke r3.<javax.jmdns.JmDNS: void addServiceListener(java.lang.String,javax.jmdns.ServiceListener)>($r1, $r2);
+
+        i1 = i1 + 1;
+
+        goto label5;
+
+     label6:
+        $r10 := @caughtexception;
+
+     label7:
+        exitmonitor r8;
+
+     label8:
+        throw $r10;
+
+     label9:
+        return;
+
+        catch java.lang.Throwable from label2 to label4 with label6;
+        catch java.lang.Throwable from label7 to label8 with label6;
+    }
+    public void addServiceTypeListener(javax.jmdns.ServiceTypeListener) throws java.io.IOException
+    {
+        javax.jmdns.impl.JmmDNSImpl r0;
+        javax.jmdns.ServiceTypeListener $r1;
+        int i0, i1;
+        javax.jmdns.JmDNS r2;
+        java.util.Set $r3;
+        javax.jmdns.JmDNS[] $r4;
+
+        r0 := @this: javax.jmdns.impl.JmmDNSImpl;
+
+        $r1 := @parameter0: javax.jmdns.ServiceTypeListener;
+
+        $r3 = r0.<javax.jmdns.impl.JmmDNSImpl: java.util.Set _typeListeners>;
+
+        interfaceinvoke $r3.<java.util.Set: boolean add(java.lang.Object)>($r1);
+
+        $r4 = virtualinvoke r0.<javax.jmdns.impl.JmmDNSImpl: javax.jmdns.JmDNS[] getDNS()>();
+
+        i0 = lengthof $r4;
+
+        i1 = 0;
+
+     label1:
+        if i1 >= i0 goto label2;
+
+        r2 = $r4[i1];
+
+        virtualinvoke r2.<javax.jmdns.JmDNS: void addServiceTypeListener(javax.jmdns.ServiceTypeListener)>($r1);
+
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label2:
+        return;
+    }
+    public void close() throws java.io.IOException
+    {
+        javax.jmdns.impl.JmmDNSImpl r0;
+        java.lang.InterruptedException r1;
+        int i0, i1;
+        javax.jmdns.JmDNS r2;
+        java.util.concurrent.atomic.AtomicBoolean $r3;
+        boolean $z0;
+        org.slf4j.Logger $r4;
+        java.lang.StringBuilder $r5;
+        java.lang.String $r6;
+        java.util.Timer $r7;
+        java.util.concurrent.ExecutorService $r8;
+        javax.jmdns.impl.util.NamedThreadFactory $r9;
+        javax.jmdns.JmDNS[] $r10;
+        javax.jmdns.impl.JmmDNSImpl$1 $r11;
+        java.util.concurrent.TimeUnit $r12;
+        java.util.concurrent.ConcurrentMap $r13;
+        java.util.Set $r14;
+        java.lang.Throwable $r15;
+
+        r0 := @this: javax.jmdns.impl.JmmDNSImpl;
+
+        $r3 = r0.<javax.jmdns.impl.JmmDNSImpl: java.util.concurrent.atomic.AtomicBoolean _isClosing>;
+
+        $z0 = virtualinvoke $r3.<java.util.concurrent.atomic.AtomicBoolean: boolean compareAndSet(boolean,boolean)>(0, 1);
+
+        if $z0 == 0 goto label12;
+
+        $r4 = <javax.jmdns.impl.JmmDNSImpl: org.slf4j.Logger logger>;
+
+        $z0 = interfaceinvoke $r4.<org.slf4j.Logger: boolean isDebugEnabled()>();
+
+        if $z0 == 0 goto label01;
+
+        $r4 = <javax.jmdns.impl.JmmDNSImpl: org.slf4j.Logger logger>;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Cancelling JmmDNS: ");
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        interfaceinvoke $r4.<org.slf4j.Logger: void debug(java.lang.String)>($r6);
+
+     label01:
+        $r7 = r0.<javax.jmdns.impl.JmmDNSImpl: java.util.Timer _timer>;
+
+        virtualinvoke $r7.<java.util.Timer: void cancel()>();
+
+        $r8 = r0.<javax.jmdns.impl.JmmDNSImpl: java.util.concurrent.ExecutorService _listenerExecutor>;
+
+        interfaceinvoke $r8.<java.util.concurrent.ExecutorService: void shutdown()>();
+
+        $r8 = r0.<javax.jmdns.impl.JmmDNSImpl: java.util.concurrent.ExecutorService _jmDNSExecutor>;
+
+        interfaceinvoke $r8.<java.util.concurrent.ExecutorService: void shutdown()>();
+
+        $r9 = new javax.jmdns.impl.util.NamedThreadFactory;
+
+        specialinvoke $r9.<javax.jmdns.impl.util.NamedThreadFactory: void <init>(java.lang.String)>("JmmDNS.close");
+
+        $r8 = staticinvoke <java.util.concurrent.Executors: java.util.concurrent.ExecutorService newCachedThreadPool(java.util.concurrent.ThreadFactory)>($r9);
+
+     label02:
+        $r10 = virtualinvoke r0.<javax.jmdns.impl.JmmDNSImpl: javax.jmdns.JmDNS[] getDNS()>();
+
+        i0 = lengthof $r10;
+
+     label03:
+        i1 = 0;
+
+     label04:
+        if i1 >= i0 goto label07;
+
+     label05:
+        r2 = $r10[i1];
+
+        $r11 = new javax.jmdns.impl.JmmDNSImpl$1;
+
+        specialinvoke $r11.<javax.jmdns.impl.JmmDNSImpl$1: void <init>(javax.jmdns.impl.JmmDNSImpl,javax.jmdns.JmDNS)>(r0, r2);
+
+        interfaceinvoke $r8.<java.util.concurrent.ExecutorService: java.util.concurrent.Future submit(java.lang.Runnable)>($r11);
+
+     label06:
+        i1 = i1 + 1;
+
+        goto label04;
+
+     label07:
+        interfaceinvoke $r8.<java.util.concurrent.ExecutorService: void shutdown()>();
+
+        $r12 = <java.util.concurrent.TimeUnit: java.util.concurrent.TimeUnit MILLISECONDS>;
+
+     label08:
+        interfaceinvoke $r8.<java.util.concurrent.ExecutorService: boolean awaitTermination(long,java.util.concurrent.TimeUnit)>(5000L, $r12);
+
+     label09:
+        $r13 = r0.<javax.jmdns.impl.JmmDNSImpl: java.util.concurrent.ConcurrentMap _knownMDNS>;
+
+        interfaceinvoke $r13.<java.util.concurrent.ConcurrentMap: void clear()>();
+
+        $r13 = r0.<javax.jmdns.impl.JmmDNSImpl: java.util.concurrent.ConcurrentMap _services>;
+
+        interfaceinvoke $r13.<java.util.concurrent.ConcurrentMap: void clear()>();
+
+        $r13 = r0.<javax.jmdns.impl.JmmDNSImpl: java.util.concurrent.ConcurrentMap _serviceListeners>;
+
+        interfaceinvoke $r13.<java.util.concurrent.ConcurrentMap: void clear()>();
+
+        $r14 = r0.<javax.jmdns.impl.JmmDNSImpl: java.util.Set _typeListeners>;
+
+        interfaceinvoke $r14.<java.util.Set: void clear()>();
+
+        $r14 = r0.<javax.jmdns.impl.JmmDNSImpl: java.util.Set _serviceTypes>;
+
+        interfaceinvoke $r14.<java.util.Set: void clear()>();
+
+        $r3 = r0.<javax.jmdns.impl.JmmDNSImpl: java.util.concurrent.atomic.AtomicBoolean _closed>;
+
+        virtualinvoke $r3.<java.util.concurrent.atomic.AtomicBoolean: void set(boolean)>(1);
+
+        staticinvoke <javax.jmdns.JmmDNS$Factory: void close()>();
+
+        return;
+
+     label10:
+        $r15 := @caughtexception;
+
+        interfaceinvoke $r8.<java.util.concurrent.ExecutorService: void shutdown()>();
+
+        throw $r15;
+
+     label11:
+        r1 := @caughtexception;
+
+        $r4 = <javax.jmdns.impl.JmmDNSImpl: org.slf4j.Logger logger>;
+
+        interfaceinvoke $r4.<org.slf4j.Logger: void warn(java.lang.String,java.lang.Throwable)>("Exception ", r1);
+
+        goto label09;
+
+     label12:
+        return;
+
+        catch java.lang.Throwable from label02 to label03 with label10;
+        catch java.lang.Throwable from label05 to label06 with label10;
+        catch java.lang.InterruptedException from label08 to label09 with label11;
+    }
+    public javax.jmdns.JmDNS[] getDNS()
+    {
+        javax.jmdns.impl.JmmDNSImpl r0;
+        java.util.concurrent.ConcurrentMap $r1, $r2;
+        java.util.Collection $r3;
+        int $i0;
+        javax.jmdns.JmDNS[] $r4;
+        java.lang.Object[] $r5;
+        java.lang.Throwable $r6;
+
+        r0 := @this: javax.jmdns.impl.JmmDNSImpl;
+
+        $r1 = r0.<javax.jmdns.impl.JmmDNSImpl: java.util.concurrent.ConcurrentMap _knownMDNS>;
+
+        entermonitor $r1;
+
+     label1:
+        $r2 = r0.<javax.jmdns.impl.JmmDNSImpl: java.util.concurrent.ConcurrentMap _knownMDNS>;
+
+        $r3 = interfaceinvoke $r2.<java.util.concurrent.ConcurrentMap: java.util.Collection values()>();
+
+        $r2 = r0.<javax.jmdns.impl.JmmDNSImpl: java.util.concurrent.ConcurrentMap _knownMDNS>;
+
+        $i0 = interfaceinvoke $r2.<java.util.concurrent.ConcurrentMap: int size()>();
+
+        $r4 = newarray (javax.jmdns.JmDNS)[$i0];
+
+        $r5 = interfaceinvoke $r3.<java.util.Collection: java.lang.Object[] toArray(java.lang.Object[])>($r4);
+
+        $r4 = (javax.jmdns.JmDNS[]) $r5;
+
+        exitmonitor $r1;
+
+     label2:
+        return $r4;
+
+     label3:
+        $r6 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label4:
+        throw $r6;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+    public java.lang.String[] getHostNames()
+    {
+        javax.jmdns.impl.JmmDNSImpl r0;
+        int i0, i1;
+        javax.jmdns.JmDNS r1;
+        java.util.HashSet r2;
+        javax.jmdns.JmDNS[] $r3;
+        java.lang.String $r4;
+        java.lang.String[] $r5;
+        java.lang.Object[] $r6;
+
+        r0 := @this: javax.jmdns.impl.JmmDNSImpl;
+
+        r2 = new java.util.HashSet;
+
+        specialinvoke r2.<java.util.HashSet: void <init>()>();
+
+        $r3 = virtualinvoke r0.<javax.jmdns.impl.JmmDNSImpl: javax.jmdns.JmDNS[] getDNS()>();
+
+        i0 = lengthof $r3;
+
+        i1 = 0;
+
+     label1:
+        if i1 >= i0 goto label2;
+
+        r1 = $r3[i1];
+
+        $r4 = virtualinvoke r1.<javax.jmdns.JmDNS: java.lang.String getHostName()>();
+
+        interfaceinvoke r2.<java.util.Set: boolean add(java.lang.Object)>($r4);
+
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label2:
+        i0 = interfaceinvoke r2.<java.util.Set: int size()>();
+
+        $r5 = newarray (java.lang.String)[i0];
+
+        $r6 = interfaceinvoke r2.<java.util.Set: java.lang.Object[] toArray(java.lang.Object[])>($r5);
+
+        $r5 = (java.lang.String[]) $r6;
+
+        return $r5;
+    }
+    public java.net.InetAddress[] getInetAddresses() throws java.io.IOException
+    {
+        javax.jmdns.impl.JmmDNSImpl r0;
+        int i0, i1;
+        javax.jmdns.JmDNS r1;
+        java.util.HashSet r2;
+        javax.jmdns.JmDNS[] $r3;
+        java.net.InetAddress $r4;
+        java.net.InetAddress[] $r5;
+        java.lang.Object[] $r6;
+
+        r0 := @this: javax.jmdns.impl.JmmDNSImpl;
+
+        r2 = new java.util.HashSet;
+
+        specialinvoke r2.<java.util.HashSet: void <init>()>();
+
+        $r3 = virtualinvoke r0.<javax.jmdns.impl.JmmDNSImpl: javax.jmdns.JmDNS[] getDNS()>();
+
+        i0 = lengthof $r3;
+
+        i1 = 0;
+
+     label1:
+        if i1 >= i0 goto label2;
+
+        r1 = $r3[i1];
+
+        $r4 = virtualinvoke r1.<javax.jmdns.JmDNS: java.net.InetAddress getInetAddress()>();
+
+        interfaceinvoke r2.<java.util.Set: boolean add(java.lang.Object)>($r4);
+
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label2:
+        i0 = interfaceinvoke r2.<java.util.Set: int size()>();
+
+        $r5 = newarray (java.net.InetAddress)[i0];
+
+        $r6 = interfaceinvoke r2.<java.util.Set: java.lang.Object[] toArray(java.lang.Object[])>($r5);
+
+        $r5 = (java.net.InetAddress[]) $r6;
+
+        return $r5;
+    }
+    public java.net.InetAddress[] getInterfaces() throws java.io.IOException
+    {
+        javax.jmdns.impl.JmmDNSImpl r0;
+        int i0, i1;
+        javax.jmdns.JmDNS r1;
+        java.util.HashSet r2;
+        javax.jmdns.JmDNS[] $r3;
+        java.net.InetAddress $r4;
+        java.net.InetAddress[] $r5;
+        java.lang.Object[] $r6;
+
+        r0 := @this: javax.jmdns.impl.JmmDNSImpl;
+
+        r2 = new java.util.HashSet;
+
+        specialinvoke r2.<java.util.HashSet: void <init>()>();
+
+        $r3 = virtualinvoke r0.<javax.jmdns.impl.JmmDNSImpl: javax.jmdns.JmDNS[] getDNS()>();
+
+        i0 = lengthof $r3;
+
+        i1 = 0;
+
+     label1:
+        if i1 >= i0 goto label2;
+
+        r1 = $r3[i1];
+
+        $r4 = virtualinvoke r1.<javax.jmdns.JmDNS: java.net.InetAddress getInterface()>();
+
+        interfaceinvoke r2.<java.util.Set: boolean add(java.lang.Object)>($r4);
+
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label2:
+        i0 = interfaceinvoke r2.<java.util.Set: int size()>();
+
+        $r5 = newarray (java.net.InetAddress)[i0];
+
+        $r6 = interfaceinvoke r2.<java.util.Set: java.lang.Object[] toArray(java.lang.Object[])>($r5);
+
+        $r5 = (java.net.InetAddress[]) $r6;
+
+        return $r5;
+    }
+    public java.lang.String[] getNames()
+    {
+        javax.jmdns.impl.JmmDNSImpl r0;
+        int i0, i1;
+        javax.jmdns.JmDNS r1;
+        java.util.HashSet r2;
+        javax.jmdns.JmDNS[] $r3;
+        java.lang.String $r4;
+        java.lang.String[] $r5;
+        java.lang.Object[] $r6;
+
+        r0 := @this: javax.jmdns.impl.JmmDNSImpl;
+
+        r2 = new java.util.HashSet;
+
+        specialinvoke r2.<java.util.HashSet: void <init>()>();
+
+        $r3 = virtualinvoke r0.<javax.jmdns.impl.JmmDNSImpl: javax.jmdns.JmDNS[] getDNS()>();
+
+        i0 = lengthof $r3;
+
+        i1 = 0;
+
+     label1:
+        if i1 >= i0 goto label2;
+
+        r1 = $r3[i1];
+
+        $r4 = virtualinvoke r1.<javax.jmdns.JmDNS: java.lang.String getName()>();
+
+        interfaceinvoke r2.<java.util.Set: boolean add(java.lang.Object)>($r4);
+
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label2:
+        i0 = interfaceinvoke r2.<java.util.Set: int size()>();
+
+        $r5 = newarray (java.lang.String)[i0];
+
+        $r6 = interfaceinvoke r2.<java.util.Set: java.lang.Object[] toArray(java.lang.Object[])>($r5);
+
+        $r5 = (java.lang.String[]) $r6;
+
+        return $r5;
+    }
+    public javax.jmdns.ServiceInfo[] getServiceInfos(java.lang.String, java.lang.String)
+    {
+        javax.jmdns.impl.JmmDNSImpl r0;
+        java.lang.String $r1, $r2;
+        javax.jmdns.ServiceInfo[] $r3;
+
+        r0 := @this: javax.jmdns.impl.JmmDNSImpl;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $r3 = virtualinvoke r0.<javax.jmdns.impl.JmmDNSImpl: javax.jmdns.ServiceInfo[] getServiceInfos(java.lang.String,java.lang.String,boolean,long)>($r1, $r2, 0, 6000L);
+
+        return $r3;
+    }
+    public javax.jmdns.ServiceInfo[] getServiceInfos(java.lang.String, java.lang.String, long)
+    {
+        javax.jmdns.impl.JmmDNSImpl r0;
+        java.lang.String $r1, $r2;
+        long $l0;
+        javax.jmdns.ServiceInfo[] $r3;
+
+        r0 := @this: javax.jmdns.impl.JmmDNSImpl;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $l0 := @parameter2: long;
+
+        $r3 = virtualinvoke r0.<javax.jmdns.impl.JmmDNSImpl: javax.jmdns.ServiceInfo[] getServiceInfos(java.lang.String,java.lang.String,boolean,long)>($r1, $r2, 0, $l0);
+
+        return $r3;
+    }
+    public javax.jmdns.ServiceInfo[] getServiceInfos(java.lang.String, java.lang.String, boolean)
+    {
+        javax.jmdns.impl.JmmDNSImpl r0;
+        java.lang.String $r1, $r2;
+        boolean $z0;
+        javax.jmdns.ServiceInfo[] $r3;
+
+        r0 := @this: javax.jmdns.impl.JmmDNSImpl;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $z0 := @parameter2: boolean;
+
+        $r3 = virtualinvoke r0.<javax.jmdns.impl.JmmDNSImpl: javax.jmdns.ServiceInfo[] getServiceInfos(java.lang.String,java.lang.String,boolean,long)>($r1, $r2, $z0, 6000L);
+
+        return $r3;
+    }
+    public javax.jmdns.ServiceInfo[] getServiceInfos(java.lang.String, java.lang.String, boolean, long)
+    {
+        javax.jmdns.impl.JmmDNSImpl r0;
+        java.lang.String $r1, $r2;
+        boolean $z0;
+        long $l0;
+        javax.jmdns.JmDNS r3;
+        java.util.HashSet r4;
+        java.util.ArrayList r5;
+        javax.jmdns.JmDNS[] $r6;
+        int $i1, i2;
+        javax.jmdns.impl.JmmDNSImpl$2 $r7;
+        javax.jmdns.impl.util.NamedThreadFactory $r8;
+        java.util.concurrent.ExecutorService $r9;
+        java.util.List $r10, $r12;
+        java.util.concurrent.TimeUnit $r11;
+        java.util.Iterator $r13;
+        java.lang.Object $r14;
+        java.util.concurrent.Future r15;
+        javax.jmdns.ServiceInfo r16;
+        java.lang.InterruptedException r17, r21;
+        org.slf4j.Logger $r18;
+        java.lang.Thread $r19;
+        java.lang.Throwable $r20;
+        java.util.concurrent.ExecutionException r22;
+        javax.jmdns.ServiceInfo[] $r23;
+        java.lang.Object[] $r24;
+
+        r0 := @this: javax.jmdns.impl.JmmDNSImpl;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $z0 := @parameter2: boolean;
+
+        $l0 := @parameter3: long;
+
+        $r6 = virtualinvoke r0.<javax.jmdns.impl.JmmDNSImpl: javax.jmdns.JmDNS[] getDNS()>();
+
+        r4 = new java.util.HashSet;
+
+        $i1 = lengthof $r6;
+
+        specialinvoke r4.<java.util.HashSet: void <init>(int)>($i1);
+
+        $i1 = lengthof $r6;
+
+        if $i1 <= 0 goto label29;
+
+        r5 = new java.util.ArrayList;
+
+        $i1 = lengthof $r6;
+
+        specialinvoke r5.<java.util.ArrayList: void <init>(int)>($i1);
+
+        $i1 = lengthof $r6;
+
+        i2 = 0;
+
+     label01:
+        if i2 >= $i1 goto label02;
+
+        r3 = $r6[i2];
+
+        $r7 = new javax.jmdns.impl.JmmDNSImpl$2;
+
+        specialinvoke $r7.<javax.jmdns.impl.JmmDNSImpl$2: void <init>(javax.jmdns.impl.JmmDNSImpl,javax.jmdns.JmDNS,java.lang.String,java.lang.String,boolean,long)>(r0, r3, $r1, $r2, $z0, $l0);
+
+        interfaceinvoke r5.<java.util.List: boolean add(java.lang.Object)>($r7);
+
+        i2 = i2 + 1;
+
+        goto label01;
+
+     label02:
+        $i1 = interfaceinvoke r5.<java.util.List: int size()>();
+
+        $r8 = new javax.jmdns.impl.util.NamedThreadFactory;
+
+        specialinvoke $r8.<javax.jmdns.impl.util.NamedThreadFactory: void <init>(java.lang.String)>("JmmDNS.getServiceInfos");
+
+        $r9 = staticinvoke <java.util.concurrent.Executors: java.util.concurrent.ExecutorService newFixedThreadPool(int,java.util.concurrent.ThreadFactory)>($i1, $r8);
+
+     label03:
+        $r10 = staticinvoke <java.util.Collections: java.util.List emptyList()>();
+
+     label04:
+        $l0 = 100L + $l0;
+
+     label05:
+        $r11 = <java.util.concurrent.TimeUnit: java.util.concurrent.TimeUnit MILLISECONDS>;
+
+     label06:
+        $r12 = interfaceinvoke $r9.<java.util.concurrent.ExecutorService: java.util.List invokeAll(java.util.Collection,long,java.util.concurrent.TimeUnit)>(r5, $l0, $r11);
+
+     label07:
+        $r10 = $r12;
+
+     label08:
+        $r13 = interfaceinvoke $r10.<java.util.List: java.util.Iterator iterator()>();
+
+     label09:
+        $z0 = interfaceinvoke $r13.<java.util.Iterator: boolean hasNext()>();
+
+     label10:
+        if $z0 == 0 goto label28;
+
+     label11:
+        $r14 = interfaceinvoke $r13.<java.util.Iterator: java.lang.Object next()>();
+
+        r15 = (java.util.concurrent.Future) $r14;
+
+        $z0 = interfaceinvoke r15.<java.util.concurrent.Future: boolean isCancelled()>();
+
+     label12:
+        if $z0 != 0 goto label09;
+
+     label13:
+        $r14 = interfaceinvoke r15.<java.util.concurrent.Future: java.lang.Object get()>();
+
+     label14:
+        r16 = (javax.jmdns.ServiceInfo) $r14;
+
+     label15:
+        if r16 == null goto label09;
+
+     label16:
+        interfaceinvoke r4.<java.util.Set: boolean add(java.lang.Object)>(r16);
+
+     label17:
+        goto label09;
+
+     label18:
+        r17 := @caughtexception;
+
+     label19:
+        $r18 = <javax.jmdns.impl.JmmDNSImpl: org.slf4j.Logger logger>;
+
+        interfaceinvoke $r18.<org.slf4j.Logger: void debug(java.lang.String,java.lang.Throwable)>("Interrupted ", r17);
+
+        $r19 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        virtualinvoke $r19.<java.lang.Thread: void interrupt()>();
+
+     label20:
+        goto label09;
+
+     label21:
+        $r20 := @caughtexception;
+
+        interfaceinvoke $r9.<java.util.concurrent.ExecutorService: void shutdown()>();
+
+        throw $r20;
+
+     label22:
+        r21 := @caughtexception;
+
+     label23:
+        $r18 = <javax.jmdns.impl.JmmDNSImpl: org.slf4j.Logger logger>;
+
+        interfaceinvoke $r18.<org.slf4j.Logger: void debug(java.lang.String,java.lang.Throwable)>("Interrupted ", r21);
+
+        $r19 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        virtualinvoke $r19.<java.lang.Thread: void interrupt()>();
+
+     label24:
+        goto label08;
+
+     label25:
+        r22 := @caughtexception;
+
+     label26:
+        $r18 = <javax.jmdns.impl.JmmDNSImpl: org.slf4j.Logger logger>;
+
+        interfaceinvoke $r18.<org.slf4j.Logger: void warn(java.lang.String,java.lang.Throwable)>("Exception ", r22);
+
+     label27:
+        goto label09;
+
+     label28:
+        interfaceinvoke $r9.<java.util.concurrent.ExecutorService: void shutdown()>();
+
+     label29:
+        $i1 = interfaceinvoke r4.<java.util.Set: int size()>();
+
+        $r23 = newarray (javax.jmdns.ServiceInfo)[$i1];
+
+        $r24 = interfaceinvoke r4.<java.util.Set: java.lang.Object[] toArray(java.lang.Object[])>($r23);
+
+        $r23 = (javax.jmdns.ServiceInfo[]) $r24;
+
+        return $r23;
+
+        catch java.lang.Throwable from label03 to label04 with label21;
+        catch java.lang.InterruptedException from label06 to label07 with label22;
+        catch java.lang.Throwable from label05 to label07 with label21;
+        catch java.lang.Throwable from label08 to label10 with label21;
+        catch java.lang.Throwable from label11 to label12 with label21;
+        catch java.lang.InterruptedException from label13 to label14 with label18;
+        catch java.lang.InterruptedException from label16 to label17 with label18;
+        catch java.util.concurrent.ExecutionException from label13 to label14 with label25;
+        catch java.util.concurrent.ExecutionException from label16 to label17 with label25;
+        catch java.lang.Throwable from label13 to label15 with label21;
+        catch java.lang.Throwable from label16 to label17 with label21;
+        catch java.lang.Throwable from label19 to label20 with label21;
+        catch java.lang.Throwable from label23 to label24 with label21;
+        catch java.lang.Throwable from label26 to label27 with label21;
+    }
+    public void inetAddressAdded(javax.jmdns.NetworkTopologyEvent)
+    {
+        javax.jmdns.impl.JmmDNSImpl r0;
+        javax.jmdns.NetworkTopologyEvent $r1;
+        java.util.Set r2, r3;
+        java.util.concurrent.ConcurrentMap r4, $r9;
+        java.lang.Exception r5;
+        javax.jmdns.impl.NetworkTopologyEventImpl r6;
+        int i0, i1;
+        javax.jmdns.NetworkTopologyListener r7;
+        java.net.InetAddress $r8;
+        boolean $z0;
+        javax.jmdns.JmDNS $r10;
+        java.lang.Object $r11;
+        java.util.Collection $r12;
+        java.util.concurrent.ExecutorService $r13;
+        javax.jmdns.impl.JmmDNSImpl$5 $r14;
+        javax.jmdns.NetworkTopologyListener[] $r15;
+        javax.jmdns.impl.JmmDNSImpl$6 $r16;
+        java.lang.Throwable $r17;
+        org.slf4j.Logger $r18;
+        java.lang.StringBuilder $r19;
+        java.lang.String $r20;
+
+        r0 := @this: javax.jmdns.impl.JmmDNSImpl;
+
+        $r1 := @parameter0: javax.jmdns.NetworkTopologyEvent;
+
+        $r8 = virtualinvoke $r1.<javax.jmdns.NetworkTopologyEvent: java.net.InetAddress getInetAddress()>();
+
+     label01:
+        $r9 = r0.<javax.jmdns.impl.JmmDNSImpl: java.util.concurrent.ConcurrentMap _knownMDNS>;
+
+        $z0 = interfaceinvoke $r9.<java.util.concurrent.ConcurrentMap: boolean containsKey(java.lang.Object)>($r8);
+
+     label02:
+        if $z0 != 0 goto label12;
+
+     label03:
+        $r9 = r0.<javax.jmdns.impl.JmmDNSImpl: java.util.concurrent.ConcurrentMap _knownMDNS>;
+
+        entermonitor $r9;
+
+     label04:
+        r4 = r0.<javax.jmdns.impl.JmmDNSImpl: java.util.concurrent.ConcurrentMap _knownMDNS>;
+
+        $z0 = interfaceinvoke r4.<java.util.concurrent.ConcurrentMap: boolean containsKey(java.lang.Object)>($r8);
+
+        if $z0 != 0 goto label07;
+
+        $r10 = staticinvoke <javax.jmdns.JmDNS: javax.jmdns.JmDNS create(java.net.InetAddress)>($r8);
+
+        r4 = r0.<javax.jmdns.impl.JmmDNSImpl: java.util.concurrent.ConcurrentMap _knownMDNS>;
+
+        $r11 = interfaceinvoke r4.<java.util.concurrent.ConcurrentMap: java.lang.Object putIfAbsent(java.lang.Object,java.lang.Object)>($r8, $r10);
+
+        if $r11 != null goto label06;
+
+        r2 = r0.<javax.jmdns.impl.JmmDNSImpl: java.util.Set _serviceTypes>;
+
+        r4 = r0.<javax.jmdns.impl.JmmDNSImpl: java.util.concurrent.ConcurrentMap _services>;
+
+        $r12 = interfaceinvoke r4.<java.util.concurrent.ConcurrentMap: java.util.Collection values()>();
+
+        r3 = r0.<javax.jmdns.impl.JmmDNSImpl: java.util.Set _typeListeners>;
+
+        r4 = r0.<javax.jmdns.impl.JmmDNSImpl: java.util.concurrent.ConcurrentMap _serviceListeners>;
+
+        $r13 = r0.<javax.jmdns.impl.JmmDNSImpl: java.util.concurrent.ExecutorService _jmDNSExecutor>;
+
+        $r14 = new javax.jmdns.impl.JmmDNSImpl$5;
+
+        specialinvoke $r14.<javax.jmdns.impl.JmmDNSImpl$5: void <init>(javax.jmdns.impl.JmmDNSImpl,java.util.Collection,javax.jmdns.JmDNS,java.util.Collection,java.util.Collection,java.util.Map)>(r0, r2, $r10, $r12, r3, r4);
+
+        interfaceinvoke $r13.<java.util.concurrent.ExecutorService: java.util.concurrent.Future submit(java.lang.Runnable)>($r14);
+
+        r6 = new javax.jmdns.impl.NetworkTopologyEventImpl;
+
+        specialinvoke r6.<javax.jmdns.impl.NetworkTopologyEventImpl: void <init>(javax.jmdns.JmDNS,java.net.InetAddress)>($r10, $r8);
+
+        $r15 = virtualinvoke r0.<javax.jmdns.impl.JmmDNSImpl: javax.jmdns.NetworkTopologyListener[] networkListeners()>();
+
+        i0 = lengthof $r15;
+
+        i1 = 0;
+
+     label05:
+        if i1 >= i0 goto label07;
+
+        r7 = $r15[i1];
+
+        $r13 = r0.<javax.jmdns.impl.JmmDNSImpl: java.util.concurrent.ExecutorService _listenerExecutor>;
+
+        $r16 = new javax.jmdns.impl.JmmDNSImpl$6;
+
+        specialinvoke $r16.<javax.jmdns.impl.JmmDNSImpl$6: void <init>(javax.jmdns.impl.JmmDNSImpl,javax.jmdns.NetworkTopologyListener,javax.jmdns.NetworkTopologyEvent)>(r0, r7, r6);
+
+        interfaceinvoke $r13.<java.util.concurrent.ExecutorService: java.util.concurrent.Future submit(java.lang.Runnable)>($r16);
+
+        i1 = i1 + 1;
+
+        goto label05;
+
+     label06:
+        virtualinvoke $r10.<javax.jmdns.JmDNS: void close()>();
+
+     label07:
+        exitmonitor $r9;
+
+     label08:
+        return;
+
+     label09:
+        $r17 := @caughtexception;
+
+        exitmonitor $r9;
+
+     label10:
+        throw $r17;
+
+     label11:
+        r5 := @caughtexception;
+
+        $r18 = <javax.jmdns.impl.JmmDNSImpl: org.slf4j.Logger logger>;
+
+        $r19 = new java.lang.StringBuilder;
+
+        specialinvoke $r19.<java.lang.StringBuilder: void <init>()>();
+
+        $r19 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unexpected unhandled exception: ");
+
+        $r19 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r5);
+
+        $r20 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        interfaceinvoke $r18.<org.slf4j.Logger: void warn(java.lang.String)>($r20);
+
+     label12:
+        return;
+
+        catch java.lang.Exception from label01 to label02 with label11;
+        catch java.lang.Exception from label03 to label04 with label11;
+        catch java.lang.Throwable from label04 to label08 with label09;
+        catch java.lang.Throwable from label09 to label10 with label09;
+        catch java.lang.Exception from label10 to label11 with label11;
+    }
+    public void inetAddressRemoved(javax.jmdns.NetworkTopologyEvent)
+    {
+        javax.jmdns.impl.JmmDNSImpl r0;
+        javax.jmdns.NetworkTopologyEvent $r1;
+        java.lang.Exception r2;
+        javax.jmdns.impl.NetworkTopologyEventImpl r3;
+        int i0, i1;
+        javax.jmdns.NetworkTopologyListener r4;
+        java.net.InetAddress $r5;
+        java.util.concurrent.ConcurrentMap $r6, $r7;
+        boolean $z0;
+        java.lang.Object $r8;
+        javax.jmdns.JmDNS r9;
+        javax.jmdns.NetworkTopologyListener[] $r10;
+        java.util.concurrent.ExecutorService $r11;
+        javax.jmdns.impl.JmmDNSImpl$7 $r12;
+        java.lang.Throwable $r13;
+        org.slf4j.Logger $r14;
+        java.lang.StringBuilder $r15;
+        java.lang.String $r16;
+
+        r0 := @this: javax.jmdns.impl.JmmDNSImpl;
+
+        $r1 := @parameter0: javax.jmdns.NetworkTopologyEvent;
+
+        $r5 = virtualinvoke $r1.<javax.jmdns.NetworkTopologyEvent: java.net.InetAddress getInetAddress()>();
+
+     label01:
+        $r6 = r0.<javax.jmdns.impl.JmmDNSImpl: java.util.concurrent.ConcurrentMap _knownMDNS>;
+
+        $z0 = interfaceinvoke $r6.<java.util.concurrent.ConcurrentMap: boolean containsKey(java.lang.Object)>($r5);
+
+     label02:
+        if $z0 == 0 goto label11;
+
+     label03:
+        $r6 = r0.<javax.jmdns.impl.JmmDNSImpl: java.util.concurrent.ConcurrentMap _knownMDNS>;
+
+        entermonitor $r6;
+
+     label04:
+        $r7 = r0.<javax.jmdns.impl.JmmDNSImpl: java.util.concurrent.ConcurrentMap _knownMDNS>;
+
+        $z0 = interfaceinvoke $r7.<java.util.concurrent.ConcurrentMap: boolean containsKey(java.lang.Object)>($r5);
+
+        if $z0 == 0 goto label06;
+
+        $r7 = r0.<javax.jmdns.impl.JmmDNSImpl: java.util.concurrent.ConcurrentMap _knownMDNS>;
+
+        $r8 = interfaceinvoke $r7.<java.util.concurrent.ConcurrentMap: java.lang.Object remove(java.lang.Object)>($r5);
+
+        r9 = (javax.jmdns.JmDNS) $r8;
+
+        virtualinvoke r9.<javax.jmdns.JmDNS: void close()>();
+
+        r3 = new javax.jmdns.impl.NetworkTopologyEventImpl;
+
+        specialinvoke r3.<javax.jmdns.impl.NetworkTopologyEventImpl: void <init>(javax.jmdns.JmDNS,java.net.InetAddress)>(r9, $r5);
+
+        $r10 = virtualinvoke r0.<javax.jmdns.impl.JmmDNSImpl: javax.jmdns.NetworkTopologyListener[] networkListeners()>();
+
+        i0 = lengthof $r10;
+
+        i1 = 0;
+
+     label05:
+        if i1 >= i0 goto label06;
+
+        r4 = $r10[i1];
+
+        $r11 = r0.<javax.jmdns.impl.JmmDNSImpl: java.util.concurrent.ExecutorService _listenerExecutor>;
+
+        $r12 = new javax.jmdns.impl.JmmDNSImpl$7;
+
+        specialinvoke $r12.<javax.jmdns.impl.JmmDNSImpl$7: void <init>(javax.jmdns.impl.JmmDNSImpl,javax.jmdns.NetworkTopologyListener,javax.jmdns.NetworkTopologyEvent)>(r0, r4, r3);
+
+        interfaceinvoke $r11.<java.util.concurrent.ExecutorService: java.util.concurrent.Future submit(java.lang.Runnable)>($r12);
+
+        i1 = i1 + 1;
+
+        goto label05;
+
+     label06:
+        exitmonitor $r6;
+
+     label07:
+        return;
+
+     label08:
+        $r13 := @caughtexception;
+
+        exitmonitor $r6;
+
+     label09:
+        throw $r13;
+
+     label10:
+        r2 := @caughtexception;
+
+        $r14 = <javax.jmdns.impl.JmmDNSImpl: org.slf4j.Logger logger>;
+
+        $r15 = new java.lang.StringBuilder;
+
+        specialinvoke $r15.<java.lang.StringBuilder: void <init>()>();
+
+        $r15 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unexpected unhandled exception: ");
+
+        $r15 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r2);
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        interfaceinvoke $r14.<org.slf4j.Logger: void warn(java.lang.String)>($r16);
+
+     label11:
+        return;
+
+        catch java.lang.Exception from label01 to label02 with label10;
+        catch java.lang.Exception from label03 to label04 with label10;
+        catch java.lang.Throwable from label04 to label07 with label08;
+        catch java.lang.Throwable from label08 to label09 with label08;
+        catch java.lang.Exception from label09 to label10 with label10;
+    }
+    public javax.jmdns.ServiceInfo[] list(java.lang.String)
+    {
+        javax.jmdns.impl.JmmDNSImpl r0;
+        java.lang.String $r1;
+        javax.jmdns.ServiceInfo[] $r2;
+
+        r0 := @this: javax.jmdns.impl.JmmDNSImpl;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = virtualinvoke r0.<javax.jmdns.impl.JmmDNSImpl: javax.jmdns.ServiceInfo[] list(java.lang.String,long)>($r1, 6000L);
+
+        return $r2;
+    }
+    public javax.jmdns.ServiceInfo[] list(java.lang.String, long)
+    {
+        javax.jmdns.impl.JmmDNSImpl r0;
+        java.lang.String $r1;
+        long $l0;
+        javax.jmdns.JmDNS r2;
+        int i1, i2;
+        java.util.HashSet r3;
+        java.util.ArrayList r4;
+        javax.jmdns.JmDNS[] $r5;
+        javax.jmdns.impl.JmmDNSImpl$4 $r6;
+        javax.jmdns.impl.util.NamedThreadFactory $r7;
+        java.util.concurrent.ExecutorService $r8;
+        java.util.List $r9, $r11;
+        java.util.concurrent.TimeUnit $r10;
+        java.util.Iterator $r12;
+        boolean $z0;
+        java.lang.Object $r13;
+        java.util.concurrent.Future r14;
+        java.util.Collection $r15;
+        java.lang.InterruptedException r16, r20;
+        org.slf4j.Logger $r17;
+        java.lang.Thread $r18;
+        java.lang.Throwable $r19;
+        java.util.concurrent.ExecutionException r21;
+        javax.jmdns.ServiceInfo[] $r22;
+        java.lang.Object[] $r23;
+
+        r0 := @this: javax.jmdns.impl.JmmDNSImpl;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $l0 := @parameter1: long;
+
+        $r5 = virtualinvoke r0.<javax.jmdns.impl.JmmDNSImpl: javax.jmdns.JmDNS[] getDNS()>();
+
+        r3 = new java.util.HashSet;
+
+        i1 = lengthof $r5;
+
+        i1 = i1 * 5;
+
+        specialinvoke r3.<java.util.HashSet: void <init>(int)>(i1);
+
+        i1 = lengthof $r5;
+
+        if i1 <= 0 goto label28;
+
+        r4 = new java.util.ArrayList;
+
+        i1 = lengthof $r5;
+
+        specialinvoke r4.<java.util.ArrayList: void <init>(int)>(i1);
+
+        i1 = lengthof $r5;
+
+        i2 = 0;
+
+     label01:
+        if i2 >= i1 goto label02;
+
+        r2 = $r5[i2];
+
+        $r6 = new javax.jmdns.impl.JmmDNSImpl$4;
+
+        specialinvoke $r6.<javax.jmdns.impl.JmmDNSImpl$4: void <init>(javax.jmdns.impl.JmmDNSImpl,javax.jmdns.JmDNS,java.lang.String,long)>(r0, r2, $r1, $l0);
+
+        interfaceinvoke r4.<java.util.List: boolean add(java.lang.Object)>($r6);
+
+        i2 = i2 + 1;
+
+        goto label01;
+
+     label02:
+        i1 = interfaceinvoke r4.<java.util.List: int size()>();
+
+        $r7 = new javax.jmdns.impl.util.NamedThreadFactory;
+
+        specialinvoke $r7.<javax.jmdns.impl.util.NamedThreadFactory: void <init>(java.lang.String)>("JmmDNS.list");
+
+        $r8 = staticinvoke <java.util.concurrent.Executors: java.util.concurrent.ExecutorService newFixedThreadPool(int,java.util.concurrent.ThreadFactory)>(i1, $r7);
+
+     label03:
+        $r9 = staticinvoke <java.util.Collections: java.util.List emptyList()>();
+
+     label04:
+        $l0 = 100L + $l0;
+
+     label05:
+        $r10 = <java.util.concurrent.TimeUnit: java.util.concurrent.TimeUnit MILLISECONDS>;
+
+     label06:
+        $r11 = interfaceinvoke $r8.<java.util.concurrent.ExecutorService: java.util.List invokeAll(java.util.Collection,long,java.util.concurrent.TimeUnit)>(r4, $l0, $r10);
+
+     label07:
+        $r9 = $r11;
+
+     label08:
+        $r12 = interfaceinvoke $r9.<java.util.List: java.util.Iterator iterator()>();
+
+     label09:
+        $z0 = interfaceinvoke $r12.<java.util.Iterator: boolean hasNext()>();
+
+     label10:
+        if $z0 == 0 goto label27;
+
+     label11:
+        $r13 = interfaceinvoke $r12.<java.util.Iterator: java.lang.Object next()>();
+
+        r14 = (java.util.concurrent.Future) $r13;
+
+        $z0 = interfaceinvoke r14.<java.util.concurrent.Future: boolean isCancelled()>();
+
+     label12:
+        if $z0 != 0 goto label09;
+
+     label13:
+        $r13 = interfaceinvoke r14.<java.util.concurrent.Future: java.lang.Object get()>();
+
+     label14:
+        $r15 = (java.util.Collection) $r13;
+
+     label15:
+        interfaceinvoke r3.<java.util.Set: boolean addAll(java.util.Collection)>($r15);
+
+     label16:
+        goto label09;
+
+     label17:
+        r16 := @caughtexception;
+
+     label18:
+        $r17 = <javax.jmdns.impl.JmmDNSImpl: org.slf4j.Logger logger>;
+
+        interfaceinvoke $r17.<org.slf4j.Logger: void debug(java.lang.String,java.lang.Throwable)>("Interrupted ", r16);
+
+        $r18 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        virtualinvoke $r18.<java.lang.Thread: void interrupt()>();
+
+     label19:
+        goto label09;
+
+     label20:
+        $r19 := @caughtexception;
+
+        interfaceinvoke $r8.<java.util.concurrent.ExecutorService: void shutdown()>();
+
+        throw $r19;
+
+     label21:
+        r20 := @caughtexception;
+
+     label22:
+        $r17 = <javax.jmdns.impl.JmmDNSImpl: org.slf4j.Logger logger>;
+
+        interfaceinvoke $r17.<org.slf4j.Logger: void debug(java.lang.String,java.lang.Throwable)>("Interrupted ", r20);
+
+        $r18 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        virtualinvoke $r18.<java.lang.Thread: void interrupt()>();
+
+     label23:
+        goto label08;
+
+     label24:
+        r21 := @caughtexception;
+
+     label25:
+        $r17 = <javax.jmdns.impl.JmmDNSImpl: org.slf4j.Logger logger>;
+
+        interfaceinvoke $r17.<org.slf4j.Logger: void warn(java.lang.String,java.lang.Throwable)>("Exception ", r21);
+
+     label26:
+        goto label09;
+
+     label27:
+        interfaceinvoke $r8.<java.util.concurrent.ExecutorService: void shutdown()>();
+
+     label28:
+        i1 = interfaceinvoke r3.<java.util.Set: int size()>();
+
+        $r22 = newarray (javax.jmdns.ServiceInfo)[i1];
+
+        $r23 = interfaceinvoke r3.<java.util.Set: java.lang.Object[] toArray(java.lang.Object[])>($r22);
+
+        $r22 = (javax.jmdns.ServiceInfo[]) $r23;
+
+        return $r22;
+
+        catch java.lang.Throwable from label03 to label04 with label20;
+        catch java.lang.InterruptedException from label06 to label07 with label21;
+        catch java.lang.Throwable from label05 to label07 with label20;
+        catch java.lang.Throwable from label08 to label10 with label20;
+        catch java.lang.Throwable from label11 to label12 with label20;
+        catch java.lang.InterruptedException from label13 to label14 with label17;
+        catch java.lang.InterruptedException from label15 to label16 with label17;
+        catch java.util.concurrent.ExecutionException from label13 to label14 with label24;
+        catch java.util.concurrent.ExecutionException from label15 to label16 with label24;
+        catch java.lang.Throwable from label13 to label16 with label20;
+        catch java.lang.Throwable from label18 to label19 with label20;
+        catch java.lang.Throwable from label22 to label23 with label20;
+        catch java.lang.Throwable from label25 to label26 with label20;
+    }
+    public java.util.Map listBySubtype(java.lang.String)
+    {
+        javax.jmdns.impl.JmmDNSImpl r0;
+        java.lang.String $r1;
+        java.util.Map $r2;
+
+        r0 := @this: javax.jmdns.impl.JmmDNSImpl;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = virtualinvoke r0.<javax.jmdns.impl.JmmDNSImpl: java.util.Map listBySubtype(java.lang.String,long)>($r1, 6000L);
+
+        return $r2;
+    }
+    public java.util.Map listBySubtype(java.lang.String, long)
+    {
+        javax.jmdns.impl.JmmDNSImpl r0;
+        java.lang.String $r1;
+        long $l0;
+        javax.jmdns.ServiceInfo r2;
+        int i1, i2;
+        java.util.HashMap r3, r4;
+        javax.jmdns.ServiceInfo[] $r5;
+        boolean $z0;
+        java.util.ArrayList $r6;
+        java.lang.Object $r7;
+        java.util.List $r8;
+        java.util.Set $r9;
+        java.util.Iterator $r10;
+        java.lang.Object[] $r11;
+
+        r0 := @this: javax.jmdns.impl.JmmDNSImpl;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $l0 := @parameter1: long;
+
+        r3 = new java.util.HashMap;
+
+        specialinvoke r3.<java.util.HashMap: void <init>(int)>(5);
+
+        $r5 = virtualinvoke r0.<javax.jmdns.impl.JmmDNSImpl: javax.jmdns.ServiceInfo[] list(java.lang.String,long)>($r1, $l0);
+
+        i1 = lengthof $r5;
+
+        i2 = 0;
+
+     label1:
+        if i2 >= i1 goto label3;
+
+        r2 = $r5[i2];
+
+        $r1 = virtualinvoke r2.<javax.jmdns.ServiceInfo: java.lang.String getSubtype()>();
+
+        $z0 = interfaceinvoke r3.<java.util.Map: boolean containsKey(java.lang.Object)>($r1);
+
+        if $z0 != 0 goto label2;
+
+        $r6 = new java.util.ArrayList;
+
+        specialinvoke $r6.<java.util.ArrayList: void <init>(int)>(10);
+
+        interfaceinvoke r3.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r1, $r6);
+
+     label2:
+        $r7 = interfaceinvoke r3.<java.util.Map: java.lang.Object get(java.lang.Object)>($r1);
+
+        $r8 = (java.util.List) $r7;
+
+        interfaceinvoke $r8.<java.util.List: boolean add(java.lang.Object)>(r2);
+
+        i2 = i2 + 1;
+
+        goto label1;
+
+     label3:
+        r4 = new java.util.HashMap;
+
+        i1 = interfaceinvoke r3.<java.util.Map: int size()>();
+
+        specialinvoke r4.<java.util.HashMap: void <init>(int)>(i1);
+
+        $r9 = interfaceinvoke r3.<java.util.Map: java.util.Set keySet()>();
+
+        $r10 = interfaceinvoke $r9.<java.util.Set: java.util.Iterator iterator()>();
+
+     label4:
+        $z0 = interfaceinvoke $r10.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label5;
+
+        $r7 = interfaceinvoke $r10.<java.util.Iterator: java.lang.Object next()>();
+
+        $r1 = (java.lang.String) $r7;
+
+        $r7 = interfaceinvoke r3.<java.util.Map: java.lang.Object get(java.lang.Object)>($r1);
+
+        $r8 = (java.util.List) $r7;
+
+        i1 = interfaceinvoke $r8.<java.util.List: int size()>();
+
+        $r5 = newarray (javax.jmdns.ServiceInfo)[i1];
+
+        $r11 = interfaceinvoke $r8.<java.util.List: java.lang.Object[] toArray(java.lang.Object[])>($r5);
+
+        interfaceinvoke r4.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r1, $r11);
+
+        goto label4;
+
+     label5:
+        return r4;
+    }
+    public javax.jmdns.NetworkTopologyListener[] networkListeners()
+    {
+        javax.jmdns.impl.JmmDNSImpl r0;
+        java.util.Set $r1, $r2;
+        int $i0;
+        javax.jmdns.NetworkTopologyListener[] $r3;
+        java.lang.Object[] $r4;
+
+        r0 := @this: javax.jmdns.impl.JmmDNSImpl;
+
+        $r1 = r0.<javax.jmdns.impl.JmmDNSImpl: java.util.Set _networkListeners>;
+
+        $r2 = r0.<javax.jmdns.impl.JmmDNSImpl: java.util.Set _networkListeners>;
+
+        $i0 = interfaceinvoke $r2.<java.util.Set: int size()>();
+
+        $r3 = newarray (javax.jmdns.NetworkTopologyListener)[$i0];
+
+        $r4 = interfaceinvoke $r1.<java.util.Set: java.lang.Object[] toArray(java.lang.Object[])>($r3);
+
+        $r3 = (javax.jmdns.NetworkTopologyListener[]) $r4;
+
+        return $r3;
+    }
+    public void registerService(javax.jmdns.ServiceInfo) throws java.io.IOException
+    {
+        javax.jmdns.impl.JmmDNSImpl r0;
+        javax.jmdns.ServiceInfo $r1, $r5;
+        int i0, i1;
+        javax.jmdns.JmDNS r2;
+        java.util.concurrent.ConcurrentMap $r3, $r7;
+        javax.jmdns.JmDNS[] $r4;
+        javax.jmdns.impl.ServiceInfoImpl $r6;
+        java.lang.String $r8;
+        java.lang.Throwable $r9;
+
+        r0 := @this: javax.jmdns.impl.JmmDNSImpl;
+
+        $r1 := @parameter0: javax.jmdns.ServiceInfo;
+
+        $r4 = virtualinvoke r0.<javax.jmdns.impl.JmmDNSImpl: javax.jmdns.JmDNS[] getDNS()>();
+
+        $r3 = r0.<javax.jmdns.impl.JmmDNSImpl: java.util.concurrent.ConcurrentMap _services>;
+
+        entermonitor $r3;
+
+     label1:
+        i0 = lengthof $r4;
+
+        i1 = 0;
+
+     label2:
+        if i1 >= i0 goto label3;
+
+        r2 = $r4[i1];
+
+        $r5 = virtualinvoke $r1.<javax.jmdns.ServiceInfo: javax.jmdns.ServiceInfo clone()>();
+
+        virtualinvoke r2.<javax.jmdns.JmDNS: void registerService(javax.jmdns.ServiceInfo)>($r5);
+
+        i1 = i1 + 1;
+
+        goto label2;
+
+     label3:
+        $r6 = (javax.jmdns.impl.ServiceInfoImpl) $r1;
+
+        virtualinvoke $r6.<javax.jmdns.impl.ServiceInfoImpl: void setDelegate(javax.jmdns.impl.ServiceInfoImpl$Delegate)>(r0);
+
+        $r7 = r0.<javax.jmdns.impl.JmmDNSImpl: java.util.concurrent.ConcurrentMap _services>;
+
+        $r8 = virtualinvoke $r1.<javax.jmdns.ServiceInfo: java.lang.String getQualifiedName()>();
+
+        interfaceinvoke $r7.<java.util.concurrent.ConcurrentMap: java.lang.Object put(java.lang.Object,java.lang.Object)>($r8, $r1);
+
+        exitmonitor $r3;
+
+     label4:
+        return;
+
+     label5:
+        $r9 := @caughtexception;
+
+        exitmonitor $r3;
+
+     label6:
+        throw $r9;
+
+        catch java.lang.Throwable from label1 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+    public void registerServiceType(java.lang.String)
+    {
+        javax.jmdns.impl.JmmDNSImpl r0;
+        java.lang.String $r1;
+        int i0, i1;
+        javax.jmdns.JmDNS r2;
+        java.util.Set $r3;
+        javax.jmdns.JmDNS[] $r4;
+
+        r0 := @this: javax.jmdns.impl.JmmDNSImpl;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r3 = r0.<javax.jmdns.impl.JmmDNSImpl: java.util.Set _serviceTypes>;
+
+        interfaceinvoke $r3.<java.util.Set: boolean add(java.lang.Object)>($r1);
+
+        $r4 = virtualinvoke r0.<javax.jmdns.impl.JmmDNSImpl: javax.jmdns.JmDNS[] getDNS()>();
+
+        i0 = lengthof $r4;
+
+        i1 = 0;
+
+     label1:
+        if i1 >= i0 goto label2;
+
+        r2 = $r4[i1];
+
+        virtualinvoke r2.<javax.jmdns.JmDNS: boolean registerServiceType(java.lang.String)>($r1);
+
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label2:
+        return;
+    }
+    public void removeNetworkTopologyListener(javax.jmdns.NetworkTopologyListener)
+    {
+        javax.jmdns.impl.JmmDNSImpl r0;
+        javax.jmdns.NetworkTopologyListener $r1;
+        java.util.Set $r2;
+
+        r0 := @this: javax.jmdns.impl.JmmDNSImpl;
+
+        $r1 := @parameter0: javax.jmdns.NetworkTopologyListener;
+
+        $r2 = r0.<javax.jmdns.impl.JmmDNSImpl: java.util.Set _networkListeners>;
+
+        interfaceinvoke $r2.<java.util.Set: boolean remove(java.lang.Object)>($r1);
+
+        return;
+    }
+    public void removeServiceListener(java.lang.String, javax.jmdns.ServiceListener)
+    {
+        javax.jmdns.impl.JmmDNSImpl r0;
+        java.lang.String $r1, $r4;
+        javax.jmdns.ServiceListener $r2;
+        int i0, i1;
+        javax.jmdns.JmDNS r3;
+        java.util.concurrent.ConcurrentMap $r5;
+        java.lang.Object $r6;
+        java.util.List r7;
+        boolean $z0;
+        javax.jmdns.JmDNS[] $r8;
+        java.lang.Throwable $r9;
+
+        r0 := @this: javax.jmdns.impl.JmmDNSImpl;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: javax.jmdns.ServiceListener;
+
+        $r4 = virtualinvoke $r1.<java.lang.String: java.lang.String toLowerCase()>();
+
+        $r5 = r0.<javax.jmdns.impl.JmmDNSImpl: java.util.concurrent.ConcurrentMap _serviceListeners>;
+
+        $r6 = interfaceinvoke $r5.<java.util.concurrent.ConcurrentMap: java.lang.Object get(java.lang.Object)>($r4);
+
+        r7 = (java.util.List) $r6;
+
+        if r7 == null goto label3;
+
+        entermonitor r7;
+
+     label1:
+        interfaceinvoke r7.<java.util.List: boolean remove(java.lang.Object)>($r2);
+
+        $z0 = interfaceinvoke r7.<java.util.List: boolean isEmpty()>();
+
+        if $z0 == 0 goto label2;
+
+        $r5 = r0.<javax.jmdns.impl.JmmDNSImpl: java.util.concurrent.ConcurrentMap _serviceListeners>;
+
+        interfaceinvoke $r5.<java.util.concurrent.ConcurrentMap: boolean remove(java.lang.Object,java.lang.Object)>($r4, r7);
+
+     label2:
+        exitmonitor r7;
+
+     label3:
+        $r8 = virtualinvoke r0.<javax.jmdns.impl.JmmDNSImpl: javax.jmdns.JmDNS[] getDNS()>();
+
+        i0 = lengthof $r8;
+
+        i1 = 0;
+
+     label4:
+        if i1 >= i0 goto label8;
+
+        r3 = $r8[i1];
+
+        virtualinvoke r3.<javax.jmdns.JmDNS: void removeServiceListener(java.lang.String,javax.jmdns.ServiceListener)>($r1, $r2);
+
+        i1 = i1 + 1;
+
+        goto label4;
+
+     label5:
+        $r9 := @caughtexception;
+
+     label6:
+        exitmonitor r7;
+
+     label7:
+        throw $r9;
+
+     label8:
+        return;
+
+        catch java.lang.Throwable from label1 to label3 with label5;
+        catch java.lang.Throwable from label6 to label7 with label5;
+    }
+    public void removeServiceTypeListener(javax.jmdns.ServiceTypeListener)
+    {
+        javax.jmdns.impl.JmmDNSImpl r0;
+        javax.jmdns.ServiceTypeListener $r1;
+        int i0, i1;
+        javax.jmdns.JmDNS r2;
+        java.util.Set $r3;
+        javax.jmdns.JmDNS[] $r4;
+
+        r0 := @this: javax.jmdns.impl.JmmDNSImpl;
+
+        $r1 := @parameter0: javax.jmdns.ServiceTypeListener;
+
+        $r3 = r0.<javax.jmdns.impl.JmmDNSImpl: java.util.Set _typeListeners>;
+
+        interfaceinvoke $r3.<java.util.Set: boolean remove(java.lang.Object)>($r1);
+
+        $r4 = virtualinvoke r0.<javax.jmdns.impl.JmmDNSImpl: javax.jmdns.JmDNS[] getDNS()>();
+
+        i0 = lengthof $r4;
+
+        i1 = 0;
+
+     label1:
+        if i1 >= i0 goto label2;
+
+        r2 = $r4[i1];
+
+        virtualinvoke r2.<javax.jmdns.JmDNS: void removeServiceTypeListener(javax.jmdns.ServiceTypeListener)>($r1);
+
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label2:
+        return;
+    }
+    public void requestServiceInfo(java.lang.String, java.lang.String)
+    {
+        javax.jmdns.impl.JmmDNSImpl r0;
+        java.lang.String $r1, $r2;
+
+        r0 := @this: javax.jmdns.impl.JmmDNSImpl;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.lang.String;
+
+        virtualinvoke r0.<javax.jmdns.impl.JmmDNSImpl: void requestServiceInfo(java.lang.String,java.lang.String,boolean,long)>($r1, $r2, 0, 6000L);
+
+        return;
+    }
+    public void requestServiceInfo(java.lang.String, java.lang.String, long)
+    {
+        javax.jmdns.impl.JmmDNSImpl r0;
+        java.lang.String $r1, $r2;
+        long $l0;
+
+        r0 := @this: javax.jmdns.impl.JmmDNSImpl;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $l0 := @parameter2: long;
+
+        virtualinvoke r0.<javax.jmdns.impl.JmmDNSImpl: void requestServiceInfo(java.lang.String,java.lang.String,boolean,long)>($r1, $r2, 0, $l0);
+
+        return;
+    }
+    public void requestServiceInfo(java.lang.String, java.lang.String, boolean)
+    {
+        javax.jmdns.impl.JmmDNSImpl r0;
+        java.lang.String $r1, $r2;
+        boolean $z0;
+
+        r0 := @this: javax.jmdns.impl.JmmDNSImpl;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $z0 := @parameter2: boolean;
+
+        virtualinvoke r0.<javax.jmdns.impl.JmmDNSImpl: void requestServiceInfo(java.lang.String,java.lang.String,boolean,long)>($r1, $r2, $z0, 6000L);
+
+        return;
+    }
+    public void requestServiceInfo(java.lang.String, java.lang.String, boolean, long)
+    {
+        javax.jmdns.impl.JmmDNSImpl r0;
+        java.lang.String $r1, $r2;
+        boolean $z0;
+        long $l0;
+        javax.jmdns.impl.JmmDNSImpl$3 $r3;
+        javax.jmdns.JmDNS r4;
+        int i1, i2;
+        java.util.concurrent.ExecutorService $r5;
+        javax.jmdns.JmDNS[] $r6;
+
+        r0 := @this: javax.jmdns.impl.JmmDNSImpl;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $z0 := @parameter2: boolean;
+
+        $l0 := @parameter3: long;
+
+        $r6 = virtualinvoke r0.<javax.jmdns.impl.JmmDNSImpl: javax.jmdns.JmDNS[] getDNS()>();
+
+        i1 = lengthof $r6;
+
+        i2 = 0;
+
+     label1:
+        if i2 >= i1 goto label2;
+
+        r4 = $r6[i2];
+
+        $r5 = r0.<javax.jmdns.impl.JmmDNSImpl: java.util.concurrent.ExecutorService _jmDNSExecutor>;
+
+        $r3 = new javax.jmdns.impl.JmmDNSImpl$3;
+
+        specialinvoke $r3.<javax.jmdns.impl.JmmDNSImpl$3: void <init>(javax.jmdns.impl.JmmDNSImpl,javax.jmdns.JmDNS,java.lang.String,java.lang.String,boolean,long)>(r0, r4, $r1, $r2, $z0, $l0);
+
+        interfaceinvoke $r5.<java.util.concurrent.ExecutorService: java.util.concurrent.Future submit(java.lang.Runnable)>($r3);
+
+        i2 = i2 + 1;
+
+        goto label1;
+
+     label2:
+        return;
+    }
+    public void textValueUpdated(javax.jmdns.ServiceInfo, byte[])
+    {
+        javax.jmdns.impl.JmmDNSImpl r0;
+        javax.jmdns.ServiceInfo $r1, r10;
+        byte[] $r2;
+        int i0, i1;
+        java.util.concurrent.ConcurrentMap $r3;
+        javax.jmdns.JmDNS[] $r4;
+        javax.jmdns.JmDNS r5;
+        javax.jmdns.impl.JmDNSImpl r6;
+        java.util.Map $r7;
+        java.lang.String $r8;
+        java.lang.Object $r9;
+        org.slf4j.Logger $r11;
+        java.lang.Throwable $r12;
+
+        r0 := @this: javax.jmdns.impl.JmmDNSImpl;
+
+        $r1 := @parameter0: javax.jmdns.ServiceInfo;
+
+        $r2 := @parameter1: byte[];
+
+        $r4 = virtualinvoke r0.<javax.jmdns.impl.JmmDNSImpl: javax.jmdns.JmDNS[] getDNS()>();
+
+        $r3 = r0.<javax.jmdns.impl.JmmDNSImpl: java.util.concurrent.ConcurrentMap _services>;
+
+        entermonitor $r3;
+
+     label1:
+        i0 = lengthof $r4;
+
+        i1 = 0;
+
+     label2:
+        if i1 >= i0 goto label7;
+
+        r5 = $r4[i1];
+
+        r6 = (javax.jmdns.impl.JmDNSImpl) r5;
+
+        $r7 = virtualinvoke r6.<javax.jmdns.impl.JmDNSImpl: java.util.Map getServices()>();
+
+        $r8 = virtualinvoke $r1.<javax.jmdns.ServiceInfo: java.lang.String getQualifiedName()>();
+
+        $r9 = interfaceinvoke $r7.<java.util.Map: java.lang.Object get(java.lang.Object)>($r8);
+
+        r10 = (javax.jmdns.ServiceInfo) $r9;
+
+        if r10 == null goto label4;
+
+        virtualinvoke r10.<javax.jmdns.ServiceInfo: void setText(byte[])>($r2);
+
+     label3:
+        i1 = i1 + 1;
+
+        goto label2;
+
+     label4:
+        $r11 = <javax.jmdns.impl.JmmDNSImpl: org.slf4j.Logger logger>;
+
+        interfaceinvoke $r11.<org.slf4j.Logger: void warn(java.lang.String)>("We have a mDNS that does not know about the service info being updated.");
+
+        goto label3;
+
+     label5:
+        $r12 := @caughtexception;
+
+        exitmonitor $r3;
+
+     label6:
+        throw $r12;
+
+     label7:
+        exitmonitor $r3;
+
+     label8:
+        return;
+
+        catch java.lang.Throwable from label1 to label6 with label5;
+        catch java.lang.Throwable from label7 to label8 with label5;
+    }
+    public void unregisterAllServices()
+    {
+        javax.jmdns.impl.JmmDNSImpl r0;
+        int i0, i1;
+        javax.jmdns.JmDNS r1;
+        java.util.concurrent.ConcurrentMap $r2, $r4;
+        javax.jmdns.JmDNS[] $r3;
+        java.lang.Throwable $r5;
+
+        r0 := @this: javax.jmdns.impl.JmmDNSImpl;
+
+        $r3 = virtualinvoke r0.<javax.jmdns.impl.JmmDNSImpl: javax.jmdns.JmDNS[] getDNS()>();
+
+        $r2 = r0.<javax.jmdns.impl.JmmDNSImpl: java.util.concurrent.ConcurrentMap _services>;
+
+        entermonitor $r2;
+
+     label1:
+        $r4 = r0.<javax.jmdns.impl.JmmDNSImpl: java.util.concurrent.ConcurrentMap _services>;
+
+        interfaceinvoke $r4.<java.util.concurrent.ConcurrentMap: void clear()>();
+
+        i0 = lengthof $r3;
+
+        i1 = 0;
+
+     label2:
+        if i1 >= i0 goto label3;
+
+        r1 = $r3[i1];
+
+        virtualinvoke r1.<javax.jmdns.JmDNS: void unregisterAllServices()>();
+
+        i1 = i1 + 1;
+
+        goto label2;
+
+     label3:
+        exitmonitor $r2;
+
+     label4:
+        return;
+
+     label5:
+        $r5 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label6:
+        throw $r5;
+
+        catch java.lang.Throwable from label1 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+    public void unregisterService(javax.jmdns.ServiceInfo)
+    {
+        javax.jmdns.impl.JmmDNSImpl r0;
+        int i0, i1;
+        javax.jmdns.JmDNS r1;
+        java.util.concurrent.ConcurrentMap $r2, $r5;
+        javax.jmdns.ServiceInfo $r3;
+        javax.jmdns.JmDNS[] $r4;
+        java.lang.String $r6;
+        javax.jmdns.impl.ServiceInfoImpl $r7;
+        java.lang.Throwable $r8;
+
+        r0 := @this: javax.jmdns.impl.JmmDNSImpl;
+
+        $r3 := @parameter0: javax.jmdns.ServiceInfo;
+
+        $r4 = virtualinvoke r0.<javax.jmdns.impl.JmmDNSImpl: javax.jmdns.JmDNS[] getDNS()>();
+
+        $r2 = r0.<javax.jmdns.impl.JmmDNSImpl: java.util.concurrent.ConcurrentMap _services>;
+
+        entermonitor $r2;
+
+     label1:
+        $r5 = r0.<javax.jmdns.impl.JmmDNSImpl: java.util.concurrent.ConcurrentMap _services>;
+
+        $r6 = virtualinvoke $r3.<javax.jmdns.ServiceInfo: java.lang.String getQualifiedName()>();
+
+        interfaceinvoke $r5.<java.util.concurrent.ConcurrentMap: java.lang.Object remove(java.lang.Object)>($r6);
+
+        i0 = lengthof $r4;
+
+        i1 = 0;
+
+     label2:
+        if i1 >= i0 goto label3;
+
+        r1 = $r4[i1];
+
+        virtualinvoke r1.<javax.jmdns.JmDNS: void unregisterService(javax.jmdns.ServiceInfo)>($r3);
+
+        i1 = i1 + 1;
+
+        goto label2;
+
+     label3:
+        $r7 = (javax.jmdns.impl.ServiceInfoImpl) $r3;
+
+        virtualinvoke $r7.<javax.jmdns.impl.ServiceInfoImpl: void setDelegate(javax.jmdns.impl.ServiceInfoImpl$Delegate)>(null);
+
+        exitmonitor $r2;
+
+     label4:
+        return;
+
+     label5:
+        $r8 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label6:
+        throw $r8;
+
+        catch java.lang.Throwable from label1 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }

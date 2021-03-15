@@ -1,0 +1,169 @@
+org.gnucash.android.receivers.TransactionRecorder extends android.content.BroadcastReceiver
+    public void <init>()
+    {
+        org.gnucash.android.receivers.TransactionRecorder r0;
+
+        r0 := @this: org.gnucash.android.receivers.TransactionRecorder;
+
+        specialinvoke r0.<android.content.BroadcastReceiver: void <init>()>();
+
+        return;
+    }
+    public void onReceive(android.content.Context, android.content.Intent)
+    {
+        org.gnucash.android.receivers.TransactionRecorder r0;
+        android.content.Context $r1;
+        android.content.Intent $r2;
+        org.gnucash.android.model.Money r3;
+        java.io.BufferedReader r4;
+        java.io.IOException r5;
+        java.io.StringReader r6;
+        org.gnucash.android.model.Transaction r7;
+        java.lang.Class $r8;
+        java.lang.String $r9, $r11, $r12, $r13;
+        android.os.Bundle $r10;
+        long $l0;
+        org.gnucash.android.model.TransactionType $r14;
+        java.io.Serializable $r15;
+        java.math.BigDecimal r16;
+        org.gnucash.android.db.adapter.CommoditiesDbAdapter $r17;
+        org.gnucash.android.model.Commodity $r18;
+        int $i1;
+        java.math.MathContext $r19;
+        org.gnucash.android.model.Split r20;
+        org.gnucash.android.db.adapter.TransactionsDbAdapter $r21;
+        org.gnucash.android.db.adapter.DatabaseAdapter$UpdateMethod $r22;
+
+        r0 := @this: org.gnucash.android.receivers.TransactionRecorder;
+
+        $r1 := @parameter0: android.content.Context;
+
+        $r2 := @parameter1: android.content.Intent;
+
+        $r8 = virtualinvoke r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r9 = virtualinvoke $r8.<java.lang.Class: java.lang.String getName()>();
+
+        staticinvoke <android.util.Log: int i(java.lang.String,java.lang.String)>($r9, "Received transaction recording intent");
+
+        $r10 = virtualinvoke $r2.<android.content.Intent: android.os.Bundle getExtras()>();
+
+        $r11 = virtualinvoke $r10.<android.os.Bundle: java.lang.String getString(java.lang.String)>("android.intent.extra.TITLE");
+
+        $r12 = virtualinvoke $r10.<android.os.Bundle: java.lang.String getString(java.lang.String)>("android.intent.extra.TEXT");
+
+        $r13 = virtualinvoke $r10.<android.os.Bundle: java.lang.String getString(java.lang.String)>("org.gnucash.android.extra.currency_code");
+
+        $r9 = $r13;
+
+        if $r13 != null goto label1;
+
+        $r9 = <org.gnucash.android.model.Money: java.lang.String DEFAULT_CURRENCY_CODE>;
+
+     label1:
+        r7 = new org.gnucash.android.model.Transaction;
+
+        specialinvoke r7.<org.gnucash.android.model.Transaction: void <init>(java.lang.String)>($r11);
+
+        $l0 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        virtualinvoke r7.<org.gnucash.android.model.Transaction: void setTime(long)>($l0);
+
+        virtualinvoke r7.<org.gnucash.android.model.Transaction: void setNote(java.lang.String)>($r12);
+
+        virtualinvoke r7.<org.gnucash.android.model.Transaction: void setCurrencyCode(java.lang.String)>($r9);
+
+        $r11 = virtualinvoke $r10.<android.os.Bundle: java.lang.String getString(java.lang.String)>("org.gnucash.android.extra.account_uid");
+
+        if $r11 == null goto label2;
+
+        $r12 = virtualinvoke $r10.<android.os.Bundle: java.lang.String getString(java.lang.String)>("org.gnucash.android.extra.transaction_type");
+
+        $r14 = staticinvoke <org.gnucash.android.model.TransactionType: org.gnucash.android.model.TransactionType valueOf(java.lang.String)>($r12);
+
+        $r15 = virtualinvoke $r10.<android.os.Bundle: java.io.Serializable getSerializable(java.lang.String)>("org.gnucash.android.extra.amount");
+
+        r16 = (java.math.BigDecimal) $r15;
+
+        $r17 = staticinvoke <org.gnucash.android.db.adapter.CommoditiesDbAdapter: org.gnucash.android.db.adapter.CommoditiesDbAdapter getInstance()>();
+
+        $r18 = virtualinvoke $r17.<org.gnucash.android.db.adapter.CommoditiesDbAdapter: org.gnucash.android.model.Commodity getCommodity(java.lang.String)>($r9);
+
+        $i1 = virtualinvoke $r18.<org.gnucash.android.model.Commodity: int getSmallestFractionDigits()>();
+
+        r16 = virtualinvoke r16.<java.math.BigDecimal: java.math.BigDecimal setScale(int,int)>($i1, 6);
+
+        $r19 = <java.math.MathContext: java.math.MathContext DECIMAL128>;
+
+        r16 = virtualinvoke r16.<java.math.BigDecimal: java.math.BigDecimal round(java.math.MathContext)>($r19);
+
+        r3 = new org.gnucash.android.model.Money;
+
+        $r18 = staticinvoke <org.gnucash.android.model.Commodity: org.gnucash.android.model.Commodity getInstance(java.lang.String)>($r9);
+
+        specialinvoke r3.<org.gnucash.android.model.Money: void <init>(java.math.BigDecimal,org.gnucash.android.model.Commodity)>(r16, $r18);
+
+        r20 = new org.gnucash.android.model.Split;
+
+        r3 = virtualinvoke r3.<org.gnucash.android.model.Money: org.gnucash.android.model.Money abs()>();
+
+        specialinvoke r20.<org.gnucash.android.model.Split: void <init>(org.gnucash.android.model.Money,java.lang.String)>(r3, $r11);
+
+        virtualinvoke r20.<org.gnucash.android.model.Split: void setType(org.gnucash.android.model.TransactionType)>($r14);
+
+        virtualinvoke r7.<org.gnucash.android.model.Transaction: void addSplit(org.gnucash.android.model.Split)>(r20);
+
+        $r9 = virtualinvoke $r10.<android.os.Bundle: java.lang.String getString(java.lang.String)>("org.gnucash.android.extra.double_account_uid");
+
+        if $r9 == null goto label2;
+
+        r20 = virtualinvoke r20.<org.gnucash.android.model.Split: org.gnucash.android.model.Split createPair(java.lang.String)>($r9);
+
+        virtualinvoke r7.<org.gnucash.android.model.Transaction: void addSplit(org.gnucash.android.model.Split)>(r20);
+
+     label2:
+        $r9 = virtualinvoke $r10.<android.os.Bundle: java.lang.String getString(java.lang.String)>("org.gnucash.android.extra.transaction.splits");
+
+        if $r9 == null goto label8;
+
+        r6 = new java.io.StringReader;
+
+        specialinvoke r6.<java.io.StringReader: void <init>(java.lang.String)>($r9);
+
+        r4 = new java.io.BufferedReader;
+
+        specialinvoke r4.<java.io.BufferedReader: void <init>(java.io.Reader)>(r6);
+
+     label3:
+        $r9 = virtualinvoke r4.<java.io.BufferedReader: java.lang.String readLine()>();
+
+     label4:
+        if $r9 == null goto label8;
+
+     label5:
+        r20 = staticinvoke <org.gnucash.android.model.Split: org.gnucash.android.model.Split parseSplit(java.lang.String)>($r9);
+
+        virtualinvoke r7.<org.gnucash.android.model.Transaction: void addSplit(org.gnucash.android.model.Split)>(r20);
+
+     label6:
+        goto label3;
+
+     label7:
+        r5 := @caughtexception;
+
+        staticinvoke <com.crashlytics.android.Crashlytics: void logException(java.lang.Throwable)>(r5);
+
+     label8:
+        $r21 = staticinvoke <org.gnucash.android.db.adapter.TransactionsDbAdapter: org.gnucash.android.db.adapter.TransactionsDbAdapter getInstance()>();
+
+        $r22 = <org.gnucash.android.db.adapter.DatabaseAdapter$UpdateMethod: org.gnucash.android.db.adapter.DatabaseAdapter$UpdateMethod insert>;
+
+        virtualinvoke $r21.<org.gnucash.android.db.adapter.TransactionsDbAdapter: void addRecord(org.gnucash.android.model.Transaction,org.gnucash.android.db.adapter.DatabaseAdapter$UpdateMethod)>(r7, $r22);
+
+        staticinvoke <org.gnucash.android.ui.homescreen.WidgetConfigurationActivity: void updateAllWidgets(android.content.Context)>($r1);
+
+        return;
+
+        catch java.io.IOException from label3 to label4 with label7;
+        catch java.io.IOException from label5 to label6 with label7;
+    }

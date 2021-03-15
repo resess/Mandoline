@@ -1,0 +1,1545 @@
+org.spongycastle.crypto.modes.OCBBlockCipher extends java.lang.Object implements org.spongycastle.crypto.modes.AEADBlockCipher
+private static final int BLOCK_SIZE
+private byte[] Checksum
+private byte[] KtopInput
+private java.util.Vector L
+private byte[] L_Asterisk
+private byte[] L_Dollar
+private byte[] OffsetHASH
+private byte[] OffsetMAIN
+private byte[] OffsetMAIN_0
+private byte[] Stretch
+private byte[] Sum
+private boolean forEncryption
+private byte[] hashBlock
+private long hashBlockCount
+private int hashBlockPos
+private org.spongycastle.crypto.BlockCipher hashCipher
+private byte[] initialAssociatedText
+private byte[] macBlock
+private int macSize
+private byte[] mainBlock
+private long mainBlockCount
+private int mainBlockPos
+private org.spongycastle.crypto.BlockCipher mainCipher
+    public void <init>(org.spongycastle.crypto.BlockCipher, org.spongycastle.crypto.BlockCipher)
+    {
+        org.spongycastle.crypto.modes.OCBBlockCipher r0;
+        org.spongycastle.crypto.BlockCipher $r1, $r2;
+        byte[] $r3;
+        java.lang.IllegalArgumentException $r4;
+        int $i0;
+        java.lang.String $r5, $r6;
+        boolean $z0;
+
+        r0 := @this: org.spongycastle.crypto.modes.OCBBlockCipher;
+
+        $r1 := @parameter0: org.spongycastle.crypto.BlockCipher;
+
+        $r2 := @parameter1: org.spongycastle.crypto.BlockCipher;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<org.spongycastle.crypto.modes.OCBBlockCipher: byte[] KtopInput> = null;
+
+        $r3 = newarray (byte)[24];
+
+        r0.<org.spongycastle.crypto.modes.OCBBlockCipher: byte[] Stretch> = $r3;
+
+        $r3 = newarray (byte)[16];
+
+        r0.<org.spongycastle.crypto.modes.OCBBlockCipher: byte[] OffsetMAIN_0> = $r3;
+
+        $r3 = newarray (byte)[16];
+
+        r0.<org.spongycastle.crypto.modes.OCBBlockCipher: byte[] OffsetMAIN> = $r3;
+
+        if $r1 != null goto label1;
+
+        $r4 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r4.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("\'hashCipher\' cannot be null");
+
+        throw $r4;
+
+     label1:
+        $i0 = interfaceinvoke $r1.<org.spongycastle.crypto.BlockCipher: int getBlockSize()>();
+
+        if $i0 == 16 goto label2;
+
+        $r4 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r4.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("\'hashCipher\' must have a block size of 16");
+
+        throw $r4;
+
+     label2:
+        if $r2 != null goto label3;
+
+        $r4 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r4.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("\'mainCipher\' cannot be null");
+
+        throw $r4;
+
+     label3:
+        $i0 = interfaceinvoke $r2.<org.spongycastle.crypto.BlockCipher: int getBlockSize()>();
+
+        if $i0 == 16 goto label4;
+
+        $r4 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r4.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("\'mainCipher\' must have a block size of 16");
+
+        throw $r4;
+
+     label4:
+        $r5 = interfaceinvoke $r1.<org.spongycastle.crypto.BlockCipher: java.lang.String getAlgorithmName()>();
+
+        $r6 = interfaceinvoke $r2.<org.spongycastle.crypto.BlockCipher: java.lang.String getAlgorithmName()>();
+
+        $z0 = virtualinvoke $r5.<java.lang.String: boolean equals(java.lang.Object)>($r6);
+
+        if $z0 != 0 goto label5;
+
+        $r4 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r4.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("\'hashCipher\' and \'mainCipher\' must be the same algorithm");
+
+        throw $r4;
+
+     label5:
+        r0.<org.spongycastle.crypto.modes.OCBBlockCipher: org.spongycastle.crypto.BlockCipher hashCipher> = $r1;
+
+        r0.<org.spongycastle.crypto.modes.OCBBlockCipher: org.spongycastle.crypto.BlockCipher mainCipher> = $r2;
+
+        return;
+    }
+    protected static byte[] OCB_double(byte[])
+    {
+        byte[] $r0, r1;
+        int $i0;
+        byte $b1;
+
+        $r0 := @parameter0: byte[];
+
+        r1 = newarray (byte)[16];
+
+        $i0 = staticinvoke <org.spongycastle.crypto.modes.OCBBlockCipher: int shiftLeft(byte[],byte[])>($r0, r1);
+
+        $b1 = r1[15];
+
+        $i0 = 1 - $i0;
+
+        $i0 = $i0 << 3;
+
+        $i0 = 135 >>> $i0;
+
+        $i0 = $b1 ^ $i0;
+
+        $b1 = (byte) $i0;
+
+        r1[15] = $b1;
+
+        return r1;
+    }
+    protected static void OCB_extend(byte[], int)
+    {
+        byte[] $r0;
+        int $i0;
+
+        $r0 := @parameter0: byte[];
+
+        $i0 := @parameter1: int;
+
+        $r0[$i0] = -128;
+
+     label1:
+        $i0 = $i0 + 1;
+
+        if $i0 >= 16 goto label2;
+
+        $r0[$i0] = 0;
+
+        goto label1;
+
+     label2:
+        return;
+    }
+    protected static int OCB_ntz(long)
+    {
+        long $l0, $l3;
+        byte $b1;
+        int i2;
+
+        $l0 := @parameter0: long;
+
+        $b1 = $l0 cmp 0L;
+
+        if $b1 != 0 goto label1;
+
+        return 64;
+
+     label1:
+        i2 = 0;
+
+     label2:
+        $l3 = 1L & $l0;
+
+        $b1 = $l3 cmp 0L;
+
+        if $b1 != 0 goto label3;
+
+        i2 = i2 + 1;
+
+        $l0 = $l0 >>> 1;
+
+        goto label2;
+
+     label3:
+        return i2;
+    }
+    protected static int shiftLeft(byte[], byte[])
+    {
+        byte[] $r0, $r1;
+        int i0, i1, i2, $i4;
+        byte $b3;
+
+        $r0 := @parameter0: byte[];
+
+        $r1 := @parameter1: byte[];
+
+        i1 = 16;
+
+        i2 = 0;
+
+     label1:
+        i1 = i1 + -1;
+
+        if i1 < 0 goto label2;
+
+        $b3 = $r0[i1];
+
+        i0 = $b3 & 255;
+
+        $i4 = i0 << 1;
+
+        i2 = $i4 | i2;
+
+        $b3 = (byte) i2;
+
+        $r1[i1] = $b3;
+
+        i0 = i0 >>> 7;
+
+        i2 = i0 & 1;
+
+        goto label1;
+
+     label2:
+        return i2;
+    }
+    protected static void xor(byte[], byte[])
+    {
+        byte[] $r0, $r1;
+        byte $b0, $b2;
+        int i1, $i3;
+
+        $r0 := @parameter0: byte[];
+
+        $r1 := @parameter1: byte[];
+
+        i1 = 15;
+
+     label1:
+        if i1 < 0 goto label2;
+
+        $b2 = $r0[i1];
+
+        $b0 = $r1[i1];
+
+        $i3 = $b2 ^ $b0;
+
+        $b0 = (byte) $i3;
+
+        $r0[i1] = $b0;
+
+        i1 = i1 + -1;
+
+        goto label1;
+
+     label2:
+        return;
+    }
+    protected void clear(byte[])
+    {
+        org.spongycastle.crypto.modes.OCBBlockCipher r0;
+        byte[] $r1;
+
+        r0 := @this: org.spongycastle.crypto.modes.OCBBlockCipher;
+
+        $r1 := @parameter0: byte[];
+
+        if $r1 == null goto label1;
+
+        staticinvoke <org.spongycastle.util.Arrays: void fill(byte[],byte)>($r1, 0);
+
+     label1:
+        return;
+    }
+    public int doFinal(byte[], int) throws java.lang.IllegalStateException, org.spongycastle.crypto.InvalidCipherTextException
+    {
+        org.spongycastle.crypto.modes.OCBBlockCipher r0;
+        byte[] $r1, r2, r3, $r5;
+        int $i0, $i1, $i2, $i3, $i4;
+        boolean $z0;
+        org.spongycastle.crypto.InvalidCipherTextException $r4;
+        org.spongycastle.crypto.BlockCipher $r6;
+        org.spongycastle.crypto.OutputLengthException $r7;
+
+        r0 := @this: org.spongycastle.crypto.modes.OCBBlockCipher;
+
+        $r1 := @parameter0: byte[];
+
+        $i0 := @parameter1: int;
+
+        r3 = null;
+
+        $z0 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: boolean forEncryption>;
+
+        if $z0 != 0 goto label2;
+
+        $i1 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: int mainBlockPos>;
+
+        $i2 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: int macSize>;
+
+        if $i1 >= $i2 goto label1;
+
+        $r4 = new org.spongycastle.crypto.InvalidCipherTextException;
+
+        specialinvoke $r4.<org.spongycastle.crypto.InvalidCipherTextException: void <init>(java.lang.String)>("data too short");
+
+        throw $r4;
+
+     label1:
+        $i1 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: int mainBlockPos>;
+
+        $i2 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: int macSize>;
+
+        $i1 = $i1 - $i2;
+
+        r0.<org.spongycastle.crypto.modes.OCBBlockCipher: int mainBlockPos> = $i1;
+
+        $i1 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: int macSize>;
+
+        r3 = newarray (byte)[$i1];
+
+        r2 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: byte[] mainBlock>;
+
+        $i1 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: int mainBlockPos>;
+
+        $i2 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: int macSize>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r2, $i1, r3, 0, $i2);
+
+     label2:
+        $i1 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: int hashBlockPos>;
+
+        if $i1 <= 0 goto label3;
+
+        r2 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: byte[] hashBlock>;
+
+        $i1 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: int hashBlockPos>;
+
+        staticinvoke <org.spongycastle.crypto.modes.OCBBlockCipher: void OCB_extend(byte[],int)>(r2, $i1);
+
+        r2 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: byte[] L_Asterisk>;
+
+        virtualinvoke r0.<org.spongycastle.crypto.modes.OCBBlockCipher: void updateHASH(byte[])>(r2);
+
+     label3:
+        $i1 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: int mainBlockPos>;
+
+        if $i1 <= 0 goto label6;
+
+        $z0 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: boolean forEncryption>;
+
+        if $z0 == 0 goto label4;
+
+        r2 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: byte[] mainBlock>;
+
+        $i1 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: int mainBlockPos>;
+
+        staticinvoke <org.spongycastle.crypto.modes.OCBBlockCipher: void OCB_extend(byte[],int)>(r2, $i1);
+
+        r2 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: byte[] Checksum>;
+
+        $r5 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: byte[] mainBlock>;
+
+        staticinvoke <org.spongycastle.crypto.modes.OCBBlockCipher: void xor(byte[],byte[])>(r2, $r5);
+
+     label4:
+        r2 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: byte[] OffsetMAIN>;
+
+        $r5 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: byte[] L_Asterisk>;
+
+        staticinvoke <org.spongycastle.crypto.modes.OCBBlockCipher: void xor(byte[],byte[])>(r2, $r5);
+
+        r2 = newarray (byte)[16];
+
+        $r6 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: org.spongycastle.crypto.BlockCipher hashCipher>;
+
+        $r5 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: byte[] OffsetMAIN>;
+
+        interfaceinvoke $r6.<org.spongycastle.crypto.BlockCipher: int processBlock(byte[],int,byte[],int)>($r5, 0, r2, 0);
+
+        $r5 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: byte[] mainBlock>;
+
+        staticinvoke <org.spongycastle.crypto.modes.OCBBlockCipher: void xor(byte[],byte[])>($r5, r2);
+
+        $i1 = lengthof $r1;
+
+        $i2 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: int mainBlockPos>;
+
+        $i2 = $i2 + $i0;
+
+        if $i1 >= $i2 goto label5;
+
+        $r7 = new org.spongycastle.crypto.OutputLengthException;
+
+        specialinvoke $r7.<org.spongycastle.crypto.OutputLengthException: void <init>(java.lang.String)>("Output buffer too short");
+
+        throw $r7;
+
+     label5:
+        r2 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: byte[] mainBlock>;
+
+        $i1 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: int mainBlockPos>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r2, 0, $r1, $i0, $i1);
+
+        $z0 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: boolean forEncryption>;
+
+        if $z0 != 0 goto label6;
+
+        r2 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: byte[] mainBlock>;
+
+        $i1 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: int mainBlockPos>;
+
+        staticinvoke <org.spongycastle.crypto.modes.OCBBlockCipher: void OCB_extend(byte[],int)>(r2, $i1);
+
+        r2 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: byte[] Checksum>;
+
+        $r5 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: byte[] mainBlock>;
+
+        staticinvoke <org.spongycastle.crypto.modes.OCBBlockCipher: void xor(byte[],byte[])>(r2, $r5);
+
+     label6:
+        r2 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: byte[] Checksum>;
+
+        $r5 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: byte[] OffsetMAIN>;
+
+        staticinvoke <org.spongycastle.crypto.modes.OCBBlockCipher: void xor(byte[],byte[])>(r2, $r5);
+
+        r2 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: byte[] Checksum>;
+
+        $r5 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: byte[] L_Dollar>;
+
+        staticinvoke <org.spongycastle.crypto.modes.OCBBlockCipher: void xor(byte[],byte[])>(r2, $r5);
+
+        $r6 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: org.spongycastle.crypto.BlockCipher hashCipher>;
+
+        r2 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: byte[] Checksum>;
+
+        $r5 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: byte[] Checksum>;
+
+        interfaceinvoke $r6.<org.spongycastle.crypto.BlockCipher: int processBlock(byte[],int,byte[],int)>(r2, 0, $r5, 0);
+
+        r2 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: byte[] Checksum>;
+
+        $r5 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: byte[] Sum>;
+
+        staticinvoke <org.spongycastle.crypto.modes.OCBBlockCipher: void xor(byte[],byte[])>(r2, $r5);
+
+        $i1 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: int macSize>;
+
+        r2 = newarray (byte)[$i1];
+
+        r0.<org.spongycastle.crypto.modes.OCBBlockCipher: byte[] macBlock> = r2;
+
+        r2 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: byte[] Checksum>;
+
+        $r5 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: byte[] macBlock>;
+
+        $i1 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: int macSize>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r2, 0, $r5, 0, $i1);
+
+        $i1 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: int mainBlockPos>;
+
+        $z0 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: boolean forEncryption>;
+
+        if $z0 == 0 goto label9;
+
+        $i2 = lengthof $r1;
+
+        $i3 = $i0 + $i1;
+
+        $i4 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: int macSize>;
+
+        $i3 = $i3 + $i4;
+
+        if $i2 >= $i3 goto label7;
+
+        $r7 = new org.spongycastle.crypto.OutputLengthException;
+
+        specialinvoke $r7.<org.spongycastle.crypto.OutputLengthException: void <init>(java.lang.String)>("Output buffer too short");
+
+        throw $r7;
+
+     label7:
+        r3 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: byte[] macBlock>;
+
+        $i0 = $i0 + $i1;
+
+        $i2 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: int macSize>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r3, 0, $r1, $i0, $i2);
+
+        $i0 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: int macSize>;
+
+        $i1 = $i1 + $i0;
+
+     label8:
+        virtualinvoke r0.<org.spongycastle.crypto.modes.OCBBlockCipher: void reset(boolean)>(0);
+
+        return $i1;
+
+     label9:
+        $r1 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: byte[] macBlock>;
+
+        $z0 = staticinvoke <org.spongycastle.util.Arrays: boolean constantTimeAreEqual(byte[],byte[])>($r1, r3);
+
+        if $z0 != 0 goto label8;
+
+        $r4 = new org.spongycastle.crypto.InvalidCipherTextException;
+
+        specialinvoke $r4.<org.spongycastle.crypto.InvalidCipherTextException: void <init>(java.lang.String)>("mac check in OCB failed");
+
+        throw $r4;
+    }
+    public java.lang.String getAlgorithmName()
+    {
+        org.spongycastle.crypto.modes.OCBBlockCipher r0;
+        java.lang.StringBuilder $r1;
+        org.spongycastle.crypto.BlockCipher $r2;
+        java.lang.String $r3;
+
+        r0 := @this: org.spongycastle.crypto.modes.OCBBlockCipher;
+
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: org.spongycastle.crypto.BlockCipher mainCipher>;
+
+        $r3 = interfaceinvoke $r2.<org.spongycastle.crypto.BlockCipher: java.lang.String getAlgorithmName()>();
+
+        $r1 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r1 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("/OCB");
+
+        $r3 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r3;
+    }
+    protected byte[] getLSub(int)
+    {
+        org.spongycastle.crypto.modes.OCBBlockCipher r0;
+        int $i0, $i1;
+        java.util.Vector $r1, $r2;
+        java.lang.Object $r3;
+        byte[] $r4;
+
+        r0 := @this: org.spongycastle.crypto.modes.OCBBlockCipher;
+
+        $i0 := @parameter0: int;
+
+     label1:
+        $r1 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: java.util.Vector L>;
+
+        $i1 = virtualinvoke $r1.<java.util.Vector: int size()>();
+
+        if $i0 < $i1 goto label2;
+
+        $r1 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: java.util.Vector L>;
+
+        $r2 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: java.util.Vector L>;
+
+        $r3 = virtualinvoke $r2.<java.util.Vector: java.lang.Object lastElement()>();
+
+        $r4 = (byte[]) $r3;
+
+        $r4 = staticinvoke <org.spongycastle.crypto.modes.OCBBlockCipher: byte[] OCB_double(byte[])>($r4);
+
+        virtualinvoke $r1.<java.util.Vector: void addElement(java.lang.Object)>($r4);
+
+        goto label1;
+
+     label2:
+        $r1 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: java.util.Vector L>;
+
+        $r3 = virtualinvoke $r1.<java.util.Vector: java.lang.Object elementAt(int)>($i0);
+
+        $r4 = (byte[]) $r3;
+
+        return $r4;
+    }
+    public byte[] getMac()
+    {
+        org.spongycastle.crypto.modes.OCBBlockCipher r0;
+        byte[] $r1;
+
+        r0 := @this: org.spongycastle.crypto.modes.OCBBlockCipher;
+
+        $r1 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: byte[] macBlock>;
+
+        $r1 = staticinvoke <org.spongycastle.util.Arrays: byte[] clone(byte[])>($r1);
+
+        return $r1;
+    }
+    public int getOutputSize(int)
+    {
+        org.spongycastle.crypto.modes.OCBBlockCipher r0;
+        int $i0, $i1;
+        boolean $z0;
+
+        r0 := @this: org.spongycastle.crypto.modes.OCBBlockCipher;
+
+        $i0 := @parameter0: int;
+
+        $i1 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: int mainBlockPos>;
+
+        $i0 = $i0 + $i1;
+
+        $z0 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: boolean forEncryption>;
+
+        if $z0 == 0 goto label1;
+
+        $i1 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: int macSize>;
+
+        $i0 = $i1 + $i0;
+
+        return $i0;
+
+     label1:
+        $i1 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: int macSize>;
+
+        if $i0 >= $i1 goto label2;
+
+        return 0;
+
+     label2:
+        $i1 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: int macSize>;
+
+        $i0 = $i0 - $i1;
+
+        return $i0;
+    }
+    public org.spongycastle.crypto.BlockCipher getUnderlyingCipher()
+    {
+        org.spongycastle.crypto.modes.OCBBlockCipher r0;
+        org.spongycastle.crypto.BlockCipher r1;
+
+        r0 := @this: org.spongycastle.crypto.modes.OCBBlockCipher;
+
+        r1 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: org.spongycastle.crypto.BlockCipher mainCipher>;
+
+        return r1;
+    }
+    public int getUpdateOutputSize(int)
+    {
+        org.spongycastle.crypto.modes.OCBBlockCipher r0;
+        int $i0, $i1;
+        boolean $z0;
+
+        r0 := @this: org.spongycastle.crypto.modes.OCBBlockCipher;
+
+        $i0 := @parameter0: int;
+
+        $i1 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: int mainBlockPos>;
+
+        $i0 = $i0 + $i1;
+
+        $z0 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: boolean forEncryption>;
+
+        if $z0 != 0 goto label2;
+
+        $i1 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: int macSize>;
+
+        if $i0 >= $i1 goto label1;
+
+        return 0;
+
+     label1:
+        $i1 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: int macSize>;
+
+        $i0 = $i0 - $i1;
+
+     label2:
+        $i1 = $i0 % 16;
+
+        $i0 = $i0 - $i1;
+
+        return $i0;
+    }
+    public void init(boolean, org.spongycastle.crypto.CipherParameters) throws java.lang.IllegalArgumentException
+    {
+        org.spongycastle.crypto.modes.OCBBlockCipher r0;
+        boolean $z0, z1, $z2;
+        org.spongycastle.crypto.CipherParameters $r1;
+        int i0, i1, i2, $i3, i4, $i6;
+        org.spongycastle.crypto.params.AEADParameters r2;
+        byte[] $r3, $r4, $r11;
+        java.lang.IllegalArgumentException $r5;
+        java.lang.StringBuilder $r6;
+        java.lang.String $r7;
+        org.spongycastle.crypto.params.KeyParameter $r8;
+        org.spongycastle.crypto.params.ParametersWithIV r9;
+        org.spongycastle.crypto.BlockCipher $r10;
+        java.util.Vector $r12;
+        byte $b5;
+
+        r0 := @this: org.spongycastle.crypto.modes.OCBBlockCipher;
+
+        $z0 := @parameter0: boolean;
+
+        $r1 := @parameter1: org.spongycastle.crypto.CipherParameters;
+
+        z1 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: boolean forEncryption>;
+
+        r0.<org.spongycastle.crypto.modes.OCBBlockCipher: boolean forEncryption> = $z0;
+
+        r0.<org.spongycastle.crypto.modes.OCBBlockCipher: byte[] macBlock> = null;
+
+        $z2 = $r1 instanceof org.spongycastle.crypto.params.AEADParameters;
+
+        if $z2 == 0 goto label06;
+
+        r2 = (org.spongycastle.crypto.params.AEADParameters) $r1;
+
+        $r3 = virtualinvoke r2.<org.spongycastle.crypto.params.AEADParameters: byte[] getNonce()>();
+
+        $r4 = virtualinvoke r2.<org.spongycastle.crypto.params.AEADParameters: byte[] getAssociatedText()>();
+
+        r0.<org.spongycastle.crypto.modes.OCBBlockCipher: byte[] initialAssociatedText> = $r4;
+
+        i2 = virtualinvoke r2.<org.spongycastle.crypto.params.AEADParameters: int getMacSize()>();
+
+        if i2 < 64 goto label01;
+
+        if i2 > 128 goto label01;
+
+        $i3 = i2 % 8;
+
+        if $i3 == 0 goto label02;
+
+     label01:
+        $r5 = new java.lang.IllegalArgumentException;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Invalid value for MAC size: ");
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i2);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r5.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r7);
+
+        throw $r5;
+
+     label02:
+        i2 = i2 / 8;
+
+        r0.<org.spongycastle.crypto.modes.OCBBlockCipher: int macSize> = i2;
+
+        $r8 = virtualinvoke r2.<org.spongycastle.crypto.params.AEADParameters: org.spongycastle.crypto.params.KeyParameter getKey()>();
+
+     label03:
+        $r4 = newarray (byte)[16];
+
+        r0.<org.spongycastle.crypto.modes.OCBBlockCipher: byte[] hashBlock> = $r4;
+
+        if $z0 == 0 goto label08;
+
+        i2 = 16;
+
+     label04:
+        $r4 = newarray (byte)[i2];
+
+        r0.<org.spongycastle.crypto.modes.OCBBlockCipher: byte[] mainBlock> = $r4;
+
+        if $r3 != null goto label05;
+
+        $r3 = newarray (byte)[0];
+
+     label05:
+        i2 = lengthof $r3;
+
+        if i2 <= 15 goto label09;
+
+        $r5 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r5.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("IV must be no more than 15 bytes");
+
+        throw $r5;
+
+     label06:
+        $z2 = $r1 instanceof org.spongycastle.crypto.params.ParametersWithIV;
+
+        if $z2 == 0 goto label07;
+
+        r9 = (org.spongycastle.crypto.params.ParametersWithIV) $r1;
+
+        $r3 = virtualinvoke r9.<org.spongycastle.crypto.params.ParametersWithIV: byte[] getIV()>();
+
+        r0.<org.spongycastle.crypto.modes.OCBBlockCipher: byte[] initialAssociatedText> = null;
+
+        r0.<org.spongycastle.crypto.modes.OCBBlockCipher: int macSize> = 16;
+
+        $r1 = virtualinvoke r9.<org.spongycastle.crypto.params.ParametersWithIV: org.spongycastle.crypto.CipherParameters getParameters()>();
+
+        $r8 = (org.spongycastle.crypto.params.KeyParameter) $r1;
+
+        goto label03;
+
+     label07:
+        $r5 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r5.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("invalid parameters passed to OCB");
+
+        throw $r5;
+
+     label08:
+        i2 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: int macSize>;
+
+        i2 = i2 + 16;
+
+        goto label04;
+
+     label09:
+        if $r8 == null goto label12;
+
+        $r10 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: org.spongycastle.crypto.BlockCipher hashCipher>;
+
+        interfaceinvoke $r10.<org.spongycastle.crypto.BlockCipher: void init(boolean,org.spongycastle.crypto.CipherParameters)>(1, $r8);
+
+        $r10 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: org.spongycastle.crypto.BlockCipher mainCipher>;
+
+        interfaceinvoke $r10.<org.spongycastle.crypto.BlockCipher: void init(boolean,org.spongycastle.crypto.CipherParameters)>($z0, $r8);
+
+        r0.<org.spongycastle.crypto.modes.OCBBlockCipher: byte[] KtopInput> = null;
+
+     label10:
+        $r4 = newarray (byte)[16];
+
+        r0.<org.spongycastle.crypto.modes.OCBBlockCipher: byte[] L_Asterisk> = $r4;
+
+        $r10 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: org.spongycastle.crypto.BlockCipher hashCipher>;
+
+        $r4 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: byte[] L_Asterisk>;
+
+        $r11 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: byte[] L_Asterisk>;
+
+        interfaceinvoke $r10.<org.spongycastle.crypto.BlockCipher: int processBlock(byte[],int,byte[],int)>($r4, 0, $r11, 0);
+
+        $r4 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: byte[] L_Asterisk>;
+
+        $r4 = staticinvoke <org.spongycastle.crypto.modes.OCBBlockCipher: byte[] OCB_double(byte[])>($r4);
+
+        r0.<org.spongycastle.crypto.modes.OCBBlockCipher: byte[] L_Dollar> = $r4;
+
+        $r12 = new java.util.Vector;
+
+        specialinvoke $r12.<java.util.Vector: void <init>()>();
+
+        r0.<org.spongycastle.crypto.modes.OCBBlockCipher: java.util.Vector L> = $r12;
+
+        $r12 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: java.util.Vector L>;
+
+        $r4 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: byte[] L_Dollar>;
+
+        $r4 = staticinvoke <org.spongycastle.crypto.modes.OCBBlockCipher: byte[] OCB_double(byte[])>($r4);
+
+        virtualinvoke $r12.<java.util.Vector: void addElement(java.lang.Object)>($r4);
+
+        $i3 = virtualinvoke r0.<org.spongycastle.crypto.modes.OCBBlockCipher: int processNonce(byte[])>($r3);
+
+        i2 = $i3 % 8;
+
+        $i3 = $i3 / 8;
+
+        if i2 != 0 goto label13;
+
+        $r3 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: byte[] Stretch>;
+
+        $r4 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: byte[] OffsetMAIN_0>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r3, $i3, $r4, 0, 16);
+
+     label11:
+        r0.<org.spongycastle.crypto.modes.OCBBlockCipher: int hashBlockPos> = 0;
+
+        r0.<org.spongycastle.crypto.modes.OCBBlockCipher: int mainBlockPos> = 0;
+
+        r0.<org.spongycastle.crypto.modes.OCBBlockCipher: long hashBlockCount> = 0L;
+
+        r0.<org.spongycastle.crypto.modes.OCBBlockCipher: long mainBlockCount> = 0L;
+
+        $r3 = newarray (byte)[16];
+
+        r0.<org.spongycastle.crypto.modes.OCBBlockCipher: byte[] OffsetHASH> = $r3;
+
+        $r3 = newarray (byte)[16];
+
+        r0.<org.spongycastle.crypto.modes.OCBBlockCipher: byte[] Sum> = $r3;
+
+        $r3 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: byte[] OffsetMAIN_0>;
+
+        $r4 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: byte[] OffsetMAIN>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r3, 0, $r4, 0, 16);
+
+        $r3 = newarray (byte)[16];
+
+        r0.<org.spongycastle.crypto.modes.OCBBlockCipher: byte[] Checksum> = $r3;
+
+        $r3 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: byte[] initialAssociatedText>;
+
+        if $r3 == null goto label15;
+
+        $r3 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: byte[] initialAssociatedText>;
+
+        $r4 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: byte[] initialAssociatedText>;
+
+        i2 = lengthof $r4;
+
+        virtualinvoke r0.<org.spongycastle.crypto.modes.OCBBlockCipher: void processAADBytes(byte[],int,int)>($r3, 0, i2);
+
+        return;
+
+     label12:
+        if z1 == $z0 goto label10;
+
+        $r5 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r5.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("cannot change encrypting state without providing key.");
+
+        throw $r5;
+
+     label13:
+        i4 = 0;
+
+     label14:
+        if i4 >= 16 goto label11;
+
+        $r3 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: byte[] Stretch>;
+
+        $b5 = $r3[$i3];
+
+        i0 = $b5 & 255;
+
+        $r3 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: byte[] Stretch>;
+
+        $i3 = $i3 + 1;
+
+        $b5 = $r3[$i3];
+
+        i1 = $b5 & 255;
+
+        $r3 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: byte[] OffsetMAIN_0>;
+
+        i0 = i0 << i2;
+
+        $i6 = 8 - i2;
+
+        i1 = i1 >>> $i6;
+
+        i1 = i0 | i1;
+
+        $b5 = (byte) i1;
+
+        $r3[i4] = $b5;
+
+        i4 = i4 + 1;
+
+        goto label14;
+
+     label15:
+        return;
+    }
+    public void processAADByte(byte)
+    {
+        org.spongycastle.crypto.modes.OCBBlockCipher r0;
+        byte $b0;
+        byte[] $r1;
+        int $i1, $i2;
+
+        r0 := @this: org.spongycastle.crypto.modes.OCBBlockCipher;
+
+        $b0 := @parameter0: byte;
+
+        $r1 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: byte[] hashBlock>;
+
+        $i1 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: int hashBlockPos>;
+
+        $r1[$i1] = $b0;
+
+        $i1 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: int hashBlockPos>;
+
+        $i1 = $i1 + 1;
+
+        r0.<org.spongycastle.crypto.modes.OCBBlockCipher: int hashBlockPos> = $i1;
+
+        $r1 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: byte[] hashBlock>;
+
+        $i2 = lengthof $r1;
+
+        if $i1 != $i2 goto label1;
+
+        virtualinvoke r0.<org.spongycastle.crypto.modes.OCBBlockCipher: void processHashBlock()>();
+
+     label1:
+        return;
+    }
+    public void processAADBytes(byte[], int, int)
+    {
+        org.spongycastle.crypto.modes.OCBBlockCipher r0;
+        byte[] $r1, $r2;
+        int $i0, $i1, i2, $i3, $i4;
+        byte $b5;
+
+        r0 := @this: org.spongycastle.crypto.modes.OCBBlockCipher;
+
+        $r1 := @parameter0: byte[];
+
+        $i0 := @parameter1: int;
+
+        $i1 := @parameter2: int;
+
+        i2 = 0;
+
+     label1:
+        if i2 >= $i1 goto label3;
+
+        $r2 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: byte[] hashBlock>;
+
+        $i3 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: int hashBlockPos>;
+
+        $i4 = $i0 + i2;
+
+        $b5 = $r1[$i4];
+
+        $r2[$i3] = $b5;
+
+        $i3 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: int hashBlockPos>;
+
+        $i3 = $i3 + 1;
+
+        r0.<org.spongycastle.crypto.modes.OCBBlockCipher: int hashBlockPos> = $i3;
+
+        $r2 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: byte[] hashBlock>;
+
+        $i4 = lengthof $r2;
+
+        if $i3 != $i4 goto label2;
+
+        virtualinvoke r0.<org.spongycastle.crypto.modes.OCBBlockCipher: void processHashBlock()>();
+
+     label2:
+        i2 = i2 + 1;
+
+        goto label1;
+
+     label3:
+        return;
+    }
+    public int processByte(byte, byte[], int) throws org.spongycastle.crypto.DataLengthException
+    {
+        org.spongycastle.crypto.modes.OCBBlockCipher r0;
+        byte $b0;
+        byte[] $r1, $r2;
+        int $i1, $i2, $i3;
+
+        r0 := @this: org.spongycastle.crypto.modes.OCBBlockCipher;
+
+        $b0 := @parameter0: byte;
+
+        $r1 := @parameter1: byte[];
+
+        $i1 := @parameter2: int;
+
+        $r2 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: byte[] mainBlock>;
+
+        $i2 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: int mainBlockPos>;
+
+        $r2[$i2] = $b0;
+
+        $i2 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: int mainBlockPos>;
+
+        $i2 = $i2 + 1;
+
+        r0.<org.spongycastle.crypto.modes.OCBBlockCipher: int mainBlockPos> = $i2;
+
+        $r2 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: byte[] mainBlock>;
+
+        $i3 = lengthof $r2;
+
+        if $i2 != $i3 goto label1;
+
+        virtualinvoke r0.<org.spongycastle.crypto.modes.OCBBlockCipher: void processMainBlock(byte[],int)>($r1, $i1);
+
+        return 16;
+
+     label1:
+        return 0;
+    }
+    public int processBytes(byte[], int, int, byte[], int) throws org.spongycastle.crypto.DataLengthException
+    {
+        org.spongycastle.crypto.modes.OCBBlockCipher r0;
+        byte[] $r1, $r2, $r4;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6;
+        org.spongycastle.crypto.DataLengthException $r3;
+        byte $b7;
+
+        r0 := @this: org.spongycastle.crypto.modes.OCBBlockCipher;
+
+        $r1 := @parameter0: byte[];
+
+        $i0 := @parameter1: int;
+
+        $i1 := @parameter2: int;
+
+        $r2 := @parameter3: byte[];
+
+        $i2 := @parameter4: int;
+
+        $i3 = lengthof $r1;
+
+        $i4 = $i0 + $i1;
+
+        if $i3 >= $i4 goto label1;
+
+        $r3 = new org.spongycastle.crypto.DataLengthException;
+
+        specialinvoke $r3.<org.spongycastle.crypto.DataLengthException: void <init>(java.lang.String)>("Input buffer too short");
+
+        throw $r3;
+
+     label1:
+        $i3 = 0;
+
+        $i4 = 0;
+
+     label2:
+        if $i4 >= $i1 goto label4;
+
+        $r4 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: byte[] mainBlock>;
+
+        $i5 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: int mainBlockPos>;
+
+        $i6 = $i0 + $i4;
+
+        $b7 = $r1[$i6];
+
+        $r4[$i5] = $b7;
+
+        $i5 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: int mainBlockPos>;
+
+        $i5 = $i5 + 1;
+
+        r0.<org.spongycastle.crypto.modes.OCBBlockCipher: int mainBlockPos> = $i5;
+
+        $r4 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: byte[] mainBlock>;
+
+        $i6 = lengthof $r4;
+
+        if $i5 != $i6 goto label3;
+
+        $i5 = $i2 + $i3;
+
+        virtualinvoke r0.<org.spongycastle.crypto.modes.OCBBlockCipher: void processMainBlock(byte[],int)>($r2, $i5);
+
+        $i3 = $i3 + 16;
+
+     label3:
+        $i4 = $i4 + 1;
+
+        goto label2;
+
+     label4:
+        return $i3;
+    }
+    protected void processHashBlock()
+    {
+        org.spongycastle.crypto.modes.OCBBlockCipher r0;
+        long $l0;
+        int $i1;
+        byte[] $r1;
+
+        r0 := @this: org.spongycastle.crypto.modes.OCBBlockCipher;
+
+        $l0 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: long hashBlockCount>;
+
+        $l0 = $l0 + 1L;
+
+        r0.<org.spongycastle.crypto.modes.OCBBlockCipher: long hashBlockCount> = $l0;
+
+        $i1 = staticinvoke <org.spongycastle.crypto.modes.OCBBlockCipher: int OCB_ntz(long)>($l0);
+
+        $r1 = virtualinvoke r0.<org.spongycastle.crypto.modes.OCBBlockCipher: byte[] getLSub(int)>($i1);
+
+        virtualinvoke r0.<org.spongycastle.crypto.modes.OCBBlockCipher: void updateHASH(byte[])>($r1);
+
+        r0.<org.spongycastle.crypto.modes.OCBBlockCipher: int hashBlockPos> = 0;
+
+        return;
+    }
+    protected void processMainBlock(byte[], int)
+    {
+        org.spongycastle.crypto.modes.OCBBlockCipher r0;
+        byte[] $r1, $r3, $r4;
+        int $i0, $i1, $i2;
+        org.spongycastle.crypto.OutputLengthException $r2;
+        boolean $z0;
+        long $l3;
+        org.spongycastle.crypto.BlockCipher $r5;
+
+        r0 := @this: org.spongycastle.crypto.modes.OCBBlockCipher;
+
+        $r1 := @parameter0: byte[];
+
+        $i0 := @parameter1: int;
+
+        $i1 = lengthof $r1;
+
+        $i2 = $i0 + 16;
+
+        if $i1 >= $i2 goto label1;
+
+        $r2 = new org.spongycastle.crypto.OutputLengthException;
+
+        specialinvoke $r2.<org.spongycastle.crypto.OutputLengthException: void <init>(java.lang.String)>("Output buffer too short");
+
+        throw $r2;
+
+     label1:
+        $z0 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: boolean forEncryption>;
+
+        if $z0 == 0 goto label2;
+
+        $r3 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: byte[] Checksum>;
+
+        $r4 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: byte[] mainBlock>;
+
+        staticinvoke <org.spongycastle.crypto.modes.OCBBlockCipher: void xor(byte[],byte[])>($r3, $r4);
+
+        r0.<org.spongycastle.crypto.modes.OCBBlockCipher: int mainBlockPos> = 0;
+
+     label2:
+        $r3 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: byte[] OffsetMAIN>;
+
+        $l3 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: long mainBlockCount>;
+
+        $l3 = $l3 + 1L;
+
+        r0.<org.spongycastle.crypto.modes.OCBBlockCipher: long mainBlockCount> = $l3;
+
+        $i1 = staticinvoke <org.spongycastle.crypto.modes.OCBBlockCipher: int OCB_ntz(long)>($l3);
+
+        $r4 = virtualinvoke r0.<org.spongycastle.crypto.modes.OCBBlockCipher: byte[] getLSub(int)>($i1);
+
+        staticinvoke <org.spongycastle.crypto.modes.OCBBlockCipher: void xor(byte[],byte[])>($r3, $r4);
+
+        $r3 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: byte[] mainBlock>;
+
+        $r4 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: byte[] OffsetMAIN>;
+
+        staticinvoke <org.spongycastle.crypto.modes.OCBBlockCipher: void xor(byte[],byte[])>($r3, $r4);
+
+        $r5 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: org.spongycastle.crypto.BlockCipher mainCipher>;
+
+        $r3 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: byte[] mainBlock>;
+
+        $r4 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: byte[] mainBlock>;
+
+        interfaceinvoke $r5.<org.spongycastle.crypto.BlockCipher: int processBlock(byte[],int,byte[],int)>($r3, 0, $r4, 0);
+
+        $r3 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: byte[] mainBlock>;
+
+        $r4 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: byte[] OffsetMAIN>;
+
+        staticinvoke <org.spongycastle.crypto.modes.OCBBlockCipher: void xor(byte[],byte[])>($r3, $r4);
+
+        $r3 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: byte[] mainBlock>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r3, 0, $r1, $i0, 16);
+
+        $z0 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: boolean forEncryption>;
+
+        if $z0 != 0 goto label3;
+
+        $r1 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: byte[] Checksum>;
+
+        $r3 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: byte[] mainBlock>;
+
+        staticinvoke <org.spongycastle.crypto.modes.OCBBlockCipher: void xor(byte[],byte[])>($r1, $r3);
+
+        $r1 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: byte[] mainBlock>;
+
+        $r3 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: byte[] mainBlock>;
+
+        $i0 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: int macSize>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r1, 16, $r3, 0, $i0);
+
+        $i0 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: int macSize>;
+
+        r0.<org.spongycastle.crypto.modes.OCBBlockCipher: int mainBlockPos> = $i0;
+
+     label3:
+        return;
+    }
+    protected int processNonce(byte[])
+    {
+        org.spongycastle.crypto.modes.OCBBlockCipher r0;
+        byte[] $r1, r2;
+        int i0, $i1, $i3, $i4;
+        boolean $z0;
+        byte $b2, $b5;
+        org.spongycastle.crypto.BlockCipher $r3;
+
+        r0 := @this: org.spongycastle.crypto.modes.OCBBlockCipher;
+
+        $r1 := @parameter0: byte[];
+
+        r2 = newarray (byte)[16];
+
+        i0 = lengthof r2;
+
+        $i1 = lengthof $r1;
+
+        i0 = i0 - $i1;
+
+        $i1 = lengthof $r1;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r1, 0, r2, i0, $i1);
+
+        i0 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: int macSize>;
+
+        i0 = i0 << 4;
+
+        $b2 = (byte) i0;
+
+        r2[0] = $b2;
+
+        i0 = lengthof $r1;
+
+        i0 = 15 - i0;
+
+        $b2 = r2[i0];
+
+        $i1 = $b2 | 1;
+
+        $b2 = (byte) $i1;
+
+        r2[i0] = $b2;
+
+        $b2 = r2[15];
+
+        i0 = $b2 & 63;
+
+        $b2 = r2[15];
+
+        $i1 = $b2 & 192;
+
+        $b2 = (byte) $i1;
+
+        r2[15] = $b2;
+
+        $r1 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: byte[] KtopInput>;
+
+        if $r1 == null goto label1;
+
+        $r1 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: byte[] KtopInput>;
+
+        $z0 = staticinvoke <org.spongycastle.util.Arrays: boolean areEqual(byte[],byte[])>(r2, $r1);
+
+        if $z0 != 0 goto label3;
+
+     label1:
+        $r1 = newarray (byte)[16];
+
+        r0.<org.spongycastle.crypto.modes.OCBBlockCipher: byte[] KtopInput> = r2;
+
+        $r3 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: org.spongycastle.crypto.BlockCipher hashCipher>;
+
+        r2 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: byte[] KtopInput>;
+
+        interfaceinvoke $r3.<org.spongycastle.crypto.BlockCipher: int processBlock(byte[],int,byte[],int)>(r2, 0, $r1, 0);
+
+        r2 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: byte[] Stretch>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r1, 0, r2, 0, 16);
+
+        $i1 = 0;
+
+     label2:
+        if $i1 >= 8 goto label3;
+
+        r2 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: byte[] Stretch>;
+
+        $i3 = $i1 + 16;
+
+        $b2 = $r1[$i1];
+
+        $i4 = $i1 + 1;
+
+        $b5 = $r1[$i4];
+
+        $i4 = $b2 ^ $b5;
+
+        $b2 = (byte) $i4;
+
+        r2[$i3] = $b2;
+
+        $i1 = $i1 + 1;
+
+        goto label2;
+
+     label3:
+        return i0;
+    }
+    public void reset()
+    {
+        org.spongycastle.crypto.modes.OCBBlockCipher r0;
+
+        r0 := @this: org.spongycastle.crypto.modes.OCBBlockCipher;
+
+        virtualinvoke r0.<org.spongycastle.crypto.modes.OCBBlockCipher: void reset(boolean)>(1);
+
+        return;
+    }
+    protected void reset(boolean)
+    {
+        org.spongycastle.crypto.modes.OCBBlockCipher r0;
+        boolean $z0;
+        org.spongycastle.crypto.BlockCipher $r1;
+        byte[] $r2, $r3;
+        int $i0;
+
+        r0 := @this: org.spongycastle.crypto.modes.OCBBlockCipher;
+
+        $z0 := @parameter0: boolean;
+
+        $r1 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: org.spongycastle.crypto.BlockCipher hashCipher>;
+
+        interfaceinvoke $r1.<org.spongycastle.crypto.BlockCipher: void reset()>();
+
+        $r1 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: org.spongycastle.crypto.BlockCipher mainCipher>;
+
+        interfaceinvoke $r1.<org.spongycastle.crypto.BlockCipher: void reset()>();
+
+        $r2 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: byte[] hashBlock>;
+
+        virtualinvoke r0.<org.spongycastle.crypto.modes.OCBBlockCipher: void clear(byte[])>($r2);
+
+        $r2 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: byte[] mainBlock>;
+
+        virtualinvoke r0.<org.spongycastle.crypto.modes.OCBBlockCipher: void clear(byte[])>($r2);
+
+        r0.<org.spongycastle.crypto.modes.OCBBlockCipher: int hashBlockPos> = 0;
+
+        r0.<org.spongycastle.crypto.modes.OCBBlockCipher: int mainBlockPos> = 0;
+
+        r0.<org.spongycastle.crypto.modes.OCBBlockCipher: long hashBlockCount> = 0L;
+
+        r0.<org.spongycastle.crypto.modes.OCBBlockCipher: long mainBlockCount> = 0L;
+
+        $r2 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: byte[] OffsetHASH>;
+
+        virtualinvoke r0.<org.spongycastle.crypto.modes.OCBBlockCipher: void clear(byte[])>($r2);
+
+        $r2 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: byte[] Sum>;
+
+        virtualinvoke r0.<org.spongycastle.crypto.modes.OCBBlockCipher: void clear(byte[])>($r2);
+
+        $r2 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: byte[] OffsetMAIN_0>;
+
+        $r3 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: byte[] OffsetMAIN>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r2, 0, $r3, 0, 16);
+
+        $r2 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: byte[] Checksum>;
+
+        virtualinvoke r0.<org.spongycastle.crypto.modes.OCBBlockCipher: void clear(byte[])>($r2);
+
+        if $z0 == 0 goto label1;
+
+        r0.<org.spongycastle.crypto.modes.OCBBlockCipher: byte[] macBlock> = null;
+
+     label1:
+        $r2 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: byte[] initialAssociatedText>;
+
+        if $r2 == null goto label2;
+
+        $r2 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: byte[] initialAssociatedText>;
+
+        $r3 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: byte[] initialAssociatedText>;
+
+        $i0 = lengthof $r3;
+
+        virtualinvoke r0.<org.spongycastle.crypto.modes.OCBBlockCipher: void processAADBytes(byte[],int,int)>($r2, 0, $i0);
+
+     label2:
+        return;
+    }
+    protected void updateHASH(byte[])
+    {
+        org.spongycastle.crypto.modes.OCBBlockCipher r0;
+        byte[] $r1, $r2;
+        org.spongycastle.crypto.BlockCipher $r3;
+
+        r0 := @this: org.spongycastle.crypto.modes.OCBBlockCipher;
+
+        $r1 := @parameter0: byte[];
+
+        $r2 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: byte[] OffsetHASH>;
+
+        staticinvoke <org.spongycastle.crypto.modes.OCBBlockCipher: void xor(byte[],byte[])>($r2, $r1);
+
+        $r1 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: byte[] hashBlock>;
+
+        $r2 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: byte[] OffsetHASH>;
+
+        staticinvoke <org.spongycastle.crypto.modes.OCBBlockCipher: void xor(byte[],byte[])>($r1, $r2);
+
+        $r3 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: org.spongycastle.crypto.BlockCipher hashCipher>;
+
+        $r2 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: byte[] hashBlock>;
+
+        $r1 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: byte[] hashBlock>;
+
+        interfaceinvoke $r3.<org.spongycastle.crypto.BlockCipher: int processBlock(byte[],int,byte[],int)>($r2, 0, $r1, 0);
+
+        $r1 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: byte[] Sum>;
+
+        $r2 = r0.<org.spongycastle.crypto.modes.OCBBlockCipher: byte[] hashBlock>;
+
+        staticinvoke <org.spongycastle.crypto.modes.OCBBlockCipher: void xor(byte[],byte[])>($r1, $r2);
+
+        return;
+    }

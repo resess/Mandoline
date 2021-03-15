@@ -1,0 +1,264 @@
+org.acra.collector.LogCatCollector extends java.lang.Object
+    public static java.lang.String collectLogCat(java.lang.String)
+    {
+        java.lang.String $r0, r5;
+        java.io.BufferedReader r1, r11;
+        java.util.ArrayList r2, r3;
+        org.acra.util.BoundedLinkedList r4;
+        int $i0, $i1, $i2;
+        org.acra.ACRAConfiguration $r6;
+        boolean $z0;
+        java.lang.StringBuilder $r7;
+        java.lang.String[] $r8;
+        java.util.List $r9;
+        java.lang.Object $r10;
+        java.lang.Runtime $r12;
+        java.lang.Object[] $r13;
+        java.lang.Process $r14;
+        java.io.InputStreamReader $r15;
+        java.io.InputStream $r16;
+        org.acra.log.ACRALog $r17;
+        java.lang.Thread $r18;
+        org.acra.collector.LogCatCollector$1 $r19;
+        java.io.IOException r20;
+        java.lang.Throwable $r21;
+
+        $r0 := @parameter0: java.lang.String;
+
+        $i0 = staticinvoke <android.os.Process: int myPid()>();
+
+        r5 = null;
+
+        $r6 = staticinvoke <org.acra.ACRA: org.acra.ACRAConfiguration getConfig()>();
+
+        $z0 = virtualinvoke $r6.<org.acra.ACRAConfiguration: boolean logcatFilterByPid()>();
+
+        if $z0 == 0 goto label01;
+
+        if $i0 <= 0 goto label01;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        r5 = staticinvoke <java.lang.Integer: java.lang.String toString(int)>($i0);
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r5);
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("):");
+
+        r5 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label01:
+        r2 = new java.util.ArrayList;
+
+        specialinvoke r2.<java.util.ArrayList: void <init>()>();
+
+        interfaceinvoke r2.<java.util.List: boolean add(java.lang.Object)>("logcat");
+
+        if $r0 == null goto label02;
+
+        interfaceinvoke r2.<java.util.List: boolean add(java.lang.Object)>("-b");
+
+        interfaceinvoke r2.<java.util.List: boolean add(java.lang.Object)>($r0);
+
+     label02:
+        r3 = new java.util.ArrayList;
+
+        $r6 = staticinvoke <org.acra.ACRA: org.acra.ACRAConfiguration getConfig()>();
+
+        $r8 = virtualinvoke $r6.<org.acra.ACRAConfiguration: java.lang.String[] logcatArguments()>();
+
+        $r9 = staticinvoke <java.util.Arrays: java.util.List asList(java.lang.Object[])>($r8);
+
+        specialinvoke r3.<java.util.ArrayList: void <init>(java.util.Collection)>($r9);
+
+        $i0 = interfaceinvoke r3.<java.util.List: int indexOf(java.lang.Object)>("-t");
+
+        if $i0 <= -1 goto label19;
+
+        $i1 = interfaceinvoke r3.<java.util.List: int size()>();
+
+        if $i0 >= $i1 goto label19;
+
+        $i1 = $i0 + 1;
+
+        $r10 = interfaceinvoke r3.<java.util.List: java.lang.Object get(int)>($i1);
+
+        $r0 = (java.lang.String) $r10;
+
+        $i1 = staticinvoke <java.lang.Integer: int parseInt(java.lang.String)>($r0);
+
+        $i2 = staticinvoke <org.acra.collector.Compatibility: int getAPILevel()>();
+
+        if $i2 >= 8 goto label03;
+
+        $i2 = $i0 + 1;
+
+        interfaceinvoke r3.<java.util.List: java.lang.Object remove(int)>($i2);
+
+        interfaceinvoke r3.<java.util.List: java.lang.Object remove(int)>($i0);
+
+        interfaceinvoke r3.<java.util.List: boolean add(java.lang.Object)>("-d");
+
+     label03:
+        r4 = new org.acra.util.BoundedLinkedList;
+
+        if $i1 <= 0 goto label20;
+
+     label04:
+        specialinvoke r4.<org.acra.util.BoundedLinkedList: void <init>(int)>($i1);
+
+        interfaceinvoke r2.<java.util.List: boolean addAll(java.util.Collection)>(r3);
+
+        r11 = null;
+
+     label05:
+        $r12 = staticinvoke <java.lang.Runtime: java.lang.Runtime getRuntime()>();
+
+        $i0 = interfaceinvoke r2.<java.util.List: int size()>();
+
+     label06:
+        $r8 = newarray (java.lang.String)[$i0];
+
+     label07:
+        $r13 = interfaceinvoke r2.<java.util.List: java.lang.Object[] toArray(java.lang.Object[])>($r8);
+
+     label08:
+        $r8 = (java.lang.String[]) $r13;
+
+     label09:
+        $r14 = virtualinvoke $r12.<java.lang.Runtime: java.lang.Process exec(java.lang.String[])>($r8);
+
+     label10:
+        r1 = new java.io.BufferedReader;
+
+        $r15 = new java.io.InputStreamReader;
+
+     label11:
+        $r16 = virtualinvoke $r14.<java.lang.Process: java.io.InputStream getInputStream()>();
+
+        specialinvoke $r15.<java.io.InputStreamReader: void <init>(java.io.InputStream)>($r16);
+
+        specialinvoke r1.<java.io.BufferedReader: void <init>(java.io.Reader,int)>($r15, 8192);
+
+     label12:
+        $r17 = <org.acra.ACRA: org.acra.log.ACRALog log>;
+
+        $r0 = <org.acra.ACRA: java.lang.String LOG_TAG>;
+
+     label13:
+        interfaceinvoke $r17.<org.acra.log.ACRALog: int d(java.lang.String,java.lang.String)>($r0, "Retrieving logcat output...");
+
+     label14:
+        $r18 = new java.lang.Thread;
+
+        $r19 = new org.acra.collector.LogCatCollector$1;
+
+     label15:
+        specialinvoke $r19.<org.acra.collector.LogCatCollector$1: void <init>(java.lang.Process)>($r14);
+
+        specialinvoke $r18.<java.lang.Thread: void <init>(java.lang.Runnable)>($r19);
+
+        virtualinvoke $r18.<java.lang.Thread: void start()>();
+
+     label16:
+        $r0 = virtualinvoke r1.<java.io.BufferedReader: java.lang.String readLine()>();
+
+     label17:
+        if $r0 != null goto label21;
+
+        staticinvoke <org.acra.collector.CollectorUtil: void safeClose(java.io.Reader)>(r1);
+
+     label18:
+        $r0 = virtualinvoke r4.<java.util.LinkedList: java.lang.String toString()>();
+
+        return $r0;
+
+     label19:
+        $i1 = -1;
+
+        goto label03;
+
+     label20:
+        $i1 = 100;
+
+        goto label04;
+
+     label21:
+        if r5 == null goto label24;
+
+     label22:
+        $z0 = virtualinvoke $r0.<java.lang.String: boolean contains(java.lang.CharSequence)>(r5);
+
+     label23:
+        if $z0 == 0 goto label16;
+
+     label24:
+        $r7 = new java.lang.StringBuilder;
+
+     label25:
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r0);
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\n");
+
+        $r0 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r4.<java.util.LinkedList: boolean add(java.lang.Object)>($r0);
+
+     label26:
+        goto label16;
+
+     label27:
+        r20 := @caughtexception;
+
+        r11 = r1;
+
+     label28:
+        $r17 = <org.acra.ACRA: org.acra.log.ACRALog log>;
+
+        $r0 = <org.acra.ACRA: java.lang.String LOG_TAG>;
+
+        interfaceinvoke $r17.<org.acra.log.ACRALog: int e(java.lang.String,java.lang.String,java.lang.Throwable)>($r0, "LogCatCollector.collectLogCat could not retrieve data.", r20);
+
+     label29:
+        staticinvoke <org.acra.collector.CollectorUtil: void safeClose(java.io.Reader)>(r11);
+
+        goto label18;
+
+     label30:
+        $r21 := @caughtexception;
+
+     label31:
+        staticinvoke <org.acra.collector.CollectorUtil: void safeClose(java.io.Reader)>(r11);
+
+        throw $r21;
+
+     label32:
+        $r21 := @caughtexception;
+
+        r11 = r1;
+
+        goto label31;
+
+     label33:
+        r20 := @caughtexception;
+
+        goto label28;
+
+        catch java.io.IOException from label05 to label06 with label33;
+        catch java.io.IOException from label07 to label08 with label33;
+        catch java.io.IOException from label09 to label10 with label33;
+        catch java.io.IOException from label11 to label12 with label33;
+        catch java.lang.Throwable from label05 to label12 with label30;
+        catch java.io.IOException from label13 to label14 with label27;
+        catch java.io.IOException from label15 to label17 with label27;
+        catch java.lang.Throwable from label12 to label17 with label32;
+        catch java.io.IOException from label22 to label23 with label27;
+        catch java.io.IOException from label25 to label26 with label27;
+        catch java.lang.Throwable from label22 to label23 with label32;
+        catch java.lang.Throwable from label24 to label26 with label32;
+        catch java.lang.Throwable from label28 to label29 with label30;
+    }

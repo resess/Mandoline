@@ -1,0 +1,634 @@
+org.fdroid.fdroid.FDroidApp extends android.app.Application
+private static final java.lang.String TAG
+public static java.lang.String bssid
+private static org.fdroid.fdroid.FDroidApp$Theme curTheme
+public static java.lang.String ipAddressString
+private static java.util.Locale locale
+public static int port
+public static final org.fdroid.fdroid.data.Repo repo
+private static final org.spongycastle.jce.provider.BouncyCastleProvider spongyCastleProvider
+public static java.lang.String ssid
+public static org.apache.commons.net.util.SubnetUtils$SubnetInfo subnetInfo
+android.bluetooth.BluetoothAdapter bluetoothAdapter
+    static void <clinit>()
+    {
+        org.fdroid.fdroid.data.Repo $r0;
+        org.spongycastle.jce.provider.BouncyCastleProvider $r1;
+        org.fdroid.fdroid.FDroidApp$Theme $r2;
+
+        $r0 = new org.fdroid.fdroid.data.Repo;
+
+        specialinvoke $r0.<org.fdroid.fdroid.data.Repo: void <init>()>();
+
+        <org.fdroid.fdroid.FDroidApp: org.fdroid.fdroid.data.Repo repo> = $r0;
+
+        $r1 = new org.spongycastle.jce.provider.BouncyCastleProvider;
+
+        specialinvoke $r1.<org.spongycastle.jce.provider.BouncyCastleProvider: void <init>()>();
+
+        <org.fdroid.fdroid.FDroidApp: org.spongycastle.jce.provider.BouncyCastleProvider spongyCastleProvider> = $r1;
+
+        staticinvoke <org.fdroid.fdroid.FDroidApp: void enableSpongyCastle()>();
+
+        $r2 = <org.fdroid.fdroid.FDroidApp$Theme: org.fdroid.fdroid.FDroidApp$Theme light>;
+
+        <org.fdroid.fdroid.FDroidApp: org.fdroid.fdroid.FDroidApp$Theme curTheme> = $r2;
+
+        return;
+    }
+    public void <init>()
+    {
+        org.fdroid.fdroid.FDroidApp r0;
+
+        r0 := @this: org.fdroid.fdroid.FDroidApp;
+
+        specialinvoke r0.<android.app.Application: void <init>()>();
+
+        return;
+    }
+    private void applyLanguage()
+    {
+        org.fdroid.fdroid.FDroidApp r0;
+        android.content.res.Configuration r1;
+        android.content.Context $r2;
+        java.util.Locale $r3;
+        android.content.res.Resources $r4;
+
+        r0 := @this: org.fdroid.fdroid.FDroidApp;
+
+        $r2 = virtualinvoke r0.<org.fdroid.fdroid.FDroidApp: android.content.Context getBaseContext()>();
+
+        r1 = new android.content.res.Configuration;
+
+        specialinvoke r1.<android.content.res.Configuration: void <init>()>();
+
+        $r3 = <org.fdroid.fdroid.FDroidApp: java.util.Locale locale>;
+
+        if $r3 != null goto label2;
+
+        $r3 = staticinvoke <java.util.Locale: java.util.Locale getDefault()>();
+
+     label1:
+        r1.<android.content.res.Configuration: java.util.Locale locale> = $r3;
+
+        $r4 = virtualinvoke $r2.<android.content.Context: android.content.res.Resources getResources()>();
+
+        virtualinvoke $r4.<android.content.res.Resources: void updateConfiguration(android.content.res.Configuration,android.util.DisplayMetrics)>(r1, null);
+
+        return;
+
+     label2:
+        $r3 = <org.fdroid.fdroid.FDroidApp: java.util.Locale locale>;
+
+        goto label1;
+    }
+    public static void disableSpongyCastleOnLollipop()
+    {
+        java.lang.String $r0;
+        int $i0;
+        org.spongycastle.jce.provider.BouncyCastleProvider $r1;
+
+        $i0 = <android.os.Build$VERSION: int SDK_INT>;
+
+        if $i0 != 21 goto label1;
+
+        $r1 = <org.fdroid.fdroid.FDroidApp: org.spongycastle.jce.provider.BouncyCastleProvider spongyCastleProvider>;
+
+        $r0 = virtualinvoke $r1.<org.spongycastle.jce.provider.BouncyCastleProvider: java.lang.String getName()>();
+
+        staticinvoke <java.security.Security: void removeProvider(java.lang.String)>($r0);
+
+     label1:
+        return;
+    }
+    public static void enableSpongyCastle()
+    {
+        org.spongycastle.jce.provider.BouncyCastleProvider $r0;
+
+        $r0 = <org.fdroid.fdroid.FDroidApp: org.spongycastle.jce.provider.BouncyCastleProvider spongyCastleProvider>;
+
+        staticinvoke <java.security.Security: int addProvider(java.security.Provider)>($r0);
+
+        return;
+    }
+    public static void enableSpongyCastleOnLollipop()
+    {
+        int $i0;
+        org.spongycastle.jce.provider.BouncyCastleProvider $r0;
+
+        $i0 = <android.os.Build$VERSION: int SDK_INT>;
+
+        if $i0 != 21 goto label1;
+
+        $r0 = <org.fdroid.fdroid.FDroidApp: org.spongycastle.jce.provider.BouncyCastleProvider spongyCastleProvider>;
+
+        staticinvoke <java.security.Security: int addProvider(java.security.Provider)>($r0);
+
+     label1:
+        return;
+    }
+    private android.bluetooth.BluetoothAdapter getBluetoothAdapter()
+    {
+        org.fdroid.fdroid.FDroidApp r0;
+        int $i0;
+        android.bluetooth.BluetoothAdapter $r1;
+        java.lang.Object $r2;
+        android.bluetooth.BluetoothManager $r3;
+
+        r0 := @this: org.fdroid.fdroid.FDroidApp;
+
+        $i0 = <android.os.Build$VERSION: int SDK_INT>;
+
+        if $i0 >= 18 goto label1;
+
+        $r1 = staticinvoke <android.bluetooth.BluetoothAdapter: android.bluetooth.BluetoothAdapter getDefaultAdapter()>();
+
+        return $r1;
+
+     label1:
+        $r2 = virtualinvoke r0.<org.fdroid.fdroid.FDroidApp: java.lang.Object getSystemService(java.lang.String)>("bluetooth");
+
+        $r3 = (android.bluetooth.BluetoothManager) $r2;
+
+        $r1 = virtualinvoke $r3.<android.bluetooth.BluetoothManager: android.bluetooth.BluetoothAdapter getAdapter()>();
+
+        return $r1;
+    }
+    public static int getCurThemeResId()
+    {
+        int $i0;
+        int[] $r0;
+        org.fdroid.fdroid.FDroidApp$Theme $r1;
+
+        $r0 = <org.fdroid.fdroid.FDroidApp$6: int[] $SwitchMap$org$fdroid$fdroid$FDroidApp$Theme>;
+
+        $r1 = <org.fdroid.fdroid.FDroidApp: org.fdroid.fdroid.FDroidApp$Theme curTheme>;
+
+        $i0 = virtualinvoke $r1.<org.fdroid.fdroid.FDroidApp$Theme: int ordinal()>();
+
+        $i0 = $r0[$i0];
+
+        lookupswitch($i0)
+        {
+            case 1: goto label1;
+            case 2: goto label2;
+            case 3: goto label3;
+            default: goto label1;
+        };
+
+     label1:
+        return 2131296312;
+
+     label2:
+        return 2131296311;
+
+     label3:
+        return 2131296395;
+    }
+    public static void initWifiSettings()
+    {
+        org.apache.commons.net.util.SubnetUtils$SubnetInfo $r0;
+        org.apache.commons.net.util.SubnetUtils $r1;
+
+        <org.fdroid.fdroid.FDroidApp: int port> = 8888;
+
+        <org.fdroid.fdroid.FDroidApp: java.lang.String ipAddressString> = null;
+
+        $r1 = new org.apache.commons.net.util.SubnetUtils;
+
+        specialinvoke $r1.<org.apache.commons.net.util.SubnetUtils: void <init>(java.lang.String)>("0.0.0.0/32");
+
+        $r0 = virtualinvoke $r1.<org.apache.commons.net.util.SubnetUtils: org.apache.commons.net.util.SubnetUtils$SubnetInfo getInfo()>();
+
+        <org.fdroid.fdroid.FDroidApp: org.apache.commons.net.util.SubnetUtils$SubnetInfo subnetInfo> = $r0;
+
+        <org.fdroid.fdroid.FDroidApp: java.lang.String ssid> = "";
+
+        <org.fdroid.fdroid.FDroidApp: java.lang.String bssid> = "";
+
+        return;
+    }
+    public void applyTheme(android.app.Activity)
+    {
+        org.fdroid.fdroid.FDroidApp r0;
+        android.app.Activity $r1;
+        int $i0;
+
+        r0 := @this: org.fdroid.fdroid.FDroidApp;
+
+        $r1 := @parameter0: android.app.Activity;
+
+        $i0 = staticinvoke <org.fdroid.fdroid.FDroidApp: int getCurThemeResId()>();
+
+        virtualinvoke $r1.<android.app.Activity: void setTheme(int)>($i0);
+
+        return;
+    }
+    public void onConfigurationChanged(android.content.res.Configuration)
+    {
+        org.fdroid.fdroid.FDroidApp r0;
+        android.content.res.Configuration $r1;
+
+        r0 := @this: org.fdroid.fdroid.FDroidApp;
+
+        $r1 := @parameter0: android.content.res.Configuration;
+
+        specialinvoke r0.<android.app.Application: void onConfigurationChanged(android.content.res.Configuration)>($r1);
+
+        specialinvoke r0.<org.fdroid.fdroid.FDroidApp: void applyLanguage()>();
+
+        return;
+    }
+    public void onCreate()
+    {
+        org.fdroid.fdroid.FDroidApp r0;
+        int $i0;
+        android.content.Context $r1;
+        org.fdroid.fdroid.Preferences $r2;
+        org.fdroid.fdroid.FDroidApp$1 $r3;
+        org.fdroid.fdroid.FDroidApp$2 $r4;
+        org.fdroid.fdroid.FDroidApp$3 $r5;
+        android.content.SharedPreferences $r6;
+        java.lang.String $r7;
+        org.fdroid.fdroid.FDroidApp$Theme $r8;
+        java.io.File $r9, $r15;
+        boolean $z0;
+        org.fdroid.fdroid.data.SanitizedFile $r10;
+        android.bluetooth.BluetoothAdapter $r11;
+        com.nostra13.universalimageloader.core.ImageLoaderConfiguration$Builder $r12;
+        org.fdroid.fdroid.net.IconDownloader $r13;
+        com.nostra13.universalimageloader.cache.disc.impl.LimitedAgeDiskCache $r14;
+        org.fdroid.fdroid.FDroidApp$4 $r16;
+        com.nostra13.universalimageloader.core.ImageLoaderConfiguration $r17;
+        com.nostra13.universalimageloader.core.ImageLoader $r18;
+        android.content.Intent $r19;
+        org.fdroid.fdroid.FDroidApp$5 $r20;
+
+        r0 := @this: org.fdroid.fdroid.FDroidApp;
+
+        $i0 = <android.os.Build$VERSION: int SDK_INT>;
+
+        if $i0 < 9 goto label1;
+
+     label1:
+        virtualinvoke r0.<org.fdroid.fdroid.FDroidApp: void updateLanguage()>();
+
+        specialinvoke r0.<android.app.Application: void onCreate()>();
+
+        staticinvoke <org.acra.ACRA: void init(android.app.Application)>(r0);
+
+        staticinvoke <org.fdroid.fdroid.Preferences: void setup(android.content.Context)>(r0);
+
+        staticinvoke <org.fdroid.fdroid.compat.PRNGFixes: void apply()>();
+
+        $r1 = virtualinvoke r0.<org.fdroid.fdroid.FDroidApp: android.content.Context getApplicationContext()>();
+
+        staticinvoke <org.fdroid.fdroid.data.InstalledAppCacheUpdater: void updateInBackground(android.content.Context)>($r1);
+
+        $r2 = staticinvoke <org.fdroid.fdroid.Preferences: org.fdroid.fdroid.Preferences get()>();
+
+        $r3 = new org.fdroid.fdroid.FDroidApp$1;
+
+        specialinvoke $r3.<org.fdroid.fdroid.FDroidApp$1: void <init>(org.fdroid.fdroid.FDroidApp)>(r0);
+
+        virtualinvoke $r2.<org.fdroid.fdroid.Preferences: void registerAppsRequiringRootChangeListener(org.fdroid.fdroid.Preferences$ChangeListener)>($r3);
+
+        $r4 = new org.fdroid.fdroid.FDroidApp$2;
+
+        specialinvoke $r4.<org.fdroid.fdroid.FDroidApp$2: void <init>(org.fdroid.fdroid.FDroidApp)>(r0);
+
+        staticinvoke <java.net.URL: void setURLStreamHandlerFactory(java.net.URLStreamHandlerFactory)>($r4);
+
+        $r2 = staticinvoke <org.fdroid.fdroid.Preferences: org.fdroid.fdroid.Preferences get()>();
+
+        $r5 = new org.fdroid.fdroid.FDroidApp$3;
+
+        specialinvoke $r5.<org.fdroid.fdroid.FDroidApp$3: void <init>(org.fdroid.fdroid.FDroidApp,android.content.Context)>(r0, r0);
+
+        virtualinvoke $r2.<org.fdroid.fdroid.Preferences: void registerUnstableUpdatesChangeListener(org.fdroid.fdroid.Preferences$ChangeListener)>($r5);
+
+        $r1 = virtualinvoke r0.<org.fdroid.fdroid.FDroidApp: android.content.Context getBaseContext()>();
+
+        $r6 = staticinvoke <android.preference.PreferenceManager: android.content.SharedPreferences getDefaultSharedPreferences(android.content.Context)>($r1);
+
+        $r7 = interfaceinvoke $r6.<android.content.SharedPreferences: java.lang.String getString(java.lang.String,java.lang.String)>("theme", "light");
+
+        $r8 = staticinvoke <org.fdroid.fdroid.FDroidApp$Theme: org.fdroid.fdroid.FDroidApp$Theme valueOf(java.lang.String)>($r7);
+
+        <org.fdroid.fdroid.FDroidApp: org.fdroid.fdroid.FDroidApp$Theme curTheme> = $r8;
+
+        $r9 = staticinvoke <org.fdroid.fdroid.Utils: java.io.File getApkDownloadDir(android.content.Context)>(r0);
+
+        staticinvoke <org.fdroid.fdroid.Utils: void deleteFiles(java.io.File,java.lang.String,java.lang.String)>($r9, null, ".apk");
+
+        $r2 = staticinvoke <org.fdroid.fdroid.Preferences: org.fdroid.fdroid.Preferences get()>();
+
+        $z0 = virtualinvoke $r2.<org.fdroid.fdroid.Preferences: boolean shouldCacheApks()>();
+
+        if $z0 != 0 goto label2;
+
+        $r10 = staticinvoke <org.fdroid.fdroid.Utils: org.fdroid.fdroid.data.SanitizedFile getApkCacheDir(android.content.Context)>(r0);
+
+        staticinvoke <org.fdroid.fdroid.Utils: void deleteFiles(java.io.File,java.lang.String,java.lang.String)>($r10, null, ".apk");
+
+     label2:
+        $r9 = virtualinvoke r0.<org.fdroid.fdroid.FDroidApp: java.io.File getCacheDir()>();
+
+        staticinvoke <org.fdroid.fdroid.Utils: void deleteFiles(java.io.File,java.lang.String,java.lang.String)>($r9, "index-", null);
+
+        $r9 = virtualinvoke r0.<org.fdroid.fdroid.FDroidApp: java.io.File getCacheDir()>();
+
+        staticinvoke <org.fdroid.fdroid.Utils: void deleteFiles(java.io.File,java.lang.String,java.lang.String)>($r9, "dl-", null);
+
+        $r9 = virtualinvoke r0.<org.fdroid.fdroid.FDroidApp: java.io.File getFilesDir()>();
+
+        staticinvoke <org.fdroid.fdroid.Utils: void deleteFiles(java.io.File,java.lang.String,java.lang.String)>($r9, "index-", null);
+
+        $r1 = virtualinvoke r0.<org.fdroid.fdroid.FDroidApp: android.content.Context getApplicationContext()>();
+
+        staticinvoke <org.fdroid.fdroid.UpdateService: void schedule(android.content.Context)>($r1);
+
+        $r11 = specialinvoke r0.<org.fdroid.fdroid.FDroidApp: android.bluetooth.BluetoothAdapter getBluetoothAdapter()>();
+
+        r0.<org.fdroid.fdroid.FDroidApp: android.bluetooth.BluetoothAdapter bluetoothAdapter> = $r11;
+
+        $r12 = new com.nostra13.universalimageloader.core.ImageLoaderConfiguration$Builder;
+
+        $r1 = virtualinvoke r0.<org.fdroid.fdroid.FDroidApp: android.content.Context getApplicationContext()>();
+
+        specialinvoke $r12.<com.nostra13.universalimageloader.core.ImageLoaderConfiguration$Builder: void <init>(android.content.Context)>($r1);
+
+        $r13 = new org.fdroid.fdroid.net.IconDownloader;
+
+        $r1 = virtualinvoke r0.<org.fdroid.fdroid.FDroidApp: android.content.Context getApplicationContext()>();
+
+        specialinvoke $r13.<org.fdroid.fdroid.net.IconDownloader: void <init>(android.content.Context)>($r1);
+
+        $r12 = virtualinvoke $r12.<com.nostra13.universalimageloader.core.ImageLoaderConfiguration$Builder: com.nostra13.universalimageloader.core.ImageLoaderConfiguration$Builder imageDownloader(com.nostra13.universalimageloader.core.download.ImageDownloader)>($r13);
+
+        $r14 = new com.nostra13.universalimageloader.cache.disc.impl.LimitedAgeDiskCache;
+
+        $r9 = new java.io.File;
+
+        $r1 = virtualinvoke r0.<org.fdroid.fdroid.FDroidApp: android.content.Context getApplicationContext()>();
+
+        $r15 = staticinvoke <com.nostra13.universalimageloader.utils.StorageUtils: java.io.File getCacheDirectory(android.content.Context,boolean)>($r1, 1);
+
+        specialinvoke $r9.<java.io.File: void <init>(java.io.File,java.lang.String)>($r15, "icons");
+
+        $r16 = new org.fdroid.fdroid.FDroidApp$4;
+
+        specialinvoke $r16.<org.fdroid.fdroid.FDroidApp$4: void <init>(org.fdroid.fdroid.FDroidApp)>(r0);
+
+        specialinvoke $r14.<com.nostra13.universalimageloader.cache.disc.impl.LimitedAgeDiskCache: void <init>(java.io.File,java.io.File,com.nostra13.universalimageloader.cache.disc.naming.FileNameGenerator,long)>($r9, null, $r16, 2592000L);
+
+        $r12 = virtualinvoke $r12.<com.nostra13.universalimageloader.core.ImageLoaderConfiguration$Builder: com.nostra13.universalimageloader.core.ImageLoaderConfiguration$Builder diskCache(com.nostra13.universalimageloader.cache.disc.DiskCache)>($r14);
+
+        $r12 = virtualinvoke $r12.<com.nostra13.universalimageloader.core.ImageLoaderConfiguration$Builder: com.nostra13.universalimageloader.core.ImageLoaderConfiguration$Builder threadPoolSize(int)>(4);
+
+        $r12 = virtualinvoke $r12.<com.nostra13.universalimageloader.core.ImageLoaderConfiguration$Builder: com.nostra13.universalimageloader.core.ImageLoaderConfiguration$Builder threadPriority(int)>(3);
+
+        $r17 = virtualinvoke $r12.<com.nostra13.universalimageloader.core.ImageLoaderConfiguration$Builder: com.nostra13.universalimageloader.core.ImageLoaderConfiguration build()>();
+
+        $r18 = staticinvoke <com.nostra13.universalimageloader.core.ImageLoader: com.nostra13.universalimageloader.core.ImageLoader getInstance()>();
+
+        virtualinvoke $r18.<com.nostra13.universalimageloader.core.ImageLoader: void init(com.nostra13.universalimageloader.core.ImageLoaderConfiguration)>($r17);
+
+        staticinvoke <org.fdroid.fdroid.FDroidApp: void initWifiSettings()>();
+
+        $r19 = new android.content.Intent;
+
+        specialinvoke $r19.<android.content.Intent: void <init>(android.content.Context,java.lang.Class)>(r0, class "Lorg/fdroid/fdroid/net/WifiStateChangeService;");
+
+        virtualinvoke r0.<org.fdroid.fdroid.FDroidApp: android.content.ComponentName startService(android.content.Intent)>($r19);
+
+        $r2 = staticinvoke <org.fdroid.fdroid.Preferences: org.fdroid.fdroid.Preferences get()>();
+
+        $r20 = new org.fdroid.fdroid.FDroidApp$5;
+
+        specialinvoke $r20.<org.fdroid.fdroid.FDroidApp$5: void <init>(org.fdroid.fdroid.FDroidApp)>(r0);
+
+        virtualinvoke $r2.<org.fdroid.fdroid.Preferences: void registerLocalRepoHttpsListeners(org.fdroid.fdroid.Preferences$ChangeListener)>($r20);
+
+        return;
+    }
+    public void reloadTheme()
+    {
+        org.fdroid.fdroid.FDroidApp r0;
+        android.content.Context $r1;
+        android.content.SharedPreferences $r2;
+        java.lang.String $r3;
+        org.fdroid.fdroid.FDroidApp$Theme $r4;
+
+        r0 := @this: org.fdroid.fdroid.FDroidApp;
+
+        $r1 = virtualinvoke r0.<org.fdroid.fdroid.FDroidApp: android.content.Context getBaseContext()>();
+
+        $r2 = staticinvoke <android.preference.PreferenceManager: android.content.SharedPreferences getDefaultSharedPreferences(android.content.Context)>($r1);
+
+        $r3 = interfaceinvoke $r2.<android.content.SharedPreferences: java.lang.String getString(java.lang.String,java.lang.String)>("theme", "light");
+
+        $r4 = staticinvoke <org.fdroid.fdroid.FDroidApp$Theme: org.fdroid.fdroid.FDroidApp$Theme valueOf(java.lang.String)>($r3);
+
+        <org.fdroid.fdroid.FDroidApp: org.fdroid.fdroid.FDroidApp$Theme curTheme> = $r4;
+
+        return;
+    }
+    public void sendViaBluetooth(android.app.Activity, int, java.lang.String)
+    {
+        org.fdroid.fdroid.FDroidApp r0;
+        android.app.Activity $r1;
+        int $i0;
+        java.lang.String $r2, r4, r5;
+        android.content.Intent r3, r6;
+        boolean z0, $z1;
+        android.content.pm.PackageManager $r7;
+        android.content.pm.ApplicationInfo $r8;
+        java.lang.StringBuilder $r9;
+        android.net.Uri $r10;
+        java.util.List $r11;
+        java.util.Iterator $r12;
+        java.lang.Object $r13;
+        android.content.pm.ResolveInfo r14;
+        android.content.pm.ActivityInfo $r15;
+        android.content.pm.PackageManager$NameNotFoundException r16;
+        android.widget.Toast $r17;
+
+        r0 := @this: org.fdroid.fdroid.FDroidApp;
+
+        $r1 := @parameter0: android.app.Activity;
+
+        $i0 := @parameter1: int;
+
+        $r2 := @parameter2: java.lang.String;
+
+        if $i0 != 0 goto label01;
+
+        return;
+
+     label01:
+        r4 = null;
+
+        r5 = null;
+
+        z0 = 0;
+
+        r6 = null;
+
+     label02:
+        $r7 = virtualinvoke r0.<org.fdroid.fdroid.FDroidApp: android.content.pm.PackageManager getPackageManager()>();
+
+        $r8 = virtualinvoke $r7.<android.content.pm.PackageManager: android.content.pm.ApplicationInfo getApplicationInfo(java.lang.String,int)>($r2, 128);
+
+     label03:
+        r3 = new android.content.Intent;
+
+     label04:
+        specialinvoke r3.<android.content.Intent: void <init>(java.lang.String)>("android.intent.action.SEND");
+
+     label05:
+        virtualinvoke r3.<android.content.Intent: android.content.Intent setType(java.lang.String)>("application/zip");
+
+     label06:
+        $r9 = new java.lang.StringBuilder;
+
+     label07:
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("file://");
+
+     label08:
+        $r2 = $r8.<android.content.pm.ApplicationInfo: java.lang.String publicSourceDir>;
+
+     label09:
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r2 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r10 = staticinvoke <android.net.Uri: android.net.Uri parse(java.lang.String)>($r2);
+
+        virtualinvoke r3.<android.content.Intent: android.content.Intent putExtra(java.lang.String,android.os.Parcelable)>("android.intent.extra.STREAM", $r10);
+
+        $r11 = virtualinvoke $r7.<android.content.pm.PackageManager: java.util.List queryIntentActivities(android.content.Intent,int)>(r3, 0);
+
+        $r12 = interfaceinvoke $r11.<java.util.List: java.util.Iterator iterator()>();
+
+     label10:
+        $z1 = interfaceinvoke $r12.<java.util.Iterator: boolean hasNext()>();
+
+     label11:
+        if $z1 == 0 goto label19;
+
+     label12:
+        $r13 = interfaceinvoke $r12.<java.util.Iterator: java.lang.Object next()>();
+
+     label13:
+        r14 = (android.content.pm.ResolveInfo) $r13;
+
+        $r15 = r14.<android.content.pm.ResolveInfo: android.content.pm.ActivityInfo activityInfo>;
+
+        r4 = $r15.<android.content.pm.ActivityInfo: java.lang.String packageName>;
+
+        $r2 = "com.android.bluetooth";
+
+     label14:
+        $z1 = virtualinvoke $r2.<java.lang.String: boolean equals(java.lang.Object)>(r4);
+
+     label15:
+        if $z1 != 0 goto label18;
+
+        $r2 = "com.mediatek.bluetooth";
+
+     label16:
+        $z1 = virtualinvoke $r2.<java.lang.String: boolean equals(java.lang.Object)>(r4);
+
+     label17:
+        if $z1 == 0 goto label10;
+
+     label18:
+        $r15 = r14.<android.content.pm.ResolveInfo: android.content.pm.ActivityInfo activityInfo>;
+
+        r5 = $r15.<android.content.pm.ActivityInfo: java.lang.String name>;
+
+        z0 = 1;
+
+     label19:
+        r6 = r3;
+
+     label20:
+        if r6 == null goto label25;
+
+        if z0 == 0 goto label23;
+
+        virtualinvoke r6.<android.content.Intent: android.content.Intent setClassName(java.lang.String,java.lang.String)>(r4, r5);
+
+        virtualinvoke $r1.<android.app.Activity: void startActivity(android.content.Intent)>(r6);
+
+        return;
+
+     label21:
+        r16 := @caughtexception;
+
+     label22:
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String,java.lang.Throwable)>("FDroidApp", "Could not get application info to send via bluetooth", r16);
+
+        z0 = 0;
+
+        goto label20;
+
+     label23:
+        $r17 = staticinvoke <android.widget.Toast: android.widget.Toast makeText(android.content.Context,int,int)>(r0, 2131165285, 0);
+
+        virtualinvoke $r17.<android.widget.Toast: void show()>();
+
+        $r2 = virtualinvoke r0.<org.fdroid.fdroid.FDroidApp: java.lang.String getString(int)>(2131165219);
+
+        r3 = staticinvoke <android.content.Intent: android.content.Intent createChooser(android.content.Intent,java.lang.CharSequence)>(r6, $r2);
+
+        virtualinvoke $r1.<android.app.Activity: void startActivity(android.content.Intent)>(r3);
+
+        return;
+
+     label24:
+        r16 := @caughtexception;
+
+        r6 = r3;
+
+        goto label22;
+
+     label25:
+        return;
+
+        catch android.content.pm.PackageManager$NameNotFoundException from label02 to label03 with label21;
+        catch android.content.pm.PackageManager$NameNotFoundException from label04 to label05 with label21;
+        catch android.content.pm.PackageManager$NameNotFoundException from label05 to label06 with label24;
+        catch android.content.pm.PackageManager$NameNotFoundException from label07 to label08 with label24;
+        catch android.content.pm.PackageManager$NameNotFoundException from label09 to label11 with label24;
+        catch android.content.pm.PackageManager$NameNotFoundException from label12 to label13 with label24;
+        catch android.content.pm.PackageManager$NameNotFoundException from label14 to label15 with label24;
+        catch android.content.pm.PackageManager$NameNotFoundException from label16 to label17 with label24;
+    }
+    public void updateLanguage()
+    {
+        org.fdroid.fdroid.FDroidApp r0;
+        android.content.Context $r1;
+        android.content.SharedPreferences $r2;
+        java.lang.String $r3;
+        java.util.Locale $r4;
+
+        r0 := @this: org.fdroid.fdroid.FDroidApp;
+
+        $r1 = virtualinvoke r0.<org.fdroid.fdroid.FDroidApp: android.content.Context getBaseContext()>();
+
+        $r2 = staticinvoke <android.preference.PreferenceManager: android.content.SharedPreferences getDefaultSharedPreferences(android.content.Context)>($r1);
+
+        $r3 = interfaceinvoke $r2.<android.content.SharedPreferences: java.lang.String getString(java.lang.String,java.lang.String)>("language", "");
+
+        $r4 = staticinvoke <org.fdroid.fdroid.Utils: java.util.Locale getLocaleFromAndroidLangTag(java.lang.String)>($r3);
+
+        <org.fdroid.fdroid.FDroidApp: java.util.Locale locale> = $r4;
+
+        specialinvoke r0.<org.fdroid.fdroid.FDroidApp: void applyLanguage()>();
+
+        return;
+    }

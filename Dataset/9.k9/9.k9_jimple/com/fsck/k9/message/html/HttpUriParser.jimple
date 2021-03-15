@@ -1,0 +1,711 @@
+com.fsck.k9.message.html.HttpUriParser extends java.lang.Object implements com.fsck.k9.message.html.UriParser
+private static final java.util.regex.Pattern DOMAIN_PATTERN
+private static final java.util.regex.Pattern IPv4_PATTERN
+private static final java.lang.String SUB_DELIM
+    static void <clinit>()
+    {
+        java.util.regex.Pattern $r0;
+
+        $r0 = staticinvoke <java.util.regex.Pattern: java.util.regex.Pattern compile(java.lang.String,int)>("[\\da-z](?:[\\da-z-]*[\\da-z])*(?:\\.[\\da-z](?:[\\da-z-]*[\\da-z])*)*(?::(\\d{0,5}))?", 2);
+
+        <com.fsck.k9.message.html.HttpUriParser: java.util.regex.Pattern DOMAIN_PATTERN> = $r0;
+
+        $r0 = staticinvoke <java.util.regex.Pattern: java.util.regex.Pattern compile(java.lang.String)>("(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})(:(\\d{0,5}))?");
+
+        <com.fsck.k9.message.html.HttpUriParser: java.util.regex.Pattern IPv4_PATTERN> = $r0;
+
+        return;
+    }
+    void <init>()
+    {
+        com.fsck.k9.message.html.HttpUriParser r0;
+
+        r0 := @this: com.fsck.k9.message.html.HttpUriParser;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+    private boolean isHexDigit(int)
+    {
+        com.fsck.k9.message.html.HttpUriParser r0;
+        int $i0;
+
+        r0 := @this: com.fsck.k9.message.html.HttpUriParser;
+
+        $i0 := @parameter0: int;
+
+        if $i0 < 97 goto label1;
+
+        if $i0 <= 122 goto label3;
+
+     label1:
+        if $i0 < 65 goto label2;
+
+        if $i0 <= 90 goto label3;
+
+     label2:
+        if $i0 < 48 goto label4;
+
+        if $i0 > 57 goto label4;
+
+     label3:
+        return 1;
+
+     label4:
+        return 0;
+    }
+    private int matchUnreservedPCTEncodedSubDelimClassesGreedy(java.lang.String, int, java.lang.String)
+    {
+        com.fsck.k9.message.html.HttpUriParser r0;
+        java.lang.String $r1, $r2;
+        int $i0, i1, $i2, $i3;
+        java.lang.StringBuilder $r3;
+        boolean $z0;
+
+        r0 := @this: com.fsck.k9.message.html.HttpUriParser;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $i0 := @parameter1: int;
+
+        $r2 := @parameter2: java.lang.String;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("!$&\'()*+,;=-._~");
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r2 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        i1 = 0;
+
+     label1:
+        $i2 = virtualinvoke $r1.<java.lang.String: int length()>();
+
+        if $i0 >= $i2 goto label4;
+
+        $i2 = virtualinvoke $r1.<java.lang.String: int codePointAt(int)>($i0);
+
+        $z0 = specialinvoke r0.<com.fsck.k9.message.html.HttpUriParser: boolean isHexDigit(int)>($i2);
+
+        if $z0 == 0 goto label3;
+
+        i1 = i1 + -1;
+
+        i1 = staticinvoke <java.lang.Math: int max(int,int)>(i1, 0);
+
+     label2:
+        $i0 = $i0 + 1;
+
+        goto label1;
+
+     label3:
+        if i1 != 0 goto label4;
+
+        $i3 = virtualinvoke $r2.<java.lang.String: int indexOf(int)>($i2);
+
+        if $i3 != -1 goto label2;
+
+        if $i2 != 37 goto label4;
+
+        i1 = 2;
+
+        goto label2;
+
+     label4:
+        return $i0;
+    }
+    private int parse16BitHexSegment(java.lang.String, int, int)
+    {
+        com.fsck.k9.message.html.HttpUriParser r0;
+        java.lang.String $r1;
+        int $i0, $i1, $i2;
+        boolean $z0;
+
+        r0 := @this: com.fsck.k9.message.html.HttpUriParser;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $i0 := @parameter1: int;
+
+        $i1 := @parameter2: int;
+
+     label1:
+        $i2 = virtualinvoke $r1.<java.lang.String: int codePointAt(int)>($i0);
+
+        $z0 = specialinvoke r0.<com.fsck.k9.message.html.HttpUriParser: boolean isHexDigit(int)>($i2);
+
+        if $z0 == 0 goto label2;
+
+        if $i0 >= $i1 goto label2;
+
+        $i0 = $i0 + 1;
+
+        goto label1;
+
+     label2:
+        return $i0;
+    }
+    private int tryMatchAuthority(java.lang.String, int)
+    {
+        com.fsck.k9.message.html.HttpUriParser r0;
+        java.lang.String $r1;
+        int i0, $i1, i2;
+
+        r0 := @this: com.fsck.k9.message.html.HttpUriParser;
+
+        $r1 := @parameter0: java.lang.String;
+
+        i0 := @parameter1: int;
+
+        $i1 = virtualinvoke $r1.<java.lang.String: int indexOf(int,int)>(47, i0);
+
+        i2 = $i1;
+
+        if $i1 != -1 goto label1;
+
+        i2 = virtualinvoke $r1.<java.lang.String: int length()>();
+
+     label1:
+        $i1 = specialinvoke r0.<com.fsck.k9.message.html.HttpUriParser: int tryMatchUserInfo(java.lang.String,int,int)>($r1, i0, i2);
+
+        i2 = specialinvoke r0.<com.fsck.k9.message.html.HttpUriParser: int tryMatchDomainName(java.lang.String,int)>($r1, $i1);
+
+        if i2 == $i1 goto label2;
+
+        return i2;
+
+     label2:
+        i2 = specialinvoke r0.<com.fsck.k9.message.html.HttpUriParser: int tryMatchIpv4Address(java.lang.String,int,boolean)>($r1, $i1, 1);
+
+        if i2 == $i1 goto label3;
+
+        return i2;
+
+     label3:
+        i2 = specialinvoke r0.<com.fsck.k9.message.html.HttpUriParser: int tryMatchIpv6Address(java.lang.String,int)>($r1, $i1);
+
+        if i2 == $i1 goto label4;
+
+        return i2;
+
+     label4:
+        return i0;
+    }
+    private int tryMatchDomainName(java.lang.String, int)
+    {
+        com.fsck.k9.message.html.HttpUriParser r0;
+        java.lang.String $r1;
+        java.lang.IllegalArgumentException r2;
+        int i0, $i1;
+        java.util.regex.Pattern $r3;
+        java.util.regex.Matcher $r4;
+        boolean $z0;
+
+        r0 := @this: com.fsck.k9.message.html.HttpUriParser;
+
+        $r1 := @parameter0: java.lang.String;
+
+        i0 := @parameter1: int;
+
+        $r3 = <com.fsck.k9.message.html.HttpUriParser: java.util.regex.Pattern DOMAIN_PATTERN>;
+
+     label01:
+        $r4 = virtualinvoke $r3.<java.util.regex.Pattern: java.util.regex.Matcher matcher(java.lang.CharSequence)>($r1);
+
+        $z0 = virtualinvoke $r4.<java.util.regex.Matcher: boolean find(int)>(i0);
+
+     label02:
+        if $z0 == 0 goto label14;
+
+     label03:
+        $i1 = virtualinvoke $r4.<java.util.regex.Matcher: int start()>();
+
+     label04:
+        if $i1 == i0 goto label05;
+
+        return i0;
+
+     label05:
+        $r1 = virtualinvoke $r4.<java.util.regex.Matcher: java.lang.String group(int)>(1);
+
+     label06:
+        if $r1 == null goto label11;
+
+     label07:
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean isEmpty()>();
+
+     label08:
+        if $z0 != 0 goto label11;
+
+     label09:
+        $i1 = staticinvoke <java.lang.Integer: int parseInt(java.lang.String)>($r1);
+
+     label10:
+        if $i1 > 65535 goto label14;
+
+     label11:
+        $i1 = virtualinvoke $r4.<java.util.regex.Matcher: int end()>();
+
+     label12:
+        return $i1;
+
+     label13:
+        r2 := @caughtexception;
+
+     label14:
+        return i0;
+
+        catch java.lang.IllegalArgumentException from label01 to label02 with label13;
+        catch java.lang.IllegalArgumentException from label03 to label04 with label13;
+        catch java.lang.IllegalArgumentException from label05 to label06 with label13;
+        catch java.lang.IllegalArgumentException from label07 to label08 with label13;
+        catch java.lang.IllegalArgumentException from label09 to label10 with label13;
+        catch java.lang.IllegalArgumentException from label11 to label12 with label13;
+    }
+    private int tryMatchIpv4Address(java.lang.String, int, boolean)
+    {
+        com.fsck.k9.message.html.HttpUriParser r0;
+        java.lang.String $r1;
+        boolean $z0, $z1;
+        int i0, $i1, $i2;
+        java.util.regex.Pattern $r2;
+        java.util.regex.Matcher $r3;
+
+        r0 := @this: com.fsck.k9.message.html.HttpUriParser;
+
+        $r1 := @parameter0: java.lang.String;
+
+        i0 := @parameter1: int;
+
+        $z0 := @parameter2: boolean;
+
+        $r2 = <com.fsck.k9.message.html.HttpUriParser: java.util.regex.Pattern IPv4_PATTERN>;
+
+        $r3 = virtualinvoke $r2.<java.util.regex.Pattern: java.util.regex.Matcher matcher(java.lang.CharSequence)>($r1);
+
+        $z1 = virtualinvoke $r3.<java.util.regex.Matcher: boolean find(int)>(i0);
+
+        if $z1 == 0 goto label6;
+
+        $i1 = virtualinvoke $r3.<java.util.regex.Matcher: int start()>();
+
+        if $i1 == i0 goto label1;
+
+        return i0;
+
+     label1:
+        $i1 = 1;
+
+     label2:
+        if $i1 > 4 goto label3;
+
+        $r1 = virtualinvoke $r3.<java.util.regex.Matcher: java.lang.String group(int)>(1);
+
+        $i2 = staticinvoke <java.lang.Integer: int parseInt(java.lang.String)>($r1);
+
+        if $i2 > 255 goto label6;
+
+        $i1 = $i1 + 1;
+
+        goto label2;
+
+     label3:
+        if $z0 != 0 goto label4;
+
+        $r1 = virtualinvoke $r3.<java.util.regex.Matcher: java.lang.String group(int)>(5);
+
+        if $r1 != null goto label6;
+
+     label4:
+        $r1 = virtualinvoke $r3.<java.util.regex.Matcher: java.lang.String group(int)>(6);
+
+        if $r1 == null goto label5;
+
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean isEmpty()>();
+
+        if $z0 != 0 goto label5;
+
+        $i1 = staticinvoke <java.lang.Integer: int parseInt(java.lang.String)>($r1);
+
+        if $i1 > 65535 goto label6;
+
+     label5:
+        i0 = virtualinvoke $r3.<java.util.regex.Matcher: int end()>();
+
+     label6:
+        return i0;
+    }
+    private int tryMatchIpv6Address(java.lang.String, int)
+    {
+        com.fsck.k9.message.html.HttpUriParser r0;
+        java.lang.String $r1;
+        int i0, $i1, $i2, i3, i4, $i5, $i6;
+        boolean z0;
+
+        r0 := @this: com.fsck.k9.message.html.HttpUriParser;
+
+        $r1 := @parameter0: java.lang.String;
+
+        i0 := @parameter1: int;
+
+        $i1 = virtualinvoke $r1.<java.lang.String: int length()>();
+
+        if i0 == $i1 goto label23;
+
+        $i1 = virtualinvoke $r1.<java.lang.String: int codePointAt(int)>(i0);
+
+        if $i1 == 91 goto label01;
+
+        return i0;
+
+     label01:
+        $i2 = virtualinvoke $r1.<java.lang.String: int indexOf(int)>(93);
+
+        if $i2 == -1 goto label23;
+
+        $i1 = i0 + 1;
+
+        i3 = 0;
+
+        i4 = 0;
+
+        $i5 = virtualinvoke $r1.<java.lang.String: int indexOf(java.lang.String)>("::");
+
+        if $i5 == -1 goto label05;
+
+        if $i5 >= $i2 goto label05;
+
+        z0 = 1;
+
+     label02:
+        if z0 == 0 goto label07;
+
+     label03:
+        if $i1 >= $i5 goto label06;
+
+        if i3 <= 0 goto label04;
+
+        $i6 = virtualinvoke $r1.<java.lang.String: int codePointAt(int)>($i1);
+
+        if $i6 != 58 goto label23;
+
+        $i1 = $i1 + 1;
+
+     label04:
+        $i6 = $i1 + 4;
+
+        $i6 = staticinvoke <java.lang.Math: int min(int,int)>($i6, $i5);
+
+        $i6 = specialinvoke r0.<com.fsck.k9.message.html.HttpUriParser: int parse16BitHexSegment(java.lang.String,int,int)>($r1, $i1, $i6);
+
+        if $i6 == $i1 goto label23;
+
+        $i1 = $i6;
+
+        i3 = i3 + 1;
+
+        goto label03;
+
+     label05:
+        z0 = 0;
+
+        goto label02;
+
+     label06:
+        $i1 = $i1 + 2;
+
+     label07:
+        if $i1 >= $i2 goto label10;
+
+        $i5 = i3 + i4;
+
+        if $i5 >= 8 goto label10;
+
+        if i4 <= 0 goto label08;
+
+        $i5 = virtualinvoke $r1.<java.lang.String: int codePointAt(int)>($i1);
+
+        if $i5 != 58 goto label23;
+
+        $i1 = $i1 + 1;
+
+     label08:
+        $i5 = virtualinvoke $r1.<java.lang.String: int indexOf(int,int)>(58, $i1);
+
+        if $i5 == -1 goto label09;
+
+        if $i5 <= $i2 goto label15;
+
+     label09:
+        $i5 = $i2 - $i1;
+
+        if $i5 < 7 goto label15;
+
+     label10:
+        if $i1 != $i2 goto label16;
+
+        if z0 != 0 goto label11;
+
+        $i2 = i3 + i4;
+
+        if $i2 == 8 goto label12;
+
+     label11:
+        if z0 == 0 goto label23;
+
+        $i2 = i3 + i4;
+
+        if $i2 >= 8 goto label23;
+
+     label12:
+        $i1 = $i1 + 1;
+
+     label13:
+        $i2 = virtualinvoke $r1.<java.lang.String: int length()>();
+
+        if $i1 == $i2 goto label14;
+
+        $i2 = virtualinvoke $r1.<java.lang.String: int codePointAt(int)>($i1);
+
+        if $i2 == 58 goto label17;
+
+     label14:
+        return $i1;
+
+     label15:
+        $i5 = $i1 + 4;
+
+        $i5 = staticinvoke <java.lang.Math: int min(int,int)>($i5, $i2);
+
+        $i5 = specialinvoke r0.<com.fsck.k9.message.html.HttpUriParser: int parse16BitHexSegment(java.lang.String,int,int)>($r1, $i1, $i5);
+
+        if $i5 == $i1 goto label23;
+
+        $i1 = $i5;
+
+        i4 = i4 + 1;
+
+        goto label07;
+
+     label16:
+        $i1 = specialinvoke r0.<com.fsck.k9.message.html.HttpUriParser: int tryMatchIpv4Address(java.lang.String,int,boolean)>($r1, $i1, 0);
+
+        if $i1 != $i2 goto label23;
+
+        $i1 = $i2 + 1;
+
+        goto label13;
+
+     label17:
+        $i1 = $i1 + 1;
+
+        $i2 = 0;
+
+     label18:
+        i3 = virtualinvoke $r1.<java.lang.String: int length()>();
+
+        if $i1 >= i3 goto label19;
+
+        i3 = virtualinvoke $r1.<java.lang.String: int codePointAt(int)>($i1);
+
+        if i3 < 48 goto label19;
+
+        if i3 <= 57 goto label21;
+
+     label19:
+        if $i2 > 65535 goto label22;
+
+     label20:
+        return $i1;
+
+     label21:
+        $i2 = $i2 * 10;
+
+        $i2 = $i2 + i3;
+
+        $i2 = $i2 + -48;
+
+        $i1 = $i1 + 1;
+
+        goto label18;
+
+     label22:
+        $i1 = i0;
+
+        goto label20;
+
+     label23:
+        return i0;
+    }
+    private int tryMatchUserInfo(java.lang.String, int, int)
+    {
+        com.fsck.k9.message.html.HttpUriParser r0;
+        java.lang.String $r1;
+        int $i0, i1, $i2;
+
+        r0 := @this: com.fsck.k9.message.html.HttpUriParser;
+
+        $r1 := @parameter0: java.lang.String;
+
+        i1 := @parameter1: int;
+
+        $i0 := @parameter2: int;
+
+        $i2 = virtualinvoke $r1.<java.lang.String: int indexOf(int,int)>(64, i1);
+
+        if $i2 == -1 goto label2;
+
+        if $i2 >= $i0 goto label2;
+
+        $i0 = specialinvoke r0.<com.fsck.k9.message.html.HttpUriParser: int matchUnreservedPCTEncodedSubDelimClassesGreedy(java.lang.String,int,java.lang.String)>($r1, i1, ":");
+
+        if $i0 == $i2 goto label1;
+
+        return i1;
+
+     label1:
+        i1 = $i2 + 1;
+
+     label2:
+        return i1;
+    }
+    public int linkifyUri(java.lang.String, int, java.lang.StringBuffer)
+    {
+        com.fsck.k9.message.html.HttpUriParser r0;
+        java.lang.String $r1, $r3, $r4;
+        java.lang.StringBuffer $r2;
+        int i0, $i1, $i2, $i3;
+        boolean $z0;
+        char $c4;
+
+        r0 := @this: com.fsck.k9.message.html.HttpUriParser;
+
+        $r1 := @parameter0: java.lang.String;
+
+        i0 := @parameter1: int;
+
+        $r2 := @parameter2: java.lang.StringBuffer;
+
+        $i1 = i0 + 7;
+
+        $i2 = virtualinvoke $r1.<java.lang.String: int length()>();
+
+        $i1 = staticinvoke <java.lang.Math: int min(int,int)>($i1, $i2);
+
+        $r3 = virtualinvoke $r1.<java.lang.String: java.lang.String substring(int,int)>(i0, $i1);
+
+        $i1 = i0 + 8;
+
+        $i2 = virtualinvoke $r1.<java.lang.String: int length()>();
+
+        $i1 = staticinvoke <java.lang.Math: int min(int,int)>($i1, $i2);
+
+        $r4 = virtualinvoke $r1.<java.lang.String: java.lang.String substring(int,int)>(i0, $i1);
+
+        $z0 = virtualinvoke $r4.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("https://");
+
+        if $z0 == 0 goto label2;
+
+        $r3 = "https://";
+
+        $i1 = virtualinvoke $r3.<java.lang.String: int length()>();
+
+        $i1 = i0 + $i1;
+
+     label1:
+        $i2 = specialinvoke r0.<com.fsck.k9.message.html.HttpUriParser: int tryMatchAuthority(java.lang.String,int)>($r1, $i1);
+
+        if $i2 != $i1 goto label4;
+
+        return i0;
+
+     label2:
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("http://");
+
+        if $z0 == 0 goto label3;
+
+        $r3 = "http://";
+
+        $i1 = virtualinvoke $r3.<java.lang.String: int length()>();
+
+        $i1 = i0 + $i1;
+
+        goto label1;
+
+     label3:
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("rtsp://");
+
+        if $z0 == 0 goto label8;
+
+        $r3 = "rtsp://";
+
+        $i1 = virtualinvoke $r3.<java.lang.String: int length()>();
+
+        $i1 = i0 + $i1;
+
+        goto label1;
+
+     label4:
+        $i1 = $i2;
+
+        $i3 = virtualinvoke $r1.<java.lang.String: int length()>();
+
+        if $i2 >= $i3 goto label5;
+
+        $c4 = virtualinvoke $r1.<java.lang.String: char charAt(int)>($i2);
+
+        if $c4 != 47 goto label5;
+
+        $i1 = $i2 + 1;
+
+        $i1 = specialinvoke r0.<com.fsck.k9.message.html.HttpUriParser: int matchUnreservedPCTEncodedSubDelimClassesGreedy(java.lang.String,int,java.lang.String)>($r1, $i1, "/:@");
+
+     label5:
+        $i2 = virtualinvoke $r1.<java.lang.String: int length()>();
+
+        if $i1 >= $i2 goto label6;
+
+        $c4 = virtualinvoke $r1.<java.lang.String: char charAt(int)>($i1);
+
+        if $c4 != 63 goto label6;
+
+        $i1 = $i1 + 1;
+
+        $i1 = specialinvoke r0.<com.fsck.k9.message.html.HttpUriParser: int matchUnreservedPCTEncodedSubDelimClassesGreedy(java.lang.String,int,java.lang.String)>($r1, $i1, ":@/?");
+
+     label6:
+        $i2 = virtualinvoke $r1.<java.lang.String: int length()>();
+
+        if $i1 >= $i2 goto label7;
+
+        $c4 = virtualinvoke $r1.<java.lang.String: char charAt(int)>($i1);
+
+        if $c4 != 35 goto label7;
+
+        $i1 = $i1 + 1;
+
+        $i1 = specialinvoke r0.<com.fsck.k9.message.html.HttpUriParser: int matchUnreservedPCTEncodedSubDelimClassesGreedy(java.lang.String,int,java.lang.String)>($r1, $i1, ":@/?");
+
+     label7:
+        $r1 = virtualinvoke $r1.<java.lang.String: java.lang.String substring(int,int)>(i0, $i1);
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>("<a href=\"");
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>($r1);
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>("\">");
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>($r1);
+
+        virtualinvoke $r2.<java.lang.StringBuffer: java.lang.StringBuffer append(java.lang.String)>("</a>");
+
+        return $i1;
+
+     label8:
+        return i0;
+    }

@@ -1,0 +1,153 @@
+com.ichi2.anki.BackupManager$1 extends java.lang.Thread
+final java.io.File val$backupFile
+final java.io.File val$colFile
+final java.lang.String val$colPath
+    void <init>(java.lang.String, java.io.File, java.io.File)
+    {
+        com.ichi2.anki.BackupManager$1 r0;
+        java.lang.String $r1;
+        java.io.File $r2, $r3;
+
+        r0 := @this: com.ichi2.anki.BackupManager$1;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.io.File;
+
+        $r3 := @parameter2: java.io.File;
+
+        r0.<com.ichi2.anki.BackupManager$1: java.lang.String val$colPath> = $r1;
+
+        r0.<com.ichi2.anki.BackupManager$1: java.io.File val$backupFile> = $r2;
+
+        r0.<com.ichi2.anki.BackupManager$1: java.io.File val$colFile> = $r3;
+
+        specialinvoke r0.<java.lang.Thread: void <init>()>();
+
+        return;
+    }
+    public void run()
+    {
+        com.ichi2.anki.BackupManager$1 r0;
+        java.io.BufferedInputStream r1;
+        byte[] r2;
+        java.io.IOException r3;
+        java.util.zip.ZipEntry r4;
+        java.util.zip.ZipOutputStream r5;
+        java.io.FileInputStream $r6;
+        java.lang.String $r7;
+        java.io.BufferedOutputStream $r8;
+        java.io.FileOutputStream $r9;
+        java.io.File $r10, $r14;
+        int $i0;
+        com.ichi2.anki.AnkiDroidApp $r11;
+        android.content.Context $r12;
+        android.content.SharedPreferences $r13;
+        long $l1;
+        java.lang.Object[] $r15;
+
+        r0 := @this: com.ichi2.anki.BackupManager$1;
+
+        r2 = newarray (byte)[1024];
+
+        r1 = new java.io.BufferedInputStream;
+
+        $r6 = new java.io.FileInputStream;
+
+        $r7 = r0.<com.ichi2.anki.BackupManager$1: java.lang.String val$colPath>;
+
+     label01:
+        specialinvoke $r6.<java.io.FileInputStream: void <init>(java.lang.String)>($r7);
+
+        specialinvoke r1.<java.io.BufferedInputStream: void <init>(java.io.InputStream,int)>($r6, 1024);
+
+     label02:
+        r5 = new java.util.zip.ZipOutputStream;
+
+        $r8 = new java.io.BufferedOutputStream;
+
+        $r9 = new java.io.FileOutputStream;
+
+        $r10 = r0.<com.ichi2.anki.BackupManager$1: java.io.File val$backupFile>;
+
+     label03:
+        specialinvoke $r9.<java.io.FileOutputStream: void <init>(java.io.File)>($r10);
+
+        specialinvoke $r8.<java.io.BufferedOutputStream: void <init>(java.io.OutputStream)>($r9);
+
+        specialinvoke r5.<java.util.zip.ZipOutputStream: void <init>(java.io.OutputStream)>($r8);
+
+     label04:
+        r4 = new java.util.zip.ZipEntry;
+
+     label05:
+        specialinvoke r4.<java.util.zip.ZipEntry: void <init>(java.lang.String)>("collection.anki2");
+
+        virtualinvoke r5.<java.util.zip.ZipOutputStream: void putNextEntry(java.util.zip.ZipEntry)>(r4);
+
+     label06:
+        $i0 = virtualinvoke r1.<java.io.BufferedInputStream: int read(byte[],int,int)>(r2, 0, 1024);
+
+     label07:
+        if $i0 == -1 goto label11;
+
+     label08:
+        virtualinvoke r5.<java.util.zip.ZipOutputStream: void write(byte[],int,int)>(r2, 0, $i0);
+
+     label09:
+        goto label06;
+
+     label10:
+        r3 := @caughtexception;
+
+        virtualinvoke r3.<java.io.IOException: void printStackTrace()>();
+
+        return;
+
+     label11:
+        virtualinvoke r5.<java.util.zip.ZipOutputStream: void close()>();
+
+        virtualinvoke r1.<java.io.BufferedInputStream: void close()>();
+
+        $r11 = staticinvoke <com.ichi2.anki.AnkiDroidApp: com.ichi2.anki.AnkiDroidApp getInstance()>();
+
+        $r12 = virtualinvoke $r11.<com.ichi2.anki.AnkiDroidApp: android.content.Context getBaseContext()>();
+
+        $r13 = staticinvoke <com.ichi2.anki.AnkiDroidApp: android.content.SharedPreferences getSharedPrefs(android.content.Context)>($r12);
+
+     label12:
+        $r7 = r0.<com.ichi2.anki.BackupManager$1: java.lang.String val$colPath>;
+
+     label13:
+        $i0 = interfaceinvoke $r13.<android.content.SharedPreferences: int getInt(java.lang.String,int)>("backupMax", 8);
+
+        staticinvoke <com.ichi2.anki.BackupManager: boolean deleteDeckBackups(java.lang.String,int)>($r7, $i0);
+
+     label14:
+        $r10 = r0.<com.ichi2.anki.BackupManager$1: java.io.File val$backupFile>;
+
+        $r14 = r0.<com.ichi2.anki.BackupManager$1: java.io.File val$colFile>;
+
+     label15:
+        $l1 = virtualinvoke $r14.<java.io.File: long lastModified()>();
+
+        virtualinvoke $r10.<java.io.File: boolean setLastModified(long)>($l1);
+
+     label16:
+        $r15 = newarray (java.lang.Object)[0];
+
+     label17:
+        staticinvoke <timber.log.Timber: void i(java.lang.String,java.lang.Object[])>("Backup created succesfully", $r15);
+
+     label18:
+        return;
+
+        catch java.io.IOException from label01 to label02 with label10;
+        catch java.io.IOException from label03 to label04 with label10;
+        catch java.io.IOException from label05 to label07 with label10;
+        catch java.io.IOException from label08 to label09 with label10;
+        catch java.io.IOException from label11 to label12 with label10;
+        catch java.io.IOException from label13 to label14 with label10;
+        catch java.io.IOException from label15 to label16 with label10;
+        catch java.io.IOException from label17 to label18 with label10;
+    }

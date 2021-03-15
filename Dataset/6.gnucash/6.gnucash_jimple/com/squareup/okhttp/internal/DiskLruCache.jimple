@@ -1,0 +1,2358 @@
+com.squareup.okhttp.internal.DiskLruCache extends java.lang.Object implements java.io.Closeable
+static final boolean $assertionsDisabled
+static final long ANY_SEQUENCE_NUMBER
+private static final java.lang.String CLEAN
+private static final java.lang.String DIRTY
+static final java.lang.String JOURNAL_FILE
+static final java.lang.String JOURNAL_FILE_BACKUP
+static final java.lang.String JOURNAL_FILE_TEMP
+static final java.util.regex.Pattern LEGAL_KEY_PATTERN
+static final java.lang.String MAGIC
+private static final okio.Sink NULL_SINK
+private static final java.lang.String READ
+private static final java.lang.String REMOVE
+static final java.lang.String VERSION_1
+private final int appVersion
+private final java.lang.Runnable cleanupRunnable
+private boolean closed
+private final java.io.File directory
+private final java.util.concurrent.Executor executor
+private final com.squareup.okhttp.internal.io.FileSystem fileSystem
+private boolean hasJournalErrors
+private boolean initialized
+private final java.io.File journalFile
+private final java.io.File journalFileBackup
+private final java.io.File journalFileTmp
+private okio.BufferedSink journalWriter
+private final java.util.LinkedHashMap lruEntries
+private long maxSize
+private long nextSequenceNumber
+private int redundantOpCount
+private long size
+private final int valueCount
+    static void <clinit>()
+    {
+        java.lang.Class $r0;
+        boolean $z0;
+        java.util.regex.Pattern $r1;
+        com.squareup.okhttp.internal.DiskLruCache$4 $r2;
+
+        $r0 = class "Lcom/squareup/okhttp/internal/DiskLruCache;";
+
+        $z0 = virtualinvoke $r0.<java.lang.Class: boolean desiredAssertionStatus()>();
+
+        if $z0 != 0 goto label2;
+
+        $z0 = 1;
+
+     label1:
+        <com.squareup.okhttp.internal.DiskLruCache: boolean $assertionsDisabled> = $z0;
+
+        $r1 = staticinvoke <java.util.regex.Pattern: java.util.regex.Pattern compile(java.lang.String)>("[a-z0-9_-]{1,120}");
+
+        <com.squareup.okhttp.internal.DiskLruCache: java.util.regex.Pattern LEGAL_KEY_PATTERN> = $r1;
+
+        $r2 = new com.squareup.okhttp.internal.DiskLruCache$4;
+
+        specialinvoke $r2.<com.squareup.okhttp.internal.DiskLruCache$4: void <init>()>();
+
+        <com.squareup.okhttp.internal.DiskLruCache: okio.Sink NULL_SINK> = $r2;
+
+        return;
+
+     label2:
+        $z0 = 0;
+
+        goto label1;
+    }
+    void <init>(com.squareup.okhttp.internal.io.FileSystem, java.io.File, int, int, long, java.util.concurrent.Executor)
+    {
+        com.squareup.okhttp.internal.DiskLruCache r0;
+        com.squareup.okhttp.internal.io.FileSystem $r1;
+        java.io.File $r2, $r6;
+        int $i0, $i1;
+        long $l2;
+        java.util.concurrent.Executor $r3;
+        java.util.LinkedHashMap $r4;
+        com.squareup.okhttp.internal.DiskLruCache$1 $r5;
+
+        r0 := @this: com.squareup.okhttp.internal.DiskLruCache;
+
+        $r1 := @parameter0: com.squareup.okhttp.internal.io.FileSystem;
+
+        $r2 := @parameter1: java.io.File;
+
+        $i0 := @parameter2: int;
+
+        $i1 := @parameter3: int;
+
+        $l2 := @parameter4: long;
+
+        $r3 := @parameter5: java.util.concurrent.Executor;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<com.squareup.okhttp.internal.DiskLruCache: long size> = 0L;
+
+        $r4 = new java.util.LinkedHashMap;
+
+        specialinvoke $r4.<java.util.LinkedHashMap: void <init>(int,float,boolean)>(0, 0.75F, 1);
+
+        r0.<com.squareup.okhttp.internal.DiskLruCache: java.util.LinkedHashMap lruEntries> = $r4;
+
+        r0.<com.squareup.okhttp.internal.DiskLruCache: long nextSequenceNumber> = 0L;
+
+        $r5 = new com.squareup.okhttp.internal.DiskLruCache$1;
+
+        specialinvoke $r5.<com.squareup.okhttp.internal.DiskLruCache$1: void <init>(com.squareup.okhttp.internal.DiskLruCache)>(r0);
+
+        r0.<com.squareup.okhttp.internal.DiskLruCache: java.lang.Runnable cleanupRunnable> = $r5;
+
+        r0.<com.squareup.okhttp.internal.DiskLruCache: com.squareup.okhttp.internal.io.FileSystem fileSystem> = $r1;
+
+        r0.<com.squareup.okhttp.internal.DiskLruCache: java.io.File directory> = $r2;
+
+        r0.<com.squareup.okhttp.internal.DiskLruCache: int appVersion> = $i0;
+
+        $r6 = new java.io.File;
+
+        specialinvoke $r6.<java.io.File: void <init>(java.io.File,java.lang.String)>($r2, "journal");
+
+        r0.<com.squareup.okhttp.internal.DiskLruCache: java.io.File journalFile> = $r6;
+
+        $r6 = new java.io.File;
+
+        specialinvoke $r6.<java.io.File: void <init>(java.io.File,java.lang.String)>($r2, "journal.tmp");
+
+        r0.<com.squareup.okhttp.internal.DiskLruCache: java.io.File journalFileTmp> = $r6;
+
+        $r6 = new java.io.File;
+
+        specialinvoke $r6.<java.io.File: void <init>(java.io.File,java.lang.String)>($r2, "journal.bkp");
+
+        r0.<com.squareup.okhttp.internal.DiskLruCache: java.io.File journalFileBackup> = $r6;
+
+        r0.<com.squareup.okhttp.internal.DiskLruCache: int valueCount> = $i1;
+
+        r0.<com.squareup.okhttp.internal.DiskLruCache: long maxSize> = $l2;
+
+        r0.<com.squareup.okhttp.internal.DiskLruCache: java.util.concurrent.Executor executor> = $r3;
+
+        return;
+    }
+    static boolean access$000(com.squareup.okhttp.internal.DiskLruCache)
+    {
+        com.squareup.okhttp.internal.DiskLruCache $r0;
+        boolean z0;
+
+        $r0 := @parameter0: com.squareup.okhttp.internal.DiskLruCache;
+
+        z0 = $r0.<com.squareup.okhttp.internal.DiskLruCache: boolean initialized>;
+
+        return z0;
+    }
+    static boolean access$100(com.squareup.okhttp.internal.DiskLruCache)
+    {
+        com.squareup.okhttp.internal.DiskLruCache $r0;
+        boolean z0;
+
+        $r0 := @parameter0: com.squareup.okhttp.internal.DiskLruCache;
+
+        z0 = $r0.<com.squareup.okhttp.internal.DiskLruCache: boolean closed>;
+
+        return z0;
+    }
+    static void access$200(com.squareup.okhttp.internal.DiskLruCache) throws java.io.IOException
+    {
+        com.squareup.okhttp.internal.DiskLruCache $r0;
+
+        $r0 := @parameter0: com.squareup.okhttp.internal.DiskLruCache;
+
+        specialinvoke $r0.<com.squareup.okhttp.internal.DiskLruCache: void trimToSize()>();
+
+        return;
+    }
+    static java.util.LinkedHashMap access$2000(com.squareup.okhttp.internal.DiskLruCache)
+    {
+        com.squareup.okhttp.internal.DiskLruCache $r0;
+        java.util.LinkedHashMap r1;
+
+        $r0 := @parameter0: com.squareup.okhttp.internal.DiskLruCache;
+
+        r1 = $r0.<com.squareup.okhttp.internal.DiskLruCache: java.util.LinkedHashMap lruEntries>;
+
+        return r1;
+    }
+    static com.squareup.okhttp.internal.DiskLruCache$Editor access$2200(com.squareup.okhttp.internal.DiskLruCache, java.lang.String, long) throws java.io.IOException
+    {
+        com.squareup.okhttp.internal.DiskLruCache $r0;
+        java.lang.String $r1;
+        long $l0;
+        com.squareup.okhttp.internal.DiskLruCache$Editor $r2;
+
+        $r0 := @parameter0: com.squareup.okhttp.internal.DiskLruCache;
+
+        $r1 := @parameter1: java.lang.String;
+
+        $l0 := @parameter2: long;
+
+        $r2 = specialinvoke $r0.<com.squareup.okhttp.internal.DiskLruCache: com.squareup.okhttp.internal.DiskLruCache$Editor edit(java.lang.String,long)>($r1, $l0);
+
+        return $r2;
+    }
+    static int access$2300(com.squareup.okhttp.internal.DiskLruCache)
+    {
+        com.squareup.okhttp.internal.DiskLruCache $r0;
+        int i0;
+
+        $r0 := @parameter0: com.squareup.okhttp.internal.DiskLruCache;
+
+        i0 = $r0.<com.squareup.okhttp.internal.DiskLruCache: int valueCount>;
+
+        return i0;
+    }
+    static com.squareup.okhttp.internal.io.FileSystem access$2400(com.squareup.okhttp.internal.DiskLruCache)
+    {
+        com.squareup.okhttp.internal.DiskLruCache $r0;
+        com.squareup.okhttp.internal.io.FileSystem r1;
+
+        $r0 := @parameter0: com.squareup.okhttp.internal.DiskLruCache;
+
+        r1 = $r0.<com.squareup.okhttp.internal.DiskLruCache: com.squareup.okhttp.internal.io.FileSystem fileSystem>;
+
+        return r1;
+    }
+    static okio.Sink access$2500()
+    {
+        okio.Sink r0;
+
+        r0 = <com.squareup.okhttp.internal.DiskLruCache: okio.Sink NULL_SINK>;
+
+        return r0;
+    }
+    static void access$2600(com.squareup.okhttp.internal.DiskLruCache, com.squareup.okhttp.internal.DiskLruCache$Editor, boolean) throws java.io.IOException
+    {
+        com.squareup.okhttp.internal.DiskLruCache $r0;
+        com.squareup.okhttp.internal.DiskLruCache$Editor $r1;
+        boolean $z0;
+
+        $r0 := @parameter0: com.squareup.okhttp.internal.DiskLruCache;
+
+        $r1 := @parameter1: com.squareup.okhttp.internal.DiskLruCache$Editor;
+
+        $z0 := @parameter2: boolean;
+
+        specialinvoke $r0.<com.squareup.okhttp.internal.DiskLruCache: void completeEdit(com.squareup.okhttp.internal.DiskLruCache$Editor,boolean)>($r1, $z0);
+
+        return;
+    }
+    static boolean access$2700(com.squareup.okhttp.internal.DiskLruCache, com.squareup.okhttp.internal.DiskLruCache$Entry) throws java.io.IOException
+    {
+        com.squareup.okhttp.internal.DiskLruCache $r0;
+        com.squareup.okhttp.internal.DiskLruCache$Entry $r1;
+        boolean $z0;
+
+        $r0 := @parameter0: com.squareup.okhttp.internal.DiskLruCache;
+
+        $r1 := @parameter1: com.squareup.okhttp.internal.DiskLruCache$Entry;
+
+        $z0 = specialinvoke $r0.<com.squareup.okhttp.internal.DiskLruCache: boolean removeEntry(com.squareup.okhttp.internal.DiskLruCache$Entry)>($r1);
+
+        return $z0;
+    }
+    static java.io.File access$2800(com.squareup.okhttp.internal.DiskLruCache)
+    {
+        com.squareup.okhttp.internal.DiskLruCache $r0;
+        java.io.File r1;
+
+        $r0 := @parameter0: com.squareup.okhttp.internal.DiskLruCache;
+
+        r1 = $r0.<com.squareup.okhttp.internal.DiskLruCache: java.io.File directory>;
+
+        return r1;
+    }
+    static boolean access$300(com.squareup.okhttp.internal.DiskLruCache)
+    {
+        com.squareup.okhttp.internal.DiskLruCache $r0;
+        boolean $z0;
+
+        $r0 := @parameter0: com.squareup.okhttp.internal.DiskLruCache;
+
+        $z0 = specialinvoke $r0.<com.squareup.okhttp.internal.DiskLruCache: boolean journalRebuildRequired()>();
+
+        return $z0;
+    }
+    static void access$400(com.squareup.okhttp.internal.DiskLruCache) throws java.io.IOException
+    {
+        com.squareup.okhttp.internal.DiskLruCache $r0;
+
+        $r0 := @parameter0: com.squareup.okhttp.internal.DiskLruCache;
+
+        specialinvoke $r0.<com.squareup.okhttp.internal.DiskLruCache: void rebuildJournal()>();
+
+        return;
+    }
+    static int access$502(com.squareup.okhttp.internal.DiskLruCache, int)
+    {
+        com.squareup.okhttp.internal.DiskLruCache $r0;
+        int $i0;
+
+        $r0 := @parameter0: com.squareup.okhttp.internal.DiskLruCache;
+
+        $i0 := @parameter1: int;
+
+        $r0.<com.squareup.okhttp.internal.DiskLruCache: int redundantOpCount> = $i0;
+
+        return $i0;
+    }
+    static boolean access$602(com.squareup.okhttp.internal.DiskLruCache, boolean)
+    {
+        com.squareup.okhttp.internal.DiskLruCache $r0;
+        boolean $z0;
+
+        $r0 := @parameter0: com.squareup.okhttp.internal.DiskLruCache;
+
+        $z0 := @parameter1: boolean;
+
+        $r0.<com.squareup.okhttp.internal.DiskLruCache: boolean hasJournalErrors> = $z0;
+
+        return $z0;
+    }
+    private void checkNotClosed()
+    {
+        com.squareup.okhttp.internal.DiskLruCache r0;
+        boolean $z0;
+        java.lang.IllegalStateException $r1;
+        java.lang.Throwable $r2;
+
+        r0 := @this: com.squareup.okhttp.internal.DiskLruCache;
+
+        entermonitor r0;
+
+     label1:
+        $z0 = virtualinvoke r0.<com.squareup.okhttp.internal.DiskLruCache: boolean isClosed()>();
+
+        if $z0 == 0 goto label3;
+
+        $r1 = new java.lang.IllegalStateException;
+
+        specialinvoke $r1.<java.lang.IllegalStateException: void <init>(java.lang.String)>("cache is closed");
+
+        throw $r1;
+
+     label2:
+        $r2 := @caughtexception;
+
+        exitmonitor r0;
+
+        throw $r2;
+
+     label3:
+        exitmonitor r0;
+
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label2;
+    }
+    private void completeEdit(com.squareup.okhttp.internal.DiskLruCache$Editor, boolean) throws java.io.IOException
+    {
+        com.squareup.okhttp.internal.DiskLruCache r0;
+        com.squareup.okhttp.internal.DiskLruCache$Editor $r1, $r5;
+        boolean $z0, $z1;
+        java.io.File r2, r3;
+        long l0, $l3, $l4;
+        com.squareup.okhttp.internal.DiskLruCache$Entry $r4;
+        java.lang.IllegalStateException $r6;
+        java.lang.Throwable $r7;
+        int i1, $i2;
+        boolean[] $r8;
+        java.lang.StringBuilder $r9;
+        java.lang.String $r10;
+        com.squareup.okhttp.internal.io.FileSystem $r11;
+        java.io.File[] $r12;
+        long[] $r13;
+        okio.BufferedSink $r14;
+        byte $b5;
+        java.util.concurrent.Executor $r15;
+        java.lang.Runnable $r16;
+        java.util.LinkedHashMap $r17;
+
+        r0 := @this: com.squareup.okhttp.internal.DiskLruCache;
+
+        $r1 := @parameter0: com.squareup.okhttp.internal.DiskLruCache$Editor;
+
+        $z0 := @parameter1: boolean;
+
+        entermonitor r0;
+
+     label01:
+        $r4 = staticinvoke <com.squareup.okhttp.internal.DiskLruCache$Editor: com.squareup.okhttp.internal.DiskLruCache$Entry access$1700(com.squareup.okhttp.internal.DiskLruCache$Editor)>($r1);
+
+        $r5 = staticinvoke <com.squareup.okhttp.internal.DiskLruCache$Entry: com.squareup.okhttp.internal.DiskLruCache$Editor access$900(com.squareup.okhttp.internal.DiskLruCache$Entry)>($r4);
+
+        if $r5 == $r1 goto label03;
+
+        $r6 = new java.lang.IllegalStateException;
+
+        specialinvoke $r6.<java.lang.IllegalStateException: void <init>()>();
+
+        throw $r6;
+
+     label02:
+        $r7 := @caughtexception;
+
+        exitmonitor r0;
+
+        throw $r7;
+
+     label03:
+        if $z0 == 0 goto label09;
+
+     label04:
+        $z1 = staticinvoke <com.squareup.okhttp.internal.DiskLruCache$Entry: boolean access$800(com.squareup.okhttp.internal.DiskLruCache$Entry)>($r4);
+
+        if $z1 != 0 goto label09;
+
+        i1 = 0;
+
+     label05:
+        $i2 = r0.<com.squareup.okhttp.internal.DiskLruCache: int valueCount>;
+
+        if i1 >= $i2 goto label09;
+
+        $r8 = staticinvoke <com.squareup.okhttp.internal.DiskLruCache$Editor: boolean[] access$1800(com.squareup.okhttp.internal.DiskLruCache$Editor)>($r1);
+
+        $z1 = $r8[i1];
+
+        if $z1 != 0 goto label06;
+
+        virtualinvoke $r1.<com.squareup.okhttp.internal.DiskLruCache$Editor: void abort()>();
+
+        $r6 = new java.lang.IllegalStateException;
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Newly created entry didn\'t create value for index ");
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i1);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r6.<java.lang.IllegalStateException: void <init>(java.lang.String)>($r10);
+
+        throw $r6;
+
+     label06:
+        $r11 = r0.<com.squareup.okhttp.internal.DiskLruCache: com.squareup.okhttp.internal.io.FileSystem fileSystem>;
+
+        $r12 = staticinvoke <com.squareup.okhttp.internal.DiskLruCache$Entry: java.io.File[] access$1400(com.squareup.okhttp.internal.DiskLruCache$Entry)>($r4);
+
+        r2 = $r12[i1];
+
+        $z1 = interfaceinvoke $r11.<com.squareup.okhttp.internal.io.FileSystem: boolean exists(java.io.File)>(r2);
+
+        if $z1 != 0 goto label08;
+
+        virtualinvoke $r1.<com.squareup.okhttp.internal.DiskLruCache$Editor: void abort()>();
+
+     label07:
+        exitmonitor r0;
+
+        return;
+
+     label08:
+        i1 = i1 + 1;
+
+        goto label05;
+
+     label09:
+        i1 = 0;
+
+     label10:
+        $i2 = r0.<com.squareup.okhttp.internal.DiskLruCache: int valueCount>;
+
+        if i1 >= $i2 goto label13;
+
+        $r12 = staticinvoke <com.squareup.okhttp.internal.DiskLruCache$Entry: java.io.File[] access$1400(com.squareup.okhttp.internal.DiskLruCache$Entry)>($r4);
+
+        r3 = $r12[i1];
+
+        if $z0 == 0 goto label12;
+
+        $r11 = r0.<com.squareup.okhttp.internal.DiskLruCache: com.squareup.okhttp.internal.io.FileSystem fileSystem>;
+
+        $z1 = interfaceinvoke $r11.<com.squareup.okhttp.internal.io.FileSystem: boolean exists(java.io.File)>(r3);
+
+        if $z1 == 0 goto label11;
+
+        $r12 = staticinvoke <com.squareup.okhttp.internal.DiskLruCache$Entry: java.io.File[] access$1300(com.squareup.okhttp.internal.DiskLruCache$Entry)>($r4);
+
+        r2 = $r12[i1];
+
+        $r11 = r0.<com.squareup.okhttp.internal.DiskLruCache: com.squareup.okhttp.internal.io.FileSystem fileSystem>;
+
+        interfaceinvoke $r11.<com.squareup.okhttp.internal.io.FileSystem: void rename(java.io.File,java.io.File)>(r3, r2);
+
+        $r13 = staticinvoke <com.squareup.okhttp.internal.DiskLruCache$Entry: long[] access$1200(com.squareup.okhttp.internal.DiskLruCache$Entry)>($r4);
+
+        l0 = $r13[i1];
+
+        $r11 = r0.<com.squareup.okhttp.internal.DiskLruCache: com.squareup.okhttp.internal.io.FileSystem fileSystem>;
+
+        $l3 = interfaceinvoke $r11.<com.squareup.okhttp.internal.io.FileSystem: long size(java.io.File)>(r2);
+
+        $r13 = staticinvoke <com.squareup.okhttp.internal.DiskLruCache$Entry: long[] access$1200(com.squareup.okhttp.internal.DiskLruCache$Entry)>($r4);
+
+        $r13[i1] = $l3;
+
+        $l4 = r0.<com.squareup.okhttp.internal.DiskLruCache: long size>;
+
+        l0 = $l4 - l0;
+
+        $l3 = l0 + $l3;
+
+        r0.<com.squareup.okhttp.internal.DiskLruCache: long size> = $l3;
+
+     label11:
+        i1 = i1 + 1;
+
+        goto label10;
+
+     label12:
+        $r11 = r0.<com.squareup.okhttp.internal.DiskLruCache: com.squareup.okhttp.internal.io.FileSystem fileSystem>;
+
+        interfaceinvoke $r11.<com.squareup.okhttp.internal.io.FileSystem: void delete(java.io.File)>(r3);
+
+        goto label11;
+
+     label13:
+        i1 = r0.<com.squareup.okhttp.internal.DiskLruCache: int redundantOpCount>;
+
+        i1 = i1 + 1;
+
+        r0.<com.squareup.okhttp.internal.DiskLruCache: int redundantOpCount> = i1;
+
+        staticinvoke <com.squareup.okhttp.internal.DiskLruCache$Entry: com.squareup.okhttp.internal.DiskLruCache$Editor access$902(com.squareup.okhttp.internal.DiskLruCache$Entry,com.squareup.okhttp.internal.DiskLruCache$Editor)>($r4, null);
+
+        $z1 = staticinvoke <com.squareup.okhttp.internal.DiskLruCache$Entry: boolean access$800(com.squareup.okhttp.internal.DiskLruCache$Entry)>($r4);
+
+        $z1 = $z1 | $z0;
+
+        if $z1 == 0 goto label16;
+
+        staticinvoke <com.squareup.okhttp.internal.DiskLruCache$Entry: boolean access$802(com.squareup.okhttp.internal.DiskLruCache$Entry,boolean)>($r4, 1);
+
+        $r14 = r0.<com.squareup.okhttp.internal.DiskLruCache: okio.BufferedSink journalWriter>;
+
+        $r14 = interfaceinvoke $r14.<okio.BufferedSink: okio.BufferedSink writeUtf8(java.lang.String)>("CLEAN");
+
+        interfaceinvoke $r14.<okio.BufferedSink: okio.BufferedSink writeByte(int)>(32);
+
+        $r14 = r0.<com.squareup.okhttp.internal.DiskLruCache: okio.BufferedSink journalWriter>;
+
+        $r10 = staticinvoke <com.squareup.okhttp.internal.DiskLruCache$Entry: java.lang.String access$1500(com.squareup.okhttp.internal.DiskLruCache$Entry)>($r4);
+
+        interfaceinvoke $r14.<okio.BufferedSink: okio.BufferedSink writeUtf8(java.lang.String)>($r10);
+
+        $r14 = r0.<com.squareup.okhttp.internal.DiskLruCache: okio.BufferedSink journalWriter>;
+
+        virtualinvoke $r4.<com.squareup.okhttp.internal.DiskLruCache$Entry: void writeLengths(okio.BufferedSink)>($r14);
+
+        $r14 = r0.<com.squareup.okhttp.internal.DiskLruCache: okio.BufferedSink journalWriter>;
+
+        interfaceinvoke $r14.<okio.BufferedSink: okio.BufferedSink writeByte(int)>(10);
+
+        if $z0 == 0 goto label14;
+
+        $l3 = r0.<com.squareup.okhttp.internal.DiskLruCache: long nextSequenceNumber>;
+
+        l0 = 1L + $l3;
+
+        r0.<com.squareup.okhttp.internal.DiskLruCache: long nextSequenceNumber> = l0;
+
+        staticinvoke <com.squareup.okhttp.internal.DiskLruCache$Entry: long access$1602(com.squareup.okhttp.internal.DiskLruCache$Entry,long)>($r4, $l3);
+
+     label14:
+        $r14 = r0.<com.squareup.okhttp.internal.DiskLruCache: okio.BufferedSink journalWriter>;
+
+        interfaceinvoke $r14.<okio.BufferedSink: void flush()>();
+
+        $l3 = r0.<com.squareup.okhttp.internal.DiskLruCache: long size>;
+
+        l0 = r0.<com.squareup.okhttp.internal.DiskLruCache: long maxSize>;
+
+        $b5 = $l3 cmp l0;
+
+        if $b5 > 0 goto label15;
+
+        $z0 = specialinvoke r0.<com.squareup.okhttp.internal.DiskLruCache: boolean journalRebuildRequired()>();
+
+        if $z0 == 0 goto label07;
+
+     label15:
+        $r15 = r0.<com.squareup.okhttp.internal.DiskLruCache: java.util.concurrent.Executor executor>;
+
+        $r16 = r0.<com.squareup.okhttp.internal.DiskLruCache: java.lang.Runnable cleanupRunnable>;
+
+        interfaceinvoke $r15.<java.util.concurrent.Executor: void execute(java.lang.Runnable)>($r16);
+
+        goto label07;
+
+     label16:
+        $r17 = r0.<com.squareup.okhttp.internal.DiskLruCache: java.util.LinkedHashMap lruEntries>;
+
+        $r10 = staticinvoke <com.squareup.okhttp.internal.DiskLruCache$Entry: java.lang.String access$1500(com.squareup.okhttp.internal.DiskLruCache$Entry)>($r4);
+
+        virtualinvoke $r17.<java.util.LinkedHashMap: java.lang.Object remove(java.lang.Object)>($r10);
+
+        $r14 = r0.<com.squareup.okhttp.internal.DiskLruCache: okio.BufferedSink journalWriter>;
+
+        $r14 = interfaceinvoke $r14.<okio.BufferedSink: okio.BufferedSink writeUtf8(java.lang.String)>("REMOVE");
+
+        interfaceinvoke $r14.<okio.BufferedSink: okio.BufferedSink writeByte(int)>(32);
+
+        $r14 = r0.<com.squareup.okhttp.internal.DiskLruCache: okio.BufferedSink journalWriter>;
+
+        $r10 = staticinvoke <com.squareup.okhttp.internal.DiskLruCache$Entry: java.lang.String access$1500(com.squareup.okhttp.internal.DiskLruCache$Entry)>($r4);
+
+        interfaceinvoke $r14.<okio.BufferedSink: okio.BufferedSink writeUtf8(java.lang.String)>($r10);
+
+        $r14 = r0.<com.squareup.okhttp.internal.DiskLruCache: okio.BufferedSink journalWriter>;
+
+        interfaceinvoke $r14.<okio.BufferedSink: okio.BufferedSink writeByte(int)>(10);
+
+     label17:
+        goto label14;
+
+        catch java.lang.Throwable from label01 to label02 with label02;
+        catch java.lang.Throwable from label04 to label07 with label02;
+        catch java.lang.Throwable from label10 to label17 with label02;
+    }
+    public static com.squareup.okhttp.internal.DiskLruCache create(com.squareup.okhttp.internal.io.FileSystem, java.io.File, int, int, long)
+    {
+        com.squareup.okhttp.internal.io.FileSystem $r0;
+        java.io.File $r1;
+        int $i0, $i1;
+        long $l2;
+        java.util.concurrent.ThreadPoolExecutor r2;
+        java.util.concurrent.ThreadFactory $r3;
+        byte $b3;
+        java.lang.IllegalArgumentException $r4;
+        java.util.concurrent.TimeUnit $r5;
+        java.util.concurrent.LinkedBlockingQueue $r6;
+        com.squareup.okhttp.internal.DiskLruCache $r7;
+
+        $r0 := @parameter0: com.squareup.okhttp.internal.io.FileSystem;
+
+        $r1 := @parameter1: java.io.File;
+
+        $i0 := @parameter2: int;
+
+        $i1 := @parameter3: int;
+
+        $l2 := @parameter4: long;
+
+        $b3 = $l2 cmp 0L;
+
+        if $b3 > 0 goto label1;
+
+        $r4 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r4.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("maxSize <= 0");
+
+        throw $r4;
+
+     label1:
+        if $i1 > 0 goto label2;
+
+        $r4 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r4.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("valueCount <= 0");
+
+        throw $r4;
+
+     label2:
+        r2 = new java.util.concurrent.ThreadPoolExecutor;
+
+        $r5 = <java.util.concurrent.TimeUnit: java.util.concurrent.TimeUnit SECONDS>;
+
+        $r6 = new java.util.concurrent.LinkedBlockingQueue;
+
+        specialinvoke $r6.<java.util.concurrent.LinkedBlockingQueue: void <init>()>();
+
+        $r3 = staticinvoke <com.squareup.okhttp.internal.Util: java.util.concurrent.ThreadFactory threadFactory(java.lang.String,boolean)>("OkHttp DiskLruCache", 1);
+
+        specialinvoke r2.<java.util.concurrent.ThreadPoolExecutor: void <init>(int,int,long,java.util.concurrent.TimeUnit,java.util.concurrent.BlockingQueue,java.util.concurrent.ThreadFactory)>(0, 1, 60L, $r5, $r6, $r3);
+
+        $r7 = new com.squareup.okhttp.internal.DiskLruCache;
+
+        specialinvoke $r7.<com.squareup.okhttp.internal.DiskLruCache: void <init>(com.squareup.okhttp.internal.io.FileSystem,java.io.File,int,int,long,java.util.concurrent.Executor)>($r0, $r1, $i0, $i1, $l2, r2);
+
+        return $r7;
+    }
+    private com.squareup.okhttp.internal.DiskLruCache$Editor edit(java.lang.String, long) throws java.io.IOException
+    {
+        com.squareup.okhttp.internal.DiskLruCache r0;
+        java.lang.String $r1;
+        long $l0, $l2;
+        com.squareup.okhttp.internal.DiskLruCache$Editor r2, $r6;
+        java.util.LinkedHashMap $r3;
+        java.lang.Object $r4;
+        com.squareup.okhttp.internal.DiskLruCache$Entry r5;
+        byte $b1;
+        okio.BufferedSink $r7;
+        boolean $z0;
+        java.lang.Throwable $r8;
+
+        r0 := @this: com.squareup.okhttp.internal.DiskLruCache;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $l0 := @parameter1: long;
+
+        r2 = null;
+
+        entermonitor r0;
+
+     label1:
+        virtualinvoke r0.<com.squareup.okhttp.internal.DiskLruCache: void initialize()>();
+
+        specialinvoke r0.<com.squareup.okhttp.internal.DiskLruCache: void checkNotClosed()>();
+
+        specialinvoke r0.<com.squareup.okhttp.internal.DiskLruCache: void validateKey(java.lang.String)>($r1);
+
+        $r3 = r0.<com.squareup.okhttp.internal.DiskLruCache: java.util.LinkedHashMap lruEntries>;
+
+        $r4 = virtualinvoke $r3.<java.util.LinkedHashMap: java.lang.Object get(java.lang.Object)>($r1);
+
+        r5 = (com.squareup.okhttp.internal.DiskLruCache$Entry) $r4;
+
+        $b1 = $l0 cmp -1L;
+
+        if $b1 == 0 goto label4;
+
+        if r5 == null goto label3;
+
+        $l2 = staticinvoke <com.squareup.okhttp.internal.DiskLruCache$Entry: long access$1600(com.squareup.okhttp.internal.DiskLruCache$Entry)>(r5);
+
+     label2:
+        $b1 = $l2 cmp $l0;
+
+        if $b1 == 0 goto label4;
+
+     label3:
+        exitmonitor r0;
+
+        return r2;
+
+     label4:
+        if r5 == null goto label6;
+
+     label5:
+        $r6 = staticinvoke <com.squareup.okhttp.internal.DiskLruCache$Entry: com.squareup.okhttp.internal.DiskLruCache$Editor access$900(com.squareup.okhttp.internal.DiskLruCache$Entry)>(r5);
+
+        if $r6 != null goto label3;
+
+     label6:
+        $r7 = r0.<com.squareup.okhttp.internal.DiskLruCache: okio.BufferedSink journalWriter>;
+
+        $r7 = interfaceinvoke $r7.<okio.BufferedSink: okio.BufferedSink writeUtf8(java.lang.String)>("DIRTY");
+
+        $r7 = interfaceinvoke $r7.<okio.BufferedSink: okio.BufferedSink writeByte(int)>(32);
+
+        $r7 = interfaceinvoke $r7.<okio.BufferedSink: okio.BufferedSink writeUtf8(java.lang.String)>($r1);
+
+        interfaceinvoke $r7.<okio.BufferedSink: okio.BufferedSink writeByte(int)>(10);
+
+        $r7 = r0.<com.squareup.okhttp.internal.DiskLruCache: okio.BufferedSink journalWriter>;
+
+        interfaceinvoke $r7.<okio.BufferedSink: void flush()>();
+
+        $z0 = r0.<com.squareup.okhttp.internal.DiskLruCache: boolean hasJournalErrors>;
+
+        if $z0 != 0 goto label3;
+
+        if r5 != null goto label7;
+
+        r5 = new com.squareup.okhttp.internal.DiskLruCache$Entry;
+
+        specialinvoke r5.<com.squareup.okhttp.internal.DiskLruCache$Entry: void <init>(com.squareup.okhttp.internal.DiskLruCache,java.lang.String,com.squareup.okhttp.internal.DiskLruCache$1)>(r0, $r1, null);
+
+        $r3 = r0.<com.squareup.okhttp.internal.DiskLruCache: java.util.LinkedHashMap lruEntries>;
+
+        virtualinvoke $r3.<java.util.LinkedHashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>($r1, r5);
+
+     label7:
+        r2 = new com.squareup.okhttp.internal.DiskLruCache$Editor;
+
+        specialinvoke r2.<com.squareup.okhttp.internal.DiskLruCache$Editor: void <init>(com.squareup.okhttp.internal.DiskLruCache,com.squareup.okhttp.internal.DiskLruCache$Entry,com.squareup.okhttp.internal.DiskLruCache$1)>(r0, r5, null);
+
+        staticinvoke <com.squareup.okhttp.internal.DiskLruCache$Entry: com.squareup.okhttp.internal.DiskLruCache$Editor access$902(com.squareup.okhttp.internal.DiskLruCache$Entry,com.squareup.okhttp.internal.DiskLruCache$Editor)>(r5, r2);
+
+     label8:
+        goto label3;
+
+     label9:
+        $r8 := @caughtexception;
+
+        exitmonitor r0;
+
+        throw $r8;
+
+        catch java.lang.Throwable from label1 to label2 with label9;
+        catch java.lang.Throwable from label5 to label8 with label9;
+    }
+    private boolean journalRebuildRequired()
+    {
+        com.squareup.okhttp.internal.DiskLruCache r0;
+        int $i0, $i1;
+        java.util.LinkedHashMap $r1;
+
+        r0 := @this: com.squareup.okhttp.internal.DiskLruCache;
+
+        $i0 = r0.<com.squareup.okhttp.internal.DiskLruCache: int redundantOpCount>;
+
+        if $i0 < 2000 goto label1;
+
+        $i1 = r0.<com.squareup.okhttp.internal.DiskLruCache: int redundantOpCount>;
+
+        $r1 = r0.<com.squareup.okhttp.internal.DiskLruCache: java.util.LinkedHashMap lruEntries>;
+
+        $i0 = virtualinvoke $r1.<java.util.LinkedHashMap: int size()>();
+
+        if $i1 < $i0 goto label1;
+
+        return 1;
+
+     label1:
+        return 0;
+    }
+    private okio.BufferedSink newJournalWriter() throws java.io.FileNotFoundException
+    {
+        com.squareup.okhttp.internal.DiskLruCache r0;
+        com.squareup.okhttp.internal.DiskLruCache$2 r1;
+        java.io.File $r2;
+        com.squareup.okhttp.internal.io.FileSystem $r3;
+        okio.Sink $r4;
+        okio.BufferedSink $r5;
+
+        r0 := @this: com.squareup.okhttp.internal.DiskLruCache;
+
+        $r3 = r0.<com.squareup.okhttp.internal.DiskLruCache: com.squareup.okhttp.internal.io.FileSystem fileSystem>;
+
+        $r2 = r0.<com.squareup.okhttp.internal.DiskLruCache: java.io.File journalFile>;
+
+        $r4 = interfaceinvoke $r3.<com.squareup.okhttp.internal.io.FileSystem: okio.Sink appendingSink(java.io.File)>($r2);
+
+        r1 = new com.squareup.okhttp.internal.DiskLruCache$2;
+
+        specialinvoke r1.<com.squareup.okhttp.internal.DiskLruCache$2: void <init>(com.squareup.okhttp.internal.DiskLruCache,okio.Sink)>(r0, $r4);
+
+        $r5 = staticinvoke <okio.Okio: okio.BufferedSink buffer(okio.Sink)>(r1);
+
+        return $r5;
+    }
+    private void processJournal() throws java.io.IOException
+    {
+        com.squareup.okhttp.internal.DiskLruCache r0;
+        long $l0, $l3;
+        com.squareup.okhttp.internal.io.FileSystem $r1;
+        java.io.File $r2;
+        java.util.LinkedHashMap $r3;
+        java.util.Collection $r4;
+        java.util.Iterator $r5;
+        boolean $z0;
+        java.lang.Object $r6;
+        com.squareup.okhttp.internal.DiskLruCache$Entry r7;
+        com.squareup.okhttp.internal.DiskLruCache$Editor $r8;
+        int i1, $i2;
+        long[] $r9;
+        java.io.File[] $r10;
+
+        r0 := @this: com.squareup.okhttp.internal.DiskLruCache;
+
+        $r1 = r0.<com.squareup.okhttp.internal.DiskLruCache: com.squareup.okhttp.internal.io.FileSystem fileSystem>;
+
+        $r2 = r0.<com.squareup.okhttp.internal.DiskLruCache: java.io.File journalFileTmp>;
+
+        interfaceinvoke $r1.<com.squareup.okhttp.internal.io.FileSystem: void delete(java.io.File)>($r2);
+
+        $r3 = r0.<com.squareup.okhttp.internal.DiskLruCache: java.util.LinkedHashMap lruEntries>;
+
+        $r4 = virtualinvoke $r3.<java.util.LinkedHashMap: java.util.Collection values()>();
+
+        $r5 = interfaceinvoke $r4.<java.util.Collection: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r5.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label6;
+
+        $r6 = interfaceinvoke $r5.<java.util.Iterator: java.lang.Object next()>();
+
+        r7 = (com.squareup.okhttp.internal.DiskLruCache$Entry) $r6;
+
+        $r8 = staticinvoke <com.squareup.okhttp.internal.DiskLruCache$Entry: com.squareup.okhttp.internal.DiskLruCache$Editor access$900(com.squareup.okhttp.internal.DiskLruCache$Entry)>(r7);
+
+        if $r8 != null goto label3;
+
+        i1 = 0;
+
+     label2:
+        $i2 = r0.<com.squareup.okhttp.internal.DiskLruCache: int valueCount>;
+
+        if i1 >= $i2 goto label1;
+
+        $l3 = r0.<com.squareup.okhttp.internal.DiskLruCache: long size>;
+
+        $r9 = staticinvoke <com.squareup.okhttp.internal.DiskLruCache$Entry: long[] access$1200(com.squareup.okhttp.internal.DiskLruCache$Entry)>(r7);
+
+        $l0 = $r9[i1];
+
+        $l0 = $l3 + $l0;
+
+        r0.<com.squareup.okhttp.internal.DiskLruCache: long size> = $l0;
+
+        i1 = i1 + 1;
+
+        goto label2;
+
+     label3:
+        staticinvoke <com.squareup.okhttp.internal.DiskLruCache$Entry: com.squareup.okhttp.internal.DiskLruCache$Editor access$902(com.squareup.okhttp.internal.DiskLruCache$Entry,com.squareup.okhttp.internal.DiskLruCache$Editor)>(r7, null);
+
+        i1 = 0;
+
+     label4:
+        $i2 = r0.<com.squareup.okhttp.internal.DiskLruCache: int valueCount>;
+
+        if i1 >= $i2 goto label5;
+
+        $r1 = r0.<com.squareup.okhttp.internal.DiskLruCache: com.squareup.okhttp.internal.io.FileSystem fileSystem>;
+
+        $r10 = staticinvoke <com.squareup.okhttp.internal.DiskLruCache$Entry: java.io.File[] access$1300(com.squareup.okhttp.internal.DiskLruCache$Entry)>(r7);
+
+        $r2 = $r10[i1];
+
+        interfaceinvoke $r1.<com.squareup.okhttp.internal.io.FileSystem: void delete(java.io.File)>($r2);
+
+        $r1 = r0.<com.squareup.okhttp.internal.DiskLruCache: com.squareup.okhttp.internal.io.FileSystem fileSystem>;
+
+        $r10 = staticinvoke <com.squareup.okhttp.internal.DiskLruCache$Entry: java.io.File[] access$1400(com.squareup.okhttp.internal.DiskLruCache$Entry)>(r7);
+
+        $r2 = $r10[i1];
+
+        interfaceinvoke $r1.<com.squareup.okhttp.internal.io.FileSystem: void delete(java.io.File)>($r2);
+
+        i1 = i1 + 1;
+
+        goto label4;
+
+     label5:
+        interfaceinvoke $r5.<java.util.Iterator: void remove()>();
+
+        goto label1;
+
+     label6:
+        return;
+    }
+    private void readJournal() throws java.io.IOException
+    {
+        com.squareup.okhttp.internal.DiskLruCache r0;
+        java.io.EOFException r1;
+        com.squareup.okhttp.internal.io.FileSystem $r2;
+        java.io.File $r3;
+        okio.Source $r4;
+        okio.BufferedSource $r5;
+        java.lang.String $r6, $r7, $r8, $r9, $r10, $r11;
+        boolean $z0;
+        int $i0, $i1;
+        java.io.IOException $r12;
+        java.lang.StringBuilder $r13;
+        java.lang.Throwable $r14;
+        java.util.LinkedHashMap $r15;
+        okio.BufferedSink $r16;
+
+        r0 := @this: com.squareup.okhttp.internal.DiskLruCache;
+
+        $r2 = r0.<com.squareup.okhttp.internal.DiskLruCache: com.squareup.okhttp.internal.io.FileSystem fileSystem>;
+
+        $r3 = r0.<com.squareup.okhttp.internal.DiskLruCache: java.io.File journalFile>;
+
+        $r4 = interfaceinvoke $r2.<com.squareup.okhttp.internal.io.FileSystem: okio.Source source(java.io.File)>($r3);
+
+        $r5 = staticinvoke <okio.Okio: okio.BufferedSource buffer(okio.Source)>($r4);
+
+     label01:
+        $r6 = interfaceinvoke $r5.<okio.BufferedSource: java.lang.String readUtf8LineStrict()>();
+
+        $r7 = interfaceinvoke $r5.<okio.BufferedSource: java.lang.String readUtf8LineStrict()>();
+
+        $r8 = interfaceinvoke $r5.<okio.BufferedSource: java.lang.String readUtf8LineStrict()>();
+
+        $r9 = interfaceinvoke $r5.<okio.BufferedSource: java.lang.String readUtf8LineStrict()>();
+
+        $r10 = interfaceinvoke $r5.<okio.BufferedSource: java.lang.String readUtf8LineStrict()>();
+
+     label02:
+        $r11 = "libcore.io.DiskLruCache";
+
+     label03:
+        $z0 = virtualinvoke $r11.<java.lang.String: boolean equals(java.lang.Object)>($r6);
+
+     label04:
+        if $z0 == 0 goto label13;
+
+        $r11 = "1";
+
+     label05:
+        $z0 = virtualinvoke $r11.<java.lang.String: boolean equals(java.lang.Object)>($r7);
+
+     label06:
+        if $z0 == 0 goto label13;
+
+     label07:
+        $i0 = r0.<com.squareup.okhttp.internal.DiskLruCache: int appVersion>;
+
+        $r11 = staticinvoke <java.lang.Integer: java.lang.String toString(int)>($i0);
+
+        $z0 = virtualinvoke $r11.<java.lang.String: boolean equals(java.lang.Object)>($r8);
+
+     label08:
+        if $z0 == 0 goto label13;
+
+     label09:
+        $i0 = r0.<com.squareup.okhttp.internal.DiskLruCache: int valueCount>;
+
+        $r8 = staticinvoke <java.lang.Integer: java.lang.String toString(int)>($i0);
+
+        $z0 = virtualinvoke $r8.<java.lang.String: boolean equals(java.lang.Object)>($r9);
+
+     label10:
+        if $z0 == 0 goto label13;
+
+        $r8 = "";
+
+     label11:
+        $z0 = virtualinvoke $r8.<java.lang.String: boolean equals(java.lang.Object)>($r10);
+
+     label12:
+        if $z0 != 0 goto label15;
+
+     label13:
+        $r12 = new java.io.IOException;
+
+        $r13 = new java.lang.StringBuilder;
+
+        specialinvoke $r13.<java.lang.StringBuilder: void <init>()>();
+
+        $r13 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("unexpected journal header: [");
+
+        $r13 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r13 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", ");
+
+        $r13 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r7);
+
+        $r13 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", ");
+
+        $r13 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r9);
+
+        $r13 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", ");
+
+        $r13 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r10);
+
+        $r13 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("]");
+
+        $r6 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r12.<java.io.IOException: void <init>(java.lang.String)>($r6);
+
+        throw $r12;
+
+     label14:
+        $r14 := @caughtexception;
+
+        staticinvoke <com.squareup.okhttp.internal.Util: void closeQuietly(java.io.Closeable)>($r5);
+
+        throw $r14;
+
+     label15:
+        $i0 = 0;
+
+     label16:
+        $r6 = interfaceinvoke $r5.<okio.BufferedSource: java.lang.String readUtf8LineStrict()>();
+
+        specialinvoke r0.<com.squareup.okhttp.internal.DiskLruCache: void readJournalLine(java.lang.String)>($r6);
+
+     label17:
+        $i0 = $i0 + 1;
+
+        goto label16;
+
+     label18:
+        r1 := @caughtexception;
+
+     label19:
+        $r15 = r0.<com.squareup.okhttp.internal.DiskLruCache: java.util.LinkedHashMap lruEntries>;
+
+        $i1 = virtualinvoke $r15.<java.util.LinkedHashMap: int size()>();
+
+     label20:
+        $i0 = $i0 - $i1;
+
+     label21:
+        r0.<com.squareup.okhttp.internal.DiskLruCache: int redundantOpCount> = $i0;
+
+        $z0 = interfaceinvoke $r5.<okio.BufferedSource: boolean exhausted()>();
+
+     label22:
+        if $z0 != 0 goto label25;
+
+     label23:
+        specialinvoke r0.<com.squareup.okhttp.internal.DiskLruCache: void rebuildJournal()>();
+
+     label24:
+        staticinvoke <com.squareup.okhttp.internal.Util: void closeQuietly(java.io.Closeable)>($r5);
+
+        return;
+
+     label25:
+        $r16 = specialinvoke r0.<com.squareup.okhttp.internal.DiskLruCache: okio.BufferedSink newJournalWriter()>();
+
+        r0.<com.squareup.okhttp.internal.DiskLruCache: okio.BufferedSink journalWriter> = $r16;
+
+     label26:
+        goto label24;
+
+        catch java.lang.Throwable from label01 to label02 with label14;
+        catch java.lang.Throwable from label03 to label04 with label14;
+        catch java.lang.Throwable from label05 to label06 with label14;
+        catch java.lang.Throwable from label07 to label08 with label14;
+        catch java.lang.Throwable from label09 to label10 with label14;
+        catch java.lang.Throwable from label11 to label12 with label14;
+        catch java.lang.Throwable from label13 to label14 with label14;
+        catch java.io.EOFException from label16 to label17 with label18;
+        catch java.lang.Throwable from label16 to label17 with label14;
+        catch java.lang.Throwable from label19 to label20 with label14;
+        catch java.lang.Throwable from label21 to label22 with label14;
+        catch java.lang.Throwable from label23 to label24 with label14;
+        catch java.lang.Throwable from label25 to label26 with label14;
+    }
+    private void readJournalLine(java.lang.String) throws java.io.IOException
+    {
+        com.squareup.okhttp.internal.DiskLruCache r0;
+        java.lang.String $r1, $r4, r5, $r6;
+        int i0, $i1, $i2;
+        java.io.IOException $r2;
+        java.lang.StringBuilder $r3;
+        boolean $z0;
+        java.util.LinkedHashMap $r7;
+        java.lang.Object $r8;
+        com.squareup.okhttp.internal.DiskLruCache$Entry r9;
+        java.lang.String[] $r10;
+        com.squareup.okhttp.internal.DiskLruCache$Editor $r11;
+
+        r0 := @this: com.squareup.okhttp.internal.DiskLruCache;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $i1 = virtualinvoke $r1.<java.lang.String: int indexOf(int)>(32);
+
+        if $i1 != -1 goto label1;
+
+        $r2 = new java.io.IOException;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("unexpected journal line: ");
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r1 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r2.<java.io.IOException: void <init>(java.lang.String)>($r1);
+
+        throw $r2;
+
+     label1:
+        i0 = $i1 + 1;
+
+        $i2 = virtualinvoke $r1.<java.lang.String: int indexOf(int,int)>(32, i0);
+
+        if $i2 != -1 goto label2;
+
+        $r4 = virtualinvoke $r1.<java.lang.String: java.lang.String substring(int)>(i0);
+
+        r5 = $r4;
+
+        $r6 = "REMOVE";
+
+        i0 = virtualinvoke $r6.<java.lang.String: int length()>();
+
+        if $i1 != i0 goto label3;
+
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean startsWith(java.lang.String)>("REMOVE");
+
+        if $z0 == 0 goto label3;
+
+        $r7 = r0.<com.squareup.okhttp.internal.DiskLruCache: java.util.LinkedHashMap lruEntries>;
+
+        virtualinvoke $r7.<java.util.LinkedHashMap: java.lang.Object remove(java.lang.Object)>($r4);
+
+        return;
+
+     label2:
+        r5 = virtualinvoke $r1.<java.lang.String: java.lang.String substring(int,int)>(i0, $i2);
+
+     label3:
+        $r7 = r0.<com.squareup.okhttp.internal.DiskLruCache: java.util.LinkedHashMap lruEntries>;
+
+        $r8 = virtualinvoke $r7.<java.util.LinkedHashMap: java.lang.Object get(java.lang.Object)>(r5);
+
+        r9 = (com.squareup.okhttp.internal.DiskLruCache$Entry) $r8;
+
+        if r9 != null goto label4;
+
+        r9 = new com.squareup.okhttp.internal.DiskLruCache$Entry;
+
+        specialinvoke r9.<com.squareup.okhttp.internal.DiskLruCache$Entry: void <init>(com.squareup.okhttp.internal.DiskLruCache,java.lang.String,com.squareup.okhttp.internal.DiskLruCache$1)>(r0, r5, null);
+
+        $r7 = r0.<com.squareup.okhttp.internal.DiskLruCache: java.util.LinkedHashMap lruEntries>;
+
+        virtualinvoke $r7.<java.util.LinkedHashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>(r5, r9);
+
+     label4:
+        if $i2 == -1 goto label5;
+
+        $r4 = "CLEAN";
+
+        i0 = virtualinvoke $r4.<java.lang.String: int length()>();
+
+        if $i1 != i0 goto label5;
+
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean startsWith(java.lang.String)>("CLEAN");
+
+        if $z0 == 0 goto label5;
+
+        $i1 = $i2 + 1;
+
+        $r1 = virtualinvoke $r1.<java.lang.String: java.lang.String substring(int)>($i1);
+
+        $r10 = virtualinvoke $r1.<java.lang.String: java.lang.String[] split(java.lang.String)>(" ");
+
+        staticinvoke <com.squareup.okhttp.internal.DiskLruCache$Entry: boolean access$802(com.squareup.okhttp.internal.DiskLruCache$Entry,boolean)>(r9, 1);
+
+        staticinvoke <com.squareup.okhttp.internal.DiskLruCache$Entry: com.squareup.okhttp.internal.DiskLruCache$Editor access$902(com.squareup.okhttp.internal.DiskLruCache$Entry,com.squareup.okhttp.internal.DiskLruCache$Editor)>(r9, null);
+
+        staticinvoke <com.squareup.okhttp.internal.DiskLruCache$Entry: void access$1000(com.squareup.okhttp.internal.DiskLruCache$Entry,java.lang.String[])>(r9, $r10);
+
+        return;
+
+     label5:
+        if $i2 != -1 goto label6;
+
+        $r4 = "DIRTY";
+
+        i0 = virtualinvoke $r4.<java.lang.String: int length()>();
+
+        if $i1 != i0 goto label6;
+
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean startsWith(java.lang.String)>("DIRTY");
+
+        if $z0 == 0 goto label6;
+
+        $r11 = new com.squareup.okhttp.internal.DiskLruCache$Editor;
+
+        specialinvoke $r11.<com.squareup.okhttp.internal.DiskLruCache$Editor: void <init>(com.squareup.okhttp.internal.DiskLruCache,com.squareup.okhttp.internal.DiskLruCache$Entry,com.squareup.okhttp.internal.DiskLruCache$1)>(r0, r9, null);
+
+        staticinvoke <com.squareup.okhttp.internal.DiskLruCache$Entry: com.squareup.okhttp.internal.DiskLruCache$Editor access$902(com.squareup.okhttp.internal.DiskLruCache$Entry,com.squareup.okhttp.internal.DiskLruCache$Editor)>(r9, $r11);
+
+        return;
+
+     label6:
+        if $i2 != -1 goto label7;
+
+        $r4 = "READ";
+
+        $i2 = virtualinvoke $r4.<java.lang.String: int length()>();
+
+        if $i1 != $i2 goto label7;
+
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean startsWith(java.lang.String)>("READ");
+
+        if $z0 != 0 goto label8;
+
+     label7:
+        $r2 = new java.io.IOException;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("unexpected journal line: ");
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r1 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r2.<java.io.IOException: void <init>(java.lang.String)>($r1);
+
+        throw $r2;
+
+     label8:
+        return;
+    }
+    private void rebuildJournal() throws java.io.IOException
+    {
+        com.squareup.okhttp.internal.DiskLruCache r0;
+        okio.BufferedSink $r1, $r5;
+        com.squareup.okhttp.internal.io.FileSystem $r2;
+        java.io.File $r3, $r15;
+        okio.Sink $r4;
+        int $i0;
+        long $l1;
+        java.util.LinkedHashMap $r6;
+        java.util.Collection $r7;
+        java.util.Iterator $r8;
+        boolean $z0;
+        java.lang.Object $r9;
+        com.squareup.okhttp.internal.DiskLruCache$Entry r10;
+        com.squareup.okhttp.internal.DiskLruCache$Editor $r11;
+        java.lang.String $r12;
+        java.lang.Throwable $r13, $r14;
+
+        r0 := @this: com.squareup.okhttp.internal.DiskLruCache;
+
+        entermonitor r0;
+
+     label01:
+        $r1 = r0.<com.squareup.okhttp.internal.DiskLruCache: okio.BufferedSink journalWriter>;
+
+        if $r1 == null goto label02;
+
+        $r1 = r0.<com.squareup.okhttp.internal.DiskLruCache: okio.BufferedSink journalWriter>;
+
+        interfaceinvoke $r1.<okio.BufferedSink: void close()>();
+
+     label02:
+        $r2 = r0.<com.squareup.okhttp.internal.DiskLruCache: com.squareup.okhttp.internal.io.FileSystem fileSystem>;
+
+        $r3 = r0.<com.squareup.okhttp.internal.DiskLruCache: java.io.File journalFileTmp>;
+
+        $r4 = interfaceinvoke $r2.<com.squareup.okhttp.internal.io.FileSystem: okio.Sink sink(java.io.File)>($r3);
+
+        $r1 = staticinvoke <okio.Okio: okio.BufferedSink buffer(okio.Sink)>($r4);
+
+     label03:
+        $r5 = interfaceinvoke $r1.<okio.BufferedSink: okio.BufferedSink writeUtf8(java.lang.String)>("libcore.io.DiskLruCache");
+
+        interfaceinvoke $r5.<okio.BufferedSink: okio.BufferedSink writeByte(int)>(10);
+
+        $r5 = interfaceinvoke $r1.<okio.BufferedSink: okio.BufferedSink writeUtf8(java.lang.String)>("1");
+
+        interfaceinvoke $r5.<okio.BufferedSink: okio.BufferedSink writeByte(int)>(10);
+
+        $i0 = r0.<com.squareup.okhttp.internal.DiskLruCache: int appVersion>;
+
+        $l1 = (long) $i0;
+
+        $r5 = interfaceinvoke $r1.<okio.BufferedSink: okio.BufferedSink writeDecimalLong(long)>($l1);
+
+        interfaceinvoke $r5.<okio.BufferedSink: okio.BufferedSink writeByte(int)>(10);
+
+        $i0 = r0.<com.squareup.okhttp.internal.DiskLruCache: int valueCount>;
+
+        $l1 = (long) $i0;
+
+        $r5 = interfaceinvoke $r1.<okio.BufferedSink: okio.BufferedSink writeDecimalLong(long)>($l1);
+
+        interfaceinvoke $r5.<okio.BufferedSink: okio.BufferedSink writeByte(int)>(10);
+
+        interfaceinvoke $r1.<okio.BufferedSink: okio.BufferedSink writeByte(int)>(10);
+
+        $r6 = r0.<com.squareup.okhttp.internal.DiskLruCache: java.util.LinkedHashMap lruEntries>;
+
+        $r7 = virtualinvoke $r6.<java.util.LinkedHashMap: java.util.Collection values()>();
+
+        $r8 = interfaceinvoke $r7.<java.util.Collection: java.util.Iterator iterator()>();
+
+     label04:
+        $z0 = interfaceinvoke $r8.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label11;
+
+        $r9 = interfaceinvoke $r8.<java.util.Iterator: java.lang.Object next()>();
+
+        r10 = (com.squareup.okhttp.internal.DiskLruCache$Entry) $r9;
+
+        $r11 = staticinvoke <com.squareup.okhttp.internal.DiskLruCache$Entry: com.squareup.okhttp.internal.DiskLruCache$Editor access$900(com.squareup.okhttp.internal.DiskLruCache$Entry)>(r10);
+
+        if $r11 == null goto label09;
+
+        $r5 = interfaceinvoke $r1.<okio.BufferedSink: okio.BufferedSink writeUtf8(java.lang.String)>("DIRTY");
+
+        interfaceinvoke $r5.<okio.BufferedSink: okio.BufferedSink writeByte(int)>(32);
+
+        $r12 = staticinvoke <com.squareup.okhttp.internal.DiskLruCache$Entry: java.lang.String access$1500(com.squareup.okhttp.internal.DiskLruCache$Entry)>(r10);
+
+        interfaceinvoke $r1.<okio.BufferedSink: okio.BufferedSink writeUtf8(java.lang.String)>($r12);
+
+        interfaceinvoke $r1.<okio.BufferedSink: okio.BufferedSink writeByte(int)>(10);
+
+     label05:
+        goto label04;
+
+     label06:
+        $r13 := @caughtexception;
+
+     label07:
+        interfaceinvoke $r1.<okio.BufferedSink: void close()>();
+
+        throw $r13;
+
+     label08:
+        $r14 := @caughtexception;
+
+        exitmonitor r0;
+
+        throw $r14;
+
+     label09:
+        $r5 = interfaceinvoke $r1.<okio.BufferedSink: okio.BufferedSink writeUtf8(java.lang.String)>("CLEAN");
+
+        interfaceinvoke $r5.<okio.BufferedSink: okio.BufferedSink writeByte(int)>(32);
+
+        $r12 = staticinvoke <com.squareup.okhttp.internal.DiskLruCache$Entry: java.lang.String access$1500(com.squareup.okhttp.internal.DiskLruCache$Entry)>(r10);
+
+        interfaceinvoke $r1.<okio.BufferedSink: okio.BufferedSink writeUtf8(java.lang.String)>($r12);
+
+        virtualinvoke r10.<com.squareup.okhttp.internal.DiskLruCache$Entry: void writeLengths(okio.BufferedSink)>($r1);
+
+        interfaceinvoke $r1.<okio.BufferedSink: okio.BufferedSink writeByte(int)>(10);
+
+     label10:
+        goto label04;
+
+     label11:
+        interfaceinvoke $r1.<okio.BufferedSink: void close()>();
+
+        $r2 = r0.<com.squareup.okhttp.internal.DiskLruCache: com.squareup.okhttp.internal.io.FileSystem fileSystem>;
+
+        $r3 = r0.<com.squareup.okhttp.internal.DiskLruCache: java.io.File journalFile>;
+
+        $z0 = interfaceinvoke $r2.<com.squareup.okhttp.internal.io.FileSystem: boolean exists(java.io.File)>($r3);
+
+        if $z0 == 0 goto label12;
+
+        $r2 = r0.<com.squareup.okhttp.internal.DiskLruCache: com.squareup.okhttp.internal.io.FileSystem fileSystem>;
+
+        $r3 = r0.<com.squareup.okhttp.internal.DiskLruCache: java.io.File journalFile>;
+
+        $r15 = r0.<com.squareup.okhttp.internal.DiskLruCache: java.io.File journalFileBackup>;
+
+        interfaceinvoke $r2.<com.squareup.okhttp.internal.io.FileSystem: void rename(java.io.File,java.io.File)>($r3, $r15);
+
+     label12:
+        $r2 = r0.<com.squareup.okhttp.internal.DiskLruCache: com.squareup.okhttp.internal.io.FileSystem fileSystem>;
+
+        $r3 = r0.<com.squareup.okhttp.internal.DiskLruCache: java.io.File journalFileTmp>;
+
+        $r15 = r0.<com.squareup.okhttp.internal.DiskLruCache: java.io.File journalFile>;
+
+        interfaceinvoke $r2.<com.squareup.okhttp.internal.io.FileSystem: void rename(java.io.File,java.io.File)>($r3, $r15);
+
+        $r2 = r0.<com.squareup.okhttp.internal.DiskLruCache: com.squareup.okhttp.internal.io.FileSystem fileSystem>;
+
+        $r3 = r0.<com.squareup.okhttp.internal.DiskLruCache: java.io.File journalFileBackup>;
+
+        interfaceinvoke $r2.<com.squareup.okhttp.internal.io.FileSystem: void delete(java.io.File)>($r3);
+
+        $r1 = specialinvoke r0.<com.squareup.okhttp.internal.DiskLruCache: okio.BufferedSink newJournalWriter()>();
+
+        r0.<com.squareup.okhttp.internal.DiskLruCache: okio.BufferedSink journalWriter> = $r1;
+
+        r0.<com.squareup.okhttp.internal.DiskLruCache: boolean hasJournalErrors> = 0;
+
+     label13:
+        exitmonitor r0;
+
+        return;
+
+        catch java.lang.Throwable from label01 to label03 with label08;
+        catch java.lang.Throwable from label03 to label05 with label06;
+        catch java.lang.Throwable from label07 to label08 with label08;
+        catch java.lang.Throwable from label09 to label10 with label06;
+        catch java.lang.Throwable from label11 to label13 with label08;
+    }
+    private boolean removeEntry(com.squareup.okhttp.internal.DiskLruCache$Entry) throws java.io.IOException
+    {
+        com.squareup.okhttp.internal.DiskLruCache r0;
+        com.squareup.okhttp.internal.DiskLruCache$Entry $r1;
+        long $l0, $l3;
+        com.squareup.okhttp.internal.DiskLruCache$Editor $r2;
+        int i1, $i2;
+        com.squareup.okhttp.internal.io.FileSystem $r3;
+        java.io.File[] $r4;
+        java.io.File $r5;
+        long[] $r6;
+        okio.BufferedSink $r7;
+        java.lang.String $r8;
+        java.util.LinkedHashMap $r9;
+        boolean $z0;
+        java.util.concurrent.Executor $r10;
+        java.lang.Runnable $r11;
+
+        r0 := @this: com.squareup.okhttp.internal.DiskLruCache;
+
+        $r1 := @parameter0: com.squareup.okhttp.internal.DiskLruCache$Entry;
+
+        $r2 = staticinvoke <com.squareup.okhttp.internal.DiskLruCache$Entry: com.squareup.okhttp.internal.DiskLruCache$Editor access$900(com.squareup.okhttp.internal.DiskLruCache$Entry)>($r1);
+
+        if $r2 == null goto label1;
+
+        $r2 = staticinvoke <com.squareup.okhttp.internal.DiskLruCache$Entry: com.squareup.okhttp.internal.DiskLruCache$Editor access$900(com.squareup.okhttp.internal.DiskLruCache$Entry)>($r1);
+
+        staticinvoke <com.squareup.okhttp.internal.DiskLruCache$Editor: boolean access$1902(com.squareup.okhttp.internal.DiskLruCache$Editor,boolean)>($r2, 1);
+
+     label1:
+        i1 = 0;
+
+     label2:
+        $i2 = r0.<com.squareup.okhttp.internal.DiskLruCache: int valueCount>;
+
+        if i1 >= $i2 goto label3;
+
+        $r3 = r0.<com.squareup.okhttp.internal.DiskLruCache: com.squareup.okhttp.internal.io.FileSystem fileSystem>;
+
+        $r4 = staticinvoke <com.squareup.okhttp.internal.DiskLruCache$Entry: java.io.File[] access$1300(com.squareup.okhttp.internal.DiskLruCache$Entry)>($r1);
+
+        $r5 = $r4[i1];
+
+        interfaceinvoke $r3.<com.squareup.okhttp.internal.io.FileSystem: void delete(java.io.File)>($r5);
+
+        $l3 = r0.<com.squareup.okhttp.internal.DiskLruCache: long size>;
+
+        $r6 = staticinvoke <com.squareup.okhttp.internal.DiskLruCache$Entry: long[] access$1200(com.squareup.okhttp.internal.DiskLruCache$Entry)>($r1);
+
+        $l0 = $r6[i1];
+
+        $l0 = $l3 - $l0;
+
+        r0.<com.squareup.okhttp.internal.DiskLruCache: long size> = $l0;
+
+        $r6 = staticinvoke <com.squareup.okhttp.internal.DiskLruCache$Entry: long[] access$1200(com.squareup.okhttp.internal.DiskLruCache$Entry)>($r1);
+
+        $r6[i1] = 0L;
+
+        i1 = i1 + 1;
+
+        goto label2;
+
+     label3:
+        i1 = r0.<com.squareup.okhttp.internal.DiskLruCache: int redundantOpCount>;
+
+        i1 = i1 + 1;
+
+        r0.<com.squareup.okhttp.internal.DiskLruCache: int redundantOpCount> = i1;
+
+        $r7 = r0.<com.squareup.okhttp.internal.DiskLruCache: okio.BufferedSink journalWriter>;
+
+        $r7 = interfaceinvoke $r7.<okio.BufferedSink: okio.BufferedSink writeUtf8(java.lang.String)>("REMOVE");
+
+        $r7 = interfaceinvoke $r7.<okio.BufferedSink: okio.BufferedSink writeByte(int)>(32);
+
+        $r8 = staticinvoke <com.squareup.okhttp.internal.DiskLruCache$Entry: java.lang.String access$1500(com.squareup.okhttp.internal.DiskLruCache$Entry)>($r1);
+
+        $r7 = interfaceinvoke $r7.<okio.BufferedSink: okio.BufferedSink writeUtf8(java.lang.String)>($r8);
+
+        interfaceinvoke $r7.<okio.BufferedSink: okio.BufferedSink writeByte(int)>(10);
+
+        $r9 = r0.<com.squareup.okhttp.internal.DiskLruCache: java.util.LinkedHashMap lruEntries>;
+
+        $r8 = staticinvoke <com.squareup.okhttp.internal.DiskLruCache$Entry: java.lang.String access$1500(com.squareup.okhttp.internal.DiskLruCache$Entry)>($r1);
+
+        virtualinvoke $r9.<java.util.LinkedHashMap: java.lang.Object remove(java.lang.Object)>($r8);
+
+        $z0 = specialinvoke r0.<com.squareup.okhttp.internal.DiskLruCache: boolean journalRebuildRequired()>();
+
+        if $z0 == 0 goto label4;
+
+        $r10 = r0.<com.squareup.okhttp.internal.DiskLruCache: java.util.concurrent.Executor executor>;
+
+        $r11 = r0.<com.squareup.okhttp.internal.DiskLruCache: java.lang.Runnable cleanupRunnable>;
+
+        interfaceinvoke $r10.<java.util.concurrent.Executor: void execute(java.lang.Runnable)>($r11);
+
+     label4:
+        return 1;
+    }
+    private void trimToSize() throws java.io.IOException
+    {
+        com.squareup.okhttp.internal.DiskLruCache r0;
+        long $l0, $l1;
+        byte $b2;
+        java.util.LinkedHashMap $r1;
+        java.util.Collection $r2;
+        java.util.Iterator $r3;
+        java.lang.Object $r4;
+        com.squareup.okhttp.internal.DiskLruCache$Entry r5;
+
+        r0 := @this: com.squareup.okhttp.internal.DiskLruCache;
+
+     label1:
+        $l0 = r0.<com.squareup.okhttp.internal.DiskLruCache: long size>;
+
+        $l1 = r0.<com.squareup.okhttp.internal.DiskLruCache: long maxSize>;
+
+        $b2 = $l0 cmp $l1;
+
+        if $b2 <= 0 goto label2;
+
+        $r1 = r0.<com.squareup.okhttp.internal.DiskLruCache: java.util.LinkedHashMap lruEntries>;
+
+        $r2 = virtualinvoke $r1.<java.util.LinkedHashMap: java.util.Collection values()>();
+
+        $r3 = interfaceinvoke $r2.<java.util.Collection: java.util.Iterator iterator()>();
+
+        $r4 = interfaceinvoke $r3.<java.util.Iterator: java.lang.Object next()>();
+
+        r5 = (com.squareup.okhttp.internal.DiskLruCache$Entry) $r4;
+
+        specialinvoke r0.<com.squareup.okhttp.internal.DiskLruCache: boolean removeEntry(com.squareup.okhttp.internal.DiskLruCache$Entry)>(r5);
+
+        goto label1;
+
+     label2:
+        return;
+    }
+    private void validateKey(java.lang.String)
+    {
+        com.squareup.okhttp.internal.DiskLruCache r0;
+        java.lang.String $r1;
+        java.util.regex.Pattern $r2;
+        java.util.regex.Matcher $r3;
+        boolean $z0;
+        java.lang.IllegalArgumentException $r4;
+        java.lang.StringBuilder $r5;
+
+        r0 := @this: com.squareup.okhttp.internal.DiskLruCache;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = <com.squareup.okhttp.internal.DiskLruCache: java.util.regex.Pattern LEGAL_KEY_PATTERN>;
+
+        $r3 = virtualinvoke $r2.<java.util.regex.Pattern: java.util.regex.Matcher matcher(java.lang.CharSequence)>($r1);
+
+        $z0 = virtualinvoke $r3.<java.util.regex.Matcher: boolean matches()>();
+
+        if $z0 != 0 goto label1;
+
+        $r4 = new java.lang.IllegalArgumentException;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("keys must match regex [a-z0-9_-]{1,120}: \"");
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\"");
+
+        $r1 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r4.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r1);
+
+        throw $r4;
+
+     label1:
+        return;
+    }
+    public void close() throws java.io.IOException
+    {
+        com.squareup.okhttp.internal.DiskLruCache r0;
+        com.squareup.okhttp.internal.DiskLruCache$Entry r1;
+        int $i0, $i1;
+        boolean $z0;
+        java.util.LinkedHashMap $r2;
+        java.util.Collection $r3;
+        com.squareup.okhttp.internal.DiskLruCache$Entry[] $r4;
+        java.lang.Object[] $r5;
+        com.squareup.okhttp.internal.DiskLruCache$Editor $r6;
+        okio.BufferedSink $r7;
+        java.lang.Throwable $r8;
+
+        r0 := @this: com.squareup.okhttp.internal.DiskLruCache;
+
+        entermonitor r0;
+
+     label1:
+        $z0 = r0.<com.squareup.okhttp.internal.DiskLruCache: boolean initialized>;
+
+        if $z0 == 0 goto label2;
+
+        $z0 = r0.<com.squareup.okhttp.internal.DiskLruCache: boolean closed>;
+
+        if $z0 == 0 goto label4;
+
+     label2:
+        r0.<com.squareup.okhttp.internal.DiskLruCache: boolean closed> = 1;
+
+     label3:
+        exitmonitor r0;
+
+        return;
+
+     label4:
+        $r2 = r0.<com.squareup.okhttp.internal.DiskLruCache: java.util.LinkedHashMap lruEntries>;
+
+        $r3 = virtualinvoke $r2.<java.util.LinkedHashMap: java.util.Collection values()>();
+
+        $r2 = r0.<com.squareup.okhttp.internal.DiskLruCache: java.util.LinkedHashMap lruEntries>;
+
+        $i0 = virtualinvoke $r2.<java.util.LinkedHashMap: int size()>();
+
+        $r4 = newarray (com.squareup.okhttp.internal.DiskLruCache$Entry)[$i0];
+
+        $r5 = interfaceinvoke $r3.<java.util.Collection: java.lang.Object[] toArray(java.lang.Object[])>($r4);
+
+        $r4 = (com.squareup.okhttp.internal.DiskLruCache$Entry[]) $r5;
+
+        $i0 = lengthof $r4;
+
+        $i1 = 0;
+
+     label5:
+        if $i1 >= $i0 goto label7;
+
+        r1 = $r4[$i1];
+
+        $r6 = staticinvoke <com.squareup.okhttp.internal.DiskLruCache$Entry: com.squareup.okhttp.internal.DiskLruCache$Editor access$900(com.squareup.okhttp.internal.DiskLruCache$Entry)>(r1);
+
+        if $r6 == null goto label6;
+
+        $r6 = staticinvoke <com.squareup.okhttp.internal.DiskLruCache$Entry: com.squareup.okhttp.internal.DiskLruCache$Editor access$900(com.squareup.okhttp.internal.DiskLruCache$Entry)>(r1);
+
+        virtualinvoke $r6.<com.squareup.okhttp.internal.DiskLruCache$Editor: void abort()>();
+
+     label6:
+        $i1 = $i1 + 1;
+
+        goto label5;
+
+     label7:
+        specialinvoke r0.<com.squareup.okhttp.internal.DiskLruCache: void trimToSize()>();
+
+        $r7 = r0.<com.squareup.okhttp.internal.DiskLruCache: okio.BufferedSink journalWriter>;
+
+        interfaceinvoke $r7.<okio.BufferedSink: void close()>();
+
+        r0.<com.squareup.okhttp.internal.DiskLruCache: okio.BufferedSink journalWriter> = null;
+
+        r0.<com.squareup.okhttp.internal.DiskLruCache: boolean closed> = 1;
+
+     label8:
+        goto label3;
+
+     label9:
+        $r8 := @caughtexception;
+
+        exitmonitor r0;
+
+        throw $r8;
+
+        catch java.lang.Throwable from label1 to label3 with label9;
+        catch java.lang.Throwable from label4 to label8 with label9;
+    }
+    public void delete() throws java.io.IOException
+    {
+        com.squareup.okhttp.internal.DiskLruCache r0;
+        com.squareup.okhttp.internal.io.FileSystem $r1;
+        java.io.File $r2;
+
+        r0 := @this: com.squareup.okhttp.internal.DiskLruCache;
+
+        virtualinvoke r0.<com.squareup.okhttp.internal.DiskLruCache: void close()>();
+
+        $r1 = r0.<com.squareup.okhttp.internal.DiskLruCache: com.squareup.okhttp.internal.io.FileSystem fileSystem>;
+
+        $r2 = r0.<com.squareup.okhttp.internal.DiskLruCache: java.io.File directory>;
+
+        interfaceinvoke $r1.<com.squareup.okhttp.internal.io.FileSystem: void deleteContents(java.io.File)>($r2);
+
+        return;
+    }
+    public com.squareup.okhttp.internal.DiskLruCache$Editor edit(java.lang.String) throws java.io.IOException
+    {
+        com.squareup.okhttp.internal.DiskLruCache r0;
+        java.lang.String $r1;
+        com.squareup.okhttp.internal.DiskLruCache$Editor $r2;
+
+        r0 := @this: com.squareup.okhttp.internal.DiskLruCache;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = specialinvoke r0.<com.squareup.okhttp.internal.DiskLruCache: com.squareup.okhttp.internal.DiskLruCache$Editor edit(java.lang.String,long)>($r1, -1L);
+
+        return $r2;
+    }
+    public void evictAll() throws java.io.IOException
+    {
+        com.squareup.okhttp.internal.DiskLruCache r0;
+        com.squareup.okhttp.internal.DiskLruCache$Entry r1;
+        int $i0, $i1;
+        java.util.LinkedHashMap $r2;
+        java.util.Collection $r3;
+        com.squareup.okhttp.internal.DiskLruCache$Entry[] $r4;
+        java.lang.Object[] $r5;
+        java.lang.Throwable $r6;
+
+        r0 := @this: com.squareup.okhttp.internal.DiskLruCache;
+
+        entermonitor r0;
+
+     label1:
+        virtualinvoke r0.<com.squareup.okhttp.internal.DiskLruCache: void initialize()>();
+
+        $r2 = r0.<com.squareup.okhttp.internal.DiskLruCache: java.util.LinkedHashMap lruEntries>;
+
+        $r3 = virtualinvoke $r2.<java.util.LinkedHashMap: java.util.Collection values()>();
+
+        $r2 = r0.<com.squareup.okhttp.internal.DiskLruCache: java.util.LinkedHashMap lruEntries>;
+
+        $i0 = virtualinvoke $r2.<java.util.LinkedHashMap: int size()>();
+
+        $r4 = newarray (com.squareup.okhttp.internal.DiskLruCache$Entry)[$i0];
+
+        $r5 = interfaceinvoke $r3.<java.util.Collection: java.lang.Object[] toArray(java.lang.Object[])>($r4);
+
+        $r4 = (com.squareup.okhttp.internal.DiskLruCache$Entry[]) $r5;
+
+        $i0 = lengthof $r4;
+
+        $i1 = 0;
+
+     label2:
+        if $i1 >= $i0 goto label4;
+
+        r1 = $r4[$i1];
+
+        specialinvoke r0.<com.squareup.okhttp.internal.DiskLruCache: boolean removeEntry(com.squareup.okhttp.internal.DiskLruCache$Entry)>(r1);
+
+     label3:
+        $i1 = $i1 + 1;
+
+        goto label2;
+
+     label4:
+        exitmonitor r0;
+
+        return;
+
+     label5:
+        $r6 := @caughtexception;
+
+        exitmonitor r0;
+
+        throw $r6;
+
+        catch java.lang.Throwable from label1 to label3 with label5;
+    }
+    public void flush() throws java.io.IOException
+    {
+        com.squareup.okhttp.internal.DiskLruCache r0;
+        boolean $z0;
+        okio.BufferedSink $r1;
+        java.lang.Throwable $r2;
+
+        r0 := @this: com.squareup.okhttp.internal.DiskLruCache;
+
+        entermonitor r0;
+
+     label1:
+        $z0 = r0.<com.squareup.okhttp.internal.DiskLruCache: boolean initialized>;
+
+     label2:
+        if $z0 != 0 goto label4;
+
+     label3:
+        exitmonitor r0;
+
+        return;
+
+     label4:
+        specialinvoke r0.<com.squareup.okhttp.internal.DiskLruCache: void checkNotClosed()>();
+
+        specialinvoke r0.<com.squareup.okhttp.internal.DiskLruCache: void trimToSize()>();
+
+        $r1 = r0.<com.squareup.okhttp.internal.DiskLruCache: okio.BufferedSink journalWriter>;
+
+        interfaceinvoke $r1.<okio.BufferedSink: void flush()>();
+
+     label5:
+        goto label3;
+
+     label6:
+        $r2 := @caughtexception;
+
+        exitmonitor r0;
+
+        throw $r2;
+
+        catch java.lang.Throwable from label1 to label2 with label6;
+        catch java.lang.Throwable from label4 to label5 with label6;
+    }
+    public com.squareup.okhttp.internal.DiskLruCache$Snapshot get(java.lang.String) throws java.io.IOException
+    {
+        com.squareup.okhttp.internal.DiskLruCache r0;
+        java.lang.String $r1;
+        java.util.LinkedHashMap $r2;
+        java.lang.Object $r3;
+        com.squareup.okhttp.internal.DiskLruCache$Entry r4;
+        boolean $z0;
+        com.squareup.okhttp.internal.DiskLruCache$Snapshot r5, $r6;
+        int $i0;
+        okio.BufferedSink $r7;
+        java.util.concurrent.Executor $r8;
+        java.lang.Runnable $r9;
+        java.lang.Throwable $r10;
+
+        r0 := @this: com.squareup.okhttp.internal.DiskLruCache;
+
+        $r1 := @parameter0: java.lang.String;
+
+        entermonitor r0;
+
+     label1:
+        virtualinvoke r0.<com.squareup.okhttp.internal.DiskLruCache: void initialize()>();
+
+        specialinvoke r0.<com.squareup.okhttp.internal.DiskLruCache: void checkNotClosed()>();
+
+        specialinvoke r0.<com.squareup.okhttp.internal.DiskLruCache: void validateKey(java.lang.String)>($r1);
+
+        $r2 = r0.<com.squareup.okhttp.internal.DiskLruCache: java.util.LinkedHashMap lruEntries>;
+
+        $r3 = virtualinvoke $r2.<java.util.LinkedHashMap: java.lang.Object get(java.lang.Object)>($r1);
+
+        r4 = (com.squareup.okhttp.internal.DiskLruCache$Entry) $r3;
+
+        if r4 == null goto label3;
+
+        $z0 = staticinvoke <com.squareup.okhttp.internal.DiskLruCache$Entry: boolean access$800(com.squareup.okhttp.internal.DiskLruCache$Entry)>(r4);
+
+     label2:
+        if $z0 != 0 goto label5;
+
+     label3:
+        r5 = null;
+
+     label4:
+        exitmonitor r0;
+
+        return r5;
+
+     label5:
+        $r6 = virtualinvoke r4.<com.squareup.okhttp.internal.DiskLruCache$Entry: com.squareup.okhttp.internal.DiskLruCache$Snapshot snapshot()>();
+
+        r5 = $r6;
+
+        if $r6 != null goto label6;
+
+        r5 = null;
+
+        goto label4;
+
+     label6:
+        $i0 = r0.<com.squareup.okhttp.internal.DiskLruCache: int redundantOpCount>;
+
+        $i0 = $i0 + 1;
+
+        r0.<com.squareup.okhttp.internal.DiskLruCache: int redundantOpCount> = $i0;
+
+        $r7 = r0.<com.squareup.okhttp.internal.DiskLruCache: okio.BufferedSink journalWriter>;
+
+        $r7 = interfaceinvoke $r7.<okio.BufferedSink: okio.BufferedSink writeUtf8(java.lang.String)>("READ");
+
+        $r7 = interfaceinvoke $r7.<okio.BufferedSink: okio.BufferedSink writeByte(int)>(32);
+
+        $r7 = interfaceinvoke $r7.<okio.BufferedSink: okio.BufferedSink writeUtf8(java.lang.String)>($r1);
+
+        interfaceinvoke $r7.<okio.BufferedSink: okio.BufferedSink writeByte(int)>(10);
+
+        $z0 = specialinvoke r0.<com.squareup.okhttp.internal.DiskLruCache: boolean journalRebuildRequired()>();
+
+        if $z0 == 0 goto label4;
+
+        $r8 = r0.<com.squareup.okhttp.internal.DiskLruCache: java.util.concurrent.Executor executor>;
+
+        $r9 = r0.<com.squareup.okhttp.internal.DiskLruCache: java.lang.Runnable cleanupRunnable>;
+
+        interfaceinvoke $r8.<java.util.concurrent.Executor: void execute(java.lang.Runnable)>($r9);
+
+     label7:
+        goto label4;
+
+     label8:
+        $r10 := @caughtexception;
+
+        exitmonitor r0;
+
+        throw $r10;
+
+        catch java.lang.Throwable from label1 to label2 with label8;
+        catch java.lang.Throwable from label5 to label7 with label8;
+    }
+    public java.io.File getDirectory()
+    {
+        com.squareup.okhttp.internal.DiskLruCache r0;
+        java.io.File r1;
+
+        r0 := @this: com.squareup.okhttp.internal.DiskLruCache;
+
+        r1 = r0.<com.squareup.okhttp.internal.DiskLruCache: java.io.File directory>;
+
+        return r1;
+    }
+    public long getMaxSize()
+    {
+        com.squareup.okhttp.internal.DiskLruCache r0;
+        java.lang.Throwable $r1;
+        long l0;
+
+        r0 := @this: com.squareup.okhttp.internal.DiskLruCache;
+
+        entermonitor r0;
+
+     label1:
+        l0 = r0.<com.squareup.okhttp.internal.DiskLruCache: long maxSize>;
+
+     label2:
+        exitmonitor r0;
+
+        return l0;
+
+     label3:
+        $r1 := @caughtexception;
+
+        exitmonitor r0;
+
+        throw $r1;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+    void initialize() throws java.io.IOException
+    {
+        com.squareup.okhttp.internal.DiskLruCache r0;
+        java.io.IOException r1;
+        boolean $z0;
+        java.lang.AssertionError $r2;
+        com.squareup.okhttp.internal.io.FileSystem $r3;
+        java.io.File $r4, $r8;
+        com.squareup.okhttp.internal.Platform $r5;
+        java.lang.StringBuilder $r6;
+        java.lang.String $r7;
+
+        r0 := @this: com.squareup.okhttp.internal.DiskLruCache;
+
+        $z0 = <com.squareup.okhttp.internal.DiskLruCache: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label1;
+
+        $z0 = staticinvoke <java.lang.Thread: boolean holdsLock(java.lang.Object)>(r0);
+
+        if $z0 != 0 goto label1;
+
+        $r2 = new java.lang.AssertionError;
+
+        specialinvoke $r2.<java.lang.AssertionError: void <init>()>();
+
+        throw $r2;
+
+     label1:
+        $z0 = r0.<com.squareup.okhttp.internal.DiskLruCache: boolean initialized>;
+
+        if $z0 == 0 goto label2;
+
+        return;
+
+     label2:
+        $r3 = r0.<com.squareup.okhttp.internal.DiskLruCache: com.squareup.okhttp.internal.io.FileSystem fileSystem>;
+
+        $r4 = r0.<com.squareup.okhttp.internal.DiskLruCache: java.io.File journalFileBackup>;
+
+        $z0 = interfaceinvoke $r3.<com.squareup.okhttp.internal.io.FileSystem: boolean exists(java.io.File)>($r4);
+
+        if $z0 == 0 goto label3;
+
+        $r3 = r0.<com.squareup.okhttp.internal.DiskLruCache: com.squareup.okhttp.internal.io.FileSystem fileSystem>;
+
+        $r4 = r0.<com.squareup.okhttp.internal.DiskLruCache: java.io.File journalFile>;
+
+        $z0 = interfaceinvoke $r3.<com.squareup.okhttp.internal.io.FileSystem: boolean exists(java.io.File)>($r4);
+
+        if $z0 == 0 goto label8;
+
+        $r3 = r0.<com.squareup.okhttp.internal.DiskLruCache: com.squareup.okhttp.internal.io.FileSystem fileSystem>;
+
+        $r4 = r0.<com.squareup.okhttp.internal.DiskLruCache: java.io.File journalFileBackup>;
+
+        interfaceinvoke $r3.<com.squareup.okhttp.internal.io.FileSystem: void delete(java.io.File)>($r4);
+
+     label3:
+        $r3 = r0.<com.squareup.okhttp.internal.DiskLruCache: com.squareup.okhttp.internal.io.FileSystem fileSystem>;
+
+        $r4 = r0.<com.squareup.okhttp.internal.DiskLruCache: java.io.File journalFile>;
+
+        $z0 = interfaceinvoke $r3.<com.squareup.okhttp.internal.io.FileSystem: boolean exists(java.io.File)>($r4);
+
+        if $z0 == 0 goto label7;
+
+     label4:
+        specialinvoke r0.<com.squareup.okhttp.internal.DiskLruCache: void readJournal()>();
+
+        specialinvoke r0.<com.squareup.okhttp.internal.DiskLruCache: void processJournal()>();
+
+     label5:
+        r0.<com.squareup.okhttp.internal.DiskLruCache: boolean initialized> = 1;
+
+        return;
+
+     label6:
+        r1 := @caughtexception;
+
+        $r5 = staticinvoke <com.squareup.okhttp.internal.Platform: com.squareup.okhttp.internal.Platform get()>();
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("DiskLruCache ");
+
+        $r4 = r0.<com.squareup.okhttp.internal.DiskLruCache: java.io.File directory>;
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r4);
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" is corrupt: ");
+
+        $r7 = virtualinvoke r1.<java.io.IOException: java.lang.String getMessage()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r7);
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", removing");
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r5.<com.squareup.okhttp.internal.Platform: void logW(java.lang.String)>($r7);
+
+        virtualinvoke r0.<com.squareup.okhttp.internal.DiskLruCache: void delete()>();
+
+        r0.<com.squareup.okhttp.internal.DiskLruCache: boolean closed> = 0;
+
+     label7:
+        specialinvoke r0.<com.squareup.okhttp.internal.DiskLruCache: void rebuildJournal()>();
+
+        r0.<com.squareup.okhttp.internal.DiskLruCache: boolean initialized> = 1;
+
+        return;
+
+     label8:
+        $r3 = r0.<com.squareup.okhttp.internal.DiskLruCache: com.squareup.okhttp.internal.io.FileSystem fileSystem>;
+
+        $r4 = r0.<com.squareup.okhttp.internal.DiskLruCache: java.io.File journalFileBackup>;
+
+        $r8 = r0.<com.squareup.okhttp.internal.DiskLruCache: java.io.File journalFile>;
+
+        interfaceinvoke $r3.<com.squareup.okhttp.internal.io.FileSystem: void rename(java.io.File,java.io.File)>($r4, $r8);
+
+        goto label3;
+
+        catch java.io.IOException from label4 to label5 with label6;
+    }
+    public boolean isClosed()
+    {
+        com.squareup.okhttp.internal.DiskLruCache r0;
+        java.lang.Throwable $r1;
+        boolean z0;
+
+        r0 := @this: com.squareup.okhttp.internal.DiskLruCache;
+
+        entermonitor r0;
+
+     label1:
+        z0 = r0.<com.squareup.okhttp.internal.DiskLruCache: boolean closed>;
+
+     label2:
+        exitmonitor r0;
+
+        return z0;
+
+     label3:
+        $r1 := @caughtexception;
+
+        exitmonitor r0;
+
+        throw $r1;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+    public boolean remove(java.lang.String) throws java.io.IOException
+    {
+        com.squareup.okhttp.internal.DiskLruCache r0;
+        java.lang.String $r1;
+        java.util.LinkedHashMap $r2;
+        java.lang.Object $r3;
+        com.squareup.okhttp.internal.DiskLruCache$Entry r4;
+        boolean $z0;
+        java.lang.Throwable $r5;
+
+        r0 := @this: com.squareup.okhttp.internal.DiskLruCache;
+
+        $r1 := @parameter0: java.lang.String;
+
+        entermonitor r0;
+
+     label1:
+        virtualinvoke r0.<com.squareup.okhttp.internal.DiskLruCache: void initialize()>();
+
+        specialinvoke r0.<com.squareup.okhttp.internal.DiskLruCache: void checkNotClosed()>();
+
+        specialinvoke r0.<com.squareup.okhttp.internal.DiskLruCache: void validateKey(java.lang.String)>($r1);
+
+        $r2 = r0.<com.squareup.okhttp.internal.DiskLruCache: java.util.LinkedHashMap lruEntries>;
+
+        $r3 = virtualinvoke $r2.<java.util.LinkedHashMap: java.lang.Object get(java.lang.Object)>($r1);
+
+        r4 = (com.squareup.okhttp.internal.DiskLruCache$Entry) $r3;
+
+     label2:
+        if r4 != null goto label4;
+
+        $z0 = 0;
+
+     label3:
+        exitmonitor r0;
+
+        return $z0;
+
+     label4:
+        $z0 = specialinvoke r0.<com.squareup.okhttp.internal.DiskLruCache: boolean removeEntry(com.squareup.okhttp.internal.DiskLruCache$Entry)>(r4);
+
+     label5:
+        goto label3;
+
+     label6:
+        $r5 := @caughtexception;
+
+        exitmonitor r0;
+
+        throw $r5;
+
+        catch java.lang.Throwable from label1 to label2 with label6;
+        catch java.lang.Throwable from label4 to label5 with label6;
+    }
+    public void setMaxSize(long)
+    {
+        com.squareup.okhttp.internal.DiskLruCache r0;
+        long $l0;
+        java.lang.Runnable $r1;
+        boolean $z0;
+        java.util.concurrent.Executor $r2;
+        java.lang.Throwable $r3;
+
+        r0 := @this: com.squareup.okhttp.internal.DiskLruCache;
+
+        $l0 := @parameter0: long;
+
+        entermonitor r0;
+
+     label1:
+        r0.<com.squareup.okhttp.internal.DiskLruCache: long maxSize> = $l0;
+
+        $z0 = r0.<com.squareup.okhttp.internal.DiskLruCache: boolean initialized>;
+
+        if $z0 == 0 goto label2;
+
+        $r2 = r0.<com.squareup.okhttp.internal.DiskLruCache: java.util.concurrent.Executor executor>;
+
+        $r1 = r0.<com.squareup.okhttp.internal.DiskLruCache: java.lang.Runnable cleanupRunnable>;
+
+        interfaceinvoke $r2.<java.util.concurrent.Executor: void execute(java.lang.Runnable)>($r1);
+
+     label2:
+        exitmonitor r0;
+
+        return;
+
+     label3:
+        $r3 := @caughtexception;
+
+        exitmonitor r0;
+
+        throw $r3;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+    public long size() throws java.io.IOException
+    {
+        com.squareup.okhttp.internal.DiskLruCache r0;
+        java.lang.Throwable $r1;
+        long l0;
+
+        r0 := @this: com.squareup.okhttp.internal.DiskLruCache;
+
+        entermonitor r0;
+
+     label1:
+        virtualinvoke r0.<com.squareup.okhttp.internal.DiskLruCache: void initialize()>();
+
+        l0 = r0.<com.squareup.okhttp.internal.DiskLruCache: long size>;
+
+     label2:
+        exitmonitor r0;
+
+        return l0;
+
+     label3:
+        $r1 := @caughtexception;
+
+        exitmonitor r0;
+
+        throw $r1;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+    public java.util.Iterator snapshots() throws java.io.IOException
+    {
+        com.squareup.okhttp.internal.DiskLruCache r0;
+        com.squareup.okhttp.internal.DiskLruCache$3 $r1;
+        java.lang.Throwable $r2;
+
+        r0 := @this: com.squareup.okhttp.internal.DiskLruCache;
+
+        entermonitor r0;
+
+     label1:
+        virtualinvoke r0.<com.squareup.okhttp.internal.DiskLruCache: void initialize()>();
+
+        $r1 = new com.squareup.okhttp.internal.DiskLruCache$3;
+
+        specialinvoke $r1.<com.squareup.okhttp.internal.DiskLruCache$3: void <init>(com.squareup.okhttp.internal.DiskLruCache)>(r0);
+
+     label2:
+        exitmonitor r0;
+
+        return $r1;
+
+     label3:
+        $r2 := @caughtexception;
+
+        exitmonitor r0;
+
+        throw $r2;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }

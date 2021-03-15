@@ -1,0 +1,1390 @@
+io.requery.android.database.sqlite.SQLiteSession extends java.lang.Object
+static final boolean $assertionsDisabled
+public static final int TRANSACTION_MODE_DEFERRED
+public static final int TRANSACTION_MODE_EXCLUSIVE
+public static final int TRANSACTION_MODE_IMMEDIATE
+private io.requery.android.database.sqlite.SQLiteConnection mConnection
+private int mConnectionFlags
+private final io.requery.android.database.sqlite.SQLiteConnectionPool mConnectionPool
+private int mConnectionUseCount
+private io.requery.android.database.sqlite.SQLiteSession$Transaction mTransactionPool
+private io.requery.android.database.sqlite.SQLiteSession$Transaction mTransactionStack
+    static void <clinit>()
+    {
+        boolean $z0;
+        java.lang.Class $r0;
+
+        $r0 = class "Lio/requery/android/database/sqlite/SQLiteSession;";
+
+        $z0 = virtualinvoke $r0.<java.lang.Class: boolean desiredAssertionStatus()>();
+
+        if $z0 != 0 goto label2;
+
+        $z0 = 1;
+
+     label1:
+        <io.requery.android.database.sqlite.SQLiteSession: boolean $assertionsDisabled> = $z0;
+
+        return;
+
+     label2:
+        $z0 = 0;
+
+        goto label1;
+    }
+    public void <init>(io.requery.android.database.sqlite.SQLiteConnectionPool)
+    {
+        io.requery.android.database.sqlite.SQLiteSession r0;
+        io.requery.android.database.sqlite.SQLiteConnectionPool $r1;
+        java.lang.IllegalArgumentException $r2;
+
+        r0 := @this: io.requery.android.database.sqlite.SQLiteSession;
+
+        $r1 := @parameter0: io.requery.android.database.sqlite.SQLiteConnectionPool;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        if $r1 != null goto label1;
+
+        $r2 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r2.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("connectionPool must not be null");
+
+        throw $r2;
+
+     label1:
+        r0.<io.requery.android.database.sqlite.SQLiteSession: io.requery.android.database.sqlite.SQLiteConnectionPool mConnectionPool> = $r1;
+
+        return;
+    }
+    private void acquireConnection(java.lang.String, int, android.support.v4.os.CancellationSignal)
+    {
+        io.requery.android.database.sqlite.SQLiteSession r0;
+        java.lang.String $r1;
+        int $i0, $i1;
+        android.support.v4.os.CancellationSignal $r2;
+        io.requery.android.database.sqlite.SQLiteConnection $r3;
+        boolean $z0;
+        java.lang.AssertionError $r4;
+        io.requery.android.database.sqlite.SQLiteConnectionPool $r5;
+
+        r0 := @this: io.requery.android.database.sqlite.SQLiteSession;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $i0 := @parameter1: int;
+
+        $r2 := @parameter2: android.support.v4.os.CancellationSignal;
+
+        $r3 = r0.<io.requery.android.database.sqlite.SQLiteSession: io.requery.android.database.sqlite.SQLiteConnection mConnection>;
+
+        if $r3 != null goto label2;
+
+        $z0 = <io.requery.android.database.sqlite.SQLiteSession: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label1;
+
+        $i1 = r0.<io.requery.android.database.sqlite.SQLiteSession: int mConnectionUseCount>;
+
+        if $i1 == 0 goto label1;
+
+        $r4 = new java.lang.AssertionError;
+
+        specialinvoke $r4.<java.lang.AssertionError: void <init>()>();
+
+        throw $r4;
+
+     label1:
+        $r5 = r0.<io.requery.android.database.sqlite.SQLiteSession: io.requery.android.database.sqlite.SQLiteConnectionPool mConnectionPool>;
+
+        $r3 = virtualinvoke $r5.<io.requery.android.database.sqlite.SQLiteConnectionPool: io.requery.android.database.sqlite.SQLiteConnection acquireConnection(java.lang.String,int,android.support.v4.os.CancellationSignal)>($r1, $i0, $r2);
+
+        r0.<io.requery.android.database.sqlite.SQLiteSession: io.requery.android.database.sqlite.SQLiteConnection mConnection> = $r3;
+
+        r0.<io.requery.android.database.sqlite.SQLiteSession: int mConnectionFlags> = $i0;
+
+     label2:
+        $i0 = r0.<io.requery.android.database.sqlite.SQLiteSession: int mConnectionUseCount>;
+
+        $i0 = $i0 + 1;
+
+        r0.<io.requery.android.database.sqlite.SQLiteSession: int mConnectionUseCount> = $i0;
+
+        return;
+    }
+    private void beginTransactionUnchecked(int, android.database.sqlite.SQLiteTransactionListener, int, android.support.v4.os.CancellationSignal)
+    {
+        io.requery.android.database.sqlite.SQLiteSession r0;
+        int $i0, $i1;
+        android.database.sqlite.SQLiteTransactionListener $r1;
+        android.support.v4.os.CancellationSignal $r2;
+        java.lang.RuntimeException r3;
+        io.requery.android.database.sqlite.SQLiteSession$Transaction $r4, $r6;
+        io.requery.android.database.sqlite.SQLiteConnection $r5;
+        java.lang.Throwable $r7;
+
+        r0 := @this: io.requery.android.database.sqlite.SQLiteSession;
+
+        $i0 := @parameter0: int;
+
+        $r1 := @parameter1: android.database.sqlite.SQLiteTransactionListener;
+
+        $i1 := @parameter2: int;
+
+        $r2 := @parameter3: android.support.v4.os.CancellationSignal;
+
+        if $r2 == null goto label01;
+
+        virtualinvoke $r2.<android.support.v4.os.CancellationSignal: void throwIfCanceled()>();
+
+     label01:
+        $r4 = r0.<io.requery.android.database.sqlite.SQLiteSession: io.requery.android.database.sqlite.SQLiteSession$Transaction mTransactionStack>;
+
+        if $r4 != null goto label02;
+
+        specialinvoke r0.<io.requery.android.database.sqlite.SQLiteSession: void acquireConnection(java.lang.String,int,android.support.v4.os.CancellationSignal)>(null, $i1, $r2);
+
+     label02:
+        $r4 = r0.<io.requery.android.database.sqlite.SQLiteSession: io.requery.android.database.sqlite.SQLiteSession$Transaction mTransactionStack>;
+
+     label03:
+        if $r4 != null goto label05;
+
+        lookupswitch($i0)
+        {
+            case 1: goto label09;
+            case 2: goto label13;
+            default: goto label04;
+        };
+
+     label04:
+        $r5 = r0.<io.requery.android.database.sqlite.SQLiteSession: io.requery.android.database.sqlite.SQLiteConnection mConnection>;
+
+        virtualinvoke $r5.<io.requery.android.database.sqlite.SQLiteConnection: void execute(java.lang.String,java.lang.Object[],android.support.v4.os.CancellationSignal)>("BEGIN;", null, $r2);
+
+     label05:
+        if $r1 == null goto label07;
+
+     label06:
+        interfaceinvoke $r1.<android.database.sqlite.SQLiteTransactionListener: void onBegin()>();
+
+     label07:
+        $r4 = specialinvoke r0.<io.requery.android.database.sqlite.SQLiteSession: io.requery.android.database.sqlite.SQLiteSession$Transaction obtainTransaction(int,android.database.sqlite.SQLiteTransactionListener)>($i0, $r1);
+
+        $r6 = r0.<io.requery.android.database.sqlite.SQLiteSession: io.requery.android.database.sqlite.SQLiteSession$Transaction mTransactionStack>;
+
+        $r4.<io.requery.android.database.sqlite.SQLiteSession$Transaction: io.requery.android.database.sqlite.SQLiteSession$Transaction mParent> = $r6;
+
+        r0.<io.requery.android.database.sqlite.SQLiteSession: io.requery.android.database.sqlite.SQLiteSession$Transaction mTransactionStack> = $r4;
+
+     label08:
+        $r4 = r0.<io.requery.android.database.sqlite.SQLiteSession: io.requery.android.database.sqlite.SQLiteSession$Transaction mTransactionStack>;
+
+        if $r4 != null goto label20;
+
+        specialinvoke r0.<io.requery.android.database.sqlite.SQLiteSession: void releaseConnection()>();
+
+        return;
+
+     label09:
+        $r5 = r0.<io.requery.android.database.sqlite.SQLiteSession: io.requery.android.database.sqlite.SQLiteConnection mConnection>;
+
+        virtualinvoke $r5.<io.requery.android.database.sqlite.SQLiteConnection: void execute(java.lang.String,java.lang.Object[],android.support.v4.os.CancellationSignal)>("BEGIN IMMEDIATE;", null, $r2);
+
+     label10:
+        goto label05;
+
+     label11:
+        $r7 := @caughtexception;
+
+        $r4 = r0.<io.requery.android.database.sqlite.SQLiteSession: io.requery.android.database.sqlite.SQLiteSession$Transaction mTransactionStack>;
+
+        if $r4 != null goto label12;
+
+        specialinvoke r0.<io.requery.android.database.sqlite.SQLiteSession: void releaseConnection()>();
+
+     label12:
+        throw $r7;
+
+     label13:
+        $r5 = r0.<io.requery.android.database.sqlite.SQLiteSession: io.requery.android.database.sqlite.SQLiteConnection mConnection>;
+
+        virtualinvoke $r5.<io.requery.android.database.sqlite.SQLiteConnection: void execute(java.lang.String,java.lang.Object[],android.support.v4.os.CancellationSignal)>("BEGIN EXCLUSIVE;", null, $r2);
+
+     label14:
+        goto label05;
+
+     label15:
+        r3 := @caughtexception;
+
+     label16:
+        $r4 = r0.<io.requery.android.database.sqlite.SQLiteSession: io.requery.android.database.sqlite.SQLiteSession$Transaction mTransactionStack>;
+
+     label17:
+        if $r4 != null goto label19;
+
+     label18:
+        $r5 = r0.<io.requery.android.database.sqlite.SQLiteSession: io.requery.android.database.sqlite.SQLiteConnection mConnection>;
+
+        virtualinvoke $r5.<io.requery.android.database.sqlite.SQLiteConnection: void execute(java.lang.String,java.lang.Object[],android.support.v4.os.CancellationSignal)>("ROLLBACK;", null, $r2);
+
+     label19:
+        throw r3;
+
+     label20:
+        return;
+
+        catch java.lang.Throwable from label02 to label03 with label11;
+        catch java.lang.Throwable from label04 to label05 with label11;
+        catch java.lang.RuntimeException from label06 to label07 with label15;
+        catch java.lang.Throwable from label06 to label07 with label11;
+        catch java.lang.Throwable from label07 to label08 with label11;
+        catch java.lang.Throwable from label09 to label10 with label11;
+        catch java.lang.Throwable from label13 to label14 with label11;
+        catch java.lang.Throwable from label16 to label17 with label11;
+        catch java.lang.Throwable from label18 to label20 with label11;
+    }
+    private void endTransactionUnchecked(android.support.v4.os.CancellationSignal, boolean)
+    {
+        io.requery.android.database.sqlite.SQLiteSession r0;
+        android.support.v4.os.CancellationSignal $r1;
+        boolean $z0, $z1;
+        java.lang.RuntimeException r2;
+        android.database.sqlite.SQLiteTransactionListener r3;
+        io.requery.android.database.sqlite.SQLiteSession$Transaction r4, $r5;
+        io.requery.android.database.sqlite.SQLiteConnection $r6;
+        java.lang.Throwable $r7;
+
+        r0 := @this: io.requery.android.database.sqlite.SQLiteSession;
+
+        $r1 := @parameter0: android.support.v4.os.CancellationSignal;
+
+        $z0 := @parameter1: boolean;
+
+        if $r1 == null goto label01;
+
+        virtualinvoke $r1.<android.support.v4.os.CancellationSignal: void throwIfCanceled()>();
+
+     label01:
+        r4 = r0.<io.requery.android.database.sqlite.SQLiteSession: io.requery.android.database.sqlite.SQLiteSession$Transaction mTransactionStack>;
+
+        $z1 = r4.<io.requery.android.database.sqlite.SQLiteSession$Transaction: boolean mMarkedSuccessful>;
+
+        if $z1 != 0 goto label02;
+
+        if $z0 == 0 goto label07;
+
+     label02:
+        $z0 = r4.<io.requery.android.database.sqlite.SQLiteSession$Transaction: boolean mChildFailed>;
+
+        if $z0 != 0 goto label07;
+
+        $z0 = 1;
+
+     label03:
+        r2 = null;
+
+        r3 = r4.<io.requery.android.database.sqlite.SQLiteSession$Transaction: android.database.sqlite.SQLiteTransactionListener mListener>;
+
+        if r3 == null goto label05;
+
+        if $z0 == 0 goto label08;
+
+     label04:
+        interfaceinvoke r3.<android.database.sqlite.SQLiteTransactionListener: void onCommit()>();
+
+     label05:
+        $r5 = r4.<io.requery.android.database.sqlite.SQLiteSession$Transaction: io.requery.android.database.sqlite.SQLiteSession$Transaction mParent>;
+
+        r0.<io.requery.android.database.sqlite.SQLiteSession: io.requery.android.database.sqlite.SQLiteSession$Transaction mTransactionStack> = $r5;
+
+        specialinvoke r0.<io.requery.android.database.sqlite.SQLiteSession: void recycleTransaction(io.requery.android.database.sqlite.SQLiteSession$Transaction)>(r4);
+
+        r4 = r0.<io.requery.android.database.sqlite.SQLiteSession: io.requery.android.database.sqlite.SQLiteSession$Transaction mTransactionStack>;
+
+        if r4 == null goto label11;
+
+        if $z0 != 0 goto label06;
+
+        r4 = r0.<io.requery.android.database.sqlite.SQLiteSession: io.requery.android.database.sqlite.SQLiteSession$Transaction mTransactionStack>;
+
+        r4.<io.requery.android.database.sqlite.SQLiteSession$Transaction: boolean mChildFailed> = 1;
+
+     label06:
+        if r2 == null goto label17;
+
+        throw r2;
+
+     label07:
+        $z0 = 0;
+
+        goto label03;
+
+     label08:
+        interfaceinvoke r3.<android.database.sqlite.SQLiteTransactionListener: void onRollback()>();
+
+     label09:
+        goto label05;
+
+     label10:
+        r2 := @caughtexception;
+
+        $z0 = 0;
+
+        goto label05;
+
+     label11:
+        if $z0 == 0 goto label14;
+
+     label12:
+        $r6 = r0.<io.requery.android.database.sqlite.SQLiteSession: io.requery.android.database.sqlite.SQLiteConnection mConnection>;
+
+        virtualinvoke $r6.<io.requery.android.database.sqlite.SQLiteConnection: void execute(java.lang.String,java.lang.Object[],android.support.v4.os.CancellationSignal)>("COMMIT;", null, $r1);
+
+     label13:
+        specialinvoke r0.<io.requery.android.database.sqlite.SQLiteSession: void releaseConnection()>();
+
+        goto label06;
+
+     label14:
+        $r6 = r0.<io.requery.android.database.sqlite.SQLiteSession: io.requery.android.database.sqlite.SQLiteConnection mConnection>;
+
+        virtualinvoke $r6.<io.requery.android.database.sqlite.SQLiteConnection: void execute(java.lang.String,java.lang.Object[],android.support.v4.os.CancellationSignal)>("ROLLBACK;", null, $r1);
+
+     label15:
+        goto label13;
+
+     label16:
+        $r7 := @caughtexception;
+
+        specialinvoke r0.<io.requery.android.database.sqlite.SQLiteSession: void releaseConnection()>();
+
+        throw $r7;
+
+     label17:
+        return;
+
+        catch java.lang.RuntimeException from label04 to label05 with label10;
+        catch java.lang.RuntimeException from label08 to label09 with label10;
+        catch java.lang.Throwable from label12 to label13 with label16;
+        catch java.lang.Throwable from label14 to label15 with label16;
+    }
+    private boolean executeSpecial(java.lang.String, java.lang.Object[], int, android.support.v4.os.CancellationSignal)
+    {
+        io.requery.android.database.sqlite.SQLiteSession r0;
+        java.lang.String $r1;
+        java.lang.Object[] $r2;
+        int $i0, $i1;
+        android.support.v4.os.CancellationSignal $r3;
+
+        r0 := @this: io.requery.android.database.sqlite.SQLiteSession;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.lang.Object[];
+
+        $i0 := @parameter2: int;
+
+        $r3 := @parameter3: android.support.v4.os.CancellationSignal;
+
+        if $r3 == null goto label1;
+
+        virtualinvoke $r3.<android.support.v4.os.CancellationSignal: void throwIfCanceled()>();
+
+     label1:
+        $i1 = staticinvoke <io.requery.android.database.sqlite.SQLiteStatementType: int getSqlStatementType(java.lang.String)>($r1);
+
+        lookupswitch($i1)
+        {
+            case 4: goto label3;
+            case 5: goto label4;
+            case 6: goto label5;
+            default: goto label2;
+        };
+
+     label2:
+        return 0;
+
+     label3:
+        virtualinvoke r0.<io.requery.android.database.sqlite.SQLiteSession: void beginTransaction(int,android.database.sqlite.SQLiteTransactionListener,int,android.support.v4.os.CancellationSignal)>(2, null, $i0, $r3);
+
+        return 1;
+
+     label4:
+        virtualinvoke r0.<io.requery.android.database.sqlite.SQLiteSession: void setTransactionSuccessful()>();
+
+        virtualinvoke r0.<io.requery.android.database.sqlite.SQLiteSession: void endTransaction(android.support.v4.os.CancellationSignal)>($r3);
+
+        return 1;
+
+     label5:
+        virtualinvoke r0.<io.requery.android.database.sqlite.SQLiteSession: void endTransaction(android.support.v4.os.CancellationSignal)>($r3);
+
+        return 1;
+    }
+    private io.requery.android.database.sqlite.SQLiteSession$Transaction obtainTransaction(int, android.database.sqlite.SQLiteTransactionListener)
+    {
+        io.requery.android.database.sqlite.SQLiteSession r0;
+        int $i0;
+        android.database.sqlite.SQLiteTransactionListener $r1;
+        io.requery.android.database.sqlite.SQLiteSession$Transaction $r2, r3;
+
+        r0 := @this: io.requery.android.database.sqlite.SQLiteSession;
+
+        $i0 := @parameter0: int;
+
+        $r1 := @parameter1: android.database.sqlite.SQLiteTransactionListener;
+
+        r3 = r0.<io.requery.android.database.sqlite.SQLiteSession: io.requery.android.database.sqlite.SQLiteSession$Transaction mTransactionPool>;
+
+        if r3 == null goto label2;
+
+        $r2 = r3.<io.requery.android.database.sqlite.SQLiteSession$Transaction: io.requery.android.database.sqlite.SQLiteSession$Transaction mParent>;
+
+        r0.<io.requery.android.database.sqlite.SQLiteSession: io.requery.android.database.sqlite.SQLiteSession$Transaction mTransactionPool> = $r2;
+
+        r3.<io.requery.android.database.sqlite.SQLiteSession$Transaction: io.requery.android.database.sqlite.SQLiteSession$Transaction mParent> = null;
+
+        r3.<io.requery.android.database.sqlite.SQLiteSession$Transaction: boolean mMarkedSuccessful> = 0;
+
+        r3.<io.requery.android.database.sqlite.SQLiteSession$Transaction: boolean mChildFailed> = 0;
+
+     label1:
+        r3.<io.requery.android.database.sqlite.SQLiteSession$Transaction: int mMode> = $i0;
+
+        r3.<io.requery.android.database.sqlite.SQLiteSession$Transaction: android.database.sqlite.SQLiteTransactionListener mListener> = $r1;
+
+        return r3;
+
+     label2:
+        r3 = new io.requery.android.database.sqlite.SQLiteSession$Transaction;
+
+        specialinvoke r3.<io.requery.android.database.sqlite.SQLiteSession$Transaction: void <init>(io.requery.android.database.sqlite.SQLiteSession$1)>(null);
+
+        goto label1;
+    }
+    private void recycleTransaction(io.requery.android.database.sqlite.SQLiteSession$Transaction)
+    {
+        io.requery.android.database.sqlite.SQLiteSession r0;
+        io.requery.android.database.sqlite.SQLiteSession$Transaction $r1, $r2;
+
+        r0 := @this: io.requery.android.database.sqlite.SQLiteSession;
+
+        $r1 := @parameter0: io.requery.android.database.sqlite.SQLiteSession$Transaction;
+
+        $r2 = r0.<io.requery.android.database.sqlite.SQLiteSession: io.requery.android.database.sqlite.SQLiteSession$Transaction mTransactionPool>;
+
+        $r1.<io.requery.android.database.sqlite.SQLiteSession$Transaction: io.requery.android.database.sqlite.SQLiteSession$Transaction mParent> = $r2;
+
+        $r1.<io.requery.android.database.sqlite.SQLiteSession$Transaction: android.database.sqlite.SQLiteTransactionListener mListener> = null;
+
+        r0.<io.requery.android.database.sqlite.SQLiteSession: io.requery.android.database.sqlite.SQLiteSession$Transaction mTransactionPool> = $r1;
+
+        return;
+    }
+    private void releaseConnection()
+    {
+        io.requery.android.database.sqlite.SQLiteSession r0;
+        io.requery.android.database.sqlite.SQLiteConnection $r1;
+        boolean $z0;
+        java.lang.AssertionError $r2;
+        int $i0;
+        io.requery.android.database.sqlite.SQLiteConnectionPool $r3;
+        java.lang.Throwable $r4;
+
+        r0 := @this: io.requery.android.database.sqlite.SQLiteSession;
+
+        $z0 = <io.requery.android.database.sqlite.SQLiteSession: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label1;
+
+        $r1 = r0.<io.requery.android.database.sqlite.SQLiteSession: io.requery.android.database.sqlite.SQLiteConnection mConnection>;
+
+        if $r1 != null goto label1;
+
+        $r2 = new java.lang.AssertionError;
+
+        specialinvoke $r2.<java.lang.AssertionError: void <init>()>();
+
+        throw $r2;
+
+     label1:
+        $z0 = <io.requery.android.database.sqlite.SQLiteSession: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label2;
+
+        $i0 = r0.<io.requery.android.database.sqlite.SQLiteSession: int mConnectionUseCount>;
+
+        if $i0 > 0 goto label2;
+
+        $r2 = new java.lang.AssertionError;
+
+        specialinvoke $r2.<java.lang.AssertionError: void <init>()>();
+
+        throw $r2;
+
+     label2:
+        $i0 = r0.<io.requery.android.database.sqlite.SQLiteSession: int mConnectionUseCount>;
+
+        $i0 = $i0 + -1;
+
+        r0.<io.requery.android.database.sqlite.SQLiteSession: int mConnectionUseCount> = $i0;
+
+        if $i0 != 0 goto label6;
+
+     label3:
+        $r3 = r0.<io.requery.android.database.sqlite.SQLiteSession: io.requery.android.database.sqlite.SQLiteConnectionPool mConnectionPool>;
+
+        $r1 = r0.<io.requery.android.database.sqlite.SQLiteSession: io.requery.android.database.sqlite.SQLiteConnection mConnection>;
+
+        virtualinvoke $r3.<io.requery.android.database.sqlite.SQLiteConnectionPool: void releaseConnection(io.requery.android.database.sqlite.SQLiteConnection)>($r1);
+
+     label4:
+        r0.<io.requery.android.database.sqlite.SQLiteSession: io.requery.android.database.sqlite.SQLiteConnection mConnection> = null;
+
+        return;
+
+     label5:
+        $r4 := @caughtexception;
+
+        r0.<io.requery.android.database.sqlite.SQLiteSession: io.requery.android.database.sqlite.SQLiteConnection mConnection> = null;
+
+        throw $r4;
+
+     label6:
+        return;
+
+        catch java.lang.Throwable from label3 to label4 with label5;
+    }
+    private void throwIfNestedTransaction()
+    {
+        io.requery.android.database.sqlite.SQLiteSession r0;
+        boolean $z0;
+        java.lang.IllegalStateException $r1;
+
+        r0 := @this: io.requery.android.database.sqlite.SQLiteSession;
+
+        $z0 = virtualinvoke r0.<io.requery.android.database.sqlite.SQLiteSession: boolean hasNestedTransaction()>();
+
+        if $z0 == 0 goto label1;
+
+        $r1 = new java.lang.IllegalStateException;
+
+        specialinvoke $r1.<java.lang.IllegalStateException: void <init>(java.lang.String)>("Cannot perform this operation because a nested transaction is in progress.");
+
+        throw $r1;
+
+     label1:
+        return;
+    }
+    private void throwIfNoTransaction()
+    {
+        io.requery.android.database.sqlite.SQLiteSession r0;
+        io.requery.android.database.sqlite.SQLiteSession$Transaction $r1;
+        java.lang.IllegalStateException $r2;
+
+        r0 := @this: io.requery.android.database.sqlite.SQLiteSession;
+
+        $r1 = r0.<io.requery.android.database.sqlite.SQLiteSession: io.requery.android.database.sqlite.SQLiteSession$Transaction mTransactionStack>;
+
+        if $r1 != null goto label1;
+
+        $r2 = new java.lang.IllegalStateException;
+
+        specialinvoke $r2.<java.lang.IllegalStateException: void <init>(java.lang.String)>("Cannot perform this operation because there is no current transaction.");
+
+        throw $r2;
+
+     label1:
+        return;
+    }
+    private void throwIfTransactionMarkedSuccessful()
+    {
+        io.requery.android.database.sqlite.SQLiteSession r0;
+        io.requery.android.database.sqlite.SQLiteSession$Transaction $r1;
+        boolean $z0;
+        java.lang.IllegalStateException $r2;
+
+        r0 := @this: io.requery.android.database.sqlite.SQLiteSession;
+
+        $r1 = r0.<io.requery.android.database.sqlite.SQLiteSession: io.requery.android.database.sqlite.SQLiteSession$Transaction mTransactionStack>;
+
+        if $r1 == null goto label1;
+
+        $r1 = r0.<io.requery.android.database.sqlite.SQLiteSession: io.requery.android.database.sqlite.SQLiteSession$Transaction mTransactionStack>;
+
+        $z0 = $r1.<io.requery.android.database.sqlite.SQLiteSession$Transaction: boolean mMarkedSuccessful>;
+
+        if $z0 == 0 goto label1;
+
+        $r2 = new java.lang.IllegalStateException;
+
+        specialinvoke $r2.<java.lang.IllegalStateException: void <init>(java.lang.String)>("Cannot perform this operation because the transaction has already been marked successful.  The only thing you can do now is call endTransaction().");
+
+        throw $r2;
+
+     label1:
+        return;
+    }
+    private boolean yieldTransactionUnchecked(long, android.support.v4.os.CancellationSignal)
+    {
+        io.requery.android.database.sqlite.SQLiteSession r0;
+        long $l0;
+        android.support.v4.os.CancellationSignal $r1;
+        int i1, i2;
+        android.database.sqlite.SQLiteTransactionListener r2;
+        io.requery.android.database.sqlite.SQLiteConnection $r3;
+        boolean $z0;
+        io.requery.android.database.sqlite.SQLiteConnectionPool $r4;
+        io.requery.android.database.sqlite.SQLiteSession$Transaction $r5;
+        byte $b3;
+        java.lang.InterruptedException $r6;
+
+        r0 := @this: io.requery.android.database.sqlite.SQLiteSession;
+
+        $l0 := @parameter0: long;
+
+        $r1 := @parameter1: android.support.v4.os.CancellationSignal;
+
+        if $r1 == null goto label1;
+
+        virtualinvoke $r1.<android.support.v4.os.CancellationSignal: void throwIfCanceled()>();
+
+     label1:
+        $r4 = r0.<io.requery.android.database.sqlite.SQLiteSession: io.requery.android.database.sqlite.SQLiteConnectionPool mConnectionPool>;
+
+        $r3 = r0.<io.requery.android.database.sqlite.SQLiteSession: io.requery.android.database.sqlite.SQLiteConnection mConnection>;
+
+        i1 = r0.<io.requery.android.database.sqlite.SQLiteSession: int mConnectionFlags>;
+
+        $z0 = virtualinvoke $r4.<io.requery.android.database.sqlite.SQLiteConnectionPool: boolean shouldYieldConnection(io.requery.android.database.sqlite.SQLiteConnection,int)>($r3, i1);
+
+        if $z0 != 0 goto label2;
+
+        return 0;
+
+     label2:
+        $r5 = r0.<io.requery.android.database.sqlite.SQLiteSession: io.requery.android.database.sqlite.SQLiteSession$Transaction mTransactionStack>;
+
+        i2 = $r5.<io.requery.android.database.sqlite.SQLiteSession$Transaction: int mMode>;
+
+        $r5 = r0.<io.requery.android.database.sqlite.SQLiteSession: io.requery.android.database.sqlite.SQLiteSession$Transaction mTransactionStack>;
+
+        r2 = $r5.<io.requery.android.database.sqlite.SQLiteSession$Transaction: android.database.sqlite.SQLiteTransactionListener mListener>;
+
+        i1 = r0.<io.requery.android.database.sqlite.SQLiteSession: int mConnectionFlags>;
+
+        specialinvoke r0.<io.requery.android.database.sqlite.SQLiteSession: void endTransactionUnchecked(android.support.v4.os.CancellationSignal,boolean)>($r1, 1);
+
+        $b3 = $l0 cmp 0L;
+
+        if $b3 <= 0 goto label4;
+
+     label3:
+        staticinvoke <java.lang.Thread: void sleep(long)>($l0);
+
+     label4:
+        specialinvoke r0.<io.requery.android.database.sqlite.SQLiteSession: void beginTransactionUnchecked(int,android.database.sqlite.SQLiteTransactionListener,int,android.support.v4.os.CancellationSignal)>(i2, r2, i1, $r1);
+
+        return 1;
+
+     label5:
+        $r6 := @caughtexception;
+
+        goto label4;
+
+        catch java.lang.InterruptedException from label3 to label4 with label5;
+    }
+    public void beginTransaction(int, android.database.sqlite.SQLiteTransactionListener, int, android.support.v4.os.CancellationSignal)
+    {
+        io.requery.android.database.sqlite.SQLiteSession r0;
+        int $i0, $i1;
+        android.database.sqlite.SQLiteTransactionListener $r1;
+        android.support.v4.os.CancellationSignal $r2;
+
+        r0 := @this: io.requery.android.database.sqlite.SQLiteSession;
+
+        $i0 := @parameter0: int;
+
+        $r1 := @parameter1: android.database.sqlite.SQLiteTransactionListener;
+
+        $i1 := @parameter2: int;
+
+        $r2 := @parameter3: android.support.v4.os.CancellationSignal;
+
+        specialinvoke r0.<io.requery.android.database.sqlite.SQLiteSession: void throwIfTransactionMarkedSuccessful()>();
+
+        specialinvoke r0.<io.requery.android.database.sqlite.SQLiteSession: void beginTransactionUnchecked(int,android.database.sqlite.SQLiteTransactionListener,int,android.support.v4.os.CancellationSignal)>($i0, $r1, $i1, $r2);
+
+        return;
+    }
+    public void endTransaction(android.support.v4.os.CancellationSignal)
+    {
+        io.requery.android.database.sqlite.SQLiteSession r0;
+        android.support.v4.os.CancellationSignal $r1;
+        boolean $z0;
+        io.requery.android.database.sqlite.SQLiteConnection $r2;
+        java.lang.AssertionError $r3;
+
+        r0 := @this: io.requery.android.database.sqlite.SQLiteSession;
+
+        $r1 := @parameter0: android.support.v4.os.CancellationSignal;
+
+        specialinvoke r0.<io.requery.android.database.sqlite.SQLiteSession: void throwIfNoTransaction()>();
+
+        $z0 = <io.requery.android.database.sqlite.SQLiteSession: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label1;
+
+        $r2 = r0.<io.requery.android.database.sqlite.SQLiteSession: io.requery.android.database.sqlite.SQLiteConnection mConnection>;
+
+        if $r2 != null goto label1;
+
+        $r3 = new java.lang.AssertionError;
+
+        specialinvoke $r3.<java.lang.AssertionError: void <init>()>();
+
+        throw $r3;
+
+     label1:
+        specialinvoke r0.<io.requery.android.database.sqlite.SQLiteSession: void endTransactionUnchecked(android.support.v4.os.CancellationSignal,boolean)>($r1, 0);
+
+        return;
+    }
+    public void execute(java.lang.String, java.lang.Object[], int, android.support.v4.os.CancellationSignal)
+    {
+        io.requery.android.database.sqlite.SQLiteSession r0;
+        java.lang.String $r1;
+        java.lang.Object[] $r2;
+        int $i0;
+        android.support.v4.os.CancellationSignal $r3;
+        boolean $z0;
+        java.lang.IllegalArgumentException $r4;
+        io.requery.android.database.sqlite.SQLiteConnection $r5;
+        java.lang.Throwable $r6;
+
+        r0 := @this: io.requery.android.database.sqlite.SQLiteSession;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.lang.Object[];
+
+        $i0 := @parameter2: int;
+
+        $r3 := @parameter3: android.support.v4.os.CancellationSignal;
+
+        if $r1 != null goto label1;
+
+        $r4 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r4.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("sql must not be null.");
+
+        throw $r4;
+
+     label1:
+        $z0 = specialinvoke r0.<io.requery.android.database.sqlite.SQLiteSession: boolean executeSpecial(java.lang.String,java.lang.Object[],int,android.support.v4.os.CancellationSignal)>($r1, $r2, $i0, $r3);
+
+        if $z0 == 0 goto label2;
+
+        return;
+
+     label2:
+        specialinvoke r0.<io.requery.android.database.sqlite.SQLiteSession: void acquireConnection(java.lang.String,int,android.support.v4.os.CancellationSignal)>($r1, $i0, $r3);
+
+     label3:
+        $r5 = r0.<io.requery.android.database.sqlite.SQLiteSession: io.requery.android.database.sqlite.SQLiteConnection mConnection>;
+
+        virtualinvoke $r5.<io.requery.android.database.sqlite.SQLiteConnection: void execute(java.lang.String,java.lang.Object[],android.support.v4.os.CancellationSignal)>($r1, $r2, $r3);
+
+     label4:
+        specialinvoke r0.<io.requery.android.database.sqlite.SQLiteSession: void releaseConnection()>();
+
+        return;
+
+     label5:
+        $r6 := @caughtexception;
+
+        specialinvoke r0.<io.requery.android.database.sqlite.SQLiteSession: void releaseConnection()>();
+
+        throw $r6;
+
+        catch java.lang.Throwable from label3 to label4 with label5;
+    }
+    public android.os.ParcelFileDescriptor executeForBlobFileDescriptor(java.lang.String, java.lang.Object[], int, android.support.v4.os.CancellationSignal)
+    {
+        io.requery.android.database.sqlite.SQLiteSession r0;
+        java.lang.String $r1;
+        java.lang.Object[] $r2;
+        int $i0;
+        android.support.v4.os.CancellationSignal $r3;
+        java.lang.IllegalArgumentException $r4;
+        boolean $z0;
+        io.requery.android.database.sqlite.SQLiteConnection $r5;
+        android.os.ParcelFileDescriptor $r6;
+        java.lang.Throwable $r7;
+
+        r0 := @this: io.requery.android.database.sqlite.SQLiteSession;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.lang.Object[];
+
+        $i0 := @parameter2: int;
+
+        $r3 := @parameter3: android.support.v4.os.CancellationSignal;
+
+        if $r1 != null goto label1;
+
+        $r4 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r4.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("sql must not be null.");
+
+        throw $r4;
+
+     label1:
+        $z0 = specialinvoke r0.<io.requery.android.database.sqlite.SQLiteSession: boolean executeSpecial(java.lang.String,java.lang.Object[],int,android.support.v4.os.CancellationSignal)>($r1, $r2, $i0, $r3);
+
+        if $z0 == 0 goto label2;
+
+        return null;
+
+     label2:
+        specialinvoke r0.<io.requery.android.database.sqlite.SQLiteSession: void acquireConnection(java.lang.String,int,android.support.v4.os.CancellationSignal)>($r1, $i0, $r3);
+
+     label3:
+        $r5 = r0.<io.requery.android.database.sqlite.SQLiteSession: io.requery.android.database.sqlite.SQLiteConnection mConnection>;
+
+        $r6 = virtualinvoke $r5.<io.requery.android.database.sqlite.SQLiteConnection: android.os.ParcelFileDescriptor executeForBlobFileDescriptor(java.lang.String,java.lang.Object[],android.support.v4.os.CancellationSignal)>($r1, $r2, $r3);
+
+     label4:
+        specialinvoke r0.<io.requery.android.database.sqlite.SQLiteSession: void releaseConnection()>();
+
+        return $r6;
+
+     label5:
+        $r7 := @caughtexception;
+
+        specialinvoke r0.<io.requery.android.database.sqlite.SQLiteSession: void releaseConnection()>();
+
+        throw $r7;
+
+        catch java.lang.Throwable from label3 to label4 with label5;
+    }
+    public int executeForChangedRowCount(java.lang.String, java.lang.Object[], int, android.support.v4.os.CancellationSignal)
+    {
+        io.requery.android.database.sqlite.SQLiteSession r0;
+        java.lang.String $r1;
+        java.lang.Object[] $r2;
+        int $i0;
+        android.support.v4.os.CancellationSignal $r3;
+        java.lang.IllegalArgumentException $r4;
+        boolean $z0;
+        io.requery.android.database.sqlite.SQLiteConnection $r5;
+        java.lang.Throwable $r6;
+
+        r0 := @this: io.requery.android.database.sqlite.SQLiteSession;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.lang.Object[];
+
+        $i0 := @parameter2: int;
+
+        $r3 := @parameter3: android.support.v4.os.CancellationSignal;
+
+        if $r1 != null goto label1;
+
+        $r4 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r4.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("sql must not be null.");
+
+        throw $r4;
+
+     label1:
+        $z0 = specialinvoke r0.<io.requery.android.database.sqlite.SQLiteSession: boolean executeSpecial(java.lang.String,java.lang.Object[],int,android.support.v4.os.CancellationSignal)>($r1, $r2, $i0, $r3);
+
+        if $z0 == 0 goto label2;
+
+        return 0;
+
+     label2:
+        specialinvoke r0.<io.requery.android.database.sqlite.SQLiteSession: void acquireConnection(java.lang.String,int,android.support.v4.os.CancellationSignal)>($r1, $i0, $r3);
+
+     label3:
+        $r5 = r0.<io.requery.android.database.sqlite.SQLiteSession: io.requery.android.database.sqlite.SQLiteConnection mConnection>;
+
+        $i0 = virtualinvoke $r5.<io.requery.android.database.sqlite.SQLiteConnection: int executeForChangedRowCount(java.lang.String,java.lang.Object[],android.support.v4.os.CancellationSignal)>($r1, $r2, $r3);
+
+     label4:
+        specialinvoke r0.<io.requery.android.database.sqlite.SQLiteSession: void releaseConnection()>();
+
+        return $i0;
+
+     label5:
+        $r6 := @caughtexception;
+
+        specialinvoke r0.<io.requery.android.database.sqlite.SQLiteSession: void releaseConnection()>();
+
+        throw $r6;
+
+        catch java.lang.Throwable from label3 to label4 with label5;
+    }
+    public int executeForCursorWindow(java.lang.String, java.lang.Object[], io.requery.android.database.CursorWindow, int, int, boolean, int, android.support.v4.os.CancellationSignal)
+    {
+        io.requery.android.database.sqlite.SQLiteSession r0;
+        java.lang.String $r1;
+        java.lang.Object[] $r2;
+        io.requery.android.database.CursorWindow $r3;
+        int $i0, $i1, $i2;
+        boolean $z0, $z1;
+        android.support.v4.os.CancellationSignal $r4;
+        java.lang.IllegalArgumentException $r5;
+        io.requery.android.database.sqlite.SQLiteConnection $r6;
+        java.lang.Throwable $r7;
+
+        r0 := @this: io.requery.android.database.sqlite.SQLiteSession;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.lang.Object[];
+
+        $r3 := @parameter2: io.requery.android.database.CursorWindow;
+
+        $i0 := @parameter3: int;
+
+        $i1 := @parameter4: int;
+
+        $z0 := @parameter5: boolean;
+
+        $i2 := @parameter6: int;
+
+        $r4 := @parameter7: android.support.v4.os.CancellationSignal;
+
+        if $r1 != null goto label1;
+
+        $r5 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r5.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("sql must not be null.");
+
+        throw $r5;
+
+     label1:
+        if $r3 != null goto label2;
+
+        $r5 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r5.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("window must not be null.");
+
+        throw $r5;
+
+     label2:
+        $z1 = specialinvoke r0.<io.requery.android.database.sqlite.SQLiteSession: boolean executeSpecial(java.lang.String,java.lang.Object[],int,android.support.v4.os.CancellationSignal)>($r1, $r2, $i2, $r4);
+
+        if $z1 == 0 goto label3;
+
+        virtualinvoke $r3.<io.requery.android.database.CursorWindow: void clear()>();
+
+        return 0;
+
+     label3:
+        specialinvoke r0.<io.requery.android.database.sqlite.SQLiteSession: void acquireConnection(java.lang.String,int,android.support.v4.os.CancellationSignal)>($r1, $i2, $r4);
+
+     label4:
+        $r6 = r0.<io.requery.android.database.sqlite.SQLiteSession: io.requery.android.database.sqlite.SQLiteConnection mConnection>;
+
+        $i0 = virtualinvoke $r6.<io.requery.android.database.sqlite.SQLiteConnection: int executeForCursorWindow(java.lang.String,java.lang.Object[],io.requery.android.database.CursorWindow,int,int,boolean,android.support.v4.os.CancellationSignal)>($r1, $r2, $r3, $i0, $i1, $z0, $r4);
+
+     label5:
+        specialinvoke r0.<io.requery.android.database.sqlite.SQLiteSession: void releaseConnection()>();
+
+        return $i0;
+
+     label6:
+        $r7 := @caughtexception;
+
+        specialinvoke r0.<io.requery.android.database.sqlite.SQLiteSession: void releaseConnection()>();
+
+        throw $r7;
+
+        catch java.lang.Throwable from label4 to label5 with label6;
+    }
+    public long executeForLastInsertedRowId(java.lang.String, java.lang.Object[], int, android.support.v4.os.CancellationSignal)
+    {
+        io.requery.android.database.sqlite.SQLiteSession r0;
+        java.lang.String $r1;
+        java.lang.Object[] $r2;
+        int $i0;
+        android.support.v4.os.CancellationSignal $r3;
+        java.lang.IllegalArgumentException $r4;
+        boolean $z0;
+        io.requery.android.database.sqlite.SQLiteConnection $r5;
+        long $l1;
+        java.lang.Throwable $r6;
+
+        r0 := @this: io.requery.android.database.sqlite.SQLiteSession;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.lang.Object[];
+
+        $i0 := @parameter2: int;
+
+        $r3 := @parameter3: android.support.v4.os.CancellationSignal;
+
+        if $r1 != null goto label1;
+
+        $r4 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r4.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("sql must not be null.");
+
+        throw $r4;
+
+     label1:
+        $z0 = specialinvoke r0.<io.requery.android.database.sqlite.SQLiteSession: boolean executeSpecial(java.lang.String,java.lang.Object[],int,android.support.v4.os.CancellationSignal)>($r1, $r2, $i0, $r3);
+
+        if $z0 == 0 goto label2;
+
+        return 0L;
+
+     label2:
+        specialinvoke r0.<io.requery.android.database.sqlite.SQLiteSession: void acquireConnection(java.lang.String,int,android.support.v4.os.CancellationSignal)>($r1, $i0, $r3);
+
+     label3:
+        $r5 = r0.<io.requery.android.database.sqlite.SQLiteSession: io.requery.android.database.sqlite.SQLiteConnection mConnection>;
+
+        $l1 = virtualinvoke $r5.<io.requery.android.database.sqlite.SQLiteConnection: long executeForLastInsertedRowId(java.lang.String,java.lang.Object[],android.support.v4.os.CancellationSignal)>($r1, $r2, $r3);
+
+     label4:
+        specialinvoke r0.<io.requery.android.database.sqlite.SQLiteSession: void releaseConnection()>();
+
+        return $l1;
+
+     label5:
+        $r6 := @caughtexception;
+
+        specialinvoke r0.<io.requery.android.database.sqlite.SQLiteSession: void releaseConnection()>();
+
+        throw $r6;
+
+        catch java.lang.Throwable from label3 to label4 with label5;
+    }
+    public long executeForLong(java.lang.String, java.lang.Object[], int, android.support.v4.os.CancellationSignal)
+    {
+        io.requery.android.database.sqlite.SQLiteSession r0;
+        java.lang.String $r1;
+        java.lang.Object[] $r2;
+        int $i0;
+        android.support.v4.os.CancellationSignal $r3;
+        java.lang.IllegalArgumentException $r4;
+        boolean $z0;
+        io.requery.android.database.sqlite.SQLiteConnection $r5;
+        long $l1;
+        java.lang.Throwable $r6;
+
+        r0 := @this: io.requery.android.database.sqlite.SQLiteSession;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.lang.Object[];
+
+        $i0 := @parameter2: int;
+
+        $r3 := @parameter3: android.support.v4.os.CancellationSignal;
+
+        if $r1 != null goto label1;
+
+        $r4 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r4.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("sql must not be null.");
+
+        throw $r4;
+
+     label1:
+        $z0 = specialinvoke r0.<io.requery.android.database.sqlite.SQLiteSession: boolean executeSpecial(java.lang.String,java.lang.Object[],int,android.support.v4.os.CancellationSignal)>($r1, $r2, $i0, $r3);
+
+        if $z0 == 0 goto label2;
+
+        return 0L;
+
+     label2:
+        specialinvoke r0.<io.requery.android.database.sqlite.SQLiteSession: void acquireConnection(java.lang.String,int,android.support.v4.os.CancellationSignal)>($r1, $i0, $r3);
+
+     label3:
+        $r5 = r0.<io.requery.android.database.sqlite.SQLiteSession: io.requery.android.database.sqlite.SQLiteConnection mConnection>;
+
+        $l1 = virtualinvoke $r5.<io.requery.android.database.sqlite.SQLiteConnection: long executeForLong(java.lang.String,java.lang.Object[],android.support.v4.os.CancellationSignal)>($r1, $r2, $r3);
+
+     label4:
+        specialinvoke r0.<io.requery.android.database.sqlite.SQLiteSession: void releaseConnection()>();
+
+        return $l1;
+
+     label5:
+        $r6 := @caughtexception;
+
+        specialinvoke r0.<io.requery.android.database.sqlite.SQLiteSession: void releaseConnection()>();
+
+        throw $r6;
+
+        catch java.lang.Throwable from label3 to label4 with label5;
+    }
+    public java.lang.String executeForString(java.lang.String, java.lang.Object[], int, android.support.v4.os.CancellationSignal)
+    {
+        io.requery.android.database.sqlite.SQLiteSession r0;
+        java.lang.String $r1;
+        java.lang.Object[] $r2;
+        int $i0;
+        android.support.v4.os.CancellationSignal $r3;
+        java.lang.IllegalArgumentException $r4;
+        boolean $z0;
+        io.requery.android.database.sqlite.SQLiteConnection $r5;
+        java.lang.Throwable $r6;
+
+        r0 := @this: io.requery.android.database.sqlite.SQLiteSession;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.lang.Object[];
+
+        $i0 := @parameter2: int;
+
+        $r3 := @parameter3: android.support.v4.os.CancellationSignal;
+
+        if $r1 != null goto label1;
+
+        $r4 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r4.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("sql must not be null.");
+
+        throw $r4;
+
+     label1:
+        $z0 = specialinvoke r0.<io.requery.android.database.sqlite.SQLiteSession: boolean executeSpecial(java.lang.String,java.lang.Object[],int,android.support.v4.os.CancellationSignal)>($r1, $r2, $i0, $r3);
+
+        if $z0 == 0 goto label2;
+
+        return null;
+
+     label2:
+        specialinvoke r0.<io.requery.android.database.sqlite.SQLiteSession: void acquireConnection(java.lang.String,int,android.support.v4.os.CancellationSignal)>($r1, $i0, $r3);
+
+     label3:
+        $r5 = r0.<io.requery.android.database.sqlite.SQLiteSession: io.requery.android.database.sqlite.SQLiteConnection mConnection>;
+
+        $r1 = virtualinvoke $r5.<io.requery.android.database.sqlite.SQLiteConnection: java.lang.String executeForString(java.lang.String,java.lang.Object[],android.support.v4.os.CancellationSignal)>($r1, $r2, $r3);
+
+     label4:
+        specialinvoke r0.<io.requery.android.database.sqlite.SQLiteSession: void releaseConnection()>();
+
+        return $r1;
+
+     label5:
+        $r6 := @caughtexception;
+
+        specialinvoke r0.<io.requery.android.database.sqlite.SQLiteSession: void releaseConnection()>();
+
+        throw $r6;
+
+        catch java.lang.Throwable from label3 to label4 with label5;
+    }
+    public boolean hasConnection()
+    {
+        io.requery.android.database.sqlite.SQLiteSession r0;
+        io.requery.android.database.sqlite.SQLiteConnection $r1;
+
+        r0 := @this: io.requery.android.database.sqlite.SQLiteSession;
+
+        $r1 = r0.<io.requery.android.database.sqlite.SQLiteSession: io.requery.android.database.sqlite.SQLiteConnection mConnection>;
+
+        if $r1 == null goto label1;
+
+        return 1;
+
+     label1:
+        return 0;
+    }
+    public boolean hasNestedTransaction()
+    {
+        io.requery.android.database.sqlite.SQLiteSession r0;
+        io.requery.android.database.sqlite.SQLiteSession$Transaction $r1;
+
+        r0 := @this: io.requery.android.database.sqlite.SQLiteSession;
+
+        $r1 = r0.<io.requery.android.database.sqlite.SQLiteSession: io.requery.android.database.sqlite.SQLiteSession$Transaction mTransactionStack>;
+
+        if $r1 == null goto label1;
+
+        $r1 = r0.<io.requery.android.database.sqlite.SQLiteSession: io.requery.android.database.sqlite.SQLiteSession$Transaction mTransactionStack>;
+
+        $r1 = $r1.<io.requery.android.database.sqlite.SQLiteSession$Transaction: io.requery.android.database.sqlite.SQLiteSession$Transaction mParent>;
+
+        if $r1 == null goto label1;
+
+        return 1;
+
+     label1:
+        return 0;
+    }
+    public boolean hasTransaction()
+    {
+        io.requery.android.database.sqlite.SQLiteSession r0;
+        io.requery.android.database.sqlite.SQLiteSession$Transaction $r1;
+
+        r0 := @this: io.requery.android.database.sqlite.SQLiteSession;
+
+        $r1 = r0.<io.requery.android.database.sqlite.SQLiteSession: io.requery.android.database.sqlite.SQLiteSession$Transaction mTransactionStack>;
+
+        if $r1 == null goto label1;
+
+        return 1;
+
+     label1:
+        return 0;
+    }
+    public void prepare(java.lang.String, int, android.support.v4.os.CancellationSignal, io.requery.android.database.sqlite.SQLiteStatementInfo)
+    {
+        io.requery.android.database.sqlite.SQLiteSession r0;
+        java.lang.String $r1;
+        int $i0;
+        android.support.v4.os.CancellationSignal $r2;
+        io.requery.android.database.sqlite.SQLiteStatementInfo $r3;
+        java.lang.IllegalArgumentException $r4;
+        io.requery.android.database.sqlite.SQLiteConnection $r5;
+        java.lang.Throwable $r6;
+
+        r0 := @this: io.requery.android.database.sqlite.SQLiteSession;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $i0 := @parameter1: int;
+
+        $r2 := @parameter2: android.support.v4.os.CancellationSignal;
+
+        $r3 := @parameter3: io.requery.android.database.sqlite.SQLiteStatementInfo;
+
+        if $r1 != null goto label1;
+
+        $r4 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r4.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("sql must not be null.");
+
+        throw $r4;
+
+     label1:
+        if $r2 == null goto label2;
+
+        virtualinvoke $r2.<android.support.v4.os.CancellationSignal: void throwIfCanceled()>();
+
+     label2:
+        specialinvoke r0.<io.requery.android.database.sqlite.SQLiteSession: void acquireConnection(java.lang.String,int,android.support.v4.os.CancellationSignal)>($r1, $i0, $r2);
+
+     label3:
+        $r5 = r0.<io.requery.android.database.sqlite.SQLiteSession: io.requery.android.database.sqlite.SQLiteConnection mConnection>;
+
+        virtualinvoke $r5.<io.requery.android.database.sqlite.SQLiteConnection: void prepare(java.lang.String,io.requery.android.database.sqlite.SQLiteStatementInfo)>($r1, $r3);
+
+     label4:
+        specialinvoke r0.<io.requery.android.database.sqlite.SQLiteSession: void releaseConnection()>();
+
+        return;
+
+     label5:
+        $r6 := @caughtexception;
+
+        specialinvoke r0.<io.requery.android.database.sqlite.SQLiteSession: void releaseConnection()>();
+
+        throw $r6;
+
+        catch java.lang.Throwable from label3 to label4 with label5;
+    }
+    public void setTransactionSuccessful()
+    {
+        io.requery.android.database.sqlite.SQLiteSession r0;
+        io.requery.android.database.sqlite.SQLiteSession$Transaction $r1;
+
+        r0 := @this: io.requery.android.database.sqlite.SQLiteSession;
+
+        specialinvoke r0.<io.requery.android.database.sqlite.SQLiteSession: void throwIfNoTransaction()>();
+
+        specialinvoke r0.<io.requery.android.database.sqlite.SQLiteSession: void throwIfTransactionMarkedSuccessful()>();
+
+        $r1 = r0.<io.requery.android.database.sqlite.SQLiteSession: io.requery.android.database.sqlite.SQLiteSession$Transaction mTransactionStack>;
+
+        $r1.<io.requery.android.database.sqlite.SQLiteSession$Transaction: boolean mMarkedSuccessful> = 1;
+
+        return;
+    }
+    public boolean yieldTransaction(long, boolean, android.support.v4.os.CancellationSignal)
+    {
+        io.requery.android.database.sqlite.SQLiteSession r0;
+        long $l0;
+        boolean $z0;
+        android.support.v4.os.CancellationSignal $r1;
+        io.requery.android.database.sqlite.SQLiteConnection $r2;
+        java.lang.AssertionError $r3;
+        io.requery.android.database.sqlite.SQLiteSession$Transaction $r4;
+
+        r0 := @this: io.requery.android.database.sqlite.SQLiteSession;
+
+        $l0 := @parameter0: long;
+
+        $z0 := @parameter1: boolean;
+
+        $r1 := @parameter2: android.support.v4.os.CancellationSignal;
+
+        if $z0 == 0 goto label2;
+
+        specialinvoke r0.<io.requery.android.database.sqlite.SQLiteSession: void throwIfNoTransaction()>();
+
+        specialinvoke r0.<io.requery.android.database.sqlite.SQLiteSession: void throwIfTransactionMarkedSuccessful()>();
+
+        specialinvoke r0.<io.requery.android.database.sqlite.SQLiteSession: void throwIfNestedTransaction()>();
+
+     label1:
+        $z0 = <io.requery.android.database.sqlite.SQLiteSession: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label3;
+
+        $r2 = r0.<io.requery.android.database.sqlite.SQLiteSession: io.requery.android.database.sqlite.SQLiteConnection mConnection>;
+
+        if $r2 != null goto label3;
+
+        $r3 = new java.lang.AssertionError;
+
+        specialinvoke $r3.<java.lang.AssertionError: void <init>()>();
+
+        throw $r3;
+
+     label2:
+        $r4 = r0.<io.requery.android.database.sqlite.SQLiteSession: io.requery.android.database.sqlite.SQLiteSession$Transaction mTransactionStack>;
+
+        if $r4 == null goto label4;
+
+        $r4 = r0.<io.requery.android.database.sqlite.SQLiteSession: io.requery.android.database.sqlite.SQLiteSession$Transaction mTransactionStack>;
+
+        $z0 = $r4.<io.requery.android.database.sqlite.SQLiteSession$Transaction: boolean mMarkedSuccessful>;
+
+        if $z0 != 0 goto label4;
+
+        $r4 = r0.<io.requery.android.database.sqlite.SQLiteSession: io.requery.android.database.sqlite.SQLiteSession$Transaction mTransactionStack>;
+
+        $r4 = $r4.<io.requery.android.database.sqlite.SQLiteSession$Transaction: io.requery.android.database.sqlite.SQLiteSession$Transaction mParent>;
+
+        if $r4 == null goto label1;
+
+        return 0;
+
+     label3:
+        $r4 = r0.<io.requery.android.database.sqlite.SQLiteSession: io.requery.android.database.sqlite.SQLiteSession$Transaction mTransactionStack>;
+
+        $z0 = $r4.<io.requery.android.database.sqlite.SQLiteSession$Transaction: boolean mChildFailed>;
+
+        if $z0 != 0 goto label4;
+
+        $z0 = specialinvoke r0.<io.requery.android.database.sqlite.SQLiteSession: boolean yieldTransactionUnchecked(long,android.support.v4.os.CancellationSignal)>($l0, $r1);
+
+        return $z0;
+
+     label4:
+        return 0;
+    }

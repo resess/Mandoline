@@ -1,0 +1,2446 @@
+org.apache.jackrabbit.webdav.WebdavRequestImpl extends java.lang.Object implements org.apache.jackrabbit.webdav.WebdavRequest org.apache.jackrabbit.webdav.DavConstants
+private static org.slf4j.Logger log
+private final org.apache.jackrabbit.webdav.DavLocatorFactory factory
+private final java.lang.String hrefPrefix
+private final javax.servlet.http.HttpServletRequest httpRequest
+private final org.apache.jackrabbit.webdav.header.IfHeader ifHeader
+private org.apache.jackrabbit.webdav.property.DavPropertyNameSet propfindProps
+private int propfindType
+private java.util.List proppatchList
+private org.apache.jackrabbit.webdav.property.DavPropertySet proppatchSet
+private org.apache.jackrabbit.webdav.DavSession session
+    static void <clinit>()
+    {
+        org.slf4j.Logger $r0;
+
+        $r0 = staticinvoke <org.slf4j.LoggerFactory: org.slf4j.Logger getLogger(java.lang.Class)>(class "Lorg/apache/jackrabbit/webdav/WebdavRequestImpl;");
+
+        <org.apache.jackrabbit.webdav.WebdavRequestImpl: org.slf4j.Logger log> = $r0;
+
+        return;
+    }
+    public void <init>(javax.servlet.http.HttpServletRequest, org.apache.jackrabbit.webdav.DavLocatorFactory)
+    {
+        org.apache.jackrabbit.webdav.WebdavRequestImpl r0;
+        javax.servlet.http.HttpServletRequest $r1;
+        org.apache.jackrabbit.webdav.DavLocatorFactory $r2;
+
+        r0 := @this: org.apache.jackrabbit.webdav.WebdavRequestImpl;
+
+        $r1 := @parameter0: javax.servlet.http.HttpServletRequest;
+
+        $r2 := @parameter1: org.apache.jackrabbit.webdav.DavLocatorFactory;
+
+        specialinvoke r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: void <init>(javax.servlet.http.HttpServletRequest,org.apache.jackrabbit.webdav.DavLocatorFactory,boolean)>($r1, $r2, 1);
+
+        return;
+    }
+    public void <init>(javax.servlet.http.HttpServletRequest, org.apache.jackrabbit.webdav.DavLocatorFactory, boolean)
+    {
+        org.apache.jackrabbit.webdav.WebdavRequestImpl r0;
+        javax.servlet.http.HttpServletRequest $r1;
+        org.apache.jackrabbit.webdav.DavLocatorFactory $r2;
+        boolean $z0;
+        org.apache.jackrabbit.webdav.header.IfHeader $r3;
+        java.lang.String $r4, $r5;
+        java.lang.StringBuilder $r6;
+
+        r0 := @this: org.apache.jackrabbit.webdav.WebdavRequestImpl;
+
+        $r1 := @parameter0: javax.servlet.http.HttpServletRequest;
+
+        $r2 := @parameter1: org.apache.jackrabbit.webdav.DavLocatorFactory;
+
+        $z0 := @parameter2: boolean;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: int propfindType> = 1;
+
+        r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: javax.servlet.http.HttpServletRequest httpRequest> = $r1;
+
+        r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: org.apache.jackrabbit.webdav.DavLocatorFactory factory> = $r2;
+
+        $r3 = new org.apache.jackrabbit.webdav.header.IfHeader;
+
+        specialinvoke $r3.<org.apache.jackrabbit.webdav.header.IfHeader: void <init>(javax.servlet.http.HttpServletRequest)>($r1);
+
+        r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: org.apache.jackrabbit.webdav.header.IfHeader ifHeader> = $r3;
+
+        $r4 = virtualinvoke r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: java.lang.String getHeader(java.lang.String)>("Host");
+
+        $r5 = virtualinvoke r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: java.lang.String getScheme()>();
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("://");
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r4 = virtualinvoke r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: java.lang.String getContextPath()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r4 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        if $z0 == 0 goto label2;
+
+     label1:
+        r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: java.lang.String hrefPrefix> = $r4;
+
+        return;
+
+     label2:
+        $r4 = virtualinvoke r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: java.lang.String getContextPath()>();
+
+        goto label1;
+    }
+    private java.lang.String getStrongETag(org.apache.jackrabbit.webdav.DavResource)
+    {
+        org.apache.jackrabbit.webdav.WebdavRequestImpl r0;
+        org.apache.jackrabbit.webdav.DavResource $r1;
+        org.apache.jackrabbit.webdav.property.DavPropertyName $r2;
+        org.apache.jackrabbit.webdav.property.DavProperty $r3;
+        java.lang.Object $r4;
+        java.lang.String $r5;
+        boolean $z0;
+
+        r0 := @this: org.apache.jackrabbit.webdav.WebdavRequestImpl;
+
+        $r1 := @parameter0: org.apache.jackrabbit.webdav.DavResource;
+
+        $r2 = <org.apache.jackrabbit.webdav.property.DavPropertyName: org.apache.jackrabbit.webdav.property.DavPropertyName GETETAG>;
+
+        $r3 = interfaceinvoke $r1.<org.apache.jackrabbit.webdav.DavResource: org.apache.jackrabbit.webdav.property.DavProperty getProperty(org.apache.jackrabbit.webdav.property.DavPropertyName)>($r2);
+
+        if $r3 == null goto label1;
+
+        $r4 = interfaceinvoke $r3.<org.apache.jackrabbit.webdav.property.DavProperty: java.lang.Object getValue()>();
+
+        if $r4 == null goto label1;
+
+        $r4 = interfaceinvoke $r3.<org.apache.jackrabbit.webdav.property.DavProperty: java.lang.Object getValue()>();
+
+        $r5 = virtualinvoke $r4.<java.lang.Object: java.lang.String toString()>();
+
+        $z0 = staticinvoke <org.apache.jackrabbit.webdav.WebdavRequestImpl: boolean isStrongETag(java.lang.String)>($r5);
+
+        if $z0 == 0 goto label1;
+
+        return $r5;
+
+     label1:
+        return "";
+    }
+    private static boolean isStrongETag(java.lang.String)
+    {
+        java.lang.String $r0;
+        int $i0;
+        boolean $z0;
+
+        $r0 := @parameter0: java.lang.String;
+
+        if $r0 == null goto label1;
+
+        $i0 = virtualinvoke $r0.<java.lang.String: int length()>();
+
+        if $i0 <= 0 goto label1;
+
+        $z0 = virtualinvoke $r0.<java.lang.String: boolean startsWith(java.lang.String)>("W\\");
+
+        if $z0 != 0 goto label1;
+
+        return 1;
+
+     label1:
+        return 0;
+    }
+    private void parsePropFindRequest() throws org.apache.jackrabbit.webdav.DavException
+    {
+        org.apache.jackrabbit.webdav.WebdavRequestImpl r0;
+        org.apache.jackrabbit.webdav.property.DavPropertyNameSet $r1, $r11;
+        org.w3c.dom.Document $r2;
+        org.w3c.dom.Element $r3;
+        java.lang.String $r4, $r5, $r10;
+        boolean $z0;
+        org.slf4j.Logger $r6;
+        org.apache.jackrabbit.webdav.DavException $r7;
+        org.apache.jackrabbit.webdav.xml.ElementIterator $r8, $r12;
+        int i0;
+        org.apache.jackrabbit.webdav.xml.Namespace $r9;
+        org.apache.jackrabbit.webdav.property.DavPropertyName $r13;
+
+        r0 := @this: org.apache.jackrabbit.webdav.WebdavRequestImpl;
+
+        $r1 = new org.apache.jackrabbit.webdav.property.DavPropertyNameSet;
+
+        specialinvoke $r1.<org.apache.jackrabbit.webdav.property.DavPropertyNameSet: void <init>()>();
+
+        r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: org.apache.jackrabbit.webdav.property.DavPropertyNameSet propfindProps> = $r1;
+
+        $r2 = virtualinvoke r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: org.w3c.dom.Document getRequestDocument()>();
+
+        if $r2 != null goto label01;
+
+        return;
+
+     label01:
+        $r3 = interfaceinvoke $r2.<org.w3c.dom.Document: org.w3c.dom.Element getDocumentElement()>();
+
+        $r4 = "propfind";
+
+        $r5 = interfaceinvoke $r3.<org.w3c.dom.Element: java.lang.String getLocalName()>();
+
+        $z0 = virtualinvoke $r4.<java.lang.String: boolean equals(java.lang.Object)>($r5);
+
+        if $z0 != 0 goto label02;
+
+        $r6 = <org.apache.jackrabbit.webdav.WebdavRequestImpl: org.slf4j.Logger log>;
+
+        interfaceinvoke $r6.<org.slf4j.Logger: void info(java.lang.String)>("PropFind-Request has no <propfind> tag.");
+
+        $r7 = new org.apache.jackrabbit.webdav.DavException;
+
+        specialinvoke $r7.<org.apache.jackrabbit.webdav.DavException: void <init>(int,java.lang.String)>(400, "PropFind-Request has no <propfind> tag.");
+
+        throw $r7;
+
+     label02:
+        $r1 = null;
+
+        $r8 = staticinvoke <org.apache.jackrabbit.webdav.xml.DomUtil: org.apache.jackrabbit.webdav.xml.ElementIterator getChildren(org.w3c.dom.Element)>($r3);
+
+        i0 = 0;
+
+     label03:
+        $z0 = virtualinvoke $r8.<org.apache.jackrabbit.webdav.xml.ElementIterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label08;
+
+        $r3 = virtualinvoke $r8.<org.apache.jackrabbit.webdav.xml.ElementIterator: org.w3c.dom.Element nextElement()>();
+
+        $r4 = interfaceinvoke $r3.<org.w3c.dom.Element: java.lang.String getLocalName()>();
+
+        $r9 = <org.apache.jackrabbit.webdav.WebdavRequestImpl: org.apache.jackrabbit.webdav.xml.Namespace NAMESPACE>;
+
+        $r5 = virtualinvoke $r9.<org.apache.jackrabbit.webdav.xml.Namespace: java.lang.String getURI()>();
+
+        $r10 = interfaceinvoke $r3.<org.w3c.dom.Element: java.lang.String getNamespaceURI()>();
+
+        $z0 = virtualinvoke $r5.<java.lang.String: boolean equals(java.lang.Object)>($r10);
+
+        if $z0 == 0 goto label03;
+
+        $r5 = "prop";
+
+        $z0 = virtualinvoke $r5.<java.lang.String: boolean equals(java.lang.Object)>($r4);
+
+        if $z0 == 0 goto label04;
+
+        r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: int propfindType> = 0;
+
+        $r11 = new org.apache.jackrabbit.webdav.property.DavPropertyNameSet;
+
+        specialinvoke $r11.<org.apache.jackrabbit.webdav.property.DavPropertyNameSet: void <init>(org.w3c.dom.Element)>($r3);
+
+        r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: org.apache.jackrabbit.webdav.property.DavPropertyNameSet propfindProps> = $r11;
+
+        i0 = i0 + 1;
+
+        goto label03;
+
+     label04:
+        $r5 = "propname";
+
+        $z0 = virtualinvoke $r5.<java.lang.String: boolean equals(java.lang.Object)>($r4);
+
+        if $z0 == 0 goto label05;
+
+        r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: int propfindType> = 2;
+
+        i0 = i0 + 1;
+
+        goto label03;
+
+     label05:
+        $r5 = "allprop";
+
+        $z0 = virtualinvoke $r5.<java.lang.String: boolean equals(java.lang.Object)>($r4);
+
+        if $z0 == 0 goto label06;
+
+        r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: int propfindType> = 1;
+
+        i0 = i0 + 1;
+
+        goto label03;
+
+     label06:
+        $r5 = "include";
+
+        $z0 = virtualinvoke $r5.<java.lang.String: boolean equals(java.lang.Object)>($r4);
+
+        if $z0 == 0 goto label03;
+
+        $r1 = new org.apache.jackrabbit.webdav.property.DavPropertyNameSet;
+
+        specialinvoke $r1.<org.apache.jackrabbit.webdav.property.DavPropertyNameSet: void <init>()>();
+
+        $r12 = staticinvoke <org.apache.jackrabbit.webdav.xml.DomUtil: org.apache.jackrabbit.webdav.xml.ElementIterator getChildren(org.w3c.dom.Element)>($r3);
+
+     label07:
+        $z0 = virtualinvoke $r12.<org.apache.jackrabbit.webdav.xml.ElementIterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label03;
+
+        $r3 = virtualinvoke $r12.<org.apache.jackrabbit.webdav.xml.ElementIterator: org.w3c.dom.Element nextElement()>();
+
+        $r13 = staticinvoke <org.apache.jackrabbit.webdav.property.DavPropertyName: org.apache.jackrabbit.webdav.property.DavPropertyName createFromXml(org.w3c.dom.Element)>($r3);
+
+        virtualinvoke $r1.<org.apache.jackrabbit.webdav.property.DavPropertyNameSet: boolean add(org.apache.jackrabbit.webdav.property.DavPropertyName)>($r13);
+
+        goto label07;
+
+     label08:
+        if i0 <= 1 goto label09;
+
+        $r6 = <org.apache.jackrabbit.webdav.WebdavRequestImpl: org.slf4j.Logger log>;
+
+        interfaceinvoke $r6.<org.slf4j.Logger: void info(java.lang.String)>("Multiple top-level propfind instructions");
+
+        $r7 = new org.apache.jackrabbit.webdav.DavException;
+
+        specialinvoke $r7.<org.apache.jackrabbit.webdav.DavException: void <init>(int,java.lang.String)>(400, "Multiple top-level propfind instructions");
+
+        throw $r7;
+
+     label09:
+        if $r1 == null goto label11;
+
+        i0 = r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: int propfindType>;
+
+        if i0 != 1 goto label10;
+
+        r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: int propfindType> = 3;
+
+        r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: org.apache.jackrabbit.webdav.property.DavPropertyNameSet propfindProps> = $r1;
+
+        return;
+
+     label10:
+        $r7 = new org.apache.jackrabbit.webdav.DavException;
+
+        specialinvoke $r7.<org.apache.jackrabbit.webdav.DavException: void <init>(int,java.lang.String)>(400, "<include> goes only with <allprop>");
+
+        throw $r7;
+
+     label11:
+        return;
+    }
+    private void parsePropPatchRequest() throws org.apache.jackrabbit.webdav.DavException
+    {
+        org.apache.jackrabbit.webdav.WebdavRequestImpl r0;
+        org.apache.jackrabbit.webdav.property.DavPropertySet $r1;
+        java.util.ArrayList $r2;
+        org.w3c.dom.Document $r3;
+        org.apache.jackrabbit.webdav.DavException $r4;
+        org.w3c.dom.Element $r5;
+        org.apache.jackrabbit.webdav.xml.Namespace $r6;
+        boolean $z0;
+        org.slf4j.Logger $r7;
+        org.apache.jackrabbit.webdav.xml.ElementIterator $r8, $r9;
+        org.apache.jackrabbit.webdav.property.DefaultDavProperty $r10;
+        java.util.List $r11;
+        org.apache.jackrabbit.webdav.property.DavPropertyName $r12;
+        java.lang.StringBuilder $r13;
+        java.lang.String $r14;
+
+        r0 := @this: org.apache.jackrabbit.webdav.WebdavRequestImpl;
+
+        $r1 = new org.apache.jackrabbit.webdav.property.DavPropertySet;
+
+        specialinvoke $r1.<org.apache.jackrabbit.webdav.property.DavPropertySet: void <init>()>();
+
+        r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: org.apache.jackrabbit.webdav.property.DavPropertySet proppatchSet> = $r1;
+
+        $r2 = new java.util.ArrayList;
+
+        specialinvoke $r2.<java.util.ArrayList: void <init>()>();
+
+        r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: java.util.List proppatchList> = $r2;
+
+        $r3 = virtualinvoke r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: org.w3c.dom.Document getRequestDocument()>();
+
+        if $r3 != null goto label1;
+
+        $r4 = new org.apache.jackrabbit.webdav.DavException;
+
+        specialinvoke $r4.<org.apache.jackrabbit.webdav.DavException: void <init>(int,java.lang.String)>(400, "Invalid request body.");
+
+        throw $r4;
+
+     label1:
+        $r5 = interfaceinvoke $r3.<org.w3c.dom.Document: org.w3c.dom.Element getDocumentElement()>();
+
+        $r6 = <org.apache.jackrabbit.webdav.WebdavRequestImpl: org.apache.jackrabbit.webdav.xml.Namespace NAMESPACE>;
+
+        $z0 = staticinvoke <org.apache.jackrabbit.webdav.xml.DomUtil: boolean matches(org.w3c.dom.Node,java.lang.String,org.apache.jackrabbit.webdav.xml.Namespace)>($r5, "propertyupdate", $r6);
+
+        if $z0 != 0 goto label2;
+
+        $r7 = <org.apache.jackrabbit.webdav.WebdavRequestImpl: org.slf4j.Logger log>;
+
+        interfaceinvoke $r7.<org.slf4j.Logger: void warn(java.lang.String)>("PropPatch-Request has no <DAV:propertyupdate> tag.");
+
+        $r4 = new org.apache.jackrabbit.webdav.DavException;
+
+        specialinvoke $r4.<org.apache.jackrabbit.webdav.DavException: void <init>(int,java.lang.String)>(400, "PropPatch-Request has no <propertyupdate> tag.");
+
+        throw $r4;
+
+     label2:
+        $r8 = staticinvoke <org.apache.jackrabbit.webdav.xml.DomUtil: org.apache.jackrabbit.webdav.xml.ElementIterator getChildren(org.w3c.dom.Element)>($r5);
+
+     label3:
+        $z0 = virtualinvoke $r8.<org.apache.jackrabbit.webdav.xml.ElementIterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label8;
+
+        $r5 = virtualinvoke $r8.<org.apache.jackrabbit.webdav.xml.ElementIterator: org.w3c.dom.Element nextElement()>();
+
+        $r6 = <org.apache.jackrabbit.webdav.WebdavRequestImpl: org.apache.jackrabbit.webdav.xml.Namespace NAMESPACE>;
+
+        $z0 = staticinvoke <org.apache.jackrabbit.webdav.xml.DomUtil: boolean matches(org.w3c.dom.Node,java.lang.String,org.apache.jackrabbit.webdav.xml.Namespace)>($r5, "set", $r6);
+
+        if $z0 == 0 goto label5;
+
+        $r6 = <org.apache.jackrabbit.webdav.WebdavRequestImpl: org.apache.jackrabbit.webdav.xml.Namespace NAMESPACE>;
+
+        $r5 = staticinvoke <org.apache.jackrabbit.webdav.xml.DomUtil: org.w3c.dom.Element getChildElement(org.w3c.dom.Node,java.lang.String,org.apache.jackrabbit.webdav.xml.Namespace)>($r5, "prop", $r6);
+
+        if $r5 == null goto label3;
+
+        $r9 = staticinvoke <org.apache.jackrabbit.webdav.xml.DomUtil: org.apache.jackrabbit.webdav.xml.ElementIterator getChildren(org.w3c.dom.Element)>($r5);
+
+     label4:
+        $z0 = virtualinvoke $r9.<org.apache.jackrabbit.webdav.xml.ElementIterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label3;
+
+        $r5 = virtualinvoke $r9.<org.apache.jackrabbit.webdav.xml.ElementIterator: org.w3c.dom.Element nextElement()>();
+
+        $r10 = staticinvoke <org.apache.jackrabbit.webdav.property.DefaultDavProperty: org.apache.jackrabbit.webdav.property.DefaultDavProperty createFromXml(org.w3c.dom.Element)>($r5);
+
+        $r1 = r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: org.apache.jackrabbit.webdav.property.DavPropertySet proppatchSet>;
+
+        virtualinvoke $r1.<org.apache.jackrabbit.webdav.property.DavPropertySet: org.apache.jackrabbit.webdav.property.DavProperty add(org.apache.jackrabbit.webdav.property.DavProperty)>($r10);
+
+        $r11 = r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: java.util.List proppatchList>;
+
+        interfaceinvoke $r11.<java.util.List: boolean add(java.lang.Object)>($r10);
+
+        goto label4;
+
+     label5:
+        $r6 = <org.apache.jackrabbit.webdav.WebdavRequestImpl: org.apache.jackrabbit.webdav.xml.Namespace NAMESPACE>;
+
+        $z0 = staticinvoke <org.apache.jackrabbit.webdav.xml.DomUtil: boolean matches(org.w3c.dom.Node,java.lang.String,org.apache.jackrabbit.webdav.xml.Namespace)>($r5, "remove", $r6);
+
+        if $z0 == 0 goto label7;
+
+        $r6 = <org.apache.jackrabbit.webdav.WebdavRequestImpl: org.apache.jackrabbit.webdav.xml.Namespace NAMESPACE>;
+
+        $r5 = staticinvoke <org.apache.jackrabbit.webdav.xml.DomUtil: org.w3c.dom.Element getChildElement(org.w3c.dom.Node,java.lang.String,org.apache.jackrabbit.webdav.xml.Namespace)>($r5, "prop", $r6);
+
+        if $r5 == null goto label3;
+
+        $r9 = staticinvoke <org.apache.jackrabbit.webdav.xml.DomUtil: org.apache.jackrabbit.webdav.xml.ElementIterator getChildren(org.w3c.dom.Element)>($r5);
+
+     label6:
+        $z0 = virtualinvoke $r9.<org.apache.jackrabbit.webdav.xml.ElementIterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label3;
+
+        $r5 = virtualinvoke $r9.<org.apache.jackrabbit.webdav.xml.ElementIterator: org.w3c.dom.Element nextElement()>();
+
+        $r10 = staticinvoke <org.apache.jackrabbit.webdav.property.DefaultDavProperty: org.apache.jackrabbit.webdav.property.DefaultDavProperty createFromXml(org.w3c.dom.Element)>($r5);
+
+        $r1 = r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: org.apache.jackrabbit.webdav.property.DavPropertySet proppatchSet>;
+
+        virtualinvoke $r1.<org.apache.jackrabbit.webdav.property.DavPropertySet: org.apache.jackrabbit.webdav.property.DavProperty add(org.apache.jackrabbit.webdav.property.DavProperty)>($r10);
+
+        $r11 = r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: java.util.List proppatchList>;
+
+        $r12 = interfaceinvoke $r10.<org.apache.jackrabbit.webdav.property.DavProperty: org.apache.jackrabbit.webdav.property.DavPropertyName getName()>();
+
+        interfaceinvoke $r11.<java.util.List: boolean add(java.lang.Object)>($r12);
+
+        goto label6;
+
+     label7:
+        $r7 = <org.apache.jackrabbit.webdav.WebdavRequestImpl: org.slf4j.Logger log>;
+
+        $r13 = new java.lang.StringBuilder;
+
+        specialinvoke $r13.<java.lang.StringBuilder: void <init>()>();
+
+        $r13 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unknown element in DAV:propertyupdate: ");
+
+        $r14 = interfaceinvoke $r5.<org.w3c.dom.Element: java.lang.String getNodeName()>();
+
+        $r13 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r14);
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        interfaceinvoke $r7.<org.slf4j.Logger: void debug(java.lang.String)>($r14);
+
+        goto label3;
+
+     label8:
+        return;
+    }
+    public java.lang.Object getAttribute(java.lang.String)
+    {
+        org.apache.jackrabbit.webdav.WebdavRequestImpl r0;
+        java.lang.String $r1;
+        java.lang.Object $r2;
+        javax.servlet.http.HttpServletRequest $r3;
+
+        r0 := @this: org.apache.jackrabbit.webdav.WebdavRequestImpl;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r3 = r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: javax.servlet.http.HttpServletRequest httpRequest>;
+
+        $r2 = interfaceinvoke $r3.<javax.servlet.http.HttpServletRequest: java.lang.Object getAttribute(java.lang.String)>($r1);
+
+        return $r2;
+    }
+    public java.util.Enumeration getAttributeNames()
+    {
+        org.apache.jackrabbit.webdav.WebdavRequestImpl r0;
+        java.util.Enumeration $r1;
+        javax.servlet.http.HttpServletRequest $r2;
+
+        r0 := @this: org.apache.jackrabbit.webdav.WebdavRequestImpl;
+
+        $r2 = r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: javax.servlet.http.HttpServletRequest httpRequest>;
+
+        $r1 = interfaceinvoke $r2.<javax.servlet.http.HttpServletRequest: java.util.Enumeration getAttributeNames()>();
+
+        return $r1;
+    }
+    public java.lang.String getAuthType()
+    {
+        org.apache.jackrabbit.webdav.WebdavRequestImpl r0;
+        java.lang.String $r1;
+        javax.servlet.http.HttpServletRequest $r2;
+
+        r0 := @this: org.apache.jackrabbit.webdav.WebdavRequestImpl;
+
+        $r2 = r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: javax.servlet.http.HttpServletRequest httpRequest>;
+
+        $r1 = interfaceinvoke $r2.<javax.servlet.http.HttpServletRequest: java.lang.String getAuthType()>();
+
+        return $r1;
+    }
+    public org.apache.jackrabbit.webdav.bind.BindInfo getBindInfo() throws org.apache.jackrabbit.webdav.DavException
+    {
+        org.apache.jackrabbit.webdav.WebdavRequestImpl r0;
+        org.w3c.dom.Document $r1;
+        org.w3c.dom.Element $r2;
+        org.apache.jackrabbit.webdav.bind.BindInfo $r3;
+
+        r0 := @this: org.apache.jackrabbit.webdav.WebdavRequestImpl;
+
+        $r1 = virtualinvoke r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: org.w3c.dom.Document getRequestDocument()>();
+
+        if $r1 == null goto label1;
+
+        $r2 = interfaceinvoke $r1.<org.w3c.dom.Document: org.w3c.dom.Element getDocumentElement()>();
+
+        $r3 = staticinvoke <org.apache.jackrabbit.webdav.bind.BindInfo: org.apache.jackrabbit.webdav.bind.BindInfo createFromXml(org.w3c.dom.Element)>($r2);
+
+        return $r3;
+
+     label1:
+        return null;
+    }
+    public java.lang.String getCharacterEncoding()
+    {
+        org.apache.jackrabbit.webdav.WebdavRequestImpl r0;
+        java.lang.String $r1;
+        javax.servlet.http.HttpServletRequest $r2;
+
+        r0 := @this: org.apache.jackrabbit.webdav.WebdavRequestImpl;
+
+        $r2 = r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: javax.servlet.http.HttpServletRequest httpRequest>;
+
+        $r1 = interfaceinvoke $r2.<javax.servlet.http.HttpServletRequest: java.lang.String getCharacterEncoding()>();
+
+        return $r1;
+    }
+    public int getContentLength()
+    {
+        org.apache.jackrabbit.webdav.WebdavRequestImpl r0;
+        int $i0;
+        javax.servlet.http.HttpServletRequest $r1;
+
+        r0 := @this: org.apache.jackrabbit.webdav.WebdavRequestImpl;
+
+        $r1 = r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: javax.servlet.http.HttpServletRequest httpRequest>;
+
+        $i0 = interfaceinvoke $r1.<javax.servlet.http.HttpServletRequest: int getContentLength()>();
+
+        return $i0;
+    }
+    public java.lang.String getContentType()
+    {
+        org.apache.jackrabbit.webdav.WebdavRequestImpl r0;
+        java.lang.String $r1;
+        javax.servlet.http.HttpServletRequest $r2;
+
+        r0 := @this: org.apache.jackrabbit.webdav.WebdavRequestImpl;
+
+        $r2 = r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: javax.servlet.http.HttpServletRequest httpRequest>;
+
+        $r1 = interfaceinvoke $r2.<javax.servlet.http.HttpServletRequest: java.lang.String getContentType()>();
+
+        return $r1;
+    }
+    public java.lang.String getContextPath()
+    {
+        org.apache.jackrabbit.webdav.WebdavRequestImpl r0;
+        java.lang.String $r1;
+        javax.servlet.http.HttpServletRequest $r2;
+
+        r0 := @this: org.apache.jackrabbit.webdav.WebdavRequestImpl;
+
+        $r2 = r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: javax.servlet.http.HttpServletRequest httpRequest>;
+
+        $r1 = interfaceinvoke $r2.<javax.servlet.http.HttpServletRequest: java.lang.String getContextPath()>();
+
+        return $r1;
+    }
+    public javax.servlet.http.Cookie[] getCookies()
+    {
+        org.apache.jackrabbit.webdav.WebdavRequestImpl r0;
+        javax.servlet.http.Cookie[] $r1;
+        javax.servlet.http.HttpServletRequest $r2;
+
+        r0 := @this: org.apache.jackrabbit.webdav.WebdavRequestImpl;
+
+        $r2 = r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: javax.servlet.http.HttpServletRequest httpRequest>;
+
+        $r1 = interfaceinvoke $r2.<javax.servlet.http.HttpServletRequest: javax.servlet.http.Cookie[] getCookies()>();
+
+        return $r1;
+    }
+    public long getDateHeader(java.lang.String)
+    {
+        org.apache.jackrabbit.webdav.WebdavRequestImpl r0;
+        java.lang.String $r1;
+        long $l0;
+        javax.servlet.http.HttpServletRequest $r2;
+
+        r0 := @this: org.apache.jackrabbit.webdav.WebdavRequestImpl;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: javax.servlet.http.HttpServletRequest httpRequest>;
+
+        $l0 = interfaceinvoke $r2.<javax.servlet.http.HttpServletRequest: long getDateHeader(java.lang.String)>($r1);
+
+        return $l0;
+    }
+    public org.apache.jackrabbit.webdav.DavSession getDavSession()
+    {
+        org.apache.jackrabbit.webdav.WebdavRequestImpl r0;
+        org.apache.jackrabbit.webdav.DavSession r1;
+
+        r0 := @this: org.apache.jackrabbit.webdav.WebdavRequestImpl;
+
+        r1 = r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: org.apache.jackrabbit.webdav.DavSession session>;
+
+        return r1;
+    }
+    public int getDepth()
+    {
+        org.apache.jackrabbit.webdav.WebdavRequestImpl r0;
+        int $i0;
+
+        r0 := @this: org.apache.jackrabbit.webdav.WebdavRequestImpl;
+
+        $i0 = virtualinvoke r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: int getDepth(int)>(2147483647);
+
+        return $i0;
+    }
+    public int getDepth(int)
+    {
+        org.apache.jackrabbit.webdav.WebdavRequestImpl r0;
+        int $i0;
+        javax.servlet.http.HttpServletRequest $r1;
+        org.apache.jackrabbit.webdav.header.DepthHeader $r2;
+
+        r0 := @this: org.apache.jackrabbit.webdav.WebdavRequestImpl;
+
+        $i0 := @parameter0: int;
+
+        $r1 = r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: javax.servlet.http.HttpServletRequest httpRequest>;
+
+        $r2 = staticinvoke <org.apache.jackrabbit.webdav.header.DepthHeader: org.apache.jackrabbit.webdav.header.DepthHeader parse(javax.servlet.http.HttpServletRequest,int)>($r1, $i0);
+
+        $i0 = virtualinvoke $r2.<org.apache.jackrabbit.webdav.header.DepthHeader: int getDepth()>();
+
+        return $i0;
+    }
+    public org.apache.jackrabbit.webdav.DavResourceLocator getDestinationLocator() throws org.apache.jackrabbit.webdav.DavException
+    {
+        org.apache.jackrabbit.webdav.WebdavRequestImpl r0;
+        javax.servlet.http.HttpServletRequest $r1;
+        java.lang.String $r2;
+        org.apache.jackrabbit.webdav.DavResourceLocator $r3;
+
+        r0 := @this: org.apache.jackrabbit.webdav.WebdavRequestImpl;
+
+        $r1 = r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: javax.servlet.http.HttpServletRequest httpRequest>;
+
+        $r2 = interfaceinvoke $r1.<javax.servlet.http.HttpServletRequest: java.lang.String getHeader(java.lang.String)>("Destination");
+
+        $r3 = virtualinvoke r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: org.apache.jackrabbit.webdav.DavResourceLocator getHrefLocator(java.lang.String)>($r2);
+
+        return $r3;
+    }
+    public java.lang.String getHeader(java.lang.String)
+    {
+        org.apache.jackrabbit.webdav.WebdavRequestImpl r0;
+        java.lang.String $r1;
+        javax.servlet.http.HttpServletRequest $r2;
+
+        r0 := @this: org.apache.jackrabbit.webdav.WebdavRequestImpl;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: javax.servlet.http.HttpServletRequest httpRequest>;
+
+        $r1 = interfaceinvoke $r2.<javax.servlet.http.HttpServletRequest: java.lang.String getHeader(java.lang.String)>($r1);
+
+        return $r1;
+    }
+    public java.util.Enumeration getHeaderNames()
+    {
+        org.apache.jackrabbit.webdav.WebdavRequestImpl r0;
+        java.util.Enumeration $r1;
+        javax.servlet.http.HttpServletRequest $r2;
+
+        r0 := @this: org.apache.jackrabbit.webdav.WebdavRequestImpl;
+
+        $r2 = r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: javax.servlet.http.HttpServletRequest httpRequest>;
+
+        $r1 = interfaceinvoke $r2.<javax.servlet.http.HttpServletRequest: java.util.Enumeration getHeaderNames()>();
+
+        return $r1;
+    }
+    public java.util.Enumeration getHeaders(java.lang.String)
+    {
+        org.apache.jackrabbit.webdav.WebdavRequestImpl r0;
+        java.lang.String $r1;
+        java.util.Enumeration $r2;
+        javax.servlet.http.HttpServletRequest $r3;
+
+        r0 := @this: org.apache.jackrabbit.webdav.WebdavRequestImpl;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r3 = r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: javax.servlet.http.HttpServletRequest httpRequest>;
+
+        $r2 = interfaceinvoke $r3.<javax.servlet.http.HttpServletRequest: java.util.Enumeration getHeaders(java.lang.String)>($r1);
+
+        return $r2;
+    }
+    public org.apache.jackrabbit.webdav.DavResourceLocator getHrefLocator(java.lang.String) throws org.apache.jackrabbit.webdav.DavException
+    {
+        org.apache.jackrabbit.webdav.WebdavRequestImpl r0;
+        java.lang.String $r1, r3, $r5, $r10;
+        java.net.URISyntaxException r2;
+        java.net.URI $r4;
+        boolean $z0;
+        org.slf4j.Logger $r6;
+        java.lang.StringBuilder $r7;
+        org.apache.jackrabbit.webdav.DavException $r8;
+        javax.servlet.http.HttpServletRequest $r9;
+        int $i0;
+        org.apache.jackrabbit.webdav.DavLocatorFactory $r11;
+        org.apache.jackrabbit.webdav.DavResourceLocator $r12;
+
+        r0 := @this: org.apache.jackrabbit.webdav.WebdavRequestImpl;
+
+        $r1 := @parameter0: java.lang.String;
+
+        r3 = $r1;
+
+        if $r1 == null goto label19;
+
+        $r4 = new java.net.URI;
+
+     label01:
+        specialinvoke $r4.<java.net.URI: void <init>(java.lang.String)>($r1);
+
+        $r4 = virtualinvoke $r4.<java.net.URI: java.net.URI normalize()>();
+
+        $r5 = virtualinvoke $r4.<java.net.URI: java.lang.String getAuthority()>();
+
+        r3 = virtualinvoke $r4.<java.net.URI: java.lang.String getRawPath()>();
+
+     label02:
+        if $r5 != null goto label13;
+
+     label03:
+        $z0 = virtualinvoke r3.<java.lang.String: boolean startsWith(java.lang.String)>("//");
+
+     label04:
+        if $z0 != 0 goto label07;
+
+     label05:
+        $z0 = virtualinvoke r3.<java.lang.String: boolean startsWith(java.lang.String)>("/");
+
+     label06:
+        if $z0 != 0 goto label18;
+
+     label07:
+        $r6 = <org.apache.jackrabbit.webdav.WebdavRequestImpl: org.slf4j.Logger log>;
+
+        $r7 = new java.lang.StringBuilder;
+
+     label08:
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("expected absolute path but found ");
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r3);
+
+        r3 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        interfaceinvoke $r6.<org.slf4j.Logger: void warn(java.lang.String)>(r3);
+
+     label09:
+        $r8 = new org.apache.jackrabbit.webdav.DavException;
+
+     label10:
+        specialinvoke $r8.<org.apache.jackrabbit.webdav.DavException: void <init>(int)>(400);
+
+     label11:
+        throw $r8;
+
+     label12:
+        r2 := @caughtexception;
+
+        $r6 = <org.apache.jackrabbit.webdav.WebdavRequestImpl: org.slf4j.Logger log>;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("malformed uri: ");
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r1 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        interfaceinvoke $r6.<org.slf4j.Logger: void warn(java.lang.String,java.lang.Throwable)>($r1, r2);
+
+        $r8 = new org.apache.jackrabbit.webdav.DavException;
+
+        specialinvoke $r8.<org.apache.jackrabbit.webdav.DavException: void <init>(int)>(400);
+
+        throw $r8;
+
+     label13:
+        $r9 = r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: javax.servlet.http.HttpServletRequest httpRequest>;
+
+     label14:
+        $r10 = interfaceinvoke $r9.<javax.servlet.http.HttpServletRequest: java.lang.String getHeader(java.lang.String)>("Host");
+
+        $z0 = virtualinvoke $r5.<java.lang.String: boolean equals(java.lang.Object)>($r10);
+
+     label15:
+        if $z0 != 0 goto label18;
+
+        $r8 = new org.apache.jackrabbit.webdav.DavException;
+
+     label16:
+        specialinvoke $r8.<org.apache.jackrabbit.webdav.DavException: void <init>(int)>(403);
+
+     label17:
+        throw $r8;
+
+     label18:
+        $r9 = r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: javax.servlet.http.HttpServletRequest httpRequest>;
+
+        $r1 = interfaceinvoke $r9.<javax.servlet.http.HttpServletRequest: java.lang.String getContextPath()>();
+
+        $z0 = virtualinvoke r3.<java.lang.String: boolean startsWith(java.lang.String)>($r1);
+
+        if $z0 == 0 goto label20;
+
+        $i0 = virtualinvoke $r1.<java.lang.String: int length()>();
+
+        r3 = virtualinvoke r3.<java.lang.String: java.lang.String substring(int)>($i0);
+
+     label19:
+        $r11 = r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: org.apache.jackrabbit.webdav.DavLocatorFactory factory>;
+
+        $r1 = r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: java.lang.String hrefPrefix>;
+
+        $r12 = interfaceinvoke $r11.<org.apache.jackrabbit.webdav.DavLocatorFactory: org.apache.jackrabbit.webdav.DavResourceLocator createResourceLocator(java.lang.String,java.lang.String)>($r1, r3);
+
+        return $r12;
+
+     label20:
+        $r8 = new org.apache.jackrabbit.webdav.DavException;
+
+        specialinvoke $r8.<org.apache.jackrabbit.webdav.DavException: void <init>(int)>(403);
+
+        throw $r8;
+
+        catch java.net.URISyntaxException from label01 to label02 with label12;
+        catch java.net.URISyntaxException from label03 to label04 with label12;
+        catch java.net.URISyntaxException from label05 to label06 with label12;
+        catch java.net.URISyntaxException from label08 to label09 with label12;
+        catch java.net.URISyntaxException from label10 to label11 with label12;
+        catch java.net.URISyntaxException from label14 to label15 with label12;
+        catch java.net.URISyntaxException from label16 to label17 with label12;
+    }
+    public javax.servlet.ServletInputStream getInputStream() throws java.io.IOException
+    {
+        org.apache.jackrabbit.webdav.WebdavRequestImpl r0;
+        javax.servlet.ServletInputStream $r1;
+        javax.servlet.http.HttpServletRequest $r2;
+
+        r0 := @this: org.apache.jackrabbit.webdav.WebdavRequestImpl;
+
+        $r2 = r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: javax.servlet.http.HttpServletRequest httpRequest>;
+
+        $r1 = interfaceinvoke $r2.<javax.servlet.http.HttpServletRequest: javax.servlet.ServletInputStream getInputStream()>();
+
+        return $r1;
+    }
+    public int getIntHeader(java.lang.String)
+    {
+        org.apache.jackrabbit.webdav.WebdavRequestImpl r0;
+        java.lang.String $r1;
+        int $i0;
+        javax.servlet.http.HttpServletRequest $r2;
+
+        r0 := @this: org.apache.jackrabbit.webdav.WebdavRequestImpl;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: javax.servlet.http.HttpServletRequest httpRequest>;
+
+        $i0 = interfaceinvoke $r2.<javax.servlet.http.HttpServletRequest: int getIntHeader(java.lang.String)>($r1);
+
+        return $i0;
+    }
+    public java.lang.String getLabel()
+    {
+        org.apache.jackrabbit.webdav.WebdavRequestImpl r0;
+        org.apache.jackrabbit.webdav.header.LabelHeader $r1;
+        java.lang.String $r2;
+
+        r0 := @this: org.apache.jackrabbit.webdav.WebdavRequestImpl;
+
+        $r1 = staticinvoke <org.apache.jackrabbit.webdav.header.LabelHeader: org.apache.jackrabbit.webdav.header.LabelHeader parse(org.apache.jackrabbit.webdav.WebdavRequest)>(r0);
+
+        if $r1 == null goto label1;
+
+        $r2 = virtualinvoke $r1.<org.apache.jackrabbit.webdav.header.LabelHeader: java.lang.String getLabel()>();
+
+        return $r2;
+
+     label1:
+        return null;
+    }
+    public org.apache.jackrabbit.webdav.version.LabelInfo getLabelInfo() throws org.apache.jackrabbit.webdav.DavException
+    {
+        org.apache.jackrabbit.webdav.WebdavRequestImpl r0;
+        org.w3c.dom.Document $r1;
+        org.w3c.dom.Element $r2;
+        int $i0;
+        org.apache.jackrabbit.webdav.version.LabelInfo r3;
+
+        r0 := @this: org.apache.jackrabbit.webdav.WebdavRequestImpl;
+
+        $r1 = virtualinvoke r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: org.w3c.dom.Document getRequestDocument()>();
+
+        if $r1 == null goto label1;
+
+        $r2 = interfaceinvoke $r1.<org.w3c.dom.Document: org.w3c.dom.Element getDocumentElement()>();
+
+        $i0 = virtualinvoke r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: int getDepth(int)>(0);
+
+        r3 = new org.apache.jackrabbit.webdav.version.LabelInfo;
+
+        specialinvoke r3.<org.apache.jackrabbit.webdav.version.LabelInfo: void <init>(org.w3c.dom.Element,int)>($r2, $i0);
+
+        return r3;
+
+     label1:
+        return null;
+    }
+    public java.util.Locale getLocale()
+    {
+        org.apache.jackrabbit.webdav.WebdavRequestImpl r0;
+        java.util.Locale $r1;
+        javax.servlet.http.HttpServletRequest $r2;
+
+        r0 := @this: org.apache.jackrabbit.webdav.WebdavRequestImpl;
+
+        $r2 = r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: javax.servlet.http.HttpServletRequest httpRequest>;
+
+        $r1 = interfaceinvoke $r2.<javax.servlet.http.HttpServletRequest: java.util.Locale getLocale()>();
+
+        return $r1;
+    }
+    public java.util.Enumeration getLocales()
+    {
+        org.apache.jackrabbit.webdav.WebdavRequestImpl r0;
+        java.util.Enumeration $r1;
+        javax.servlet.http.HttpServletRequest $r2;
+
+        r0 := @this: org.apache.jackrabbit.webdav.WebdavRequestImpl;
+
+        $r2 = r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: javax.servlet.http.HttpServletRequest httpRequest>;
+
+        $r1 = interfaceinvoke $r2.<javax.servlet.http.HttpServletRequest: java.util.Enumeration getLocales()>();
+
+        return $r1;
+    }
+    public org.apache.jackrabbit.webdav.lock.LockInfo getLockInfo() throws org.apache.jackrabbit.webdav.DavException
+    {
+        org.apache.jackrabbit.webdav.WebdavRequestImpl r0;
+        int $i0;
+        boolean z0, $z1;
+        org.w3c.dom.Document $r1;
+        org.w3c.dom.Element $r2;
+        java.lang.String $r3;
+        org.apache.jackrabbit.webdav.lock.LockInfo r4;
+        long $l1;
+        org.slf4j.Logger $r5;
+        org.apache.jackrabbit.webdav.DavException $r6;
+
+        r0 := @this: org.apache.jackrabbit.webdav.WebdavRequestImpl;
+
+        $i0 = virtualinvoke r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: int getDepth(int)>(2147483647);
+
+        if $i0 != 2147483647 goto label2;
+
+        z0 = 1;
+
+     label1:
+        $r1 = virtualinvoke r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: org.w3c.dom.Document getRequestDocument()>();
+
+        if $r1 == null goto label4;
+
+        $r2 = interfaceinvoke $r1.<org.w3c.dom.Document: org.w3c.dom.Element getDocumentElement()>();
+
+        $r3 = interfaceinvoke $r2.<org.w3c.dom.Element: java.lang.String getLocalName()>();
+
+        $z1 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("lockinfo");
+
+        if $z1 == 0 goto label3;
+
+        r4 = new org.apache.jackrabbit.webdav.lock.LockInfo;
+
+        $l1 = virtualinvoke r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: long getTimeout()>();
+
+        specialinvoke r4.<org.apache.jackrabbit.webdav.lock.LockInfo: void <init>(org.w3c.dom.Element,long,boolean)>($r2, $l1, z0);
+
+        return r4;
+
+     label2:
+        z0 = 0;
+
+        goto label1;
+
+     label3:
+        $r5 = <org.apache.jackrabbit.webdav.WebdavRequestImpl: org.slf4j.Logger log>;
+
+        interfaceinvoke $r5.<org.slf4j.Logger: void debug(java.lang.String)>("Lock request body must start with a DAV:lockinfo element.");
+
+        $r6 = new org.apache.jackrabbit.webdav.DavException;
+
+        specialinvoke $r6.<org.apache.jackrabbit.webdav.DavException: void <init>(int)>(400);
+
+        throw $r6;
+
+     label4:
+        r4 = new org.apache.jackrabbit.webdav.lock.LockInfo;
+
+        $l1 = virtualinvoke r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: long getTimeout()>();
+
+        specialinvoke r4.<org.apache.jackrabbit.webdav.lock.LockInfo: void <init>(org.w3c.dom.Element,long,boolean)>(null, $l1, z0);
+
+        return r4;
+    }
+    public java.lang.String getLockToken()
+    {
+        org.apache.jackrabbit.webdav.WebdavRequestImpl r0;
+        javax.servlet.http.HttpServletRequest $r1;
+        org.apache.jackrabbit.webdav.header.CodedUrlHeader $r2;
+        java.lang.String $r3;
+
+        r0 := @this: org.apache.jackrabbit.webdav.WebdavRequestImpl;
+
+        $r1 = r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: javax.servlet.http.HttpServletRequest httpRequest>;
+
+        $r2 = staticinvoke <org.apache.jackrabbit.webdav.header.CodedUrlHeader: org.apache.jackrabbit.webdav.header.CodedUrlHeader parse(javax.servlet.http.HttpServletRequest,java.lang.String)>($r1, "Lock-Token");
+
+        $r3 = virtualinvoke $r2.<org.apache.jackrabbit.webdav.header.CodedUrlHeader: java.lang.String getCodedUrl()>();
+
+        return $r3;
+    }
+    public org.apache.jackrabbit.webdav.DavResourceLocator getMemberLocator(java.lang.String)
+    {
+        org.apache.jackrabbit.webdav.WebdavRequestImpl r0;
+        java.lang.String $r1, $r4;
+        java.lang.StringBuilder $r2;
+        org.apache.jackrabbit.webdav.DavResourceLocator $r3;
+        int $i0;
+        org.apache.jackrabbit.webdav.DavLocatorFactory $r5;
+
+        r0 := @this: org.apache.jackrabbit.webdav.WebdavRequestImpl;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: org.apache.jackrabbit.webdav.DavResourceLocator getRequestLocator()>();
+
+        $r4 = interfaceinvoke $r3.<org.apache.jackrabbit.webdav.DavResourceLocator: java.lang.String getHref(boolean)>(1);
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r1 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r4 = r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: java.lang.String hrefPrefix>;
+
+        $i0 = virtualinvoke $r4.<java.lang.String: int length()>();
+
+        $r1 = virtualinvoke $r1.<java.lang.String: java.lang.String substring(int)>($i0);
+
+        $r5 = r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: org.apache.jackrabbit.webdav.DavLocatorFactory factory>;
+
+        $r4 = r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: java.lang.String hrefPrefix>;
+
+        $r3 = interfaceinvoke $r5.<org.apache.jackrabbit.webdav.DavLocatorFactory: org.apache.jackrabbit.webdav.DavResourceLocator createResourceLocator(java.lang.String,java.lang.String)>($r4, $r1);
+
+        return $r3;
+    }
+    public org.apache.jackrabbit.webdav.version.MergeInfo getMergeInfo() throws org.apache.jackrabbit.webdav.DavException
+    {
+        org.apache.jackrabbit.webdav.WebdavRequestImpl r0;
+        org.w3c.dom.Document $r1;
+        org.apache.jackrabbit.webdav.version.MergeInfo r2;
+        org.w3c.dom.Element $r3;
+
+        r0 := @this: org.apache.jackrabbit.webdav.WebdavRequestImpl;
+
+        $r1 = virtualinvoke r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: org.w3c.dom.Document getRequestDocument()>();
+
+        if $r1 == null goto label1;
+
+        r2 = new org.apache.jackrabbit.webdav.version.MergeInfo;
+
+        $r3 = interfaceinvoke $r1.<org.w3c.dom.Document: org.w3c.dom.Element getDocumentElement()>();
+
+        specialinvoke r2.<org.apache.jackrabbit.webdav.version.MergeInfo: void <init>(org.w3c.dom.Element)>($r3);
+
+        return r2;
+
+     label1:
+        return null;
+    }
+    public java.lang.String getMethod()
+    {
+        org.apache.jackrabbit.webdav.WebdavRequestImpl r0;
+        java.lang.String $r1;
+        javax.servlet.http.HttpServletRequest $r2;
+
+        r0 := @this: org.apache.jackrabbit.webdav.WebdavRequestImpl;
+
+        $r2 = r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: javax.servlet.http.HttpServletRequest httpRequest>;
+
+        $r1 = interfaceinvoke $r2.<javax.servlet.http.HttpServletRequest: java.lang.String getMethod()>();
+
+        return $r1;
+    }
+    public org.apache.jackrabbit.webdav.version.OptionsInfo getOptionsInfo() throws org.apache.jackrabbit.webdav.DavException
+    {
+        org.apache.jackrabbit.webdav.WebdavRequestImpl r0;
+        org.w3c.dom.Document $r1;
+        org.w3c.dom.Element $r2;
+        org.apache.jackrabbit.webdav.version.OptionsInfo $r3;
+
+        r0 := @this: org.apache.jackrabbit.webdav.WebdavRequestImpl;
+
+        $r1 = virtualinvoke r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: org.w3c.dom.Document getRequestDocument()>();
+
+        if $r1 == null goto label1;
+
+        $r2 = interfaceinvoke $r1.<org.w3c.dom.Document: org.w3c.dom.Element getDocumentElement()>();
+
+        $r3 = staticinvoke <org.apache.jackrabbit.webdav.version.OptionsInfo: org.apache.jackrabbit.webdav.version.OptionsInfo createFromXml(org.w3c.dom.Element)>($r2);
+
+        return $r3;
+
+     label1:
+        return null;
+    }
+    public org.apache.jackrabbit.webdav.ordering.OrderPatch getOrderPatch() throws org.apache.jackrabbit.webdav.DavException
+    {
+        org.apache.jackrabbit.webdav.WebdavRequestImpl r0;
+        org.slf4j.Logger $r1;
+        org.w3c.dom.Document $r2;
+        org.w3c.dom.Element $r3;
+        org.apache.jackrabbit.webdav.ordering.OrderPatch $r4;
+
+        r0 := @this: org.apache.jackrabbit.webdav.WebdavRequestImpl;
+
+        $r2 = virtualinvoke r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: org.w3c.dom.Document getRequestDocument()>();
+
+        if $r2 == null goto label1;
+
+        $r3 = interfaceinvoke $r2.<org.w3c.dom.Document: org.w3c.dom.Element getDocumentElement()>();
+
+        $r4 = staticinvoke <org.apache.jackrabbit.webdav.ordering.OrderPatch: org.apache.jackrabbit.webdav.ordering.OrderPatch createFromXml(org.w3c.dom.Element)>($r3);
+
+        return $r4;
+
+     label1:
+        $r1 = <org.apache.jackrabbit.webdav.WebdavRequestImpl: org.slf4j.Logger log>;
+
+        interfaceinvoke $r1.<org.slf4j.Logger: void error(java.lang.String)>("Error while building xml document from ORDERPATH request body.");
+
+        return null;
+    }
+    public java.lang.String getOrderingType()
+    {
+        org.apache.jackrabbit.webdav.WebdavRequestImpl r0;
+        java.lang.String $r1;
+
+        r0 := @this: org.apache.jackrabbit.webdav.WebdavRequestImpl;
+
+        $r1 = virtualinvoke r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: java.lang.String getHeader(java.lang.String)>("Ordering-Type");
+
+        return $r1;
+    }
+    public java.lang.String getParameter(java.lang.String)
+    {
+        org.apache.jackrabbit.webdav.WebdavRequestImpl r0;
+        java.lang.String $r1;
+        javax.servlet.http.HttpServletRequest $r2;
+
+        r0 := @this: org.apache.jackrabbit.webdav.WebdavRequestImpl;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: javax.servlet.http.HttpServletRequest httpRequest>;
+
+        $r1 = interfaceinvoke $r2.<javax.servlet.http.HttpServletRequest: java.lang.String getParameter(java.lang.String)>($r1);
+
+        return $r1;
+    }
+    public java.util.Map getParameterMap()
+    {
+        org.apache.jackrabbit.webdav.WebdavRequestImpl r0;
+        java.util.Map $r1;
+        javax.servlet.http.HttpServletRequest $r2;
+
+        r0 := @this: org.apache.jackrabbit.webdav.WebdavRequestImpl;
+
+        $r2 = r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: javax.servlet.http.HttpServletRequest httpRequest>;
+
+        $r1 = interfaceinvoke $r2.<javax.servlet.http.HttpServletRequest: java.util.Map getParameterMap()>();
+
+        return $r1;
+    }
+    public java.util.Enumeration getParameterNames()
+    {
+        org.apache.jackrabbit.webdav.WebdavRequestImpl r0;
+        java.util.Enumeration $r1;
+        javax.servlet.http.HttpServletRequest $r2;
+
+        r0 := @this: org.apache.jackrabbit.webdav.WebdavRequestImpl;
+
+        $r2 = r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: javax.servlet.http.HttpServletRequest httpRequest>;
+
+        $r1 = interfaceinvoke $r2.<javax.servlet.http.HttpServletRequest: java.util.Enumeration getParameterNames()>();
+
+        return $r1;
+    }
+    public java.lang.String[] getParameterValues(java.lang.String)
+    {
+        org.apache.jackrabbit.webdav.WebdavRequestImpl r0;
+        java.lang.String $r1;
+        java.lang.String[] $r2;
+        javax.servlet.http.HttpServletRequest $r3;
+
+        r0 := @this: org.apache.jackrabbit.webdav.WebdavRequestImpl;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r3 = r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: javax.servlet.http.HttpServletRequest httpRequest>;
+
+        $r2 = interfaceinvoke $r3.<javax.servlet.http.HttpServletRequest: java.lang.String[] getParameterValues(java.lang.String)>($r1);
+
+        return $r2;
+    }
+    public java.lang.String getPathInfo()
+    {
+        org.apache.jackrabbit.webdav.WebdavRequestImpl r0;
+        java.lang.String $r1;
+        javax.servlet.http.HttpServletRequest $r2;
+
+        r0 := @this: org.apache.jackrabbit.webdav.WebdavRequestImpl;
+
+        $r2 = r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: javax.servlet.http.HttpServletRequest httpRequest>;
+
+        $r1 = interfaceinvoke $r2.<javax.servlet.http.HttpServletRequest: java.lang.String getPathInfo()>();
+
+        return $r1;
+    }
+    public java.lang.String getPathTranslated()
+    {
+        org.apache.jackrabbit.webdav.WebdavRequestImpl r0;
+        java.lang.String $r1;
+        javax.servlet.http.HttpServletRequest $r2;
+
+        r0 := @this: org.apache.jackrabbit.webdav.WebdavRequestImpl;
+
+        $r2 = r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: javax.servlet.http.HttpServletRequest httpRequest>;
+
+        $r1 = interfaceinvoke $r2.<javax.servlet.http.HttpServletRequest: java.lang.String getPathTranslated()>();
+
+        return $r1;
+    }
+    public long getPollTimeout()
+    {
+        org.apache.jackrabbit.webdav.WebdavRequestImpl r0;
+        javax.servlet.http.HttpServletRequest $r1;
+        org.apache.jackrabbit.webdav.header.PollTimeoutHeader $r2;
+        long $l0;
+
+        r0 := @this: org.apache.jackrabbit.webdav.WebdavRequestImpl;
+
+        $r1 = r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: javax.servlet.http.HttpServletRequest httpRequest>;
+
+        $r2 = staticinvoke <org.apache.jackrabbit.webdav.header.PollTimeoutHeader: org.apache.jackrabbit.webdav.header.PollTimeoutHeader parseHeader(javax.servlet.http.HttpServletRequest,long)>($r1, 0L);
+
+        $l0 = virtualinvoke $r2.<org.apache.jackrabbit.webdav.header.PollTimeoutHeader: long getTimeout()>();
+
+        return $l0;
+    }
+    public org.apache.jackrabbit.webdav.ordering.Position getPosition()
+    {
+        org.apache.jackrabbit.webdav.WebdavRequestImpl r0;
+        java.lang.IllegalArgumentException r1;
+        org.apache.jackrabbit.webdav.ordering.Position r2;
+        java.lang.String $r3, $r5;
+        java.lang.String[] $r4;
+        int $i0;
+        org.slf4j.Logger $r6;
+        java.lang.StringBuilder $r7;
+
+        r0 := @this: org.apache.jackrabbit.webdav.WebdavRequestImpl;
+
+        $r3 = virtualinvoke r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: java.lang.String getHeader(java.lang.String)>("Position");
+
+        if $r3 == null goto label4;
+
+        $r4 = virtualinvoke $r3.<java.lang.String: java.lang.String[] split(java.lang.String)>("\\s");
+
+        $i0 = lengthof $r4;
+
+        if $i0 != 2 goto label4;
+
+        r2 = new org.apache.jackrabbit.webdav.ordering.Position;
+
+        $r3 = $r4[0];
+
+        $r5 = $r4[1];
+
+     label1:
+        specialinvoke r2.<org.apache.jackrabbit.webdav.ordering.Position: void <init>(java.lang.String,java.lang.String)>($r3, $r5);
+
+     label2:
+        return r2;
+
+     label3:
+        r1 := @caughtexception;
+
+        $r6 = <org.apache.jackrabbit.webdav.WebdavRequestImpl: org.slf4j.Logger log>;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Cannot parse Position header: ");
+
+        $r3 = virtualinvoke r1.<java.lang.IllegalArgumentException: java.lang.String getMessage()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r3 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        interfaceinvoke $r6.<org.slf4j.Logger: void error(java.lang.String)>($r3);
+
+     label4:
+        return null;
+
+        catch java.lang.IllegalArgumentException from label1 to label2 with label3;
+    }
+    public org.apache.jackrabbit.webdav.property.DavPropertyNameSet getPropFindProperties() throws org.apache.jackrabbit.webdav.DavException
+    {
+        org.apache.jackrabbit.webdav.WebdavRequestImpl r0;
+        org.apache.jackrabbit.webdav.property.DavPropertyNameSet $r1;
+
+        r0 := @this: org.apache.jackrabbit.webdav.WebdavRequestImpl;
+
+        $r1 = r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: org.apache.jackrabbit.webdav.property.DavPropertyNameSet propfindProps>;
+
+        if $r1 != null goto label1;
+
+        specialinvoke r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: void parsePropFindRequest()>();
+
+     label1:
+        $r1 = r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: org.apache.jackrabbit.webdav.property.DavPropertyNameSet propfindProps>;
+
+        return $r1;
+    }
+    public int getPropFindType() throws org.apache.jackrabbit.webdav.DavException
+    {
+        org.apache.jackrabbit.webdav.WebdavRequestImpl r0;
+        org.apache.jackrabbit.webdav.property.DavPropertyNameSet $r1;
+        int i0;
+
+        r0 := @this: org.apache.jackrabbit.webdav.WebdavRequestImpl;
+
+        $r1 = r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: org.apache.jackrabbit.webdav.property.DavPropertyNameSet propfindProps>;
+
+        if $r1 != null goto label1;
+
+        specialinvoke r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: void parsePropFindRequest()>();
+
+     label1:
+        i0 = r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: int propfindType>;
+
+        return i0;
+    }
+    public java.util.List getPropPatchChangeList() throws org.apache.jackrabbit.webdav.DavException
+    {
+        org.apache.jackrabbit.webdav.WebdavRequestImpl r0;
+        java.util.List $r1;
+
+        r0 := @this: org.apache.jackrabbit.webdav.WebdavRequestImpl;
+
+        $r1 = r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: java.util.List proppatchList>;
+
+        if $r1 != null goto label1;
+
+        specialinvoke r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: void parsePropPatchRequest()>();
+
+     label1:
+        $r1 = r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: java.util.List proppatchList>;
+
+        return $r1;
+    }
+    public java.lang.String getProtocol()
+    {
+        org.apache.jackrabbit.webdav.WebdavRequestImpl r0;
+        java.lang.String $r1;
+        javax.servlet.http.HttpServletRequest $r2;
+
+        r0 := @this: org.apache.jackrabbit.webdav.WebdavRequestImpl;
+
+        $r2 = r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: javax.servlet.http.HttpServletRequest httpRequest>;
+
+        $r1 = interfaceinvoke $r2.<javax.servlet.http.HttpServletRequest: java.lang.String getProtocol()>();
+
+        return $r1;
+    }
+    public java.lang.String getQueryString()
+    {
+        org.apache.jackrabbit.webdav.WebdavRequestImpl r0;
+        java.lang.String $r1;
+        javax.servlet.http.HttpServletRequest $r2;
+
+        r0 := @this: org.apache.jackrabbit.webdav.WebdavRequestImpl;
+
+        $r2 = r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: javax.servlet.http.HttpServletRequest httpRequest>;
+
+        $r1 = interfaceinvoke $r2.<javax.servlet.http.HttpServletRequest: java.lang.String getQueryString()>();
+
+        return $r1;
+    }
+    public java.io.BufferedReader getReader() throws java.io.IOException
+    {
+        org.apache.jackrabbit.webdav.WebdavRequestImpl r0;
+        java.io.BufferedReader $r1;
+        javax.servlet.http.HttpServletRequest $r2;
+
+        r0 := @this: org.apache.jackrabbit.webdav.WebdavRequestImpl;
+
+        $r2 = r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: javax.servlet.http.HttpServletRequest httpRequest>;
+
+        $r1 = interfaceinvoke $r2.<javax.servlet.http.HttpServletRequest: java.io.BufferedReader getReader()>();
+
+        return $r1;
+    }
+    public java.lang.String getRealPath(java.lang.String)
+    {
+        org.apache.jackrabbit.webdav.WebdavRequestImpl r0;
+        java.lang.String $r1;
+        javax.servlet.http.HttpServletRequest $r2;
+
+        r0 := @this: org.apache.jackrabbit.webdav.WebdavRequestImpl;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: javax.servlet.http.HttpServletRequest httpRequest>;
+
+        $r1 = interfaceinvoke $r2.<javax.servlet.http.HttpServletRequest: java.lang.String getRealPath(java.lang.String)>($r1);
+
+        return $r1;
+    }
+    public org.apache.jackrabbit.webdav.bind.RebindInfo getRebindInfo() throws org.apache.jackrabbit.webdav.DavException
+    {
+        org.apache.jackrabbit.webdav.WebdavRequestImpl r0;
+        org.w3c.dom.Document $r1;
+        org.w3c.dom.Element $r2;
+        org.apache.jackrabbit.webdav.bind.RebindInfo $r3;
+
+        r0 := @this: org.apache.jackrabbit.webdav.WebdavRequestImpl;
+
+        $r1 = virtualinvoke r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: org.w3c.dom.Document getRequestDocument()>();
+
+        if $r1 == null goto label1;
+
+        $r2 = interfaceinvoke $r1.<org.w3c.dom.Document: org.w3c.dom.Element getDocumentElement()>();
+
+        $r3 = staticinvoke <org.apache.jackrabbit.webdav.bind.RebindInfo: org.apache.jackrabbit.webdav.bind.RebindInfo createFromXml(org.w3c.dom.Element)>($r2);
+
+        return $r3;
+
+     label1:
+        return null;
+    }
+    public java.lang.String getRemoteAddr()
+    {
+        org.apache.jackrabbit.webdav.WebdavRequestImpl r0;
+        java.lang.String $r1;
+        javax.servlet.http.HttpServletRequest $r2;
+
+        r0 := @this: org.apache.jackrabbit.webdav.WebdavRequestImpl;
+
+        $r2 = r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: javax.servlet.http.HttpServletRequest httpRequest>;
+
+        $r1 = interfaceinvoke $r2.<javax.servlet.http.HttpServletRequest: java.lang.String getRemoteAddr()>();
+
+        return $r1;
+    }
+    public java.lang.String getRemoteHost()
+    {
+        org.apache.jackrabbit.webdav.WebdavRequestImpl r0;
+        java.lang.String $r1;
+        javax.servlet.http.HttpServletRequest $r2;
+
+        r0 := @this: org.apache.jackrabbit.webdav.WebdavRequestImpl;
+
+        $r2 = r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: javax.servlet.http.HttpServletRequest httpRequest>;
+
+        $r1 = interfaceinvoke $r2.<javax.servlet.http.HttpServletRequest: java.lang.String getRemoteHost()>();
+
+        return $r1;
+    }
+    public java.lang.String getRemoteUser()
+    {
+        org.apache.jackrabbit.webdav.WebdavRequestImpl r0;
+        java.lang.String $r1;
+        javax.servlet.http.HttpServletRequest $r2;
+
+        r0 := @this: org.apache.jackrabbit.webdav.WebdavRequestImpl;
+
+        $r2 = r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: javax.servlet.http.HttpServletRequest httpRequest>;
+
+        $r1 = interfaceinvoke $r2.<javax.servlet.http.HttpServletRequest: java.lang.String getRemoteUser()>();
+
+        return $r1;
+    }
+    public org.apache.jackrabbit.webdav.version.report.ReportInfo getReportInfo() throws org.apache.jackrabbit.webdav.DavException
+    {
+        org.apache.jackrabbit.webdav.WebdavRequestImpl r0;
+        org.w3c.dom.Document $r1;
+        org.apache.jackrabbit.webdav.version.report.ReportInfo r2;
+        org.w3c.dom.Element $r3;
+        int $i0;
+
+        r0 := @this: org.apache.jackrabbit.webdav.WebdavRequestImpl;
+
+        $r1 = virtualinvoke r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: org.w3c.dom.Document getRequestDocument()>();
+
+        if $r1 == null goto label1;
+
+        r2 = new org.apache.jackrabbit.webdav.version.report.ReportInfo;
+
+        $r3 = interfaceinvoke $r1.<org.w3c.dom.Document: org.w3c.dom.Element getDocumentElement()>();
+
+        $i0 = virtualinvoke r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: int getDepth(int)>(0);
+
+        specialinvoke r2.<org.apache.jackrabbit.webdav.version.report.ReportInfo: void <init>(org.w3c.dom.Element,int)>($r3, $i0);
+
+        return r2;
+
+     label1:
+        return null;
+    }
+    public javax.servlet.RequestDispatcher getRequestDispatcher(java.lang.String)
+    {
+        org.apache.jackrabbit.webdav.WebdavRequestImpl r0;
+        java.lang.String $r1;
+        javax.servlet.RequestDispatcher $r2;
+        javax.servlet.http.HttpServletRequest $r3;
+
+        r0 := @this: org.apache.jackrabbit.webdav.WebdavRequestImpl;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r3 = r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: javax.servlet.http.HttpServletRequest httpRequest>;
+
+        $r2 = interfaceinvoke $r3.<javax.servlet.http.HttpServletRequest: javax.servlet.RequestDispatcher getRequestDispatcher(java.lang.String)>($r1);
+
+        return $r2;
+    }
+    public org.w3c.dom.Document getRequestDocument() throws org.apache.jackrabbit.webdav.DavException
+    {
+        org.apache.jackrabbit.webdav.WebdavRequestImpl r0;
+        boolean z0;
+        org.w3c.dom.Document r2;
+        javax.servlet.http.HttpServletRequest $r3;
+        int $i0;
+        javax.servlet.ServletInputStream $r4;
+        java.io.IOException r5;
+        org.slf4j.Logger $r6;
+        java.lang.StringBuilder $r7, $r12;
+        java.lang.String $r8;
+        javax.xml.parsers.ParserConfigurationException r9;
+        org.xml.sax.SAXException r10;
+        java.io.BufferedInputStream $r11;
+        org.apache.jackrabbit.webdav.DavException $r13;
+        java.io.InputStream $r14;
+
+        r0 := @this: org.apache.jackrabbit.webdav.WebdavRequestImpl;
+
+        z0 = 1;
+
+        r2 = null;
+
+        $r3 = r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: javax.servlet.http.HttpServletRequest httpRequest>;
+
+        $i0 = interfaceinvoke $r3.<javax.servlet.http.HttpServletRequest: int getContentLength()>();
+
+        if $i0 != 0 goto label01;
+
+        return null;
+
+     label01:
+        $r3 = r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: javax.servlet.http.HttpServletRequest httpRequest>;
+
+     label02:
+        $r4 = interfaceinvoke $r3.<javax.servlet.http.HttpServletRequest: javax.servlet.ServletInputStream getInputStream()>();
+
+     label03:
+        if $r4 == null goto label09;
+
+        $r11 = new java.io.BufferedInputStream;
+
+        $r14 = (java.io.InputStream) $r4;
+
+     label04:
+        specialinvoke $r11.<java.io.BufferedInputStream: void <init>(java.io.InputStream)>($r14);
+
+        virtualinvoke $r11.<java.io.InputStream: void mark(int)>(1);
+
+        $i0 = virtualinvoke $r11.<java.io.InputStream: int read()>();
+
+     label05:
+        if -1 != $i0 goto label10;
+
+     label06:
+        virtualinvoke $r11.<java.io.InputStream: void reset()>();
+
+     label07:
+        if z0 != 0 goto label09;
+
+     label08:
+        r2 = staticinvoke <org.apache.jackrabbit.webdav.xml.DomUtil: org.w3c.dom.Document parseDocument(java.io.InputStream)>($r11);
+
+     label09:
+        return r2;
+
+     label10:
+        z0 = 0;
+
+        goto label06;
+
+     label11:
+        r5 := @caughtexception;
+
+        $r6 = <org.apache.jackrabbit.webdav.WebdavRequestImpl: org.slf4j.Logger log>;
+
+        z0 = interfaceinvoke $r6.<org.slf4j.Logger: boolean isDebugEnabled()>();
+
+        if z0 == 0 goto label12;
+
+        $r6 = <org.apache.jackrabbit.webdav.WebdavRequestImpl: org.slf4j.Logger log>;
+
+        $r12 = new java.lang.StringBuilder;
+
+        specialinvoke $r12.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unable to build an XML Document from the request body: ");
+
+        $r8 = virtualinvoke r5.<java.io.IOException: java.lang.String getMessage()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r8);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        interfaceinvoke $r6.<org.slf4j.Logger: void debug(java.lang.String)>($r8);
+
+     label12:
+        $r13 = new org.apache.jackrabbit.webdav.DavException;
+
+        specialinvoke $r13.<org.apache.jackrabbit.webdav.DavException: void <init>(int)>(400);
+
+        throw $r13;
+
+     label13:
+        r9 := @caughtexception;
+
+        $r6 = <org.apache.jackrabbit.webdav.WebdavRequestImpl: org.slf4j.Logger log>;
+
+        z0 = interfaceinvoke $r6.<org.slf4j.Logger: boolean isDebugEnabled()>();
+
+        if z0 == 0 goto label14;
+
+        $r6 = <org.apache.jackrabbit.webdav.WebdavRequestImpl: org.slf4j.Logger log>;
+
+        $r12 = new java.lang.StringBuilder;
+
+        specialinvoke $r12.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unable to build an XML Document from the request body: ");
+
+        $r8 = virtualinvoke r9.<javax.xml.parsers.ParserConfigurationException: java.lang.String getMessage()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r8);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        interfaceinvoke $r6.<org.slf4j.Logger: void debug(java.lang.String)>($r8);
+
+     label14:
+        $r13 = new org.apache.jackrabbit.webdav.DavException;
+
+        specialinvoke $r13.<org.apache.jackrabbit.webdav.DavException: void <init>(int)>(500);
+
+        throw $r13;
+
+     label15:
+        r10 := @caughtexception;
+
+        $r6 = <org.apache.jackrabbit.webdav.WebdavRequestImpl: org.slf4j.Logger log>;
+
+        z0 = interfaceinvoke $r6.<org.slf4j.Logger: boolean isDebugEnabled()>();
+
+        if z0 == 0 goto label16;
+
+        $r6 = <org.apache.jackrabbit.webdav.WebdavRequestImpl: org.slf4j.Logger log>;
+
+        $r12 = new java.lang.StringBuilder;
+
+        specialinvoke $r12.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unable to build an XML Document from the request body: ");
+
+        $r8 = virtualinvoke r10.<org.xml.sax.SAXException: java.lang.String getMessage()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r8);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        interfaceinvoke $r6.<org.slf4j.Logger: void debug(java.lang.String)>($r8);
+
+     label16:
+        $r13 = new org.apache.jackrabbit.webdav.DavException;
+
+        specialinvoke $r13.<org.apache.jackrabbit.webdav.DavException: void <init>(int)>(400);
+
+        throw $r13;
+
+        catch java.io.IOException from label02 to label03 with label11;
+        catch java.io.IOException from label04 to label05 with label11;
+        catch java.io.IOException from label06 to label07 with label11;
+        catch java.io.IOException from label08 to label09 with label11;
+        catch javax.xml.parsers.ParserConfigurationException from label02 to label03 with label13;
+        catch javax.xml.parsers.ParserConfigurationException from label04 to label05 with label13;
+        catch javax.xml.parsers.ParserConfigurationException from label06 to label07 with label13;
+        catch javax.xml.parsers.ParserConfigurationException from label08 to label09 with label13;
+        catch org.xml.sax.SAXException from label02 to label03 with label15;
+        catch org.xml.sax.SAXException from label04 to label05 with label15;
+        catch org.xml.sax.SAXException from label06 to label07 with label15;
+        catch org.xml.sax.SAXException from label08 to label09 with label15;
+    }
+    public org.apache.jackrabbit.webdav.DavResourceLocator getRequestLocator()
+    {
+        org.apache.jackrabbit.webdav.WebdavRequestImpl r0;
+        java.lang.String $r1, r2, $r3;
+        boolean $z0;
+        int $i0;
+        org.apache.jackrabbit.webdav.DavLocatorFactory $r4;
+        org.apache.jackrabbit.webdav.DavResourceLocator $r5;
+
+        r0 := @this: org.apache.jackrabbit.webdav.WebdavRequestImpl;
+
+        $r1 = virtualinvoke r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: java.lang.String getRequestURI()>();
+
+        r2 = $r1;
+
+        $r3 = virtualinvoke r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: java.lang.String getContextPath()>();
+
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean startsWith(java.lang.String)>($r3);
+
+        if $z0 == 0 goto label1;
+
+        $i0 = virtualinvoke $r3.<java.lang.String: int length()>();
+
+        r2 = virtualinvoke $r1.<java.lang.String: java.lang.String substring(int)>($i0);
+
+     label1:
+        $r4 = r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: org.apache.jackrabbit.webdav.DavLocatorFactory factory>;
+
+        $r1 = r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: java.lang.String hrefPrefix>;
+
+        $r5 = interfaceinvoke $r4.<org.apache.jackrabbit.webdav.DavLocatorFactory: org.apache.jackrabbit.webdav.DavResourceLocator createResourceLocator(java.lang.String,java.lang.String)>($r1, r2);
+
+        return $r5;
+    }
+    public java.lang.String getRequestURI()
+    {
+        org.apache.jackrabbit.webdav.WebdavRequestImpl r0;
+        java.lang.String $r1;
+        javax.servlet.http.HttpServletRequest $r2;
+
+        r0 := @this: org.apache.jackrabbit.webdav.WebdavRequestImpl;
+
+        $r2 = r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: javax.servlet.http.HttpServletRequest httpRequest>;
+
+        $r1 = interfaceinvoke $r2.<javax.servlet.http.HttpServletRequest: java.lang.String getRequestURI()>();
+
+        return $r1;
+    }
+    public java.lang.StringBuffer getRequestURL()
+    {
+        org.apache.jackrabbit.webdav.WebdavRequestImpl r0;
+        java.lang.StringBuffer $r1;
+        javax.servlet.http.HttpServletRequest $r2;
+
+        r0 := @this: org.apache.jackrabbit.webdav.WebdavRequestImpl;
+
+        $r2 = r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: javax.servlet.http.HttpServletRequest httpRequest>;
+
+        $r1 = interfaceinvoke $r2.<javax.servlet.http.HttpServletRequest: java.lang.StringBuffer getRequestURL()>();
+
+        return $r1;
+    }
+    public java.lang.String getRequestedSessionId()
+    {
+        org.apache.jackrabbit.webdav.WebdavRequestImpl r0;
+        java.lang.String $r1;
+        javax.servlet.http.HttpServletRequest $r2;
+
+        r0 := @this: org.apache.jackrabbit.webdav.WebdavRequestImpl;
+
+        $r2 = r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: javax.servlet.http.HttpServletRequest httpRequest>;
+
+        $r1 = interfaceinvoke $r2.<javax.servlet.http.HttpServletRequest: java.lang.String getRequestedSessionId()>();
+
+        return $r1;
+    }
+    public java.lang.String getScheme()
+    {
+        org.apache.jackrabbit.webdav.WebdavRequestImpl r0;
+        java.lang.String $r1;
+        javax.servlet.http.HttpServletRequest $r2;
+
+        r0 := @this: org.apache.jackrabbit.webdav.WebdavRequestImpl;
+
+        $r2 = r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: javax.servlet.http.HttpServletRequest httpRequest>;
+
+        $r1 = interfaceinvoke $r2.<javax.servlet.http.HttpServletRequest: java.lang.String getScheme()>();
+
+        return $r1;
+    }
+    public java.lang.String getServerName()
+    {
+        org.apache.jackrabbit.webdav.WebdavRequestImpl r0;
+        java.lang.String $r1;
+        javax.servlet.http.HttpServletRequest $r2;
+
+        r0 := @this: org.apache.jackrabbit.webdav.WebdavRequestImpl;
+
+        $r2 = r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: javax.servlet.http.HttpServletRequest httpRequest>;
+
+        $r1 = interfaceinvoke $r2.<javax.servlet.http.HttpServletRequest: java.lang.String getServerName()>();
+
+        return $r1;
+    }
+    public int getServerPort()
+    {
+        org.apache.jackrabbit.webdav.WebdavRequestImpl r0;
+        int $i0;
+        javax.servlet.http.HttpServletRequest $r1;
+
+        r0 := @this: org.apache.jackrabbit.webdav.WebdavRequestImpl;
+
+        $r1 = r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: javax.servlet.http.HttpServletRequest httpRequest>;
+
+        $i0 = interfaceinvoke $r1.<javax.servlet.http.HttpServletRequest: int getServerPort()>();
+
+        return $i0;
+    }
+    public java.lang.String getServletPath()
+    {
+        org.apache.jackrabbit.webdav.WebdavRequestImpl r0;
+        java.lang.String $r1;
+        javax.servlet.http.HttpServletRequest $r2;
+
+        r0 := @this: org.apache.jackrabbit.webdav.WebdavRequestImpl;
+
+        $r2 = r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: javax.servlet.http.HttpServletRequest httpRequest>;
+
+        $r1 = interfaceinvoke $r2.<javax.servlet.http.HttpServletRequest: java.lang.String getServletPath()>();
+
+        return $r1;
+    }
+    public javax.servlet.http.HttpSession getSession()
+    {
+        org.apache.jackrabbit.webdav.WebdavRequestImpl r0;
+        javax.servlet.http.HttpSession $r1;
+        javax.servlet.http.HttpServletRequest $r2;
+
+        r0 := @this: org.apache.jackrabbit.webdav.WebdavRequestImpl;
+
+        $r2 = r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: javax.servlet.http.HttpServletRequest httpRequest>;
+
+        $r1 = interfaceinvoke $r2.<javax.servlet.http.HttpServletRequest: javax.servlet.http.HttpSession getSession()>();
+
+        return $r1;
+    }
+    public javax.servlet.http.HttpSession getSession(boolean)
+    {
+        org.apache.jackrabbit.webdav.WebdavRequestImpl r0;
+        boolean $z0;
+        javax.servlet.http.HttpSession $r1;
+        javax.servlet.http.HttpServletRequest $r2;
+
+        r0 := @this: org.apache.jackrabbit.webdav.WebdavRequestImpl;
+
+        $z0 := @parameter0: boolean;
+
+        $r2 = r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: javax.servlet.http.HttpServletRequest httpRequest>;
+
+        $r1 = interfaceinvoke $r2.<javax.servlet.http.HttpServletRequest: javax.servlet.http.HttpSession getSession(boolean)>($z0);
+
+        return $r1;
+    }
+    public java.lang.String getSubscriptionId()
+    {
+        org.apache.jackrabbit.webdav.WebdavRequestImpl r0;
+        javax.servlet.http.HttpServletRequest $r1;
+        org.apache.jackrabbit.webdav.header.CodedUrlHeader $r2;
+        java.lang.String $r3;
+
+        r0 := @this: org.apache.jackrabbit.webdav.WebdavRequestImpl;
+
+        $r1 = r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: javax.servlet.http.HttpServletRequest httpRequest>;
+
+        $r2 = staticinvoke <org.apache.jackrabbit.webdav.header.CodedUrlHeader: org.apache.jackrabbit.webdav.header.CodedUrlHeader parse(javax.servlet.http.HttpServletRequest,java.lang.String)>($r1, "SubscriptionId");
+
+        $r3 = virtualinvoke $r2.<org.apache.jackrabbit.webdav.header.CodedUrlHeader: java.lang.String getCodedUrl()>();
+
+        return $r3;
+    }
+    public org.apache.jackrabbit.webdav.observation.SubscriptionInfo getSubscriptionInfo() throws org.apache.jackrabbit.webdav.DavException
+    {
+        org.apache.jackrabbit.webdav.WebdavRequestImpl r0;
+        boolean $z0, $z1;
+        org.w3c.dom.Document $r1;
+        org.w3c.dom.Element $r2;
+        java.lang.String $r3, $r4;
+        int $i0;
+        org.apache.jackrabbit.webdav.observation.SubscriptionInfo $r5;
+        long $l1;
+
+        r0 := @this: org.apache.jackrabbit.webdav.WebdavRequestImpl;
+
+        $z0 = 0;
+
+        $r1 = virtualinvoke r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: org.w3c.dom.Document getRequestDocument()>();
+
+        if $r1 == null goto label2;
+
+        $r2 = interfaceinvoke $r1.<org.w3c.dom.Document: org.w3c.dom.Element getDocumentElement()>();
+
+        $r3 = "subscriptioninfo";
+
+        $r4 = interfaceinvoke $r2.<org.w3c.dom.Element: java.lang.String getLocalName()>();
+
+        $z1 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>($r4);
+
+        if $z1 == 0 goto label2;
+
+        $i0 = virtualinvoke r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: int getDepth(int)>(0);
+
+        $r5 = new org.apache.jackrabbit.webdav.observation.SubscriptionInfo;
+
+        $l1 = virtualinvoke r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: long getTimeout()>();
+
+        if $i0 != 2147483647 goto label1;
+
+        $z0 = 1;
+
+     label1:
+        specialinvoke $r5.<org.apache.jackrabbit.webdav.observation.SubscriptionInfo: void <init>(org.w3c.dom.Element,long,boolean)>($r2, $l1, $z0);
+
+        return $r5;
+
+     label2:
+        return null;
+    }
+    public long getTimeout()
+    {
+        org.apache.jackrabbit.webdav.WebdavRequestImpl r0;
+        javax.servlet.http.HttpServletRequest $r1;
+        org.apache.jackrabbit.webdav.header.TimeoutHeader $r2;
+        long $l0;
+
+        r0 := @this: org.apache.jackrabbit.webdav.WebdavRequestImpl;
+
+        $r1 = r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: javax.servlet.http.HttpServletRequest httpRequest>;
+
+        $r2 = staticinvoke <org.apache.jackrabbit.webdav.header.TimeoutHeader: org.apache.jackrabbit.webdav.header.TimeoutHeader parse(javax.servlet.http.HttpServletRequest,long)>($r1, -2147483648L);
+
+        $l0 = virtualinvoke $r2.<org.apache.jackrabbit.webdav.header.TimeoutHeader: long getTimeout()>();
+
+        return $l0;
+    }
+    public java.lang.String getTransactionId()
+    {
+        org.apache.jackrabbit.webdav.WebdavRequestImpl r0;
+        javax.servlet.http.HttpServletRequest $r1;
+        org.apache.jackrabbit.webdav.header.CodedUrlHeader $r2;
+        java.lang.String $r3;
+
+        r0 := @this: org.apache.jackrabbit.webdav.WebdavRequestImpl;
+
+        $r1 = r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: javax.servlet.http.HttpServletRequest httpRequest>;
+
+        $r2 = staticinvoke <org.apache.jackrabbit.webdav.header.CodedUrlHeader: org.apache.jackrabbit.webdav.header.CodedUrlHeader parse(javax.servlet.http.HttpServletRequest,java.lang.String)>($r1, "TransactionId");
+
+        $r3 = virtualinvoke $r2.<org.apache.jackrabbit.webdav.header.CodedUrlHeader: java.lang.String getCodedUrl()>();
+
+        return $r3;
+    }
+    public org.apache.jackrabbit.webdav.transaction.TransactionInfo getTransactionInfo() throws org.apache.jackrabbit.webdav.DavException
+    {
+        org.apache.jackrabbit.webdav.WebdavRequestImpl r0;
+        org.w3c.dom.Document $r1;
+        org.apache.jackrabbit.webdav.transaction.TransactionInfo $r2;
+        org.w3c.dom.Element $r3;
+
+        r0 := @this: org.apache.jackrabbit.webdav.WebdavRequestImpl;
+
+        $r1 = virtualinvoke r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: org.w3c.dom.Document getRequestDocument()>();
+
+        if $r1 == null goto label1;
+
+        $r2 = new org.apache.jackrabbit.webdav.transaction.TransactionInfo;
+
+        $r3 = interfaceinvoke $r1.<org.w3c.dom.Document: org.w3c.dom.Element getDocumentElement()>();
+
+        specialinvoke $r2.<org.apache.jackrabbit.webdav.transaction.TransactionInfo: void <init>(org.w3c.dom.Element)>($r3);
+
+        return $r2;
+
+     label1:
+        return null;
+    }
+    public org.apache.jackrabbit.webdav.bind.UnbindInfo getUnbindInfo() throws org.apache.jackrabbit.webdav.DavException
+    {
+        org.apache.jackrabbit.webdav.WebdavRequestImpl r0;
+        org.w3c.dom.Document $r1;
+        org.w3c.dom.Element $r2;
+        org.apache.jackrabbit.webdav.bind.UnbindInfo $r3;
+
+        r0 := @this: org.apache.jackrabbit.webdav.WebdavRequestImpl;
+
+        $r1 = virtualinvoke r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: org.w3c.dom.Document getRequestDocument()>();
+
+        if $r1 == null goto label1;
+
+        $r2 = interfaceinvoke $r1.<org.w3c.dom.Document: org.w3c.dom.Element getDocumentElement()>();
+
+        $r3 = staticinvoke <org.apache.jackrabbit.webdav.bind.UnbindInfo: org.apache.jackrabbit.webdav.bind.UnbindInfo createFromXml(org.w3c.dom.Element)>($r2);
+
+        return $r3;
+
+     label1:
+        return null;
+    }
+    public org.apache.jackrabbit.webdav.version.UpdateInfo getUpdateInfo() throws org.apache.jackrabbit.webdav.DavException
+    {
+        org.apache.jackrabbit.webdav.WebdavRequestImpl r0;
+        org.w3c.dom.Document $r1;
+        org.apache.jackrabbit.webdav.version.UpdateInfo r2;
+        org.w3c.dom.Element $r3;
+
+        r0 := @this: org.apache.jackrabbit.webdav.WebdavRequestImpl;
+
+        $r1 = virtualinvoke r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: org.w3c.dom.Document getRequestDocument()>();
+
+        if $r1 == null goto label1;
+
+        r2 = new org.apache.jackrabbit.webdav.version.UpdateInfo;
+
+        $r3 = interfaceinvoke $r1.<org.w3c.dom.Document: org.w3c.dom.Element getDocumentElement()>();
+
+        specialinvoke r2.<org.apache.jackrabbit.webdav.version.UpdateInfo: void <init>(org.w3c.dom.Element)>($r3);
+
+        return r2;
+
+     label1:
+        return null;
+    }
+    public java.security.Principal getUserPrincipal()
+    {
+        org.apache.jackrabbit.webdav.WebdavRequestImpl r0;
+        java.security.Principal $r1;
+        javax.servlet.http.HttpServletRequest $r2;
+
+        r0 := @this: org.apache.jackrabbit.webdav.WebdavRequestImpl;
+
+        $r2 = r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: javax.servlet.http.HttpServletRequest httpRequest>;
+
+        $r1 = interfaceinvoke $r2.<javax.servlet.http.HttpServletRequest: java.security.Principal getUserPrincipal()>();
+
+        return $r1;
+    }
+    public boolean isOverwrite()
+    {
+        org.apache.jackrabbit.webdav.WebdavRequestImpl r0;
+        javax.servlet.http.HttpServletRequest $r1;
+        boolean $z0;
+        org.apache.jackrabbit.webdav.header.OverwriteHeader $r2;
+
+        r0 := @this: org.apache.jackrabbit.webdav.WebdavRequestImpl;
+
+        $r2 = new org.apache.jackrabbit.webdav.header.OverwriteHeader;
+
+        $r1 = r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: javax.servlet.http.HttpServletRequest httpRequest>;
+
+        specialinvoke $r2.<org.apache.jackrabbit.webdav.header.OverwriteHeader: void <init>(javax.servlet.http.HttpServletRequest)>($r1);
+
+        $z0 = virtualinvoke $r2.<org.apache.jackrabbit.webdav.header.OverwriteHeader: boolean isOverwrite()>();
+
+        return $z0;
+    }
+    public boolean isRequestedSessionIdFromCookie()
+    {
+        org.apache.jackrabbit.webdav.WebdavRequestImpl r0;
+        boolean $z0;
+        javax.servlet.http.HttpServletRequest $r1;
+
+        r0 := @this: org.apache.jackrabbit.webdav.WebdavRequestImpl;
+
+        $r1 = r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: javax.servlet.http.HttpServletRequest httpRequest>;
+
+        $z0 = interfaceinvoke $r1.<javax.servlet.http.HttpServletRequest: boolean isRequestedSessionIdFromCookie()>();
+
+        return $z0;
+    }
+    public boolean isRequestedSessionIdFromURL()
+    {
+        org.apache.jackrabbit.webdav.WebdavRequestImpl r0;
+        boolean $z0;
+        javax.servlet.http.HttpServletRequest $r1;
+
+        r0 := @this: org.apache.jackrabbit.webdav.WebdavRequestImpl;
+
+        $r1 = r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: javax.servlet.http.HttpServletRequest httpRequest>;
+
+        $z0 = interfaceinvoke $r1.<javax.servlet.http.HttpServletRequest: boolean isRequestedSessionIdFromURL()>();
+
+        return $z0;
+    }
+    public boolean isRequestedSessionIdFromUrl()
+    {
+        org.apache.jackrabbit.webdav.WebdavRequestImpl r0;
+        boolean $z0;
+        javax.servlet.http.HttpServletRequest $r1;
+
+        r0 := @this: org.apache.jackrabbit.webdav.WebdavRequestImpl;
+
+        $r1 = r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: javax.servlet.http.HttpServletRequest httpRequest>;
+
+        $z0 = interfaceinvoke $r1.<javax.servlet.http.HttpServletRequest: boolean isRequestedSessionIdFromUrl()>();
+
+        return $z0;
+    }
+    public boolean isRequestedSessionIdValid()
+    {
+        org.apache.jackrabbit.webdav.WebdavRequestImpl r0;
+        boolean $z0;
+        javax.servlet.http.HttpServletRequest $r1;
+
+        r0 := @this: org.apache.jackrabbit.webdav.WebdavRequestImpl;
+
+        $r1 = r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: javax.servlet.http.HttpServletRequest httpRequest>;
+
+        $z0 = interfaceinvoke $r1.<javax.servlet.http.HttpServletRequest: boolean isRequestedSessionIdValid()>();
+
+        return $z0;
+    }
+    public boolean isSecure()
+    {
+        org.apache.jackrabbit.webdav.WebdavRequestImpl r0;
+        boolean $z0;
+        javax.servlet.http.HttpServletRequest $r1;
+
+        r0 := @this: org.apache.jackrabbit.webdav.WebdavRequestImpl;
+
+        $r1 = r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: javax.servlet.http.HttpServletRequest httpRequest>;
+
+        $z0 = interfaceinvoke $r1.<javax.servlet.http.HttpServletRequest: boolean isSecure()>();
+
+        return $z0;
+    }
+    public boolean isUserInRole(java.lang.String)
+    {
+        org.apache.jackrabbit.webdav.WebdavRequestImpl r0;
+        java.lang.String $r1;
+        boolean $z0;
+        javax.servlet.http.HttpServletRequest $r2;
+
+        r0 := @this: org.apache.jackrabbit.webdav.WebdavRequestImpl;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: javax.servlet.http.HttpServletRequest httpRequest>;
+
+        $z0 = interfaceinvoke $r2.<javax.servlet.http.HttpServletRequest: boolean isUserInRole(java.lang.String)>($r1);
+
+        return $z0;
+    }
+    public boolean matchesIfHeader(java.lang.String, java.lang.String, java.lang.String)
+    {
+        org.apache.jackrabbit.webdav.WebdavRequestImpl r0;
+        java.lang.String $r1, $r2, r3;
+        org.apache.jackrabbit.webdav.header.IfHeader $r4;
+        boolean $z0;
+
+        r0 := @this: org.apache.jackrabbit.webdav.WebdavRequestImpl;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.lang.String;
+
+        r3 := @parameter2: java.lang.String;
+
+        $r4 = r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: org.apache.jackrabbit.webdav.header.IfHeader ifHeader>;
+
+        $z0 = staticinvoke <org.apache.jackrabbit.webdav.WebdavRequestImpl: boolean isStrongETag(java.lang.String)>(r3);
+
+        if $z0 == 0 goto label2;
+
+     label1:
+        $z0 = virtualinvoke $r4.<org.apache.jackrabbit.webdav.header.IfHeader: boolean matches(java.lang.String,java.lang.String,java.lang.String)>($r1, $r2, r3);
+
+        return $z0;
+
+     label2:
+        r3 = "";
+
+        goto label1;
+    }
+    public boolean matchesIfHeader(org.apache.jackrabbit.webdav.DavResource)
+    {
+        org.apache.jackrabbit.webdav.WebdavRequestImpl r0;
+        org.apache.jackrabbit.webdav.DavResource $r1;
+        org.apache.jackrabbit.webdav.header.IfHeader $r2;
+        boolean $z0;
+        org.apache.jackrabbit.webdav.lock.Type $r3;
+        org.apache.jackrabbit.webdav.lock.Scope $r4;
+        org.apache.jackrabbit.webdav.lock.ActiveLock $r5;
+        java.lang.String $r6, $r7, $r8;
+
+        r0 := @this: org.apache.jackrabbit.webdav.WebdavRequestImpl;
+
+        $r1 := @parameter0: org.apache.jackrabbit.webdav.DavResource;
+
+        $r2 = r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: org.apache.jackrabbit.webdav.header.IfHeader ifHeader>;
+
+        $z0 = virtualinvoke $r2.<org.apache.jackrabbit.webdav.header.IfHeader: boolean hasValue()>();
+
+        if $z0 == 0 goto label1;
+
+        if $r1 == null goto label1;
+
+        $r3 = <org.apache.jackrabbit.webdav.lock.Type: org.apache.jackrabbit.webdav.lock.Type WRITE>;
+
+        $r4 = <org.apache.jackrabbit.webdav.lock.Scope: org.apache.jackrabbit.webdav.lock.Scope EXCLUSIVE>;
+
+        $z0 = interfaceinvoke $r1.<org.apache.jackrabbit.webdav.DavResource: boolean hasLock(org.apache.jackrabbit.webdav.lock.Type,org.apache.jackrabbit.webdav.lock.Scope)>($r3, $r4);
+
+        if $z0 != 0 goto label2;
+
+     label1:
+        return 1;
+
+     label2:
+        $r3 = <org.apache.jackrabbit.webdav.lock.Type: org.apache.jackrabbit.webdav.lock.Type WRITE>;
+
+        $r4 = <org.apache.jackrabbit.webdav.lock.Scope: org.apache.jackrabbit.webdav.lock.Scope EXCLUSIVE>;
+
+        $r5 = interfaceinvoke $r1.<org.apache.jackrabbit.webdav.DavResource: org.apache.jackrabbit.webdav.lock.ActiveLock getLock(org.apache.jackrabbit.webdav.lock.Type,org.apache.jackrabbit.webdav.lock.Scope)>($r3, $r4);
+
+        $r6 = interfaceinvoke $r5.<org.apache.jackrabbit.webdav.lock.ActiveLock: java.lang.String getToken()>();
+
+        if $r6 == null goto label3;
+
+        $r7 = interfaceinvoke $r1.<org.apache.jackrabbit.webdav.DavResource: java.lang.String getHref()>();
+
+        $r8 = specialinvoke r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: java.lang.String getStrongETag(org.apache.jackrabbit.webdav.DavResource)>($r1);
+
+        $z0 = virtualinvoke r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: boolean matchesIfHeader(java.lang.String,java.lang.String,java.lang.String)>($r7, $r6, $r8);
+
+        return $z0;
+
+     label3:
+        return 0;
+    }
+    public void removeAttribute(java.lang.String)
+    {
+        org.apache.jackrabbit.webdav.WebdavRequestImpl r0;
+        java.lang.String $r1;
+        javax.servlet.http.HttpServletRequest $r2;
+
+        r0 := @this: org.apache.jackrabbit.webdav.WebdavRequestImpl;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: javax.servlet.http.HttpServletRequest httpRequest>;
+
+        interfaceinvoke $r2.<javax.servlet.http.HttpServletRequest: void removeAttribute(java.lang.String)>($r1);
+
+        return;
+    }
+    public void setAttribute(java.lang.String, java.lang.Object)
+    {
+        org.apache.jackrabbit.webdav.WebdavRequestImpl r0;
+        java.lang.String $r1;
+        java.lang.Object $r2;
+        javax.servlet.http.HttpServletRequest $r3;
+
+        r0 := @this: org.apache.jackrabbit.webdav.WebdavRequestImpl;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.lang.Object;
+
+        $r3 = r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: javax.servlet.http.HttpServletRequest httpRequest>;
+
+        interfaceinvoke $r3.<javax.servlet.http.HttpServletRequest: void setAttribute(java.lang.String,java.lang.Object)>($r1, $r2);
+
+        return;
+    }
+    public void setCharacterEncoding(java.lang.String) throws java.io.UnsupportedEncodingException
+    {
+        org.apache.jackrabbit.webdav.WebdavRequestImpl r0;
+        java.lang.String $r1;
+        javax.servlet.http.HttpServletRequest $r2;
+
+        r0 := @this: org.apache.jackrabbit.webdav.WebdavRequestImpl;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: javax.servlet.http.HttpServletRequest httpRequest>;
+
+        interfaceinvoke $r2.<javax.servlet.http.HttpServletRequest: void setCharacterEncoding(java.lang.String)>($r1);
+
+        return;
+    }
+    public void setDavSession(org.apache.jackrabbit.webdav.DavSession)
+    {
+        org.apache.jackrabbit.webdav.WebdavRequestImpl r0;
+        org.apache.jackrabbit.webdav.DavSession $r1;
+        java.lang.String $r2;
+        org.apache.jackrabbit.webdav.header.IfHeader $r3;
+        java.util.Iterator $r4;
+        boolean $z0;
+        java.lang.Object $r5;
+
+        r0 := @this: org.apache.jackrabbit.webdav.WebdavRequestImpl;
+
+        $r1 := @parameter0: org.apache.jackrabbit.webdav.DavSession;
+
+        r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: org.apache.jackrabbit.webdav.DavSession session> = $r1;
+
+        if $r1 == null goto label3;
+
+        $r2 = virtualinvoke r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: java.lang.String getLockToken()>();
+
+        if $r2 == null goto label1;
+
+        interfaceinvoke $r1.<org.apache.jackrabbit.webdav.DavSession: void addLockToken(java.lang.String)>($r2);
+
+     label1:
+        $r3 = r0.<org.apache.jackrabbit.webdav.WebdavRequestImpl: org.apache.jackrabbit.webdav.header.IfHeader ifHeader>;
+
+        $r4 = virtualinvoke $r3.<org.apache.jackrabbit.webdav.header.IfHeader: java.util.Iterator getAllTokens()>();
+
+     label2:
+        $z0 = interfaceinvoke $r4.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label3;
+
+        $r5 = interfaceinvoke $r4.<java.util.Iterator: java.lang.Object next()>();
+
+        $r2 = (java.lang.String) $r5;
+
+        interfaceinvoke $r1.<org.apache.jackrabbit.webdav.DavSession: void addLockToken(java.lang.String)>($r2);
+
+        goto label2;
+
+     label3:
+        return;
+    }

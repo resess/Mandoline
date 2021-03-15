@@ -1,0 +1,691 @@
+com.fsck.k9.notification.NotificationData extends java.lang.Object
+static final int MAX_NUMBER_OF_MESSAGES_FOR_SUMMARY_NOTIFICATION
+static final int MAX_NUMBER_OF_STACKED_NOTIFICATIONS
+private final com.fsck.k9.Account account
+private final java.util.LinkedList activeNotifications
+private final java.util.Deque additionalNotifications
+private final android.util.SparseBooleanArray notificationIdsInUse
+private int unreadMessageCount
+    public void <init>(com.fsck.k9.Account)
+    {
+        com.fsck.k9.notification.NotificationData r0;
+        com.fsck.k9.Account $r1;
+        java.util.LinkedList $r2;
+        android.util.SparseBooleanArray $r3;
+
+        r0 := @this: com.fsck.k9.notification.NotificationData;
+
+        $r1 := @parameter0: com.fsck.k9.Account;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r2 = new java.util.LinkedList;
+
+        specialinvoke $r2.<java.util.LinkedList: void <init>()>();
+
+        r0.<com.fsck.k9.notification.NotificationData: java.util.LinkedList activeNotifications> = $r2;
+
+        $r2 = new java.util.LinkedList;
+
+        specialinvoke $r2.<java.util.LinkedList: void <init>()>();
+
+        r0.<com.fsck.k9.notification.NotificationData: java.util.Deque additionalNotifications> = $r2;
+
+        $r3 = new android.util.SparseBooleanArray;
+
+        specialinvoke $r3.<android.util.SparseBooleanArray: void <init>()>();
+
+        r0.<com.fsck.k9.notification.NotificationData: android.util.SparseBooleanArray notificationIdsInUse> = $r3;
+
+        r0.<com.fsck.k9.notification.NotificationData: com.fsck.k9.Account account> = $r1;
+
+        return;
+    }
+    private void addToAdditionalNotifications(com.fsck.k9.notification.NotificationHolder)
+    {
+        com.fsck.k9.notification.NotificationData r0;
+        com.fsck.k9.notification.NotificationHolder $r1;
+        java.util.Deque $r2;
+        com.fsck.k9.notification.NotificationContent $r3;
+
+        r0 := @this: com.fsck.k9.notification.NotificationData;
+
+        $r1 := @parameter0: com.fsck.k9.notification.NotificationHolder;
+
+        $r2 = r0.<com.fsck.k9.notification.NotificationData: java.util.Deque additionalNotifications>;
+
+        $r3 = $r1.<com.fsck.k9.notification.NotificationHolder: com.fsck.k9.notification.NotificationContent content>;
+
+        interfaceinvoke $r2.<java.util.Deque: void addFirst(java.lang.Object)>($r3);
+
+        return;
+    }
+    private int calculateNumberOfMessagesForSummaryNotification()
+    {
+        com.fsck.k9.notification.NotificationData r0;
+        java.util.LinkedList $r1;
+        int $i0;
+
+        r0 := @this: com.fsck.k9.notification.NotificationData;
+
+        $r1 = r0.<com.fsck.k9.notification.NotificationData: java.util.LinkedList activeNotifications>;
+
+        $i0 = virtualinvoke $r1.<java.util.LinkedList: int size()>();
+
+        $i0 = staticinvoke <java.lang.Math: int min(int,int)>($i0, 5);
+
+        return $i0;
+    }
+    private int getNewNotificationId()
+    {
+        com.fsck.k9.notification.NotificationData r0;
+        int i0, $i1;
+        com.fsck.k9.Account $r1;
+        boolean $z0;
+        java.lang.AssertionError $r2;
+
+        r0 := @this: com.fsck.k9.notification.NotificationData;
+
+        i0 = 0;
+
+     label1:
+        if i0 >= 8 goto label3;
+
+        $r1 = r0.<com.fsck.k9.notification.NotificationData: com.fsck.k9.Account account>;
+
+        $i1 = staticinvoke <com.fsck.k9.notification.NotificationIds: int getNewMailStackedNotificationId(com.fsck.k9.Account,int)>($r1, i0);
+
+        $z0 = specialinvoke r0.<com.fsck.k9.notification.NotificationData: boolean isNotificationInUse(int)>($i1);
+
+        if $z0 != 0 goto label2;
+
+        specialinvoke r0.<com.fsck.k9.notification.NotificationData: void markNotificationIdAsInUse(int)>($i1);
+
+        return $i1;
+
+     label2:
+        i0 = i0 + 1;
+
+        goto label1;
+
+     label3:
+        $r2 = new java.lang.AssertionError;
+
+        specialinvoke $r2.<java.lang.AssertionError: void <init>(java.lang.Object)>("getNewNotificationId() called with no free notification ID");
+
+        throw $r2;
+    }
+    private com.fsck.k9.notification.NotificationHolder getNotificationHolderForMessage(com.fsck.k9.activity.MessageReference)
+    {
+        com.fsck.k9.notification.NotificationData r0;
+        com.fsck.k9.activity.MessageReference $r1, $r7;
+        java.util.LinkedList $r2;
+        java.util.Iterator $r3;
+        boolean $z0;
+        java.lang.Object $r4;
+        com.fsck.k9.notification.NotificationHolder r5;
+        com.fsck.k9.notification.NotificationContent $r6;
+
+        r0 := @this: com.fsck.k9.notification.NotificationData;
+
+        $r1 := @parameter0: com.fsck.k9.activity.MessageReference;
+
+        $r2 = r0.<com.fsck.k9.notification.NotificationData: java.util.LinkedList activeNotifications>;
+
+        $r3 = virtualinvoke $r2.<java.util.LinkedList: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r3.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label2;
+
+        $r4 = interfaceinvoke $r3.<java.util.Iterator: java.lang.Object next()>();
+
+        r5 = (com.fsck.k9.notification.NotificationHolder) $r4;
+
+        $r6 = r5.<com.fsck.k9.notification.NotificationHolder: com.fsck.k9.notification.NotificationContent content>;
+
+        $r7 = $r6.<com.fsck.k9.notification.NotificationContent: com.fsck.k9.activity.MessageReference messageReference>;
+
+        $z0 = virtualinvoke $r1.<com.fsck.k9.activity.MessageReference: boolean equals(java.lang.Object)>($r7);
+
+        if $z0 == 0 goto label1;
+
+        return r5;
+
+     label2:
+        return null;
+    }
+    private boolean isMaxNumberOfActiveNotificationsReached()
+    {
+        com.fsck.k9.notification.NotificationData r0;
+        int $i0;
+        java.util.LinkedList $r1;
+
+        r0 := @this: com.fsck.k9.notification.NotificationData;
+
+        $r1 = r0.<com.fsck.k9.notification.NotificationData: java.util.LinkedList activeNotifications>;
+
+        $i0 = virtualinvoke $r1.<java.util.LinkedList: int size()>();
+
+        if $i0 != 8 goto label1;
+
+        return 1;
+
+     label1:
+        return 0;
+    }
+    private boolean isNotificationInUse(int)
+    {
+        com.fsck.k9.notification.NotificationData r0;
+        int $i0;
+        boolean $z0;
+        android.util.SparseBooleanArray $r1;
+
+        r0 := @this: com.fsck.k9.notification.NotificationData;
+
+        $i0 := @parameter0: int;
+
+        $r1 = r0.<com.fsck.k9.notification.NotificationData: android.util.SparseBooleanArray notificationIdsInUse>;
+
+        $z0 = virtualinvoke $r1.<android.util.SparseBooleanArray: boolean get(int)>($i0);
+
+        return $z0;
+    }
+    private void markNotificationIdAsInUse(int)
+    {
+        com.fsck.k9.notification.NotificationData r0;
+        int $i0;
+        android.util.SparseBooleanArray $r1;
+
+        r0 := @this: com.fsck.k9.notification.NotificationData;
+
+        $i0 := @parameter0: int;
+
+        $r1 = r0.<com.fsck.k9.notification.NotificationData: android.util.SparseBooleanArray notificationIdsInUse>;
+
+        virtualinvoke $r1.<android.util.SparseBooleanArray: void put(int,boolean)>($i0, 1);
+
+        return;
+    }
+    public com.fsck.k9.notification.AddNotificationResult addNotificationContent(com.fsck.k9.notification.NotificationContent)
+    {
+        com.fsck.k9.notification.NotificationData r0;
+        com.fsck.k9.notification.NotificationContent $r1;
+        boolean $z0;
+        java.util.LinkedList $r2;
+        java.lang.Object $r3;
+        com.fsck.k9.notification.NotificationHolder r4;
+        int i0;
+        com.fsck.k9.notification.AddNotificationResult $r5;
+
+        r0 := @this: com.fsck.k9.notification.NotificationData;
+
+        $r1 := @parameter0: com.fsck.k9.notification.NotificationContent;
+
+        $z0 = specialinvoke r0.<com.fsck.k9.notification.NotificationData: boolean isMaxNumberOfActiveNotificationsReached()>();
+
+        if $z0 == 0 goto label2;
+
+        $r2 = r0.<com.fsck.k9.notification.NotificationData: java.util.LinkedList activeNotifications>;
+
+        $r3 = virtualinvoke $r2.<java.util.LinkedList: java.lang.Object removeLast()>();
+
+        r4 = (com.fsck.k9.notification.NotificationHolder) $r3;
+
+        specialinvoke r0.<com.fsck.k9.notification.NotificationData: void addToAdditionalNotifications(com.fsck.k9.notification.NotificationHolder)>(r4);
+
+        i0 = r4.<com.fsck.k9.notification.NotificationHolder: int notificationId>;
+
+        $z0 = 1;
+
+     label1:
+        r4 = virtualinvoke r0.<com.fsck.k9.notification.NotificationData: com.fsck.k9.notification.NotificationHolder createNotificationHolder(int,com.fsck.k9.notification.NotificationContent)>(i0, $r1);
+
+        $r2 = r0.<com.fsck.k9.notification.NotificationData: java.util.LinkedList activeNotifications>;
+
+        virtualinvoke $r2.<java.util.LinkedList: void addFirst(java.lang.Object)>(r4);
+
+        if $z0 == 0 goto label3;
+
+        $r5 = staticinvoke <com.fsck.k9.notification.AddNotificationResult: com.fsck.k9.notification.AddNotificationResult replaceNotification(com.fsck.k9.notification.NotificationHolder)>(r4);
+
+        return $r5;
+
+     label2:
+        i0 = specialinvoke r0.<com.fsck.k9.notification.NotificationData: int getNewNotificationId()>();
+
+        $z0 = 0;
+
+        goto label1;
+
+     label3:
+        $r5 = staticinvoke <com.fsck.k9.notification.AddNotificationResult: com.fsck.k9.notification.AddNotificationResult newNotification(com.fsck.k9.notification.NotificationHolder)>(r4);
+
+        return $r5;
+    }
+    public boolean containsStarredMessages()
+    {
+        com.fsck.k9.notification.NotificationData r0;
+        java.util.LinkedList $r1;
+        java.util.Iterator $r2;
+        boolean $z0;
+        java.lang.Object $r3;
+        com.fsck.k9.notification.NotificationHolder r4;
+        com.fsck.k9.notification.NotificationContent $r5;
+        java.util.Deque $r6;
+
+        r0 := @this: com.fsck.k9.notification.NotificationData;
+
+        $r1 = r0.<com.fsck.k9.notification.NotificationData: java.util.LinkedList activeNotifications>;
+
+        $r2 = virtualinvoke $r1.<java.util.LinkedList: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r2.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label2;
+
+        $r3 = interfaceinvoke $r2.<java.util.Iterator: java.lang.Object next()>();
+
+        r4 = (com.fsck.k9.notification.NotificationHolder) $r3;
+
+        $r5 = r4.<com.fsck.k9.notification.NotificationHolder: com.fsck.k9.notification.NotificationContent content>;
+
+        $z0 = $r5.<com.fsck.k9.notification.NotificationContent: boolean starred>;
+
+        if $z0 == 0 goto label1;
+
+        return 1;
+
+     label2:
+        $r6 = r0.<com.fsck.k9.notification.NotificationData: java.util.Deque additionalNotifications>;
+
+        $r2 = interfaceinvoke $r6.<java.util.Deque: java.util.Iterator iterator()>();
+
+     label3:
+        $z0 = interfaceinvoke $r2.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label4;
+
+        $r3 = interfaceinvoke $r2.<java.util.Iterator: java.lang.Object next()>();
+
+        $r5 = (com.fsck.k9.notification.NotificationContent) $r3;
+
+        $z0 = $r5.<com.fsck.k9.notification.NotificationContent: boolean starred>;
+
+        if $z0 == 0 goto label3;
+
+        return 1;
+
+     label4:
+        return 0;
+    }
+    com.fsck.k9.notification.NotificationHolder createNotificationHolder(int, com.fsck.k9.notification.NotificationContent)
+    {
+        com.fsck.k9.notification.NotificationData r0;
+        int $i0;
+        com.fsck.k9.notification.NotificationContent $r1;
+        com.fsck.k9.notification.NotificationHolder $r2;
+
+        r0 := @this: com.fsck.k9.notification.NotificationData;
+
+        $i0 := @parameter0: int;
+
+        $r1 := @parameter1: com.fsck.k9.notification.NotificationContent;
+
+        $r2 = new com.fsck.k9.notification.NotificationHolder;
+
+        specialinvoke $r2.<com.fsck.k9.notification.NotificationHolder: void <init>(int,com.fsck.k9.notification.NotificationContent)>($i0, $r1);
+
+        return $r2;
+    }
+    public com.fsck.k9.Account getAccount()
+    {
+        com.fsck.k9.notification.NotificationData r0;
+        com.fsck.k9.Account r1;
+
+        r0 := @this: com.fsck.k9.notification.NotificationData;
+
+        r1 = r0.<com.fsck.k9.notification.NotificationData: com.fsck.k9.Account account>;
+
+        return r1;
+    }
+    public int[] getActiveNotificationIds()
+    {
+        com.fsck.k9.notification.NotificationData r0;
+        int[] r1;
+        java.util.LinkedList $r2;
+        int $i0, i1, $i2;
+        java.lang.Object $r3;
+        com.fsck.k9.notification.NotificationHolder r4;
+
+        r0 := @this: com.fsck.k9.notification.NotificationData;
+
+        $r2 = r0.<com.fsck.k9.notification.NotificationData: java.util.LinkedList activeNotifications>;
+
+        $i0 = virtualinvoke $r2.<java.util.LinkedList: int size()>();
+
+        r1 = newarray (int)[$i0];
+
+        i1 = 0;
+
+     label1:
+        if i1 >= $i0 goto label2;
+
+        $r2 = r0.<com.fsck.k9.notification.NotificationData: java.util.LinkedList activeNotifications>;
+
+        $r3 = virtualinvoke $r2.<java.util.LinkedList: java.lang.Object get(int)>(i1);
+
+        r4 = (com.fsck.k9.notification.NotificationHolder) $r3;
+
+        $i2 = r4.<com.fsck.k9.notification.NotificationHolder: int notificationId>;
+
+        r1[i1] = $i2;
+
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label2:
+        return r1;
+    }
+    public int getAdditionalMessagesCount()
+    {
+        com.fsck.k9.notification.NotificationData r0;
+        int $i0;
+        java.util.Deque $r1;
+
+        r0 := @this: com.fsck.k9.notification.NotificationData;
+
+        $r1 = r0.<com.fsck.k9.notification.NotificationData: java.util.Deque additionalNotifications>;
+
+        $i0 = interfaceinvoke $r1.<java.util.Deque: int size()>();
+
+        return $i0;
+    }
+    public java.util.ArrayList getAllMessageReferences()
+    {
+        com.fsck.k9.notification.NotificationData r0;
+        java.util.ArrayList r1;
+        int i0, $i1;
+        java.util.LinkedList $r2;
+        java.util.Deque $r3;
+        java.util.Iterator $r4;
+        boolean $z0;
+        java.lang.Object $r5;
+        com.fsck.k9.notification.NotificationHolder r6;
+        com.fsck.k9.notification.NotificationContent $r7;
+        com.fsck.k9.activity.MessageReference $r8;
+
+        r0 := @this: com.fsck.k9.notification.NotificationData;
+
+        $r2 = r0.<com.fsck.k9.notification.NotificationData: java.util.LinkedList activeNotifications>;
+
+        i0 = virtualinvoke $r2.<java.util.LinkedList: int size()>();
+
+        $r3 = r0.<com.fsck.k9.notification.NotificationData: java.util.Deque additionalNotifications>;
+
+        $i1 = interfaceinvoke $r3.<java.util.Deque: int size()>();
+
+        i0 = i0 + $i1;
+
+        r1 = new java.util.ArrayList;
+
+        specialinvoke r1.<java.util.ArrayList: void <init>(int)>(i0);
+
+        $r2 = r0.<com.fsck.k9.notification.NotificationData: java.util.LinkedList activeNotifications>;
+
+        $r4 = virtualinvoke $r2.<java.util.LinkedList: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r4.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label2;
+
+        $r5 = interfaceinvoke $r4.<java.util.Iterator: java.lang.Object next()>();
+
+        r6 = (com.fsck.k9.notification.NotificationHolder) $r5;
+
+        $r7 = r6.<com.fsck.k9.notification.NotificationHolder: com.fsck.k9.notification.NotificationContent content>;
+
+        $r8 = $r7.<com.fsck.k9.notification.NotificationContent: com.fsck.k9.activity.MessageReference messageReference>;
+
+        virtualinvoke r1.<java.util.ArrayList: boolean add(java.lang.Object)>($r8);
+
+        goto label1;
+
+     label2:
+        $r3 = r0.<com.fsck.k9.notification.NotificationData: java.util.Deque additionalNotifications>;
+
+        $r4 = interfaceinvoke $r3.<java.util.Deque: java.util.Iterator iterator()>();
+
+     label3:
+        $z0 = interfaceinvoke $r4.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label4;
+
+        $r5 = interfaceinvoke $r4.<java.util.Iterator: java.lang.Object next()>();
+
+        $r7 = (com.fsck.k9.notification.NotificationContent) $r5;
+
+        $r8 = $r7.<com.fsck.k9.notification.NotificationContent: com.fsck.k9.activity.MessageReference messageReference>;
+
+        virtualinvoke r1.<java.util.ArrayList: boolean add(java.lang.Object)>($r8);
+
+        goto label3;
+
+     label4:
+        return r1;
+    }
+    public java.util.List getContentForSummaryNotification()
+    {
+        com.fsck.k9.notification.NotificationData r0;
+        java.util.ArrayList r1;
+        int $i0;
+        java.util.LinkedList $r2;
+        java.util.Iterator $r3;
+        boolean $z0;
+        java.lang.Object $r4;
+        com.fsck.k9.notification.NotificationHolder r5;
+        com.fsck.k9.notification.NotificationContent $r6;
+
+        r0 := @this: com.fsck.k9.notification.NotificationData;
+
+        $i0 = specialinvoke r0.<com.fsck.k9.notification.NotificationData: int calculateNumberOfMessagesForSummaryNotification()>();
+
+        r1 = new java.util.ArrayList;
+
+        specialinvoke r1.<java.util.ArrayList: void <init>(int)>($i0);
+
+        $r2 = r0.<com.fsck.k9.notification.NotificationData: java.util.LinkedList activeNotifications>;
+
+        $r3 = virtualinvoke $r2.<java.util.LinkedList: java.util.Iterator iterator()>();
+
+        $i0 = 0;
+
+     label1:
+        $z0 = interfaceinvoke $r3.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label2;
+
+        if $i0 >= 5 goto label2;
+
+        $r4 = interfaceinvoke $r3.<java.util.Iterator: java.lang.Object next()>();
+
+        r5 = (com.fsck.k9.notification.NotificationHolder) $r4;
+
+        $r6 = r5.<com.fsck.k9.notification.NotificationHolder: com.fsck.k9.notification.NotificationContent content>;
+
+        interfaceinvoke r1.<java.util.List: boolean add(java.lang.Object)>($r6);
+
+        $i0 = $i0 + 1;
+
+        goto label1;
+
+     label2:
+        return r1;
+    }
+    public com.fsck.k9.notification.NotificationHolder getHolderForLatestNotification()
+    {
+        com.fsck.k9.notification.NotificationData r0;
+        java.lang.Object $r1;
+        java.util.LinkedList $r2;
+        com.fsck.k9.notification.NotificationHolder $r3;
+
+        r0 := @this: com.fsck.k9.notification.NotificationData;
+
+        $r2 = r0.<com.fsck.k9.notification.NotificationData: java.util.LinkedList activeNotifications>;
+
+        $r1 = virtualinvoke $r2.<java.util.LinkedList: java.lang.Object getFirst()>();
+
+        $r3 = (com.fsck.k9.notification.NotificationHolder) $r1;
+
+        return $r3;
+    }
+    public int getNewMessagesCount()
+    {
+        com.fsck.k9.notification.NotificationData r0;
+        java.util.LinkedList $r1;
+        int $i0, $i1;
+        java.util.Deque $r2;
+
+        r0 := @this: com.fsck.k9.notification.NotificationData;
+
+        $r1 = r0.<com.fsck.k9.notification.NotificationData: java.util.LinkedList activeNotifications>;
+
+        $i0 = virtualinvoke $r1.<java.util.LinkedList: int size()>();
+
+        $r2 = r0.<com.fsck.k9.notification.NotificationData: java.util.Deque additionalNotifications>;
+
+        $i1 = interfaceinvoke $r2.<java.util.Deque: int size()>();
+
+        $i0 = $i0 + $i1;
+
+        return $i0;
+    }
+    public int getUnreadMessageCount()
+    {
+        com.fsck.k9.notification.NotificationData r0;
+        int $i0, $i1;
+
+        r0 := @this: com.fsck.k9.notification.NotificationData;
+
+        $i1 = r0.<com.fsck.k9.notification.NotificationData: int unreadMessageCount>;
+
+        $i0 = virtualinvoke r0.<com.fsck.k9.notification.NotificationData: int getNewMessagesCount()>();
+
+        $i0 = $i1 + $i0;
+
+        return $i0;
+    }
+    public boolean hasAdditionalMessages()
+    {
+        com.fsck.k9.notification.NotificationData r0;
+        int $i0;
+        java.util.LinkedList $r1;
+
+        r0 := @this: com.fsck.k9.notification.NotificationData;
+
+        $r1 = r0.<com.fsck.k9.notification.NotificationData: java.util.LinkedList activeNotifications>;
+
+        $i0 = virtualinvoke $r1.<java.util.LinkedList: int size()>();
+
+        if $i0 <= 5 goto label1;
+
+        return 1;
+
+     label1:
+        return 0;
+    }
+    public boolean isSingleMessageNotification()
+    {
+        com.fsck.k9.notification.NotificationData r0;
+        int $i0;
+        java.util.LinkedList $r1;
+
+        r0 := @this: com.fsck.k9.notification.NotificationData;
+
+        $r1 = r0.<com.fsck.k9.notification.NotificationData: java.util.LinkedList activeNotifications>;
+
+        $i0 = virtualinvoke $r1.<java.util.LinkedList: int size()>();
+
+        if $i0 != 1 goto label1;
+
+        return 1;
+
+     label1:
+        return 0;
+    }
+    public com.fsck.k9.notification.RemoveNotificationResult removeNotificationForMessage(com.fsck.k9.activity.MessageReference)
+    {
+        com.fsck.k9.notification.NotificationData r0;
+        com.fsck.k9.activity.MessageReference $r1;
+        int i0;
+        com.fsck.k9.notification.NotificationHolder $r2;
+        com.fsck.k9.notification.RemoveNotificationResult $r3;
+        java.util.LinkedList $r4;
+        java.util.Deque $r5;
+        boolean $z0;
+        java.lang.Object $r6;
+        com.fsck.k9.notification.NotificationContent r7;
+
+        r0 := @this: com.fsck.k9.notification.NotificationData;
+
+        $r1 := @parameter0: com.fsck.k9.activity.MessageReference;
+
+        $r2 = specialinvoke r0.<com.fsck.k9.notification.NotificationData: com.fsck.k9.notification.NotificationHolder getNotificationHolderForMessage(com.fsck.k9.activity.MessageReference)>($r1);
+
+        if $r2 != null goto label1;
+
+        $r3 = staticinvoke <com.fsck.k9.notification.RemoveNotificationResult: com.fsck.k9.notification.RemoveNotificationResult unknownNotification()>();
+
+        return $r3;
+
+     label1:
+        $r4 = r0.<com.fsck.k9.notification.NotificationData: java.util.LinkedList activeNotifications>;
+
+        virtualinvoke $r4.<java.util.LinkedList: boolean remove(java.lang.Object)>($r2);
+
+        i0 = $r2.<com.fsck.k9.notification.NotificationHolder: int notificationId>;
+
+        $r5 = r0.<com.fsck.k9.notification.NotificationData: java.util.Deque additionalNotifications>;
+
+        $z0 = interfaceinvoke $r5.<java.util.Deque: boolean isEmpty()>();
+
+        if $z0 != 0 goto label2;
+
+        $r5 = r0.<com.fsck.k9.notification.NotificationData: java.util.Deque additionalNotifications>;
+
+        $r6 = interfaceinvoke $r5.<java.util.Deque: java.lang.Object removeFirst()>();
+
+        r7 = (com.fsck.k9.notification.NotificationContent) $r6;
+
+        $r2 = virtualinvoke r0.<com.fsck.k9.notification.NotificationData: com.fsck.k9.notification.NotificationHolder createNotificationHolder(int,com.fsck.k9.notification.NotificationContent)>(i0, r7);
+
+        $r4 = r0.<com.fsck.k9.notification.NotificationData: java.util.LinkedList activeNotifications>;
+
+        virtualinvoke $r4.<java.util.LinkedList: void addLast(java.lang.Object)>($r2);
+
+        $r3 = staticinvoke <com.fsck.k9.notification.RemoveNotificationResult: com.fsck.k9.notification.RemoveNotificationResult createNotification(com.fsck.k9.notification.NotificationHolder)>($r2);
+
+        return $r3;
+
+     label2:
+        $r3 = staticinvoke <com.fsck.k9.notification.RemoveNotificationResult: com.fsck.k9.notification.RemoveNotificationResult cancelNotification(int)>(i0);
+
+        return $r3;
+    }
+    public void setUnreadMessageCount(int)
+    {
+        com.fsck.k9.notification.NotificationData r0;
+        int $i0;
+
+        r0 := @this: com.fsck.k9.notification.NotificationData;
+
+        $i0 := @parameter0: int;
+
+        r0.<com.fsck.k9.notification.NotificationData: int unreadMessageCount> = $i0;
+
+        return;
+    }

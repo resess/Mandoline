@@ -1,0 +1,245 @@
+com.fsck.k9.mailstore.StoreSchemaDefinition extends java.lang.Object implements com.fsck.k9.mailstore.LockableDatabase$SchemaDefinition
+private final com.fsck.k9.mailstore.LocalStore localStore
+    void <init>(com.fsck.k9.mailstore.LocalStore)
+    {
+        com.fsck.k9.mailstore.StoreSchemaDefinition r0;
+        com.fsck.k9.mailstore.LocalStore $r1;
+
+        r0 := @this: com.fsck.k9.mailstore.StoreSchemaDefinition;
+
+        $r1 := @parameter0: com.fsck.k9.mailstore.LocalStore;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<com.fsck.k9.mailstore.StoreSchemaDefinition: com.fsck.k9.mailstore.LocalStore localStore> = $r1;
+
+        return;
+    }
+    private static void dbCreateDatabaseFromScratch(android.database.sqlite.SQLiteDatabase)
+    {
+        android.database.sqlite.SQLiteDatabase $r0;
+        java.lang.StringBuilder $r1;
+        com.fsck.k9.mail.Folder$FolderClass $r2;
+        java.lang.String $r3;
+
+        $r0 := @parameter0: android.database.sqlite.SQLiteDatabase;
+
+        virtualinvoke $r0.<android.database.sqlite.SQLiteDatabase: void execSQL(java.lang.String)>("DROP TABLE IF EXISTS folders");
+
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r1 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("CREATE TABLE folders (id INTEGER PRIMARY KEY,name TEXT, last_updated INTEGER, unread_count INTEGER, visible_limit INTEGER, status TEXT, push_state TEXT, last_pushed INTEGER, flagged_count INTEGER default 0, integrate INTEGER, top_group INTEGER, poll_class TEXT, push_class TEXT, display_class TEXT, notify_class TEXT default \'");
+
+        $r2 = <com.fsck.k9.mail.Folder$FolderClass: com.fsck.k9.mail.Folder$FolderClass INHERITED>;
+
+        $r3 = virtualinvoke $r2.<com.fsck.k9.mail.Folder$FolderClass: java.lang.String name()>();
+
+        $r1 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r1 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\', more_messages TEXT default \"unknown\")");
+
+        $r3 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r0.<android.database.sqlite.SQLiteDatabase: void execSQL(java.lang.String)>($r3);
+
+        virtualinvoke $r0.<android.database.sqlite.SQLiteDatabase: void execSQL(java.lang.String)>("CREATE INDEX IF NOT EXISTS folder_name ON folders (name)");
+
+        virtualinvoke $r0.<android.database.sqlite.SQLiteDatabase: void execSQL(java.lang.String)>("DROP TABLE IF EXISTS messages");
+
+        virtualinvoke $r0.<android.database.sqlite.SQLiteDatabase: void execSQL(java.lang.String)>("CREATE TABLE messages (id INTEGER PRIMARY KEY, deleted INTEGER default 0, folder_id INTEGER, uid TEXT, subject TEXT, date INTEGER, flags TEXT, sender_list TEXT, to_list TEXT, cc_list TEXT, bcc_list TEXT, reply_to_list TEXT, attachment_count INTEGER, internal_date INTEGER, message_id TEXT, preview_type TEXT default \"none\", preview TEXT, mime_type TEXT, normalized_subject_hash INTEGER, empty INTEGER default 0, read INTEGER default 0, flagged INTEGER default 0, answered INTEGER default 0, forwarded INTEGER default 0, message_part_id INTEGER)");
+
+        virtualinvoke $r0.<android.database.sqlite.SQLiteDatabase: void execSQL(java.lang.String)>("DROP TABLE IF EXISTS message_parts");
+
+        virtualinvoke $r0.<android.database.sqlite.SQLiteDatabase: void execSQL(java.lang.String)>("CREATE TABLE message_parts (id INTEGER PRIMARY KEY, type INTEGER NOT NULL, root INTEGER, parent INTEGER NOT NULL, seq INTEGER NOT NULL, mime_type TEXT, decoded_body_size INTEGER, display_name TEXT, header TEXT, encoding TEXT, charset TEXT, data_location INTEGER NOT NULL, data BLOB, preamble TEXT, epilogue TEXT, boundary TEXT, content_id TEXT, server_extra TEXT)");
+
+        virtualinvoke $r0.<android.database.sqlite.SQLiteDatabase: void execSQL(java.lang.String)>("CREATE TRIGGER set_message_part_root AFTER INSERT ON message_parts BEGIN UPDATE message_parts SET root=id WHERE root IS NULL AND ROWID = NEW.ROWID; END");
+
+        virtualinvoke $r0.<android.database.sqlite.SQLiteDatabase: void execSQL(java.lang.String)>("CREATE INDEX IF NOT EXISTS msg_uid ON messages (uid, folder_id)");
+
+        virtualinvoke $r0.<android.database.sqlite.SQLiteDatabase: void execSQL(java.lang.String)>("DROP INDEX IF EXISTS msg_folder_id");
+
+        virtualinvoke $r0.<android.database.sqlite.SQLiteDatabase: void execSQL(java.lang.String)>("DROP INDEX IF EXISTS msg_folder_id_date");
+
+        virtualinvoke $r0.<android.database.sqlite.SQLiteDatabase: void execSQL(java.lang.String)>("CREATE INDEX IF NOT EXISTS msg_folder_id_deleted_date ON messages (folder_id,deleted,internal_date)");
+
+        virtualinvoke $r0.<android.database.sqlite.SQLiteDatabase: void execSQL(java.lang.String)>("DROP INDEX IF EXISTS msg_empty");
+
+        virtualinvoke $r0.<android.database.sqlite.SQLiteDatabase: void execSQL(java.lang.String)>("CREATE INDEX IF NOT EXISTS msg_empty ON messages (empty)");
+
+        virtualinvoke $r0.<android.database.sqlite.SQLiteDatabase: void execSQL(java.lang.String)>("DROP INDEX IF EXISTS msg_read");
+
+        virtualinvoke $r0.<android.database.sqlite.SQLiteDatabase: void execSQL(java.lang.String)>("CREATE INDEX IF NOT EXISTS msg_read ON messages (read)");
+
+        virtualinvoke $r0.<android.database.sqlite.SQLiteDatabase: void execSQL(java.lang.String)>("DROP INDEX IF EXISTS msg_flagged");
+
+        virtualinvoke $r0.<android.database.sqlite.SQLiteDatabase: void execSQL(java.lang.String)>("CREATE INDEX IF NOT EXISTS msg_flagged ON messages (flagged)");
+
+        virtualinvoke $r0.<android.database.sqlite.SQLiteDatabase: void execSQL(java.lang.String)>("DROP INDEX IF EXISTS msg_composite");
+
+        virtualinvoke $r0.<android.database.sqlite.SQLiteDatabase: void execSQL(java.lang.String)>("CREATE INDEX IF NOT EXISTS msg_composite ON messages (deleted, empty,folder_id,flagged,read)");
+
+        virtualinvoke $r0.<android.database.sqlite.SQLiteDatabase: void execSQL(java.lang.String)>("DROP TABLE IF EXISTS threads");
+
+        virtualinvoke $r0.<android.database.sqlite.SQLiteDatabase: void execSQL(java.lang.String)>("CREATE TABLE threads (id INTEGER PRIMARY KEY, message_id INTEGER, root INTEGER, parent INTEGER)");
+
+        virtualinvoke $r0.<android.database.sqlite.SQLiteDatabase: void execSQL(java.lang.String)>("DROP INDEX IF EXISTS threads_message_id");
+
+        virtualinvoke $r0.<android.database.sqlite.SQLiteDatabase: void execSQL(java.lang.String)>("CREATE INDEX IF NOT EXISTS threads_message_id ON threads (message_id)");
+
+        virtualinvoke $r0.<android.database.sqlite.SQLiteDatabase: void execSQL(java.lang.String)>("DROP INDEX IF EXISTS threads_root");
+
+        virtualinvoke $r0.<android.database.sqlite.SQLiteDatabase: void execSQL(java.lang.String)>("CREATE INDEX IF NOT EXISTS threads_root ON threads (root)");
+
+        virtualinvoke $r0.<android.database.sqlite.SQLiteDatabase: void execSQL(java.lang.String)>("DROP INDEX IF EXISTS threads_parent");
+
+        virtualinvoke $r0.<android.database.sqlite.SQLiteDatabase: void execSQL(java.lang.String)>("CREATE INDEX IF NOT EXISTS threads_parent ON threads (parent)");
+
+        virtualinvoke $r0.<android.database.sqlite.SQLiteDatabase: void execSQL(java.lang.String)>("DROP TRIGGER IF EXISTS set_thread_root");
+
+        virtualinvoke $r0.<android.database.sqlite.SQLiteDatabase: void execSQL(java.lang.String)>("CREATE TRIGGER set_thread_root AFTER INSERT ON threads BEGIN UPDATE threads SET root=id WHERE root IS NULL AND ROWID = NEW.ROWID; END");
+
+        virtualinvoke $r0.<android.database.sqlite.SQLiteDatabase: void execSQL(java.lang.String)>("DROP TABLE IF EXISTS pending_commands");
+
+        virtualinvoke $r0.<android.database.sqlite.SQLiteDatabase: void execSQL(java.lang.String)>("CREATE TABLE pending_commands (id INTEGER PRIMARY KEY, command TEXT, data TEXT)");
+
+        virtualinvoke $r0.<android.database.sqlite.SQLiteDatabase: void execSQL(java.lang.String)>("DROP TRIGGER IF EXISTS delete_folder");
+
+        virtualinvoke $r0.<android.database.sqlite.SQLiteDatabase: void execSQL(java.lang.String)>("CREATE TRIGGER delete_folder BEFORE DELETE ON folders BEGIN DELETE FROM messages WHERE old.id = folder_id; END;");
+
+        virtualinvoke $r0.<android.database.sqlite.SQLiteDatabase: void execSQL(java.lang.String)>("DROP TRIGGER IF EXISTS delete_message");
+
+        virtualinvoke $r0.<android.database.sqlite.SQLiteDatabase: void execSQL(java.lang.String)>("CREATE TRIGGER delete_message BEFORE DELETE ON messages BEGIN DELETE FROM message_parts WHERE root = OLD.message_part_id; DELETE FROM messages_fulltext WHERE docid = OLD.id; END");
+
+        virtualinvoke $r0.<android.database.sqlite.SQLiteDatabase: void execSQL(java.lang.String)>("DROP TABLE IF EXISTS messages_fulltext");
+
+        virtualinvoke $r0.<android.database.sqlite.SQLiteDatabase: void execSQL(java.lang.String)>("CREATE VIRTUAL TABLE messages_fulltext USING fts4 (fulltext)");
+
+        return;
+    }
+    private void upgradeDatabase(android.database.sqlite.SQLiteDatabase)
+    {
+        com.fsck.k9.mailstore.StoreSchemaDefinition r0;
+        android.database.sqlite.SQLiteDatabase $r1;
+        com.fsck.k9.mailstore.StoreSchemaDefinition$RealMigrationsHelper r2;
+        java.lang.Object[] $r3;
+        int $i0;
+        java.lang.Integer $r4;
+        java.lang.RuntimeException $r5;
+        com.fsck.k9.mailstore.LocalStore $r6;
+        java.lang.Throwable $r7;
+
+        r0 := @this: com.fsck.k9.mailstore.StoreSchemaDefinition;
+
+        $r1 := @parameter0: android.database.sqlite.SQLiteDatabase;
+
+        $r3 = newarray (java.lang.Object)[2];
+
+        $i0 = virtualinvoke $r1.<android.database.sqlite.SQLiteDatabase: int getVersion()>();
+
+        $r4 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        $r3[0] = $r4;
+
+        $r4 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(61);
+
+        $r3[1] = $r4;
+
+        staticinvoke <timber.log.Timber: void i(java.lang.String,java.lang.Object[])>("Upgrading database from version %d to version %d", $r3);
+
+        virtualinvoke $r1.<android.database.sqlite.SQLiteDatabase: void beginTransaction()>();
+
+     label1:
+        $i0 = virtualinvoke $r1.<android.database.sqlite.SQLiteDatabase: int getVersion()>();
+
+     label2:
+        if $i0 >= 29 goto label6;
+
+     label3:
+        staticinvoke <com.fsck.k9.mailstore.StoreSchemaDefinition: void dbCreateDatabaseFromScratch(android.database.sqlite.SQLiteDatabase)>($r1);
+
+     label4:
+        virtualinvoke $r1.<android.database.sqlite.SQLiteDatabase: void setVersion(int)>(61);
+
+        virtualinvoke $r1.<android.database.sqlite.SQLiteDatabase: void setTransactionSuccessful()>();
+
+     label5:
+        virtualinvoke $r1.<android.database.sqlite.SQLiteDatabase: void endTransaction()>();
+
+        $i0 = virtualinvoke $r1.<android.database.sqlite.SQLiteDatabase: int getVersion()>();
+
+        if $i0 == 61 goto label9;
+
+        $r5 = new java.lang.RuntimeException;
+
+        specialinvoke $r5.<java.lang.RuntimeException: void <init>(java.lang.String)>("Database upgrade failed!");
+
+        throw $r5;
+
+     label6:
+        r2 = new com.fsck.k9.mailstore.StoreSchemaDefinition$RealMigrationsHelper;
+
+        $r6 = r0.<com.fsck.k9.mailstore.StoreSchemaDefinition: com.fsck.k9.mailstore.LocalStore localStore>;
+
+        specialinvoke r2.<com.fsck.k9.mailstore.StoreSchemaDefinition$RealMigrationsHelper: void <init>(com.fsck.k9.mailstore.LocalStore)>($r6);
+
+        staticinvoke <com.fsck.k9.mailstore.migrations.Migrations: void upgradeDatabase(android.database.sqlite.SQLiteDatabase,com.fsck.k9.mailstore.migrations.MigrationsHelper)>($r1, r2);
+
+     label7:
+        goto label4;
+
+     label8:
+        $r7 := @caughtexception;
+
+        virtualinvoke $r1.<android.database.sqlite.SQLiteDatabase: void endTransaction()>();
+
+        throw $r7;
+
+     label9:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label8;
+        catch java.lang.Throwable from label3 to label5 with label8;
+        catch java.lang.Throwable from label6 to label7 with label8;
+    }
+    public void doDbUpgrade(android.database.sqlite.SQLiteDatabase)
+    {
+        com.fsck.k9.mailstore.StoreSchemaDefinition r0;
+        android.database.sqlite.SQLiteDatabase $r1;
+        java.lang.Exception r2;
+        java.lang.Object[] $r3;
+
+        r0 := @this: com.fsck.k9.mailstore.StoreSchemaDefinition;
+
+        $r1 := @parameter0: android.database.sqlite.SQLiteDatabase;
+
+     label1:
+        specialinvoke r0.<com.fsck.k9.mailstore.StoreSchemaDefinition: void upgradeDatabase(android.database.sqlite.SQLiteDatabase)>($r1);
+
+     label2:
+        return;
+
+     label3:
+        r2 := @caughtexception;
+
+        $r3 = newarray (java.lang.Object)[0];
+
+        staticinvoke <timber.log.Timber: void e(java.lang.Throwable,java.lang.String,java.lang.Object[])>(r2, "Exception while upgrading database. Resetting the DB to v0", $r3);
+
+        virtualinvoke $r1.<android.database.sqlite.SQLiteDatabase: void setVersion(int)>(0);
+
+        specialinvoke r0.<com.fsck.k9.mailstore.StoreSchemaDefinition: void upgradeDatabase(android.database.sqlite.SQLiteDatabase)>($r1);
+
+        return;
+
+        catch java.lang.Exception from label1 to label2 with label3;
+    }
+    public int getVersion()
+    {
+        com.fsck.k9.mailstore.StoreSchemaDefinition r0;
+
+        r0 := @this: com.fsck.k9.mailstore.StoreSchemaDefinition;
+
+        return 61;
+    }

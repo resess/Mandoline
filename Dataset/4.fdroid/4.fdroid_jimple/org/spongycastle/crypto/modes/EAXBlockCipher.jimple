@@ -1,0 +1,1003 @@
+org.spongycastle.crypto.modes.EAXBlockCipher extends java.lang.Object implements org.spongycastle.crypto.modes.AEADBlockCipher
+private static final byte cTAG
+private static final byte hTAG
+private static final byte nTAG
+private byte[] associatedTextMac
+private int blockSize
+private byte[] bufBlock
+private int bufOff
+private org.spongycastle.crypto.modes.SICBlockCipher cipher
+private boolean cipherInitialized
+private boolean forEncryption
+private byte[] initialAssociatedText
+private org.spongycastle.crypto.Mac mac
+private byte[] macBlock
+private int macSize
+private byte[] nonceMac
+    public void <init>(org.spongycastle.crypto.BlockCipher)
+    {
+        org.spongycastle.crypto.modes.EAXBlockCipher r0;
+        org.spongycastle.crypto.BlockCipher $r1;
+        int $i0;
+        org.spongycastle.crypto.macs.CMac $r2;
+        byte[] $r3;
+        org.spongycastle.crypto.Mac $r4;
+        org.spongycastle.crypto.modes.SICBlockCipher $r5;
+
+        r0 := @this: org.spongycastle.crypto.modes.EAXBlockCipher;
+
+        $r1 := @parameter0: org.spongycastle.crypto.BlockCipher;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $i0 = interfaceinvoke $r1.<org.spongycastle.crypto.BlockCipher: int getBlockSize()>();
+
+        r0.<org.spongycastle.crypto.modes.EAXBlockCipher: int blockSize> = $i0;
+
+        $r2 = new org.spongycastle.crypto.macs.CMac;
+
+        specialinvoke $r2.<org.spongycastle.crypto.macs.CMac: void <init>(org.spongycastle.crypto.BlockCipher)>($r1);
+
+        r0.<org.spongycastle.crypto.modes.EAXBlockCipher: org.spongycastle.crypto.Mac mac> = $r2;
+
+        $i0 = r0.<org.spongycastle.crypto.modes.EAXBlockCipher: int blockSize>;
+
+        $r3 = newarray (byte)[$i0];
+
+        r0.<org.spongycastle.crypto.modes.EAXBlockCipher: byte[] macBlock> = $r3;
+
+        $r4 = r0.<org.spongycastle.crypto.modes.EAXBlockCipher: org.spongycastle.crypto.Mac mac>;
+
+        $i0 = interfaceinvoke $r4.<org.spongycastle.crypto.Mac: int getMacSize()>();
+
+        $r3 = newarray (byte)[$i0];
+
+        r0.<org.spongycastle.crypto.modes.EAXBlockCipher: byte[] associatedTextMac> = $r3;
+
+        $r4 = r0.<org.spongycastle.crypto.modes.EAXBlockCipher: org.spongycastle.crypto.Mac mac>;
+
+        $i0 = interfaceinvoke $r4.<org.spongycastle.crypto.Mac: int getMacSize()>();
+
+        $r3 = newarray (byte)[$i0];
+
+        r0.<org.spongycastle.crypto.modes.EAXBlockCipher: byte[] nonceMac> = $r3;
+
+        $r5 = new org.spongycastle.crypto.modes.SICBlockCipher;
+
+        specialinvoke $r5.<org.spongycastle.crypto.modes.SICBlockCipher: void <init>(org.spongycastle.crypto.BlockCipher)>($r1);
+
+        r0.<org.spongycastle.crypto.modes.EAXBlockCipher: org.spongycastle.crypto.modes.SICBlockCipher cipher> = $r5;
+
+        return;
+    }
+    private void calculateMac()
+    {
+        org.spongycastle.crypto.modes.EAXBlockCipher r0;
+        byte[] r1, $r3, $r4;
+        int $i0, $i1;
+        org.spongycastle.crypto.Mac $r2;
+        byte $b2, $b3;
+
+        r0 := @this: org.spongycastle.crypto.modes.EAXBlockCipher;
+
+        $i0 = r0.<org.spongycastle.crypto.modes.EAXBlockCipher: int blockSize>;
+
+        r1 = newarray (byte)[$i0];
+
+        $r2 = r0.<org.spongycastle.crypto.modes.EAXBlockCipher: org.spongycastle.crypto.Mac mac>;
+
+        interfaceinvoke $r2.<org.spongycastle.crypto.Mac: int doFinal(byte[],int)>(r1, 0);
+
+        $i0 = 0;
+
+     label1:
+        $r3 = r0.<org.spongycastle.crypto.modes.EAXBlockCipher: byte[] macBlock>;
+
+        $i1 = lengthof $r3;
+
+        if $i0 >= $i1 goto label2;
+
+        $r3 = r0.<org.spongycastle.crypto.modes.EAXBlockCipher: byte[] macBlock>;
+
+        $r4 = r0.<org.spongycastle.crypto.modes.EAXBlockCipher: byte[] nonceMac>;
+
+        $b2 = $r4[$i0];
+
+        $r4 = r0.<org.spongycastle.crypto.modes.EAXBlockCipher: byte[] associatedTextMac>;
+
+        $b3 = $r4[$i0];
+
+        $i1 = $b2 ^ $b3;
+
+        $b2 = r1[$i0];
+
+        $i1 = $i1 ^ $b2;
+
+        $b2 = (byte) $i1;
+
+        $r3[$i0] = $b2;
+
+        $i0 = $i0 + 1;
+
+        goto label1;
+
+     label2:
+        return;
+    }
+    private void initCipher()
+    {
+        org.spongycastle.crypto.modes.EAXBlockCipher r0;
+        byte[] r1;
+        boolean $z0;
+        org.spongycastle.crypto.Mac $r2;
+        int $i0;
+
+        r0 := @this: org.spongycastle.crypto.modes.EAXBlockCipher;
+
+        $z0 = r0.<org.spongycastle.crypto.modes.EAXBlockCipher: boolean cipherInitialized>;
+
+        if $z0 == 0 goto label1;
+
+        return;
+
+     label1:
+        r0.<org.spongycastle.crypto.modes.EAXBlockCipher: boolean cipherInitialized> = 1;
+
+        $r2 = r0.<org.spongycastle.crypto.modes.EAXBlockCipher: org.spongycastle.crypto.Mac mac>;
+
+        r1 = r0.<org.spongycastle.crypto.modes.EAXBlockCipher: byte[] associatedTextMac>;
+
+        interfaceinvoke $r2.<org.spongycastle.crypto.Mac: int doFinal(byte[],int)>(r1, 0);
+
+        $i0 = r0.<org.spongycastle.crypto.modes.EAXBlockCipher: int blockSize>;
+
+        r1 = newarray (byte)[$i0];
+
+        $i0 = r0.<org.spongycastle.crypto.modes.EAXBlockCipher: int blockSize>;
+
+        $i0 = $i0 + -1;
+
+        r1[$i0] = 2;
+
+        $r2 = r0.<org.spongycastle.crypto.modes.EAXBlockCipher: org.spongycastle.crypto.Mac mac>;
+
+        $i0 = r0.<org.spongycastle.crypto.modes.EAXBlockCipher: int blockSize>;
+
+        interfaceinvoke $r2.<org.spongycastle.crypto.Mac: void update(byte[],int,int)>(r1, 0, $i0);
+
+        return;
+    }
+    private int process(byte, byte[], int)
+    {
+        org.spongycastle.crypto.modes.EAXBlockCipher r0;
+        byte $b0;
+        byte[] $r1, $r2;
+        int $i1, $i2, $i3;
+        org.spongycastle.crypto.OutputLengthException $r3;
+        boolean $z0;
+        org.spongycastle.crypto.modes.SICBlockCipher $r4;
+        org.spongycastle.crypto.Mac $r5;
+
+        r0 := @this: org.spongycastle.crypto.modes.EAXBlockCipher;
+
+        $b0 := @parameter0: byte;
+
+        $r1 := @parameter1: byte[];
+
+        $i1 := @parameter2: int;
+
+        $r2 = r0.<org.spongycastle.crypto.modes.EAXBlockCipher: byte[] bufBlock>;
+
+        $i2 = r0.<org.spongycastle.crypto.modes.EAXBlockCipher: int bufOff>;
+
+        $i3 = $i2 + 1;
+
+        r0.<org.spongycastle.crypto.modes.EAXBlockCipher: int bufOff> = $i3;
+
+        $r2[$i2] = $b0;
+
+        $i2 = r0.<org.spongycastle.crypto.modes.EAXBlockCipher: int bufOff>;
+
+        $r2 = r0.<org.spongycastle.crypto.modes.EAXBlockCipher: byte[] bufBlock>;
+
+        $i3 = lengthof $r2;
+
+        if $i2 != $i3 goto label4;
+
+        $i2 = lengthof $r1;
+
+        $i3 = r0.<org.spongycastle.crypto.modes.EAXBlockCipher: int blockSize>;
+
+        $i3 = $i3 + $i1;
+
+        if $i2 >= $i3 goto label1;
+
+        $r3 = new org.spongycastle.crypto.OutputLengthException;
+
+        specialinvoke $r3.<org.spongycastle.crypto.OutputLengthException: void <init>(java.lang.String)>("Output buffer is too short");
+
+        throw $r3;
+
+     label1:
+        $z0 = r0.<org.spongycastle.crypto.modes.EAXBlockCipher: boolean forEncryption>;
+
+        if $z0 == 0 goto label3;
+
+        $r4 = r0.<org.spongycastle.crypto.modes.EAXBlockCipher: org.spongycastle.crypto.modes.SICBlockCipher cipher>;
+
+        $r2 = r0.<org.spongycastle.crypto.modes.EAXBlockCipher: byte[] bufBlock>;
+
+        $i2 = virtualinvoke $r4.<org.spongycastle.crypto.modes.SICBlockCipher: int processBlock(byte[],int,byte[],int)>($r2, 0, $r1, $i1);
+
+        $r5 = r0.<org.spongycastle.crypto.modes.EAXBlockCipher: org.spongycastle.crypto.Mac mac>;
+
+        $i3 = r0.<org.spongycastle.crypto.modes.EAXBlockCipher: int blockSize>;
+
+        interfaceinvoke $r5.<org.spongycastle.crypto.Mac: void update(byte[],int,int)>($r1, $i1, $i3);
+
+     label2:
+        r0.<org.spongycastle.crypto.modes.EAXBlockCipher: int bufOff> = 0;
+
+        $z0 = r0.<org.spongycastle.crypto.modes.EAXBlockCipher: boolean forEncryption>;
+
+        if $z0 != 0 goto label5;
+
+        $r1 = r0.<org.spongycastle.crypto.modes.EAXBlockCipher: byte[] bufBlock>;
+
+        $i3 = r0.<org.spongycastle.crypto.modes.EAXBlockCipher: int blockSize>;
+
+        $r2 = r0.<org.spongycastle.crypto.modes.EAXBlockCipher: byte[] bufBlock>;
+
+        $i1 = r0.<org.spongycastle.crypto.modes.EAXBlockCipher: int macSize>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r1, $i3, $r2, 0, $i1);
+
+        $i1 = r0.<org.spongycastle.crypto.modes.EAXBlockCipher: int macSize>;
+
+        r0.<org.spongycastle.crypto.modes.EAXBlockCipher: int bufOff> = $i1;
+
+        return $i2;
+
+     label3:
+        $r5 = r0.<org.spongycastle.crypto.modes.EAXBlockCipher: org.spongycastle.crypto.Mac mac>;
+
+        $r2 = r0.<org.spongycastle.crypto.modes.EAXBlockCipher: byte[] bufBlock>;
+
+        $i2 = r0.<org.spongycastle.crypto.modes.EAXBlockCipher: int blockSize>;
+
+        interfaceinvoke $r5.<org.spongycastle.crypto.Mac: void update(byte[],int,int)>($r2, 0, $i2);
+
+        $r4 = r0.<org.spongycastle.crypto.modes.EAXBlockCipher: org.spongycastle.crypto.modes.SICBlockCipher cipher>;
+
+        $r2 = r0.<org.spongycastle.crypto.modes.EAXBlockCipher: byte[] bufBlock>;
+
+        $i2 = virtualinvoke $r4.<org.spongycastle.crypto.modes.SICBlockCipher: int processBlock(byte[],int,byte[],int)>($r2, 0, $r1, $i1);
+
+        goto label2;
+
+     label4:
+        return 0;
+
+     label5:
+        return $i2;
+    }
+    private void reset(boolean)
+    {
+        org.spongycastle.crypto.modes.EAXBlockCipher r0;
+        boolean $z0;
+        byte[] r1, $r4;
+        org.spongycastle.crypto.modes.SICBlockCipher $r2;
+        org.spongycastle.crypto.Mac $r3;
+        int $i0;
+
+        r0 := @this: org.spongycastle.crypto.modes.EAXBlockCipher;
+
+        $z0 := @parameter0: boolean;
+
+        $r2 = r0.<org.spongycastle.crypto.modes.EAXBlockCipher: org.spongycastle.crypto.modes.SICBlockCipher cipher>;
+
+        virtualinvoke $r2.<org.spongycastle.crypto.modes.SICBlockCipher: void reset()>();
+
+        $r3 = r0.<org.spongycastle.crypto.modes.EAXBlockCipher: org.spongycastle.crypto.Mac mac>;
+
+        interfaceinvoke $r3.<org.spongycastle.crypto.Mac: void reset()>();
+
+        r0.<org.spongycastle.crypto.modes.EAXBlockCipher: int bufOff> = 0;
+
+        r1 = r0.<org.spongycastle.crypto.modes.EAXBlockCipher: byte[] bufBlock>;
+
+        staticinvoke <org.spongycastle.util.Arrays: void fill(byte[],byte)>(r1, 0);
+
+        if $z0 == 0 goto label1;
+
+        r1 = r0.<org.spongycastle.crypto.modes.EAXBlockCipher: byte[] macBlock>;
+
+        staticinvoke <org.spongycastle.util.Arrays: void fill(byte[],byte)>(r1, 0);
+
+     label1:
+        $i0 = r0.<org.spongycastle.crypto.modes.EAXBlockCipher: int blockSize>;
+
+        r1 = newarray (byte)[$i0];
+
+        $i0 = r0.<org.spongycastle.crypto.modes.EAXBlockCipher: int blockSize>;
+
+        $i0 = $i0 + -1;
+
+        r1[$i0] = 1;
+
+        $r3 = r0.<org.spongycastle.crypto.modes.EAXBlockCipher: org.spongycastle.crypto.Mac mac>;
+
+        $i0 = r0.<org.spongycastle.crypto.modes.EAXBlockCipher: int blockSize>;
+
+        interfaceinvoke $r3.<org.spongycastle.crypto.Mac: void update(byte[],int,int)>(r1, 0, $i0);
+
+        r0.<org.spongycastle.crypto.modes.EAXBlockCipher: boolean cipherInitialized> = 0;
+
+        r1 = r0.<org.spongycastle.crypto.modes.EAXBlockCipher: byte[] initialAssociatedText>;
+
+        if r1 == null goto label2;
+
+        r1 = r0.<org.spongycastle.crypto.modes.EAXBlockCipher: byte[] initialAssociatedText>;
+
+        $r4 = r0.<org.spongycastle.crypto.modes.EAXBlockCipher: byte[] initialAssociatedText>;
+
+        $i0 = lengthof $r4;
+
+        virtualinvoke r0.<org.spongycastle.crypto.modes.EAXBlockCipher: void processAADBytes(byte[],int,int)>(r1, 0, $i0);
+
+     label2:
+        return;
+    }
+    private boolean verifyMac(byte[], int)
+    {
+        org.spongycastle.crypto.modes.EAXBlockCipher r0;
+        byte[] $r1, $r2;
+        int $i0, i1, i2, $i3;
+        byte $b4, $b5;
+
+        r0 := @this: org.spongycastle.crypto.modes.EAXBlockCipher;
+
+        $r1 := @parameter0: byte[];
+
+        $i0 := @parameter1: int;
+
+        i1 = 0;
+
+        i2 = 0;
+
+     label1:
+        $i3 = r0.<org.spongycastle.crypto.modes.EAXBlockCipher: int macSize>;
+
+        if i2 >= $i3 goto label2;
+
+        $r2 = r0.<org.spongycastle.crypto.modes.EAXBlockCipher: byte[] macBlock>;
+
+        $b4 = $r2[i2];
+
+        $i3 = $i0 + i2;
+
+        $b5 = $r1[$i3];
+
+        $i3 = $b4 ^ $b5;
+
+        i1 = i1 | $i3;
+
+        i2 = i2 + 1;
+
+        goto label1;
+
+     label2:
+        if i1 != 0 goto label3;
+
+        return 1;
+
+     label3:
+        return 0;
+    }
+    public int doFinal(byte[], int) throws java.lang.IllegalStateException, org.spongycastle.crypto.InvalidCipherTextException
+    {
+        org.spongycastle.crypto.modes.EAXBlockCipher r0;
+        byte[] $r1, r2, $r5;
+        int $i0, i1, $i2, $i3, $i4;
+        boolean $z0;
+        org.spongycastle.crypto.OutputLengthException $r3;
+        org.spongycastle.crypto.modes.SICBlockCipher $r4;
+        org.spongycastle.crypto.Mac $r6;
+        org.spongycastle.crypto.InvalidCipherTextException $r7;
+
+        r0 := @this: org.spongycastle.crypto.modes.EAXBlockCipher;
+
+        $r1 := @parameter0: byte[];
+
+        $i0 := @parameter1: int;
+
+        specialinvoke r0.<org.spongycastle.crypto.modes.EAXBlockCipher: void initCipher()>();
+
+        i1 = r0.<org.spongycastle.crypto.modes.EAXBlockCipher: int bufOff>;
+
+        r2 = r0.<org.spongycastle.crypto.modes.EAXBlockCipher: byte[] bufBlock>;
+
+        $i2 = lengthof r2;
+
+        r2 = newarray (byte)[$i2];
+
+        r0.<org.spongycastle.crypto.modes.EAXBlockCipher: int bufOff> = 0;
+
+        $z0 = r0.<org.spongycastle.crypto.modes.EAXBlockCipher: boolean forEncryption>;
+
+        if $z0 == 0 goto label2;
+
+        $i2 = lengthof $r1;
+
+        $i3 = $i0 + i1;
+
+        $i4 = r0.<org.spongycastle.crypto.modes.EAXBlockCipher: int macSize>;
+
+        $i3 = $i3 + $i4;
+
+        if $i2 >= $i3 goto label1;
+
+        $r3 = new org.spongycastle.crypto.OutputLengthException;
+
+        specialinvoke $r3.<org.spongycastle.crypto.OutputLengthException: void <init>(java.lang.String)>("Output buffer too short");
+
+        throw $r3;
+
+     label1:
+        $r4 = r0.<org.spongycastle.crypto.modes.EAXBlockCipher: org.spongycastle.crypto.modes.SICBlockCipher cipher>;
+
+        $r5 = r0.<org.spongycastle.crypto.modes.EAXBlockCipher: byte[] bufBlock>;
+
+        virtualinvoke $r4.<org.spongycastle.crypto.modes.SICBlockCipher: int processBlock(byte[],int,byte[],int)>($r5, 0, r2, 0);
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r2, 0, $r1, $i0, i1);
+
+        $r6 = r0.<org.spongycastle.crypto.modes.EAXBlockCipher: org.spongycastle.crypto.Mac mac>;
+
+        interfaceinvoke $r6.<org.spongycastle.crypto.Mac: void update(byte[],int,int)>(r2, 0, i1);
+
+        specialinvoke r0.<org.spongycastle.crypto.modes.EAXBlockCipher: void calculateMac()>();
+
+        r2 = r0.<org.spongycastle.crypto.modes.EAXBlockCipher: byte[] macBlock>;
+
+        $i0 = $i0 + i1;
+
+        $i2 = r0.<org.spongycastle.crypto.modes.EAXBlockCipher: int macSize>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r2, 0, $r1, $i0, $i2);
+
+        specialinvoke r0.<org.spongycastle.crypto.modes.EAXBlockCipher: void reset(boolean)>(0);
+
+        $i0 = r0.<org.spongycastle.crypto.modes.EAXBlockCipher: int macSize>;
+
+        $i0 = $i0 + i1;
+
+        return $i0;
+
+     label2:
+        $i2 = r0.<org.spongycastle.crypto.modes.EAXBlockCipher: int macSize>;
+
+        if i1 >= $i2 goto label3;
+
+        $r7 = new org.spongycastle.crypto.InvalidCipherTextException;
+
+        specialinvoke $r7.<org.spongycastle.crypto.InvalidCipherTextException: void <init>(java.lang.String)>("data too short");
+
+        throw $r7;
+
+     label3:
+        $i2 = lengthof $r1;
+
+        $i3 = $i0 + i1;
+
+        $i4 = r0.<org.spongycastle.crypto.modes.EAXBlockCipher: int macSize>;
+
+        $i3 = $i3 - $i4;
+
+        if $i2 >= $i3 goto label4;
+
+        $r3 = new org.spongycastle.crypto.OutputLengthException;
+
+        specialinvoke $r3.<org.spongycastle.crypto.OutputLengthException: void <init>(java.lang.String)>("Output buffer too short");
+
+        throw $r3;
+
+     label4:
+        $i2 = r0.<org.spongycastle.crypto.modes.EAXBlockCipher: int macSize>;
+
+        if i1 <= $i2 goto label5;
+
+        $r6 = r0.<org.spongycastle.crypto.modes.EAXBlockCipher: org.spongycastle.crypto.Mac mac>;
+
+        $r5 = r0.<org.spongycastle.crypto.modes.EAXBlockCipher: byte[] bufBlock>;
+
+        $i2 = r0.<org.spongycastle.crypto.modes.EAXBlockCipher: int macSize>;
+
+        $i2 = i1 - $i2;
+
+        interfaceinvoke $r6.<org.spongycastle.crypto.Mac: void update(byte[],int,int)>($r5, 0, $i2);
+
+        $r4 = r0.<org.spongycastle.crypto.modes.EAXBlockCipher: org.spongycastle.crypto.modes.SICBlockCipher cipher>;
+
+        $r5 = r0.<org.spongycastle.crypto.modes.EAXBlockCipher: byte[] bufBlock>;
+
+        virtualinvoke $r4.<org.spongycastle.crypto.modes.SICBlockCipher: int processBlock(byte[],int,byte[],int)>($r5, 0, r2, 0);
+
+        $i2 = r0.<org.spongycastle.crypto.modes.EAXBlockCipher: int macSize>;
+
+        $i2 = i1 - $i2;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r2, 0, $r1, $i0, $i2);
+
+     label5:
+        specialinvoke r0.<org.spongycastle.crypto.modes.EAXBlockCipher: void calculateMac()>();
+
+        $r1 = r0.<org.spongycastle.crypto.modes.EAXBlockCipher: byte[] bufBlock>;
+
+        $i0 = r0.<org.spongycastle.crypto.modes.EAXBlockCipher: int macSize>;
+
+        $i0 = i1 - $i0;
+
+        $z0 = specialinvoke r0.<org.spongycastle.crypto.modes.EAXBlockCipher: boolean verifyMac(byte[],int)>($r1, $i0);
+
+        if $z0 != 0 goto label6;
+
+        $r7 = new org.spongycastle.crypto.InvalidCipherTextException;
+
+        specialinvoke $r7.<org.spongycastle.crypto.InvalidCipherTextException: void <init>(java.lang.String)>("mac check in EAX failed");
+
+        throw $r7;
+
+     label6:
+        specialinvoke r0.<org.spongycastle.crypto.modes.EAXBlockCipher: void reset(boolean)>(0);
+
+        $i0 = r0.<org.spongycastle.crypto.modes.EAXBlockCipher: int macSize>;
+
+        $i0 = i1 - $i0;
+
+        return $i0;
+    }
+    public java.lang.String getAlgorithmName()
+    {
+        org.spongycastle.crypto.modes.EAXBlockCipher r0;
+        java.lang.StringBuilder $r1;
+        org.spongycastle.crypto.modes.SICBlockCipher $r2;
+        org.spongycastle.crypto.BlockCipher $r3;
+        java.lang.String $r4;
+
+        r0 := @this: org.spongycastle.crypto.modes.EAXBlockCipher;
+
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = r0.<org.spongycastle.crypto.modes.EAXBlockCipher: org.spongycastle.crypto.modes.SICBlockCipher cipher>;
+
+        $r3 = virtualinvoke $r2.<org.spongycastle.crypto.modes.SICBlockCipher: org.spongycastle.crypto.BlockCipher getUnderlyingCipher()>();
+
+        $r4 = interfaceinvoke $r3.<org.spongycastle.crypto.BlockCipher: java.lang.String getAlgorithmName()>();
+
+        $r1 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r1 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("/EAX");
+
+        $r4 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r4;
+    }
+    public int getBlockSize()
+    {
+        org.spongycastle.crypto.modes.EAXBlockCipher r0;
+        int $i0;
+        org.spongycastle.crypto.modes.SICBlockCipher $r1;
+
+        r0 := @this: org.spongycastle.crypto.modes.EAXBlockCipher;
+
+        $r1 = r0.<org.spongycastle.crypto.modes.EAXBlockCipher: org.spongycastle.crypto.modes.SICBlockCipher cipher>;
+
+        $i0 = virtualinvoke $r1.<org.spongycastle.crypto.modes.SICBlockCipher: int getBlockSize()>();
+
+        return $i0;
+    }
+    public byte[] getMac()
+    {
+        org.spongycastle.crypto.modes.EAXBlockCipher r0;
+        byte[] r1, $r2;
+        int $i0;
+
+        r0 := @this: org.spongycastle.crypto.modes.EAXBlockCipher;
+
+        $i0 = r0.<org.spongycastle.crypto.modes.EAXBlockCipher: int macSize>;
+
+        r1 = newarray (byte)[$i0];
+
+        $r2 = r0.<org.spongycastle.crypto.modes.EAXBlockCipher: byte[] macBlock>;
+
+        $i0 = r0.<org.spongycastle.crypto.modes.EAXBlockCipher: int macSize>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r2, 0, r1, 0, $i0);
+
+        return r1;
+    }
+    public int getOutputSize(int)
+    {
+        org.spongycastle.crypto.modes.EAXBlockCipher r0;
+        int $i0, $i1;
+        boolean $z0;
+
+        r0 := @this: org.spongycastle.crypto.modes.EAXBlockCipher;
+
+        $i0 := @parameter0: int;
+
+        $i1 = r0.<org.spongycastle.crypto.modes.EAXBlockCipher: int bufOff>;
+
+        $i0 = $i0 + $i1;
+
+        $z0 = r0.<org.spongycastle.crypto.modes.EAXBlockCipher: boolean forEncryption>;
+
+        if $z0 == 0 goto label1;
+
+        $i1 = r0.<org.spongycastle.crypto.modes.EAXBlockCipher: int macSize>;
+
+        $i0 = $i1 + $i0;
+
+        return $i0;
+
+     label1:
+        $i1 = r0.<org.spongycastle.crypto.modes.EAXBlockCipher: int macSize>;
+
+        if $i0 >= $i1 goto label2;
+
+        return 0;
+
+     label2:
+        $i1 = r0.<org.spongycastle.crypto.modes.EAXBlockCipher: int macSize>;
+
+        $i0 = $i0 - $i1;
+
+        return $i0;
+    }
+    public org.spongycastle.crypto.BlockCipher getUnderlyingCipher()
+    {
+        org.spongycastle.crypto.modes.EAXBlockCipher r0;
+        org.spongycastle.crypto.BlockCipher $r1;
+        org.spongycastle.crypto.modes.SICBlockCipher $r2;
+
+        r0 := @this: org.spongycastle.crypto.modes.EAXBlockCipher;
+
+        $r2 = r0.<org.spongycastle.crypto.modes.EAXBlockCipher: org.spongycastle.crypto.modes.SICBlockCipher cipher>;
+
+        $r1 = virtualinvoke $r2.<org.spongycastle.crypto.modes.SICBlockCipher: org.spongycastle.crypto.BlockCipher getUnderlyingCipher()>();
+
+        return $r1;
+    }
+    public int getUpdateOutputSize(int)
+    {
+        org.spongycastle.crypto.modes.EAXBlockCipher r0;
+        int $i0, $i1;
+        boolean $z0;
+
+        r0 := @this: org.spongycastle.crypto.modes.EAXBlockCipher;
+
+        $i0 := @parameter0: int;
+
+        $i1 = r0.<org.spongycastle.crypto.modes.EAXBlockCipher: int bufOff>;
+
+        $i0 = $i0 + $i1;
+
+        $z0 = r0.<org.spongycastle.crypto.modes.EAXBlockCipher: boolean forEncryption>;
+
+        if $z0 != 0 goto label2;
+
+        $i1 = r0.<org.spongycastle.crypto.modes.EAXBlockCipher: int macSize>;
+
+        if $i0 >= $i1 goto label1;
+
+        return 0;
+
+     label1:
+        $i1 = r0.<org.spongycastle.crypto.modes.EAXBlockCipher: int macSize>;
+
+        $i0 = $i0 - $i1;
+
+     label2:
+        $i1 = r0.<org.spongycastle.crypto.modes.EAXBlockCipher: int blockSize>;
+
+        $i1 = $i0 % $i1;
+
+        $i0 = $i0 - $i1;
+
+        return $i0;
+    }
+    public void init(boolean, org.spongycastle.crypto.CipherParameters) throws java.lang.IllegalArgumentException
+    {
+        org.spongycastle.crypto.modes.EAXBlockCipher r0;
+        boolean $z0, $z1;
+        org.spongycastle.crypto.CipherParameters $r1;
+        byte[] r2, $r3;
+        org.spongycastle.crypto.params.AEADParameters r4;
+        int $i0, $i1;
+        java.lang.Object r5;
+        org.spongycastle.crypto.Mac $r6;
+        org.spongycastle.crypto.modes.SICBlockCipher $r7;
+        org.spongycastle.crypto.params.ParametersWithIV $r8, $r9;
+        java.lang.IllegalArgumentException $r10;
+
+        r0 := @this: org.spongycastle.crypto.modes.EAXBlockCipher;
+
+        $z0 := @parameter0: boolean;
+
+        $r1 := @parameter1: org.spongycastle.crypto.CipherParameters;
+
+        r0.<org.spongycastle.crypto.modes.EAXBlockCipher: boolean forEncryption> = $z0;
+
+        $z1 = $r1 instanceof org.spongycastle.crypto.params.AEADParameters;
+
+        if $z1 == 0 goto label3;
+
+        r4 = (org.spongycastle.crypto.params.AEADParameters) $r1;
+
+        $r3 = virtualinvoke r4.<org.spongycastle.crypto.params.AEADParameters: byte[] getNonce()>();
+
+        r2 = virtualinvoke r4.<org.spongycastle.crypto.params.AEADParameters: byte[] getAssociatedText()>();
+
+        r0.<org.spongycastle.crypto.modes.EAXBlockCipher: byte[] initialAssociatedText> = r2;
+
+        $i0 = virtualinvoke r4.<org.spongycastle.crypto.params.AEADParameters: int getMacSize()>();
+
+        $i0 = $i0 / 8;
+
+        r0.<org.spongycastle.crypto.modes.EAXBlockCipher: int macSize> = $i0;
+
+        r5 = virtualinvoke r4.<org.spongycastle.crypto.params.AEADParameters: org.spongycastle.crypto.params.KeyParameter getKey()>();
+
+     label1:
+        if $z0 == 0 goto label5;
+
+        $i0 = r0.<org.spongycastle.crypto.modes.EAXBlockCipher: int blockSize>;
+
+     label2:
+        r2 = newarray (byte)[$i0];
+
+        r0.<org.spongycastle.crypto.modes.EAXBlockCipher: byte[] bufBlock> = r2;
+
+        $i0 = r0.<org.spongycastle.crypto.modes.EAXBlockCipher: int blockSize>;
+
+        r2 = newarray (byte)[$i0];
+
+        $r6 = r0.<org.spongycastle.crypto.modes.EAXBlockCipher: org.spongycastle.crypto.Mac mac>;
+
+        $r1 = (org.spongycastle.crypto.CipherParameters) r5;
+
+        interfaceinvoke $r6.<org.spongycastle.crypto.Mac: void init(org.spongycastle.crypto.CipherParameters)>($r1);
+
+        $i0 = r0.<org.spongycastle.crypto.modes.EAXBlockCipher: int blockSize>;
+
+        $i0 = $i0 + -1;
+
+        r2[$i0] = 0;
+
+        $r6 = r0.<org.spongycastle.crypto.modes.EAXBlockCipher: org.spongycastle.crypto.Mac mac>;
+
+        $i0 = r0.<org.spongycastle.crypto.modes.EAXBlockCipher: int blockSize>;
+
+        interfaceinvoke $r6.<org.spongycastle.crypto.Mac: void update(byte[],int,int)>(r2, 0, $i0);
+
+        $r6 = r0.<org.spongycastle.crypto.modes.EAXBlockCipher: org.spongycastle.crypto.Mac mac>;
+
+        $i0 = lengthof $r3;
+
+        interfaceinvoke $r6.<org.spongycastle.crypto.Mac: void update(byte[],int,int)>($r3, 0, $i0);
+
+        $r6 = r0.<org.spongycastle.crypto.modes.EAXBlockCipher: org.spongycastle.crypto.Mac mac>;
+
+        $r3 = r0.<org.spongycastle.crypto.modes.EAXBlockCipher: byte[] nonceMac>;
+
+        interfaceinvoke $r6.<org.spongycastle.crypto.Mac: int doFinal(byte[],int)>($r3, 0);
+
+        $r7 = r0.<org.spongycastle.crypto.modes.EAXBlockCipher: org.spongycastle.crypto.modes.SICBlockCipher cipher>;
+
+        $r9 = new org.spongycastle.crypto.params.ParametersWithIV;
+
+        $r3 = r0.<org.spongycastle.crypto.modes.EAXBlockCipher: byte[] nonceMac>;
+
+        specialinvoke $r9.<org.spongycastle.crypto.params.ParametersWithIV: void <init>(org.spongycastle.crypto.CipherParameters,byte[])>(null, $r3);
+
+        virtualinvoke $r7.<org.spongycastle.crypto.modes.SICBlockCipher: void init(boolean,org.spongycastle.crypto.CipherParameters)>(1, $r9);
+
+        virtualinvoke r0.<org.spongycastle.crypto.modes.EAXBlockCipher: void reset()>();
+
+        return;
+
+     label3:
+        $z1 = $r1 instanceof org.spongycastle.crypto.params.ParametersWithIV;
+
+        if $z1 == 0 goto label4;
+
+        $r8 = (org.spongycastle.crypto.params.ParametersWithIV) $r1;
+
+        $r3 = virtualinvoke $r8.<org.spongycastle.crypto.params.ParametersWithIV: byte[] getIV()>();
+
+        r0.<org.spongycastle.crypto.modes.EAXBlockCipher: byte[] initialAssociatedText> = null;
+
+        $r6 = r0.<org.spongycastle.crypto.modes.EAXBlockCipher: org.spongycastle.crypto.Mac mac>;
+
+        $i0 = interfaceinvoke $r6.<org.spongycastle.crypto.Mac: int getMacSize()>();
+
+        $i0 = $i0 / 2;
+
+        r0.<org.spongycastle.crypto.modes.EAXBlockCipher: int macSize> = $i0;
+
+        r5 = virtualinvoke $r8.<org.spongycastle.crypto.params.ParametersWithIV: org.spongycastle.crypto.CipherParameters getParameters()>();
+
+        goto label1;
+
+     label4:
+        $r10 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r10.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("invalid parameters passed to EAX");
+
+        throw $r10;
+
+     label5:
+        $i0 = r0.<org.spongycastle.crypto.modes.EAXBlockCipher: int blockSize>;
+
+        $i1 = r0.<org.spongycastle.crypto.modes.EAXBlockCipher: int macSize>;
+
+        $i0 = $i0 + $i1;
+
+        goto label2;
+    }
+    public void processAADByte(byte)
+    {
+        org.spongycastle.crypto.modes.EAXBlockCipher r0;
+        byte $b0;
+        boolean $z0;
+        java.lang.IllegalStateException $r1;
+        org.spongycastle.crypto.Mac $r2;
+
+        r0 := @this: org.spongycastle.crypto.modes.EAXBlockCipher;
+
+        $b0 := @parameter0: byte;
+
+        $z0 = r0.<org.spongycastle.crypto.modes.EAXBlockCipher: boolean cipherInitialized>;
+
+        if $z0 == 0 goto label1;
+
+        $r1 = new java.lang.IllegalStateException;
+
+        specialinvoke $r1.<java.lang.IllegalStateException: void <init>(java.lang.String)>("AAD data cannot be added after encryption/decryption processing has begun.");
+
+        throw $r1;
+
+     label1:
+        $r2 = r0.<org.spongycastle.crypto.modes.EAXBlockCipher: org.spongycastle.crypto.Mac mac>;
+
+        interfaceinvoke $r2.<org.spongycastle.crypto.Mac: void update(byte)>($b0);
+
+        return;
+    }
+    public void processAADBytes(byte[], int, int)
+    {
+        org.spongycastle.crypto.modes.EAXBlockCipher r0;
+        byte[] $r1;
+        int $i0, $i1;
+        boolean $z0;
+        java.lang.IllegalStateException $r2;
+        org.spongycastle.crypto.Mac $r3;
+
+        r0 := @this: org.spongycastle.crypto.modes.EAXBlockCipher;
+
+        $r1 := @parameter0: byte[];
+
+        $i0 := @parameter1: int;
+
+        $i1 := @parameter2: int;
+
+        $z0 = r0.<org.spongycastle.crypto.modes.EAXBlockCipher: boolean cipherInitialized>;
+
+        if $z0 == 0 goto label1;
+
+        $r2 = new java.lang.IllegalStateException;
+
+        specialinvoke $r2.<java.lang.IllegalStateException: void <init>(java.lang.String)>("AAD data cannot be added after encryption/decryption processing has begun.");
+
+        throw $r2;
+
+     label1:
+        $r3 = r0.<org.spongycastle.crypto.modes.EAXBlockCipher: org.spongycastle.crypto.Mac mac>;
+
+        interfaceinvoke $r3.<org.spongycastle.crypto.Mac: void update(byte[],int,int)>($r1, $i0, $i1);
+
+        return;
+    }
+    public int processByte(byte, byte[], int) throws org.spongycastle.crypto.DataLengthException
+    {
+        org.spongycastle.crypto.modes.EAXBlockCipher r0;
+        byte $b0;
+        byte[] $r1;
+        int $i1;
+
+        r0 := @this: org.spongycastle.crypto.modes.EAXBlockCipher;
+
+        $b0 := @parameter0: byte;
+
+        $r1 := @parameter1: byte[];
+
+        $i1 := @parameter2: int;
+
+        specialinvoke r0.<org.spongycastle.crypto.modes.EAXBlockCipher: void initCipher()>();
+
+        $i1 = specialinvoke r0.<org.spongycastle.crypto.modes.EAXBlockCipher: int process(byte,byte[],int)>($b0, $r1, $i1);
+
+        return $i1;
+    }
+    public int processBytes(byte[], int, int, byte[], int) throws org.spongycastle.crypto.DataLengthException
+    {
+        org.spongycastle.crypto.modes.EAXBlockCipher r0;
+        byte[] $r1, $r2;
+        int $i0, $i1, $i2, $i3, $i4, $i5;
+        org.spongycastle.crypto.DataLengthException $r3;
+        byte $b6;
+
+        r0 := @this: org.spongycastle.crypto.modes.EAXBlockCipher;
+
+        $r1 := @parameter0: byte[];
+
+        $i0 := @parameter1: int;
+
+        $i1 := @parameter2: int;
+
+        $r2 := @parameter3: byte[];
+
+        $i2 := @parameter4: int;
+
+        specialinvoke r0.<org.spongycastle.crypto.modes.EAXBlockCipher: void initCipher()>();
+
+        $i4 = lengthof $r1;
+
+        $i5 = $i0 + $i1;
+
+        if $i4 >= $i5 goto label1;
+
+        $r3 = new org.spongycastle.crypto.DataLengthException;
+
+        specialinvoke $r3.<org.spongycastle.crypto.DataLengthException: void <init>(java.lang.String)>("Input buffer too short");
+
+        throw $r3;
+
+     label1:
+        $i4 = 0;
+
+        $i5 = 0;
+
+     label2:
+        if $i5 == $i1 goto label3;
+
+        $i3 = $i0 + $i5;
+
+        $b6 = $r1[$i3];
+
+        $i3 = $i2 + $i4;
+
+        $i3 = specialinvoke r0.<org.spongycastle.crypto.modes.EAXBlockCipher: int process(byte,byte[],int)>($b6, $r2, $i3);
+
+        $i4 = $i4 + $i3;
+
+        $i5 = $i5 + 1;
+
+        goto label2;
+
+     label3:
+        return $i4;
+    }
+    public void reset()
+    {
+        org.spongycastle.crypto.modes.EAXBlockCipher r0;
+
+        r0 := @this: org.spongycastle.crypto.modes.EAXBlockCipher;
+
+        specialinvoke r0.<org.spongycastle.crypto.modes.EAXBlockCipher: void reset(boolean)>(1);
+
+        return;
+    }

@@ -1,0 +1,505 @@
+com.dropbox.sync.android.CoreBatteryStateManager extends java.lang.Object
+private static final float BATTERY_HIGH_THRESHOLD
+private static final java.lang.Object sInitLock
+private static com.dropbox.sync.android.CoreBatteryStateManager sInstance
+private java.util.concurrent.atomic.AtomicInteger mCachedBatteryLowThresholdPct
+private final java.util.concurrent.CopyOnWriteArrayList mListenerList
+private com.dropbox.sync.android.CoreBatteryStateManager$State mState
+    static void <clinit>()
+    {
+        java.lang.Object $r0;
+
+        $r0 = new java.lang.Object;
+
+        specialinvoke $r0.<java.lang.Object: void <init>()>();
+
+        <com.dropbox.sync.android.CoreBatteryStateManager: java.lang.Object sInitLock> = $r0;
+
+        return;
+    }
+    private void <init>()
+    {
+        com.dropbox.sync.android.CoreBatteryStateManager r0;
+        com.dropbox.sync.android.DbxBatteryLevel $r1;
+        com.dropbox.sync.android.CoreBatteryStateManager$State $r2;
+        com.dropbox.sync.android.DbxChargingState $r3;
+        java.util.concurrent.CopyOnWriteArrayList $r4;
+        java.util.concurrent.atomic.AtomicInteger $r5;
+
+        r0 := @this: com.dropbox.sync.android.CoreBatteryStateManager;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r2 = new com.dropbox.sync.android.CoreBatteryStateManager$State;
+
+        $r3 = <com.dropbox.sync.android.DbxChargingState: com.dropbox.sync.android.DbxChargingState UNKNOWN>;
+
+        $r1 = <com.dropbox.sync.android.DbxBatteryLevel: com.dropbox.sync.android.DbxBatteryLevel UNKNOWN>;
+
+        specialinvoke $r2.<com.dropbox.sync.android.CoreBatteryStateManager$State: void <init>(com.dropbox.sync.android.CoreBatteryStateManager,com.dropbox.sync.android.DbxChargingState,com.dropbox.sync.android.DbxBatteryLevel)>(r0, $r3, $r1);
+
+        r0.<com.dropbox.sync.android.CoreBatteryStateManager: com.dropbox.sync.android.CoreBatteryStateManager$State mState> = $r2;
+
+        $r4 = new java.util.concurrent.CopyOnWriteArrayList;
+
+        specialinvoke $r4.<java.util.concurrent.CopyOnWriteArrayList: void <init>()>();
+
+        r0.<com.dropbox.sync.android.CoreBatteryStateManager: java.util.concurrent.CopyOnWriteArrayList mListenerList> = $r4;
+
+        $r5 = new java.util.concurrent.atomic.AtomicInteger;
+
+        specialinvoke $r5.<java.util.concurrent.atomic.AtomicInteger: void <init>(int)>(-1);
+
+        r0.<com.dropbox.sync.android.CoreBatteryStateManager: java.util.concurrent.atomic.AtomicInteger mCachedBatteryLowThresholdPct> = $r5;
+
+        return;
+    }
+    private static android.content.Intent getBatteryChangedIntent(android.content.Context)
+    {
+        android.content.Context $r0;
+        android.content.IntentFilter $r1;
+        android.content.Intent $r2;
+
+        $r0 := @parameter0: android.content.Context;
+
+        $r1 = new android.content.IntentFilter;
+
+        specialinvoke $r1.<android.content.IntentFilter: void <init>(java.lang.String)>("android.intent.action.BATTERY_CHANGED");
+
+        $r2 = virtualinvoke $r0.<android.content.Context: android.content.Intent registerReceiver(android.content.BroadcastReceiver,android.content.IntentFilter)>(null, $r1);
+
+        return $r2;
+    }
+    private float getBatteryLowThreshold()
+    {
+        com.dropbox.sync.android.CoreBatteryStateManager r0;
+        java.util.concurrent.atomic.AtomicInteger $r1;
+        int $i0;
+        android.content.res.Resources $r2;
+        float $f0;
+
+        r0 := @this: com.dropbox.sync.android.CoreBatteryStateManager;
+
+        $r1 = r0.<com.dropbox.sync.android.CoreBatteryStateManager: java.util.concurrent.atomic.AtomicInteger mCachedBatteryLowThresholdPct>;
+
+        $i0 = virtualinvoke $r1.<java.util.concurrent.atomic.AtomicInteger: int get()>();
+
+        if $i0 >= 0 goto label1;
+
+        $r2 = staticinvoke <android.content.res.Resources: android.content.res.Resources getSystem()>();
+
+        $i0 = virtualinvoke $r2.<android.content.res.Resources: int getIdentifier(java.lang.String,java.lang.String,java.lang.String)>("config_lowBatteryWarningLevel", "integer", "android");
+
+        $i0 = virtualinvoke $r2.<android.content.res.Resources: int getInteger(int)>($i0);
+
+        $r1 = r0.<com.dropbox.sync.android.CoreBatteryStateManager: java.util.concurrent.atomic.AtomicInteger mCachedBatteryLowThresholdPct>;
+
+        virtualinvoke $r1.<java.util.concurrent.atomic.AtomicInteger: void set(int)>($i0);
+
+     label1:
+        $r1 = r0.<com.dropbox.sync.android.CoreBatteryStateManager: java.util.concurrent.atomic.AtomicInteger mCachedBatteryLowThresholdPct>;
+
+        $f0 = virtualinvoke $r1.<java.util.concurrent.atomic.AtomicInteger: float floatValue()>();
+
+        $f0 = $f0 / 100.0F;
+
+        return $f0;
+    }
+    public static com.dropbox.sync.android.CoreBatteryStateManager getInstance()
+    {
+        java.lang.Object $r0;
+        com.dropbox.sync.android.CoreBatteryStateManager $r1;
+        java.lang.Throwable $r2;
+
+        $r0 = <com.dropbox.sync.android.CoreBatteryStateManager: java.lang.Object sInitLock>;
+
+        entermonitor $r0;
+
+     label1:
+        $r1 = <com.dropbox.sync.android.CoreBatteryStateManager: com.dropbox.sync.android.CoreBatteryStateManager sInstance>;
+
+        if $r1 != null goto label2;
+
+        $r1 = new com.dropbox.sync.android.CoreBatteryStateManager;
+
+        specialinvoke $r1.<com.dropbox.sync.android.CoreBatteryStateManager: void <init>()>();
+
+        <com.dropbox.sync.android.CoreBatteryStateManager: com.dropbox.sync.android.CoreBatteryStateManager sInstance> = $r1;
+
+     label2:
+        $r1 = <com.dropbox.sync.android.CoreBatteryStateManager: com.dropbox.sync.android.CoreBatteryStateManager sInstance>;
+
+        exitmonitor $r0;
+
+     label3:
+        return $r1;
+
+     label4:
+        $r2 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label5:
+        throw $r2;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+    private void notifyListenersOfStateChange()
+    {
+        com.dropbox.sync.android.CoreBatteryStateManager r0;
+        boolean $z0, $z1;
+        com.dropbox.sync.android.CoreBatteryStateManager$State $r1;
+        com.dropbox.sync.android.DbxChargingState $r2, $r3;
+        com.dropbox.sync.android.DbxBatteryLevel $r4, $r5;
+        java.util.concurrent.CopyOnWriteArrayList $r6;
+        java.util.Iterator $r7;
+        java.lang.Object $r8;
+        com.dropbox.sync.android.CoreBatteryStateManager$Listener r9;
+
+        r0 := @this: com.dropbox.sync.android.CoreBatteryStateManager;
+
+        $z0 = 1;
+
+        $r1 = r0.<com.dropbox.sync.android.CoreBatteryStateManager: com.dropbox.sync.android.CoreBatteryStateManager$State mState>;
+
+        $r2 = $r1.<com.dropbox.sync.android.CoreBatteryStateManager$State: com.dropbox.sync.android.DbxChargingState charging>;
+
+        $r3 = <com.dropbox.sync.android.DbxChargingState: com.dropbox.sync.android.DbxChargingState UNKNOWN>;
+
+        if $r2 == $r3 goto label4;
+
+        $z1 = 1;
+
+     label1:
+        staticinvoke <com.dropbox.sync.android.CoreAssert: void isTrue(boolean)>($z1);
+
+        $r1 = r0.<com.dropbox.sync.android.CoreBatteryStateManager: com.dropbox.sync.android.CoreBatteryStateManager$State mState>;
+
+        $r4 = $r1.<com.dropbox.sync.android.CoreBatteryStateManager$State: com.dropbox.sync.android.DbxBatteryLevel level>;
+
+        $r5 = <com.dropbox.sync.android.DbxBatteryLevel: com.dropbox.sync.android.DbxBatteryLevel UNKNOWN>;
+
+        if $r4 == $r5 goto label5;
+
+     label2:
+        staticinvoke <com.dropbox.sync.android.CoreAssert: void isTrue(boolean)>($z0);
+
+        $r6 = r0.<com.dropbox.sync.android.CoreBatteryStateManager: java.util.concurrent.CopyOnWriteArrayList mListenerList>;
+
+        $r7 = virtualinvoke $r6.<java.util.concurrent.CopyOnWriteArrayList: java.util.Iterator iterator()>();
+
+     label3:
+        $z0 = interfaceinvoke $r7.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label6;
+
+        $r8 = interfaceinvoke $r7.<java.util.Iterator: java.lang.Object next()>();
+
+        r9 = (com.dropbox.sync.android.CoreBatteryStateManager$Listener) $r8;
+
+        interfaceinvoke r9.<com.dropbox.sync.android.CoreBatteryStateManager$Listener: void stateChanged()>();
+
+        goto label3;
+
+     label4:
+        $z1 = 0;
+
+        goto label1;
+
+     label5:
+        $z0 = 0;
+
+        goto label2;
+
+     label6:
+        return;
+    }
+    private void setStateHelper(android.content.Context, boolean, android.content.Intent)
+    {
+        com.dropbox.sync.android.CoreBatteryStateManager r0;
+        android.content.Context $r1;
+        boolean $z0, $z1;
+        android.content.Intent $r2;
+        float f0, $f1;
+        java.lang.String $r3, $r4;
+        int $i0, $i1;
+
+        r0 := @this: com.dropbox.sync.android.CoreBatteryStateManager;
+
+        $r1 := @parameter0: android.content.Context;
+
+        $z0 := @parameter1: boolean;
+
+        $r2 := @parameter2: android.content.Intent;
+
+        if $r2 == null goto label4;
+
+        $z1 = 1;
+
+     label1:
+        staticinvoke <com.dropbox.sync.android.CoreAssert: void isTrue(boolean)>($z1);
+
+        $r3 = "android.intent.action.BATTERY_CHANGED";
+
+        $r4 = virtualinvoke $r2.<android.content.Intent: java.lang.String getAction()>();
+
+        $z1 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>($r4);
+
+        staticinvoke <com.dropbox.sync.android.CoreAssert: void isTrue(boolean)>($z1);
+
+        $i0 = virtualinvoke $r2.<android.content.Intent: int getIntExtra(java.lang.String,int)>("status", -1);
+
+        if $i0 == 2 goto label2;
+
+        if $i0 != 5 goto label5;
+
+     label2:
+        $z1 = 1;
+
+     label3:
+        $i0 = virtualinvoke $r2.<android.content.Intent: int getIntExtra(java.lang.String,int)>("level", -1);
+
+        $i1 = virtualinvoke $r2.<android.content.Intent: int getIntExtra(java.lang.String,int)>("scale", -1);
+
+        f0 = (float) $i0;
+
+        $f1 = (float) $i1;
+
+        f0 = f0 / $f1;
+
+        $z0 = specialinvoke r0.<com.dropbox.sync.android.CoreBatteryStateManager: boolean updateState(boolean,boolean,float)>($z1, $z0, f0);
+
+        if $z0 == 0 goto label6;
+
+        specialinvoke r0.<com.dropbox.sync.android.CoreBatteryStateManager: void notifyListenersOfStateChange()>();
+
+        return;
+
+     label4:
+        $z1 = 0;
+
+        goto label1;
+
+     label5:
+        $z1 = 0;
+
+        goto label3;
+
+     label6:
+        return;
+    }
+    private boolean updateState(boolean, boolean, float)
+    {
+        com.dropbox.sync.android.CoreBatteryStateManager r0;
+        boolean $z0, $z1;
+        float $f0, $f1;
+        com.dropbox.sync.android.DbxChargingState r1, $r4;
+        byte $b0;
+        com.dropbox.sync.android.DbxBatteryLevel r2, $r5;
+        com.dropbox.sync.android.CoreBatteryStateManager$State $r3;
+        java.lang.Throwable $r6;
+
+        r0 := @this: com.dropbox.sync.android.CoreBatteryStateManager;
+
+        $z0 := @parameter0: boolean;
+
+        $z1 := @parameter1: boolean;
+
+        $f0 := @parameter2: float;
+
+        entermonitor r0;
+
+        if $z0 == 0 goto label07;
+
+     label01:
+        r1 = <com.dropbox.sync.android.DbxChargingState: com.dropbox.sync.android.DbxChargingState CHARGING>;
+
+     label02:
+        if $z1 != 0 goto label03;
+
+        $f1 = specialinvoke r0.<com.dropbox.sync.android.CoreBatteryStateManager: float getBatteryLowThreshold()>();
+
+        $b0 = $f0 cmpg $f1;
+
+        if $b0 > 0 goto label08;
+
+     label03:
+        r2 = <com.dropbox.sync.android.DbxBatteryLevel: com.dropbox.sync.android.DbxBatteryLevel LOW>;
+
+     label04:
+        $r3 = r0.<com.dropbox.sync.android.CoreBatteryStateManager: com.dropbox.sync.android.CoreBatteryStateManager$State mState>;
+
+        $r4 = $r3.<com.dropbox.sync.android.CoreBatteryStateManager$State: com.dropbox.sync.android.DbxChargingState charging>;
+
+        if r1 != $r4 goto label10;
+
+        $r3 = r0.<com.dropbox.sync.android.CoreBatteryStateManager: com.dropbox.sync.android.CoreBatteryStateManager$State mState>;
+
+        $r5 = $r3.<com.dropbox.sync.android.CoreBatteryStateManager$State: com.dropbox.sync.android.DbxBatteryLevel level>;
+
+     label05:
+        if r2 != $r5 goto label10;
+
+        $z0 = 0;
+
+     label06:
+        exitmonitor r0;
+
+        return $z0;
+
+     label07:
+        r1 = <com.dropbox.sync.android.DbxChargingState: com.dropbox.sync.android.DbxChargingState UNPLUGGED>;
+
+        goto label02;
+
+     label08:
+        $b0 = $f0 cmpl 0.7F;
+
+        if $b0 < 0 goto label09;
+
+        r2 = <com.dropbox.sync.android.DbxBatteryLevel: com.dropbox.sync.android.DbxBatteryLevel HIGH>;
+
+        goto label04;
+
+     label09:
+        r2 = <com.dropbox.sync.android.DbxBatteryLevel: com.dropbox.sync.android.DbxBatteryLevel MEDIUM>;
+
+        goto label04;
+
+     label10:
+        $r3 = new com.dropbox.sync.android.CoreBatteryStateManager$State;
+
+        specialinvoke $r3.<com.dropbox.sync.android.CoreBatteryStateManager$State: void <init>(com.dropbox.sync.android.CoreBatteryStateManager,com.dropbox.sync.android.DbxChargingState,com.dropbox.sync.android.DbxBatteryLevel)>(r0, r1, r2);
+
+        r0.<com.dropbox.sync.android.CoreBatteryStateManager: com.dropbox.sync.android.CoreBatteryStateManager$State mState> = $r3;
+
+     label11:
+        $z0 = 1;
+
+        goto label06;
+
+     label12:
+        $r6 := @caughtexception;
+
+        exitmonitor r0;
+
+        throw $r6;
+
+        catch java.lang.Throwable from label01 to label05 with label12;
+        catch java.lang.Throwable from label07 to label11 with label12;
+    }
+    public void addListener(com.dropbox.sync.android.CoreBatteryStateManager$Listener)
+    {
+        com.dropbox.sync.android.CoreBatteryStateManager r0;
+        com.dropbox.sync.android.CoreBatteryStateManager$Listener $r1;
+        java.util.concurrent.CopyOnWriteArrayList $r2;
+
+        r0 := @this: com.dropbox.sync.android.CoreBatteryStateManager;
+
+        $r1 := @parameter0: com.dropbox.sync.android.CoreBatteryStateManager$Listener;
+
+        $r2 = r0.<com.dropbox.sync.android.CoreBatteryStateManager: java.util.concurrent.CopyOnWriteArrayList mListenerList>;
+
+        virtualinvoke $r2.<java.util.concurrent.CopyOnWriteArrayList: boolean add(java.lang.Object)>($r1);
+
+        return;
+    }
+    public com.dropbox.sync.android.CoreBatteryStateManager$State getState()
+    {
+        com.dropbox.sync.android.CoreBatteryStateManager r0;
+        java.lang.Throwable $r1;
+        com.dropbox.sync.android.CoreBatteryStateManager$State r2;
+
+        r0 := @this: com.dropbox.sync.android.CoreBatteryStateManager;
+
+        entermonitor r0;
+
+     label1:
+        r2 = r0.<com.dropbox.sync.android.CoreBatteryStateManager: com.dropbox.sync.android.CoreBatteryStateManager$State mState>;
+
+     label2:
+        exitmonitor r0;
+
+        return r2;
+
+     label3:
+        $r1 := @caughtexception;
+
+        exitmonitor r0;
+
+        throw $r1;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+    public boolean isSet()
+    {
+        com.dropbox.sync.android.CoreBatteryStateManager r0;
+        com.dropbox.sync.android.CoreBatteryStateManager$State $r1;
+        com.dropbox.sync.android.DbxChargingState $r2, $r3;
+        com.dropbox.sync.android.DbxBatteryLevel $r4, $r5;
+        boolean $z0;
+        java.lang.Throwable $r6;
+
+        r0 := @this: com.dropbox.sync.android.CoreBatteryStateManager;
+
+        entermonitor r0;
+
+     label1:
+        $r1 = r0.<com.dropbox.sync.android.CoreBatteryStateManager: com.dropbox.sync.android.CoreBatteryStateManager$State mState>;
+
+        $r2 = $r1.<com.dropbox.sync.android.CoreBatteryStateManager$State: com.dropbox.sync.android.DbxChargingState charging>;
+
+        $r3 = <com.dropbox.sync.android.DbxChargingState: com.dropbox.sync.android.DbxChargingState UNKNOWN>;
+
+        if $r2 == $r3 goto label4;
+
+        $r1 = r0.<com.dropbox.sync.android.CoreBatteryStateManager: com.dropbox.sync.android.CoreBatteryStateManager$State mState>;
+
+        $r4 = $r1.<com.dropbox.sync.android.CoreBatteryStateManager$State: com.dropbox.sync.android.DbxBatteryLevel level>;
+
+        $r5 = <com.dropbox.sync.android.DbxBatteryLevel: com.dropbox.sync.android.DbxBatteryLevel UNKNOWN>;
+
+     label2:
+        if $r4 == $r5 goto label4;
+
+        $z0 = 1;
+
+     label3:
+        exitmonitor r0;
+
+        return $z0;
+
+     label4:
+        $z0 = 0;
+
+        goto label3;
+
+     label5:
+        $r6 := @caughtexception;
+
+        exitmonitor r0;
+
+        throw $r6;
+
+        catch java.lang.Throwable from label1 to label2 with label5;
+    }
+    com.dropbox.sync.android.CoreBatteryStateManager$State refreshState(android.content.Context)
+    {
+        com.dropbox.sync.android.CoreBatteryStateManager r0;
+        android.content.Context $r1;
+        android.content.Intent $r2;
+        com.dropbox.sync.android.CoreBatteryStateManager$State $r3;
+
+        r0 := @this: com.dropbox.sync.android.CoreBatteryStateManager;
+
+        $r1 := @parameter0: android.content.Context;
+
+        $r2 = staticinvoke <com.dropbox.sync.android.CoreBatteryStateManager: android.content.Intent getBatteryChangedIntent(android.content.Context)>($r1);
+
+        specialinvoke r0.<com.dropbox.sync.android.CoreBatteryStateManager: void setStateHelper(android.content.Context,boolean,android.content.Intent)>($r1, 0, $r2);
+
+        $r3 = virtualinvoke r0.<com.dropbox.sync.android.CoreBatteryStateManager: com.dropbox.sync.android.CoreBatteryStateManager$State getState()>();
+
+        return $r3;
+    }

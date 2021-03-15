@@ -1,0 +1,621 @@
+okhttp3.internal.ws.WebSocketWriter extends java.lang.Object
+static final boolean $assertionsDisabled
+boolean activeWriter
+final okio.Buffer buffer
+final okhttp3.internal.ws.WebSocketWriter$FrameSink frameSink
+final boolean isClient
+final byte[] maskBuffer
+final byte[] maskKey
+final java.util.Random random
+final okio.BufferedSink sink
+boolean writerClosed
+    static void <clinit>()
+    {
+        boolean $z0;
+        java.lang.Class $r0;
+
+        $r0 = class "Lokhttp3/internal/ws/WebSocketWriter;";
+
+        $z0 = virtualinvoke $r0.<java.lang.Class: boolean desiredAssertionStatus()>();
+
+        if $z0 != 0 goto label2;
+
+        $z0 = 1;
+
+     label1:
+        <okhttp3.internal.ws.WebSocketWriter: boolean $assertionsDisabled> = $z0;
+
+        return;
+
+     label2:
+        $z0 = 0;
+
+        goto label1;
+    }
+    void <init>(boolean, okio.BufferedSink, java.util.Random)
+    {
+        okhttp3.internal.ws.WebSocketWriter r0;
+        boolean $z0;
+        okio.BufferedSink $r1;
+        java.util.Random $r2;
+        byte[] $r3, $r7;
+        okio.Buffer $r4;
+        okhttp3.internal.ws.WebSocketWriter$FrameSink $r5;
+        java.lang.NullPointerException $r6;
+
+        r0 := @this: okhttp3.internal.ws.WebSocketWriter;
+
+        $z0 := @parameter0: boolean;
+
+        $r1 := @parameter1: okio.BufferedSink;
+
+        $r2 := @parameter2: java.util.Random;
+
+        $r3 = null;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r4 = new okio.Buffer;
+
+        specialinvoke $r4.<okio.Buffer: void <init>()>();
+
+        r0.<okhttp3.internal.ws.WebSocketWriter: okio.Buffer buffer> = $r4;
+
+        $r5 = new okhttp3.internal.ws.WebSocketWriter$FrameSink;
+
+        specialinvoke $r5.<okhttp3.internal.ws.WebSocketWriter$FrameSink: void <init>(okhttp3.internal.ws.WebSocketWriter)>(r0);
+
+        r0.<okhttp3.internal.ws.WebSocketWriter: okhttp3.internal.ws.WebSocketWriter$FrameSink frameSink> = $r5;
+
+        if $r1 != null goto label1;
+
+        $r6 = new java.lang.NullPointerException;
+
+        specialinvoke $r6.<java.lang.NullPointerException: void <init>(java.lang.String)>("sink == null");
+
+        throw $r6;
+
+     label1:
+        if $r2 != null goto label2;
+
+        $r6 = new java.lang.NullPointerException;
+
+        specialinvoke $r6.<java.lang.NullPointerException: void <init>(java.lang.String)>("random == null");
+
+        throw $r6;
+
+     label2:
+        r0.<okhttp3.internal.ws.WebSocketWriter: boolean isClient> = $z0;
+
+        r0.<okhttp3.internal.ws.WebSocketWriter: okio.BufferedSink sink> = $r1;
+
+        r0.<okhttp3.internal.ws.WebSocketWriter: java.util.Random random> = $r2;
+
+        if $z0 == 0 goto label5;
+
+        $r7 = newarray (byte)[4];
+
+     label3:
+        r0.<okhttp3.internal.ws.WebSocketWriter: byte[] maskKey> = $r7;
+
+        if $z0 == 0 goto label4;
+
+        $r3 = newarray (byte)[8192];
+
+     label4:
+        r0.<okhttp3.internal.ws.WebSocketWriter: byte[] maskBuffer> = $r3;
+
+        return;
+
+     label5:
+        $r7 = null;
+
+        goto label3;
+    }
+    private void writeControlFrameSynchronized(int, okio.ByteString) throws java.io.IOException
+    {
+        okhttp3.internal.ws.WebSocketWriter r0;
+        int $i0, $i1;
+        okio.ByteString $r1;
+        byte[] $r2, $r8;
+        boolean $z0;
+        java.lang.AssertionError $r3;
+        java.io.IOException $r4;
+        long $l2;
+        byte $b3;
+        java.lang.IllegalArgumentException $r5;
+        okio.BufferedSink $r6;
+        java.util.Random $r7;
+
+        r0 := @this: okhttp3.internal.ws.WebSocketWriter;
+
+        $i0 := @parameter0: int;
+
+        $r1 := @parameter1: okio.ByteString;
+
+        $z0 = <okhttp3.internal.ws.WebSocketWriter: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label1;
+
+        $z0 = staticinvoke <java.lang.Thread: boolean holdsLock(java.lang.Object)>(r0);
+
+        if $z0 != 0 goto label1;
+
+        $r3 = new java.lang.AssertionError;
+
+        specialinvoke $r3.<java.lang.AssertionError: void <init>()>();
+
+        throw $r3;
+
+     label1:
+        $z0 = r0.<okhttp3.internal.ws.WebSocketWriter: boolean writerClosed>;
+
+        if $z0 == 0 goto label2;
+
+        $r4 = new java.io.IOException;
+
+        specialinvoke $r4.<java.io.IOException: void <init>(java.lang.String)>("closed");
+
+        throw $r4;
+
+     label2:
+        $i1 = virtualinvoke $r1.<okio.ByteString: int size()>();
+
+        $l2 = (long) $i1;
+
+        $b3 = $l2 cmp 125L;
+
+        if $b3 <= 0 goto label3;
+
+        $r5 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r5.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Payload size must be less than or equal to 125");
+
+        throw $r5;
+
+     label3:
+        $i0 = $i0 | 128;
+
+        $r6 = r0.<okhttp3.internal.ws.WebSocketWriter: okio.BufferedSink sink>;
+
+        interfaceinvoke $r6.<okio.BufferedSink: okio.BufferedSink writeByte(int)>($i0);
+
+        $z0 = r0.<okhttp3.internal.ws.WebSocketWriter: boolean isClient>;
+
+        if $z0 == 0 goto label5;
+
+        $i0 = $i1 | 128;
+
+        $r6 = r0.<okhttp3.internal.ws.WebSocketWriter: okio.BufferedSink sink>;
+
+        interfaceinvoke $r6.<okio.BufferedSink: okio.BufferedSink writeByte(int)>($i0);
+
+        $r7 = r0.<okhttp3.internal.ws.WebSocketWriter: java.util.Random random>;
+
+        $r2 = r0.<okhttp3.internal.ws.WebSocketWriter: byte[] maskKey>;
+
+        virtualinvoke $r7.<java.util.Random: void nextBytes(byte[])>($r2);
+
+        $r6 = r0.<okhttp3.internal.ws.WebSocketWriter: okio.BufferedSink sink>;
+
+        $r2 = r0.<okhttp3.internal.ws.WebSocketWriter: byte[] maskKey>;
+
+        interfaceinvoke $r6.<okio.BufferedSink: okio.BufferedSink write(byte[])>($r2);
+
+        $r8 = virtualinvoke $r1.<okio.ByteString: byte[] toByteArray()>();
+
+        $i0 = lengthof $r8;
+
+        $l2 = (long) $i0;
+
+        $r2 = r0.<okhttp3.internal.ws.WebSocketWriter: byte[] maskKey>;
+
+        staticinvoke <okhttp3.internal.ws.WebSocketProtocol: void toggleMask(byte[],long,byte[],long)>($r8, $l2, $r2, 0L);
+
+        $r6 = r0.<okhttp3.internal.ws.WebSocketWriter: okio.BufferedSink sink>;
+
+        interfaceinvoke $r6.<okio.BufferedSink: okio.BufferedSink write(byte[])>($r8);
+
+     label4:
+        $r6 = r0.<okhttp3.internal.ws.WebSocketWriter: okio.BufferedSink sink>;
+
+        interfaceinvoke $r6.<okio.BufferedSink: void flush()>();
+
+        return;
+
+     label5:
+        $r6 = r0.<okhttp3.internal.ws.WebSocketWriter: okio.BufferedSink sink>;
+
+        interfaceinvoke $r6.<okio.BufferedSink: okio.BufferedSink writeByte(int)>($i1);
+
+        $r6 = r0.<okhttp3.internal.ws.WebSocketWriter: okio.BufferedSink sink>;
+
+        interfaceinvoke $r6.<okio.BufferedSink: okio.BufferedSink write(okio.ByteString)>($r1);
+
+        goto label4;
+    }
+    okio.Sink newMessageSink(int, long)
+    {
+        okhttp3.internal.ws.WebSocketWriter r0;
+        int $i0;
+        long $l1;
+        boolean $z0;
+        java.lang.IllegalStateException $r1;
+        okhttp3.internal.ws.WebSocketWriter$FrameSink $r2;
+
+        r0 := @this: okhttp3.internal.ws.WebSocketWriter;
+
+        $i0 := @parameter0: int;
+
+        $l1 := @parameter1: long;
+
+        $z0 = r0.<okhttp3.internal.ws.WebSocketWriter: boolean activeWriter>;
+
+        if $z0 == 0 goto label1;
+
+        $r1 = new java.lang.IllegalStateException;
+
+        specialinvoke $r1.<java.lang.IllegalStateException: void <init>(java.lang.String)>("Another message writer is active. Did you call close()?");
+
+        throw $r1;
+
+     label1:
+        r0.<okhttp3.internal.ws.WebSocketWriter: boolean activeWriter> = 1;
+
+        $r2 = r0.<okhttp3.internal.ws.WebSocketWriter: okhttp3.internal.ws.WebSocketWriter$FrameSink frameSink>;
+
+        $r2.<okhttp3.internal.ws.WebSocketWriter$FrameSink: int formatOpcode> = $i0;
+
+        $r2 = r0.<okhttp3.internal.ws.WebSocketWriter: okhttp3.internal.ws.WebSocketWriter$FrameSink frameSink>;
+
+        $r2.<okhttp3.internal.ws.WebSocketWriter$FrameSink: long contentLength> = $l1;
+
+        $r2 = r0.<okhttp3.internal.ws.WebSocketWriter: okhttp3.internal.ws.WebSocketWriter$FrameSink frameSink>;
+
+        $r2.<okhttp3.internal.ws.WebSocketWriter$FrameSink: boolean isFirstFrame> = 1;
+
+        $r2 = r0.<okhttp3.internal.ws.WebSocketWriter: okhttp3.internal.ws.WebSocketWriter$FrameSink frameSink>;
+
+        $r2.<okhttp3.internal.ws.WebSocketWriter$FrameSink: boolean closed> = 0;
+
+        $r2 = r0.<okhttp3.internal.ws.WebSocketWriter: okhttp3.internal.ws.WebSocketWriter$FrameSink frameSink>;
+
+        return $r2;
+    }
+    void writeClose(int, okio.ByteString) throws java.io.IOException
+    {
+        okhttp3.internal.ws.WebSocketWriter r0;
+        int $i0;
+        okio.ByteString $r1, r3;
+        okio.Buffer r2;
+        java.lang.Throwable $r4, $r5;
+
+        r0 := @this: okhttp3.internal.ws.WebSocketWriter;
+
+        $i0 := @parameter0: int;
+
+        $r1 := @parameter1: okio.ByteString;
+
+        r3 = <okio.ByteString: okio.ByteString EMPTY>;
+
+        if $i0 != 0 goto label01;
+
+        if $r1 == null goto label04;
+
+     label01:
+        if $i0 == 0 goto label02;
+
+        staticinvoke <okhttp3.internal.ws.WebSocketProtocol: void validateCloseCode(int)>($i0);
+
+     label02:
+        r2 = new okio.Buffer;
+
+        specialinvoke r2.<okio.Buffer: void <init>()>();
+
+        virtualinvoke r2.<okio.Buffer: okio.Buffer writeShort(int)>($i0);
+
+        if $r1 == null goto label03;
+
+        virtualinvoke r2.<okio.Buffer: okio.Buffer write(okio.ByteString)>($r1);
+
+     label03:
+        r3 = virtualinvoke r2.<okio.Buffer: okio.ByteString readByteString()>();
+
+     label04:
+        entermonitor r0;
+
+     label05:
+        specialinvoke r0.<okhttp3.internal.ws.WebSocketWriter: void writeControlFrameSynchronized(int,okio.ByteString)>(8, r3);
+
+     label06:
+        r0.<okhttp3.internal.ws.WebSocketWriter: boolean writerClosed> = 1;
+
+        exitmonitor r0;
+
+     label07:
+        return;
+
+     label08:
+        $r4 := @caughtexception;
+
+        r0.<okhttp3.internal.ws.WebSocketWriter: boolean writerClosed> = 1;
+
+        throw $r4;
+
+     label09:
+        $r5 := @caughtexception;
+
+        exitmonitor r0;
+
+     label10:
+        throw $r5;
+
+        catch java.lang.Throwable from label05 to label06 with label08;
+        catch java.lang.Throwable from label06 to label07 with label09;
+        catch java.lang.Throwable from label08 to label10 with label09;
+    }
+    void writeMessageFrameSynchronized(int, long, boolean, boolean) throws java.io.IOException
+    {
+        okhttp3.internal.ws.WebSocketWriter r0;
+        int $i0, $i3;
+        long $l1, l4, $l5;
+        boolean $z0, $z1, $z2;
+        byte[] $r1, $r7;
+        java.lang.AssertionError $r2;
+        java.io.IOException $r3;
+        okio.BufferedSink $r4;
+        byte $b2;
+        java.util.Random $r5;
+        okio.Buffer $r6;
+
+        r0 := @this: okhttp3.internal.ws.WebSocketWriter;
+
+        $i0 := @parameter0: int;
+
+        $l1 := @parameter1: long;
+
+        $z0 := @parameter2: boolean;
+
+        $z1 := @parameter3: boolean;
+
+        $z2 = <okhttp3.internal.ws.WebSocketWriter: boolean $assertionsDisabled>;
+
+        if $z2 != 0 goto label01;
+
+        $z2 = staticinvoke <java.lang.Thread: boolean holdsLock(java.lang.Object)>(r0);
+
+        if $z2 != 0 goto label01;
+
+        $r2 = new java.lang.AssertionError;
+
+        specialinvoke $r2.<java.lang.AssertionError: void <init>()>();
+
+        throw $r2;
+
+     label01:
+        $z2 = r0.<okhttp3.internal.ws.WebSocketWriter: boolean writerClosed>;
+
+        if $z2 == 0 goto label02;
+
+        $r3 = new java.io.IOException;
+
+        specialinvoke $r3.<java.io.IOException: void <init>(java.lang.String)>("closed");
+
+        throw $r3;
+
+     label02:
+        if $z0 == 0 goto label08;
+
+     label03:
+        if $z1 == 0 goto label04;
+
+        $i0 = $i0 | 128;
+
+     label04:
+        $r4 = r0.<okhttp3.internal.ws.WebSocketWriter: okio.BufferedSink sink>;
+
+        interfaceinvoke $r4.<okio.BufferedSink: okio.BufferedSink writeByte(int)>($i0);
+
+        $i0 = 0;
+
+        $z0 = r0.<okhttp3.internal.ws.WebSocketWriter: boolean isClient>;
+
+        if $z0 == 0 goto label05;
+
+        $i0 = 128;
+
+     label05:
+        $b2 = $l1 cmp 125L;
+
+        if $b2 > 0 goto label09;
+
+        $i3 = (int) $l1;
+
+        $i0 = $i0 | $i3;
+
+        $r4 = r0.<okhttp3.internal.ws.WebSocketWriter: okio.BufferedSink sink>;
+
+        interfaceinvoke $r4.<okio.BufferedSink: okio.BufferedSink writeByte(int)>($i0);
+
+     label06:
+        $z0 = r0.<okhttp3.internal.ws.WebSocketWriter: boolean isClient>;
+
+        if $z0 == 0 goto label12;
+
+        $r5 = r0.<okhttp3.internal.ws.WebSocketWriter: java.util.Random random>;
+
+        $r1 = r0.<okhttp3.internal.ws.WebSocketWriter: byte[] maskKey>;
+
+        virtualinvoke $r5.<java.util.Random: void nextBytes(byte[])>($r1);
+
+        $r4 = r0.<okhttp3.internal.ws.WebSocketWriter: okio.BufferedSink sink>;
+
+        $r1 = r0.<okhttp3.internal.ws.WebSocketWriter: byte[] maskKey>;
+
+        interfaceinvoke $r4.<okio.BufferedSink: okio.BufferedSink write(byte[])>($r1);
+
+        l4 = 0L;
+
+     label07:
+        $b2 = l4 cmp $l1;
+
+        if $b2 >= 0 goto label13;
+
+        $r1 = r0.<okhttp3.internal.ws.WebSocketWriter: byte[] maskBuffer>;
+
+        $i0 = lengthof $r1;
+
+        $l5 = (long) $i0;
+
+        $l5 = staticinvoke <java.lang.Math: long min(long,long)>($l1, $l5);
+
+        $i0 = (int) $l5;
+
+        $r6 = r0.<okhttp3.internal.ws.WebSocketWriter: okio.Buffer buffer>;
+
+        $r1 = r0.<okhttp3.internal.ws.WebSocketWriter: byte[] maskBuffer>;
+
+        $i0 = virtualinvoke $r6.<okio.Buffer: int read(byte[],int,int)>($r1, 0, $i0);
+
+        if $i0 != -1 goto label11;
+
+        $r2 = new java.lang.AssertionError;
+
+        specialinvoke $r2.<java.lang.AssertionError: void <init>()>();
+
+        throw $r2;
+
+     label08:
+        $i0 = 0;
+
+        goto label03;
+
+     label09:
+        $b2 = $l1 cmp 65535L;
+
+        if $b2 > 0 goto label10;
+
+        $i0 = $i0 | 126;
+
+        $r4 = r0.<okhttp3.internal.ws.WebSocketWriter: okio.BufferedSink sink>;
+
+        interfaceinvoke $r4.<okio.BufferedSink: okio.BufferedSink writeByte(int)>($i0);
+
+        $r4 = r0.<okhttp3.internal.ws.WebSocketWriter: okio.BufferedSink sink>;
+
+        $i0 = (int) $l1;
+
+        interfaceinvoke $r4.<okio.BufferedSink: okio.BufferedSink writeShort(int)>($i0);
+
+        goto label06;
+
+     label10:
+        $i0 = $i0 | 127;
+
+        $r4 = r0.<okhttp3.internal.ws.WebSocketWriter: okio.BufferedSink sink>;
+
+        interfaceinvoke $r4.<okio.BufferedSink: okio.BufferedSink writeByte(int)>($i0);
+
+        $r4 = r0.<okhttp3.internal.ws.WebSocketWriter: okio.BufferedSink sink>;
+
+        interfaceinvoke $r4.<okio.BufferedSink: okio.BufferedSink writeLong(long)>($l1);
+
+        goto label06;
+
+     label11:
+        $r7 = r0.<okhttp3.internal.ws.WebSocketWriter: byte[] maskBuffer>;
+
+        $l5 = (long) $i0;
+
+        $r1 = r0.<okhttp3.internal.ws.WebSocketWriter: byte[] maskKey>;
+
+        staticinvoke <okhttp3.internal.ws.WebSocketProtocol: void toggleMask(byte[],long,byte[],long)>($r7, $l5, $r1, l4);
+
+        $r4 = r0.<okhttp3.internal.ws.WebSocketWriter: okio.BufferedSink sink>;
+
+        $r1 = r0.<okhttp3.internal.ws.WebSocketWriter: byte[] maskBuffer>;
+
+        interfaceinvoke $r4.<okio.BufferedSink: okio.BufferedSink write(byte[],int,int)>($r1, 0, $i0);
+
+        $l5 = (long) $i0;
+
+        l4 = l4 + $l5;
+
+        goto label07;
+
+     label12:
+        $r4 = r0.<okhttp3.internal.ws.WebSocketWriter: okio.BufferedSink sink>;
+
+        $r6 = r0.<okhttp3.internal.ws.WebSocketWriter: okio.Buffer buffer>;
+
+        interfaceinvoke $r4.<okio.BufferedSink: void write(okio.Buffer,long)>($r6, $l1);
+
+     label13:
+        $r4 = r0.<okhttp3.internal.ws.WebSocketWriter: okio.BufferedSink sink>;
+
+        interfaceinvoke $r4.<okio.BufferedSink: okio.BufferedSink emit()>();
+
+        return;
+    }
+    void writePing(okio.ByteString) throws java.io.IOException
+    {
+        okhttp3.internal.ws.WebSocketWriter r0;
+        okio.ByteString $r1;
+        java.lang.Throwable $r2;
+
+        r0 := @this: okhttp3.internal.ws.WebSocketWriter;
+
+        $r1 := @parameter0: okio.ByteString;
+
+        entermonitor r0;
+
+     label1:
+        specialinvoke r0.<okhttp3.internal.ws.WebSocketWriter: void writeControlFrameSynchronized(int,okio.ByteString)>(9, $r1);
+
+        exitmonitor r0;
+
+     label2:
+        return;
+
+     label3:
+        $r2 := @caughtexception;
+
+        exitmonitor r0;
+
+     label4:
+        throw $r2;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+    void writePong(okio.ByteString) throws java.io.IOException
+    {
+        okhttp3.internal.ws.WebSocketWriter r0;
+        okio.ByteString $r1;
+        java.lang.Throwable $r2;
+
+        r0 := @this: okhttp3.internal.ws.WebSocketWriter;
+
+        $r1 := @parameter0: okio.ByteString;
+
+        entermonitor r0;
+
+     label1:
+        specialinvoke r0.<okhttp3.internal.ws.WebSocketWriter: void writeControlFrameSynchronized(int,okio.ByteString)>(10, $r1);
+
+        exitmonitor r0;
+
+     label2:
+        return;
+
+     label3:
+        $r2 := @caughtexception;
+
+        exitmonitor r0;
+
+     label4:
+        throw $r2;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }

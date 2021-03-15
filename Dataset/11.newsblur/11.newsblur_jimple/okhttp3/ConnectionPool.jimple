@@ -1,0 +1,758 @@
+okhttp3.ConnectionPool extends java.lang.Object
+static final boolean $assertionsDisabled
+private static final java.util.concurrent.Executor executor
+private final java.lang.Runnable cleanupRunnable
+boolean cleanupRunning
+private final java.util.Deque connections
+private final long keepAliveDurationNs
+private final int maxIdleConnections
+final okhttp3.internal.connection.RouteDatabase routeDatabase
+    static void <clinit>()
+    {
+        java.util.concurrent.ThreadPoolExecutor $r0;
+        java.util.concurrent.TimeUnit $r1;
+        java.util.concurrent.SynchronousQueue $r2;
+        java.lang.Class $r3;
+        boolean $z0;
+        java.util.concurrent.ThreadFactory $r4;
+
+        $r3 = class "Lokhttp3/ConnectionPool;";
+
+        $z0 = virtualinvoke $r3.<java.lang.Class: boolean desiredAssertionStatus()>();
+
+        if $z0 != 0 goto label2;
+
+        $z0 = 1;
+
+     label1:
+        <okhttp3.ConnectionPool: boolean $assertionsDisabled> = $z0;
+
+        $r0 = new java.util.concurrent.ThreadPoolExecutor;
+
+        $r1 = <java.util.concurrent.TimeUnit: java.util.concurrent.TimeUnit SECONDS>;
+
+        $r2 = new java.util.concurrent.SynchronousQueue;
+
+        specialinvoke $r2.<java.util.concurrent.SynchronousQueue: void <init>()>();
+
+        $r4 = staticinvoke <okhttp3.internal.Util: java.util.concurrent.ThreadFactory threadFactory(java.lang.String,boolean)>("OkHttp ConnectionPool", 1);
+
+        specialinvoke $r0.<java.util.concurrent.ThreadPoolExecutor: void <init>(int,int,long,java.util.concurrent.TimeUnit,java.util.concurrent.BlockingQueue,java.util.concurrent.ThreadFactory)>(0, 2147483647, 60L, $r1, $r2, $r4);
+
+        <okhttp3.ConnectionPool: java.util.concurrent.Executor executor> = $r0;
+
+        return;
+
+     label2:
+        $z0 = 0;
+
+        goto label1;
+    }
+    public void <init>()
+    {
+        okhttp3.ConnectionPool r0;
+        java.util.concurrent.TimeUnit $r1;
+
+        r0 := @this: okhttp3.ConnectionPool;
+
+        $r1 = <java.util.concurrent.TimeUnit: java.util.concurrent.TimeUnit MINUTES>;
+
+        specialinvoke r0.<okhttp3.ConnectionPool: void <init>(int,long,java.util.concurrent.TimeUnit)>(5, 5L, $r1);
+
+        return;
+    }
+    public void <init>(int, long, java.util.concurrent.TimeUnit)
+    {
+        okhttp3.ConnectionPool r0;
+        int $i0;
+        long $l1, $l2;
+        java.util.concurrent.TimeUnit $r1;
+        okhttp3.ConnectionPool$1 $r2;
+        java.util.ArrayDeque $r3;
+        okhttp3.internal.connection.RouteDatabase $r4;
+        byte $b3;
+        java.lang.IllegalArgumentException $r5;
+        java.lang.StringBuilder $r6;
+        java.lang.String $r7;
+
+        r0 := @this: okhttp3.ConnectionPool;
+
+        $i0 := @parameter0: int;
+
+        $l1 := @parameter1: long;
+
+        $r1 := @parameter2: java.util.concurrent.TimeUnit;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r2 = new okhttp3.ConnectionPool$1;
+
+        specialinvoke $r2.<okhttp3.ConnectionPool$1: void <init>(okhttp3.ConnectionPool)>(r0);
+
+        r0.<okhttp3.ConnectionPool: java.lang.Runnable cleanupRunnable> = $r2;
+
+        $r3 = new java.util.ArrayDeque;
+
+        specialinvoke $r3.<java.util.ArrayDeque: void <init>()>();
+
+        r0.<okhttp3.ConnectionPool: java.util.Deque connections> = $r3;
+
+        $r4 = new okhttp3.internal.connection.RouteDatabase;
+
+        specialinvoke $r4.<okhttp3.internal.connection.RouteDatabase: void <init>()>();
+
+        r0.<okhttp3.ConnectionPool: okhttp3.internal.connection.RouteDatabase routeDatabase> = $r4;
+
+        r0.<okhttp3.ConnectionPool: int maxIdleConnections> = $i0;
+
+        $l2 = virtualinvoke $r1.<java.util.concurrent.TimeUnit: long toNanos(long)>($l1);
+
+        r0.<okhttp3.ConnectionPool: long keepAliveDurationNs> = $l2;
+
+        $b3 = $l1 cmp 0L;
+
+        if $b3 > 0 goto label1;
+
+        $r5 = new java.lang.IllegalArgumentException;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("keepAliveDuration <= 0: ");
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l1);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r5.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r7);
+
+        throw $r5;
+
+     label1:
+        return;
+    }
+    private int pruneAndGetAllocationCount(okhttp3.internal.connection.RealConnection, long)
+    {
+        okhttp3.ConnectionPool r0;
+        okhttp3.internal.connection.RealConnection $r1;
+        long $l0, $l3;
+        java.util.List r2;
+        int i1, $i2;
+        java.lang.Object $r3;
+        java.lang.ref.Reference r4;
+        okhttp3.internal.connection.StreamAllocation$StreamAllocationReference r5;
+        java.lang.StringBuilder $r6;
+        okhttp3.Route $r7;
+        okhttp3.Address $r8;
+        okhttp3.HttpUrl $r9;
+        java.lang.String $r10;
+        okhttp3.internal.platform.Platform $r11;
+        boolean $z0;
+
+        r0 := @this: okhttp3.ConnectionPool;
+
+        $r1 := @parameter0: okhttp3.internal.connection.RealConnection;
+
+        $l0 := @parameter1: long;
+
+        r2 = $r1.<okhttp3.internal.connection.RealConnection: java.util.List allocations>;
+
+        i1 = 0;
+
+     label1:
+        $i2 = interfaceinvoke r2.<java.util.List: int size()>();
+
+        if i1 >= $i2 goto label3;
+
+        $r3 = interfaceinvoke r2.<java.util.List: java.lang.Object get(int)>(i1);
+
+        r4 = (java.lang.ref.Reference) $r3;
+
+        $r3 = virtualinvoke r4.<java.lang.ref.Reference: java.lang.Object get()>();
+
+        if $r3 == null goto label2;
+
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label2:
+        r5 = (okhttp3.internal.connection.StreamAllocation$StreamAllocationReference) r4;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("A connection to ");
+
+        $r7 = virtualinvoke $r1.<okhttp3.internal.connection.RealConnection: okhttp3.Route route()>();
+
+        $r8 = virtualinvoke $r7.<okhttp3.Route: okhttp3.Address address()>();
+
+        $r9 = virtualinvoke $r8.<okhttp3.Address: okhttp3.HttpUrl url()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r9);
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" was leaked. Did you forget to close a response body?");
+
+        $r10 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r11 = staticinvoke <okhttp3.internal.platform.Platform: okhttp3.internal.platform.Platform get()>();
+
+        $r3 = r5.<okhttp3.internal.connection.StreamAllocation$StreamAllocationReference: java.lang.Object callStackTrace>;
+
+        virtualinvoke $r11.<okhttp3.internal.platform.Platform: void logCloseableLeak(java.lang.String,java.lang.Object)>($r10, $r3);
+
+        interfaceinvoke r2.<java.util.List: java.lang.Object remove(int)>(i1);
+
+        $r1.<okhttp3.internal.connection.RealConnection: boolean noNewStreams> = 1;
+
+        $z0 = interfaceinvoke r2.<java.util.List: boolean isEmpty()>();
+
+        if $z0 == 0 goto label1;
+
+        $l3 = r0.<okhttp3.ConnectionPool: long keepAliveDurationNs>;
+
+        $l0 = $l0 - $l3;
+
+        $r1.<okhttp3.internal.connection.RealConnection: long idleAtNanos> = $l0;
+
+        return 0;
+
+     label3:
+        i1 = interfaceinvoke r2.<java.util.List: int size()>();
+
+        return i1;
+    }
+    long cleanup(long)
+    {
+        okhttp3.ConnectionPool r0;
+        long $l0, l1, l4;
+        int i2, i3, $i5;
+        okhttp3.internal.connection.RealConnection r1, r5;
+        java.util.Deque $r2;
+        java.util.Iterator $r3;
+        boolean $z0;
+        java.lang.Object $r4;
+        byte $b6;
+        java.net.Socket $r6;
+        java.lang.Throwable $r7;
+
+        r0 := @this: okhttp3.ConnectionPool;
+
+        $l0 := @parameter0: long;
+
+        i2 = 0;
+
+        i3 = 0;
+
+        r1 = null;
+
+        l4 = -9223372036854775808L;
+
+        entermonitor r0;
+
+     label01:
+        $r2 = r0.<okhttp3.ConnectionPool: java.util.Deque connections>;
+
+        $r3 = interfaceinvoke $r2.<java.util.Deque: java.util.Iterator iterator()>();
+
+     label02:
+        $z0 = interfaceinvoke $r3.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label04;
+
+        $r4 = interfaceinvoke $r3.<java.util.Iterator: java.lang.Object next()>();
+
+        r5 = (okhttp3.internal.connection.RealConnection) $r4;
+
+        $i5 = specialinvoke r0.<okhttp3.ConnectionPool: int pruneAndGetAllocationCount(okhttp3.internal.connection.RealConnection,long)>(r5, $l0);
+
+        if $i5 <= 0 goto label03;
+
+        i2 = i2 + 1;
+
+        goto label02;
+
+     label03:
+        i3 = i3 + 1;
+
+        l1 = r5.<okhttp3.internal.connection.RealConnection: long idleAtNanos>;
+
+        l1 = $l0 - l1;
+
+        $b6 = l1 cmp l4;
+
+        if $b6 <= 0 goto label02;
+
+        l4 = l1;
+
+        r1 = r5;
+
+        goto label02;
+
+     label04:
+        $l0 = r0.<okhttp3.ConnectionPool: long keepAliveDurationNs>;
+
+        $b6 = l4 cmp $l0;
+
+        if $b6 >= 0 goto label05;
+
+        $i5 = r0.<okhttp3.ConnectionPool: int maxIdleConnections>;
+
+        if i3 <= $i5 goto label07;
+
+     label05:
+        $r2 = r0.<okhttp3.ConnectionPool: java.util.Deque connections>;
+
+        interfaceinvoke $r2.<java.util.Deque: boolean remove(java.lang.Object)>(r1);
+
+        exitmonitor r0;
+
+     label06:
+        $r6 = virtualinvoke r1.<okhttp3.internal.connection.RealConnection: java.net.Socket socket()>();
+
+        staticinvoke <okhttp3.internal.Util: void closeQuietly(java.net.Socket)>($r6);
+
+        return 0L;
+
+     label07:
+        if i3 <= 0 goto label12;
+
+     label08:
+        $l0 = r0.<okhttp3.ConnectionPool: long keepAliveDurationNs>;
+
+        $l0 = $l0 - l4;
+
+        exitmonitor r0;
+
+     label09:
+        return $l0;
+
+     label10:
+        $r7 := @caughtexception;
+
+        exitmonitor r0;
+
+     label11:
+        throw $r7;
+
+     label12:
+        if i2 <= 0 goto label15;
+
+     label13:
+        $l0 = r0.<okhttp3.ConnectionPool: long keepAliveDurationNs>;
+
+        exitmonitor r0;
+
+     label14:
+        return $l0;
+
+     label15:
+        r0.<okhttp3.ConnectionPool: boolean cleanupRunning> = 0;
+
+        exitmonitor r0;
+
+     label16:
+        return -1L;
+
+        catch java.lang.Throwable from label01 to label06 with label10;
+        catch java.lang.Throwable from label08 to label09 with label10;
+        catch java.lang.Throwable from label10 to label11 with label10;
+        catch java.lang.Throwable from label13 to label14 with label10;
+        catch java.lang.Throwable from label15 to label16 with label10;
+    }
+    boolean connectionBecameIdle(okhttp3.internal.connection.RealConnection)
+    {
+        okhttp3.ConnectionPool r0;
+        okhttp3.internal.connection.RealConnection $r1;
+        boolean $z0;
+        java.lang.AssertionError $r2;
+        int $i0;
+        java.util.Deque $r3;
+
+        r0 := @this: okhttp3.ConnectionPool;
+
+        $r1 := @parameter0: okhttp3.internal.connection.RealConnection;
+
+        $z0 = <okhttp3.ConnectionPool: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label1;
+
+        $z0 = staticinvoke <java.lang.Thread: boolean holdsLock(java.lang.Object)>(r0);
+
+        if $z0 != 0 goto label1;
+
+        $r2 = new java.lang.AssertionError;
+
+        specialinvoke $r2.<java.lang.AssertionError: void <init>()>();
+
+        throw $r2;
+
+     label1:
+        $z0 = $r1.<okhttp3.internal.connection.RealConnection: boolean noNewStreams>;
+
+        if $z0 != 0 goto label2;
+
+        $i0 = r0.<okhttp3.ConnectionPool: int maxIdleConnections>;
+
+        if $i0 != 0 goto label3;
+
+     label2:
+        $r3 = r0.<okhttp3.ConnectionPool: java.util.Deque connections>;
+
+        interfaceinvoke $r3.<java.util.Deque: boolean remove(java.lang.Object)>($r1);
+
+        return 1;
+
+     label3:
+        virtualinvoke r0.<java.lang.Object: void notifyAll()>();
+
+        return 0;
+    }
+    public int connectionCount()
+    {
+        okhttp3.ConnectionPool r0;
+        int $i0;
+        java.util.Deque $r1;
+        java.lang.Throwable $r2;
+
+        r0 := @this: okhttp3.ConnectionPool;
+
+        entermonitor r0;
+
+     label1:
+        $r1 = r0.<okhttp3.ConnectionPool: java.util.Deque connections>;
+
+        $i0 = interfaceinvoke $r1.<java.util.Deque: int size()>();
+
+     label2:
+        exitmonitor r0;
+
+        return $i0;
+
+     label3:
+        $r2 := @caughtexception;
+
+        exitmonitor r0;
+
+        throw $r2;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+    java.net.Socket deduplicate(okhttp3.Address, okhttp3.internal.connection.StreamAllocation)
+    {
+        okhttp3.ConnectionPool r0;
+        okhttp3.Address $r1;
+        okhttp3.internal.connection.StreamAllocation $r2;
+        boolean $z0;
+        java.lang.AssertionError $r3;
+        java.util.Deque $r4;
+        java.util.Iterator $r5;
+        java.lang.Object $r6;
+        okhttp3.internal.connection.RealConnection r7, $r8;
+        java.net.Socket $r9;
+
+        r0 := @this: okhttp3.ConnectionPool;
+
+        $r1 := @parameter0: okhttp3.Address;
+
+        $r2 := @parameter1: okhttp3.internal.connection.StreamAllocation;
+
+        $z0 = <okhttp3.ConnectionPool: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label1;
+
+        $z0 = staticinvoke <java.lang.Thread: boolean holdsLock(java.lang.Object)>(r0);
+
+        if $z0 != 0 goto label1;
+
+        $r3 = new java.lang.AssertionError;
+
+        specialinvoke $r3.<java.lang.AssertionError: void <init>()>();
+
+        throw $r3;
+
+     label1:
+        $r4 = r0.<okhttp3.ConnectionPool: java.util.Deque connections>;
+
+        $r5 = interfaceinvoke $r4.<java.util.Deque: java.util.Iterator iterator()>();
+
+     label2:
+        $z0 = interfaceinvoke $r5.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label3;
+
+        $r6 = interfaceinvoke $r5.<java.util.Iterator: java.lang.Object next()>();
+
+        r7 = (okhttp3.internal.connection.RealConnection) $r6;
+
+        $z0 = virtualinvoke r7.<okhttp3.internal.connection.RealConnection: boolean isEligible(okhttp3.Address,okhttp3.Route)>($r1, null);
+
+        if $z0 == 0 goto label2;
+
+        $z0 = virtualinvoke r7.<okhttp3.internal.connection.RealConnection: boolean isMultiplexed()>();
+
+        if $z0 == 0 goto label2;
+
+        $r8 = virtualinvoke $r2.<okhttp3.internal.connection.StreamAllocation: okhttp3.internal.connection.RealConnection connection()>();
+
+        if r7 == $r8 goto label2;
+
+        $r9 = virtualinvoke $r2.<okhttp3.internal.connection.StreamAllocation: java.net.Socket releaseAndAcquire(okhttp3.internal.connection.RealConnection)>(r7);
+
+        return $r9;
+
+     label3:
+        return null;
+    }
+    public void evictAll()
+    {
+        okhttp3.ConnectionPool r0;
+        java.util.ArrayList r1;
+        java.util.Deque $r2;
+        java.util.Iterator $r3;
+        boolean $z0;
+        java.lang.Object $r4;
+        okhttp3.internal.connection.RealConnection r5;
+        java.util.List $r6;
+        java.lang.Throwable $r7;
+        java.net.Socket $r8;
+
+        r0 := @this: okhttp3.ConnectionPool;
+
+        r1 = new java.util.ArrayList;
+
+        specialinvoke r1.<java.util.ArrayList: void <init>()>();
+
+        entermonitor r0;
+
+     label1:
+        $r2 = r0.<okhttp3.ConnectionPool: java.util.Deque connections>;
+
+        $r3 = interfaceinvoke $r2.<java.util.Deque: java.util.Iterator iterator()>();
+
+     label2:
+        $z0 = interfaceinvoke $r3.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label5;
+
+        $r4 = interfaceinvoke $r3.<java.util.Iterator: java.lang.Object next()>();
+
+        r5 = (okhttp3.internal.connection.RealConnection) $r4;
+
+        $r6 = r5.<okhttp3.internal.connection.RealConnection: java.util.List allocations>;
+
+        $z0 = interfaceinvoke $r6.<java.util.List: boolean isEmpty()>();
+
+        if $z0 == 0 goto label2;
+
+        r5.<okhttp3.internal.connection.RealConnection: boolean noNewStreams> = 1;
+
+        interfaceinvoke r1.<java.util.List: boolean add(java.lang.Object)>(r5);
+
+        interfaceinvoke $r3.<java.util.Iterator: void remove()>();
+
+        goto label2;
+
+     label3:
+        $r7 := @caughtexception;
+
+        exitmonitor r0;
+
+     label4:
+        throw $r7;
+
+     label5:
+        exitmonitor r0;
+
+     label6:
+        $r3 = interfaceinvoke r1.<java.util.List: java.util.Iterator iterator()>();
+
+     label7:
+        $z0 = interfaceinvoke $r3.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label8;
+
+        $r4 = interfaceinvoke $r3.<java.util.Iterator: java.lang.Object next()>();
+
+        r5 = (okhttp3.internal.connection.RealConnection) $r4;
+
+        $r8 = virtualinvoke r5.<okhttp3.internal.connection.RealConnection: java.net.Socket socket()>();
+
+        staticinvoke <okhttp3.internal.Util: void closeQuietly(java.net.Socket)>($r8);
+
+        goto label7;
+
+     label8:
+        return;
+
+        catch java.lang.Throwable from label1 to label4 with label3;
+        catch java.lang.Throwable from label5 to label6 with label3;
+    }
+    okhttp3.internal.connection.RealConnection get(okhttp3.Address, okhttp3.internal.connection.StreamAllocation, okhttp3.Route)
+    {
+        okhttp3.ConnectionPool r0;
+        okhttp3.Address $r1;
+        okhttp3.internal.connection.StreamAllocation $r2;
+        okhttp3.Route $r3;
+        boolean $z0;
+        java.lang.AssertionError $r4;
+        java.util.Deque $r5;
+        java.util.Iterator $r6;
+        java.lang.Object $r7;
+        okhttp3.internal.connection.RealConnection r8;
+
+        r0 := @this: okhttp3.ConnectionPool;
+
+        $r1 := @parameter0: okhttp3.Address;
+
+        $r2 := @parameter1: okhttp3.internal.connection.StreamAllocation;
+
+        $r3 := @parameter2: okhttp3.Route;
+
+        $z0 = <okhttp3.ConnectionPool: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label1;
+
+        $z0 = staticinvoke <java.lang.Thread: boolean holdsLock(java.lang.Object)>(r0);
+
+        if $z0 != 0 goto label1;
+
+        $r4 = new java.lang.AssertionError;
+
+        specialinvoke $r4.<java.lang.AssertionError: void <init>()>();
+
+        throw $r4;
+
+     label1:
+        $r5 = r0.<okhttp3.ConnectionPool: java.util.Deque connections>;
+
+        $r6 = interfaceinvoke $r5.<java.util.Deque: java.util.Iterator iterator()>();
+
+     label2:
+        $z0 = interfaceinvoke $r6.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label3;
+
+        $r7 = interfaceinvoke $r6.<java.util.Iterator: java.lang.Object next()>();
+
+        r8 = (okhttp3.internal.connection.RealConnection) $r7;
+
+        $z0 = virtualinvoke r8.<okhttp3.internal.connection.RealConnection: boolean isEligible(okhttp3.Address,okhttp3.Route)>($r1, $r3);
+
+        if $z0 == 0 goto label2;
+
+        virtualinvoke $r2.<okhttp3.internal.connection.StreamAllocation: void acquire(okhttp3.internal.connection.RealConnection)>(r8);
+
+        return r8;
+
+     label3:
+        return null;
+    }
+    public int idleConnectionCount()
+    {
+        okhttp3.ConnectionPool r0;
+        int i0;
+        java.util.Deque $r1;
+        java.util.Iterator $r2;
+        boolean $z0;
+        java.lang.Object $r3;
+        okhttp3.internal.connection.RealConnection r4;
+        java.util.List $r5;
+        java.lang.Throwable $r6;
+
+        r0 := @this: okhttp3.ConnectionPool;
+
+        entermonitor r0;
+
+        i0 = 0;
+
+     label1:
+        $r1 = r0.<okhttp3.ConnectionPool: java.util.Deque connections>;
+
+        $r2 = interfaceinvoke $r1.<java.util.Deque: java.util.Iterator iterator()>();
+
+     label2:
+        $z0 = interfaceinvoke $r2.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label4;
+
+        $r3 = interfaceinvoke $r2.<java.util.Iterator: java.lang.Object next()>();
+
+        r4 = (okhttp3.internal.connection.RealConnection) $r3;
+
+        $r5 = r4.<okhttp3.internal.connection.RealConnection: java.util.List allocations>;
+
+        $z0 = interfaceinvoke $r5.<java.util.List: boolean isEmpty()>();
+
+     label3:
+        if $z0 == 0 goto label2;
+
+        i0 = i0 + 1;
+
+        goto label2;
+
+     label4:
+        exitmonitor r0;
+
+        return i0;
+
+     label5:
+        $r6 := @caughtexception;
+
+        exitmonitor r0;
+
+        throw $r6;
+
+        catch java.lang.Throwable from label1 to label3 with label5;
+    }
+    void put(okhttp3.internal.connection.RealConnection)
+    {
+        okhttp3.ConnectionPool r0;
+        okhttp3.internal.connection.RealConnection $r1;
+        java.lang.Runnable $r2;
+        boolean $z0;
+        java.lang.AssertionError $r3;
+        java.util.concurrent.Executor $r4;
+        java.util.Deque $r5;
+
+        r0 := @this: okhttp3.ConnectionPool;
+
+        $r1 := @parameter0: okhttp3.internal.connection.RealConnection;
+
+        $z0 = <okhttp3.ConnectionPool: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label1;
+
+        $z0 = staticinvoke <java.lang.Thread: boolean holdsLock(java.lang.Object)>(r0);
+
+        if $z0 != 0 goto label1;
+
+        $r3 = new java.lang.AssertionError;
+
+        specialinvoke $r3.<java.lang.AssertionError: void <init>()>();
+
+        throw $r3;
+
+     label1:
+        $z0 = r0.<okhttp3.ConnectionPool: boolean cleanupRunning>;
+
+        if $z0 != 0 goto label2;
+
+        r0.<okhttp3.ConnectionPool: boolean cleanupRunning> = 1;
+
+        $r4 = <okhttp3.ConnectionPool: java.util.concurrent.Executor executor>;
+
+        $r2 = r0.<okhttp3.ConnectionPool: java.lang.Runnable cleanupRunnable>;
+
+        interfaceinvoke $r4.<java.util.concurrent.Executor: void execute(java.lang.Runnable)>($r2);
+
+     label2:
+        $r5 = r0.<okhttp3.ConnectionPool: java.util.Deque connections>;
+
+        interfaceinvoke $r5.<java.util.Deque: boolean add(java.lang.Object)>($r1);
+
+        return;
+    }

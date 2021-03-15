@@ -1,0 +1,2697 @@
+kellinwood.security.zipsigner.ZipSigner extends java.lang.Object
+private static final java.lang.String CERT_RSA_NAME
+private static final java.lang.String CERT_SF_NAME
+public static final java.lang.String KEY_NONE
+public static final java.lang.String KEY_TESTKEY
+public static final java.lang.String MODE_AUTO
+public static final java.lang.String MODE_AUTO_NONE
+public static final java.lang.String MODE_AUTO_TESTKEY
+public static final java.lang.String[] SUPPORTED_KEY_MODES
+static kellinwood.logging.LoggerInterface log
+private static java.util.regex.Pattern stripPattern
+java.util.Map autoKeyDetect
+kellinwood.security.zipsigner.ZipSigner$AutoKeyObservable autoKeyObservable
+private boolean canceled
+kellinwood.security.zipsigner.KeySet keySet
+java.lang.String keymode
+java.util.Map loadedKeys
+private kellinwood.security.zipsigner.ProgressHelper progressHelper
+private kellinwood.security.zipsigner.ResourceAdapter resourceAdapter
+    static void <clinit>()
+    {
+        java.util.regex.Pattern $r0;
+        java.lang.String[] $r1;
+
+        <kellinwood.security.zipsigner.ZipSigner: kellinwood.logging.LoggerInterface log> = null;
+
+        $r0 = staticinvoke <java.util.regex.Pattern: java.util.regex.Pattern compile(java.lang.String)>("^META-INF/(.*)[.](SF|RSA|DSA)$");
+
+        <kellinwood.security.zipsigner.ZipSigner: java.util.regex.Pattern stripPattern> = $r0;
+
+        $r1 = newarray (java.lang.String)[8];
+
+        $r1[0] = "auto-testkey";
+
+        $r1[1] = "auto";
+
+        $r1[2] = "auto-none";
+
+        $r1[3] = "media";
+
+        $r1[4] = "platform";
+
+        $r1[5] = "shared";
+
+        $r1[6] = "testkey";
+
+        $r1[7] = "none";
+
+        <kellinwood.security.zipsigner.ZipSigner: java.lang.String[] SUPPORTED_KEY_MODES> = $r1;
+
+        return;
+    }
+    public void <init>() throws java.lang.ClassNotFoundException, java.lang.IllegalAccessException, java.lang.InstantiationException
+    {
+        kellinwood.security.zipsigner.ZipSigner r0;
+        kellinwood.security.zipsigner.ProgressHelper $r1;
+        kellinwood.security.zipsigner.DefaultResourceAdapter $r2;
+        java.util.HashMap $r3;
+        kellinwood.security.zipsigner.ZipSigner$AutoKeyObservable $r4;
+        java.util.Map $r5;
+
+        r0 := @this: kellinwood.security.zipsigner.ZipSigner;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<kellinwood.security.zipsigner.ZipSigner: boolean canceled> = 0;
+
+        $r1 = new kellinwood.security.zipsigner.ProgressHelper;
+
+        specialinvoke $r1.<kellinwood.security.zipsigner.ProgressHelper: void <init>()>();
+
+        r0.<kellinwood.security.zipsigner.ZipSigner: kellinwood.security.zipsigner.ProgressHelper progressHelper> = $r1;
+
+        $r2 = new kellinwood.security.zipsigner.DefaultResourceAdapter;
+
+        specialinvoke $r2.<kellinwood.security.zipsigner.DefaultResourceAdapter: void <init>()>();
+
+        r0.<kellinwood.security.zipsigner.ZipSigner: kellinwood.security.zipsigner.ResourceAdapter resourceAdapter> = $r2;
+
+        $r3 = new java.util.HashMap;
+
+        specialinvoke $r3.<java.util.HashMap: void <init>()>();
+
+        r0.<kellinwood.security.zipsigner.ZipSigner: java.util.Map loadedKeys> = $r3;
+
+        r0.<kellinwood.security.zipsigner.ZipSigner: kellinwood.security.zipsigner.KeySet keySet> = null;
+
+        r0.<kellinwood.security.zipsigner.ZipSigner: java.lang.String keymode> = "testkey";
+
+        $r3 = new java.util.HashMap;
+
+        specialinvoke $r3.<java.util.HashMap: void <init>()>();
+
+        r0.<kellinwood.security.zipsigner.ZipSigner: java.util.Map autoKeyDetect> = $r3;
+
+        $r4 = new kellinwood.security.zipsigner.ZipSigner$AutoKeyObservable;
+
+        specialinvoke $r4.<kellinwood.security.zipsigner.ZipSigner$AutoKeyObservable: void <init>()>();
+
+        r0.<kellinwood.security.zipsigner.ZipSigner: kellinwood.security.zipsigner.ZipSigner$AutoKeyObservable autoKeyObservable> = $r4;
+
+        $r5 = r0.<kellinwood.security.zipsigner.ZipSigner: java.util.Map autoKeyDetect>;
+
+        interfaceinvoke $r5.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>("aa9852bc5a53272ac8031d49b65e4b0e", "media");
+
+        $r5 = r0.<kellinwood.security.zipsigner.ZipSigner: java.util.Map autoKeyDetect>;
+
+        interfaceinvoke $r5.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>("e60418c4b638f20d0721e115674ca11f", "platform");
+
+        $r5 = r0.<kellinwood.security.zipsigner.ZipSigner: java.util.Map autoKeyDetect>;
+
+        interfaceinvoke $r5.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>("3e24e49741b60c215c010dc6048fca7d", "shared");
+
+        $r5 = r0.<kellinwood.security.zipsigner.ZipSigner: java.util.Map autoKeyDetect>;
+
+        interfaceinvoke $r5.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>("dab2cead827ef5313f28e22b6fa8479f", "testkey");
+
+        return;
+    }
+    private java.util.jar.Manifest addDigestsToManifest(java.util.Map) throws java.io.IOException, java.security.GeneralSecurityException
+    {
+        kellinwood.security.zipsigner.ZipSigner r0;
+        java.util.Map r1;
+        byte[] r2, $r23;
+        java.util.TreeMap r3;
+        java.util.jar.Manifest r4, r6;
+        kellinwood.security.zipsigner.ResourceAdapter$Item $r5;
+        java.lang.Object $r7;
+        kellinwood.zipio.ZioEntry r8;
+        java.io.InputStream $r9;
+        java.util.jar.Attributes $r10, $r11;
+        java.security.MessageDigest $r12;
+        kellinwood.logging.LoggerInterface $r13;
+        boolean $z0, $z1;
+        java.util.Collection $r14;
+        java.util.Iterator $r15;
+        java.lang.String $r16, $r22;
+        java.util.regex.Pattern $r17;
+        java.util.regex.Matcher $r18;
+        kellinwood.security.zipsigner.ProgressHelper $r19;
+        kellinwood.security.zipsigner.ResourceAdapter $r20;
+        java.lang.Object[] $r21;
+        int $i0;
+
+        r0 := @this: kellinwood.security.zipsigner.ZipSigner;
+
+        r1 := @parameter0: java.util.Map;
+
+        r6 = null;
+
+        $r7 = interfaceinvoke r1.<java.util.Map: java.lang.Object get(java.lang.Object)>("META-INF/MANIFEST.MF");
+
+        r8 = (kellinwood.zipio.ZioEntry) $r7;
+
+        if r8 == null goto label01;
+
+        $r9 = virtualinvoke r8.<kellinwood.zipio.ZioEntry: java.io.InputStream getInputStream()>();
+
+        r6 = new java.util.jar.Manifest;
+
+        specialinvoke r6.<java.util.jar.Manifest: void <init>()>();
+
+        virtualinvoke r6.<java.util.jar.Manifest: void read(java.io.InputStream)>($r9);
+
+        virtualinvoke $r9.<java.io.InputStream: void close()>();
+
+     label01:
+        r4 = new java.util.jar.Manifest;
+
+        specialinvoke r4.<java.util.jar.Manifest: void <init>()>();
+
+        $r10 = virtualinvoke r4.<java.util.jar.Manifest: java.util.jar.Attributes getMainAttributes()>();
+
+        if r6 == null goto label05;
+
+        $r11 = virtualinvoke r6.<java.util.jar.Manifest: java.util.jar.Attributes getMainAttributes()>();
+
+        virtualinvoke $r10.<java.util.jar.Attributes: void putAll(java.util.Map)>($r11);
+
+     label02:
+        $r12 = staticinvoke <java.security.MessageDigest: java.security.MessageDigest getInstance(java.lang.String)>("SHA1");
+
+        r2 = newarray (byte)[512];
+
+        r3 = new java.util.TreeMap;
+
+        specialinvoke r3.<java.util.TreeMap: void <init>()>();
+
+        virtualinvoke r3.<java.util.TreeMap: void putAll(java.util.Map)>(r1);
+
+        $r13 = staticinvoke <kellinwood.security.zipsigner.ZipSigner: kellinwood.logging.LoggerInterface getLogger()>();
+
+        $z0 = interfaceinvoke $r13.<kellinwood.logging.LoggerInterface: boolean isDebugEnabled()>();
+
+        if $z0 == 0 goto label03;
+
+        $r13 = staticinvoke <kellinwood.security.zipsigner.ZipSigner: kellinwood.logging.LoggerInterface getLogger()>();
+
+        interfaceinvoke $r13.<kellinwood.logging.LoggerInterface: void debug(java.lang.String)>("Manifest entries:");
+
+     label03:
+        $r14 = virtualinvoke r3.<java.util.TreeMap: java.util.Collection values()>();
+
+        $r15 = interfaceinvoke $r14.<java.util.Collection: java.util.Iterator iterator()>();
+
+     label04:
+        $z1 = interfaceinvoke $r15.<java.util.Iterator: boolean hasNext()>();
+
+        if $z1 == 0 goto label13;
+
+        $r7 = interfaceinvoke $r15.<java.util.Iterator: java.lang.Object next()>();
+
+        r8 = (kellinwood.zipio.ZioEntry) $r7;
+
+        $z1 = r0.<kellinwood.security.zipsigner.ZipSigner: boolean canceled>;
+
+        if $z1 == 0 goto label06;
+
+        return r4;
+
+     label05:
+        virtualinvoke $r10.<java.util.jar.Attributes: java.lang.String putValue(java.lang.String,java.lang.String)>("Manifest-Version", "1.0");
+
+        virtualinvoke $r10.<java.util.jar.Attributes: java.lang.String putValue(java.lang.String,java.lang.String)>("Created-By", "1.0 (Android SignApk)");
+
+        goto label02;
+
+     label06:
+        $r16 = virtualinvoke r8.<kellinwood.zipio.ZioEntry: java.lang.String getName()>();
+
+        if $z0 == 0 goto label07;
+
+        $r13 = staticinvoke <kellinwood.security.zipsigner.ZipSigner: kellinwood.logging.LoggerInterface getLogger()>();
+
+        interfaceinvoke $r13.<kellinwood.logging.LoggerInterface: void debug(java.lang.String)>($r16);
+
+     label07:
+        $z1 = virtualinvoke r8.<kellinwood.zipio.ZioEntry: boolean isDirectory()>();
+
+        if $z1 != 0 goto label04;
+
+        $z1 = virtualinvoke $r16.<java.lang.String: boolean equals(java.lang.Object)>("META-INF/MANIFEST.MF");
+
+        if $z1 != 0 goto label04;
+
+        $z1 = virtualinvoke $r16.<java.lang.String: boolean equals(java.lang.Object)>("META-INF/CERT.SF");
+
+        if $z1 != 0 goto label04;
+
+        $z1 = virtualinvoke $r16.<java.lang.String: boolean equals(java.lang.Object)>("META-INF/CERT.RSA");
+
+        if $z1 != 0 goto label04;
+
+        $r17 = <kellinwood.security.zipsigner.ZipSigner: java.util.regex.Pattern stripPattern>;
+
+        if $r17 == null goto label08;
+
+        $r17 = <kellinwood.security.zipsigner.ZipSigner: java.util.regex.Pattern stripPattern>;
+
+        $r18 = virtualinvoke $r17.<java.util.regex.Pattern: java.util.regex.Matcher matcher(java.lang.CharSequence)>($r16);
+
+        $z1 = virtualinvoke $r18.<java.util.regex.Matcher: boolean matches()>();
+
+        if $z1 != 0 goto label04;
+
+     label08:
+        $r19 = r0.<kellinwood.security.zipsigner.ZipSigner: kellinwood.security.zipsigner.ProgressHelper progressHelper>;
+
+        $r20 = r0.<kellinwood.security.zipsigner.ZipSigner: kellinwood.security.zipsigner.ResourceAdapter resourceAdapter>;
+
+        $r5 = <kellinwood.security.zipsigner.ResourceAdapter$Item: kellinwood.security.zipsigner.ResourceAdapter$Item GENERATING_MANIFEST>;
+
+        $r21 = newarray (java.lang.Object)[0];
+
+        $r22 = interfaceinvoke $r20.<kellinwood.security.zipsigner.ResourceAdapter: java.lang.String getString(kellinwood.security.zipsigner.ResourceAdapter$Item,java.lang.Object[])>($r5, $r21);
+
+        virtualinvoke $r19.<kellinwood.security.zipsigner.ProgressHelper: void progress(int,java.lang.String)>(0, $r22);
+
+        $r9 = virtualinvoke r8.<kellinwood.zipio.ZioEntry: java.io.InputStream getInputStream()>();
+
+     label09:
+        $i0 = virtualinvoke $r9.<java.io.InputStream: int read(byte[])>(r2);
+
+        if $i0 <= 0 goto label10;
+
+        virtualinvoke $r12.<java.security.MessageDigest: void update(byte[],int,int)>(r2, 0, $i0);
+
+        goto label09;
+
+     label10:
+        $r10 = null;
+
+        if r6 == null goto label11;
+
+        $r11 = virtualinvoke r6.<java.util.jar.Manifest: java.util.jar.Attributes getAttributes(java.lang.String)>($r16);
+
+        if $r11 == null goto label11;
+
+        $r10 = new java.util.jar.Attributes;
+
+        specialinvoke $r10.<java.util.jar.Attributes: void <init>(java.util.jar.Attributes)>($r11);
+
+     label11:
+        if $r10 != null goto label12;
+
+        $r10 = new java.util.jar.Attributes;
+
+        specialinvoke $r10.<java.util.jar.Attributes: void <init>()>();
+
+     label12:
+        $r23 = virtualinvoke $r12.<java.security.MessageDigest: byte[] digest()>();
+
+        $r22 = staticinvoke <kellinwood.security.zipsigner.Base64: java.lang.String encode(byte[])>($r23);
+
+        virtualinvoke $r10.<java.util.jar.Attributes: java.lang.String putValue(java.lang.String,java.lang.String)>("SHA1-Digest", $r22);
+
+        r1 = virtualinvoke r4.<java.util.jar.Manifest: java.util.Map getEntries()>();
+
+        interfaceinvoke r1.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r16, $r10);
+
+        goto label04;
+
+     label13:
+        return r4;
+    }
+    private void copyFiles(java.util.Map, kellinwood.zipio.ZipOutput) throws java.io.IOException
+    {
+        kellinwood.security.zipsigner.ZipSigner r0;
+        java.util.Map r1;
+        kellinwood.zipio.ZipOutput $r2;
+        kellinwood.security.zipsigner.ResourceAdapter$Item $r3;
+        int i0, $i1;
+        java.util.Collection $r4;
+        java.util.Iterator $r5;
+        boolean $z0;
+        java.lang.Object $r6;
+        kellinwood.zipio.ZioEntry r7;
+        kellinwood.security.zipsigner.ProgressHelper $r8;
+        kellinwood.security.zipsigner.ResourceAdapter $r9;
+        java.lang.Object[] $r10;
+        java.lang.Integer $r11;
+        java.lang.String $r12;
+
+        r0 := @this: kellinwood.security.zipsigner.ZipSigner;
+
+        r1 := @parameter0: java.util.Map;
+
+        $r2 := @parameter1: kellinwood.zipio.ZipOutput;
+
+        i0 = 1;
+
+        $r4 = interfaceinvoke r1.<java.util.Map: java.util.Collection values()>();
+
+        $r5 = interfaceinvoke $r4.<java.util.Collection: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r5.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label3;
+
+        $r6 = interfaceinvoke $r5.<java.util.Iterator: java.lang.Object next()>();
+
+        r7 = (kellinwood.zipio.ZioEntry) $r6;
+
+        $z0 = r0.<kellinwood.security.zipsigner.ZipSigner: boolean canceled>;
+
+        if $z0 == 0 goto label2;
+
+        return;
+
+     label2:
+        $r8 = r0.<kellinwood.security.zipsigner.ZipSigner: kellinwood.security.zipsigner.ProgressHelper progressHelper>;
+
+        $r9 = r0.<kellinwood.security.zipsigner.ZipSigner: kellinwood.security.zipsigner.ResourceAdapter resourceAdapter>;
+
+        $r3 = <kellinwood.security.zipsigner.ResourceAdapter$Item: kellinwood.security.zipsigner.ResourceAdapter$Item COPYING_ZIP_ENTRY>;
+
+        $r10 = newarray (java.lang.Object)[2];
+
+        $r11 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(i0);
+
+        $r10[0] = $r11;
+
+        $i1 = interfaceinvoke r1.<java.util.Map: int size()>();
+
+        $r11 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i1);
+
+        $r10[1] = $r11;
+
+        $r12 = interfaceinvoke $r9.<kellinwood.security.zipsigner.ResourceAdapter: java.lang.String getString(kellinwood.security.zipsigner.ResourceAdapter$Item,java.lang.Object[])>($r3, $r10);
+
+        virtualinvoke $r8.<kellinwood.security.zipsigner.ProgressHelper: void progress(int,java.lang.String)>(0, $r12);
+
+        i0 = i0 + 1;
+
+        virtualinvoke $r2.<kellinwood.zipio.ZipOutput: void write(kellinwood.zipio.ZioEntry)>(r7);
+
+        goto label1;
+
+     label3:
+        return;
+    }
+    private void copyFiles(java.util.jar.Manifest, java.util.Map, kellinwood.zipio.ZipOutput, long) throws java.io.IOException
+    {
+        kellinwood.security.zipsigner.ZipSigner r0;
+        java.util.jar.Manifest $r1;
+        java.util.Map r2, $r6;
+        kellinwood.zipio.ZipOutput $r3;
+        long $l0;
+        java.util.ArrayList r4;
+        kellinwood.security.zipsigner.ResourceAdapter$Item $r5;
+        java.util.Set $r7;
+        int i1, $i2;
+        java.util.Iterator $r8;
+        boolean $z0;
+        java.lang.Object $r9;
+        java.lang.String r10, $r15;
+        kellinwood.security.zipsigner.ProgressHelper $r11;
+        kellinwood.security.zipsigner.ResourceAdapter $r12;
+        java.lang.Object[] $r13;
+        java.lang.Integer $r14;
+        kellinwood.zipio.ZioEntry r16;
+
+        r0 := @this: kellinwood.security.zipsigner.ZipSigner;
+
+        $r1 := @parameter0: java.util.jar.Manifest;
+
+        r2 := @parameter1: java.util.Map;
+
+        $r3 := @parameter2: kellinwood.zipio.ZipOutput;
+
+        $l0 := @parameter3: long;
+
+        $r6 = virtualinvoke $r1.<java.util.jar.Manifest: java.util.Map getEntries()>();
+
+        r4 = new java.util.ArrayList;
+
+        $r7 = interfaceinvoke $r6.<java.util.Map: java.util.Set keySet()>();
+
+        specialinvoke r4.<java.util.ArrayList: void <init>(java.util.Collection)>($r7);
+
+        staticinvoke <java.util.Collections: void sort(java.util.List)>(r4);
+
+        i1 = 1;
+
+        $r8 = interfaceinvoke r4.<java.util.List: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r8.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label3;
+
+        $r9 = interfaceinvoke $r8.<java.util.Iterator: java.lang.Object next()>();
+
+        r10 = (java.lang.String) $r9;
+
+        $z0 = r0.<kellinwood.security.zipsigner.ZipSigner: boolean canceled>;
+
+        if $z0 == 0 goto label2;
+
+        return;
+
+     label2:
+        $r11 = r0.<kellinwood.security.zipsigner.ZipSigner: kellinwood.security.zipsigner.ProgressHelper progressHelper>;
+
+        $r12 = r0.<kellinwood.security.zipsigner.ZipSigner: kellinwood.security.zipsigner.ResourceAdapter resourceAdapter>;
+
+        $r5 = <kellinwood.security.zipsigner.ResourceAdapter$Item: kellinwood.security.zipsigner.ResourceAdapter$Item COPYING_ZIP_ENTRY>;
+
+        $r13 = newarray (java.lang.Object)[2];
+
+        $r14 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(i1);
+
+        $r13[0] = $r14;
+
+        $i2 = interfaceinvoke r4.<java.util.List: int size()>();
+
+        $r14 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i2);
+
+        $r13[1] = $r14;
+
+        $r15 = interfaceinvoke $r12.<kellinwood.security.zipsigner.ResourceAdapter: java.lang.String getString(kellinwood.security.zipsigner.ResourceAdapter$Item,java.lang.Object[])>($r5, $r13);
+
+        virtualinvoke $r11.<kellinwood.security.zipsigner.ProgressHelper: void progress(int,java.lang.String)>(0, $r15);
+
+        i1 = i1 + 1;
+
+        $r9 = interfaceinvoke r2.<java.util.Map: java.lang.Object get(java.lang.Object)>(r10);
+
+        r16 = (kellinwood.zipio.ZioEntry) $r9;
+
+        virtualinvoke r16.<kellinwood.zipio.ZioEntry: void setTime(long)>($l0);
+
+        virtualinvoke $r3.<kellinwood.zipio.ZipOutput: void write(kellinwood.zipio.ZioEntry)>(r16);
+
+        goto label1;
+
+     label3:
+        return;
+    }
+    private java.security.spec.KeySpec decryptPrivateKey(byte[], java.lang.String) throws java.security.GeneralSecurityException
+    {
+        kellinwood.security.zipsigner.ZipSigner r0;
+        byte[] $r1;
+        java.lang.String $r2;
+        javax.crypto.EncryptedPrivateKeyInfo r3;
+        char[] $r4;
+        javax.crypto.SecretKeyFactory $r5;
+        javax.crypto.spec.PBEKeySpec $r6;
+        javax.crypto.SecretKey $r7;
+        javax.crypto.Cipher $r8;
+        java.security.AlgorithmParameters $r9;
+        java.security.spec.PKCS8EncodedKeySpec $r10;
+        java.io.IOException r11;
+        java.security.spec.InvalidKeySpecException r12;
+        kellinwood.logging.LoggerInterface $r13;
+
+        r0 := @this: kellinwood.security.zipsigner.ZipSigner;
+
+        $r1 := @parameter0: byte[];
+
+        $r2 := @parameter1: java.lang.String;
+
+        r3 = new javax.crypto.EncryptedPrivateKeyInfo;
+
+     label1:
+        specialinvoke r3.<javax.crypto.EncryptedPrivateKeyInfo: void <init>(byte[])>($r1);
+
+     label2:
+        $r4 = virtualinvoke $r2.<java.lang.String: char[] toCharArray()>();
+
+        $r2 = virtualinvoke r3.<javax.crypto.EncryptedPrivateKeyInfo: java.lang.String getAlgName()>();
+
+        $r5 = staticinvoke <javax.crypto.SecretKeyFactory: javax.crypto.SecretKeyFactory getInstance(java.lang.String)>($r2);
+
+        $r6 = new javax.crypto.spec.PBEKeySpec;
+
+        specialinvoke $r6.<javax.crypto.spec.PBEKeySpec: void <init>(char[])>($r4);
+
+        $r7 = virtualinvoke $r5.<javax.crypto.SecretKeyFactory: javax.crypto.SecretKey generateSecret(java.security.spec.KeySpec)>($r6);
+
+        $r2 = virtualinvoke r3.<javax.crypto.EncryptedPrivateKeyInfo: java.lang.String getAlgName()>();
+
+        $r8 = staticinvoke <javax.crypto.Cipher: javax.crypto.Cipher getInstance(java.lang.String)>($r2);
+
+        $r9 = virtualinvoke r3.<javax.crypto.EncryptedPrivateKeyInfo: java.security.AlgorithmParameters getAlgParameters()>();
+
+        virtualinvoke $r8.<javax.crypto.Cipher: void init(int,java.security.Key,java.security.AlgorithmParameters)>(2, $r7, $r9);
+
+     label3:
+        $r10 = virtualinvoke r3.<javax.crypto.EncryptedPrivateKeyInfo: java.security.spec.PKCS8EncodedKeySpec getKeySpec(javax.crypto.Cipher)>($r8);
+
+     label4:
+        return $r10;
+
+     label5:
+        r11 := @caughtexception;
+
+        return null;
+
+     label6:
+        r12 := @caughtexception;
+
+        $r13 = staticinvoke <kellinwood.security.zipsigner.ZipSigner: kellinwood.logging.LoggerInterface getLogger()>();
+
+        interfaceinvoke $r13.<kellinwood.logging.LoggerInterface: void error(java.lang.String)>("signapk: Password for private key may be bad.");
+
+        throw r12;
+
+        catch java.io.IOException from label1 to label2 with label5;
+        catch java.security.spec.InvalidKeySpecException from label3 to label4 with label6;
+    }
+    private void generateSignatureFile(java.util.jar.Manifest, java.io.OutputStream) throws java.io.IOException, java.security.GeneralSecurityException
+    {
+        kellinwood.security.zipsigner.ZipSigner r0;
+        java.util.jar.Manifest $r1;
+        java.io.OutputStream $r2;
+        java.io.PrintStream r3;
+        java.lang.Object[] $r4;
+        java.lang.String $r5, $r21;
+        byte[] $r6;
+        java.security.MessageDigest $r7;
+        java.security.DigestOutputStream $r8;
+        java.io.ByteArrayOutputStream $r9;
+        java.lang.StringBuilder $r10;
+        java.util.Map $r11;
+        java.util.Set $r12;
+        java.util.Iterator $r13, $r20;
+        boolean $z0;
+        java.lang.Object $r14;
+        java.util.Map$Entry r15;
+        kellinwood.security.zipsigner.ProgressHelper $r16;
+        kellinwood.security.zipsigner.ResourceAdapter $r17;
+        kellinwood.security.zipsigner.ResourceAdapter$Item $r18;
+        java.util.jar.Attributes $r19;
+
+        r0 := @this: kellinwood.security.zipsigner.ZipSigner;
+
+        $r1 := @parameter0: java.util.jar.Manifest;
+
+        $r2 := @parameter1: java.io.OutputStream;
+
+        $r5 = "Signature-Version: 1.0\r\n";
+
+        $r6 = virtualinvoke $r5.<java.lang.String: byte[] getBytes()>();
+
+        virtualinvoke $r2.<java.io.OutputStream: void write(byte[])>($r6);
+
+        $r5 = "Created-By: 1.0 (Android SignApk)\r\n";
+
+        $r6 = virtualinvoke $r5.<java.lang.String: byte[] getBytes()>();
+
+        virtualinvoke $r2.<java.io.OutputStream: void write(byte[])>($r6);
+
+        $r7 = staticinvoke <java.security.MessageDigest: java.security.MessageDigest getInstance(java.lang.String)>("SHA1");
+
+        r3 = new java.io.PrintStream;
+
+        $r8 = new java.security.DigestOutputStream;
+
+        $r9 = new java.io.ByteArrayOutputStream;
+
+        specialinvoke $r9.<java.io.ByteArrayOutputStream: void <init>()>();
+
+        specialinvoke $r8.<java.security.DigestOutputStream: void <init>(java.io.OutputStream,java.security.MessageDigest)>($r9, $r7);
+
+        specialinvoke r3.<java.io.PrintStream: void <init>(java.io.OutputStream,boolean,java.lang.String)>($r8, 1, "UTF-8");
+
+        virtualinvoke $r1.<java.util.jar.Manifest: void write(java.io.OutputStream)>(r3);
+
+        virtualinvoke r3.<java.io.PrintStream: void flush()>();
+
+        $r10 = new java.lang.StringBuilder;
+
+        specialinvoke $r10.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("SHA1-Digest-Manifest: ");
+
+        $r6 = virtualinvoke $r7.<java.security.MessageDigest: byte[] digest()>();
+
+        $r5 = staticinvoke <kellinwood.security.zipsigner.Base64: java.lang.String encode(byte[])>($r6);
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\r\n\r\n");
+
+        $r5 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r6 = virtualinvoke $r5.<java.lang.String: byte[] getBytes()>();
+
+        virtualinvoke $r2.<java.io.OutputStream: void write(byte[])>($r6);
+
+        $r11 = virtualinvoke $r1.<java.util.jar.Manifest: java.util.Map getEntries()>();
+
+        $r12 = interfaceinvoke $r11.<java.util.Map: java.util.Set entrySet()>();
+
+        $r13 = interfaceinvoke $r12.<java.util.Set: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r13.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label5;
+
+        $r14 = interfaceinvoke $r13.<java.util.Iterator: java.lang.Object next()>();
+
+        r15 = (java.util.Map$Entry) $r14;
+
+        $z0 = r0.<kellinwood.security.zipsigner.ZipSigner: boolean canceled>;
+
+        if $z0 == 0 goto label2;
+
+        return;
+
+     label2:
+        $r16 = r0.<kellinwood.security.zipsigner.ZipSigner: kellinwood.security.zipsigner.ProgressHelper progressHelper>;
+
+        $r17 = r0.<kellinwood.security.zipsigner.ZipSigner: kellinwood.security.zipsigner.ResourceAdapter resourceAdapter>;
+
+        $r18 = <kellinwood.security.zipsigner.ResourceAdapter$Item: kellinwood.security.zipsigner.ResourceAdapter$Item GENERATING_SIGNATURE_FILE>;
+
+        $r4 = newarray (java.lang.Object)[0];
+
+        $r5 = interfaceinvoke $r17.<kellinwood.security.zipsigner.ResourceAdapter: java.lang.String getString(kellinwood.security.zipsigner.ResourceAdapter$Item,java.lang.Object[])>($r18, $r4);
+
+        virtualinvoke $r16.<kellinwood.security.zipsigner.ProgressHelper: void progress(int,java.lang.String)>(0, $r5);
+
+        $r10 = new java.lang.StringBuilder;
+
+        specialinvoke $r10.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Name: ");
+
+        $r14 = interfaceinvoke r15.<java.util.Map$Entry: java.lang.Object getKey()>();
+
+        $r5 = (java.lang.String) $r14;
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\r\n");
+
+        $r5 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r3.<java.io.PrintStream: void print(java.lang.String)>($r5);
+
+        $r14 = interfaceinvoke r15.<java.util.Map$Entry: java.lang.Object getValue()>();
+
+        $r19 = (java.util.jar.Attributes) $r14;
+
+        $r12 = virtualinvoke $r19.<java.util.jar.Attributes: java.util.Set entrySet()>();
+
+        $r20 = interfaceinvoke $r12.<java.util.Set: java.util.Iterator iterator()>();
+
+     label3:
+        $z0 = interfaceinvoke $r20.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label4;
+
+        $r14 = interfaceinvoke $r20.<java.util.Iterator: java.lang.Object next()>();
+
+        r15 = (java.util.Map$Entry) $r14;
+
+        $r10 = new java.lang.StringBuilder;
+
+        specialinvoke $r10.<java.lang.StringBuilder: void <init>()>();
+
+        $r14 = interfaceinvoke r15.<java.util.Map$Entry: java.lang.Object getKey()>();
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r14);
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(": ");
+
+        $r14 = interfaceinvoke r15.<java.util.Map$Entry: java.lang.Object getValue()>();
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r14);
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\r\n");
+
+        $r21 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r3.<java.io.PrintStream: void print(java.lang.String)>($r21);
+
+        goto label3;
+
+     label4:
+        virtualinvoke r3.<java.io.PrintStream: void print(java.lang.String)>("\r\n");
+
+        virtualinvoke r3.<java.io.PrintStream: void flush()>();
+
+        $r6 = virtualinvoke $r5.<java.lang.String: byte[] getBytes()>();
+
+        virtualinvoke $r2.<java.io.OutputStream: void write(byte[])>($r6);
+
+        $r10 = new java.lang.StringBuilder;
+
+        specialinvoke $r10.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("SHA1-Digest: ");
+
+        $r6 = virtualinvoke $r7.<java.security.MessageDigest: byte[] digest()>();
+
+        $r5 = staticinvoke <kellinwood.security.zipsigner.Base64: java.lang.String encode(byte[])>($r6);
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\r\n\r\n");
+
+        $r5 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r6 = virtualinvoke $r5.<java.lang.String: byte[] getBytes()>();
+
+        virtualinvoke $r2.<java.io.OutputStream: void write(byte[])>($r6);
+
+        goto label1;
+
+     label5:
+        return;
+    }
+    public static kellinwood.logging.LoggerInterface getLogger()
+    {
+        kellinwood.logging.LoggerInterface $r0;
+        java.lang.Class $r1;
+        java.lang.String $r2;
+
+        $r0 = <kellinwood.security.zipsigner.ZipSigner: kellinwood.logging.LoggerInterface log>;
+
+        if $r0 != null goto label1;
+
+        $r1 = class "Lkellinwood/security/zipsigner/ZipSigner;";
+
+        $r2 = virtualinvoke $r1.<java.lang.Class: java.lang.String getName()>();
+
+        $r0 = staticinvoke <kellinwood.logging.LoggerManager: kellinwood.logging.LoggerInterface getLogger(java.lang.String)>($r2);
+
+        <kellinwood.security.zipsigner.ZipSigner: kellinwood.logging.LoggerInterface log> = $r0;
+
+     label1:
+        $r0 = <kellinwood.security.zipsigner.ZipSigner: kellinwood.logging.LoggerInterface log>;
+
+        return $r0;
+    }
+    public static java.lang.String[] getSupportedKeyModes()
+    {
+        java.lang.String[] r0;
+
+        r0 = <kellinwood.security.zipsigner.ZipSigner: java.lang.String[] SUPPORTED_KEY_MODES>;
+
+        return r0;
+    }
+    private void writeSignatureBlock(kellinwood.security.zipsigner.KeySet, byte[], java.io.OutputStream) throws java.io.IOException, java.security.GeneralSecurityException
+    {
+        kellinwood.security.zipsigner.ZipSigner r0;
+        kellinwood.security.zipsigner.KeySet $r1;
+        byte[] $r2, $r6, $r8;
+        java.io.OutputStream $r3;
+        kellinwood.security.zipsigner.ZipSignature r4;
+        java.lang.Exception r5;
+        java.security.PrivateKey $r7;
+        kellinwood.logging.LoggerInterface $r9;
+        boolean $z0;
+        java.security.MessageDigest $r10;
+        java.lang.StringBuilder $r11;
+        java.lang.String $r12;
+        javax.crypto.Cipher $r13;
+        java.security.cert.X509Certificate $r14;
+        java.lang.Class $r15, $r17;
+        java.lang.Class[] $r16;
+        java.lang.reflect.Method $r18;
+        java.lang.Object[] $r19;
+        java.lang.Object $r20;
+        java.lang.RuntimeException $r21;
+
+        r0 := @this: kellinwood.security.zipsigner.ZipSigner;
+
+        $r1 := @parameter0: kellinwood.security.zipsigner.KeySet;
+
+        $r2 := @parameter1: byte[];
+
+        $r3 := @parameter2: java.io.OutputStream;
+
+        $r6 = virtualinvoke $r1.<kellinwood.security.zipsigner.KeySet: byte[] getSigBlockTemplate()>();
+
+        if $r6 == null goto label1;
+
+        r4 = new kellinwood.security.zipsigner.ZipSignature;
+
+        specialinvoke r4.<kellinwood.security.zipsigner.ZipSignature: void <init>()>();
+
+        $r7 = virtualinvoke $r1.<kellinwood.security.zipsigner.KeySet: java.security.PrivateKey getPrivateKey()>();
+
+        virtualinvoke r4.<kellinwood.security.zipsigner.ZipSignature: void initSign(java.security.PrivateKey)>($r7);
+
+        virtualinvoke r4.<kellinwood.security.zipsigner.ZipSignature: void update(byte[])>($r2);
+
+        $r6 = virtualinvoke r4.<kellinwood.security.zipsigner.ZipSignature: byte[] sign()>();
+
+        $r8 = virtualinvoke $r1.<kellinwood.security.zipsigner.KeySet: byte[] getSigBlockTemplate()>();
+
+        virtualinvoke $r3.<java.io.OutputStream: void write(byte[])>($r8);
+
+        virtualinvoke $r3.<java.io.OutputStream: void write(byte[])>($r6);
+
+        $r9 = staticinvoke <kellinwood.security.zipsigner.ZipSigner: kellinwood.logging.LoggerInterface getLogger()>();
+
+        $z0 = interfaceinvoke $r9.<kellinwood.logging.LoggerInterface: boolean isDebugEnabled()>();
+
+        if $z0 == 0 goto label5;
+
+        $r10 = staticinvoke <java.security.MessageDigest: java.security.MessageDigest getInstance(java.lang.String)>("SHA1");
+
+        virtualinvoke $r10.<java.security.MessageDigest: void update(byte[])>($r2);
+
+        $r2 = virtualinvoke $r10.<java.security.MessageDigest: byte[] digest()>();
+
+        $r9 = staticinvoke <kellinwood.security.zipsigner.ZipSigner: kellinwood.logging.LoggerInterface getLogger()>();
+
+        $r11 = new java.lang.StringBuilder;
+
+        specialinvoke $r11.<java.lang.StringBuilder: void <init>()>();
+
+        $r11 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Sig File SHA1: \n");
+
+        $r12 = staticinvoke <kellinwood.security.zipsigner.HexDumpEncoder: java.lang.String encode(byte[])>($r2);
+
+        $r11 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r12);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        interfaceinvoke $r9.<kellinwood.logging.LoggerInterface: void debug(java.lang.String)>($r12);
+
+        $r9 = staticinvoke <kellinwood.security.zipsigner.ZipSigner: kellinwood.logging.LoggerInterface getLogger()>();
+
+        $r11 = new java.lang.StringBuilder;
+
+        specialinvoke $r11.<java.lang.StringBuilder: void <init>()>();
+
+        $r11 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Signature: \n");
+
+        $r12 = staticinvoke <kellinwood.security.zipsigner.HexDumpEncoder: java.lang.String encode(byte[])>($r6);
+
+        $r11 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r12);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        interfaceinvoke $r9.<kellinwood.logging.LoggerInterface: void debug(java.lang.String)>($r12);
+
+        $r13 = staticinvoke <javax.crypto.Cipher: javax.crypto.Cipher getInstance(java.lang.String)>("RSA/ECB/PKCS1Padding");
+
+        $r14 = virtualinvoke $r1.<kellinwood.security.zipsigner.KeySet: java.security.cert.X509Certificate getPublicKey()>();
+
+        virtualinvoke $r13.<javax.crypto.Cipher: void init(int,java.security.cert.Certificate)>(2, $r14);
+
+        $r2 = virtualinvoke $r13.<javax.crypto.Cipher: byte[] doFinal(byte[])>($r6);
+
+        $r9 = staticinvoke <kellinwood.security.zipsigner.ZipSigner: kellinwood.logging.LoggerInterface getLogger()>();
+
+        $r11 = new java.lang.StringBuilder;
+
+        specialinvoke $r11.<java.lang.StringBuilder: void <init>()>();
+
+        $r11 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Signature Decrypted: \n");
+
+        $r12 = staticinvoke <kellinwood.security.zipsigner.HexDumpEncoder: java.lang.String encode(byte[])>($r2);
+
+        $r11 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r12);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        interfaceinvoke $r9.<kellinwood.logging.LoggerInterface: void debug(java.lang.String)>($r12);
+
+        return;
+
+     label1:
+        $r15 = staticinvoke <java.lang.Class: java.lang.Class forName(java.lang.String)>("kellinwood.security.zipsigner.optional.SignatureBlockGenerator");
+
+        $r16 = newarray (java.lang.Class)[2];
+
+        $r16[0] = class "Lkellinwood/security/zipsigner/KeySet;";
+
+        $r6 = newarray (byte)[1];
+
+        $r17 = virtualinvoke $r6.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r16[1] = $r17;
+
+        $r18 = virtualinvoke $r15.<java.lang.Class: java.lang.reflect.Method getMethod(java.lang.String,java.lang.Class[])>("generate", $r16);
+
+        $r19 = newarray (java.lang.Object)[2];
+
+        $r19[0] = $r1;
+
+        $r19[1] = $r2;
+
+        $r20 = virtualinvoke $r18.<java.lang.reflect.Method: java.lang.Object invoke(java.lang.Object,java.lang.Object[])>(null, $r19);
+
+        $r2 = (byte[]) $r20;
+
+     label2:
+        virtualinvoke $r3.<java.io.OutputStream: void write(byte[])>($r2);
+
+     label3:
+        return;
+
+     label4:
+        r5 := @caughtexception;
+
+        $r21 = new java.lang.RuntimeException;
+
+        $r12 = virtualinvoke r5.<java.lang.Exception: java.lang.String getMessage()>();
+
+        specialinvoke $r21.<java.lang.RuntimeException: void <init>(java.lang.String,java.lang.Throwable)>($r12, r5);
+
+        throw $r21;
+
+     label5:
+        return;
+
+        catch java.lang.Exception from label1 to label2 with label4;
+        catch java.lang.Exception from label2 to label3 with label4;
+    }
+    public void addAutoKeyObserver(java.util.Observer)
+    {
+        kellinwood.security.zipsigner.ZipSigner r0;
+        java.util.Observer $r1;
+        kellinwood.security.zipsigner.ZipSigner$AutoKeyObservable $r2;
+
+        r0 := @this: kellinwood.security.zipsigner.ZipSigner;
+
+        $r1 := @parameter0: java.util.Observer;
+
+        $r2 = r0.<kellinwood.security.zipsigner.ZipSigner: kellinwood.security.zipsigner.ZipSigner$AutoKeyObservable autoKeyObservable>;
+
+        virtualinvoke $r2.<kellinwood.security.zipsigner.ZipSigner$AutoKeyObservable: void addObserver(java.util.Observer)>($r1);
+
+        return;
+    }
+    public void addProgressListener(kellinwood.security.zipsigner.ProgressListener)
+    {
+        kellinwood.security.zipsigner.ZipSigner r0;
+        kellinwood.security.zipsigner.ProgressListener $r1;
+        kellinwood.security.zipsigner.ProgressHelper $r2;
+
+        r0 := @this: kellinwood.security.zipsigner.ZipSigner;
+
+        $r1 := @parameter0: kellinwood.security.zipsigner.ProgressListener;
+
+        $r2 = r0.<kellinwood.security.zipsigner.ZipSigner: kellinwood.security.zipsigner.ProgressHelper progressHelper>;
+
+        virtualinvoke $r2.<kellinwood.security.zipsigner.ProgressHelper: void addProgressListener(kellinwood.security.zipsigner.ProgressListener)>($r1);
+
+        return;
+    }
+    protected java.lang.String autoDetectKey(java.lang.String, java.util.Map) throws java.security.NoSuchAlgorithmException, java.io.IOException
+    {
+        kellinwood.security.zipsigner.ZipSigner r0;
+        java.util.Map r1;
+        byte b0;
+        java.lang.StringBuilder r2;
+        int i1, i2;
+        java.lang.String r3, r5, r10;
+        kellinwood.logging.LoggerInterface $r4;
+        boolean $z0, $z1;
+        java.util.Set $r6;
+        java.util.Iterator $r7;
+        java.lang.Object $r8;
+        java.util.Map$Entry r9;
+        java.security.MessageDigest $r11;
+        kellinwood.zipio.ZioEntry $r12;
+        byte[] $r13;
+        java.lang.Object[] $r14;
+        java.lang.Byte $r15;
+
+        r0 := @this: kellinwood.security.zipsigner.ZipSigner;
+
+        r3 := @parameter0: java.lang.String;
+
+        r1 := @parameter1: java.util.Map;
+
+        $r4 = staticinvoke <kellinwood.security.zipsigner.ZipSigner: kellinwood.logging.LoggerInterface getLogger()>();
+
+        $z0 = interfaceinvoke $r4.<kellinwood.logging.LoggerInterface: boolean isDebugEnabled()>();
+
+        $z1 = virtualinvoke r3.<java.lang.String: boolean startsWith(java.lang.String)>("auto");
+
+        if $z1 != 0 goto label01;
+
+        return r3;
+
+     label01:
+        r5 = null;
+
+        $r6 = interfaceinvoke r1.<java.util.Map: java.util.Set entrySet()>();
+
+        $r7 = interfaceinvoke $r6.<java.util.Set: java.util.Iterator iterator()>();
+
+     label02:
+        $z1 = interfaceinvoke $r7.<java.util.Iterator: boolean hasNext()>();
+
+        if $z1 == 0 goto label03;
+
+        $r8 = interfaceinvoke $r7.<java.util.Iterator: java.lang.Object next()>();
+
+        r9 = (java.util.Map$Entry) $r8;
+
+        $r8 = interfaceinvoke r9.<java.util.Map$Entry: java.lang.Object getKey()>();
+
+        r10 = (java.lang.String) $r8;
+
+        $z1 = virtualinvoke r10.<java.lang.String: boolean startsWith(java.lang.String)>("META-INF/");
+
+        if $z1 == 0 goto label02;
+
+        $z1 = virtualinvoke r10.<java.lang.String: boolean endsWith(java.lang.String)>(".RSA");
+
+        if $z1 == 0 goto label02;
+
+        $r11 = staticinvoke <java.security.MessageDigest: java.security.MessageDigest getInstance(java.lang.String)>("MD5");
+
+        $r8 = interfaceinvoke r9.<java.util.Map$Entry: java.lang.Object getValue()>();
+
+        $r12 = (kellinwood.zipio.ZioEntry) $r8;
+
+        $r13 = virtualinvoke $r12.<kellinwood.zipio.ZioEntry: byte[] getData()>();
+
+        i1 = lengthof $r13;
+
+        if i1 >= 1458 goto label05;
+
+     label03:
+        $z1 = virtualinvoke r3.<java.lang.String: boolean equals(java.lang.Object)>("auto-testkey");
+
+        if $z1 == 0 goto label10;
+
+        if $z0 == 0 goto label04;
+
+        $r4 = staticinvoke <kellinwood.security.zipsigner.ZipSigner: kellinwood.logging.LoggerInterface getLogger()>();
+
+        r2 = new java.lang.StringBuilder;
+
+        specialinvoke r2.<java.lang.StringBuilder: void <init>()>();
+
+        r2 = virtualinvoke r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Falling back to key=");
+
+        r2 = virtualinvoke r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r5);
+
+        r3 = virtualinvoke r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        interfaceinvoke $r4.<kellinwood.logging.LoggerInterface: void debug(java.lang.String)>(r3);
+
+     label04:
+        return "testkey";
+
+     label05:
+        virtualinvoke $r11.<java.security.MessageDigest: void update(byte[],int,int)>($r13, 0, 1458);
+
+        $r13 = virtualinvoke $r11.<java.security.MessageDigest: byte[] digest()>();
+
+        r2 = new java.lang.StringBuilder;
+
+        specialinvoke r2.<java.lang.StringBuilder: void <init>()>();
+
+        i1 = lengthof $r13;
+
+        i2 = 0;
+
+     label06:
+        if i2 >= i1 goto label07;
+
+        b0 = $r13[i2];
+
+        $r14 = newarray (java.lang.Object)[1];
+
+        $r15 = staticinvoke <java.lang.Byte: java.lang.Byte valueOf(byte)>(b0);
+
+        $r14[0] = $r15;
+
+        r5 = staticinvoke <java.lang.String: java.lang.String format(java.lang.String,java.lang.Object[])>("%02x", $r14);
+
+        virtualinvoke r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r5);
+
+        i2 = i2 + 1;
+
+        goto label06;
+
+     label07:
+        r10 = virtualinvoke r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        r1 = r0.<kellinwood.security.zipsigner.ZipSigner: java.util.Map autoKeyDetect>;
+
+        $r8 = interfaceinvoke r1.<java.util.Map: java.lang.Object get(java.lang.Object)>(r10);
+
+        r5 = (java.lang.String) $r8;
+
+        if $z0 == 0 goto label08;
+
+        if r5 == null goto label09;
+
+        $r4 = staticinvoke <kellinwood.security.zipsigner.ZipSigner: kellinwood.logging.LoggerInterface getLogger()>();
+
+        $r14 = newarray (java.lang.Object)[2];
+
+        $r14[0] = r5;
+
+        $r14[1] = r10;
+
+        r10 = staticinvoke <java.lang.String: java.lang.String format(java.lang.String,java.lang.Object[])>("Auto-determined key=%s using md5=%s", $r14);
+
+        interfaceinvoke $r4.<kellinwood.logging.LoggerInterface: void debug(java.lang.String)>(r10);
+
+     label08:
+        if r5 == null goto label02;
+
+        return r5;
+
+     label09:
+        $r4 = staticinvoke <kellinwood.security.zipsigner.ZipSigner: kellinwood.logging.LoggerInterface getLogger()>();
+
+        $r14 = newarray (java.lang.Object)[1];
+
+        $r14[0] = r10;
+
+        r10 = staticinvoke <java.lang.String: java.lang.String format(java.lang.String,java.lang.Object[])>("Auto key determination failed for md5=%s", $r14);
+
+        interfaceinvoke $r4.<kellinwood.logging.LoggerInterface: void debug(java.lang.String)>(r10);
+
+        goto label08;
+
+     label10:
+        $z1 = virtualinvoke r3.<java.lang.String: boolean equals(java.lang.Object)>("auto-none");
+
+        if $z1 == 0 goto label12;
+
+        if $z0 == 0 goto label11;
+
+        $r4 = staticinvoke <kellinwood.security.zipsigner.ZipSigner: kellinwood.logging.LoggerInterface getLogger()>();
+
+        interfaceinvoke $r4.<kellinwood.logging.LoggerInterface: void debug(java.lang.String)>("Unable to determine key, returning: none");
+
+     label11:
+        return "none";
+
+     label12:
+        return null;
+    }
+    public void cancel()
+    {
+        kellinwood.security.zipsigner.ZipSigner r0;
+
+        r0 := @this: kellinwood.security.zipsigner.ZipSigner;
+
+        r0.<kellinwood.security.zipsigner.ZipSigner: boolean canceled> = 1;
+
+        return;
+    }
+    public kellinwood.security.zipsigner.KeySet getKeySet()
+    {
+        kellinwood.security.zipsigner.ZipSigner r0;
+        kellinwood.security.zipsigner.KeySet r1;
+
+        r0 := @this: kellinwood.security.zipsigner.ZipSigner;
+
+        r1 = r0.<kellinwood.security.zipsigner.ZipSigner: kellinwood.security.zipsigner.KeySet keySet>;
+
+        return r1;
+    }
+    public java.lang.String getKeymode()
+    {
+        kellinwood.security.zipsigner.ZipSigner r0;
+        java.lang.String r1;
+
+        r0 := @this: kellinwood.security.zipsigner.ZipSigner;
+
+        r1 = r0.<kellinwood.security.zipsigner.ZipSigner: java.lang.String keymode>;
+
+        return r1;
+    }
+    public kellinwood.security.zipsigner.ResourceAdapter getResourceAdapter()
+    {
+        kellinwood.security.zipsigner.ZipSigner r0;
+        kellinwood.security.zipsigner.ResourceAdapter r1;
+
+        r0 := @this: kellinwood.security.zipsigner.ZipSigner;
+
+        r1 = r0.<kellinwood.security.zipsigner.ZipSigner: kellinwood.security.zipsigner.ResourceAdapter resourceAdapter>;
+
+        return r1;
+    }
+    public boolean isCanceled()
+    {
+        kellinwood.security.zipsigner.ZipSigner r0;
+        boolean z0;
+
+        r0 := @this: kellinwood.security.zipsigner.ZipSigner;
+
+        z0 = r0.<kellinwood.security.zipsigner.ZipSigner: boolean canceled>;
+
+        return z0;
+    }
+    public void issueLoadingCertAndKeysProgressEvent()
+    {
+        kellinwood.security.zipsigner.ZipSigner r0;
+        kellinwood.security.zipsigner.ProgressHelper $r1;
+        kellinwood.security.zipsigner.ResourceAdapter$Item $r2;
+        java.lang.String $r3;
+        kellinwood.security.zipsigner.ResourceAdapter $r4;
+        java.lang.Object[] $r5;
+
+        r0 := @this: kellinwood.security.zipsigner.ZipSigner;
+
+        $r1 = r0.<kellinwood.security.zipsigner.ZipSigner: kellinwood.security.zipsigner.ProgressHelper progressHelper>;
+
+        $r4 = r0.<kellinwood.security.zipsigner.ZipSigner: kellinwood.security.zipsigner.ResourceAdapter resourceAdapter>;
+
+        $r2 = <kellinwood.security.zipsigner.ResourceAdapter$Item: kellinwood.security.zipsigner.ResourceAdapter$Item LOADING_CERTIFICATE_AND_KEY>;
+
+        $r5 = newarray (java.lang.Object)[0];
+
+        $r3 = interfaceinvoke $r4.<kellinwood.security.zipsigner.ResourceAdapter: java.lang.String getString(kellinwood.security.zipsigner.ResourceAdapter$Item,java.lang.Object[])>($r2, $r5);
+
+        virtualinvoke $r1.<kellinwood.security.zipsigner.ProgressHelper: void progress(int,java.lang.String)>(1, $r3);
+
+        return;
+    }
+    public void loadKeys(java.lang.String) throws java.io.IOException, java.security.GeneralSecurityException
+    {
+        kellinwood.security.zipsigner.ZipSigner r0;
+        java.lang.String $r1, $r5;
+        java.util.Map $r2;
+        java.lang.Object $r3;
+        kellinwood.security.zipsigner.KeySet $r4;
+        boolean $z0;
+        java.lang.Class $r6;
+        java.lang.StringBuilder $r7;
+        java.net.URL $r8;
+        java.security.PrivateKey $r9;
+        java.security.cert.X509Certificate $r10;
+        byte[] $r11;
+
+        r0 := @this: kellinwood.security.zipsigner.ZipSigner;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = r0.<kellinwood.security.zipsigner.ZipSigner: java.util.Map loadedKeys>;
+
+        $r3 = interfaceinvoke $r2.<java.util.Map: java.lang.Object get(java.lang.Object)>($r1);
+
+        $r4 = (kellinwood.security.zipsigner.KeySet) $r3;
+
+        r0.<kellinwood.security.zipsigner.ZipSigner: kellinwood.security.zipsigner.KeySet keySet> = $r4;
+
+        $r4 = r0.<kellinwood.security.zipsigner.ZipSigner: kellinwood.security.zipsigner.KeySet keySet>;
+
+        if $r4 == null goto label1;
+
+        return;
+
+     label1:
+        $r4 = new kellinwood.security.zipsigner.KeySet;
+
+        specialinvoke $r4.<kellinwood.security.zipsigner.KeySet: void <init>()>();
+
+        r0.<kellinwood.security.zipsigner.ZipSigner: kellinwood.security.zipsigner.KeySet keySet> = $r4;
+
+        $r4 = r0.<kellinwood.security.zipsigner.ZipSigner: kellinwood.security.zipsigner.KeySet keySet>;
+
+        virtualinvoke $r4.<kellinwood.security.zipsigner.KeySet: void setName(java.lang.String)>($r1);
+
+        $r2 = r0.<kellinwood.security.zipsigner.ZipSigner: java.util.Map loadedKeys>;
+
+        $r4 = r0.<kellinwood.security.zipsigner.ZipSigner: kellinwood.security.zipsigner.KeySet keySet>;
+
+        interfaceinvoke $r2.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r1, $r4);
+
+        $r5 = "none";
+
+        $z0 = virtualinvoke $r5.<java.lang.String: boolean equals(java.lang.Object)>($r1);
+
+        if $z0 != 0 goto label2;
+
+        virtualinvoke r0.<kellinwood.security.zipsigner.ZipSigner: void issueLoadingCertAndKeysProgressEvent()>();
+
+        $r6 = virtualinvoke r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("/keys/");
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".pk8");
+
+        $r5 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r8 = virtualinvoke $r6.<java.lang.Class: java.net.URL getResource(java.lang.String)>($r5);
+
+        $r4 = r0.<kellinwood.security.zipsigner.ZipSigner: kellinwood.security.zipsigner.KeySet keySet>;
+
+        $r9 = virtualinvoke r0.<kellinwood.security.zipsigner.ZipSigner: java.security.PrivateKey readPrivateKey(java.net.URL,java.lang.String)>($r8, null);
+
+        virtualinvoke $r4.<kellinwood.security.zipsigner.KeySet: void setPrivateKey(java.security.PrivateKey)>($r9);
+
+        $r6 = virtualinvoke r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("/keys/");
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".x509.pem");
+
+        $r5 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r8 = virtualinvoke $r6.<java.lang.Class: java.net.URL getResource(java.lang.String)>($r5);
+
+        $r4 = r0.<kellinwood.security.zipsigner.ZipSigner: kellinwood.security.zipsigner.KeySet keySet>;
+
+        $r10 = virtualinvoke r0.<kellinwood.security.zipsigner.ZipSigner: java.security.cert.X509Certificate readPublicKey(java.net.URL)>($r8);
+
+        virtualinvoke $r4.<kellinwood.security.zipsigner.KeySet: void setPublicKey(java.security.cert.X509Certificate)>($r10);
+
+        $r6 = virtualinvoke r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("/keys/");
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".sbt");
+
+        $r1 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r8 = virtualinvoke $r6.<java.lang.Class: java.net.URL getResource(java.lang.String)>($r1);
+
+        if $r8 == null goto label2;
+
+        $r4 = r0.<kellinwood.security.zipsigner.ZipSigner: kellinwood.security.zipsigner.KeySet keySet>;
+
+        $r11 = virtualinvoke r0.<kellinwood.security.zipsigner.ZipSigner: byte[] readContentAsBytes(java.net.URL)>($r8);
+
+        virtualinvoke $r4.<kellinwood.security.zipsigner.KeySet: void setSigBlockTemplate(byte[])>($r11);
+
+     label2:
+        return;
+    }
+    public void loadProvider(java.lang.String) throws java.lang.ClassNotFoundException, java.lang.IllegalAccessException, java.lang.InstantiationException
+    {
+        kellinwood.security.zipsigner.ZipSigner r0;
+        java.lang.String $r1;
+        java.lang.Class $r2;
+        java.lang.Object $r3;
+        java.security.Provider r4;
+
+        r0 := @this: kellinwood.security.zipsigner.ZipSigner;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = staticinvoke <java.lang.Class: java.lang.Class forName(java.lang.String)>($r1);
+
+        $r3 = virtualinvoke $r2.<java.lang.Class: java.lang.Object newInstance()>();
+
+        r4 = (java.security.Provider) $r3;
+
+        staticinvoke <java.security.Security: int insertProviderAt(java.security.Provider,int)>(r4, 1);
+
+        return;
+    }
+    public byte[] readContentAsBytes(java.io.InputStream) throws java.io.IOException
+    {
+        kellinwood.security.zipsigner.ZipSigner r0;
+        java.io.InputStream $r1;
+        java.io.ByteArrayOutputStream r2;
+        byte[] r3;
+        int $i0;
+
+        r0 := @this: kellinwood.security.zipsigner.ZipSigner;
+
+        $r1 := @parameter0: java.io.InputStream;
+
+        r2 = new java.io.ByteArrayOutputStream;
+
+        specialinvoke r2.<java.io.ByteArrayOutputStream: void <init>()>();
+
+        r3 = newarray (byte)[2048];
+
+        $i0 = virtualinvoke $r1.<java.io.InputStream: int read(byte[])>(r3);
+
+     label1:
+        if $i0 == -1 goto label2;
+
+        virtualinvoke r2.<java.io.ByteArrayOutputStream: void write(byte[],int,int)>(r3, 0, $i0);
+
+        $i0 = virtualinvoke $r1.<java.io.InputStream: int read(byte[])>(r3);
+
+        goto label1;
+
+     label2:
+        r3 = virtualinvoke r2.<java.io.ByteArrayOutputStream: byte[] toByteArray()>();
+
+        return r3;
+    }
+    public byte[] readContentAsBytes(java.net.URL) throws java.io.IOException
+    {
+        kellinwood.security.zipsigner.ZipSigner r0;
+        java.net.URL $r1;
+        java.io.InputStream $r2;
+        byte[] $r3;
+
+        r0 := @this: kellinwood.security.zipsigner.ZipSigner;
+
+        $r1 := @parameter0: java.net.URL;
+
+        $r2 = virtualinvoke $r1.<java.net.URL: java.io.InputStream openStream()>();
+
+        $r3 = virtualinvoke r0.<kellinwood.security.zipsigner.ZipSigner: byte[] readContentAsBytes(java.io.InputStream)>($r2);
+
+        return $r3;
+    }
+    public java.security.PrivateKey readPrivateKey(java.net.URL, java.lang.String) throws java.io.IOException, java.security.GeneralSecurityException
+    {
+        kellinwood.security.zipsigner.ZipSigner r0;
+        java.net.URL $r1;
+        java.lang.String $r2;
+        java.security.spec.InvalidKeySpecException r3;
+        java.io.InputStream $r5;
+        byte[] $r6;
+        java.security.spec.KeySpec $r7;
+        java.lang.Object r8;
+        java.security.KeyFactory $r9;
+        java.security.PrivateKey $r10;
+        java.lang.Throwable $r11;
+        java.io.DataInputStream $r12;
+        java.security.spec.PKCS8EncodedKeySpec $r13;
+
+        r0 := @this: kellinwood.security.zipsigner.ZipSigner;
+
+        $r1 := @parameter0: java.net.URL;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $r12 = new java.io.DataInputStream;
+
+        $r5 = virtualinvoke $r1.<java.net.URL: java.io.InputStream openStream()>();
+
+        specialinvoke $r12.<java.io.DataInputStream: void <init>(java.io.InputStream)>($r5);
+
+     label01:
+        $r6 = virtualinvoke r0.<kellinwood.security.zipsigner.ZipSigner: byte[] readContentAsBytes(java.io.InputStream)>($r12);
+
+        $r7 = specialinvoke r0.<kellinwood.security.zipsigner.ZipSigner: java.security.spec.KeySpec decryptPrivateKey(byte[],java.lang.String)>($r6, $r2);
+
+     label02:
+        r8 = $r7;
+
+        if $r7 != null goto label06;
+
+     label03:
+        $r13 = new java.security.spec.PKCS8EncodedKeySpec;
+
+     label04:
+        r8 = $r13;
+
+     label05:
+        specialinvoke $r13.<java.security.spec.PKCS8EncodedKeySpec: void <init>(byte[])>($r6);
+
+     label06:
+        $r9 = staticinvoke <java.security.KeyFactory: java.security.KeyFactory getInstance(java.lang.String)>("RSA");
+
+     label07:
+        $r7 = (java.security.spec.KeySpec) r8;
+
+     label08:
+        $r10 = virtualinvoke $r9.<java.security.KeyFactory: java.security.PrivateKey generatePrivate(java.security.spec.KeySpec)>($r7);
+
+     label09:
+        virtualinvoke $r12.<java.io.DataInputStream: void close()>();
+
+        return $r10;
+
+     label10:
+        r3 := @caughtexception;
+
+     label11:
+        $r9 = staticinvoke <java.security.KeyFactory: java.security.KeyFactory getInstance(java.lang.String)>("DSA");
+
+        $r7 = (java.security.spec.KeySpec) r8;
+
+        $r10 = virtualinvoke $r9.<java.security.KeyFactory: java.security.PrivateKey generatePrivate(java.security.spec.KeySpec)>($r7);
+
+     label12:
+        virtualinvoke $r12.<java.io.DataInputStream: void close()>();
+
+        return $r10;
+
+     label13:
+        $r11 := @caughtexception;
+
+        virtualinvoke $r12.<java.io.DataInputStream: void close()>();
+
+        throw $r11;
+
+        catch java.lang.Throwable from label01 to label02 with label13;
+        catch java.lang.Throwable from label03 to label04 with label13;
+        catch java.lang.Throwable from label05 to label06 with label13;
+        catch java.security.spec.InvalidKeySpecException from label06 to label07 with label10;
+        catch java.security.spec.InvalidKeySpecException from label08 to label09 with label10;
+        catch java.lang.Throwable from label06 to label09 with label13;
+        catch java.lang.Throwable from label11 to label12 with label13;
+    }
+    public java.security.cert.X509Certificate readPublicKey(java.net.URL) throws java.io.IOException, java.security.GeneralSecurityException
+    {
+        kellinwood.security.zipsigner.ZipSigner r0;
+        java.net.URL $r1;
+        java.io.InputStream $r2;
+        java.security.cert.CertificateFactory $r3;
+        java.security.cert.Certificate $r4;
+        java.security.cert.X509Certificate $r5;
+        java.lang.Throwable $r6;
+
+        r0 := @this: kellinwood.security.zipsigner.ZipSigner;
+
+        $r1 := @parameter0: java.net.URL;
+
+        $r2 = virtualinvoke $r1.<java.net.URL: java.io.InputStream openStream()>();
+
+     label1:
+        $r3 = staticinvoke <java.security.cert.CertificateFactory: java.security.cert.CertificateFactory getInstance(java.lang.String)>("X.509");
+
+        $r4 = virtualinvoke $r3.<java.security.cert.CertificateFactory: java.security.cert.Certificate generateCertificate(java.io.InputStream)>($r2);
+
+        $r5 = (java.security.cert.X509Certificate) $r4;
+
+     label2:
+        virtualinvoke $r2.<java.io.InputStream: void close()>();
+
+        return $r5;
+
+     label3:
+        $r6 := @caughtexception;
+
+        virtualinvoke $r2.<java.io.InputStream: void close()>();
+
+        throw $r6;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+    public void removeProgressListener(kellinwood.security.zipsigner.ProgressListener)
+    {
+        kellinwood.security.zipsigner.ZipSigner r0;
+        kellinwood.security.zipsigner.ProgressListener $r1;
+        kellinwood.security.zipsigner.ProgressHelper $r2;
+        java.lang.Throwable $r3;
+
+        r0 := @this: kellinwood.security.zipsigner.ZipSigner;
+
+        $r1 := @parameter0: kellinwood.security.zipsigner.ProgressListener;
+
+        entermonitor r0;
+
+     label1:
+        $r2 = r0.<kellinwood.security.zipsigner.ZipSigner: kellinwood.security.zipsigner.ProgressHelper progressHelper>;
+
+        virtualinvoke $r2.<kellinwood.security.zipsigner.ProgressHelper: void removeProgressListener(kellinwood.security.zipsigner.ProgressListener)>($r1);
+
+     label2:
+        exitmonitor r0;
+
+        return;
+
+     label3:
+        $r3 := @caughtexception;
+
+        exitmonitor r0;
+
+        throw $r3;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+    public void resetCanceled()
+    {
+        kellinwood.security.zipsigner.ZipSigner r0;
+
+        r0 := @this: kellinwood.security.zipsigner.ZipSigner;
+
+        r0.<kellinwood.security.zipsigner.ZipSigner: boolean canceled> = 0;
+
+        return;
+    }
+    public void setKeymode(java.lang.String) throws java.io.IOException, java.security.GeneralSecurityException
+    {
+        kellinwood.security.zipsigner.ZipSigner r0;
+        java.lang.String $r1, $r4;
+        kellinwood.logging.LoggerInterface $r2;
+        boolean $z0;
+        java.lang.StringBuilder $r3;
+        kellinwood.security.zipsigner.ProgressHelper $r5;
+
+        r0 := @this: kellinwood.security.zipsigner.ZipSigner;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = staticinvoke <kellinwood.security.zipsigner.ZipSigner: kellinwood.logging.LoggerInterface getLogger()>();
+
+        $z0 = interfaceinvoke $r2.<kellinwood.logging.LoggerInterface: boolean isDebugEnabled()>();
+
+        if $z0 == 0 goto label1;
+
+        $r2 = staticinvoke <kellinwood.security.zipsigner.ZipSigner: kellinwood.logging.LoggerInterface getLogger()>();
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("setKeymode: ");
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        interfaceinvoke $r2.<kellinwood.logging.LoggerInterface: void debug(java.lang.String)>($r4);
+
+     label1:
+        r0.<kellinwood.security.zipsigner.ZipSigner: java.lang.String keymode> = $r1;
+
+        $r1 = r0.<kellinwood.security.zipsigner.ZipSigner: java.lang.String keymode>;
+
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean startsWith(java.lang.String)>("auto");
+
+        if $z0 == 0 goto label2;
+
+        r0.<kellinwood.security.zipsigner.ZipSigner: kellinwood.security.zipsigner.KeySet keySet> = null;
+
+        return;
+
+     label2:
+        $r5 = r0.<kellinwood.security.zipsigner.ZipSigner: kellinwood.security.zipsigner.ProgressHelper progressHelper>;
+
+        virtualinvoke $r5.<kellinwood.security.zipsigner.ProgressHelper: void initProgress()>();
+
+        $r1 = r0.<kellinwood.security.zipsigner.ZipSigner: java.lang.String keymode>;
+
+        virtualinvoke r0.<kellinwood.security.zipsigner.ZipSigner: void loadKeys(java.lang.String)>($r1);
+
+        return;
+    }
+    public void setKeys(java.lang.String, java.security.cert.X509Certificate, java.security.PrivateKey, java.lang.String, byte[])
+    {
+        kellinwood.security.zipsigner.ZipSigner r0;
+        java.lang.String $r1, $r4;
+        java.security.cert.X509Certificate $r2;
+        java.security.PrivateKey $r3;
+        byte[] $r5;
+        kellinwood.security.zipsigner.KeySet $r6;
+
+        r0 := @this: kellinwood.security.zipsigner.ZipSigner;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.security.cert.X509Certificate;
+
+        $r3 := @parameter2: java.security.PrivateKey;
+
+        $r4 := @parameter3: java.lang.String;
+
+        $r5 := @parameter4: byte[];
+
+        $r6 = new kellinwood.security.zipsigner.KeySet;
+
+        specialinvoke $r6.<kellinwood.security.zipsigner.KeySet: void <init>(java.lang.String,java.security.cert.X509Certificate,java.security.PrivateKey,java.lang.String,byte[])>($r1, $r2, $r3, $r4, $r5);
+
+        r0.<kellinwood.security.zipsigner.ZipSigner: kellinwood.security.zipsigner.KeySet keySet> = $r6;
+
+        return;
+    }
+    public void setKeys(java.lang.String, java.security.cert.X509Certificate, java.security.PrivateKey, byte[])
+    {
+        kellinwood.security.zipsigner.ZipSigner r0;
+        java.lang.String $r1;
+        java.security.cert.X509Certificate $r2;
+        java.security.PrivateKey $r3;
+        byte[] $r4;
+        kellinwood.security.zipsigner.KeySet $r5;
+
+        r0 := @this: kellinwood.security.zipsigner.ZipSigner;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.security.cert.X509Certificate;
+
+        $r3 := @parameter2: java.security.PrivateKey;
+
+        $r4 := @parameter3: byte[];
+
+        $r5 = new kellinwood.security.zipsigner.KeySet;
+
+        specialinvoke $r5.<kellinwood.security.zipsigner.KeySet: void <init>(java.lang.String,java.security.cert.X509Certificate,java.security.PrivateKey,byte[])>($r1, $r2, $r3, $r4);
+
+        r0.<kellinwood.security.zipsigner.ZipSigner: kellinwood.security.zipsigner.KeySet keySet> = $r5;
+
+        return;
+    }
+    public void setResourceAdapter(kellinwood.security.zipsigner.ResourceAdapter)
+    {
+        kellinwood.security.zipsigner.ZipSigner r0;
+        kellinwood.security.zipsigner.ResourceAdapter $r1;
+
+        r0 := @this: kellinwood.security.zipsigner.ZipSigner;
+
+        $r1 := @parameter0: kellinwood.security.zipsigner.ResourceAdapter;
+
+        r0.<kellinwood.security.zipsigner.ZipSigner: kellinwood.security.zipsigner.ResourceAdapter resourceAdapter> = $r1;
+
+        return;
+    }
+    public void signZip(java.lang.String, java.lang.String) throws java.io.IOException, java.security.GeneralSecurityException
+    {
+        kellinwood.security.zipsigner.ZipSigner r0;
+        java.lang.String $r1, $r2, $r10;
+        java.io.File $r3, $r4;
+        boolean $z0;
+        java.lang.IllegalArgumentException $r5;
+        kellinwood.security.zipsigner.ResourceAdapter $r6;
+        kellinwood.security.zipsigner.ResourceAdapter$Item $r7;
+        java.lang.Object[] $r8;
+        kellinwood.security.zipsigner.ProgressHelper $r9;
+        kellinwood.zipio.ZipInput $r11;
+        java.util.Map $r12;
+        java.io.FileOutputStream $r13;
+
+        r0 := @this: kellinwood.security.zipsigner.ZipSigner;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $r3 = new java.io.File;
+
+        specialinvoke $r3.<java.io.File: void <init>(java.lang.String)>($r1);
+
+        $r3 = virtualinvoke $r3.<java.io.File: java.io.File getCanonicalFile()>();
+
+        $r4 = new java.io.File;
+
+        specialinvoke $r4.<java.io.File: void <init>(java.lang.String)>($r2);
+
+        $r4 = virtualinvoke $r4.<java.io.File: java.io.File getCanonicalFile()>();
+
+        $z0 = virtualinvoke $r3.<java.io.File: boolean equals(java.lang.Object)>($r4);
+
+        if $z0 == 0 goto label1;
+
+        $r5 = new java.lang.IllegalArgumentException;
+
+        $r6 = r0.<kellinwood.security.zipsigner.ZipSigner: kellinwood.security.zipsigner.ResourceAdapter resourceAdapter>;
+
+        $r7 = <kellinwood.security.zipsigner.ResourceAdapter$Item: kellinwood.security.zipsigner.ResourceAdapter$Item INPUT_SAME_AS_OUTPUT_ERROR>;
+
+        $r8 = newarray (java.lang.Object)[0];
+
+        $r1 = interfaceinvoke $r6.<kellinwood.security.zipsigner.ResourceAdapter: java.lang.String getString(kellinwood.security.zipsigner.ResourceAdapter$Item,java.lang.Object[])>($r7, $r8);
+
+        specialinvoke $r5.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r1);
+
+        throw $r5;
+
+     label1:
+        $r9 = r0.<kellinwood.security.zipsigner.ZipSigner: kellinwood.security.zipsigner.ProgressHelper progressHelper>;
+
+        virtualinvoke $r9.<kellinwood.security.zipsigner.ProgressHelper: void initProgress()>();
+
+        $r9 = r0.<kellinwood.security.zipsigner.ZipSigner: kellinwood.security.zipsigner.ProgressHelper progressHelper>;
+
+        $r6 = r0.<kellinwood.security.zipsigner.ZipSigner: kellinwood.security.zipsigner.ResourceAdapter resourceAdapter>;
+
+        $r7 = <kellinwood.security.zipsigner.ResourceAdapter$Item: kellinwood.security.zipsigner.ResourceAdapter$Item PARSING_CENTRAL_DIRECTORY>;
+
+        $r8 = newarray (java.lang.Object)[0];
+
+        $r10 = interfaceinvoke $r6.<kellinwood.security.zipsigner.ResourceAdapter: java.lang.String getString(kellinwood.security.zipsigner.ResourceAdapter$Item,java.lang.Object[])>($r7, $r8);
+
+        virtualinvoke $r9.<kellinwood.security.zipsigner.ProgressHelper: void progress(int,java.lang.String)>(1, $r10);
+
+        $r11 = staticinvoke <kellinwood.zipio.ZipInput: kellinwood.zipio.ZipInput read(java.lang.String)>($r1);
+
+        $r12 = virtualinvoke $r11.<kellinwood.zipio.ZipInput: java.util.Map getEntries()>();
+
+        $r13 = new java.io.FileOutputStream;
+
+        specialinvoke $r13.<java.io.FileOutputStream: void <init>(java.lang.String)>($r2);
+
+        virtualinvoke r0.<kellinwood.security.zipsigner.ZipSigner: void signZip(java.util.Map,java.io.OutputStream,java.lang.String)>($r12, $r13, $r2);
+
+        virtualinvoke $r11.<kellinwood.zipio.ZipInput: void close()>();
+
+        return;
+    }
+    public void signZip(java.net.URL, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String) throws java.lang.ClassNotFoundException, java.lang.IllegalAccessException, java.lang.InstantiationException, java.io.IOException, java.security.GeneralSecurityException
+    {
+        kellinwood.security.zipsigner.ZipSigner r0;
+        java.net.URL $r1;
+        java.lang.String $r2, $r3, $r4, $r5, $r6, $r7;
+        char[] $r8, $r9;
+
+        r0 := @this: kellinwood.security.zipsigner.ZipSigner;
+
+        $r1 := @parameter0: java.net.URL;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $r3 := @parameter2: java.lang.String;
+
+        $r4 := @parameter3: java.lang.String;
+
+        $r5 := @parameter4: java.lang.String;
+
+        $r6 := @parameter5: java.lang.String;
+
+        $r7 := @parameter6: java.lang.String;
+
+        $r8 = virtualinvoke $r3.<java.lang.String: char[] toCharArray()>();
+
+        $r9 = virtualinvoke $r5.<java.lang.String: char[] toCharArray()>();
+
+        virtualinvoke r0.<kellinwood.security.zipsigner.ZipSigner: void signZip(java.net.URL,java.lang.String,char[],java.lang.String,char[],java.lang.String,java.lang.String,java.lang.String)>($r1, $r2, $r8, $r4, $r9, "SHA1withRSA", $r6, $r7);
+
+        return;
+    }
+    public void signZip(java.net.URL, java.lang.String, char[], java.lang.String, char[], java.lang.String, java.lang.String, java.lang.String) throws java.lang.ClassNotFoundException, java.lang.IllegalAccessException, java.lang.InstantiationException, java.io.IOException, java.security.GeneralSecurityException
+    {
+        kellinwood.security.zipsigner.ZipSigner r0;
+        java.net.URL $r1;
+        char[] $r2, $r4;
+        java.lang.String $r3, $r5, $r6, $r7, $r8;
+        java.io.InputStream r9, $r11;
+        java.security.KeyStore $r10;
+        java.security.cert.Certificate $r12;
+        java.security.cert.X509Certificate $r13;
+        java.security.Key $r14;
+        java.security.PrivateKey $r15;
+        java.lang.Throwable $r16;
+
+        r0 := @this: kellinwood.security.zipsigner.ZipSigner;
+
+        $r1 := @parameter0: java.net.URL;
+
+        $r8 := @parameter1: java.lang.String;
+
+        $r2 := @parameter2: char[];
+
+        $r3 := @parameter3: java.lang.String;
+
+        $r4 := @parameter4: char[];
+
+        $r5 := @parameter5: java.lang.String;
+
+        $r6 := @parameter6: java.lang.String;
+
+        $r7 := @parameter7: java.lang.String;
+
+        r9 = null;
+
+        if $r8 != null goto label2;
+
+     label1:
+        $r8 = staticinvoke <java.security.KeyStore: java.lang.String getDefaultType()>();
+
+     label2:
+        $r10 = staticinvoke <java.security.KeyStore: java.security.KeyStore getInstance(java.lang.String)>($r8);
+
+        $r11 = virtualinvoke $r1.<java.net.URL: java.io.InputStream openStream()>();
+
+     label3:
+        r9 = $r11;
+
+     label4:
+        virtualinvoke $r10.<java.security.KeyStore: void load(java.io.InputStream,char[])>($r11, $r2);
+
+        $r12 = virtualinvoke $r10.<java.security.KeyStore: java.security.cert.Certificate getCertificate(java.lang.String)>($r3);
+
+        $r13 = (java.security.cert.X509Certificate) $r12;
+
+        $r14 = virtualinvoke $r10.<java.security.KeyStore: java.security.Key getKey(java.lang.String,char[])>($r3, $r4);
+
+        $r15 = (java.security.PrivateKey) $r14;
+
+        virtualinvoke r0.<kellinwood.security.zipsigner.ZipSigner: void setKeys(java.lang.String,java.security.cert.X509Certificate,java.security.PrivateKey,java.lang.String,byte[])>("custom", $r13, $r15, $r5, null);
+
+        virtualinvoke r0.<kellinwood.security.zipsigner.ZipSigner: void signZip(java.lang.String,java.lang.String)>($r6, $r7);
+
+     label5:
+        if $r11 == null goto label8;
+
+        virtualinvoke $r11.<java.io.InputStream: void close()>();
+
+        return;
+
+     label6:
+        $r16 := @caughtexception;
+
+        if r9 == null goto label7;
+
+        virtualinvoke r9.<java.io.InputStream: void close()>();
+
+     label7:
+        throw $r16;
+
+     label8:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label6;
+        catch java.lang.Throwable from label2 to label3 with label6;
+        catch java.lang.Throwable from label4 to label5 with label6;
+    }
+    public void signZip(java.util.Map, java.io.OutputStream, java.lang.String) throws java.io.IOException, java.security.GeneralSecurityException
+    {
+        kellinwood.security.zipsigner.ZipSigner r0;
+        java.util.Map r1;
+        java.io.OutputStream $r2;
+        java.lang.String $r3, $r8, $r17;
+        long l0;
+        java.io.ByteArrayOutputStream r4;
+        kellinwood.logging.LoggerInterface $r5;
+        boolean $z0, $z1;
+        kellinwood.security.zipsigner.ProgressHelper $r6;
+        kellinwood.security.zipsigner.KeySet $r7;
+        java.lang.IllegalStateException $r9;
+        kellinwood.security.zipsigner.AutoKeyException $r10;
+        kellinwood.security.zipsigner.ResourceAdapter $r11;
+        kellinwood.security.zipsigner.ResourceAdapter$Item $r12;
+        java.lang.Object[] $r13;
+        java.io.File $r14;
+        kellinwood.security.zipsigner.ZipSigner$AutoKeyObservable $r15;
+        kellinwood.zipio.ZipOutput r16;
+        int $i1;
+        java.lang.Throwable r18, r30, r31, r33, r34, r35, $r36, r37;
+        java.lang.StringBuilder $r19;
+        java.lang.Class $r20;
+        java.util.Collection $r21;
+        java.util.Iterator $r22;
+        java.lang.Object $r23;
+        kellinwood.zipio.ZioEntry r24;
+        java.util.regex.Pattern $r25;
+        java.util.regex.Matcher $r26;
+        java.security.cert.X509Certificate $r27;
+        java.util.Date $r28;
+        java.util.jar.Manifest $r29;
+        byte[] $r32;
+
+        r0 := @this: kellinwood.security.zipsigner.ZipSigner;
+
+        r1 := @parameter0: java.util.Map;
+
+        $r2 := @parameter1: java.io.OutputStream;
+
+        $r3 := @parameter2: java.lang.String;
+
+        $r5 = staticinvoke <kellinwood.security.zipsigner.ZipSigner: kellinwood.logging.LoggerInterface getLogger()>();
+
+        $z0 = interfaceinvoke $r5.<kellinwood.logging.LoggerInterface: boolean isDebugEnabled()>();
+
+        $r6 = r0.<kellinwood.security.zipsigner.ZipSigner: kellinwood.security.zipsigner.ProgressHelper progressHelper>;
+
+        virtualinvoke $r6.<kellinwood.security.zipsigner.ProgressHelper: void initProgress()>();
+
+        $r7 = r0.<kellinwood.security.zipsigner.ZipSigner: kellinwood.security.zipsigner.KeySet keySet>;
+
+        if $r7 != null goto label03;
+
+        $r8 = r0.<kellinwood.security.zipsigner.ZipSigner: java.lang.String keymode>;
+
+        $z1 = virtualinvoke $r8.<java.lang.String: boolean startsWith(java.lang.String)>("auto");
+
+        if $z1 != 0 goto label01;
+
+        $r9 = new java.lang.IllegalStateException;
+
+        specialinvoke $r9.<java.lang.IllegalStateException: void <init>(java.lang.String)>("No keys configured for signing the file!");
+
+        throw $r9;
+
+     label01:
+        $r8 = r0.<kellinwood.security.zipsigner.ZipSigner: java.lang.String keymode>;
+
+        $r8 = virtualinvoke r0.<kellinwood.security.zipsigner.ZipSigner: java.lang.String autoDetectKey(java.lang.String,java.util.Map)>($r8, r1);
+
+        if $r8 != null goto label02;
+
+        $r10 = new kellinwood.security.zipsigner.AutoKeyException;
+
+        $r11 = r0.<kellinwood.security.zipsigner.ZipSigner: kellinwood.security.zipsigner.ResourceAdapter resourceAdapter>;
+
+        $r12 = <kellinwood.security.zipsigner.ResourceAdapter$Item: kellinwood.security.zipsigner.ResourceAdapter$Item AUTO_KEY_SELECTION_ERROR>;
+
+        $r13 = newarray (java.lang.Object)[1];
+
+        $r14 = new java.io.File;
+
+        specialinvoke $r14.<java.io.File: void <init>(java.lang.String)>($r3);
+
+        $r3 = virtualinvoke $r14.<java.io.File: java.lang.String getName()>();
+
+        $r13[0] = $r3;
+
+        $r3 = interfaceinvoke $r11.<kellinwood.security.zipsigner.ResourceAdapter: java.lang.String getString(kellinwood.security.zipsigner.ResourceAdapter$Item,java.lang.Object[])>($r12, $r13);
+
+        specialinvoke $r10.<kellinwood.security.zipsigner.AutoKeyException: void <init>(java.lang.String)>($r3);
+
+        throw $r10;
+
+     label02:
+        $r15 = r0.<kellinwood.security.zipsigner.ZipSigner: kellinwood.security.zipsigner.ZipSigner$AutoKeyObservable autoKeyObservable>;
+
+        virtualinvoke $r15.<kellinwood.security.zipsigner.ZipSigner$AutoKeyObservable: void notifyObservers(java.lang.Object)>($r8);
+
+        virtualinvoke r0.<kellinwood.security.zipsigner.ZipSigner: void loadKeys(java.lang.String)>($r8);
+
+     label03:
+        r16 = new kellinwood.zipio.ZipOutput;
+
+        specialinvoke r16.<kellinwood.zipio.ZipOutput: void <init>(java.io.OutputStream)>($r2);
+
+     label04:
+        $r8 = "none";
+
+     label05:
+        $r7 = r0.<kellinwood.security.zipsigner.ZipSigner: kellinwood.security.zipsigner.KeySet keySet>;
+
+        $r17 = virtualinvoke $r7.<kellinwood.security.zipsigner.KeySet: java.lang.String getName()>();
+
+        $z1 = virtualinvoke $r8.<java.lang.String: boolean equals(java.lang.Object)>($r17);
+
+     label06:
+        if $z1 == 0 goto label12;
+
+     label07:
+        $r6 = r0.<kellinwood.security.zipsigner.ZipSigner: kellinwood.security.zipsigner.ProgressHelper progressHelper>;
+
+        $i1 = interfaceinvoke r1.<java.util.Map: int size()>();
+
+        virtualinvoke $r6.<kellinwood.security.zipsigner.ProgressHelper: void setProgressTotalItems(int)>($i1);
+
+        $r6 = r0.<kellinwood.security.zipsigner.ZipSigner: kellinwood.security.zipsigner.ProgressHelper progressHelper>;
+
+        virtualinvoke $r6.<kellinwood.security.zipsigner.ProgressHelper: void setProgressCurrentItem(int)>(0);
+
+        specialinvoke r0.<kellinwood.security.zipsigner.ZipSigner: void copyFiles(java.util.Map,kellinwood.zipio.ZipOutput)>(r1, r16);
+
+     label08:
+        virtualinvoke r16.<kellinwood.zipio.ZipOutput: void close()>();
+
+        $z0 = r0.<kellinwood.security.zipsigner.ZipSigner: boolean canceled>;
+
+        if $z0 == 0 goto label65;
+
+        if $r3 == null goto label65;
+
+     label09:
+        $r14 = new java.io.File;
+
+        specialinvoke $r14.<java.io.File: void <init>(java.lang.String)>($r3);
+
+        virtualinvoke $r14.<java.io.File: boolean delete()>();
+
+     label10:
+        return;
+
+     label11:
+        r18 := @caughtexception;
+
+        $r5 = staticinvoke <kellinwood.security.zipsigner.ZipSigner: kellinwood.logging.LoggerInterface getLogger()>();
+
+        $r19 = new java.lang.StringBuilder;
+
+        specialinvoke $r19.<java.lang.StringBuilder: void <init>()>();
+
+        $r20 = virtualinvoke r18.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r3 = virtualinvoke $r20.<java.lang.Class: java.lang.String getName()>();
+
+        $r19 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r19 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(":");
+
+        $r3 = virtualinvoke r18.<java.lang.Throwable: java.lang.String getMessage()>();
+
+        $r19 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r3 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        interfaceinvoke $r5.<kellinwood.logging.LoggerInterface: void warning(java.lang.String)>($r3);
+
+        return;
+
+     label12:
+        $i1 = 0;
+
+     label13:
+        $r21 = interfaceinvoke r1.<java.util.Map: java.util.Collection values()>();
+
+        $r22 = interfaceinvoke $r21.<java.util.Collection: java.util.Iterator iterator()>();
+
+     label14:
+        $z1 = interfaceinvoke $r22.<java.util.Iterator: boolean hasNext()>();
+
+     label15:
+        if $z1 == 0 goto label29;
+
+     label16:
+        $r23 = interfaceinvoke $r22.<java.util.Iterator: java.lang.Object next()>();
+
+        r24 = (kellinwood.zipio.ZioEntry) $r23;
+
+        $r8 = virtualinvoke r24.<kellinwood.zipio.ZioEntry: java.lang.String getName()>();
+
+        $z1 = virtualinvoke r24.<kellinwood.zipio.ZioEntry: boolean isDirectory()>();
+
+     label17:
+        if $z1 != 0 goto label14;
+
+     label18:
+        $z1 = virtualinvoke $r8.<java.lang.String: boolean equals(java.lang.Object)>("META-INF/MANIFEST.MF");
+
+     label19:
+        if $z1 != 0 goto label14;
+
+     label20:
+        $z1 = virtualinvoke $r8.<java.lang.String: boolean equals(java.lang.Object)>("META-INF/CERT.SF");
+
+     label21:
+        if $z1 != 0 goto label14;
+
+     label22:
+        $z1 = virtualinvoke $r8.<java.lang.String: boolean equals(java.lang.Object)>("META-INF/CERT.RSA");
+
+     label23:
+        if $z1 != 0 goto label14;
+
+     label24:
+        $r25 = <kellinwood.security.zipsigner.ZipSigner: java.util.regex.Pattern stripPattern>;
+
+     label25:
+        if $r25 == null goto label28;
+
+     label26:
+        $r25 = <kellinwood.security.zipsigner.ZipSigner: java.util.regex.Pattern stripPattern>;
+
+        $r26 = virtualinvoke $r25.<java.util.regex.Pattern: java.util.regex.Matcher matcher(java.lang.CharSequence)>($r8);
+
+        $z1 = virtualinvoke $r26.<java.util.regex.Matcher: boolean matches()>();
+
+     label27:
+        if $z1 != 0 goto label14;
+
+     label28:
+        $i1 = $i1 + 3;
+
+        goto label14;
+
+     label29:
+        $i1 = $i1 + 1;
+
+     label30:
+        $r6 = r0.<kellinwood.security.zipsigner.ZipSigner: kellinwood.security.zipsigner.ProgressHelper progressHelper>;
+
+        virtualinvoke $r6.<kellinwood.security.zipsigner.ProgressHelper: void setProgressTotalItems(int)>($i1);
+
+        $r6 = r0.<kellinwood.security.zipsigner.ZipSigner: kellinwood.security.zipsigner.ProgressHelper progressHelper>;
+
+        virtualinvoke $r6.<kellinwood.security.zipsigner.ProgressHelper: void setProgressCurrentItem(int)>(0);
+
+        $r7 = r0.<kellinwood.security.zipsigner.ZipSigner: kellinwood.security.zipsigner.KeySet keySet>;
+
+        $r27 = virtualinvoke $r7.<kellinwood.security.zipsigner.KeySet: java.security.cert.X509Certificate getPublicKey()>();
+
+        $r28 = virtualinvoke $r27.<java.security.cert.X509Certificate: java.util.Date getNotBefore()>();
+
+        l0 = virtualinvoke $r28.<java.util.Date: long getTime()>();
+
+     label31:
+        l0 = l0 + 3600000L;
+
+     label32:
+        $r29 = specialinvoke r0.<kellinwood.security.zipsigner.ZipSigner: java.util.jar.Manifest addDigestsToManifest(java.util.Map)>(r1);
+
+        $z1 = r0.<kellinwood.security.zipsigner.ZipSigner: boolean canceled>;
+
+     label33:
+        if $z1 == 0 goto label37;
+
+        virtualinvoke r16.<kellinwood.zipio.ZipOutput: void close()>();
+
+        $z0 = r0.<kellinwood.security.zipsigner.ZipSigner: boolean canceled>;
+
+        if $z0 == 0 goto label65;
+
+        if $r3 == null goto label65;
+
+     label34:
+        $r14 = new java.io.File;
+
+        specialinvoke $r14.<java.io.File: void <init>(java.lang.String)>($r3);
+
+        virtualinvoke $r14.<java.io.File: boolean delete()>();
+
+     label35:
+        return;
+
+     label36:
+        r30 := @caughtexception;
+
+        $r5 = staticinvoke <kellinwood.security.zipsigner.ZipSigner: kellinwood.logging.LoggerInterface getLogger()>();
+
+        $r19 = new java.lang.StringBuilder;
+
+        specialinvoke $r19.<java.lang.StringBuilder: void <init>()>();
+
+        $r20 = virtualinvoke r30.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r3 = virtualinvoke $r20.<java.lang.Class: java.lang.String getName()>();
+
+        $r19 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r19 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(":");
+
+        $r3 = virtualinvoke r30.<java.lang.Throwable: java.lang.String getMessage()>();
+
+        $r19 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r3 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        interfaceinvoke $r5.<kellinwood.logging.LoggerInterface: void warning(java.lang.String)>($r3);
+
+        return;
+
+     label37:
+        r24 = new kellinwood.zipio.ZioEntry;
+
+        specialinvoke r24.<kellinwood.zipio.ZioEntry: void <init>(java.lang.String)>("META-INF/MANIFEST.MF");
+
+        virtualinvoke r24.<kellinwood.zipio.ZioEntry: void setTime(long)>(l0);
+
+        $r2 = virtualinvoke r24.<kellinwood.zipio.ZioEntry: java.io.OutputStream getOutputStream()>();
+
+        virtualinvoke $r29.<java.util.jar.Manifest: void write(java.io.OutputStream)>($r2);
+
+        virtualinvoke r16.<kellinwood.zipio.ZipOutput: void write(kellinwood.zipio.ZioEntry)>(r24);
+
+        r24 = new kellinwood.zipio.ZioEntry;
+
+        specialinvoke r24.<kellinwood.zipio.ZioEntry: void <init>(java.lang.String)>("META-INF/CERT.SF");
+
+        virtualinvoke r24.<kellinwood.zipio.ZioEntry: void setTime(long)>(l0);
+
+        r4 = new java.io.ByteArrayOutputStream;
+
+        specialinvoke r4.<java.io.ByteArrayOutputStream: void <init>()>();
+
+        specialinvoke r0.<kellinwood.security.zipsigner.ZipSigner: void generateSignatureFile(java.util.jar.Manifest,java.io.OutputStream)>($r29, r4);
+
+        $z1 = r0.<kellinwood.security.zipsigner.ZipSigner: boolean canceled>;
+
+     label38:
+        if $z1 == 0 goto label42;
+
+        virtualinvoke r16.<kellinwood.zipio.ZipOutput: void close()>();
+
+        $z0 = r0.<kellinwood.security.zipsigner.ZipSigner: boolean canceled>;
+
+        if $z0 == 0 goto label65;
+
+        if $r3 == null goto label65;
+
+     label39:
+        $r14 = new java.io.File;
+
+        specialinvoke $r14.<java.io.File: void <init>(java.lang.String)>($r3);
+
+        virtualinvoke $r14.<java.io.File: boolean delete()>();
+
+     label40:
+        return;
+
+     label41:
+        r31 := @caughtexception;
+
+        $r5 = staticinvoke <kellinwood.security.zipsigner.ZipSigner: kellinwood.logging.LoggerInterface getLogger()>();
+
+        $r19 = new java.lang.StringBuilder;
+
+        specialinvoke $r19.<java.lang.StringBuilder: void <init>()>();
+
+        $r20 = virtualinvoke r31.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r3 = virtualinvoke $r20.<java.lang.Class: java.lang.String getName()>();
+
+        $r19 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r19 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(":");
+
+        $r3 = virtualinvoke r31.<java.lang.Throwable: java.lang.String getMessage()>();
+
+        $r19 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r3 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        interfaceinvoke $r5.<kellinwood.logging.LoggerInterface: void warning(java.lang.String)>($r3);
+
+        return;
+
+     label42:
+        $r32 = virtualinvoke r4.<java.io.ByteArrayOutputStream: byte[] toByteArray()>();
+
+     label43:
+        if $z0 == 0 goto label45;
+
+     label44:
+        $r5 = staticinvoke <kellinwood.security.zipsigner.ZipSigner: kellinwood.logging.LoggerInterface getLogger()>();
+
+        $r19 = new java.lang.StringBuilder;
+
+        specialinvoke $r19.<java.lang.StringBuilder: void <init>()>();
+
+        $r19 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Signature File: \n");
+
+        $r8 = new java.lang.String;
+
+        specialinvoke $r8.<java.lang.String: void <init>(byte[])>($r32);
+
+        $r19 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r8);
+
+        $r19 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\n");
+
+        $r8 = staticinvoke <kellinwood.security.zipsigner.HexDumpEncoder: java.lang.String encode(byte[])>($r32);
+
+        $r19 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r8);
+
+        $r8 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        interfaceinvoke $r5.<kellinwood.logging.LoggerInterface: void debug(java.lang.String)>($r8);
+
+     label45:
+        $r2 = virtualinvoke r24.<kellinwood.zipio.ZioEntry: java.io.OutputStream getOutputStream()>();
+
+        virtualinvoke $r2.<java.io.OutputStream: void write(byte[])>($r32);
+
+        virtualinvoke r16.<kellinwood.zipio.ZipOutput: void write(kellinwood.zipio.ZioEntry)>(r24);
+
+        $r6 = r0.<kellinwood.security.zipsigner.ZipSigner: kellinwood.security.zipsigner.ProgressHelper progressHelper>;
+
+        $r11 = r0.<kellinwood.security.zipsigner.ZipSigner: kellinwood.security.zipsigner.ResourceAdapter resourceAdapter>;
+
+        $r12 = <kellinwood.security.zipsigner.ResourceAdapter$Item: kellinwood.security.zipsigner.ResourceAdapter$Item GENERATING_SIGNATURE_BLOCK>;
+
+        $r13 = newarray (java.lang.Object)[0];
+
+        $r8 = interfaceinvoke $r11.<kellinwood.security.zipsigner.ResourceAdapter: java.lang.String getString(kellinwood.security.zipsigner.ResourceAdapter$Item,java.lang.Object[])>($r12, $r13);
+
+        virtualinvoke $r6.<kellinwood.security.zipsigner.ProgressHelper: void progress(int,java.lang.String)>(0, $r8);
+
+        r24 = new kellinwood.zipio.ZioEntry;
+
+        specialinvoke r24.<kellinwood.zipio.ZioEntry: void <init>(java.lang.String)>("META-INF/CERT.RSA");
+
+        virtualinvoke r24.<kellinwood.zipio.ZioEntry: void setTime(long)>(l0);
+
+        $r7 = r0.<kellinwood.security.zipsigner.ZipSigner: kellinwood.security.zipsigner.KeySet keySet>;
+
+        $r2 = virtualinvoke r24.<kellinwood.zipio.ZioEntry: java.io.OutputStream getOutputStream()>();
+
+        specialinvoke r0.<kellinwood.security.zipsigner.ZipSigner: void writeSignatureBlock(kellinwood.security.zipsigner.KeySet,byte[],java.io.OutputStream)>($r7, $r32, $r2);
+
+        virtualinvoke r16.<kellinwood.zipio.ZipOutput: void write(kellinwood.zipio.ZioEntry)>(r24);
+
+        $z0 = r0.<kellinwood.security.zipsigner.ZipSigner: boolean canceled>;
+
+     label46:
+        if $z0 == 0 goto label50;
+
+        virtualinvoke r16.<kellinwood.zipio.ZipOutput: void close()>();
+
+        $z0 = r0.<kellinwood.security.zipsigner.ZipSigner: boolean canceled>;
+
+        if $z0 == 0 goto label65;
+
+        if $r3 == null goto label65;
+
+     label47:
+        $r14 = new java.io.File;
+
+        specialinvoke $r14.<java.io.File: void <init>(java.lang.String)>($r3);
+
+        virtualinvoke $r14.<java.io.File: boolean delete()>();
+
+     label48:
+        return;
+
+     label49:
+        r33 := @caughtexception;
+
+        $r5 = staticinvoke <kellinwood.security.zipsigner.ZipSigner: kellinwood.logging.LoggerInterface getLogger()>();
+
+        $r19 = new java.lang.StringBuilder;
+
+        specialinvoke $r19.<java.lang.StringBuilder: void <init>()>();
+
+        $r20 = virtualinvoke r33.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r3 = virtualinvoke $r20.<java.lang.Class: java.lang.String getName()>();
+
+        $r19 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r19 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(":");
+
+        $r3 = virtualinvoke r33.<java.lang.Throwable: java.lang.String getMessage()>();
+
+        $r19 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r3 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        interfaceinvoke $r5.<kellinwood.logging.LoggerInterface: void warning(java.lang.String)>($r3);
+
+        return;
+
+     label50:
+        specialinvoke r0.<kellinwood.security.zipsigner.ZipSigner: void copyFiles(java.util.jar.Manifest,java.util.Map,kellinwood.zipio.ZipOutput,long)>($r29, r1, r16, l0);
+
+        $z0 = r0.<kellinwood.security.zipsigner.ZipSigner: boolean canceled>;
+
+     label51:
+        if $z0 == 0 goto label55;
+
+        virtualinvoke r16.<kellinwood.zipio.ZipOutput: void close()>();
+
+        $z0 = r0.<kellinwood.security.zipsigner.ZipSigner: boolean canceled>;
+
+        if $z0 == 0 goto label65;
+
+        if $r3 == null goto label65;
+
+     label52:
+        $r14 = new java.io.File;
+
+        specialinvoke $r14.<java.io.File: void <init>(java.lang.String)>($r3);
+
+        virtualinvoke $r14.<java.io.File: boolean delete()>();
+
+     label53:
+        return;
+
+     label54:
+        r34 := @caughtexception;
+
+        $r5 = staticinvoke <kellinwood.security.zipsigner.ZipSigner: kellinwood.logging.LoggerInterface getLogger()>();
+
+        $r19 = new java.lang.StringBuilder;
+
+        specialinvoke $r19.<java.lang.StringBuilder: void <init>()>();
+
+        $r20 = virtualinvoke r34.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r3 = virtualinvoke $r20.<java.lang.Class: java.lang.String getName()>();
+
+        $r19 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r19 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(":");
+
+        $r3 = virtualinvoke r34.<java.lang.Throwable: java.lang.String getMessage()>();
+
+        $r19 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r3 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        interfaceinvoke $r5.<kellinwood.logging.LoggerInterface: void warning(java.lang.String)>($r3);
+
+        return;
+
+     label55:
+        virtualinvoke r16.<kellinwood.zipio.ZipOutput: void close()>();
+
+        $z0 = r0.<kellinwood.security.zipsigner.ZipSigner: boolean canceled>;
+
+        if $z0 == 0 goto label65;
+
+        if $r3 == null goto label65;
+
+     label56:
+        $r14 = new java.io.File;
+
+        specialinvoke $r14.<java.io.File: void <init>(java.lang.String)>($r3);
+
+        virtualinvoke $r14.<java.io.File: boolean delete()>();
+
+     label57:
+        return;
+
+     label58:
+        r35 := @caughtexception;
+
+        $r5 = staticinvoke <kellinwood.security.zipsigner.ZipSigner: kellinwood.logging.LoggerInterface getLogger()>();
+
+        $r19 = new java.lang.StringBuilder;
+
+        specialinvoke $r19.<java.lang.StringBuilder: void <init>()>();
+
+        $r20 = virtualinvoke r35.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r3 = virtualinvoke $r20.<java.lang.Class: java.lang.String getName()>();
+
+        $r19 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r19 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(":");
+
+        $r3 = virtualinvoke r35.<java.lang.Throwable: java.lang.String getMessage()>();
+
+        $r19 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r3 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        interfaceinvoke $r5.<kellinwood.logging.LoggerInterface: void warning(java.lang.String)>($r3);
+
+        return;
+
+     label59:
+        $r36 := @caughtexception;
+
+        r16 = null;
+
+     label60:
+        virtualinvoke r16.<kellinwood.zipio.ZipOutput: void close()>();
+
+        $z0 = r0.<kellinwood.security.zipsigner.ZipSigner: boolean canceled>;
+
+        if $z0 == 0 goto label62;
+
+        if $r3 == null goto label62;
+
+     label61:
+        $r14 = new java.io.File;
+
+        specialinvoke $r14.<java.io.File: void <init>(java.lang.String)>($r3);
+
+        virtualinvoke $r14.<java.io.File: boolean delete()>();
+
+     label62:
+        throw $r36;
+
+     label63:
+        r37 := @caughtexception;
+
+        $r5 = staticinvoke <kellinwood.security.zipsigner.ZipSigner: kellinwood.logging.LoggerInterface getLogger()>();
+
+        $r19 = new java.lang.StringBuilder;
+
+        specialinvoke $r19.<java.lang.StringBuilder: void <init>()>();
+
+        $r20 = virtualinvoke r37.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r3 = virtualinvoke $r20.<java.lang.Class: java.lang.String getName()>();
+
+        $r19 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r19 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(":");
+
+        $r3 = virtualinvoke r37.<java.lang.Throwable: java.lang.String getMessage()>();
+
+        $r19 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r3 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        interfaceinvoke $r5.<kellinwood.logging.LoggerInterface: void warning(java.lang.String)>($r3);
+
+        goto label62;
+
+     label64:
+        $r36 := @caughtexception;
+
+        goto label60;
+
+     label65:
+        return;
+
+        catch java.lang.Throwable from label03 to label04 with label59;
+        catch java.lang.Throwable from label05 to label06 with label64;
+        catch java.lang.Throwable from label07 to label08 with label64;
+        catch java.lang.Throwable from label09 to label10 with label11;
+        catch java.lang.Throwable from label13 to label15 with label64;
+        catch java.lang.Throwable from label16 to label17 with label64;
+        catch java.lang.Throwable from label18 to label19 with label64;
+        catch java.lang.Throwable from label20 to label21 with label64;
+        catch java.lang.Throwable from label22 to label23 with label64;
+        catch java.lang.Throwable from label24 to label25 with label64;
+        catch java.lang.Throwable from label26 to label27 with label64;
+        catch java.lang.Throwable from label30 to label31 with label64;
+        catch java.lang.Throwable from label32 to label33 with label64;
+        catch java.lang.Throwable from label34 to label35 with label36;
+        catch java.lang.Throwable from label37 to label38 with label64;
+        catch java.lang.Throwable from label39 to label40 with label41;
+        catch java.lang.Throwable from label42 to label43 with label64;
+        catch java.lang.Throwable from label44 to label46 with label64;
+        catch java.lang.Throwable from label47 to label48 with label49;
+        catch java.lang.Throwable from label50 to label51 with label64;
+        catch java.lang.Throwable from label52 to label53 with label54;
+        catch java.lang.Throwable from label56 to label57 with label58;
+        catch java.lang.Throwable from label61 to label62 with label63;
+    }
+    public void signZip(java.util.Map, java.lang.String) throws java.io.IOException, java.security.GeneralSecurityException
+    {
+        kellinwood.security.zipsigner.ZipSigner r0;
+        java.util.Map r1;
+        java.lang.String $r2;
+        kellinwood.security.zipsigner.ProgressHelper $r3;
+        java.io.FileOutputStream $r4;
+
+        r0 := @this: kellinwood.security.zipsigner.ZipSigner;
+
+        r1 := @parameter0: java.util.Map;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $r3 = r0.<kellinwood.security.zipsigner.ZipSigner: kellinwood.security.zipsigner.ProgressHelper progressHelper>;
+
+        virtualinvoke $r3.<kellinwood.security.zipsigner.ProgressHelper: void initProgress()>();
+
+        $r4 = new java.io.FileOutputStream;
+
+        specialinvoke $r4.<java.io.FileOutputStream: void <init>(java.lang.String)>($r2);
+
+        virtualinvoke r0.<kellinwood.security.zipsigner.ZipSigner: void signZip(java.util.Map,java.io.OutputStream,java.lang.String)>(r1, $r4, $r2);
+
+        return;
+    }

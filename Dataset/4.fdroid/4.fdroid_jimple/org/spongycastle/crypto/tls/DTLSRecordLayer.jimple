@@ -1,0 +1,1102 @@
+org.spongycastle.crypto.tls.DTLSRecordLayer extends java.lang.Object implements org.spongycastle.crypto.tls.DatagramTransport
+private static final int MAX_FRAGMENT_LENGTH
+private static final int RECORD_HEADER_LENGTH
+private static final long RETRANSMIT_TIMEOUT
+private static final long TCP_MSL
+private volatile boolean closed
+private final org.spongycastle.crypto.tls.TlsContext context
+private org.spongycastle.crypto.tls.DTLSEpoch currentEpoch
+private volatile org.spongycastle.crypto.tls.ProtocolVersion discoveredPeerVersion
+private volatile boolean failed
+private volatile boolean inHandshake
+private final org.spongycastle.crypto.tls.TlsPeer peer
+private org.spongycastle.crypto.tls.DTLSEpoch pendingEpoch
+private volatile int plaintextLimit
+private org.spongycastle.crypto.tls.DTLSEpoch readEpoch
+private final org.spongycastle.crypto.tls.ByteQueue recordQueue
+private org.spongycastle.crypto.tls.DTLSHandshakeRetransmit retransmit
+private org.spongycastle.crypto.tls.DTLSEpoch retransmitEpoch
+private long retransmitExpiry
+private final org.spongycastle.crypto.tls.DatagramTransport transport
+private org.spongycastle.crypto.tls.DTLSEpoch writeEpoch
+    void <init>(org.spongycastle.crypto.tls.DatagramTransport, org.spongycastle.crypto.tls.TlsContext, org.spongycastle.crypto.tls.TlsPeer, short)
+    {
+        org.spongycastle.crypto.tls.DTLSRecordLayer r0;
+        org.spongycastle.crypto.tls.DatagramTransport $r1;
+        org.spongycastle.crypto.tls.TlsContext $r2;
+        org.spongycastle.crypto.tls.TlsPeer $r3;
+        short $s0;
+        org.spongycastle.crypto.tls.TlsNullCipher $r4;
+        org.spongycastle.crypto.tls.ByteQueue $r5;
+        org.spongycastle.crypto.tls.DTLSEpoch $r6;
+
+        r0 := @this: org.spongycastle.crypto.tls.DTLSRecordLayer;
+
+        $r1 := @parameter0: org.spongycastle.crypto.tls.DatagramTransport;
+
+        $r2 := @parameter1: org.spongycastle.crypto.tls.TlsContext;
+
+        $r3 := @parameter2: org.spongycastle.crypto.tls.TlsPeer;
+
+        $s0 := @parameter3: short;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r5 = new org.spongycastle.crypto.tls.ByteQueue;
+
+        specialinvoke $r5.<org.spongycastle.crypto.tls.ByteQueue: void <init>()>();
+
+        r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: org.spongycastle.crypto.tls.ByteQueue recordQueue> = $r5;
+
+        r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: boolean closed> = 0;
+
+        r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: boolean failed> = 0;
+
+        r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: org.spongycastle.crypto.tls.ProtocolVersion discoveredPeerVersion> = null;
+
+        r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: org.spongycastle.crypto.tls.DTLSHandshakeRetransmit retransmit> = null;
+
+        r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: org.spongycastle.crypto.tls.DTLSEpoch retransmitEpoch> = null;
+
+        r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: long retransmitExpiry> = 0L;
+
+        r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: org.spongycastle.crypto.tls.DatagramTransport transport> = $r1;
+
+        r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: org.spongycastle.crypto.tls.TlsContext context> = $r2;
+
+        r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: org.spongycastle.crypto.tls.TlsPeer peer> = $r3;
+
+        r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: boolean inHandshake> = 1;
+
+        $r6 = new org.spongycastle.crypto.tls.DTLSEpoch;
+
+        $r4 = new org.spongycastle.crypto.tls.TlsNullCipher;
+
+        specialinvoke $r4.<org.spongycastle.crypto.tls.TlsNullCipher: void <init>(org.spongycastle.crypto.tls.TlsContext)>($r2);
+
+        specialinvoke $r6.<org.spongycastle.crypto.tls.DTLSEpoch: void <init>(int,org.spongycastle.crypto.tls.TlsCipher)>(0, $r4);
+
+        r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: org.spongycastle.crypto.tls.DTLSEpoch currentEpoch> = $r6;
+
+        r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: org.spongycastle.crypto.tls.DTLSEpoch pendingEpoch> = null;
+
+        $r6 = r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: org.spongycastle.crypto.tls.DTLSEpoch currentEpoch>;
+
+        r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: org.spongycastle.crypto.tls.DTLSEpoch readEpoch> = $r6;
+
+        $r6 = r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: org.spongycastle.crypto.tls.DTLSEpoch currentEpoch>;
+
+        r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: org.spongycastle.crypto.tls.DTLSEpoch writeEpoch> = $r6;
+
+        virtualinvoke r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: void setPlaintextLimit(int)>(16384);
+
+        return;
+    }
+    private void closeTransport()
+    {
+        org.spongycastle.crypto.tls.DTLSRecordLayer r0;
+        boolean $z0;
+        org.spongycastle.crypto.tls.DatagramTransport $r1;
+        java.lang.Exception $r2;
+
+        r0 := @this: org.spongycastle.crypto.tls.DTLSRecordLayer;
+
+        $z0 = r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: boolean closed>;
+
+        if $z0 != 0 goto label7;
+
+     label1:
+        $z0 = r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: boolean failed>;
+
+     label2:
+        if $z0 != 0 goto label4;
+
+     label3:
+        virtualinvoke r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: void warn(short,java.lang.String)>(0, null);
+
+     label4:
+        $r1 = r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: org.spongycastle.crypto.tls.DatagramTransport transport>;
+
+        interfaceinvoke $r1.<org.spongycastle.crypto.tls.DatagramTransport: void close()>();
+
+     label5:
+        r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: boolean closed> = 1;
+
+        return;
+
+     label6:
+        $r2 := @caughtexception;
+
+        goto label5;
+
+     label7:
+        return;
+
+        catch java.lang.Exception from label1 to label2 with label6;
+        catch java.lang.Exception from label3 to label5 with label6;
+    }
+    private static long getMacSequenceNumber(int, long)
+    {
+        int $i0;
+        long $l1, $l2;
+
+        $i0 := @parameter0: int;
+
+        $l1 := @parameter1: long;
+
+        $l2 = (long) $i0;
+
+        $l2 = $l2 & 4294967295L;
+
+        $l2 = $l2 << 48;
+
+        $l1 = $l2 | $l1;
+
+        return $l1;
+    }
+    private void raiseAlert(short, short, java.lang.String, java.lang.Throwable) throws java.io.IOException
+    {
+        org.spongycastle.crypto.tls.DTLSRecordLayer r0;
+        short $s0, $s1;
+        java.lang.String $r1;
+        java.lang.Throwable $r2;
+        byte[] r3;
+        byte $b2;
+        org.spongycastle.crypto.tls.TlsPeer $r4;
+
+        r0 := @this: org.spongycastle.crypto.tls.DTLSRecordLayer;
+
+        $s0 := @parameter0: short;
+
+        $s1 := @parameter1: short;
+
+        $r1 := @parameter2: java.lang.String;
+
+        $r2 := @parameter3: java.lang.Throwable;
+
+        $r4 = r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: org.spongycastle.crypto.tls.TlsPeer peer>;
+
+        interfaceinvoke $r4.<org.spongycastle.crypto.tls.TlsPeer: void notifyAlertRaised(short,short,java.lang.String,java.lang.Throwable)>($s0, $s1, $r1, $r2);
+
+        r3 = newarray (byte)[2];
+
+        $b2 = (byte) $s0;
+
+        r3[0] = $b2;
+
+        $b2 = (byte) $s1;
+
+        r3[1] = $b2;
+
+        specialinvoke r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: void sendRecord(short,byte[],int,int)>(21, r3, 0, 2);
+
+        return;
+    }
+    private int receiveRecord(byte[], int, int, int) throws java.io.IOException
+    {
+        org.spongycastle.crypto.tls.DTLSRecordLayer r0;
+        byte[] $r1, r2;
+        int $i0, $i1, $i2, $i3;
+        org.spongycastle.crypto.tls.ByteQueue $r3;
+        org.spongycastle.crypto.tls.DatagramTransport $r4;
+
+        r0 := @this: org.spongycastle.crypto.tls.DTLSRecordLayer;
+
+        $r1 := @parameter0: byte[];
+
+        $i0 := @parameter1: int;
+
+        $i1 := @parameter2: int;
+
+        $i2 := @parameter3: int;
+
+        $r3 = r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: org.spongycastle.crypto.tls.ByteQueue recordQueue>;
+
+        $i3 = virtualinvoke $r3.<org.spongycastle.crypto.tls.ByteQueue: int available()>();
+
+        if $i3 <= 0 goto label2;
+
+        $i1 = 0;
+
+        $r3 = r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: org.spongycastle.crypto.tls.ByteQueue recordQueue>;
+
+        $i2 = virtualinvoke $r3.<org.spongycastle.crypto.tls.ByteQueue: int available()>();
+
+        if $i2 < 13 goto label1;
+
+        r2 = newarray (byte)[2];
+
+        $r3 = r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: org.spongycastle.crypto.tls.ByteQueue recordQueue>;
+
+        virtualinvoke $r3.<org.spongycastle.crypto.tls.ByteQueue: void read(byte[],int,int,int)>(r2, 0, 2, 11);
+
+        $i1 = staticinvoke <org.spongycastle.crypto.tls.TlsUtils: int readUint16(byte[],int)>(r2, 0);
+
+     label1:
+        $r3 = r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: org.spongycastle.crypto.tls.ByteQueue recordQueue>;
+
+        $i2 = virtualinvoke $r3.<org.spongycastle.crypto.tls.ByteQueue: int available()>();
+
+        $i1 = $i1 + 13;
+
+        $i1 = staticinvoke <java.lang.Math: int min(int,int)>($i2, $i1);
+
+        $r3 = r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: org.spongycastle.crypto.tls.ByteQueue recordQueue>;
+
+        virtualinvoke $r3.<org.spongycastle.crypto.tls.ByteQueue: void removeData(byte[],int,int,int)>($r1, $i0, $i1, 0);
+
+        return $i1;
+
+     label2:
+        $r4 = r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: org.spongycastle.crypto.tls.DatagramTransport transport>;
+
+        $i1 = interfaceinvoke $r4.<org.spongycastle.crypto.tls.DatagramTransport: int receive(byte[],int,int,int)>($r1, $i0, $i1, $i2);
+
+        if $i1 < 13 goto label3;
+
+        $i2 = $i0 + 11;
+
+        $i2 = staticinvoke <org.spongycastle.crypto.tls.TlsUtils: int readUint16(byte[],int)>($r1, $i2);
+
+        $i2 = $i2 + 13;
+
+        if $i1 <= $i2 goto label3;
+
+        $r3 = r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: org.spongycastle.crypto.tls.ByteQueue recordQueue>;
+
+        $i0 = $i0 + $i2;
+
+        $i1 = $i1 - $i2;
+
+        virtualinvoke $r3.<org.spongycastle.crypto.tls.ByteQueue: void addData(byte[],int,int)>($r1, $i0, $i1);
+
+        return $i2;
+
+     label3:
+        return $i1;
+    }
+    private void sendRecord(short, byte[], int, int) throws java.io.IOException
+    {
+        org.spongycastle.crypto.tls.DTLSRecordLayer r0;
+        short $s0;
+        byte[] $r1, $r5;
+        int $i1, $i2, $i3;
+        org.spongycastle.crypto.tls.TlsFatalAlert $r2;
+        org.spongycastle.crypto.tls.DTLSEpoch $r3;
+        long $l4, $l5;
+        org.spongycastle.crypto.tls.TlsCipher $r4;
+        org.spongycastle.crypto.tls.ProtocolVersion $r6;
+        org.spongycastle.crypto.tls.DatagramTransport $r7;
+        org.spongycastle.crypto.tls.TlsContext $r8;
+
+        r0 := @this: org.spongycastle.crypto.tls.DTLSRecordLayer;
+
+        $s0 := @parameter0: short;
+
+        $r1 := @parameter1: byte[];
+
+        $i1 := @parameter2: int;
+
+        $i2 := @parameter3: int;
+
+        $i3 = r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: int plaintextLimit>;
+
+        if $i2 <= $i3 goto label1;
+
+        $r2 = new org.spongycastle.crypto.tls.TlsFatalAlert;
+
+        specialinvoke $r2.<org.spongycastle.crypto.tls.TlsFatalAlert: void <init>(short)>(80);
+
+        throw $r2;
+
+     label1:
+        if $i2 >= 1 goto label2;
+
+        if $s0 == 23 goto label2;
+
+        $r2 = new org.spongycastle.crypto.tls.TlsFatalAlert;
+
+        specialinvoke $r2.<org.spongycastle.crypto.tls.TlsFatalAlert: void <init>(short)>(80);
+
+        throw $r2;
+
+     label2:
+        $r3 = r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: org.spongycastle.crypto.tls.DTLSEpoch writeEpoch>;
+
+        $i3 = virtualinvoke $r3.<org.spongycastle.crypto.tls.DTLSEpoch: int getEpoch()>();
+
+        $r3 = r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: org.spongycastle.crypto.tls.DTLSEpoch writeEpoch>;
+
+        $l4 = virtualinvoke $r3.<org.spongycastle.crypto.tls.DTLSEpoch: long allocateSequenceNumber()>();
+
+        $r3 = r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: org.spongycastle.crypto.tls.DTLSEpoch writeEpoch>;
+
+        $r4 = virtualinvoke $r3.<org.spongycastle.crypto.tls.DTLSEpoch: org.spongycastle.crypto.tls.TlsCipher getCipher()>();
+
+        $l5 = staticinvoke <org.spongycastle.crypto.tls.DTLSRecordLayer: long getMacSequenceNumber(int,long)>($i3, $l4);
+
+        $r5 = interfaceinvoke $r4.<org.spongycastle.crypto.tls.TlsCipher: byte[] encodePlaintext(long,short,byte[],int,int)>($l5, $s0, $r1, $i1, $i2);
+
+        $i1 = lengthof $r5;
+
+        $i1 = $i1 + 13;
+
+        $r1 = newarray (byte)[$i1];
+
+        staticinvoke <org.spongycastle.crypto.tls.TlsUtils: void writeUint8(short,byte[],int)>($s0, $r1, 0);
+
+        $r6 = r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: org.spongycastle.crypto.tls.ProtocolVersion discoveredPeerVersion>;
+
+        if $r6 == null goto label4;
+
+        $r6 = r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: org.spongycastle.crypto.tls.ProtocolVersion discoveredPeerVersion>;
+
+     label3:
+        staticinvoke <org.spongycastle.crypto.tls.TlsUtils: void writeVersion(org.spongycastle.crypto.tls.ProtocolVersion,byte[],int)>($r6, $r1, 1);
+
+        staticinvoke <org.spongycastle.crypto.tls.TlsUtils: void writeUint16(int,byte[],int)>($i3, $r1, 3);
+
+        staticinvoke <org.spongycastle.crypto.tls.TlsUtils: void writeUint48(long,byte[],int)>($l4, $r1, 5);
+
+        $i1 = lengthof $r5;
+
+        staticinvoke <org.spongycastle.crypto.tls.TlsUtils: void writeUint16(int,byte[],int)>($i1, $r1, 11);
+
+        $i1 = lengthof $r5;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r5, 0, $r1, 13, $i1);
+
+        $r7 = r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: org.spongycastle.crypto.tls.DatagramTransport transport>;
+
+        $i1 = lengthof $r1;
+
+        interfaceinvoke $r7.<org.spongycastle.crypto.tls.DatagramTransport: void send(byte[],int,int)>($r1, 0, $i1);
+
+        return;
+
+     label4:
+        $r8 = r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: org.spongycastle.crypto.tls.TlsContext context>;
+
+        $r6 = interfaceinvoke $r8.<org.spongycastle.crypto.tls.TlsContext: org.spongycastle.crypto.tls.ProtocolVersion getClientVersion()>();
+
+        goto label3;
+    }
+    public void close() throws java.io.IOException
+    {
+        org.spongycastle.crypto.tls.DTLSRecordLayer r0;
+        boolean $z0;
+
+        r0 := @this: org.spongycastle.crypto.tls.DTLSRecordLayer;
+
+        $z0 = r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: boolean closed>;
+
+        if $z0 != 0 goto label2;
+
+        $z0 = r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: boolean inHandshake>;
+
+        if $z0 == 0 goto label1;
+
+        virtualinvoke r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: void warn(short,java.lang.String)>(90, "User canceled handshake");
+
+     label1:
+        specialinvoke r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: void closeTransport()>();
+
+     label2:
+        return;
+    }
+    void fail(short)
+    {
+        org.spongycastle.crypto.tls.DTLSRecordLayer r0;
+        short $s0;
+        boolean $z0;
+        java.lang.Exception $r1;
+
+        r0 := @this: org.spongycastle.crypto.tls.DTLSRecordLayer;
+
+        $s0 := @parameter0: short;
+
+        $z0 = r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: boolean closed>;
+
+        if $z0 != 0 goto label4;
+
+     label1:
+        specialinvoke r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: void raiseAlert(short,short,java.lang.String,java.lang.Throwable)>(2, $s0, null, null);
+
+     label2:
+        r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: boolean failed> = 1;
+
+        specialinvoke r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: void closeTransport()>();
+
+        return;
+
+     label3:
+        $r1 := @caughtexception;
+
+        goto label2;
+
+     label4:
+        return;
+
+        catch java.lang.Exception from label1 to label2 with label3;
+    }
+    org.spongycastle.crypto.tls.ProtocolVersion getDiscoveredPeerVersion()
+    {
+        org.spongycastle.crypto.tls.DTLSRecordLayer r0;
+        org.spongycastle.crypto.tls.ProtocolVersion r1;
+
+        r0 := @this: org.spongycastle.crypto.tls.DTLSRecordLayer;
+
+        r1 = r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: org.spongycastle.crypto.tls.ProtocolVersion discoveredPeerVersion>;
+
+        return r1;
+    }
+    public int getReceiveLimit() throws java.io.IOException
+    {
+        org.spongycastle.crypto.tls.DTLSRecordLayer r0;
+        int $i0, $i1;
+        org.spongycastle.crypto.tls.DTLSEpoch $r1;
+        org.spongycastle.crypto.tls.TlsCipher $r2;
+        org.spongycastle.crypto.tls.DatagramTransport $r3;
+
+        r0 := @this: org.spongycastle.crypto.tls.DTLSRecordLayer;
+
+        $i0 = r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: int plaintextLimit>;
+
+        $r1 = r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: org.spongycastle.crypto.tls.DTLSEpoch readEpoch>;
+
+        $r2 = virtualinvoke $r1.<org.spongycastle.crypto.tls.DTLSEpoch: org.spongycastle.crypto.tls.TlsCipher getCipher()>();
+
+        $r3 = r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: org.spongycastle.crypto.tls.DatagramTransport transport>;
+
+        $i1 = interfaceinvoke $r3.<org.spongycastle.crypto.tls.DatagramTransport: int getReceiveLimit()>();
+
+        $i1 = $i1 + -13;
+
+        $i1 = interfaceinvoke $r2.<org.spongycastle.crypto.tls.TlsCipher: int getPlaintextLimit(int)>($i1);
+
+        $i0 = staticinvoke <java.lang.Math: int min(int,int)>($i0, $i1);
+
+        return $i0;
+    }
+    public int getSendLimit() throws java.io.IOException
+    {
+        org.spongycastle.crypto.tls.DTLSRecordLayer r0;
+        int $i0, $i1;
+        org.spongycastle.crypto.tls.DTLSEpoch $r1;
+        org.spongycastle.crypto.tls.TlsCipher $r2;
+        org.spongycastle.crypto.tls.DatagramTransport $r3;
+
+        r0 := @this: org.spongycastle.crypto.tls.DTLSRecordLayer;
+
+        $i0 = r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: int plaintextLimit>;
+
+        $r1 = r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: org.spongycastle.crypto.tls.DTLSEpoch writeEpoch>;
+
+        $r2 = virtualinvoke $r1.<org.spongycastle.crypto.tls.DTLSEpoch: org.spongycastle.crypto.tls.TlsCipher getCipher()>();
+
+        $r3 = r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: org.spongycastle.crypto.tls.DatagramTransport transport>;
+
+        $i1 = interfaceinvoke $r3.<org.spongycastle.crypto.tls.DatagramTransport: int getSendLimit()>();
+
+        $i1 = $i1 + -13;
+
+        $i1 = interfaceinvoke $r2.<org.spongycastle.crypto.tls.TlsCipher: int getPlaintextLimit(int)>($i1);
+
+        $i0 = staticinvoke <java.lang.Math: int min(int,int)>($i0, $i1);
+
+        return $i0;
+    }
+    void handshakeSuccessful(org.spongycastle.crypto.tls.DTLSHandshakeRetransmit)
+    {
+        org.spongycastle.crypto.tls.DTLSRecordLayer r0;
+        org.spongycastle.crypto.tls.DTLSHandshakeRetransmit $r1;
+        long $l0;
+        org.spongycastle.crypto.tls.DTLSEpoch $r2, $r3;
+        java.lang.IllegalStateException $r4;
+
+        r0 := @this: org.spongycastle.crypto.tls.DTLSRecordLayer;
+
+        $r1 := @parameter0: org.spongycastle.crypto.tls.DTLSHandshakeRetransmit;
+
+        $r2 = r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: org.spongycastle.crypto.tls.DTLSEpoch readEpoch>;
+
+        $r3 = r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: org.spongycastle.crypto.tls.DTLSEpoch currentEpoch>;
+
+        if $r2 == $r3 goto label1;
+
+        $r2 = r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: org.spongycastle.crypto.tls.DTLSEpoch writeEpoch>;
+
+        $r3 = r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: org.spongycastle.crypto.tls.DTLSEpoch currentEpoch>;
+
+        if $r2 != $r3 goto label2;
+
+     label1:
+        $r4 = new java.lang.IllegalStateException;
+
+        specialinvoke $r4.<java.lang.IllegalStateException: void <init>()>();
+
+        throw $r4;
+
+     label2:
+        if $r1 == null goto label3;
+
+        r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: org.spongycastle.crypto.tls.DTLSHandshakeRetransmit retransmit> = $r1;
+
+        $r2 = r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: org.spongycastle.crypto.tls.DTLSEpoch currentEpoch>;
+
+        r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: org.spongycastle.crypto.tls.DTLSEpoch retransmitEpoch> = $r2;
+
+        $l0 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        $l0 = $l0 + 240000L;
+
+        r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: long retransmitExpiry> = $l0;
+
+     label3:
+        r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: boolean inHandshake> = 0;
+
+        $r2 = r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: org.spongycastle.crypto.tls.DTLSEpoch pendingEpoch>;
+
+        r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: org.spongycastle.crypto.tls.DTLSEpoch currentEpoch> = $r2;
+
+        r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: org.spongycastle.crypto.tls.DTLSEpoch pendingEpoch> = null;
+
+        return;
+    }
+    void initPendingEpoch(org.spongycastle.crypto.tls.TlsCipher)
+    {
+        org.spongycastle.crypto.tls.DTLSRecordLayer r0;
+        org.spongycastle.crypto.tls.TlsCipher $r1;
+        int $i0;
+        org.spongycastle.crypto.tls.DTLSEpoch $r2, $r4;
+        java.lang.IllegalStateException $r3;
+
+        r0 := @this: org.spongycastle.crypto.tls.DTLSRecordLayer;
+
+        $r1 := @parameter0: org.spongycastle.crypto.tls.TlsCipher;
+
+        $r2 = r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: org.spongycastle.crypto.tls.DTLSEpoch pendingEpoch>;
+
+        if $r2 == null goto label1;
+
+        $r3 = new java.lang.IllegalStateException;
+
+        specialinvoke $r3.<java.lang.IllegalStateException: void <init>()>();
+
+        throw $r3;
+
+     label1:
+        $r2 = new org.spongycastle.crypto.tls.DTLSEpoch;
+
+        $r4 = r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: org.spongycastle.crypto.tls.DTLSEpoch writeEpoch>;
+
+        $i0 = virtualinvoke $r4.<org.spongycastle.crypto.tls.DTLSEpoch: int getEpoch()>();
+
+        $i0 = $i0 + 1;
+
+        specialinvoke $r2.<org.spongycastle.crypto.tls.DTLSEpoch: void <init>(int,org.spongycastle.crypto.tls.TlsCipher)>($i0, $r1);
+
+        r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: org.spongycastle.crypto.tls.DTLSEpoch pendingEpoch> = $r2;
+
+        return;
+    }
+    public int receive(byte[], int, int, int) throws java.io.IOException
+    {
+        org.spongycastle.crypto.tls.DTLSRecordLayer r0;
+        byte[] $r1, r3, $r11;
+        int $i0, $i1, $i2, $i4, i6, $i10;
+        short s3, s5;
+        java.io.IOException r2;
+        org.spongycastle.crypto.tls.DTLSHandshakeRetransmit $r4;
+        long $l7, $l8;
+        byte $b9;
+        org.spongycastle.crypto.tls.DTLSEpoch r5, $r6;
+        org.spongycastle.crypto.tls.DTLSReplayWindow $r7;
+        boolean $z0;
+        org.spongycastle.crypto.tls.ProtocolVersion $r8, $r9;
+        org.spongycastle.crypto.tls.TlsCipher $r10;
+        org.spongycastle.crypto.tls.TlsPeer $r12;
+        org.spongycastle.crypto.tls.TlsFatalAlert $r13;
+
+        r0 := @this: org.spongycastle.crypto.tls.DTLSRecordLayer;
+
+        $r1 := @parameter0: byte[];
+
+        $i0 := @parameter1: int;
+
+        $i1 := @parameter2: int;
+
+        $i2 := @parameter3: int;
+
+        r3 = null;
+
+     label01:
+        i6 = virtualinvoke r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: int getReceiveLimit()>();
+
+        i6 = staticinvoke <java.lang.Math: int min(int,int)>($i1, i6);
+
+        i6 = i6 + 13;
+
+        if r3 == null goto label02;
+
+        $i4 = lengthof r3;
+
+        if $i4 >= i6 goto label03;
+
+     label02:
+        r3 = newarray (byte)[i6];
+
+     label03:
+        $r4 = r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: org.spongycastle.crypto.tls.DTLSHandshakeRetransmit retransmit>;
+
+        if $r4 == null goto label06;
+
+     label04:
+        $l7 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+     label05:
+        $l8 = r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: long retransmitExpiry>;
+
+        $b9 = $l7 cmp $l8;
+
+        if $b9 <= 0 goto label06;
+
+        r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: org.spongycastle.crypto.tls.DTLSHandshakeRetransmit retransmit> = null;
+
+        r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: org.spongycastle.crypto.tls.DTLSEpoch retransmitEpoch> = null;
+
+     label06:
+        $i4 = specialinvoke r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: int receiveRecord(byte[],int,int,int)>(r3, 0, i6, $i2);
+
+     label07:
+        if $i4 >= 0 goto label08;
+
+        return $i4;
+
+     label08:
+        if $i4 < 13 goto label01;
+
+     label09:
+        i6 = staticinvoke <org.spongycastle.crypto.tls.TlsUtils: int readUint16(byte[],int)>(r3, 11);
+
+     label10:
+        i6 = i6 + 13;
+
+        if $i4 != i6 goto label01;
+
+     label11:
+        s3 = staticinvoke <org.spongycastle.crypto.tls.TlsUtils: short readUint8(byte[],int)>(r3, 0);
+
+     label12:
+        lookupswitch(s3)
+        {
+            case 20: goto label14;
+            case 21: goto label14;
+            case 22: goto label14;
+            case 23: goto label14;
+            case 24: goto label14;
+            default: goto label13;
+        };
+
+     label13:
+        goto label01;
+
+     label14:
+        i6 = staticinvoke <org.spongycastle.crypto.tls.TlsUtils: int readUint16(byte[],int)>(r3, 3);
+
+     label15:
+        r5 = null;
+
+        $r6 = r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: org.spongycastle.crypto.tls.DTLSEpoch readEpoch>;
+
+     label16:
+        $i10 = virtualinvoke $r6.<org.spongycastle.crypto.tls.DTLSEpoch: int getEpoch()>();
+
+     label17:
+        if i6 != $i10 goto label34;
+
+        r5 = r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: org.spongycastle.crypto.tls.DTLSEpoch readEpoch>;
+
+     label18:
+        if r5 == null goto label01;
+
+     label19:
+        $l7 = staticinvoke <org.spongycastle.crypto.tls.TlsUtils: long readUint48(byte[],int)>(r3, 5);
+
+        $r7 = virtualinvoke r5.<org.spongycastle.crypto.tls.DTLSEpoch: org.spongycastle.crypto.tls.DTLSReplayWindow getReplayWindow()>();
+
+        $z0 = virtualinvoke $r7.<org.spongycastle.crypto.tls.DTLSReplayWindow: boolean shouldDiscard(long)>($l7);
+
+     label20:
+        if $z0 != 0 goto label01;
+
+     label21:
+        $r8 = staticinvoke <org.spongycastle.crypto.tls.TlsUtils: org.spongycastle.crypto.tls.ProtocolVersion readVersion(byte[],int)>(r3, 1);
+
+     label22:
+        $r9 = r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: org.spongycastle.crypto.tls.ProtocolVersion discoveredPeerVersion>;
+
+        if $r9 == null goto label25;
+
+        $r9 = r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: org.spongycastle.crypto.tls.ProtocolVersion discoveredPeerVersion>;
+
+     label23:
+        $z0 = virtualinvoke $r9.<org.spongycastle.crypto.tls.ProtocolVersion: boolean equals(org.spongycastle.crypto.tls.ProtocolVersion)>($r8);
+
+     label24:
+        if $z0 == 0 goto label01;
+
+     label25:
+        $r10 = virtualinvoke r5.<org.spongycastle.crypto.tls.DTLSEpoch: org.spongycastle.crypto.tls.TlsCipher getCipher()>();
+
+        $i10 = virtualinvoke r5.<org.spongycastle.crypto.tls.DTLSEpoch: int getEpoch()>();
+
+        $l8 = staticinvoke <org.spongycastle.crypto.tls.DTLSRecordLayer: long getMacSequenceNumber(int,long)>($i10, $l7);
+
+     label26:
+        $i4 = $i4 + -13;
+
+     label27:
+        $r11 = interfaceinvoke $r10.<org.spongycastle.crypto.tls.TlsCipher: byte[] decodeCiphertext(long,short,byte[],int,int)>($l8, s3, r3, 13, $i4);
+
+        $r7 = virtualinvoke r5.<org.spongycastle.crypto.tls.DTLSEpoch: org.spongycastle.crypto.tls.DTLSReplayWindow getReplayWindow()>();
+
+        virtualinvoke $r7.<org.spongycastle.crypto.tls.DTLSReplayWindow: void reportAuthenticated(long)>($l7);
+
+     label28:
+        $i4 = lengthof $r11;
+
+        $i10 = r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: int plaintextLimit>;
+
+        if $i4 > $i10 goto label01;
+
+        $r9 = r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: org.spongycastle.crypto.tls.ProtocolVersion discoveredPeerVersion>;
+
+        if $r9 != null goto label29;
+
+        r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: org.spongycastle.crypto.tls.ProtocolVersion discoveredPeerVersion> = $r8;
+
+     label29:
+        lookupswitch(s3)
+        {
+            case 20: goto label48;
+            case 21: goto label37;
+            case 22: goto label54;
+            case 23: goto label47;
+            case 24: goto label01;
+            default: goto label30;
+        };
+
+     label30:
+        $z0 = r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: boolean inHandshake>;
+
+        if $z0 != 0 goto label31;
+
+        $r4 = r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: org.spongycastle.crypto.tls.DTLSHandshakeRetransmit retransmit>;
+
+        if $r4 == null goto label31;
+
+        r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: org.spongycastle.crypto.tls.DTLSHandshakeRetransmit retransmit> = null;
+
+        r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: org.spongycastle.crypto.tls.DTLSEpoch retransmitEpoch> = null;
+
+     label31:
+        $i1 = lengthof $r11;
+
+     label32:
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r11, 0, $r1, $i0, $i1);
+
+     label33:
+        $i0 = lengthof $r11;
+
+        return $i0;
+
+     label34:
+        if s3 != 22 goto label18;
+
+        $r6 = r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: org.spongycastle.crypto.tls.DTLSEpoch retransmitEpoch>;
+
+        if $r6 == null goto label18;
+
+        $r6 = r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: org.spongycastle.crypto.tls.DTLSEpoch retransmitEpoch>;
+
+     label35:
+        $i10 = virtualinvoke $r6.<org.spongycastle.crypto.tls.DTLSEpoch: int getEpoch()>();
+
+     label36:
+        if i6 != $i10 goto label18;
+
+        r5 = r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: org.spongycastle.crypto.tls.DTLSEpoch retransmitEpoch>;
+
+        goto label18;
+
+     label37:
+        i6 = lengthof $r11;
+
+        if i6 != 2 goto label01;
+
+        $b9 = $r11[0];
+
+        s5 = (short) $b9;
+
+        $b9 = $r11[1];
+
+        s3 = (short) $b9;
+
+        $r12 = r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: org.spongycastle.crypto.tls.TlsPeer peer>;
+
+     label38:
+        interfaceinvoke $r12.<org.spongycastle.crypto.tls.TlsPeer: void notifyAlertReceived(short,short)>(s5, s3);
+
+     label39:
+        if s5 != 2 goto label44;
+
+     label40:
+        virtualinvoke r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: void fail(short)>(s3);
+
+     label41:
+        $r13 = new org.spongycastle.crypto.tls.TlsFatalAlert;
+
+     label42:
+        specialinvoke $r13.<org.spongycastle.crypto.tls.TlsFatalAlert: void <init>(short)>(s3);
+
+        throw $r13;
+
+     label43:
+        r2 := @caughtexception;
+
+        throw r2;
+
+     label44:
+        if s3 != 0 goto label01;
+
+     label45:
+        specialinvoke r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: void closeTransport()>();
+
+     label46:
+        goto label01;
+
+     label47:
+        $z0 = r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: boolean inHandshake>;
+
+        if $z0 == 0 goto label30;
+
+        goto label01;
+
+     label48:
+        i6 = 0;
+
+     label49:
+        $i4 = lengthof $r11;
+
+        if i6 >= $i4 goto label01;
+
+     label50:
+        s3 = staticinvoke <org.spongycastle.crypto.tls.TlsUtils: short readUint8(byte[],int)>($r11, i6);
+
+     label51:
+        if s3 == 1 goto label53;
+
+     label52:
+        i6 = i6 + 1;
+
+        goto label49;
+
+     label53:
+        r5 = r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: org.spongycastle.crypto.tls.DTLSEpoch pendingEpoch>;
+
+        if r5 == null goto label52;
+
+        r5 = r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: org.spongycastle.crypto.tls.DTLSEpoch pendingEpoch>;
+
+        r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: org.spongycastle.crypto.tls.DTLSEpoch readEpoch> = r5;
+
+        goto label52;
+
+     label54:
+        $z0 = r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: boolean inHandshake>;
+
+        if $z0 != 0 goto label30;
+
+        $r4 = r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: org.spongycastle.crypto.tls.DTLSHandshakeRetransmit retransmit>;
+
+        if $r4 == null goto label01;
+
+        $r4 = r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: org.spongycastle.crypto.tls.DTLSHandshakeRetransmit retransmit>;
+
+        $i4 = lengthof $r11;
+
+     label55:
+        interfaceinvoke $r4.<org.spongycastle.crypto.tls.DTLSHandshakeRetransmit: void receivedHandshakeRecord(int,byte[],int,int)>(i6, $r11, 0, $i4);
+
+     label56:
+        goto label01;
+
+        catch java.io.IOException from label04 to label05 with label43;
+        catch java.io.IOException from label06 to label07 with label43;
+        catch java.io.IOException from label09 to label10 with label43;
+        catch java.io.IOException from label11 to label12 with label43;
+        catch java.io.IOException from label14 to label15 with label43;
+        catch java.io.IOException from label16 to label17 with label43;
+        catch java.io.IOException from label19 to label20 with label43;
+        catch java.io.IOException from label21 to label22 with label43;
+        catch java.io.IOException from label23 to label24 with label43;
+        catch java.io.IOException from label25 to label26 with label43;
+        catch java.io.IOException from label27 to label28 with label43;
+        catch java.io.IOException from label32 to label33 with label43;
+        catch java.io.IOException from label35 to label36 with label43;
+        catch java.io.IOException from label38 to label39 with label43;
+        catch java.io.IOException from label40 to label41 with label43;
+        catch java.io.IOException from label42 to label43 with label43;
+        catch java.io.IOException from label45 to label46 with label43;
+        catch java.io.IOException from label50 to label51 with label43;
+        catch java.io.IOException from label55 to label56 with label43;
+    }
+    org.spongycastle.crypto.tls.ProtocolVersion resetDiscoveredPeerVersion()
+    {
+        org.spongycastle.crypto.tls.DTLSRecordLayer r0;
+        org.spongycastle.crypto.tls.ProtocolVersion r1;
+
+        r0 := @this: org.spongycastle.crypto.tls.DTLSRecordLayer;
+
+        r1 = r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: org.spongycastle.crypto.tls.ProtocolVersion discoveredPeerVersion>;
+
+        r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: org.spongycastle.crypto.tls.ProtocolVersion discoveredPeerVersion> = null;
+
+        return r1;
+    }
+    void resetWriteEpoch()
+    {
+        org.spongycastle.crypto.tls.DTLSRecordLayer r0;
+        org.spongycastle.crypto.tls.DTLSEpoch $r1;
+
+        r0 := @this: org.spongycastle.crypto.tls.DTLSRecordLayer;
+
+        $r1 = r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: org.spongycastle.crypto.tls.DTLSEpoch retransmitEpoch>;
+
+        if $r1 == null goto label1;
+
+        $r1 = r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: org.spongycastle.crypto.tls.DTLSEpoch retransmitEpoch>;
+
+        r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: org.spongycastle.crypto.tls.DTLSEpoch writeEpoch> = $r1;
+
+        return;
+
+     label1:
+        $r1 = r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: org.spongycastle.crypto.tls.DTLSEpoch currentEpoch>;
+
+        r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: org.spongycastle.crypto.tls.DTLSEpoch writeEpoch> = $r1;
+
+        return;
+    }
+    public void send(byte[], int, int) throws java.io.IOException
+    {
+        org.spongycastle.crypto.tls.DTLSRecordLayer r0;
+        byte[] $r1, r2;
+        int $i0, $i1, $i4;
+        short $s2;
+        byte b3;
+        boolean $z0;
+        org.spongycastle.crypto.tls.DTLSEpoch $r3, $r4, $r6;
+        java.lang.IllegalStateException $r5;
+
+        r0 := @this: org.spongycastle.crypto.tls.DTLSRecordLayer;
+
+        $r1 := @parameter0: byte[];
+
+        $i0 := @parameter1: int;
+
+        $i1 := @parameter2: int;
+
+        b3 = 23;
+
+        $z0 = r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: boolean inHandshake>;
+
+        if $z0 != 0 goto label1;
+
+        $r3 = r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: org.spongycastle.crypto.tls.DTLSEpoch writeEpoch>;
+
+        $r4 = r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: org.spongycastle.crypto.tls.DTLSEpoch retransmitEpoch>;
+
+        if $r3 != $r4 goto label5;
+
+     label1:
+        b3 = 22;
+
+        $s2 = staticinvoke <org.spongycastle.crypto.tls.TlsUtils: short readUint8(byte[],int)>($r1, $i0);
+
+        if $s2 != 20 goto label5;
+
+        $r3 = null;
+
+        $z0 = r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: boolean inHandshake>;
+
+        if $z0 == 0 goto label3;
+
+        $r3 = r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: org.spongycastle.crypto.tls.DTLSEpoch pendingEpoch>;
+
+     label2:
+        if $r3 != null goto label4;
+
+        $r5 = new java.lang.IllegalStateException;
+
+        specialinvoke $r5.<java.lang.IllegalStateException: void <init>()>();
+
+        throw $r5;
+
+     label3:
+        $r4 = r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: org.spongycastle.crypto.tls.DTLSEpoch writeEpoch>;
+
+        $r6 = r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: org.spongycastle.crypto.tls.DTLSEpoch retransmitEpoch>;
+
+        if $r4 != $r6 goto label2;
+
+        $r3 = r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: org.spongycastle.crypto.tls.DTLSEpoch currentEpoch>;
+
+        goto label2;
+
+     label4:
+        r2 = newarray (byte)[1];
+
+        r2[0] = 1;
+
+        $i4 = lengthof r2;
+
+        specialinvoke r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: void sendRecord(short,byte[],int,int)>(20, r2, 0, $i4);
+
+        r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: org.spongycastle.crypto.tls.DTLSEpoch writeEpoch> = $r3;
+
+     label5:
+        specialinvoke r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: void sendRecord(short,byte[],int,int)>(b3, $r1, $i0, $i1);
+
+        return;
+    }
+    void setPlaintextLimit(int)
+    {
+        org.spongycastle.crypto.tls.DTLSRecordLayer r0;
+        int $i0;
+
+        r0 := @this: org.spongycastle.crypto.tls.DTLSRecordLayer;
+
+        $i0 := @parameter0: int;
+
+        r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: int plaintextLimit> = $i0;
+
+        return;
+    }
+    void warn(short, java.lang.String) throws java.io.IOException
+    {
+        org.spongycastle.crypto.tls.DTLSRecordLayer r0;
+        short $s0;
+        java.lang.String $r1;
+
+        r0 := @this: org.spongycastle.crypto.tls.DTLSRecordLayer;
+
+        $s0 := @parameter0: short;
+
+        $r1 := @parameter1: java.lang.String;
+
+        specialinvoke r0.<org.spongycastle.crypto.tls.DTLSRecordLayer: void raiseAlert(short,short,java.lang.String,java.lang.Throwable)>(1, $s0, $r1, null);
+
+        return;
+    }

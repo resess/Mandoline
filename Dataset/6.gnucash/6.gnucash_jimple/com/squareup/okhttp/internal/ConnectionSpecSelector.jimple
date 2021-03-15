@@ -1,0 +1,229 @@
+com.squareup.okhttp.internal.ConnectionSpecSelector extends java.lang.Object
+private final java.util.List connectionSpecs
+private boolean isFallback
+private boolean isFallbackPossible
+private int nextModeIndex
+    public void <init>(java.util.List)
+    {
+        com.squareup.okhttp.internal.ConnectionSpecSelector r0;
+        java.util.List r1;
+
+        r0 := @this: com.squareup.okhttp.internal.ConnectionSpecSelector;
+
+        r1 := @parameter0: java.util.List;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<com.squareup.okhttp.internal.ConnectionSpecSelector: int nextModeIndex> = 0;
+
+        r0.<com.squareup.okhttp.internal.ConnectionSpecSelector: java.util.List connectionSpecs> = r1;
+
+        return;
+    }
+    private boolean isFallbackPossible(javax.net.ssl.SSLSocket)
+    {
+        com.squareup.okhttp.internal.ConnectionSpecSelector r0;
+        javax.net.ssl.SSLSocket $r1;
+        int i0, $i1;
+        java.util.List $r2;
+        java.lang.Object $r3;
+        com.squareup.okhttp.ConnectionSpec $r4;
+        boolean $z0;
+
+        r0 := @this: com.squareup.okhttp.internal.ConnectionSpecSelector;
+
+        $r1 := @parameter0: javax.net.ssl.SSLSocket;
+
+        i0 = r0.<com.squareup.okhttp.internal.ConnectionSpecSelector: int nextModeIndex>;
+
+     label1:
+        $r2 = r0.<com.squareup.okhttp.internal.ConnectionSpecSelector: java.util.List connectionSpecs>;
+
+        $i1 = interfaceinvoke $r2.<java.util.List: int size()>();
+
+        if i0 >= $i1 goto label3;
+
+        $r2 = r0.<com.squareup.okhttp.internal.ConnectionSpecSelector: java.util.List connectionSpecs>;
+
+        $r3 = interfaceinvoke $r2.<java.util.List: java.lang.Object get(int)>(i0);
+
+        $r4 = (com.squareup.okhttp.ConnectionSpec) $r3;
+
+        $z0 = virtualinvoke $r4.<com.squareup.okhttp.ConnectionSpec: boolean isCompatible(javax.net.ssl.SSLSocket)>($r1);
+
+        if $z0 == 0 goto label2;
+
+        return 1;
+
+     label2:
+        i0 = i0 + 1;
+
+        goto label1;
+
+     label3:
+        return 0;
+    }
+    public com.squareup.okhttp.ConnectionSpec configureSecureSocket(javax.net.ssl.SSLSocket) throws java.io.IOException
+    {
+        com.squareup.okhttp.internal.ConnectionSpecSelector r0;
+        javax.net.ssl.SSLSocket $r1;
+        com.squareup.okhttp.ConnectionSpec r2, r5;
+        int i0, $i1;
+        java.util.List $r3;
+        java.lang.Object $r4;
+        boolean $z0;
+        java.net.UnknownServiceException $r6;
+        java.lang.StringBuilder $r7;
+        java.lang.String[] $r8;
+        java.lang.String $r9;
+        com.squareup.okhttp.internal.Internal $r10;
+
+        r0 := @this: com.squareup.okhttp.internal.ConnectionSpecSelector;
+
+        $r1 := @parameter0: javax.net.ssl.SSLSocket;
+
+        r2 = null;
+
+        i0 = r0.<com.squareup.okhttp.internal.ConnectionSpecSelector: int nextModeIndex>;
+
+        $r3 = r0.<com.squareup.okhttp.internal.ConnectionSpecSelector: java.util.List connectionSpecs>;
+
+        $i1 = interfaceinvoke $r3.<java.util.List: int size()>();
+
+     label1:
+        if i0 >= $i1 goto label2;
+
+        $r3 = r0.<com.squareup.okhttp.internal.ConnectionSpecSelector: java.util.List connectionSpecs>;
+
+        $r4 = interfaceinvoke $r3.<java.util.List: java.lang.Object get(int)>(i0);
+
+        r5 = (com.squareup.okhttp.ConnectionSpec) $r4;
+
+        $z0 = virtualinvoke r5.<com.squareup.okhttp.ConnectionSpec: boolean isCompatible(javax.net.ssl.SSLSocket)>($r1);
+
+        if $z0 == 0 goto label3;
+
+        r2 = r5;
+
+        i0 = i0 + 1;
+
+        r0.<com.squareup.okhttp.internal.ConnectionSpecSelector: int nextModeIndex> = i0;
+
+     label2:
+        if r2 != null goto label4;
+
+        $r6 = new java.net.UnknownServiceException;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unable to find acceptable protocols. isFallback=");
+
+        $z0 = r0.<com.squareup.okhttp.internal.ConnectionSpecSelector: boolean isFallback>;
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>($z0);
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", modes=");
+
+        $r3 = r0.<com.squareup.okhttp.internal.ConnectionSpecSelector: java.util.List connectionSpecs>;
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r3);
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", supported protocols=");
+
+        $r8 = virtualinvoke $r1.<javax.net.ssl.SSLSocket: java.lang.String[] getEnabledProtocols()>();
+
+        $r9 = staticinvoke <java.util.Arrays: java.lang.String toString(java.lang.Object[])>($r8);
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r9);
+
+        $r9 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r6.<java.net.UnknownServiceException: void <init>(java.lang.String)>($r9);
+
+        throw $r6;
+
+     label3:
+        i0 = i0 + 1;
+
+        goto label1;
+
+     label4:
+        $z0 = specialinvoke r0.<com.squareup.okhttp.internal.ConnectionSpecSelector: boolean isFallbackPossible(javax.net.ssl.SSLSocket)>($r1);
+
+        r0.<com.squareup.okhttp.internal.ConnectionSpecSelector: boolean isFallbackPossible> = $z0;
+
+        $r10 = <com.squareup.okhttp.internal.Internal: com.squareup.okhttp.internal.Internal instance>;
+
+        $z0 = r0.<com.squareup.okhttp.internal.ConnectionSpecSelector: boolean isFallback>;
+
+        virtualinvoke $r10.<com.squareup.okhttp.internal.Internal: void apply(com.squareup.okhttp.ConnectionSpec,javax.net.ssl.SSLSocket,boolean)>(r2, $r1, $z0);
+
+        return r2;
+    }
+    public boolean connectionFailed(java.io.IOException)
+    {
+        com.squareup.okhttp.internal.ConnectionSpecSelector r0;
+        java.io.IOException $r1;
+        java.lang.Throwable $r2;
+        boolean $z0, $z1;
+
+        r0 := @this: com.squareup.okhttp.internal.ConnectionSpecSelector;
+
+        $r1 := @parameter0: java.io.IOException;
+
+        $z0 = 1;
+
+        r0.<com.squareup.okhttp.internal.ConnectionSpecSelector: boolean isFallback> = 1;
+
+        $z1 = $r1 instanceof java.net.ProtocolException;
+
+        if $z1 == 0 goto label1;
+
+        return 0;
+
+     label1:
+        $z1 = $r1 instanceof java.io.InterruptedIOException;
+
+        if $z1 != 0 goto label6;
+
+        $z1 = $r1 instanceof javax.net.ssl.SSLHandshakeException;
+
+        if $z1 == 0 goto label2;
+
+        $r2 = virtualinvoke $r1.<java.io.IOException: java.lang.Throwable getCause()>();
+
+        $z1 = $r2 instanceof java.security.cert.CertificateException;
+
+        if $z1 != 0 goto label6;
+
+     label2:
+        $z1 = $r1 instanceof javax.net.ssl.SSLPeerUnverifiedException;
+
+        if $z1 != 0 goto label6;
+
+        $z1 = $r1 instanceof javax.net.ssl.SSLHandshakeException;
+
+        if $z1 != 0 goto label3;
+
+        $z1 = $r1 instanceof javax.net.ssl.SSLProtocolException;
+
+        if $z1 == 0 goto label5;
+
+     label3:
+        $z1 = r0.<com.squareup.okhttp.internal.ConnectionSpecSelector: boolean isFallbackPossible>;
+
+        if $z1 == 0 goto label5;
+
+     label4:
+        return $z0;
+
+     label5:
+        $z0 = 0;
+
+        goto label4;
+
+     label6:
+        return 0;
+    }

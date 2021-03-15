@@ -1,0 +1,1206 @@
+org.gnucash.android.db.SplitsDbAdapter extends org.gnucash.android.db.DatabaseAdapter
+    public void <init>(android.database.sqlite.SQLiteDatabase)
+    {
+        org.gnucash.android.db.SplitsDbAdapter r0;
+        android.database.sqlite.SQLiteDatabase $r1;
+
+        r0 := @this: org.gnucash.android.db.SplitsDbAdapter;
+
+        $r1 := @parameter0: android.database.sqlite.SQLiteDatabase;
+
+        specialinvoke r0.<org.gnucash.android.db.DatabaseAdapter: void <init>(android.database.sqlite.SQLiteDatabase,java.lang.String)>($r1, "splits");
+
+        r0.<org.gnucash.android.db.SplitsDbAdapter: java.lang.String LOG_TAG> = "SplitsDbAdapter";
+
+        return;
+    }
+    private org.gnucash.android.model.Money calculateSplitBalance(java.util.List, java.lang.String, boolean, long, long)
+    {
+        org.gnucash.android.db.SplitsDbAdapter r0;
+        java.util.List r1;
+        java.lang.String $r2, $r6, $r7;
+        boolean $z0, $z1;
+        long $l0, $l1, $l4;
+        int $i2;
+        org.gnucash.android.model.Money r3, $r14;
+        java.lang.String[] r4, $r9;
+        java.lang.StringBuilder $r5;
+        byte $b3;
+        android.database.sqlite.SQLiteDatabase $r8;
+        android.database.Cursor $r10;
+        org.gnucash.android.db.CommoditiesDbAdapter r11;
+        org.gnucash.android.db.PricesDbAdapter r12;
+        org.gnucash.android.model.Commodity r13;
+        android.util.Pair $r15;
+        java.lang.Object $r16;
+        java.lang.Long $r17;
+        java.math.BigDecimal $r18, $r19;
+        java.lang.Throwable $r20;
+
+        r0 := @this: org.gnucash.android.db.SplitsDbAdapter;
+
+        r1 := @parameter0: java.util.List;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $z0 := @parameter2: boolean;
+
+        $l0 := @parameter3: long;
+
+        $l1 := @parameter4: long;
+
+        $i2 = interfaceinvoke r1.<java.util.List: int size()>();
+
+        if $i2 != 0 goto label01;
+
+        r3 = new org.gnucash.android.model.Money;
+
+        specialinvoke r3.<org.gnucash.android.model.Money: void <init>(java.lang.String,java.lang.String)>("0", $r2);
+
+        return r3;
+
+     label01:
+        r4 = null;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("accounts_uid in ( \'");
+
+        $r6 = staticinvoke <android.text.TextUtils: java.lang.String join(java.lang.CharSequence,java.lang.Iterable)>("\' , \'", r1);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\' ) AND ");
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("transactions");
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("_");
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("is_template");
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" = 0");
+
+        $r7 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r6 = $r7;
+
+        $b3 = $l0 cmp -1L;
+
+        if $b3 == 0 goto label15;
+
+        $b3 = $l1 cmp -1L;
+
+        if $b3 == 0 goto label15;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r7);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" AND transactions_timestamp BETWEEN ? AND ? ");
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        r4 = newarray (java.lang.String)[2];
+
+        $r7 = staticinvoke <java.lang.String: java.lang.String valueOf(long)>($l0);
+
+        r4[0] = $r7;
+
+        $r7 = staticinvoke <java.lang.String: java.lang.String valueOf(long)>($l1);
+
+        r4[1] = $r7;
+
+     label02:
+        $r8 = r0.<org.gnucash.android.db.SplitsDbAdapter: android.database.sqlite.SQLiteDatabase mDb>;
+
+        $r9 = newarray (java.lang.String)[3];
+
+        $r9[0] = "TOTAL ( CASE WHEN splits_type = \'DEBIT\' THEN splits_quantity_num ELSE - splits_quantity_num END )";
+
+        $r9[1] = "splits_quantity_denom";
+
+        $r9[2] = "accounts_currency_code";
+
+        $r10 = virtualinvoke $r8.<android.database.sqlite.SQLiteDatabase: android.database.Cursor query(java.lang.String,java.lang.String[],java.lang.String,java.lang.String[],java.lang.String,java.lang.String,java.lang.String)>("trans_split_acct", $r9, $r6, r4, "accounts_currency_code", null, null);
+
+     label03:
+        r3 = staticinvoke <org.gnucash.android.model.Money: org.gnucash.android.model.Money createZeroInstance(java.lang.String)>($r2);
+
+     label04:
+        r11 = null;
+
+        r12 = null;
+
+        r13 = null;
+
+        $r6 = null;
+
+     label05:
+        $z1 = interfaceinvoke $r10.<android.database.Cursor: boolean moveToNext()>();
+
+     label06:
+        if $z1 == 0 goto label26;
+
+     label07:
+        $l4 = interfaceinvoke $r10.<android.database.Cursor: long getLong(int)>(0);
+
+     label08:
+        $l0 = $l4;
+
+     label09:
+        $l1 = interfaceinvoke $r10.<android.database.Cursor: long getLong(int)>(1);
+
+        $r7 = interfaceinvoke $r10.<android.database.Cursor: java.lang.String getString(int)>(2);
+
+        $z1 = virtualinvoke $r7.<java.lang.String: boolean equals(java.lang.Object)>("XXX");
+
+     label10:
+        if $z1 != 0 goto label05;
+
+        $b3 = $l4 cmp 0L;
+
+        if $b3 == 0 goto label05;
+
+        if $z0 != 0 goto label11;
+
+        $l0 = neg $l4;
+
+     label11:
+        $z1 = virtualinvoke $r7.<java.lang.String: boolean equals(java.lang.Object)>($r2);
+
+     label12:
+        if $z1 == 0 goto label17;
+
+     label13:
+        $r14 = new org.gnucash.android.model.Money;
+
+        specialinvoke $r14.<org.gnucash.android.model.Money: void <init>(long,long,java.lang.String)>($l0, $l1, $r2);
+
+        r3 = virtualinvoke r3.<org.gnucash.android.model.Money: org.gnucash.android.model.Money add(org.gnucash.android.model.Money)>($r14);
+
+     label14:
+        goto label05;
+
+     label15:
+        $b3 = $l0 cmp -1L;
+
+        if $b3 != 0 goto label16;
+
+        $b3 = $l1 cmp -1L;
+
+        if $b3 == 0 goto label16;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r7);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" AND transactions_timestamp <= ?");
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        r4 = newarray (java.lang.String)[1];
+
+        $r7 = staticinvoke <java.lang.String: java.lang.String valueOf(long)>($l1);
+
+        r4[0] = $r7;
+
+        goto label02;
+
+     label16:
+        $b3 = $l0 cmp -1L;
+
+        if $b3 == 0 goto label02;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r7);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" AND transactions_timestamp >= ?");
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        r4 = newarray (java.lang.String)[1];
+
+        $r7 = staticinvoke <java.lang.String: java.lang.String valueOf(long)>($l0);
+
+        r4[0] = $r7;
+
+        goto label02;
+
+     label17:
+        if r11 != null goto label20;
+
+     label18:
+        r11 = new org.gnucash.android.db.CommoditiesDbAdapter;
+
+        $r8 = r0.<org.gnucash.android.db.SplitsDbAdapter: android.database.sqlite.SQLiteDatabase mDb>;
+
+        specialinvoke r11.<org.gnucash.android.db.CommoditiesDbAdapter: void <init>(android.database.sqlite.SQLiteDatabase)>($r8);
+
+        r12 = new org.gnucash.android.db.PricesDbAdapter;
+
+        $r8 = r0.<org.gnucash.android.db.SplitsDbAdapter: android.database.sqlite.SQLiteDatabase mDb>;
+
+        specialinvoke r12.<org.gnucash.android.db.PricesDbAdapter: void <init>(android.database.sqlite.SQLiteDatabase)>($r8);
+
+        r13 = virtualinvoke r11.<org.gnucash.android.db.CommoditiesDbAdapter: org.gnucash.android.model.Commodity getCommodity(java.lang.String)>($r2);
+
+     label19:
+        $r6 = virtualinvoke r11.<org.gnucash.android.db.CommoditiesDbAdapter: java.lang.String getCommodityUID(java.lang.String)>($r2);
+
+     label20:
+        $r7 = virtualinvoke r11.<org.gnucash.android.db.CommoditiesDbAdapter: java.lang.String getCommodityUID(java.lang.String)>($r7);
+
+        $r15 = virtualinvoke r12.<org.gnucash.android.db.PricesDbAdapter: android.util.Pair getPrice(java.lang.String,java.lang.String)>($r7, $r6);
+
+        $r16 = $r15.<android.util.Pair: java.lang.Object first>;
+
+        $r17 = (java.lang.Long) $r16;
+
+        $l4 = virtualinvoke $r17.<java.lang.Long: long longValue()>();
+
+     label21:
+        $b3 = $l4 cmp 0L;
+
+        if $b3 <= 0 goto label05;
+
+     label22:
+        $r16 = $r15.<android.util.Pair: java.lang.Object second>;
+
+        $r17 = (java.lang.Long) $r16;
+
+        $l4 = virtualinvoke $r17.<java.lang.Long: long longValue()>();
+
+     label23:
+        $b3 = $l4 cmp 0L;
+
+        if $b3 <= 0 goto label05;
+
+     label24:
+        $r18 = staticinvoke <org.gnucash.android.model.Money: java.math.BigDecimal getBigDecimal(long,long)>($l0, $l1);
+
+        $r19 = new java.math.BigDecimal;
+
+        $r16 = $r15.<android.util.Pair: java.lang.Object first>;
+
+        $r17 = (java.lang.Long) $r16;
+
+        $l0 = virtualinvoke $r17.<java.lang.Long: long longValue()>();
+
+        specialinvoke $r19.<java.math.BigDecimal: void <init>(long)>($l0);
+
+        $r18 = virtualinvoke $r18.<java.math.BigDecimal: java.math.BigDecimal multiply(java.math.BigDecimal)>($r19);
+
+        $r19 = new java.math.BigDecimal;
+
+        $r16 = $r15.<android.util.Pair: java.lang.Object second>;
+
+        $r17 = (java.lang.Long) $r16;
+
+        $l0 = virtualinvoke $r17.<java.lang.Long: long longValue()>();
+
+        specialinvoke $r19.<java.math.BigDecimal: void <init>(long)>($l0);
+
+        $i2 = virtualinvoke r13.<org.gnucash.android.model.Commodity: int getSmallestFractionDigits()>();
+
+        $r18 = virtualinvoke $r18.<java.math.BigDecimal: java.math.BigDecimal divide(java.math.BigDecimal,int,int)>($r19, $i2, 6);
+
+        $r14 = new org.gnucash.android.model.Money;
+
+        specialinvoke $r14.<org.gnucash.android.model.Money: void <init>(java.math.BigDecimal,org.gnucash.android.model.Commodity)>($r18, r13);
+
+        r3 = virtualinvoke r3.<org.gnucash.android.model.Money: org.gnucash.android.model.Money add(org.gnucash.android.model.Money)>($r14);
+
+     label25:
+        goto label05;
+
+     label26:
+        interfaceinvoke $r10.<android.database.Cursor: void close()>();
+
+        return r3;
+
+     label27:
+        $r20 := @caughtexception;
+
+        interfaceinvoke $r10.<android.database.Cursor: void close()>();
+
+        throw $r20;
+
+        catch java.lang.Throwable from label03 to label04 with label27;
+        catch java.lang.Throwable from label05 to label06 with label27;
+        catch java.lang.Throwable from label07 to label08 with label27;
+        catch java.lang.Throwable from label09 to label10 with label27;
+        catch java.lang.Throwable from label11 to label12 with label27;
+        catch java.lang.Throwable from label13 to label14 with label27;
+        catch java.lang.Throwable from label18 to label19 with label27;
+        catch java.lang.Throwable from label19 to label20 with label27;
+        catch java.lang.Throwable from label20 to label21 with label27;
+        catch java.lang.Throwable from label22 to label23 with label27;
+        catch java.lang.Throwable from label24 to label25 with label27;
+    }
+    public static org.gnucash.android.db.SplitsDbAdapter getInstance()
+    {
+        org.gnucash.android.db.SplitsDbAdapter $r0;
+
+        $r0 = staticinvoke <org.gnucash.android.app.GnuCashApplication: org.gnucash.android.db.SplitsDbAdapter getSplitsDbAdapter()>();
+
+        return $r0;
+    }
+    public volatile void addRecord(org.gnucash.android.model.BaseModel)
+    {
+        org.gnucash.android.db.SplitsDbAdapter r0;
+        org.gnucash.android.model.BaseModel $r1;
+        org.gnucash.android.model.Split $r2;
+
+        r0 := @this: org.gnucash.android.db.SplitsDbAdapter;
+
+        $r1 := @parameter0: org.gnucash.android.model.BaseModel;
+
+        $r2 = (org.gnucash.android.model.Split) $r1;
+
+        virtualinvoke r0.<org.gnucash.android.db.SplitsDbAdapter: void addRecord(org.gnucash.android.model.Split)>($r2);
+
+        return;
+    }
+    public void addRecord(org.gnucash.android.model.Split)
+    {
+        org.gnucash.android.db.SplitsDbAdapter r0;
+        org.gnucash.android.model.Split $r1;
+        java.lang.String $r2;
+        long $l0, $l1;
+        java.sql.Timestamp $r3;
+
+        r0 := @this: org.gnucash.android.db.SplitsDbAdapter;
+
+        $r1 := @parameter0: org.gnucash.android.model.Split;
+
+        $r2 = r0.<org.gnucash.android.db.SplitsDbAdapter: java.lang.String LOG_TAG>;
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>($r2, "Replace transaction split in db");
+
+        specialinvoke r0.<org.gnucash.android.db.DatabaseAdapter: void addRecord(org.gnucash.android.model.BaseModel)>($r1);
+
+        $r2 = virtualinvoke $r1.<org.gnucash.android.model.Split: java.lang.String getTransactionUID()>();
+
+        $l0 = virtualinvoke r0.<org.gnucash.android.db.SplitsDbAdapter: long getTransactionID(java.lang.String)>($r2);
+
+        $r2 = staticinvoke <java.lang.String: java.lang.String valueOf(int)>(0);
+
+        virtualinvoke r0.<org.gnucash.android.db.SplitsDbAdapter: int updateRecord(java.lang.String,long,java.lang.String,java.lang.String)>("transactions", $l0, "is_exported", $r2);
+
+        $r3 = new java.sql.Timestamp;
+
+        $l1 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        specialinvoke $r3.<java.sql.Timestamp: void <init>(long)>($l1);
+
+        $r2 = virtualinvoke $r3.<java.sql.Timestamp: java.lang.String toString()>();
+
+        virtualinvoke r0.<org.gnucash.android.db.SplitsDbAdapter: int updateRecord(java.lang.String,long,java.lang.String,java.lang.String)>("transactions", $l0, "modified_at", $r2);
+
+        return;
+    }
+    public volatile org.gnucash.android.model.BaseModel buildModelInstance(android.database.Cursor)
+    {
+        org.gnucash.android.db.SplitsDbAdapter r0;
+        android.database.Cursor $r1;
+        org.gnucash.android.model.Split $r2;
+
+        r0 := @this: org.gnucash.android.db.SplitsDbAdapter;
+
+        $r1 := @parameter0: android.database.Cursor;
+
+        $r2 = virtualinvoke r0.<org.gnucash.android.db.SplitsDbAdapter: org.gnucash.android.model.Split buildModelInstance(android.database.Cursor)>($r1);
+
+        return $r2;
+    }
+    public org.gnucash.android.model.Split buildModelInstance(android.database.Cursor)
+    {
+        org.gnucash.android.db.SplitsDbAdapter r0;
+        android.database.Cursor $r1;
+        org.gnucash.android.model.Money r2, r3;
+        org.gnucash.android.model.Split r4;
+        int $i0;
+        long $l1, $l2, $l3, $l4;
+        java.lang.String $r5, $r6, $r7, $r8, $r10;
+        org.gnucash.android.db.TransactionsDbAdapter $r9;
+        org.gnucash.android.model.TransactionType $r11;
+
+        r0 := @this: org.gnucash.android.db.SplitsDbAdapter;
+
+        $r1 := @parameter0: android.database.Cursor;
+
+        $i0 = interfaceinvoke $r1.<android.database.Cursor: int getColumnIndexOrThrow(java.lang.String)>("value_num");
+
+        $l1 = interfaceinvoke $r1.<android.database.Cursor: long getLong(int)>($i0);
+
+        $i0 = interfaceinvoke $r1.<android.database.Cursor: int getColumnIndexOrThrow(java.lang.String)>("value_denom");
+
+        $l2 = interfaceinvoke $r1.<android.database.Cursor: long getLong(int)>($i0);
+
+        $i0 = interfaceinvoke $r1.<android.database.Cursor: int getColumnIndexOrThrow(java.lang.String)>("quantity_num");
+
+        $l3 = interfaceinvoke $r1.<android.database.Cursor: long getLong(int)>($i0);
+
+        $i0 = interfaceinvoke $r1.<android.database.Cursor: int getColumnIndexOrThrow(java.lang.String)>("quantity_denom");
+
+        $l4 = interfaceinvoke $r1.<android.database.Cursor: long getLong(int)>($i0);
+
+        $i0 = interfaceinvoke $r1.<android.database.Cursor: int getColumnIndexOrThrow(java.lang.String)>("type");
+
+        $r5 = interfaceinvoke $r1.<android.database.Cursor: java.lang.String getString(int)>($i0);
+
+        $i0 = interfaceinvoke $r1.<android.database.Cursor: int getColumnIndexOrThrow(java.lang.String)>("account_uid");
+
+        $r6 = interfaceinvoke $r1.<android.database.Cursor: java.lang.String getString(int)>($i0);
+
+        $i0 = interfaceinvoke $r1.<android.database.Cursor: int getColumnIndexOrThrow(java.lang.String)>("transaction_uid");
+
+        $r7 = interfaceinvoke $r1.<android.database.Cursor: java.lang.String getString(int)>($i0);
+
+        $i0 = interfaceinvoke $r1.<android.database.Cursor: int getColumnIndexOrThrow(java.lang.String)>("memo");
+
+        $r8 = interfaceinvoke $r1.<android.database.Cursor: java.lang.String getString(int)>($i0);
+
+        $r9 = staticinvoke <org.gnucash.android.db.TransactionsDbAdapter: org.gnucash.android.db.TransactionsDbAdapter getInstance()>();
+
+        $r10 = virtualinvoke $r9.<org.gnucash.android.db.TransactionsDbAdapter: java.lang.String getAttribute(java.lang.String,java.lang.String)>($r7, "currency_code");
+
+        r2 = new org.gnucash.android.model.Money;
+
+        specialinvoke r2.<org.gnucash.android.model.Money: void <init>(long,long,java.lang.String)>($l1, $l2, $r10);
+
+        $r10 = virtualinvoke r0.<org.gnucash.android.db.SplitsDbAdapter: java.lang.String getAccountCurrencyCode(java.lang.String)>($r6);
+
+        r3 = new org.gnucash.android.model.Money;
+
+        specialinvoke r3.<org.gnucash.android.model.Money: void <init>(long,long,java.lang.String)>($l3, $l4, $r10);
+
+        r4 = new org.gnucash.android.model.Split;
+
+        specialinvoke r4.<org.gnucash.android.model.Split: void <init>(org.gnucash.android.model.Money,java.lang.String)>(r2, $r6);
+
+        virtualinvoke r4.<org.gnucash.android.model.Split: void setQuantity(org.gnucash.android.model.Money)>(r3);
+
+        virtualinvoke r0.<org.gnucash.android.db.SplitsDbAdapter: void populateBaseModelAttributes(android.database.Cursor,org.gnucash.android.model.BaseModel)>($r1, r4);
+
+        virtualinvoke r4.<org.gnucash.android.model.Split: void setTransactionUID(java.lang.String)>($r7);
+
+        $r11 = staticinvoke <org.gnucash.android.model.TransactionType: org.gnucash.android.model.TransactionType valueOf(java.lang.String)>($r5);
+
+        virtualinvoke r4.<org.gnucash.android.model.Split: void setType(org.gnucash.android.model.TransactionType)>($r11);
+
+        virtualinvoke r4.<org.gnucash.android.model.Split: void setMemo(java.lang.String)>($r8);
+
+        return r4;
+    }
+    protected volatile android.database.sqlite.SQLiteStatement compileReplaceStatement(org.gnucash.android.model.BaseModel)
+    {
+        org.gnucash.android.db.SplitsDbAdapter r0;
+        android.database.sqlite.SQLiteStatement $r1;
+        org.gnucash.android.model.BaseModel $r2;
+        org.gnucash.android.model.Split $r3;
+
+        r0 := @this: org.gnucash.android.db.SplitsDbAdapter;
+
+        $r2 := @parameter0: org.gnucash.android.model.BaseModel;
+
+        $r3 = (org.gnucash.android.model.Split) $r2;
+
+        $r1 = virtualinvoke r0.<org.gnucash.android.db.SplitsDbAdapter: android.database.sqlite.SQLiteStatement compileReplaceStatement(org.gnucash.android.model.Split)>($r3);
+
+        return $r1;
+    }
+    protected android.database.sqlite.SQLiteStatement compileReplaceStatement(org.gnucash.android.model.Split)
+    {
+        org.gnucash.android.db.SplitsDbAdapter r0;
+        org.gnucash.android.model.Split $r1;
+        android.database.sqlite.SQLiteStatement $r2;
+        android.database.sqlite.SQLiteDatabase $r3;
+        java.lang.String $r4;
+        org.gnucash.android.model.TransactionType $r5;
+        org.gnucash.android.model.Money $r6;
+        long $l0;
+        java.sql.Timestamp $r7;
+
+        r0 := @this: org.gnucash.android.db.SplitsDbAdapter;
+
+        $r1 := @parameter0: org.gnucash.android.model.Split;
+
+        $r2 = r0.<org.gnucash.android.db.SplitsDbAdapter: android.database.sqlite.SQLiteStatement mReplaceStatement>;
+
+        if $r2 != null goto label1;
+
+        $r3 = r0.<org.gnucash.android.db.SplitsDbAdapter: android.database.sqlite.SQLiteDatabase mDb>;
+
+        $r2 = virtualinvoke $r3.<android.database.sqlite.SQLiteDatabase: android.database.sqlite.SQLiteStatement compileStatement(java.lang.String)>("REPLACE INTO splits ( uid , memo , type , value_num , value_denom , quantity_num , quantity_denom , created_at , account_uid , transaction_uid ) VALUES ( ? , ? , ? , ? , ? , ? , ? , ? , ? , ? ) ");
+
+        r0.<org.gnucash.android.db.SplitsDbAdapter: android.database.sqlite.SQLiteStatement mReplaceStatement> = $r2;
+
+     label1:
+        $r2 = r0.<org.gnucash.android.db.SplitsDbAdapter: android.database.sqlite.SQLiteStatement mReplaceStatement>;
+
+        virtualinvoke $r2.<android.database.sqlite.SQLiteStatement: void clearBindings()>();
+
+        $r2 = r0.<org.gnucash.android.db.SplitsDbAdapter: android.database.sqlite.SQLiteStatement mReplaceStatement>;
+
+        $r4 = virtualinvoke $r1.<org.gnucash.android.model.Split: java.lang.String getUID()>();
+
+        virtualinvoke $r2.<android.database.sqlite.SQLiteStatement: void bindString(int,java.lang.String)>(1, $r4);
+
+        $r4 = virtualinvoke $r1.<org.gnucash.android.model.Split: java.lang.String getMemo()>();
+
+        if $r4 == null goto label2;
+
+        $r2 = r0.<org.gnucash.android.db.SplitsDbAdapter: android.database.sqlite.SQLiteStatement mReplaceStatement>;
+
+        $r4 = virtualinvoke $r1.<org.gnucash.android.model.Split: java.lang.String getMemo()>();
+
+        virtualinvoke $r2.<android.database.sqlite.SQLiteStatement: void bindString(int,java.lang.String)>(2, $r4);
+
+     label2:
+        $r2 = r0.<org.gnucash.android.db.SplitsDbAdapter: android.database.sqlite.SQLiteStatement mReplaceStatement>;
+
+        $r5 = virtualinvoke $r1.<org.gnucash.android.model.Split: org.gnucash.android.model.TransactionType getType()>();
+
+        $r4 = virtualinvoke $r5.<org.gnucash.android.model.TransactionType: java.lang.String name()>();
+
+        virtualinvoke $r2.<android.database.sqlite.SQLiteStatement: void bindString(int,java.lang.String)>(3, $r4);
+
+        $r2 = r0.<org.gnucash.android.db.SplitsDbAdapter: android.database.sqlite.SQLiteStatement mReplaceStatement>;
+
+        $r6 = virtualinvoke $r1.<org.gnucash.android.model.Split: org.gnucash.android.model.Money getValue()>();
+
+        $l0 = virtualinvoke $r6.<org.gnucash.android.model.Money: long getNumerator()>();
+
+        virtualinvoke $r2.<android.database.sqlite.SQLiteStatement: void bindLong(int,long)>(4, $l0);
+
+        $r2 = r0.<org.gnucash.android.db.SplitsDbAdapter: android.database.sqlite.SQLiteStatement mReplaceStatement>;
+
+        $r6 = virtualinvoke $r1.<org.gnucash.android.model.Split: org.gnucash.android.model.Money getValue()>();
+
+        $l0 = virtualinvoke $r6.<org.gnucash.android.model.Money: long getDenominator()>();
+
+        virtualinvoke $r2.<android.database.sqlite.SQLiteStatement: void bindLong(int,long)>(5, $l0);
+
+        $r2 = r0.<org.gnucash.android.db.SplitsDbAdapter: android.database.sqlite.SQLiteStatement mReplaceStatement>;
+
+        $r6 = virtualinvoke $r1.<org.gnucash.android.model.Split: org.gnucash.android.model.Money getQuantity()>();
+
+        $l0 = virtualinvoke $r6.<org.gnucash.android.model.Money: long getNumerator()>();
+
+        virtualinvoke $r2.<android.database.sqlite.SQLiteStatement: void bindLong(int,long)>(6, $l0);
+
+        $r2 = r0.<org.gnucash.android.db.SplitsDbAdapter: android.database.sqlite.SQLiteStatement mReplaceStatement>;
+
+        $r6 = virtualinvoke $r1.<org.gnucash.android.model.Split: org.gnucash.android.model.Money getQuantity()>();
+
+        $l0 = virtualinvoke $r6.<org.gnucash.android.model.Money: long getDenominator()>();
+
+        virtualinvoke $r2.<android.database.sqlite.SQLiteStatement: void bindLong(int,long)>(7, $l0);
+
+        $r2 = r0.<org.gnucash.android.db.SplitsDbAdapter: android.database.sqlite.SQLiteStatement mReplaceStatement>;
+
+        $r7 = virtualinvoke $r1.<org.gnucash.android.model.Split: java.sql.Timestamp getCreatedTimestamp()>();
+
+        $r4 = virtualinvoke $r7.<java.sql.Timestamp: java.lang.String toString()>();
+
+        virtualinvoke $r2.<android.database.sqlite.SQLiteStatement: void bindString(int,java.lang.String)>(8, $r4);
+
+        $r2 = r0.<org.gnucash.android.db.SplitsDbAdapter: android.database.sqlite.SQLiteStatement mReplaceStatement>;
+
+        $r4 = virtualinvoke $r1.<org.gnucash.android.model.Split: java.lang.String getAccountUID()>();
+
+        virtualinvoke $r2.<android.database.sqlite.SQLiteStatement: void bindString(int,java.lang.String)>(9, $r4);
+
+        $r2 = r0.<org.gnucash.android.db.SplitsDbAdapter: android.database.sqlite.SQLiteStatement mReplaceStatement>;
+
+        $r4 = virtualinvoke $r1.<org.gnucash.android.model.Split: java.lang.String getTransactionUID()>();
+
+        virtualinvoke $r2.<android.database.sqlite.SQLiteStatement: void bindString(int,java.lang.String)>(10, $r4);
+
+        $r2 = r0.<org.gnucash.android.db.SplitsDbAdapter: android.database.sqlite.SQLiteStatement mReplaceStatement>;
+
+        return $r2;
+    }
+    public org.gnucash.android.model.Money computeSplitBalance(java.util.List, java.lang.String, boolean)
+    {
+        org.gnucash.android.db.SplitsDbAdapter r0;
+        java.util.List r1;
+        java.lang.String $r2;
+        boolean $z0;
+        org.gnucash.android.model.Money $r3;
+
+        r0 := @this: org.gnucash.android.db.SplitsDbAdapter;
+
+        r1 := @parameter0: java.util.List;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $z0 := @parameter2: boolean;
+
+        $r3 = specialinvoke r0.<org.gnucash.android.db.SplitsDbAdapter: org.gnucash.android.model.Money calculateSplitBalance(java.util.List,java.lang.String,boolean,long,long)>(r1, $r2, $z0, -1L, -1L);
+
+        return $r3;
+    }
+    public org.gnucash.android.model.Money computeSplitBalance(java.util.List, java.lang.String, boolean, long, long)
+    {
+        org.gnucash.android.db.SplitsDbAdapter r0;
+        java.util.List r1;
+        java.lang.String $r2;
+        boolean $z0;
+        long $l0, $l1;
+        org.gnucash.android.model.Money $r3;
+
+        r0 := @this: org.gnucash.android.db.SplitsDbAdapter;
+
+        r1 := @parameter0: java.util.List;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $z0 := @parameter2: boolean;
+
+        $l0 := @parameter3: long;
+
+        $l1 := @parameter4: long;
+
+        $r3 = specialinvoke r0.<org.gnucash.android.db.SplitsDbAdapter: org.gnucash.android.model.Money calculateSplitBalance(java.util.List,java.lang.String,boolean,long,long)>(r1, $r2, $z0, $l0, $l1);
+
+        return $r3;
+    }
+    public boolean deleteRecord(long)
+    {
+        org.gnucash.android.db.SplitsDbAdapter r0;
+        long $l0;
+        org.gnucash.android.model.BaseModel $r1;
+        org.gnucash.android.model.Split r2;
+        java.lang.String $r3, $r6;
+        android.database.sqlite.SQLiteDatabase $r4;
+        java.lang.StringBuilder $r5;
+        int $i1;
+        boolean z0;
+        android.database.Cursor $r7;
+        java.lang.Throwable $r8;
+
+        r0 := @this: org.gnucash.android.db.SplitsDbAdapter;
+
+        $l0 := @parameter0: long;
+
+        $r1 = virtualinvoke r0.<org.gnucash.android.db.SplitsDbAdapter: org.gnucash.android.model.BaseModel getRecord(long)>($l0);
+
+        r2 = (org.gnucash.android.model.Split) $r1;
+
+        $r3 = virtualinvoke r2.<org.gnucash.android.model.Split: java.lang.String getTransactionUID()>();
+
+        $r4 = r0.<org.gnucash.android.db.SplitsDbAdapter: android.database.sqlite.SQLiteDatabase mDb>;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("_id=");
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l0);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $i1 = virtualinvoke $r4.<android.database.sqlite.SQLiteDatabase: int delete(java.lang.String,java.lang.String,java.lang.String[])>("splits", $r6, null);
+
+        if $i1 <= 0 goto label02;
+
+        z0 = 1;
+
+     label01:
+        if z0 != 0 goto label03;
+
+        return 0;
+
+     label02:
+        z0 = 0;
+
+        goto label01;
+
+     label03:
+        $r7 = virtualinvoke r0.<org.gnucash.android.db.SplitsDbAdapter: android.database.Cursor fetchSplitsForTransaction(java.lang.String)>($r3);
+
+     label04:
+        $i1 = interfaceinvoke $r7.<android.database.Cursor: int getCount()>();
+
+     label05:
+        if $i1 <= 0 goto label08;
+
+     label06:
+        $l0 = virtualinvoke r0.<org.gnucash.android.db.SplitsDbAdapter: long getTransactionID(java.lang.String)>($r3);
+
+        $r4 = r0.<org.gnucash.android.db.SplitsDbAdapter: android.database.sqlite.SQLiteDatabase mDb>;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("_id=");
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l0);
+
+        $r3 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $i1 = virtualinvoke $r4.<android.database.sqlite.SQLiteDatabase: int delete(java.lang.String,java.lang.String,java.lang.String[])>("transactions", $r3, null);
+
+     label07:
+        if $i1 <= 0 goto label09;
+
+        z0 = 1;
+
+     label08:
+        interfaceinvoke $r7.<android.database.Cursor: void close()>();
+
+        return z0;
+
+     label09:
+        z0 = 0;
+
+        goto label08;
+
+     label10:
+        $r8 := @caughtexception;
+
+        interfaceinvoke $r7.<android.database.Cursor: void close()>();
+
+        throw $r8;
+
+        catch java.lang.Throwable from label04 to label05 with label10;
+        catch java.lang.Throwable from label06 to label07 with label10;
+    }
+    public android.database.Cursor fetchSplits(java.lang.String, java.lang.String[], java.lang.String)
+    {
+        org.gnucash.android.db.SplitsDbAdapter r0;
+        java.lang.String $r1, $r3;
+        java.lang.String[] $r2;
+        android.database.Cursor $r4;
+        android.database.sqlite.SQLiteDatabase $r5;
+
+        r0 := @this: org.gnucash.android.db.SplitsDbAdapter;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.lang.String[];
+
+        $r3 := @parameter2: java.lang.String;
+
+        $r5 = r0.<org.gnucash.android.db.SplitsDbAdapter: android.database.sqlite.SQLiteDatabase mDb>;
+
+        $r4 = virtualinvoke $r5.<android.database.sqlite.SQLiteDatabase: android.database.Cursor query(java.lang.String,java.lang.String[],java.lang.String,java.lang.String[],java.lang.String,java.lang.String,java.lang.String)>("splits", null, $r1, $r2, null, null, $r3);
+
+        return $r4;
+    }
+    public android.database.Cursor fetchSplitsForAccount(java.lang.String)
+    {
+        org.gnucash.android.db.SplitsDbAdapter r0;
+        java.lang.String $r1, $r5, $r7;
+        android.database.sqlite.SQLiteQueryBuilder r2;
+        java.lang.String[] r3, r4;
+        java.lang.StringBuilder $r6;
+        android.database.sqlite.SQLiteDatabase $r8;
+        android.database.Cursor $r9;
+
+        r0 := @this: org.gnucash.android.db.SplitsDbAdapter;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r5 = r0.<org.gnucash.android.db.SplitsDbAdapter: java.lang.String LOG_TAG>;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Fetching all splits for account UID ");
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>($r5, $r7);
+
+        r2 = new android.database.sqlite.SQLiteQueryBuilder;
+
+        specialinvoke r2.<android.database.sqlite.SQLiteQueryBuilder: void <init>()>();
+
+        virtualinvoke r2.<android.database.sqlite.SQLiteQueryBuilder: void setTables(java.lang.String)>("transactions INNER JOIN splits ON transactions.uid = splits.transaction_uid");
+
+        virtualinvoke r2.<android.database.sqlite.SQLiteQueryBuilder: void setDistinct(boolean)>(1);
+
+        r3 = newarray (java.lang.String)[1];
+
+        r3[0] = "splits.*";
+
+        r4 = newarray (java.lang.String)[1];
+
+        r4[0] = $r1;
+
+        $r8 = r0.<org.gnucash.android.db.SplitsDbAdapter: android.database.sqlite.SQLiteDatabase mDb>;
+
+        $r9 = virtualinvoke r2.<android.database.sqlite.SQLiteQueryBuilder: android.database.Cursor query(android.database.sqlite.SQLiteDatabase,java.lang.String[],java.lang.String,java.lang.String[],java.lang.String,java.lang.String,java.lang.String)>($r8, r3, "splits.account_uid = ? AND transactions.is_template = 0", r4, null, null, "transactions.timestamp DESC");
+
+        return $r9;
+    }
+    public android.database.Cursor fetchSplitsForTransaction(java.lang.String)
+    {
+        org.gnucash.android.db.SplitsDbAdapter r0;
+        java.lang.String $r1, $r2, $r4;
+        java.lang.StringBuilder $r3;
+        android.database.sqlite.SQLiteDatabase $r5;
+        java.lang.String[] $r6;
+        android.database.Cursor $r7;
+
+        r0 := @this: org.gnucash.android.db.SplitsDbAdapter;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = r0.<org.gnucash.android.db.SplitsDbAdapter: java.lang.String LOG_TAG>;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Fetching all splits for transaction UID ");
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int v(java.lang.String,java.lang.String)>($r2, $r4);
+
+        $r5 = r0.<org.gnucash.android.db.SplitsDbAdapter: android.database.sqlite.SQLiteDatabase mDb>;
+
+        $r6 = newarray (java.lang.String)[1];
+
+        $r6[0] = $r1;
+
+        $r7 = virtualinvoke $r5.<android.database.sqlite.SQLiteDatabase: android.database.Cursor query(java.lang.String,java.lang.String[],java.lang.String,java.lang.String[],java.lang.String,java.lang.String,java.lang.String)>("splits", null, "transaction_uid = ?", $r6, null, null, null);
+
+        return $r7;
+    }
+    public android.database.Cursor fetchSplitsForTransactionAndAccount(java.lang.String, java.lang.String)
+    {
+        org.gnucash.android.db.SplitsDbAdapter r0;
+        java.lang.String $r1, $r2, $r3, $r5;
+        java.lang.StringBuilder $r4;
+        android.database.sqlite.SQLiteDatabase $r6;
+        java.lang.String[] $r7;
+        android.database.Cursor $r8;
+
+        r0 := @this: org.gnucash.android.db.SplitsDbAdapter;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.lang.String;
+
+        if $r1 == null goto label2;
+
+        if $r2 != null goto label1;
+
+        return null;
+
+     label1:
+        $r3 = r0.<org.gnucash.android.db.SplitsDbAdapter: java.lang.String LOG_TAG>;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Fetching all splits for transaction ID ");
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("and account ID ");
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int v(java.lang.String,java.lang.String)>($r3, $r5);
+
+        $r6 = r0.<org.gnucash.android.db.SplitsDbAdapter: android.database.sqlite.SQLiteDatabase mDb>;
+
+        $r7 = newarray (java.lang.String)[2];
+
+        $r7[0] = $r1;
+
+        $r7[1] = $r2;
+
+        $r8 = virtualinvoke $r6.<android.database.sqlite.SQLiteDatabase: android.database.Cursor query(java.lang.String,java.lang.String[],java.lang.String,java.lang.String[],java.lang.String,java.lang.String,java.lang.String)>("splits", null, "transaction_uid = ? AND account_uid = ?", $r7, null, null, "value_num ASC");
+
+        return $r8;
+
+     label2:
+        return null;
+    }
+    public java.util.List getSplitsForTransaction(long)
+    {
+        org.gnucash.android.db.SplitsDbAdapter r0;
+        long $l0;
+        java.lang.String $r1;
+        java.util.List $r2;
+
+        r0 := @this: org.gnucash.android.db.SplitsDbAdapter;
+
+        $l0 := @parameter0: long;
+
+        $r1 = virtualinvoke r0.<org.gnucash.android.db.SplitsDbAdapter: java.lang.String getTransactionUID(long)>($l0);
+
+        $r2 = virtualinvoke r0.<org.gnucash.android.db.SplitsDbAdapter: java.util.List getSplitsForTransaction(java.lang.String)>($r1);
+
+        return $r2;
+    }
+    public java.util.List getSplitsForTransaction(java.lang.String)
+    {
+        org.gnucash.android.db.SplitsDbAdapter r0;
+        java.lang.String $r1;
+        java.util.ArrayList r2;
+        android.database.Cursor $r3;
+        boolean $z0;
+        org.gnucash.android.model.Split $r4;
+        java.lang.Throwable $r5;
+
+        r0 := @this: org.gnucash.android.db.SplitsDbAdapter;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r3 = virtualinvoke r0.<org.gnucash.android.db.SplitsDbAdapter: android.database.Cursor fetchSplitsForTransaction(java.lang.String)>($r1);
+
+        r2 = new java.util.ArrayList;
+
+        specialinvoke r2.<java.util.ArrayList: void <init>()>();
+
+     label1:
+        $z0 = interfaceinvoke $r3.<android.database.Cursor: boolean moveToNext()>();
+
+     label2:
+        if $z0 == 0 goto label6;
+
+     label3:
+        $r4 = virtualinvoke r0.<org.gnucash.android.db.SplitsDbAdapter: org.gnucash.android.model.Split buildModelInstance(android.database.Cursor)>($r3);
+
+        interfaceinvoke r2.<java.util.List: boolean add(java.lang.Object)>($r4);
+
+     label4:
+        goto label1;
+
+     label5:
+        $r5 := @caughtexception;
+
+        interfaceinvoke $r3.<android.database.Cursor: void close()>();
+
+        throw $r5;
+
+     label6:
+        interfaceinvoke $r3.<android.database.Cursor: void close()>();
+
+        return r2;
+
+        catch java.lang.Throwable from label1 to label2 with label5;
+        catch java.lang.Throwable from label3 to label4 with label5;
+    }
+    public java.util.List getSplitsForTransactionInAccount(java.lang.String, java.lang.String)
+    {
+        org.gnucash.android.db.SplitsDbAdapter r0;
+        java.lang.String $r1, $r2;
+        java.util.ArrayList r3;
+        android.database.Cursor $r4;
+        boolean $z0;
+        org.gnucash.android.model.Split $r5;
+
+        r0 := @this: org.gnucash.android.db.SplitsDbAdapter;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $r4 = virtualinvoke r0.<org.gnucash.android.db.SplitsDbAdapter: android.database.Cursor fetchSplitsForTransactionAndAccount(java.lang.String,java.lang.String)>($r1, $r2);
+
+        r3 = new java.util.ArrayList;
+
+        specialinvoke r3.<java.util.ArrayList: void <init>()>();
+
+        if $r4 == null goto label3;
+
+     label1:
+        $z0 = interfaceinvoke $r4.<android.database.Cursor: boolean moveToNext()>();
+
+        if $z0 == 0 goto label2;
+
+        $r5 = virtualinvoke r0.<org.gnucash.android.db.SplitsDbAdapter: org.gnucash.android.model.Split buildModelInstance(android.database.Cursor)>($r4);
+
+        interfaceinvoke r3.<java.util.List: boolean add(java.lang.Object)>($r5);
+
+        goto label1;
+
+     label2:
+        interfaceinvoke $r4.<android.database.Cursor: void close()>();
+
+     label3:
+        return r3;
+    }
+    public long getTransactionID(java.lang.String)
+    {
+        org.gnucash.android.db.SplitsDbAdapter r0;
+        java.lang.String $r1;
+        android.database.sqlite.SQLiteDatabase $r2;
+        java.lang.String[] $r3, $r4;
+        android.database.Cursor $r5;
+        boolean $z0;
+        long $l0;
+        java.lang.IllegalArgumentException $r6;
+        java.lang.StringBuilder $r7;
+        java.lang.Throwable $r8;
+
+        r0 := @this: org.gnucash.android.db.SplitsDbAdapter;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = r0.<org.gnucash.android.db.SplitsDbAdapter: android.database.sqlite.SQLiteDatabase mDb>;
+
+        $r3 = newarray (java.lang.String)[1];
+
+        $r3[0] = "_id";
+
+        $r4 = newarray (java.lang.String)[1];
+
+        $r4[0] = $r1;
+
+        $r5 = virtualinvoke $r2.<android.database.sqlite.SQLiteDatabase: android.database.Cursor query(java.lang.String,java.lang.String[],java.lang.String,java.lang.String[],java.lang.String,java.lang.String,java.lang.String)>("transactions", $r3, "uid=?", $r4, null, null, null);
+
+     label1:
+        $z0 = interfaceinvoke $r5.<android.database.Cursor: boolean moveToFirst()>();
+
+     label2:
+        if $z0 == 0 goto label5;
+
+     label3:
+        $l0 = interfaceinvoke $r5.<android.database.Cursor: long getLong(int)>(0);
+
+     label4:
+        interfaceinvoke $r5.<android.database.Cursor: void close()>();
+
+        return $l0;
+
+     label5:
+        $r6 = new java.lang.IllegalArgumentException;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("transaction ");
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" does not exist");
+
+        $r1 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r6.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r1);
+
+        throw $r6;
+
+     label6:
+        $r8 := @caughtexception;
+
+        interfaceinvoke $r5.<android.database.Cursor: void close()>();
+
+        throw $r8;
+
+        catch java.lang.Throwable from label1 to label2 with label6;
+        catch java.lang.Throwable from label3 to label4 with label6;
+        catch java.lang.Throwable from label5 to label6 with label6;
+    }
+    public java.lang.String getTransactionUID(long)
+    {
+        org.gnucash.android.db.SplitsDbAdapter r0;
+        long $l0;
+        android.database.sqlite.SQLiteDatabase $r1;
+        java.lang.String[] $r2;
+        java.lang.StringBuilder $r3;
+        java.lang.String $r4;
+        android.database.Cursor $r5;
+        boolean $z0;
+        int $i1;
+        java.lang.IllegalArgumentException $r6;
+        java.lang.Throwable $r7;
+
+        r0 := @this: org.gnucash.android.db.SplitsDbAdapter;
+
+        $l0 := @parameter0: long;
+
+        $r1 = r0.<org.gnucash.android.db.SplitsDbAdapter: android.database.sqlite.SQLiteDatabase mDb>;
+
+        $r2 = newarray (java.lang.String)[1];
+
+        $r2[0] = "uid";
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("_id = ");
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l0);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r5 = virtualinvoke $r1.<android.database.sqlite.SQLiteDatabase: android.database.Cursor query(java.lang.String,java.lang.String[],java.lang.String,java.lang.String[],java.lang.String,java.lang.String,java.lang.String)>("transactions", $r2, $r4, null, null, null, null);
+
+     label1:
+        $z0 = interfaceinvoke $r5.<android.database.Cursor: boolean moveToFirst()>();
+
+     label2:
+        if $z0 == 0 goto label5;
+
+     label3:
+        $i1 = interfaceinvoke $r5.<android.database.Cursor: int getColumnIndexOrThrow(java.lang.String)>("uid");
+
+        $r4 = interfaceinvoke $r5.<android.database.Cursor: java.lang.String getString(int)>($i1);
+
+     label4:
+        interfaceinvoke $r5.<android.database.Cursor: void close()>();
+
+        return $r4;
+
+     label5:
+        $r6 = new java.lang.IllegalArgumentException;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("transaction ");
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l0);
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" does not exist");
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r6.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r4);
+
+        throw $r6;
+
+     label6:
+        $r7 := @caughtexception;
+
+        interfaceinvoke $r5.<android.database.Cursor: void close()>();
+
+        throw $r7;
+
+        catch java.lang.Throwable from label1 to label2 with label6;
+        catch java.lang.Throwable from label3 to label4 with label6;
+        catch java.lang.Throwable from label5 to label6 with label6;
+    }

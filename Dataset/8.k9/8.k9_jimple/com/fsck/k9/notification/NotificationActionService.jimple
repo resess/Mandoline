@@ -1,0 +1,681 @@
+com.fsck.k9.notification.NotificationActionService extends com.fsck.k9.service.CoreService
+private static final java.lang.String ACTION_ARCHIVE
+private static final java.lang.String ACTION_DELETE
+private static final java.lang.String ACTION_DISMISS
+private static final java.lang.String ACTION_MARK_AS_READ
+private static final java.lang.String ACTION_SPAM
+private static final java.lang.String EXTRA_ACCOUNT_UUID
+private static final java.lang.String EXTRA_MESSAGE_REFERENCE
+private static final java.lang.String EXTRA_MESSAGE_REFERENCES
+    public void <init>()
+    {
+        com.fsck.k9.notification.NotificationActionService r0;
+
+        r0 := @this: com.fsck.k9.notification.NotificationActionService;
+
+        specialinvoke r0.<com.fsck.k9.service.CoreService: void <init>()>();
+
+        return;
+    }
+    private void archiveMessages(android.content.Intent, com.fsck.k9.Account, com.fsck.k9.controller.MessagingController)
+    {
+        com.fsck.k9.notification.NotificationActionService r0;
+        android.content.Intent $r1;
+        com.fsck.k9.Account $r2;
+        com.fsck.k9.controller.MessagingController $r3;
+        boolean $z0;
+        java.lang.String $r4, $r5;
+        java.util.ArrayList $r6;
+        java.util.Iterator $r7;
+        java.lang.Object $r8;
+        com.fsck.k9.activity.MessageReference r9;
+
+        r0 := @this: com.fsck.k9.notification.NotificationActionService;
+
+        $r1 := @parameter0: android.content.Intent;
+
+        $r2 := @parameter1: com.fsck.k9.Account;
+
+        $r3 := @parameter2: com.fsck.k9.controller.MessagingController;
+
+        $z0 = <com.fsck.k9.K9: boolean DEBUG>;
+
+        if $z0 == 0 goto label1;
+
+        staticinvoke <android.util.Log: int i(java.lang.String,java.lang.String)>("k9", "NotificationActionService archiving messages");
+
+     label1:
+        $r4 = virtualinvoke $r2.<com.fsck.k9.Account: java.lang.String getArchiveFolderName()>();
+
+        if $r4 == null goto label3;
+
+        $r5 = virtualinvoke $r2.<com.fsck.k9.Account: java.lang.String getSpamFolderName()>();
+
+        $z0 = virtualinvoke $r4.<java.lang.String: boolean equals(java.lang.Object)>($r5);
+
+        if $z0 == 0 goto label2;
+
+        $z0 = staticinvoke <com.fsck.k9.K9: boolean confirmSpam()>();
+
+        if $z0 != 0 goto label3;
+
+     label2:
+        $z0 = specialinvoke r0.<com.fsck.k9.notification.NotificationActionService: boolean isMovePossible(com.fsck.k9.controller.MessagingController,com.fsck.k9.Account,java.lang.String)>($r3, $r2, $r4);
+
+        if $z0 != 0 goto label4;
+
+     label3:
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String)>("k9", "Can not archive messages");
+
+        return;
+
+     label4:
+        $r6 = virtualinvoke $r1.<android.content.Intent: java.util.ArrayList getParcelableArrayListExtra(java.lang.String)>("messageReferences");
+
+        $r7 = interfaceinvoke $r6.<java.util.List: java.util.Iterator iterator()>();
+
+     label5:
+        $z0 = interfaceinvoke $r7.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label6;
+
+        $r8 = interfaceinvoke $r7.<java.util.Iterator: java.lang.Object next()>();
+
+        r9 = (com.fsck.k9.activity.MessageReference) $r8;
+
+        $z0 = virtualinvoke $r3.<com.fsck.k9.controller.MessagingController: boolean isMoveCapable(com.fsck.k9.activity.MessageReference)>(r9);
+
+        if $z0 == 0 goto label5;
+
+        $r5 = virtualinvoke r9.<com.fsck.k9.activity.MessageReference: java.lang.String getFolderName()>();
+
+        virtualinvoke $r3.<com.fsck.k9.controller.MessagingController: void moveMessage(com.fsck.k9.Account,java.lang.String,com.fsck.k9.activity.MessageReference,java.lang.String)>($r2, $r5, r9, $r4);
+
+        goto label5;
+
+     label6:
+        return;
+    }
+    private void cancelNotifications(android.content.Intent, com.fsck.k9.Account, com.fsck.k9.controller.MessagingController)
+    {
+        com.fsck.k9.notification.NotificationActionService r0;
+        android.content.Intent $r1;
+        com.fsck.k9.Account $r2;
+        com.fsck.k9.controller.MessagingController $r3;
+        boolean $z0;
+        android.os.Parcelable $r4;
+        com.fsck.k9.activity.MessageReference r5;
+        java.util.ArrayList $r6;
+        java.util.Iterator $r7;
+        java.lang.Object $r8;
+
+        r0 := @this: com.fsck.k9.notification.NotificationActionService;
+
+        $r1 := @parameter0: android.content.Intent;
+
+        $r2 := @parameter1: com.fsck.k9.Account;
+
+        $r3 := @parameter2: com.fsck.k9.controller.MessagingController;
+
+        $z0 = virtualinvoke $r1.<android.content.Intent: boolean hasExtra(java.lang.String)>("messageReference");
+
+        if $z0 == 0 goto label1;
+
+        $r4 = virtualinvoke $r1.<android.content.Intent: android.os.Parcelable getParcelableExtra(java.lang.String)>("messageReference");
+
+        r5 = (com.fsck.k9.activity.MessageReference) $r4;
+
+        virtualinvoke $r3.<com.fsck.k9.controller.MessagingController: void cancelNotificationForMessage(com.fsck.k9.Account,com.fsck.k9.activity.MessageReference)>($r2, r5);
+
+        return;
+
+     label1:
+        $z0 = virtualinvoke $r1.<android.content.Intent: boolean hasExtra(java.lang.String)>("messageReferences");
+
+        if $z0 == 0 goto label3;
+
+        $r6 = virtualinvoke $r1.<android.content.Intent: java.util.ArrayList getParcelableArrayListExtra(java.lang.String)>("messageReferences");
+
+        $r7 = interfaceinvoke $r6.<java.util.List: java.util.Iterator iterator()>();
+
+     label2:
+        $z0 = interfaceinvoke $r7.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label4;
+
+        $r8 = interfaceinvoke $r7.<java.util.Iterator: java.lang.Object next()>();
+
+        r5 = (com.fsck.k9.activity.MessageReference) $r8;
+
+        virtualinvoke $r3.<com.fsck.k9.controller.MessagingController: void cancelNotificationForMessage(com.fsck.k9.Account,com.fsck.k9.activity.MessageReference)>($r2, r5);
+
+        goto label2;
+
+     label3:
+        virtualinvoke $r3.<com.fsck.k9.controller.MessagingController: void cancelNotificationsForAccount(com.fsck.k9.Account)>($r2);
+
+     label4:
+        return;
+    }
+    static android.content.Intent createArchiveAllIntent(android.content.Context, com.fsck.k9.Account, java.util.ArrayList)
+    {
+        android.content.Context $r0;
+        com.fsck.k9.Account $r1;
+        java.util.ArrayList r2;
+        android.content.Intent r3;
+        java.lang.String $r4;
+
+        $r0 := @parameter0: android.content.Context;
+
+        $r1 := @parameter1: com.fsck.k9.Account;
+
+        r2 := @parameter2: java.util.ArrayList;
+
+        r3 = new android.content.Intent;
+
+        specialinvoke r3.<android.content.Intent: void <init>(android.content.Context,java.lang.Class)>($r0, class "Lcom/fsck/k9/notification/NotificationActionService;");
+
+        virtualinvoke r3.<android.content.Intent: android.content.Intent setAction(java.lang.String)>("ACTION_ARCHIVE");
+
+        $r4 = virtualinvoke $r1.<com.fsck.k9.Account: java.lang.String getUuid()>();
+
+        virtualinvoke r3.<android.content.Intent: android.content.Intent putExtra(java.lang.String,java.lang.String)>("accountUuid", $r4);
+
+        virtualinvoke r3.<android.content.Intent: android.content.Intent putExtra(java.lang.String,java.io.Serializable)>("messageReferences", r2);
+
+        return r3;
+    }
+    static android.content.Intent createArchiveMessageIntent(android.content.Context, com.fsck.k9.activity.MessageReference)
+    {
+        android.content.Context $r0;
+        com.fsck.k9.activity.MessageReference $r1;
+        android.content.Intent r2;
+        java.util.ArrayList $r3;
+        java.lang.String $r4;
+
+        $r0 := @parameter0: android.content.Context;
+
+        $r1 := @parameter1: com.fsck.k9.activity.MessageReference;
+
+        $r3 = staticinvoke <com.fsck.k9.notification.NotificationActionService: java.util.ArrayList createSingleItemArrayList(com.fsck.k9.activity.MessageReference)>($r1);
+
+        r2 = new android.content.Intent;
+
+        specialinvoke r2.<android.content.Intent: void <init>(android.content.Context,java.lang.Class)>($r0, class "Lcom/fsck/k9/notification/NotificationActionService;");
+
+        virtualinvoke r2.<android.content.Intent: android.content.Intent setAction(java.lang.String)>("ACTION_ARCHIVE");
+
+        $r4 = virtualinvoke $r1.<com.fsck.k9.activity.MessageReference: java.lang.String getAccountUuid()>();
+
+        virtualinvoke r2.<android.content.Intent: android.content.Intent putExtra(java.lang.String,java.lang.String)>("accountUuid", $r4);
+
+        virtualinvoke r2.<android.content.Intent: android.content.Intent putExtra(java.lang.String,java.io.Serializable)>("messageReferences", $r3);
+
+        return r2;
+    }
+    public static android.content.Intent createDeleteAllMessagesIntent(android.content.Context, java.lang.String, java.util.ArrayList)
+    {
+        android.content.Context $r0;
+        java.lang.String $r1;
+        java.util.ArrayList r2;
+        android.content.Intent r3;
+
+        $r0 := @parameter0: android.content.Context;
+
+        $r1 := @parameter1: java.lang.String;
+
+        r2 := @parameter2: java.util.ArrayList;
+
+        r3 = new android.content.Intent;
+
+        specialinvoke r3.<android.content.Intent: void <init>(android.content.Context,java.lang.Class)>($r0, class "Lcom/fsck/k9/notification/NotificationActionService;");
+
+        virtualinvoke r3.<android.content.Intent: android.content.Intent setAction(java.lang.String)>("ACTION_DELETE");
+
+        virtualinvoke r3.<android.content.Intent: android.content.Intent putExtra(java.lang.String,java.lang.String)>("accountUuid", $r1);
+
+        virtualinvoke r3.<android.content.Intent: android.content.Intent putExtra(java.lang.String,java.io.Serializable)>("messageReferences", r2);
+
+        return r3;
+    }
+    static android.content.Intent createDeleteMessageIntent(android.content.Context, com.fsck.k9.activity.MessageReference)
+    {
+        android.content.Context $r0;
+        com.fsck.k9.activity.MessageReference $r1;
+        java.lang.String $r2;
+        java.util.ArrayList $r3;
+        android.content.Intent $r4;
+
+        $r0 := @parameter0: android.content.Context;
+
+        $r1 := @parameter1: com.fsck.k9.activity.MessageReference;
+
+        $r2 = virtualinvoke $r1.<com.fsck.k9.activity.MessageReference: java.lang.String getAccountUuid()>();
+
+        $r3 = staticinvoke <com.fsck.k9.notification.NotificationActionService: java.util.ArrayList createSingleItemArrayList(com.fsck.k9.activity.MessageReference)>($r1);
+
+        $r4 = staticinvoke <com.fsck.k9.notification.NotificationActionService: android.content.Intent createDeleteAllMessagesIntent(android.content.Context,java.lang.String,java.util.ArrayList)>($r0, $r2, $r3);
+
+        return $r4;
+    }
+    static android.content.Intent createDismissAllMessagesIntent(android.content.Context, com.fsck.k9.Account)
+    {
+        android.content.Context $r0;
+        com.fsck.k9.Account $r1;
+        android.content.Intent r2;
+        java.lang.String $r3;
+
+        $r0 := @parameter0: android.content.Context;
+
+        $r1 := @parameter1: com.fsck.k9.Account;
+
+        r2 = new android.content.Intent;
+
+        specialinvoke r2.<android.content.Intent: void <init>(android.content.Context,java.lang.Class)>($r0, class "Lcom/fsck/k9/notification/NotificationActionService;");
+
+        virtualinvoke r2.<android.content.Intent: android.content.Intent setAction(java.lang.String)>("ACTION_DISMISS");
+
+        $r3 = virtualinvoke $r1.<com.fsck.k9.Account: java.lang.String getUuid()>();
+
+        virtualinvoke r2.<android.content.Intent: android.content.Intent putExtra(java.lang.String,java.lang.String)>("accountUuid", $r3);
+
+        return r2;
+    }
+    static android.content.Intent createDismissMessageIntent(android.content.Context, com.fsck.k9.activity.MessageReference)
+    {
+        android.content.Context $r0;
+        com.fsck.k9.activity.MessageReference $r1;
+        android.content.Intent r2;
+        java.lang.String $r3;
+
+        $r0 := @parameter0: android.content.Context;
+
+        $r1 := @parameter1: com.fsck.k9.activity.MessageReference;
+
+        r2 = new android.content.Intent;
+
+        specialinvoke r2.<android.content.Intent: void <init>(android.content.Context,java.lang.Class)>($r0, class "Lcom/fsck/k9/notification/NotificationActionService;");
+
+        virtualinvoke r2.<android.content.Intent: android.content.Intent setAction(java.lang.String)>("ACTION_DISMISS");
+
+        $r3 = virtualinvoke $r1.<com.fsck.k9.activity.MessageReference: java.lang.String getAccountUuid()>();
+
+        virtualinvoke r2.<android.content.Intent: android.content.Intent putExtra(java.lang.String,java.lang.String)>("accountUuid", $r3);
+
+        virtualinvoke r2.<android.content.Intent: android.content.Intent putExtra(java.lang.String,android.os.Parcelable)>("messageReference", $r1);
+
+        return r2;
+    }
+    static android.content.Intent createMarkAllAsReadIntent(android.content.Context, java.lang.String, java.util.ArrayList)
+    {
+        android.content.Context $r0;
+        java.lang.String $r1;
+        java.util.ArrayList r2;
+        android.content.Intent r3;
+
+        $r0 := @parameter0: android.content.Context;
+
+        $r1 := @parameter1: java.lang.String;
+
+        r2 := @parameter2: java.util.ArrayList;
+
+        r3 = new android.content.Intent;
+
+        specialinvoke r3.<android.content.Intent: void <init>(android.content.Context,java.lang.Class)>($r0, class "Lcom/fsck/k9/notification/NotificationActionService;");
+
+        virtualinvoke r3.<android.content.Intent: android.content.Intent setAction(java.lang.String)>("ACTION_MARK_AS_READ");
+
+        virtualinvoke r3.<android.content.Intent: android.content.Intent putExtra(java.lang.String,java.lang.String)>("accountUuid", $r1);
+
+        virtualinvoke r3.<android.content.Intent: android.content.Intent putExtra(java.lang.String,java.io.Serializable)>("messageReferences", r2);
+
+        return r3;
+    }
+    static android.content.Intent createMarkMessageAsReadIntent(android.content.Context, com.fsck.k9.activity.MessageReference)
+    {
+        android.content.Context $r0;
+        com.fsck.k9.activity.MessageReference $r1;
+        java.lang.String $r2;
+        java.util.ArrayList $r3;
+        android.content.Intent $r4;
+
+        $r0 := @parameter0: android.content.Context;
+
+        $r1 := @parameter1: com.fsck.k9.activity.MessageReference;
+
+        $r2 = virtualinvoke $r1.<com.fsck.k9.activity.MessageReference: java.lang.String getAccountUuid()>();
+
+        $r3 = staticinvoke <com.fsck.k9.notification.NotificationActionService: java.util.ArrayList createSingleItemArrayList(com.fsck.k9.activity.MessageReference)>($r1);
+
+        $r4 = staticinvoke <com.fsck.k9.notification.NotificationActionService: android.content.Intent createMarkAllAsReadIntent(android.content.Context,java.lang.String,java.util.ArrayList)>($r0, $r2, $r3);
+
+        return $r4;
+    }
+    static android.content.Intent createMarkMessageAsSpamIntent(android.content.Context, com.fsck.k9.activity.MessageReference)
+    {
+        android.content.Context $r0;
+        com.fsck.k9.activity.MessageReference $r1;
+        android.content.Intent r2;
+        java.lang.String $r3;
+
+        $r0 := @parameter0: android.content.Context;
+
+        $r1 := @parameter1: com.fsck.k9.activity.MessageReference;
+
+        r2 = new android.content.Intent;
+
+        specialinvoke r2.<android.content.Intent: void <init>(android.content.Context,java.lang.Class)>($r0, class "Lcom/fsck/k9/notification/NotificationActionService;");
+
+        virtualinvoke r2.<android.content.Intent: android.content.Intent setAction(java.lang.String)>("ACTION_SPAM");
+
+        $r3 = virtualinvoke $r1.<com.fsck.k9.activity.MessageReference: java.lang.String getAccountUuid()>();
+
+        virtualinvoke r2.<android.content.Intent: android.content.Intent putExtra(java.lang.String,java.lang.String)>("accountUuid", $r3);
+
+        virtualinvoke r2.<android.content.Intent: android.content.Intent putExtra(java.lang.String,android.os.Parcelable)>("messageReference", $r1);
+
+        return r2;
+    }
+    private static java.util.ArrayList createSingleItemArrayList(com.fsck.k9.activity.MessageReference)
+    {
+        com.fsck.k9.activity.MessageReference $r0;
+        java.util.ArrayList r1;
+
+        $r0 := @parameter0: com.fsck.k9.activity.MessageReference;
+
+        r1 = new java.util.ArrayList;
+
+        specialinvoke r1.<java.util.ArrayList: void <init>(int)>(1);
+
+        virtualinvoke r1.<java.util.ArrayList: boolean add(java.lang.Object)>($r0);
+
+        return r1;
+    }
+    private void deleteMessages(android.content.Intent, com.fsck.k9.controller.MessagingController)
+    {
+        com.fsck.k9.notification.NotificationActionService r0;
+        android.content.Intent $r1;
+        com.fsck.k9.controller.MessagingController $r2;
+        java.util.ArrayList $r3;
+        boolean $z0;
+
+        r0 := @this: com.fsck.k9.notification.NotificationActionService;
+
+        $r1 := @parameter0: android.content.Intent;
+
+        $r2 := @parameter1: com.fsck.k9.controller.MessagingController;
+
+        $z0 = <com.fsck.k9.K9: boolean DEBUG>;
+
+        if $z0 == 0 goto label1;
+
+        staticinvoke <android.util.Log: int i(java.lang.String,java.lang.String)>("k9", "NotificationActionService deleting messages");
+
+     label1:
+        $r3 = virtualinvoke $r1.<android.content.Intent: java.util.ArrayList getParcelableArrayListExtra(java.lang.String)>("messageReferences");
+
+        virtualinvoke $r2.<com.fsck.k9.controller.MessagingController: void deleteMessages(java.util.List,com.fsck.k9.controller.MessagingListener)>($r3, null);
+
+        return;
+    }
+    private boolean isMovePossible(com.fsck.k9.controller.MessagingController, com.fsck.k9.Account, java.lang.String)
+    {
+        com.fsck.k9.notification.NotificationActionService r0;
+        com.fsck.k9.controller.MessagingController $r1;
+        com.fsck.k9.Account $r2;
+        java.lang.String $r3, $r4;
+        boolean $z0;
+
+        r0 := @this: com.fsck.k9.notification.NotificationActionService;
+
+        $r1 := @parameter0: com.fsck.k9.controller.MessagingController;
+
+        $r2 := @parameter1: com.fsck.k9.Account;
+
+        $r3 := @parameter2: java.lang.String;
+
+        $r4 = "-NONE-";
+
+        $z0 = virtualinvoke $r4.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>($r3);
+
+        if $z0 != 0 goto label2;
+
+        $z0 = 1;
+
+     label1:
+        if $z0 == 0 goto label3;
+
+        $z0 = virtualinvoke $r1.<com.fsck.k9.controller.MessagingController: boolean isMoveCapable(com.fsck.k9.Account)>($r2);
+
+        if $z0 == 0 goto label3;
+
+        return 1;
+
+     label2:
+        $z0 = 0;
+
+        goto label1;
+
+     label3:
+        return 0;
+    }
+    private void markMessageAsSpam(android.content.Intent, com.fsck.k9.Account, com.fsck.k9.controller.MessagingController)
+    {
+        com.fsck.k9.notification.NotificationActionService r0;
+        android.content.Intent $r1;
+        com.fsck.k9.Account $r2;
+        com.fsck.k9.controller.MessagingController $r3;
+        boolean $z0;
+        android.os.Parcelable $r4;
+        com.fsck.k9.activity.MessageReference r5;
+        java.lang.String $r6, $r7;
+
+        r0 := @this: com.fsck.k9.notification.NotificationActionService;
+
+        $r1 := @parameter0: android.content.Intent;
+
+        $r2 := @parameter1: com.fsck.k9.Account;
+
+        $r3 := @parameter2: com.fsck.k9.controller.MessagingController;
+
+        $z0 = <com.fsck.k9.K9: boolean DEBUG>;
+
+        if $z0 == 0 goto label1;
+
+        staticinvoke <android.util.Log: int i(java.lang.String,java.lang.String)>("k9", "NotificationActionService moving messages to spam");
+
+     label1:
+        $r4 = virtualinvoke $r1.<android.content.Intent: android.os.Parcelable getParcelableExtra(java.lang.String)>("messageReference");
+
+        r5 = (com.fsck.k9.activity.MessageReference) $r4;
+
+        $r6 = virtualinvoke $r2.<com.fsck.k9.Account: java.lang.String getSpamFolderName()>();
+
+        if $r6 == null goto label2;
+
+        $z0 = staticinvoke <com.fsck.k9.K9: boolean confirmSpam()>();
+
+        if $z0 != 0 goto label2;
+
+        $z0 = specialinvoke r0.<com.fsck.k9.notification.NotificationActionService: boolean isMovePossible(com.fsck.k9.controller.MessagingController,com.fsck.k9.Account,java.lang.String)>($r3, $r2, $r6);
+
+        if $z0 == 0 goto label2;
+
+        $r7 = virtualinvoke r5.<com.fsck.k9.activity.MessageReference: java.lang.String getFolderName()>();
+
+        virtualinvoke $r3.<com.fsck.k9.controller.MessagingController: void moveMessage(com.fsck.k9.Account,java.lang.String,com.fsck.k9.activity.MessageReference,java.lang.String)>($r2, $r7, r5, $r6);
+
+     label2:
+        return;
+    }
+    private void markMessagesAsRead(android.content.Intent, com.fsck.k9.Account, com.fsck.k9.controller.MessagingController)
+    {
+        com.fsck.k9.notification.NotificationActionService r0;
+        android.content.Intent $r1;
+        com.fsck.k9.Account $r2;
+        com.fsck.k9.controller.MessagingController $r3;
+        com.fsck.k9.mail.Flag $r4;
+        boolean $z0;
+        java.util.ArrayList $r5;
+        java.util.Iterator $r6;
+        java.lang.Object $r7;
+        com.fsck.k9.activity.MessageReference r8;
+        java.lang.String $r9, $r10;
+
+        r0 := @this: com.fsck.k9.notification.NotificationActionService;
+
+        $r1 := @parameter0: android.content.Intent;
+
+        $r2 := @parameter1: com.fsck.k9.Account;
+
+        $r3 := @parameter2: com.fsck.k9.controller.MessagingController;
+
+        $z0 = <com.fsck.k9.K9: boolean DEBUG>;
+
+        if $z0 == 0 goto label1;
+
+        staticinvoke <android.util.Log: int i(java.lang.String,java.lang.String)>("k9", "NotificationActionService marking messages as read");
+
+     label1:
+        $r5 = virtualinvoke $r1.<android.content.Intent: java.util.ArrayList getParcelableArrayListExtra(java.lang.String)>("messageReferences");
+
+        $r6 = interfaceinvoke $r5.<java.util.List: java.util.Iterator iterator()>();
+
+     label2:
+        $z0 = interfaceinvoke $r6.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label3;
+
+        $r7 = interfaceinvoke $r6.<java.util.Iterator: java.lang.Object next()>();
+
+        r8 = (com.fsck.k9.activity.MessageReference) $r7;
+
+        $r9 = virtualinvoke r8.<com.fsck.k9.activity.MessageReference: java.lang.String getFolderName()>();
+
+        $r10 = virtualinvoke r8.<com.fsck.k9.activity.MessageReference: java.lang.String getUid()>();
+
+        $r4 = <com.fsck.k9.mail.Flag: com.fsck.k9.mail.Flag SEEN>;
+
+        virtualinvoke $r3.<com.fsck.k9.controller.MessagingController: void setFlag(com.fsck.k9.Account,java.lang.String,java.lang.String,com.fsck.k9.mail.Flag,boolean)>($r2, $r9, $r10, $r4, 1);
+
+        goto label2;
+
+     label3:
+        return;
+    }
+    public int startService(android.content.Intent, int)
+    {
+        com.fsck.k9.notification.NotificationActionService r0;
+        android.content.Intent $r1;
+        int $i0;
+        boolean $z0;
+        java.lang.StringBuilder $r2;
+        java.lang.String $r3, $r8;
+        com.fsck.k9.Preferences $r4;
+        com.fsck.k9.Account $r5;
+        android.app.Application $r6;
+        com.fsck.k9.controller.MessagingController $r7;
+
+        r0 := @this: com.fsck.k9.notification.NotificationActionService;
+
+        $r1 := @parameter0: android.content.Intent;
+
+        $i0 := @parameter1: int;
+
+        $z0 = <com.fsck.k9.K9: boolean DEBUG>;
+
+        if $z0 == 0 goto label1;
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("NotificationActionService started with startId = ");
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int i(java.lang.String,java.lang.String)>("k9", $r3);
+
+     label1:
+        $r3 = virtualinvoke $r1.<android.content.Intent: java.lang.String getStringExtra(java.lang.String)>("accountUuid");
+
+        $r4 = staticinvoke <com.fsck.k9.Preferences: com.fsck.k9.Preferences getPreferences(android.content.Context)>(r0);
+
+        $r5 = virtualinvoke $r4.<com.fsck.k9.Preferences: com.fsck.k9.Account getAccount(java.lang.String)>($r3);
+
+        if $r5 != null goto label2;
+
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String)>("k9", "Could not find account for notification action.");
+
+        return 2;
+
+     label2:
+        $r6 = virtualinvoke r0.<com.fsck.k9.notification.NotificationActionService: android.app.Application getApplication()>();
+
+        $r7 = staticinvoke <com.fsck.k9.controller.MessagingController: com.fsck.k9.controller.MessagingController getInstance(android.content.Context)>($r6);
+
+        $r3 = virtualinvoke $r1.<android.content.Intent: java.lang.String getAction()>();
+
+        $r8 = "ACTION_MARK_AS_READ";
+
+        $z0 = virtualinvoke $r8.<java.lang.String: boolean equals(java.lang.Object)>($r3);
+
+        if $z0 == 0 goto label4;
+
+        specialinvoke r0.<com.fsck.k9.notification.NotificationActionService: void markMessagesAsRead(android.content.Intent,com.fsck.k9.Account,com.fsck.k9.controller.MessagingController)>($r1, $r5, $r7);
+
+     label3:
+        specialinvoke r0.<com.fsck.k9.notification.NotificationActionService: void cancelNotifications(android.content.Intent,com.fsck.k9.Account,com.fsck.k9.controller.MessagingController)>($r1, $r5, $r7);
+
+        return 2;
+
+     label4:
+        $r8 = "ACTION_DELETE";
+
+        $z0 = virtualinvoke $r8.<java.lang.String: boolean equals(java.lang.Object)>($r3);
+
+        if $z0 == 0 goto label5;
+
+        specialinvoke r0.<com.fsck.k9.notification.NotificationActionService: void deleteMessages(android.content.Intent,com.fsck.k9.controller.MessagingController)>($r1, $r7);
+
+        goto label3;
+
+     label5:
+        $r8 = "ACTION_ARCHIVE";
+
+        $z0 = virtualinvoke $r8.<java.lang.String: boolean equals(java.lang.Object)>($r3);
+
+        if $z0 == 0 goto label6;
+
+        specialinvoke r0.<com.fsck.k9.notification.NotificationActionService: void archiveMessages(android.content.Intent,com.fsck.k9.Account,com.fsck.k9.controller.MessagingController)>($r1, $r5, $r7);
+
+        goto label3;
+
+     label6:
+        $r8 = "ACTION_SPAM";
+
+        $z0 = virtualinvoke $r8.<java.lang.String: boolean equals(java.lang.Object)>($r3);
+
+        if $z0 == 0 goto label7;
+
+        specialinvoke r0.<com.fsck.k9.notification.NotificationActionService: void markMessageAsSpam(android.content.Intent,com.fsck.k9.Account,com.fsck.k9.controller.MessagingController)>($r1, $r5, $r7);
+
+        goto label3;
+
+     label7:
+        $r8 = "ACTION_DISMISS";
+
+        $z0 = virtualinvoke $r8.<java.lang.String: boolean equals(java.lang.Object)>($r3);
+
+        if $z0 == 0 goto label3;
+
+        $z0 = <com.fsck.k9.K9: boolean DEBUG>;
+
+        if $z0 == 0 goto label3;
+
+        staticinvoke <android.util.Log: int i(java.lang.String,java.lang.String)>("k9", "Notification dismissed");
+
+        goto label3;
+    }

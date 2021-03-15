@@ -1,0 +1,1131 @@
+org.spongycastle.math.ec.WNafUtil extends java.lang.Object
+private static final int[] DEFAULT_WINDOW_SIZE_CUTOFFS
+private static final byte[] EMPTY_BYTES
+private static final int[] EMPTY_INTS
+private static final org.spongycastle.math.ec.ECPoint[] EMPTY_POINTS
+public static final java.lang.String PRECOMP_NAME
+    static void <clinit>()
+    {
+        int[] $r0;
+        byte[] $r1;
+        org.spongycastle.math.ec.ECPoint[] $r2;
+
+        $r0 = newarray (int)[6];
+
+        $r0[0] = 13;
+
+        $r0[1] = 41;
+
+        $r0[2] = 121;
+
+        $r0[3] = 337;
+
+        $r0[4] = 897;
+
+        $r0[5] = 2305;
+
+        <org.spongycastle.math.ec.WNafUtil: int[] DEFAULT_WINDOW_SIZE_CUTOFFS> = $r0;
+
+        $r1 = newarray (byte)[0];
+
+        <org.spongycastle.math.ec.WNafUtil: byte[] EMPTY_BYTES> = $r1;
+
+        $r0 = newarray (int)[0];
+
+        <org.spongycastle.math.ec.WNafUtil: int[] EMPTY_INTS> = $r0;
+
+        $r2 = newarray (org.spongycastle.math.ec.ECPoint)[0];
+
+        <org.spongycastle.math.ec.WNafUtil: org.spongycastle.math.ec.ECPoint[] EMPTY_POINTS> = $r2;
+
+        return;
+    }
+    public void <init>()
+    {
+        org.spongycastle.math.ec.WNafUtil r0;
+
+        r0 := @this: org.spongycastle.math.ec.WNafUtil;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+    public static int[] generateCompactNaf(java.math.BigInteger)
+    {
+        java.math.BigInteger $r0, $r2;
+        int i0, $i1, i2, i3, i4, i5;
+        java.lang.IllegalArgumentException $r1;
+        int[] r3;
+        boolean $z0;
+
+        $r0 := @parameter0: java.math.BigInteger;
+
+        $i1 = virtualinvoke $r0.<java.math.BigInteger: int bitLength()>();
+
+        $i1 = $i1 >>> 16;
+
+        if $i1 == 0 goto label1;
+
+        $r1 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r1.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("\'k\' must have bitlength < 2^16");
+
+        throw $r1;
+
+     label1:
+        $i1 = virtualinvoke $r0.<java.math.BigInteger: int signum()>();
+
+        if $i1 != 0 goto label2;
+
+        r3 = <org.spongycastle.math.ec.WNafUtil: int[] EMPTY_INTS>;
+
+        return r3;
+
+     label2:
+        $r2 = virtualinvoke $r0.<java.math.BigInteger: java.math.BigInteger shiftLeft(int)>(1);
+
+        $r2 = virtualinvoke $r2.<java.math.BigInteger: java.math.BigInteger add(java.math.BigInteger)>($r0);
+
+        $i1 = virtualinvoke $r2.<java.math.BigInteger: int bitLength()>();
+
+        i0 = $i1 >> 1;
+
+        r3 = newarray (int)[i0];
+
+        $r2 = virtualinvoke $r2.<java.math.BigInteger: java.math.BigInteger xor(java.math.BigInteger)>($r0);
+
+        i0 = $i1 + -1;
+
+        i2 = 0;
+
+        i3 = 1;
+
+        $i1 = 0;
+
+     label3:
+        if i3 >= i0 goto label8;
+
+        $z0 = virtualinvoke $r2.<java.math.BigInteger: boolean testBit(int)>(i3);
+
+        if $z0 != 0 goto label5;
+
+        i2 = i2 + 1;
+
+        i4 = $i1;
+
+     label4:
+        i3 = i3 + 1;
+
+        $i1 = i4;
+
+        goto label3;
+
+     label5:
+        $z0 = virtualinvoke $r0.<java.math.BigInteger: boolean testBit(int)>(i3);
+
+        if $z0 == 0 goto label7;
+
+        i5 = -1;
+
+     label6:
+        i4 = $i1 + 1;
+
+        i5 = i5 << 16;
+
+        i2 = i5 | i2;
+
+        r3[$i1] = i2;
+
+        i2 = 1;
+
+        i3 = i3 + 1;
+
+        goto label4;
+
+     label7:
+        i5 = 1;
+
+        goto label6;
+
+     label8:
+        i0 = $i1 + 1;
+
+        i2 = 65536 | i2;
+
+        r3[$i1] = i2;
+
+        $i1 = lengthof r3;
+
+        if $i1 <= i0 goto label9;
+
+        r3 = staticinvoke <org.spongycastle.math.ec.WNafUtil: int[] trim(int[],int)>(r3, i0);
+
+     label9:
+        return r3;
+    }
+    public static int[] generateCompactWindowNaf(int, java.math.BigInteger)
+    {
+        int $i0, i1, i2, i3, i4, $i5, i6, i7;
+        java.math.BigInteger $r0, $r3;
+        int[] $r1;
+        java.lang.IllegalArgumentException $r2;
+        boolean z0, $z1;
+
+        $i0 := @parameter0: int;
+
+        $r0 := @parameter1: java.math.BigInteger;
+
+        if $i0 != 2 goto label01;
+
+        $r1 = staticinvoke <org.spongycastle.math.ec.WNafUtil: int[] generateCompactNaf(java.math.BigInteger)>($r0);
+
+        return $r1;
+
+     label01:
+        if $i0 < 2 goto label02;
+
+        if $i0 <= 16 goto label03;
+
+     label02:
+        $r2 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r2.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("\'width\' must be in the range [2, 16]");
+
+        throw $r2;
+
+     label03:
+        $i5 = virtualinvoke $r0.<java.math.BigInteger: int bitLength()>();
+
+        $i5 = $i5 >>> 16;
+
+        if $i5 == 0 goto label04;
+
+        $r2 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r2.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("\'k\' must have bitlength < 2^16");
+
+        throw $r2;
+
+     label04:
+        $i5 = virtualinvoke $r0.<java.math.BigInteger: int signum()>();
+
+        if $i5 != 0 goto label05;
+
+        $r1 = <org.spongycastle.math.ec.WNafUtil: int[] EMPTY_INTS>;
+
+        return $r1;
+
+     label05:
+        $i5 = virtualinvoke $r0.<java.math.BigInteger: int bitLength()>();
+
+        $i5 = $i5 / $i0;
+
+        $i5 = $i5 + 1;
+
+        $r1 = newarray (int)[$i5];
+
+        i3 = 1 << $i0;
+
+        i2 = i3 + -1;
+
+        i4 = i3 >>> 1;
+
+        z0 = 0;
+
+        $i5 = 0;
+
+        i6 = 0;
+
+     label06:
+        i1 = virtualinvoke $r0.<java.math.BigInteger: int bitLength()>();
+
+        if i6 > i1 goto label14;
+
+        $z1 = virtualinvoke $r0.<java.math.BigInteger: boolean testBit(int)>(i6);
+
+        if $z1 != z0 goto label07;
+
+        i6 = i6 + 1;
+
+        goto label06;
+
+     label07:
+        $r3 = virtualinvoke $r0.<java.math.BigInteger: java.math.BigInteger shiftRight(int)>(i6);
+
+        $r0 = $r3;
+
+        i1 = virtualinvoke $r3.<java.math.BigInteger: int intValue()>();
+
+        i7 = i1 & i2;
+
+        if z0 == 0 goto label08;
+
+        i7 = i7 + 1;
+
+     label08:
+        i1 = i7 & i4;
+
+        if i1 == 0 goto label12;
+
+        z0 = 1;
+
+     label09:
+        if z0 == 0 goto label10;
+
+        i7 = i7 - i3;
+
+     label10:
+        if $i5 <= 0 goto label13;
+
+        i6 = i6 + -1;
+
+     label11:
+        i7 = i7 << 16;
+
+        i6 = i7 | i6;
+
+        $r1[$i5] = i6;
+
+        i6 = $i0;
+
+        $i5 = $i5 + 1;
+
+        goto label06;
+
+     label12:
+        z0 = 0;
+
+        goto label09;
+
+     label13:
+        goto label11;
+
+     label14:
+        $i0 = lengthof $r1;
+
+        if $i0 <= $i5 goto label15;
+
+        $r1 = staticinvoke <org.spongycastle.math.ec.WNafUtil: int[] trim(int[],int)>($r1, $i5);
+
+     label15:
+        return $r1;
+    }
+    public static byte[] generateJSF(java.math.BigInteger, java.math.BigInteger)
+    {
+        java.math.BigInteger $r0, $r1;
+        int i0, i1, i2, $i3, i4, i5, $i6, $i7, $i8;
+        byte[] r2;
+        byte $b9;
+
+        $r0 := @parameter0: java.math.BigInteger;
+
+        $r1 := @parameter1: java.math.BigInteger;
+
+        i0 = virtualinvoke $r0.<java.math.BigInteger: int bitLength()>();
+
+        $i3 = virtualinvoke $r1.<java.math.BigInteger: int bitLength()>();
+
+        i0 = staticinvoke <java.lang.Math: int max(int,int)>(i0, $i3);
+
+        i0 = i0 + 1;
+
+        r2 = newarray (byte)[i0];
+
+        $i3 = 0;
+
+        i4 = 0;
+
+        i5 = 0;
+
+        i0 = 0;
+
+     label1:
+        $i6 = $i3 | i4;
+
+        if $i6 != 0 goto label2;
+
+        $i6 = virtualinvoke $r0.<java.math.BigInteger: int bitLength()>();
+
+        if $i6 > i5 goto label2;
+
+        $i6 = virtualinvoke $r1.<java.math.BigInteger: int bitLength()>();
+
+        if $i6 <= i5 goto label8;
+
+     label2:
+        $i6 = virtualinvoke $r0.<java.math.BigInteger: int intValue()>();
+
+        $i6 = $i6 >>> i5;
+
+        $i6 = $i6 + $i3;
+
+        i1 = $i6 & 7;
+
+        $i6 = virtualinvoke $r1.<java.math.BigInteger: int intValue()>();
+
+        $i6 = $i6 >>> i5;
+
+        $i6 = $i6 + i4;
+
+        i2 = $i6 & 7;
+
+        $i6 = i1 & 1;
+
+        if $i6 == 0 goto label3;
+
+        $i7 = i1 & 2;
+
+        $i6 = $i6 - $i7;
+
+        $i7 = i1 + $i6;
+
+        if $i7 != 4 goto label3;
+
+        $i7 = i2 & 3;
+
+        if $i7 != 2 goto label3;
+
+        $i6 = neg $i6;
+
+     label3:
+        $i7 = i2 & 1;
+
+        if $i7 == 0 goto label4;
+
+        $i8 = i2 & 2;
+
+        $i7 = $i7 - $i8;
+
+        i2 = i2 + $i7;
+
+        if i2 != 4 goto label4;
+
+        i1 = i1 & 3;
+
+        if i1 != 2 goto label4;
+
+        $i7 = neg $i7;
+
+     label4:
+        i1 = $i3 << 1;
+
+        i2 = $i6 + 1;
+
+        if i1 != i2 goto label5;
+
+        $i3 = $i3 ^ 1;
+
+     label5:
+        i1 = i4 << 1;
+
+        i2 = $i7 + 1;
+
+        if i1 != i2 goto label6;
+
+        i4 = i4 ^ 1;
+
+     label6:
+        i5 = i5 + 1;
+
+        if i5 != 30 goto label7;
+
+        i5 = 0;
+
+        $r0 = virtualinvoke $r0.<java.math.BigInteger: java.math.BigInteger shiftRight(int)>(30);
+
+        $r1 = virtualinvoke $r1.<java.math.BigInteger: java.math.BigInteger shiftRight(int)>(30);
+
+     label7:
+        $i6 = $i6 << 4;
+
+        $i7 = $i7 & 15;
+
+        $i6 = $i6 | $i7;
+
+        $b9 = (byte) $i6;
+
+        r2[i0] = $b9;
+
+        i0 = i0 + 1;
+
+        goto label1;
+
+     label8:
+        $i3 = lengthof r2;
+
+        if $i3 <= i0 goto label9;
+
+        r2 = staticinvoke <org.spongycastle.math.ec.WNafUtil: byte[] trim(byte[],int)>(r2, i0);
+
+     label9:
+        return r2;
+    }
+    public static byte[] generateNaf(java.math.BigInteger)
+    {
+        java.math.BigInteger $r0, $r1;
+        int i0, $i1, i2, $i3;
+        byte[] r2;
+        boolean $z0;
+        byte $b4;
+
+        $r0 := @parameter0: java.math.BigInteger;
+
+        i0 = virtualinvoke $r0.<java.math.BigInteger: int signum()>();
+
+        if i0 != 0 goto label1;
+
+        r2 = <org.spongycastle.math.ec.WNafUtil: byte[] EMPTY_BYTES>;
+
+        return r2;
+
+     label1:
+        $r1 = virtualinvoke $r0.<java.math.BigInteger: java.math.BigInteger shiftLeft(int)>(1);
+
+        $r1 = virtualinvoke $r1.<java.math.BigInteger: java.math.BigInteger add(java.math.BigInteger)>($r0);
+
+        i0 = virtualinvoke $r1.<java.math.BigInteger: int bitLength()>();
+
+        i0 = i0 + -1;
+
+        r2 = newarray (byte)[i0];
+
+        $r1 = virtualinvoke $r1.<java.math.BigInteger: java.math.BigInteger xor(java.math.BigInteger)>($r0);
+
+        i2 = 1;
+
+     label2:
+        if i2 >= i0 goto label6;
+
+        $z0 = virtualinvoke $r1.<java.math.BigInteger: boolean testBit(int)>(i2);
+
+        if $z0 == 0 goto label4;
+
+        $i1 = i2 + -1;
+
+        $z0 = virtualinvoke $r0.<java.math.BigInteger: boolean testBit(int)>(i2);
+
+        if $z0 == 0 goto label5;
+
+        $i3 = -1;
+
+     label3:
+        $b4 = (byte) $i3;
+
+        r2[$i1] = $b4;
+
+        i2 = i2 + 1;
+
+     label4:
+        i2 = i2 + 1;
+
+        goto label2;
+
+     label5:
+        $i3 = 1;
+
+        goto label3;
+
+     label6:
+        i0 = i0 + -1;
+
+        r2[i0] = 1;
+
+        return r2;
+    }
+    public static byte[] generateWindowNaf(int, java.math.BigInteger)
+    {
+        int $i0, i1, i2, i3, i4, i5, $i6, $i7;
+        java.math.BigInteger $r0, $r3;
+        byte[] $r1;
+        java.lang.IllegalArgumentException $r2;
+        boolean z0, $z1;
+        byte $b8;
+
+        $i0 := @parameter0: int;
+
+        $r0 := @parameter1: java.math.BigInteger;
+
+        if $i0 != 2 goto label01;
+
+        $r1 = staticinvoke <org.spongycastle.math.ec.WNafUtil: byte[] generateNaf(java.math.BigInteger)>($r0);
+
+        return $r1;
+
+     label01:
+        if $i0 < 2 goto label02;
+
+        if $i0 <= 8 goto label03;
+
+     label02:
+        $r2 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r2.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("\'width\' must be in the range [2, 8]");
+
+        throw $r2;
+
+     label03:
+        i2 = virtualinvoke $r0.<java.math.BigInteger: int signum()>();
+
+        if i2 != 0 goto label04;
+
+        $r1 = <org.spongycastle.math.ec.WNafUtil: byte[] EMPTY_BYTES>;
+
+        return $r1;
+
+     label04:
+        i2 = virtualinvoke $r0.<java.math.BigInteger: int bitLength()>();
+
+        i2 = i2 + 1;
+
+        $r1 = newarray (byte)[i2];
+
+        i3 = 1 << $i0;
+
+        i2 = i3 + -1;
+
+        i4 = i3 >>> 1;
+
+        z0 = 0;
+
+        i1 = 0;
+
+        i5 = 0;
+
+     label05:
+        $i6 = virtualinvoke $r0.<java.math.BigInteger: int bitLength()>();
+
+        if i5 > $i6 goto label12;
+
+        $z1 = virtualinvoke $r0.<java.math.BigInteger: boolean testBit(int)>(i5);
+
+        if $z1 != z0 goto label06;
+
+        i5 = i5 + 1;
+
+        goto label05;
+
+     label06:
+        $r3 = virtualinvoke $r0.<java.math.BigInteger: java.math.BigInteger shiftRight(int)>(i5);
+
+        $r0 = $r3;
+
+        $i6 = virtualinvoke $r3.<java.math.BigInteger: int intValue()>();
+
+        $i6 = $i6 & i2;
+
+        if z0 == 0 goto label07;
+
+        $i6 = $i6 + 1;
+
+     label07:
+        $i7 = $i6 & i4;
+
+        if $i7 == 0 goto label11;
+
+        z0 = 1;
+
+     label08:
+        if z0 == 0 goto label09;
+
+        $i6 = $i6 - i3;
+
+     label09:
+        if i1 <= 0 goto label10;
+
+        i5 = i5 + -1;
+
+     label10:
+        i5 = i1 + i5;
+
+        i1 = i5 + 1;
+
+        $b8 = (byte) $i6;
+
+        $r1[i5] = $b8;
+
+        i5 = $i0;
+
+        goto label05;
+
+     label11:
+        z0 = 0;
+
+        goto label08;
+
+     label12:
+        $i0 = lengthof $r1;
+
+        if $i0 <= i1 goto label13;
+
+        $r1 = staticinvoke <org.spongycastle.math.ec.WNafUtil: byte[] trim(byte[],int)>($r1, i1);
+
+     label13:
+        return $r1;
+    }
+    public static int getNafWeight(java.math.BigInteger)
+    {
+        java.math.BigInteger $r0, $r1;
+        int $i0;
+
+        $r0 := @parameter0: java.math.BigInteger;
+
+        $i0 = virtualinvoke $r0.<java.math.BigInteger: int signum()>();
+
+        if $i0 != 0 goto label1;
+
+        return 0;
+
+     label1:
+        $r1 = virtualinvoke $r0.<java.math.BigInteger: java.math.BigInteger shiftLeft(int)>(1);
+
+        $r1 = virtualinvoke $r1.<java.math.BigInteger: java.math.BigInteger add(java.math.BigInteger)>($r0);
+
+        $r0 = virtualinvoke $r1.<java.math.BigInteger: java.math.BigInteger xor(java.math.BigInteger)>($r0);
+
+        $i0 = virtualinvoke $r0.<java.math.BigInteger: int bitCount()>();
+
+        return $i0;
+    }
+    public static org.spongycastle.math.ec.WNafPreCompInfo getWNafPreCompInfo(org.spongycastle.math.ec.ECPoint)
+    {
+        org.spongycastle.math.ec.ECPoint $r0;
+        org.spongycastle.math.ec.ECCurve $r1;
+        org.spongycastle.math.ec.PreCompInfo $r2;
+        org.spongycastle.math.ec.WNafPreCompInfo $r3;
+
+        $r0 := @parameter0: org.spongycastle.math.ec.ECPoint;
+
+        $r1 = virtualinvoke $r0.<org.spongycastle.math.ec.ECPoint: org.spongycastle.math.ec.ECCurve getCurve()>();
+
+        $r2 = virtualinvoke $r1.<org.spongycastle.math.ec.ECCurve: org.spongycastle.math.ec.PreCompInfo getPreCompInfo(org.spongycastle.math.ec.ECPoint,java.lang.String)>($r0, "bc_wnaf");
+
+        $r3 = staticinvoke <org.spongycastle.math.ec.WNafUtil: org.spongycastle.math.ec.WNafPreCompInfo getWNafPreCompInfo(org.spongycastle.math.ec.PreCompInfo)>($r2);
+
+        return $r3;
+    }
+    public static org.spongycastle.math.ec.WNafPreCompInfo getWNafPreCompInfo(org.spongycastle.math.ec.PreCompInfo)
+    {
+        boolean $z0;
+        org.spongycastle.math.ec.PreCompInfo r0;
+        org.spongycastle.math.ec.WNafPreCompInfo r1;
+
+        r0 := @parameter0: org.spongycastle.math.ec.PreCompInfo;
+
+        if r0 == null goto label1;
+
+        $z0 = r0 instanceof org.spongycastle.math.ec.WNafPreCompInfo;
+
+        if $z0 == 0 goto label1;
+
+        r1 = (org.spongycastle.math.ec.WNafPreCompInfo) r0;
+
+        return r1;
+
+     label1:
+        r1 = new org.spongycastle.math.ec.WNafPreCompInfo;
+
+        specialinvoke r1.<org.spongycastle.math.ec.WNafPreCompInfo: void <init>()>();
+
+        return r1;
+    }
+    public static int getWindowSize(int)
+    {
+        int $i0;
+        int[] $r0;
+
+        $i0 := @parameter0: int;
+
+        $r0 = <org.spongycastle.math.ec.WNafUtil: int[] DEFAULT_WINDOW_SIZE_CUTOFFS>;
+
+        $i0 = staticinvoke <org.spongycastle.math.ec.WNafUtil: int getWindowSize(int,int[])>($i0, $r0);
+
+        return $i0;
+    }
+    public static int getWindowSize(int, int[])
+    {
+        int $i0, i1, $i2;
+        int[] $r0;
+
+        $i0 := @parameter0: int;
+
+        $r0 := @parameter1: int[];
+
+        i1 = 0;
+
+     label1:
+        $i2 = lengthof $r0;
+
+        if i1 >= $i2 goto label2;
+
+        $i2 = $r0[i1];
+
+        if $i0 >= $i2 goto label3;
+
+     label2:
+        $i0 = i1 + 2;
+
+        return $i0;
+
+     label3:
+        i1 = i1 + 1;
+
+        goto label1;
+    }
+    public static org.spongycastle.math.ec.ECPoint mapPointWithPrecomp(org.spongycastle.math.ec.ECPoint, int, boolean, org.spongycastle.math.ec.ECPointMap)
+    {
+        org.spongycastle.math.ec.ECPoint $r0, $r8;
+        int $i0, $i1;
+        boolean $z0;
+        org.spongycastle.math.ec.ECPointMap $r1;
+        org.spongycastle.math.ec.ECPoint[] r2, r3;
+        org.spongycastle.math.ec.ECCurve $r4;
+        org.spongycastle.math.ec.WNafPreCompInfo $r5, $r7;
+        org.spongycastle.math.ec.PreCompInfo $r6;
+
+        $r0 := @parameter0: org.spongycastle.math.ec.ECPoint;
+
+        $i0 := @parameter1: int;
+
+        $z0 := @parameter2: boolean;
+
+        $r1 := @parameter3: org.spongycastle.math.ec.ECPointMap;
+
+        $r4 = virtualinvoke $r0.<org.spongycastle.math.ec.ECPoint: org.spongycastle.math.ec.ECCurve getCurve()>();
+
+        $r5 = staticinvoke <org.spongycastle.math.ec.WNafUtil: org.spongycastle.math.ec.WNafPreCompInfo precompute(org.spongycastle.math.ec.ECPoint,int,boolean)>($r0, $i0, $z0);
+
+        $r0 = interfaceinvoke $r1.<org.spongycastle.math.ec.ECPointMap: org.spongycastle.math.ec.ECPoint map(org.spongycastle.math.ec.ECPoint)>($r0);
+
+        $r6 = virtualinvoke $r4.<org.spongycastle.math.ec.ECCurve: org.spongycastle.math.ec.PreCompInfo getPreCompInfo(org.spongycastle.math.ec.ECPoint,java.lang.String)>($r0, "bc_wnaf");
+
+        $r7 = staticinvoke <org.spongycastle.math.ec.WNafUtil: org.spongycastle.math.ec.WNafPreCompInfo getWNafPreCompInfo(org.spongycastle.math.ec.PreCompInfo)>($r6);
+
+        $r8 = virtualinvoke $r5.<org.spongycastle.math.ec.WNafPreCompInfo: org.spongycastle.math.ec.ECPoint getTwice()>();
+
+        if $r8 == null goto label1;
+
+        $r8 = interfaceinvoke $r1.<org.spongycastle.math.ec.ECPointMap: org.spongycastle.math.ec.ECPoint map(org.spongycastle.math.ec.ECPoint)>($r8);
+
+        virtualinvoke $r7.<org.spongycastle.math.ec.WNafPreCompInfo: void setTwice(org.spongycastle.math.ec.ECPoint)>($r8);
+
+     label1:
+        r2 = virtualinvoke $r5.<org.spongycastle.math.ec.WNafPreCompInfo: org.spongycastle.math.ec.ECPoint[] getPreComp()>();
+
+        $i0 = lengthof r2;
+
+        r3 = newarray (org.spongycastle.math.ec.ECPoint)[$i0];
+
+        $i0 = 0;
+
+     label2:
+        $i1 = lengthof r2;
+
+        if $i0 >= $i1 goto label3;
+
+        $r8 = r2[$i0];
+
+        $r8 = interfaceinvoke $r1.<org.spongycastle.math.ec.ECPointMap: org.spongycastle.math.ec.ECPoint map(org.spongycastle.math.ec.ECPoint)>($r8);
+
+        r3[$i0] = $r8;
+
+        $i0 = $i0 + 1;
+
+        goto label2;
+
+     label3:
+        virtualinvoke $r7.<org.spongycastle.math.ec.WNafPreCompInfo: void setPreComp(org.spongycastle.math.ec.ECPoint[])>(r3);
+
+        if $z0 == 0 goto label6;
+
+        $i0 = lengthof r3;
+
+        r2 = newarray (org.spongycastle.math.ec.ECPoint)[$i0];
+
+        $i0 = 0;
+
+     label4:
+        $i1 = lengthof r2;
+
+        if $i0 >= $i1 goto label5;
+
+        $r8 = r3[$i0];
+
+        $r8 = virtualinvoke $r8.<org.spongycastle.math.ec.ECPoint: org.spongycastle.math.ec.ECPoint negate()>();
+
+        r2[$i0] = $r8;
+
+        $i0 = $i0 + 1;
+
+        goto label4;
+
+     label5:
+        virtualinvoke $r7.<org.spongycastle.math.ec.WNafPreCompInfo: void setPreCompNeg(org.spongycastle.math.ec.ECPoint[])>(r2);
+
+     label6:
+        virtualinvoke $r4.<org.spongycastle.math.ec.ECCurve: void setPreCompInfo(org.spongycastle.math.ec.ECPoint,java.lang.String,org.spongycastle.math.ec.PreCompInfo)>($r0, "bc_wnaf", $r7);
+
+        return $r0;
+    }
+    public static org.spongycastle.math.ec.WNafPreCompInfo precompute(org.spongycastle.math.ec.ECPoint, int, boolean)
+    {
+        org.spongycastle.math.ec.ECPoint $r0, $r6, $r9, r10;
+        int $i0, i1, i2, $i3;
+        boolean $z0, $z1;
+        org.spongycastle.math.ec.ECCurve $r1;
+        org.spongycastle.math.ec.PreCompInfo $r2;
+        org.spongycastle.math.ec.WNafPreCompInfo $r3;
+        org.spongycastle.math.ec.ECPoint[] $r4, r5, r7;
+        org.spongycastle.math.ec.ECFieldElement r8, $r11, $r12;
+        java.math.BigInteger $r13, $r14;
+
+        $r0 := @parameter0: org.spongycastle.math.ec.ECPoint;
+
+        $i0 := @parameter1: int;
+
+        $z0 := @parameter2: boolean;
+
+        $r1 = virtualinvoke $r0.<org.spongycastle.math.ec.ECPoint: org.spongycastle.math.ec.ECCurve getCurve()>();
+
+        $r2 = virtualinvoke $r1.<org.spongycastle.math.ec.ECCurve: org.spongycastle.math.ec.PreCompInfo getPreCompInfo(org.spongycastle.math.ec.ECPoint,java.lang.String)>($r0, "bc_wnaf");
+
+        $r3 = staticinvoke <org.spongycastle.math.ec.WNafUtil: org.spongycastle.math.ec.WNafPreCompInfo getWNafPreCompInfo(org.spongycastle.math.ec.PreCompInfo)>($r2);
+
+        i1 = 0;
+
+        $i0 = $i0 + -2;
+
+        $i0 = staticinvoke <java.lang.Math: int max(int,int)>(0, $i0);
+
+        $i0 = 1 << $i0;
+
+        $r4 = virtualinvoke $r3.<org.spongycastle.math.ec.WNafPreCompInfo: org.spongycastle.math.ec.ECPoint[] getPreComp()>();
+
+        r5 = $r4;
+
+        if $r4 != null goto label04;
+
+        r5 = <org.spongycastle.math.ec.WNafUtil: org.spongycastle.math.ec.ECPoint[] EMPTY_POINTS>;
+
+     label01:
+        if i1 >= $i0 goto label02;
+
+        $r4 = staticinvoke <org.spongycastle.math.ec.WNafUtil: org.spongycastle.math.ec.ECPoint[] resizeTable(org.spongycastle.math.ec.ECPoint[],int)>(r5, $i0);
+
+        r5 = $r4;
+
+        if $i0 != 1 goto label05;
+
+        $r6 = virtualinvoke $r0.<org.spongycastle.math.ec.ECPoint: org.spongycastle.math.ec.ECPoint normalize()>();
+
+        $r4[0] = $r6;
+
+     label02:
+        virtualinvoke $r3.<org.spongycastle.math.ec.WNafPreCompInfo: void setPreComp(org.spongycastle.math.ec.ECPoint[])>(r5);
+
+        if $z0 == 0 goto label13;
+
+        $r4 = virtualinvoke $r3.<org.spongycastle.math.ec.WNafPreCompInfo: org.spongycastle.math.ec.ECPoint[] getPreCompNeg()>();
+
+        r7 = $r4;
+
+        if $r4 != null goto label11;
+
+        i1 = 0;
+
+        r7 = newarray (org.spongycastle.math.ec.ECPoint)[$i0];
+
+     label03:
+        if i1 >= $i0 goto label12;
+
+        $r6 = r5[i1];
+
+        $r6 = virtualinvoke $r6.<org.spongycastle.math.ec.ECPoint: org.spongycastle.math.ec.ECPoint negate()>();
+
+        r7[i1] = $r6;
+
+        i1 = i1 + 1;
+
+        goto label03;
+
+     label04:
+        i1 = lengthof $r4;
+
+        goto label01;
+
+     label05:
+        i2 = i1;
+
+        if i1 != 0 goto label06;
+
+        $r4[0] = $r0;
+
+        i2 = 1;
+
+     label06:
+        r8 = null;
+
+        if $i0 != 2 goto label08;
+
+        $r6 = virtualinvoke $r0.<org.spongycastle.math.ec.ECPoint: org.spongycastle.math.ec.ECPoint threeTimes()>();
+
+        $r4[1] = $r6;
+
+     label07:
+        i2 = $i0 - i1;
+
+        virtualinvoke $r1.<org.spongycastle.math.ec.ECCurve: void normalizeAll(org.spongycastle.math.ec.ECPoint[],int,int,org.spongycastle.math.ec.ECFieldElement)>($r4, i1, i2, r8);
+
+        goto label02;
+
+     label08:
+        $r9 = virtualinvoke $r3.<org.spongycastle.math.ec.WNafPreCompInfo: org.spongycastle.math.ec.ECPoint getTwice()>();
+
+        r10 = $r9;
+
+        $i3 = i2 + -1;
+
+        $r6 = $r4[$i3];
+
+        if $r9 != null goto label09;
+
+        r10 = $r4[0];
+
+        $r9 = virtualinvoke r10.<org.spongycastle.math.ec.ECPoint: org.spongycastle.math.ec.ECPoint twice()>();
+
+        r10 = $r9;
+
+        virtualinvoke $r3.<org.spongycastle.math.ec.WNafPreCompInfo: void setTwice(org.spongycastle.math.ec.ECPoint)>($r9);
+
+        $z1 = staticinvoke <org.spongycastle.math.ec.ECAlgorithms: boolean isFpCurve(org.spongycastle.math.ec.ECCurve)>($r1);
+
+        if $z1 == 0 goto label09;
+
+        $i3 = virtualinvoke $r1.<org.spongycastle.math.ec.ECCurve: int getFieldSize()>();
+
+        if $i3 < 64 goto label09;
+
+        $i3 = virtualinvoke $r1.<org.spongycastle.math.ec.ECCurve: int getCoordinateSystem()>();
+
+        lookupswitch($i3)
+        {
+            case 2: goto label10;
+            case 3: goto label10;
+            case 4: goto label10;
+            default: goto label09;
+        };
+
+     label09:
+        if i2 >= $i0 goto label14;
+
+        $r9 = virtualinvoke $r6.<org.spongycastle.math.ec.ECPoint: org.spongycastle.math.ec.ECPoint add(org.spongycastle.math.ec.ECPoint)>(r10);
+
+        $r6 = $r9;
+
+        $r4[i2] = $r9;
+
+        i2 = i2 + 1;
+
+        goto label09;
+
+     label10:
+        $r11 = virtualinvoke $r9.<org.spongycastle.math.ec.ECPoint: org.spongycastle.math.ec.ECFieldElement getZCoord(int)>(0);
+
+        r8 = $r11;
+
+        $r12 = virtualinvoke $r9.<org.spongycastle.math.ec.ECPoint: org.spongycastle.math.ec.ECFieldElement getXCoord()>();
+
+        $r13 = virtualinvoke $r12.<org.spongycastle.math.ec.ECFieldElement: java.math.BigInteger toBigInteger()>();
+
+        $r12 = virtualinvoke $r9.<org.spongycastle.math.ec.ECPoint: org.spongycastle.math.ec.ECFieldElement getYCoord()>();
+
+        $r14 = virtualinvoke $r12.<org.spongycastle.math.ec.ECFieldElement: java.math.BigInteger toBigInteger()>();
+
+        r10 = virtualinvoke $r1.<org.spongycastle.math.ec.ECCurve: org.spongycastle.math.ec.ECPoint createPoint(java.math.BigInteger,java.math.BigInteger)>($r13, $r14);
+
+        $r12 = virtualinvoke $r11.<org.spongycastle.math.ec.ECFieldElement: org.spongycastle.math.ec.ECFieldElement square()>();
+
+        $r11 = virtualinvoke $r12.<org.spongycastle.math.ec.ECFieldElement: org.spongycastle.math.ec.ECFieldElement multiply(org.spongycastle.math.ec.ECFieldElement)>($r11);
+
+        $r6 = virtualinvoke $r6.<org.spongycastle.math.ec.ECPoint: org.spongycastle.math.ec.ECPoint scaleX(org.spongycastle.math.ec.ECFieldElement)>($r12);
+
+        $r9 = virtualinvoke $r6.<org.spongycastle.math.ec.ECPoint: org.spongycastle.math.ec.ECPoint scaleY(org.spongycastle.math.ec.ECFieldElement)>($r11);
+
+        $r6 = $r9;
+
+        if i1 != 0 goto label09;
+
+        $r4[0] = $r9;
+
+        goto label09;
+
+     label11:
+        i1 = lengthof $r4;
+
+        if i1 >= $i0 goto label03;
+
+        r7 = staticinvoke <org.spongycastle.math.ec.WNafUtil: org.spongycastle.math.ec.ECPoint[] resizeTable(org.spongycastle.math.ec.ECPoint[],int)>($r4, $i0);
+
+        goto label03;
+
+     label12:
+        virtualinvoke $r3.<org.spongycastle.math.ec.WNafPreCompInfo: void setPreCompNeg(org.spongycastle.math.ec.ECPoint[])>(r7);
+
+     label13:
+        virtualinvoke $r1.<org.spongycastle.math.ec.ECCurve: void setPreCompInfo(org.spongycastle.math.ec.ECPoint,java.lang.String,org.spongycastle.math.ec.PreCompInfo)>($r0, "bc_wnaf", $r3);
+
+        return $r3;
+
+     label14:
+        goto label07;
+    }
+    private static org.spongycastle.math.ec.ECPoint[] resizeTable(org.spongycastle.math.ec.ECPoint[], int)
+    {
+        org.spongycastle.math.ec.ECPoint[] $r0, r1;
+        int $i0;
+
+        $r0 := @parameter0: org.spongycastle.math.ec.ECPoint[];
+
+        $i0 := @parameter1: int;
+
+        r1 = newarray (org.spongycastle.math.ec.ECPoint)[$i0];
+
+        $i0 = lengthof $r0;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r0, 0, r1, 0, $i0);
+
+        return r1;
+    }
+    private static byte[] trim(byte[], int)
+    {
+        byte[] $r0, r1;
+        int $i0;
+
+        $r0 := @parameter0: byte[];
+
+        $i0 := @parameter1: int;
+
+        r1 = newarray (byte)[$i0];
+
+        $i0 = lengthof r1;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r0, 0, r1, 0, $i0);
+
+        return r1;
+    }
+    private static int[] trim(int[], int)
+    {
+        int[] $r0, r1;
+        int $i0;
+
+        $r0 := @parameter0: int[];
+
+        $i0 := @parameter1: int;
+
+        r1 = newarray (int)[$i0];
+
+        $i0 = lengthof r1;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r0, 0, r1, 0, $i0);
+
+        return r1;
+    }

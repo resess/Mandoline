@@ -1,0 +1,169 @@
+com.facebook.stetho.inspector.network.RequestBodyHelper extends java.lang.Object
+private java.io.ByteArrayOutputStream mDeflatedOutput
+private com.facebook.stetho.inspector.network.CountingOutputStream mDeflatingOutput
+private final com.facebook.stetho.inspector.network.NetworkEventReporter mEventReporter
+private final java.lang.String mRequestId
+    public void <init>(com.facebook.stetho.inspector.network.NetworkEventReporter, java.lang.String)
+    {
+        com.facebook.stetho.inspector.network.RequestBodyHelper r0;
+        com.facebook.stetho.inspector.network.NetworkEventReporter $r1;
+        java.lang.String $r2;
+
+        r0 := @this: com.facebook.stetho.inspector.network.RequestBodyHelper;
+
+        $r1 := @parameter0: com.facebook.stetho.inspector.network.NetworkEventReporter;
+
+        $r2 := @parameter1: java.lang.String;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<com.facebook.stetho.inspector.network.RequestBodyHelper: com.facebook.stetho.inspector.network.NetworkEventReporter mEventReporter> = $r1;
+
+        r0.<com.facebook.stetho.inspector.network.RequestBodyHelper: java.lang.String mRequestId> = $r2;
+
+        return;
+    }
+    private void throwIfNoBody()
+    {
+        com.facebook.stetho.inspector.network.RequestBodyHelper r0;
+        boolean $z0;
+        java.lang.IllegalStateException $r1;
+
+        r0 := @this: com.facebook.stetho.inspector.network.RequestBodyHelper;
+
+        $z0 = virtualinvoke r0.<com.facebook.stetho.inspector.network.RequestBodyHelper: boolean hasBody()>();
+
+        if $z0 != 0 goto label1;
+
+        $r1 = new java.lang.IllegalStateException;
+
+        specialinvoke $r1.<java.lang.IllegalStateException: void <init>(java.lang.String)>("No body found; has createBodySink been called?");
+
+        throw $r1;
+
+     label1:
+        return;
+    }
+    public java.io.OutputStream createBodySink(java.lang.String) throws java.io.IOException
+    {
+        com.facebook.stetho.inspector.network.RequestBodyHelper r0;
+        java.lang.String $r1, $r3;
+        boolean $z0;
+        java.io.OutputStream r4;
+        com.facebook.stetho.inspector.network.CountingOutputStream $r5, $r7;
+        java.io.ByteArrayOutputStream $r6;
+        java.util.zip.InflaterOutputStream $r8;
+
+        r0 := @this: com.facebook.stetho.inspector.network.RequestBodyHelper;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r6 = new java.io.ByteArrayOutputStream;
+
+        specialinvoke $r6.<java.io.ByteArrayOutputStream: void <init>()>();
+
+        $r3 = "gzip";
+
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>($r1);
+
+        if $z0 == 0 goto label2;
+
+        r4 = staticinvoke <com.facebook.stetho.inspector.network.GunzippingOutputStream: com.facebook.stetho.inspector.network.GunzippingOutputStream create(java.io.OutputStream)>($r6);
+
+     label1:
+        $r7 = new com.facebook.stetho.inspector.network.CountingOutputStream;
+
+        specialinvoke $r7.<com.facebook.stetho.inspector.network.CountingOutputStream: void <init>(java.io.OutputStream)>(r4);
+
+        r0.<com.facebook.stetho.inspector.network.RequestBodyHelper: com.facebook.stetho.inspector.network.CountingOutputStream mDeflatingOutput> = $r7;
+
+        r0.<com.facebook.stetho.inspector.network.RequestBodyHelper: java.io.ByteArrayOutputStream mDeflatedOutput> = $r6;
+
+        $r5 = r0.<com.facebook.stetho.inspector.network.RequestBodyHelper: com.facebook.stetho.inspector.network.CountingOutputStream mDeflatingOutput>;
+
+        return $r5;
+
+     label2:
+        $r3 = "deflate";
+
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>($r1);
+
+        if $z0 == 0 goto label3;
+
+        $r8 = new java.util.zip.InflaterOutputStream;
+
+        r4 = $r8;
+
+        specialinvoke $r8.<java.util.zip.InflaterOutputStream: void <init>(java.io.OutputStream)>($r6);
+
+        goto label1;
+
+     label3:
+        r4 = $r6;
+
+        goto label1;
+    }
+    public byte[] getDisplayBody()
+    {
+        com.facebook.stetho.inspector.network.RequestBodyHelper r0;
+        byte[] $r1;
+        java.io.ByteArrayOutputStream $r2;
+
+        r0 := @this: com.facebook.stetho.inspector.network.RequestBodyHelper;
+
+        specialinvoke r0.<com.facebook.stetho.inspector.network.RequestBodyHelper: void throwIfNoBody()>();
+
+        $r2 = r0.<com.facebook.stetho.inspector.network.RequestBodyHelper: java.io.ByteArrayOutputStream mDeflatedOutput>;
+
+        $r1 = virtualinvoke $r2.<java.io.ByteArrayOutputStream: byte[] toByteArray()>();
+
+        return $r1;
+    }
+    public boolean hasBody()
+    {
+        com.facebook.stetho.inspector.network.RequestBodyHelper r0;
+        java.io.ByteArrayOutputStream $r1;
+
+        r0 := @this: com.facebook.stetho.inspector.network.RequestBodyHelper;
+
+        $r1 = r0.<com.facebook.stetho.inspector.network.RequestBodyHelper: java.io.ByteArrayOutputStream mDeflatedOutput>;
+
+        if $r1 == null goto label1;
+
+        return 1;
+
+     label1:
+        return 0;
+    }
+    public void reportDataSent()
+    {
+        com.facebook.stetho.inspector.network.RequestBodyHelper r0;
+        com.facebook.stetho.inspector.network.NetworkEventReporter $r1;
+        java.lang.String $r2;
+        java.io.ByteArrayOutputStream $r3;
+        int $i0, $i2;
+        com.facebook.stetho.inspector.network.CountingOutputStream $r4;
+        long $l1;
+
+        r0 := @this: com.facebook.stetho.inspector.network.RequestBodyHelper;
+
+        specialinvoke r0.<com.facebook.stetho.inspector.network.RequestBodyHelper: void throwIfNoBody()>();
+
+        $r1 = r0.<com.facebook.stetho.inspector.network.RequestBodyHelper: com.facebook.stetho.inspector.network.NetworkEventReporter mEventReporter>;
+
+        $r2 = r0.<com.facebook.stetho.inspector.network.RequestBodyHelper: java.lang.String mRequestId>;
+
+        $r3 = r0.<com.facebook.stetho.inspector.network.RequestBodyHelper: java.io.ByteArrayOutputStream mDeflatedOutput>;
+
+        $i0 = virtualinvoke $r3.<java.io.ByteArrayOutputStream: int size()>();
+
+        $r4 = r0.<com.facebook.stetho.inspector.network.RequestBodyHelper: com.facebook.stetho.inspector.network.CountingOutputStream mDeflatingOutput>;
+
+        $l1 = virtualinvoke $r4.<com.facebook.stetho.inspector.network.CountingOutputStream: long getCount()>();
+
+        $i2 = (int) $l1;
+
+        interfaceinvoke $r1.<com.facebook.stetho.inspector.network.NetworkEventReporter: void dataSent(java.lang.String,int,int)>($r2, $i0, $i2);
+
+        return;
+    }

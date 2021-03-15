@@ -1,0 +1,2675 @@
+org.htmlcleaner.HtmlTokenizer extends java.lang.Object
+private static final int WORKING_BUFFER_SIZE
+private boolean _asExpected
+private transient int _col
+private transient org.htmlcleaner.TagToken _currentTagToken
+private transient org.htmlcleaner.DoctypeToken _docType
+private transient boolean _isLateForDoctype
+private boolean _isSpecialContext
+private java.lang.String _isSpecialContextName
+private transient int _len
+private transient java.util.Set _namespacePrefixes
+private transient int _pos
+private java.io.BufferedReader _reader
+private transient int _row
+private transient java.lang.StringBuffer _saved
+private transient java.util.List _tokenList
+private char[] _working
+private org.htmlcleaner.CleanTimeValues cleanTimeValues
+private org.htmlcleaner.HtmlCleaner cleaner
+private org.htmlcleaner.CleanerProperties props
+private org.htmlcleaner.CleanerTransformations transformations
+    public void <init>(org.htmlcleaner.HtmlCleaner, java.io.Reader, org.htmlcleaner.CleanTimeValues)
+    {
+        org.htmlcleaner.HtmlTokenizer r0;
+        org.htmlcleaner.HtmlCleaner $r1;
+        java.io.Reader $r2;
+        org.htmlcleaner.CleanTimeValues $r3;
+        char[] $r4;
+        java.lang.StringBuffer $r5;
+        java.util.ArrayList $r6;
+        java.util.HashSet $r7;
+        java.io.BufferedReader $r8;
+        org.htmlcleaner.CleanerProperties $r9;
+        org.htmlcleaner.CleanerTransformations $r10;
+
+        r0 := @this: org.htmlcleaner.HtmlTokenizer;
+
+        $r1 := @parameter0: org.htmlcleaner.HtmlCleaner;
+
+        $r2 := @parameter1: java.io.Reader;
+
+        $r3 := @parameter2: org.htmlcleaner.CleanTimeValues;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r4 = newarray (char)[1024];
+
+        r0.<org.htmlcleaner.HtmlTokenizer: char[] _working> = $r4;
+
+        r0.<org.htmlcleaner.HtmlTokenizer: int _len> = -1;
+
+        r0.<org.htmlcleaner.HtmlTokenizer: int _row> = 1;
+
+        r0.<org.htmlcleaner.HtmlTokenizer: int _col> = 1;
+
+        $r5 = new java.lang.StringBuffer;
+
+        specialinvoke $r5.<java.lang.StringBuffer: void <init>(int)>(512);
+
+        r0.<org.htmlcleaner.HtmlTokenizer: java.lang.StringBuffer _saved> = $r5;
+
+        $r6 = new java.util.ArrayList;
+
+        specialinvoke $r6.<java.util.ArrayList: void <init>()>();
+
+        r0.<org.htmlcleaner.HtmlTokenizer: java.util.List _tokenList> = $r6;
+
+        $r7 = new java.util.HashSet;
+
+        specialinvoke $r7.<java.util.HashSet: void <init>()>();
+
+        r0.<org.htmlcleaner.HtmlTokenizer: java.util.Set _namespacePrefixes> = $r7;
+
+        r0.<org.htmlcleaner.HtmlTokenizer: boolean _asExpected> = 1;
+
+        $r8 = new java.io.BufferedReader;
+
+        specialinvoke $r8.<java.io.BufferedReader: void <init>(java.io.Reader)>($r2);
+
+        r0.<org.htmlcleaner.HtmlTokenizer: java.io.BufferedReader _reader> = $r8;
+
+        r0.<org.htmlcleaner.HtmlTokenizer: org.htmlcleaner.HtmlCleaner cleaner> = $r1;
+
+        $r9 = virtualinvoke $r1.<org.htmlcleaner.HtmlCleaner: org.htmlcleaner.CleanerProperties getProperties()>();
+
+        r0.<org.htmlcleaner.HtmlTokenizer: org.htmlcleaner.CleanerProperties props> = $r9;
+
+        $r10 = virtualinvoke $r1.<org.htmlcleaner.HtmlCleaner: org.htmlcleaner.CleanerTransformations getTransformations()>();
+
+        r0.<org.htmlcleaner.HtmlTokenizer: org.htmlcleaner.CleanerTransformations transformations> = $r10;
+
+        r0.<org.htmlcleaner.HtmlTokenizer: org.htmlcleaner.CleanTimeValues cleanTimeValues> = $r3;
+
+        return;
+    }
+    private boolean addSavedAsContent()
+    {
+        org.htmlcleaner.HtmlTokenizer r0;
+        java.lang.StringBuffer $r1, $r5;
+        int $i0;
+        org.htmlcleaner.ContentNode $r2;
+        org.htmlcleaner.CleanerProperties $r3;
+        boolean $z0;
+        java.lang.String $r4;
+
+        r0 := @this: org.htmlcleaner.HtmlTokenizer;
+
+        $r1 = r0.<org.htmlcleaner.HtmlTokenizer: java.lang.StringBuffer _saved>;
+
+        $i0 = virtualinvoke $r1.<java.lang.StringBuffer: int length()>();
+
+        if $i0 <= 0 goto label3;
+
+        $r2 = new org.htmlcleaner.ContentNode;
+
+        $r3 = r0.<org.htmlcleaner.HtmlTokenizer: org.htmlcleaner.CleanerProperties props>;
+
+        $z0 = virtualinvoke $r3.<org.htmlcleaner.CleanerProperties: boolean isDeserializeEntities()>();
+
+        if $z0 == 0 goto label2;
+
+        $r4 = specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: java.lang.String deserializeEntitiesInSaved()>();
+
+     label1:
+        specialinvoke $r2.<org.htmlcleaner.ContentNode: void <init>(java.lang.String)>($r4);
+
+        specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: void addToken(org.htmlcleaner.BaseToken)>($r2);
+
+        $r1 = r0.<org.htmlcleaner.HtmlTokenizer: java.lang.StringBuffer _saved>;
+
+        $r5 = r0.<org.htmlcleaner.HtmlTokenizer: java.lang.StringBuffer _saved>;
+
+        $i0 = virtualinvoke $r5.<java.lang.StringBuffer: int length()>();
+
+        virtualinvoke $r1.<java.lang.StringBuffer: java.lang.StringBuffer delete(int,int)>(0, $i0);
+
+        return 1;
+
+     label2:
+        $r1 = r0.<org.htmlcleaner.HtmlTokenizer: java.lang.StringBuffer _saved>;
+
+        $r4 = virtualinvoke $r1.<java.lang.StringBuffer: java.lang.String toString()>();
+
+        goto label1;
+
+     label3:
+        return 0;
+    }
+    private void addToken(org.htmlcleaner.BaseToken)
+    {
+        org.htmlcleaner.HtmlTokenizer r0;
+        org.htmlcleaner.BaseToken $r1;
+        java.util.List $r2, $r4, $r5;
+        int $i0;
+        org.htmlcleaner.HtmlCleaner $r3;
+        java.util.ListIterator $r6;
+        org.htmlcleaner.CleanTimeValues $r7;
+
+        r0 := @this: org.htmlcleaner.HtmlTokenizer;
+
+        $r1 := @parameter0: org.htmlcleaner.BaseToken;
+
+        $i0 = r0.<org.htmlcleaner.HtmlTokenizer: int _row>;
+
+        interfaceinvoke $r1.<org.htmlcleaner.BaseToken: void setRow(int)>($i0);
+
+        $i0 = r0.<org.htmlcleaner.HtmlTokenizer: int _col>;
+
+        interfaceinvoke $r1.<org.htmlcleaner.BaseToken: void setCol(int)>($i0);
+
+        $r2 = r0.<org.htmlcleaner.HtmlTokenizer: java.util.List _tokenList>;
+
+        interfaceinvoke $r2.<java.util.List: boolean add(java.lang.Object)>($r1);
+
+        $r3 = r0.<org.htmlcleaner.HtmlTokenizer: org.htmlcleaner.HtmlCleaner cleaner>;
+
+        $r2 = r0.<org.htmlcleaner.HtmlTokenizer: java.util.List _tokenList>;
+
+        $r4 = r0.<org.htmlcleaner.HtmlTokenizer: java.util.List _tokenList>;
+
+        $r5 = r0.<org.htmlcleaner.HtmlTokenizer: java.util.List _tokenList>;
+
+        $i0 = interfaceinvoke $r5.<java.util.List: int size()>();
+
+        $i0 = $i0 + -1;
+
+        $r6 = interfaceinvoke $r4.<java.util.List: java.util.ListIterator listIterator(int)>($i0);
+
+        $r7 = r0.<org.htmlcleaner.HtmlTokenizer: org.htmlcleaner.CleanTimeValues cleanTimeValues>;
+
+        virtualinvoke $r3.<org.htmlcleaner.HtmlCleaner: void makeTree(java.util.List,java.util.ListIterator,org.htmlcleaner.CleanTimeValues)>($r2, $r6, $r7);
+
+        return;
+    }
+    private java.lang.String attributeValue() throws java.io.IOException
+    {
+        org.htmlcleaner.HtmlTokenizer r0;
+        java.lang.StringBuffer r1;
+        int $i0;
+        boolean $z0, z1, $z2, $z3, $z4;
+        org.htmlcleaner.CleanerProperties $r2;
+        char[] $r3;
+        char $c1;
+        java.lang.String $r4;
+
+        r0 := @this: org.htmlcleaner.HtmlTokenizer;
+
+        specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: void skipWhitespaces()>();
+
+        $z0 = specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: boolean isChar(char)>(60);
+
+        if $z0 != 0 goto label01;
+
+        $z0 = specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: boolean isChar(char)>(62);
+
+        if $z0 != 0 goto label01;
+
+        $z0 = specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: boolean startsWith(java.lang.String)>("/>");
+
+        if $z0 == 0 goto label02;
+
+     label01:
+        return "";
+
+     label02:
+        $z0 = 0;
+
+        z1 = 0;
+
+        r1 = new java.lang.StringBuffer;
+
+        specialinvoke r1.<java.lang.StringBuffer: void <init>()>();
+
+        $z2 = specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: boolean isChar(char)>(39);
+
+        if $z2 == 0 goto label10;
+
+        z1 = 1;
+
+        specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: void saveCurrent()>();
+
+        specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: void go()>();
+
+     label03:
+        $r2 = r0.<org.htmlcleaner.HtmlTokenizer: org.htmlcleaner.CleanerProperties props>;
+
+        $z2 = virtualinvoke $r2.<org.htmlcleaner.CleanerProperties: boolean isAllowMultiWordAttributes()>();
+
+        $r2 = r0.<org.htmlcleaner.HtmlTokenizer: org.htmlcleaner.CleanerProperties props>;
+
+        $z3 = virtualinvoke $r2.<org.htmlcleaner.CleanerProperties: boolean isAllowHtmlInsideAttributes()>();
+
+     label04:
+        $z4 = specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: boolean isAllRead()>();
+
+        if $z4 != 0 goto label11;
+
+        if z1 == 0 goto label06;
+
+        $z4 = specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: boolean isChar(char)>(39);
+
+        if $z4 != 0 goto label06;
+
+        if $z3 != 0 goto label05;
+
+        $z4 = specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: boolean isChar(char)>(62);
+
+        if $z4 != 0 goto label06;
+
+        $z4 = specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: boolean isChar(char)>(60);
+
+        if $z4 != 0 goto label06;
+
+     label05:
+        if $z2 != 0 goto label09;
+
+        $z4 = specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: boolean isWhitespace()>();
+
+        if $z4 == 0 goto label09;
+
+     label06:
+        if $z0 == 0 goto label08;
+
+        $z4 = specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: boolean isChar(char)>(34);
+
+        if $z4 != 0 goto label08;
+
+        if $z3 != 0 goto label07;
+
+        $z4 = specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: boolean isChar(char)>(62);
+
+        if $z4 != 0 goto label08;
+
+        $z4 = specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: boolean isChar(char)>(60);
+
+        if $z4 != 0 goto label08;
+
+     label07:
+        if $z2 != 0 goto label09;
+
+        $z4 = specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: boolean isWhitespace()>();
+
+        if $z4 == 0 goto label09;
+
+     label08:
+        if z1 != 0 goto label11;
+
+        if $z0 != 0 goto label11;
+
+        $z4 = specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: boolean isWhitespace()>();
+
+        if $z4 != 0 goto label11;
+
+        $z4 = specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: boolean isChar(char)>(62);
+
+        if $z4 != 0 goto label11;
+
+        $z4 = specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: boolean isChar(char)>(60);
+
+        if $z4 != 0 goto label11;
+
+     label09:
+        $r3 = r0.<org.htmlcleaner.HtmlTokenizer: char[] _working>;
+
+        $i0 = r0.<org.htmlcleaner.HtmlTokenizer: int _pos>;
+
+        $c1 = $r3[$i0];
+
+        virtualinvoke r1.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>($c1);
+
+        specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: void saveCurrent()>();
+
+        specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: void go()>();
+
+        goto label04;
+
+     label10:
+        $z2 = specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: boolean isChar(char)>(34);
+
+        if $z2 == 0 goto label03;
+
+        $z0 = 1;
+
+        specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: void saveCurrent()>();
+
+        specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: void go()>();
+
+        goto label03;
+
+     label11:
+        $z2 = specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: boolean isChar(char)>(39);
+
+        if $z2 == 0 goto label13;
+
+        if z1 == 0 goto label13;
+
+        specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: void saveCurrent()>();
+
+        specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: void go()>();
+
+     label12:
+        $r4 = virtualinvoke r1.<java.lang.StringBuffer: java.lang.String toString()>();
+
+        return $r4;
+
+     label13:
+        z1 = specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: boolean isChar(char)>(34);
+
+        if z1 == 0 goto label12;
+
+        if $z0 == 0 goto label12;
+
+        specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: void saveCurrent()>();
+
+        specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: void go()>();
+
+        goto label12;
+    }
+    private void cdata() throws java.io.IOException
+    {
+        org.htmlcleaner.HtmlTokenizer r0;
+        boolean z0, $z1;
+        org.htmlcleaner.CleanerProperties $r1;
+        java.lang.String $r2;
+        int $i0, $i1;
+        java.lang.StringBuffer $r3, $r6;
+        org.htmlcleaner.ContentNode $r4;
+        org.htmlcleaner.CData $r5;
+
+        r0 := @this: org.htmlcleaner.HtmlTokenizer;
+
+        z0 = 0;
+
+        $z1 = r0.<org.htmlcleaner.HtmlTokenizer: boolean _isSpecialContext>;
+
+        if $z1 != 0 goto label01;
+
+        $r1 = r0.<org.htmlcleaner.HtmlTokenizer: org.htmlcleaner.CleanerProperties props>;
+
+        $z1 = virtualinvoke $r1.<org.htmlcleaner.CleanerProperties: boolean isOmitCdataOutsideScriptAndStyle()>();
+
+        if $z1 != 0 goto label01;
+
+        specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: boolean content()>();
+
+        return;
+
+     label01:
+        $z1 = specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: boolean startsWith(java.lang.String)>("/*<![CDATA[*/");
+
+        if $z1 == 0 goto label04;
+
+        $r2 = "/*<![CDATA[*/";
+
+        $i0 = virtualinvoke $r2.<java.lang.String: int length()>();
+
+        specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: void go(int)>($i0);
+
+     label02:
+        $r3 = r0.<org.htmlcleaner.HtmlTokenizer: java.lang.StringBuffer _saved>;
+
+        $i0 = virtualinvoke $r3.<java.lang.StringBuffer: int length()>();
+
+     label03:
+        $z1 = specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: boolean isAllRead()>();
+
+        if $z1 != 0 goto label06;
+
+        $z1 = specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: boolean startsWith(java.lang.String)>("/*]]>*/");
+
+        if $z1 != 0 goto label06;
+
+        $z1 = specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: boolean startsWith(java.lang.String)>("]]>");
+
+        if $z1 != 0 goto label06;
+
+        $z1 = specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: boolean startsWith(java.lang.String)>("//]]>");
+
+        if $z1 != 0 goto label06;
+
+        specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: void saveCurrent()>();
+
+        specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: void go()>();
+
+        goto label03;
+
+     label04:
+        $z1 = specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: boolean startsWith(java.lang.String)>("//<![CDATA[");
+
+        if $z1 == 0 goto label05;
+
+        z0 = 1;
+
+        $r2 = "//<![CDATA[";
+
+        $i0 = virtualinvoke $r2.<java.lang.String: int length()>();
+
+        specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: void go(int)>($i0);
+
+        goto label02;
+
+     label05:
+        $r2 = "<![CDATA[";
+
+        $i0 = virtualinvoke $r2.<java.lang.String: int length()>();
+
+        specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: void go(int)>($i0);
+
+        goto label02;
+
+     label06:
+        $z1 = specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: boolean startsWith(java.lang.String)>("/*]]>*/");
+
+        if $z1 == 0 goto label11;
+
+        $r2 = "/*]]>*/";
+
+        $i1 = virtualinvoke $r2.<java.lang.String: int length()>();
+
+        specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: void go(int)>($i1);
+
+     label07:
+        $r3 = r0.<org.htmlcleaner.HtmlTokenizer: java.lang.StringBuffer _saved>;
+
+        $i1 = virtualinvoke $r3.<java.lang.StringBuffer: int length()>();
+
+        if $i1 <= 0 goto label10;
+
+        $z1 = r0.<org.htmlcleaner.HtmlTokenizer: boolean _isSpecialContext>;
+
+        if $z1 != 0 goto label08;
+
+        $r1 = r0.<org.htmlcleaner.HtmlTokenizer: org.htmlcleaner.CleanerProperties props>;
+
+        $z1 = virtualinvoke $r1.<org.htmlcleaner.CleanerProperties: boolean isOmitCdataOutsideScriptAndStyle()>();
+
+        if $z1 != 0 goto label10;
+
+     label08:
+        if z0 == 0 goto label09;
+
+        $r4 = new org.htmlcleaner.ContentNode;
+
+        specialinvoke $r4.<org.htmlcleaner.ContentNode: void <init>(java.lang.String)>("//");
+
+        specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: void addToken(org.htmlcleaner.BaseToken)>($r4);
+
+     label09:
+        $r3 = r0.<org.htmlcleaner.HtmlTokenizer: java.lang.StringBuffer _saved>;
+
+        $r2 = virtualinvoke $r3.<java.lang.StringBuffer: java.lang.String toString()>();
+
+        $r2 = virtualinvoke $r2.<java.lang.String: java.lang.String substring(int)>($i0);
+
+        $r5 = new org.htmlcleaner.CData;
+
+        specialinvoke $r5.<org.htmlcleaner.CData: void <init>(java.lang.String)>($r2);
+
+        specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: void addToken(org.htmlcleaner.BaseToken)>($r5);
+
+     label10:
+        $r3 = r0.<org.htmlcleaner.HtmlTokenizer: java.lang.StringBuffer _saved>;
+
+        $r6 = r0.<org.htmlcleaner.HtmlTokenizer: java.lang.StringBuffer _saved>;
+
+        $i1 = virtualinvoke $r6.<java.lang.StringBuffer: int length()>();
+
+        virtualinvoke $r3.<java.lang.StringBuffer: java.lang.StringBuffer delete(int,int)>($i0, $i1);
+
+        return;
+
+     label11:
+        $z1 = specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: boolean startsWith(java.lang.String)>("//]]>");
+
+        if $z1 == 0 goto label12;
+
+        $r2 = "//]]>";
+
+        $i1 = virtualinvoke $r2.<java.lang.String: int length()>();
+
+        specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: void go(int)>($i1);
+
+        goto label07;
+
+     label12:
+        $z1 = specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: boolean startsWith(java.lang.String)>("]]>");
+
+        if $z1 == 0 goto label07;
+
+        $r2 = "]]>";
+
+        $i1 = virtualinvoke $r2.<java.lang.String: int length()>();
+
+        specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: void go(int)>($i1);
+
+        goto label07;
+    }
+    private void comment() throws java.io.IOException
+    {
+        org.htmlcleaner.HtmlTokenizer r0;
+        boolean $z0;
+        java.lang.StringBuffer $r1, $r8;
+        int $i0, $i2;
+        org.htmlcleaner.CleanerProperties $r2;
+        java.lang.String $r3, $r4, $r6;
+        java.lang.StringBuilder $r5;
+        char $c1;
+        org.htmlcleaner.CommentNode $r7;
+
+        r0 := @this: org.htmlcleaner.HtmlTokenizer;
+
+        specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: void go(int)>(4);
+
+     label1:
+        $z0 = specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: boolean isAllRead()>();
+
+        if $z0 != 0 goto label2;
+
+        $z0 = specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: boolean startsWith(java.lang.String)>("-->");
+
+        if $z0 != 0 goto label2;
+
+        specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: void saveCurrent()>();
+
+        specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: void go()>();
+
+        goto label1;
+
+     label2:
+        $z0 = specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: boolean startsWith(java.lang.String)>("-->");
+
+        if $z0 == 0 goto label3;
+
+        specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: void go(int)>(3);
+
+     label3:
+        $r1 = r0.<org.htmlcleaner.HtmlTokenizer: java.lang.StringBuffer _saved>;
+
+        $i0 = virtualinvoke $r1.<java.lang.StringBuffer: int length()>();
+
+        if $i0 <= 0 goto label7;
+
+        $r2 = r0.<org.htmlcleaner.HtmlTokenizer: org.htmlcleaner.CleanerProperties props>;
+
+        $z0 = virtualinvoke $r2.<org.htmlcleaner.CleanerProperties: boolean isOmitComments()>();
+
+        if $z0 != 0 goto label6;
+
+        $r2 = r0.<org.htmlcleaner.HtmlTokenizer: org.htmlcleaner.CleanerProperties props>;
+
+        $r3 = virtualinvoke $r2.<org.htmlcleaner.CleanerProperties: java.lang.String getHyphenReplacementInComment()>();
+
+        $r1 = r0.<org.htmlcleaner.HtmlTokenizer: java.lang.StringBuffer _saved>;
+
+        $r4 = virtualinvoke $r1.<java.lang.StringBuffer: java.lang.String toString()>();
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.String: java.lang.String replaceAll(java.lang.String,java.lang.String)>("--", $r6);
+
+        $r6 = $r4;
+
+        $i0 = virtualinvoke $r4.<java.lang.String: int length()>();
+
+        if $i0 <= 0 goto label4;
+
+        $c1 = virtualinvoke $r4.<java.lang.String: char charAt(int)>(0);
+
+        if $c1 != 45 goto label4;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r4 = virtualinvoke $r4.<java.lang.String: java.lang.String substring(int)>(1);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label4:
+        $i0 = virtualinvoke $r6.<java.lang.String: int length()>();
+
+        if $i0 <= 0 goto label5;
+
+        $i2 = $i0 + -1;
+
+        $c1 = virtualinvoke $r6.<java.lang.String: char charAt(int)>($i2);
+
+        if $c1 != 45 goto label5;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $i0 = $i0 + -1;
+
+        $r4 = virtualinvoke $r6.<java.lang.String: java.lang.String substring(int,int)>(0, $i0);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label5:
+        $r7 = new org.htmlcleaner.CommentNode;
+
+        specialinvoke $r7.<org.htmlcleaner.CommentNode: void <init>(java.lang.String)>($r6);
+
+        specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: void addToken(org.htmlcleaner.BaseToken)>($r7);
+
+     label6:
+        $r1 = r0.<org.htmlcleaner.HtmlTokenizer: java.lang.StringBuffer _saved>;
+
+        $r8 = r0.<org.htmlcleaner.HtmlTokenizer: java.lang.StringBuffer _saved>;
+
+        $i0 = virtualinvoke $r8.<java.lang.StringBuffer: int length()>();
+
+        virtualinvoke $r1.<java.lang.StringBuffer: java.lang.StringBuffer delete(int,int)>(0, $i0);
+
+     label7:
+        return;
+    }
+    private boolean content() throws java.io.IOException
+    {
+        org.htmlcleaner.HtmlTokenizer r0;
+        boolean $z0;
+
+        r0 := @this: org.htmlcleaner.HtmlTokenizer;
+
+     label1:
+        $z0 = specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: boolean isAllRead()>();
+
+        if $z0 != 0 goto label2;
+
+        specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: void saveCurrent()>();
+
+        specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: void go()>();
+
+        $z0 = specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: boolean startsWith(java.lang.String)>("/*<![CDATA[*/");
+
+        if $z0 != 0 goto label2;
+
+        $z0 = specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: boolean startsWith(java.lang.String)>("<![CDATA[");
+
+        if $z0 != 0 goto label2;
+
+        $z0 = specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: boolean startsWith(java.lang.String)>("//<![CDATA[");
+
+        if $z0 == 0 goto label3;
+
+     label2:
+        $z0 = specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: boolean addSavedAsContent()>();
+
+        return $z0;
+
+     label3:
+        $z0 = specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: boolean isTagStartOrEnd()>();
+
+        if $z0 == 0 goto label1;
+
+        goto label2;
+    }
+    private java.lang.String deserializeEntitiesInSaved()
+    {
+        org.htmlcleaner.HtmlTokenizer r0;
+        java.lang.NumberFormatException r1;
+        org.htmlcleaner.SpecialEntities r2;
+        java.lang.String $r3;
+        int i0, $i1, i2, $i3, i5, $i7;
+        boolean z0, z1, $z2;
+        java.lang.StringBuffer $r4;
+        char $c4;
+        byte $b6;
+        org.htmlcleaner.SpecialEntity $r5;
+        char[] $r6;
+        org.htmlcleaner.CleanerProperties $r7;
+
+        r0 := @this: org.htmlcleaner.HtmlTokenizer;
+
+        r2 = <org.htmlcleaner.SpecialEntities: org.htmlcleaner.SpecialEntities INSTANCE>;
+
+        i0 = -1;
+
+        z0 = 0;
+
+        z1 = 0;
+
+        $i1 = virtualinvoke r2.<org.htmlcleaner.SpecialEntities: int getMaxEntityLength()>();
+
+        i2 = 0;
+
+        $r4 = r0.<org.htmlcleaner.HtmlTokenizer: java.lang.StringBuffer _saved>;
+
+        $i3 = virtualinvoke $r4.<java.lang.StringBuffer: int length()>();
+
+     label01:
+        if i2 >= $i3 goto label21;
+
+        $r4 = r0.<org.htmlcleaner.HtmlTokenizer: java.lang.StringBuffer _saved>;
+
+        $c4 = virtualinvoke $r4.<java.lang.StringBuffer: char charAt(int)>(i2);
+
+        if $c4 != 38 goto label02;
+
+        i0 = i2;
+
+        z0 = 0;
+
+        z1 = 0;
+
+        i2 = i2 + 1;
+
+        goto label01;
+
+     label02:
+        if i0 == -1 goto label20;
+
+        $r4 = r0.<org.htmlcleaner.HtmlTokenizer: java.lang.StringBuffer _saved>;
+
+        $c4 = virtualinvoke $r4.<java.lang.StringBuffer: char charAt(int)>(i2);
+
+        if $c4 != 59 goto label16;
+
+        i5 = -1;
+
+        if z0 == 0 goto label14;
+
+        $r4 = r0.<org.htmlcleaner.HtmlTokenizer: java.lang.StringBuffer _saved>;
+
+        if z1 == 0 goto label10;
+
+        $b6 = 3;
+
+     label03:
+        i5 = $b6 + i0;
+
+     label04:
+        $r3 = virtualinvoke $r4.<java.lang.StringBuffer: java.lang.String substring(int,int)>(i5, i2);
+
+     label05:
+        if z1 == 0 goto label11;
+
+        $b6 = 16;
+
+     label06:
+        i5 = staticinvoke <java.lang.Integer: int parseInt(java.lang.String,int)>($r3, $b6);
+
+     label07:
+        $r5 = virtualinvoke r2.<org.htmlcleaner.SpecialEntities: org.htmlcleaner.SpecialEntity getSpecialEntityByUnicode(int)>(i5);
+
+        if $r5 == null goto label13;
+
+        i5 = virtualinvoke $r5.<org.htmlcleaner.SpecialEntity: int intValue()>();
+
+     label08:
+        if i5 < 0 goto label15;
+
+        $r6 = staticinvoke <java.lang.Character: char[] toChars(int)>(i5);
+
+        $r4 = r0.<org.htmlcleaner.HtmlTokenizer: java.lang.StringBuffer _saved>;
+
+        i2 = i2 + 1;
+
+        $r3 = new java.lang.String;
+
+        specialinvoke $r3.<java.lang.String: void <init>(char[])>($r6);
+
+        virtualinvoke $r4.<java.lang.StringBuffer: java.lang.StringBuffer replace(int,int,java.lang.String)>(i0, i2, $r3);
+
+        $r4 = r0.<org.htmlcleaner.HtmlTokenizer: java.lang.StringBuffer _saved>;
+
+        $i3 = virtualinvoke $r4.<java.lang.StringBuffer: int length()>();
+
+        i2 = lengthof $r6;
+
+        i2 = i0 + i2;
+
+     label09:
+        i0 = -1;
+
+        goto label01;
+
+     label10:
+        $b6 = 2;
+
+        goto label03;
+
+     label11:
+        $b6 = 10;
+
+        goto label06;
+
+     label12:
+        r1 := @caughtexception;
+
+        i5 = -1;
+
+        goto label07;
+
+     label13:
+        $r7 = r0.<org.htmlcleaner.HtmlTokenizer: org.htmlcleaner.CleanerProperties props>;
+
+        $z2 = virtualinvoke $r7.<org.htmlcleaner.CleanerProperties: boolean isRecognizeUnicodeChars()>();
+
+        if $z2 != 0 goto label08;
+
+        i5 = -1;
+
+        goto label08;
+
+     label14:
+        $r4 = r0.<org.htmlcleaner.HtmlTokenizer: java.lang.StringBuffer _saved>;
+
+        $i7 = i0 + 1;
+
+        $r3 = virtualinvoke $r4.<java.lang.StringBuffer: java.lang.String substring(int,int)>($i7, i2);
+
+        $r5 = virtualinvoke r2.<org.htmlcleaner.SpecialEntities: org.htmlcleaner.SpecialEntity getSpecialEntity(java.lang.String)>($r3);
+
+        if $r5 == null goto label08;
+
+        i5 = virtualinvoke $r5.<org.htmlcleaner.SpecialEntity: int intValue()>();
+
+        goto label08;
+
+     label15:
+        i2 = i2 + 1;
+
+        goto label09;
+
+     label16:
+        i5 = i0 + 1;
+
+        if i2 != i5 goto label18;
+
+        $r4 = r0.<org.htmlcleaner.HtmlTokenizer: java.lang.StringBuffer _saved>;
+
+        $c4 = virtualinvoke $r4.<java.lang.StringBuffer: char charAt(int)>(i2);
+
+        if $c4 != 35 goto label18;
+
+        z0 = 1;
+
+     label17:
+        i2 = i2 + 1;
+
+        goto label01;
+
+     label18:
+        i5 = i0 + 2;
+
+        if i2 != i5 goto label19;
+
+        if z0 == 0 goto label19;
+
+        $r4 = r0.<org.htmlcleaner.HtmlTokenizer: java.lang.StringBuffer _saved>;
+
+        $c4 = virtualinvoke $r4.<java.lang.StringBuffer: char charAt(int)>(i2);
+
+        if $c4 != 120 goto label19;
+
+        z1 = 1;
+
+        goto label17;
+
+     label19:
+        i5 = i2 - i0;
+
+        if i5 <= $i1 goto label17;
+
+        i0 = -1;
+
+        goto label17;
+
+     label20:
+        i2 = i2 + 1;
+
+        goto label01;
+
+     label21:
+        $r4 = r0.<org.htmlcleaner.HtmlTokenizer: java.lang.StringBuffer _saved>;
+
+        $r3 = virtualinvoke $r4.<java.lang.StringBuffer: java.lang.String toString()>();
+
+        return $r3;
+
+        catch java.lang.NumberFormatException from label04 to label05 with label12;
+        catch java.lang.NumberFormatException from label06 to label07 with label12;
+    }
+    private void doctype() throws java.io.IOException
+    {
+        org.htmlcleaner.HtmlTokenizer r0;
+        java.lang.String $r1, $r2, $r3, $r4, $r5;
+        int $i0;
+        org.htmlcleaner.DoctypeToken $r6;
+
+        r0 := @this: org.htmlcleaner.HtmlTokenizer;
+
+        specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: void go(int)>(9);
+
+        specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: void skipWhitespaces()>();
+
+        $r1 = specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: java.lang.String identifier()>();
+
+        specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: void skipWhitespaces()>();
+
+        $r2 = specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: java.lang.String identifier()>();
+
+        specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: void skipWhitespaces()>();
+
+        $r3 = specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: java.lang.String attributeValue()>();
+
+        specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: void skipWhitespaces()>();
+
+        $r4 = specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: java.lang.String attributeValue()>();
+
+        specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: void skipWhitespaces()>();
+
+        $r5 = specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: java.lang.String attributeValue()>();
+
+        specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: void ignoreUntil(char)>(60);
+
+        if $r5 == null goto label1;
+
+        $i0 = virtualinvoke $r5.<java.lang.String: int length()>();
+
+        if $i0 != 0 goto label2;
+
+     label1:
+        $r6 = new org.htmlcleaner.DoctypeToken;
+
+        specialinvoke $r6.<org.htmlcleaner.DoctypeToken: void <init>(java.lang.String,java.lang.String,java.lang.String,java.lang.String)>($r1, $r2, $r3, $r4);
+
+        r0.<org.htmlcleaner.HtmlTokenizer: org.htmlcleaner.DoctypeToken _docType> = $r6;
+
+        return;
+
+     label2:
+        $r6 = new org.htmlcleaner.DoctypeToken;
+
+        specialinvoke $r6.<org.htmlcleaner.DoctypeToken: void <init>(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String)>($r1, $r2, $r3, $r4, $r5);
+
+        r0.<org.htmlcleaner.HtmlTokenizer: org.htmlcleaner.DoctypeToken _docType> = $r6;
+
+        return;
+    }
+    private void go() throws java.io.IOException
+    {
+        org.htmlcleaner.HtmlTokenizer r0;
+
+        r0 := @this: org.htmlcleaner.HtmlTokenizer;
+
+        specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: void go(int)>(1);
+
+        return;
+    }
+    private void go(int) throws java.io.IOException
+    {
+        org.htmlcleaner.HtmlTokenizer r0;
+        int $i0, $i1;
+
+        r0 := @this: org.htmlcleaner.HtmlTokenizer;
+
+        $i0 := @parameter0: int;
+
+        $i1 = r0.<org.htmlcleaner.HtmlTokenizer: int _pos>;
+
+        $i1 = $i1 + $i0;
+
+        r0.<org.htmlcleaner.HtmlTokenizer: int _pos> = $i1;
+
+        $i0 = $i0 + -1;
+
+        specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: void readIfNeeded(int)>($i0);
+
+        return;
+    }
+    private void handleInterruption()
+    {
+        org.htmlcleaner.HtmlTokenizer r0;
+
+        r0 := @this: org.htmlcleaner.HtmlTokenizer;
+
+        return;
+    }
+    private java.lang.String identifier() throws java.io.IOException
+    {
+        org.htmlcleaner.HtmlTokenizer r0;
+        java.lang.StringBuffer r1;
+        boolean $z0;
+        char[] $r2;
+        int $i0;
+        char $c1;
+        java.lang.String $r3, $r4, r5;
+        org.htmlcleaner.CleanerProperties $r6;
+        java.lang.StringBuilder $r7;
+        java.util.Set $r8;
+
+        r0 := @this: org.htmlcleaner.HtmlTokenizer;
+
+        r0.<org.htmlcleaner.HtmlTokenizer: boolean _asExpected> = 1;
+
+        $z0 = specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: boolean isIdentifierStartChar()>();
+
+        if $z0 != 0 goto label1;
+
+        r0.<org.htmlcleaner.HtmlTokenizer: boolean _asExpected> = 0;
+
+        return null;
+
+     label1:
+        r1 = new java.lang.StringBuffer;
+
+        specialinvoke r1.<java.lang.StringBuffer: void <init>()>();
+
+     label2:
+        $z0 = specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: boolean isAllRead()>();
+
+        if $z0 != 0 goto label3;
+
+        $z0 = specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: boolean isIdentifierChar()>();
+
+        if $z0 == 0 goto label3;
+
+        specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: void saveCurrent()>();
+
+        $r2 = r0.<org.htmlcleaner.HtmlTokenizer: char[] _working>;
+
+        $i0 = r0.<org.htmlcleaner.HtmlTokenizer: int _pos>;
+
+        $c1 = $r2[$i0];
+
+        virtualinvoke r1.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>($c1);
+
+        specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: void go()>();
+
+        goto label2;
+
+     label3:
+        $i0 = virtualinvoke r1.<java.lang.StringBuffer: int length()>();
+
+        if $i0 <= 0 goto label4;
+
+        $i0 = virtualinvoke r1.<java.lang.StringBuffer: int length()>();
+
+        $i0 = $i0 + -1;
+
+        $c1 = virtualinvoke r1.<java.lang.StringBuffer: char charAt(int)>($i0);
+
+        $z0 = staticinvoke <org.htmlcleaner.Utils: boolean isIdentifierHelperChar(char)>($c1);
+
+        if $z0 == 0 goto label4;
+
+        $i0 = virtualinvoke r1.<java.lang.StringBuffer: int length()>();
+
+        $i0 = $i0 + -1;
+
+        virtualinvoke r1.<java.lang.StringBuffer: java.lang.StringBuffer deleteCharAt(int)>($i0);
+
+        goto label3;
+
+     label4:
+        $i0 = virtualinvoke r1.<java.lang.StringBuffer: int length()>();
+
+        if $i0 == 0 goto label7;
+
+        $r3 = virtualinvoke r1.<java.lang.StringBuffer: java.lang.String toString()>();
+
+        $i0 = virtualinvoke $r3.<java.lang.String: int indexOf(int)>(58);
+
+        if $i0 < 0 goto label8;
+
+        $r4 = virtualinvoke $r3.<java.lang.String: java.lang.String substring(int,int)>(0, $i0);
+
+        $i0 = $i0 + 1;
+
+        $r3 = virtualinvoke $r3.<java.lang.String: java.lang.String substring(int)>($i0);
+
+        r5 = $r3;
+
+        $i0 = virtualinvoke $r3.<java.lang.String: int indexOf(int)>(58);
+
+        if $i0 < 0 goto label5;
+
+        r5 = virtualinvoke $r3.<java.lang.String: java.lang.String substring(int,int)>(0, $i0);
+
+     label5:
+        $r6 = r0.<org.htmlcleaner.HtmlTokenizer: org.htmlcleaner.CleanerProperties props>;
+
+        $z0 = virtualinvoke $r6.<org.htmlcleaner.CleanerProperties: boolean isNamespacesAware()>();
+
+        if $z0 == 0 goto label6;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(":");
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r5);
+
+        $r3 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        r5 = "xmlns";
+
+        $z0 = virtualinvoke r5.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>($r4);
+
+        if $z0 != 0 goto label8;
+
+        $r8 = r0.<org.htmlcleaner.HtmlTokenizer: java.util.Set _namespacePrefixes>;
+
+        $r4 = virtualinvoke $r4.<java.lang.String: java.lang.String toLowerCase()>();
+
+        interfaceinvoke $r8.<java.util.Set: boolean add(java.lang.Object)>($r4);
+
+        return $r3;
+
+     label6:
+        return r5;
+
+     label7:
+        return null;
+
+     label8:
+        return $r3;
+    }
+    private void ignoreUntil(char) throws java.io.IOException
+    {
+        org.htmlcleaner.HtmlTokenizer r0;
+        char $c0, $c2;
+        int $i1;
+        boolean $z0;
+        char[] $r1;
+
+        r0 := @this: org.htmlcleaner.HtmlTokenizer;
+
+        $c0 := @parameter0: char;
+
+     label1:
+        $z0 = specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: boolean isAllRead()>();
+
+        if $z0 != 0 goto label2;
+
+        specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: void go()>();
+
+        $r1 = r0.<org.htmlcleaner.HtmlTokenizer: char[] _working>;
+
+        $i1 = r0.<org.htmlcleaner.HtmlTokenizer: int _pos>;
+
+        $c2 = $r1[$i1];
+
+        specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: void updateCoordinates(char)>($c2);
+
+        $z0 = specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: boolean isChar(char)>($c0);
+
+        if $z0 == 0 goto label1;
+
+     label2:
+        return;
+    }
+    private boolean isAllRead()
+    {
+        org.htmlcleaner.HtmlTokenizer r0;
+        int $i0, $i1;
+
+        r0 := @this: org.htmlcleaner.HtmlTokenizer;
+
+        $i0 = r0.<org.htmlcleaner.HtmlTokenizer: int _len>;
+
+        if $i0 < 0 goto label1;
+
+        $i1 = r0.<org.htmlcleaner.HtmlTokenizer: int _pos>;
+
+        $i0 = r0.<org.htmlcleaner.HtmlTokenizer: int _len>;
+
+        if $i1 < $i0 goto label1;
+
+        return 1;
+
+     label1:
+        return 0;
+    }
+    private boolean isChar(char)
+    {
+        org.htmlcleaner.HtmlTokenizer r0;
+        char $c0;
+        boolean $z0;
+        int $i1;
+
+        r0 := @this: org.htmlcleaner.HtmlTokenizer;
+
+        $c0 := @parameter0: char;
+
+        $i1 = r0.<org.htmlcleaner.HtmlTokenizer: int _pos>;
+
+        $z0 = specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: boolean isChar(int,char)>($i1, $c0);
+
+        return $z0;
+    }
+    private boolean isChar(int, char)
+    {
+        org.htmlcleaner.HtmlTokenizer r0;
+        int $i0, $i2;
+        char $c1, $c3;
+        char[] $r1;
+
+        r0 := @this: org.htmlcleaner.HtmlTokenizer;
+
+        $i0 := @parameter0: int;
+
+        $c1 := @parameter1: char;
+
+        $i2 = r0.<org.htmlcleaner.HtmlTokenizer: int _len>;
+
+        if $i2 < 0 goto label1;
+
+        $i2 = r0.<org.htmlcleaner.HtmlTokenizer: int _len>;
+
+        if $i0 < $i2 goto label1;
+
+        return 0;
+
+     label1:
+        $c1 = staticinvoke <java.lang.Character: char toLowerCase(char)>($c1);
+
+        $r1 = r0.<org.htmlcleaner.HtmlTokenizer: char[] _working>;
+
+        $c3 = $r1[$i0];
+
+        $c3 = staticinvoke <java.lang.Character: char toLowerCase(char)>($c3);
+
+        if $c1 != $c3 goto label2;
+
+        return 1;
+
+     label2:
+        return 0;
+    }
+    private boolean isIdentifierChar()
+    {
+        org.htmlcleaner.HtmlTokenizer r0;
+        char c0;
+        int $i1, $i2;
+        char[] $r1;
+        boolean $z0;
+
+        r0 := @this: org.htmlcleaner.HtmlTokenizer;
+
+        $i1 = r0.<org.htmlcleaner.HtmlTokenizer: int _len>;
+
+        if $i1 < 0 goto label1;
+
+        $i1 = r0.<org.htmlcleaner.HtmlTokenizer: int _pos>;
+
+        $i2 = r0.<org.htmlcleaner.HtmlTokenizer: int _len>;
+
+        if $i1 < $i2 goto label1;
+
+        return 0;
+
+     label1:
+        $r1 = r0.<org.htmlcleaner.HtmlTokenizer: char[] _working>;
+
+        $i1 = r0.<org.htmlcleaner.HtmlTokenizer: int _pos>;
+
+        c0 = $r1[$i1];
+
+        $z0 = staticinvoke <java.lang.Character: boolean isUnicodeIdentifierStart(char)>(c0);
+
+        if $z0 != 0 goto label2;
+
+        $z0 = staticinvoke <java.lang.Character: boolean isDigit(char)>(c0);
+
+        if $z0 != 0 goto label2;
+
+        $z0 = staticinvoke <org.htmlcleaner.Utils: boolean isIdentifierHelperChar(char)>(c0);
+
+        if $z0 == 0 goto label3;
+
+     label2:
+        return 1;
+
+     label3:
+        return 0;
+    }
+    private boolean isIdentifierStartChar()
+    {
+        org.htmlcleaner.HtmlTokenizer r0;
+        boolean $z0;
+        int $i0;
+
+        r0 := @this: org.htmlcleaner.HtmlTokenizer;
+
+        $i0 = r0.<org.htmlcleaner.HtmlTokenizer: int _pos>;
+
+        $z0 = specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: boolean isIdentifierStartChar(int)>($i0);
+
+        return $z0;
+    }
+    private boolean isIdentifierStartChar(int)
+    {
+        org.htmlcleaner.HtmlTokenizer r0;
+        int $i0, $i2;
+        char c1;
+        boolean $z0;
+        char[] $r1;
+
+        r0 := @this: org.htmlcleaner.HtmlTokenizer;
+
+        $i0 := @parameter0: int;
+
+        $i2 = r0.<org.htmlcleaner.HtmlTokenizer: int _len>;
+
+        if $i2 < 0 goto label1;
+
+        $i2 = r0.<org.htmlcleaner.HtmlTokenizer: int _len>;
+
+        if $i0 < $i2 goto label1;
+
+        return 0;
+
+     label1:
+        $r1 = r0.<org.htmlcleaner.HtmlTokenizer: char[] _working>;
+
+        c1 = $r1[$i0];
+
+        $z0 = staticinvoke <java.lang.Character: boolean isUnicodeIdentifierStart(char)>(c1);
+
+        return $z0;
+    }
+    private boolean isReservedTag(java.lang.String)
+    {
+        org.htmlcleaner.HtmlTokenizer r0;
+        java.lang.String $r1, $r2;
+        boolean $z0;
+
+        r0 := @this: org.htmlcleaner.HtmlTokenizer;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = "html";
+
+        $z0 = virtualinvoke $r2.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>($r1);
+
+        if $z0 != 0 goto label1;
+
+        $r2 = "head";
+
+        $z0 = virtualinvoke $r2.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>($r1);
+
+        if $z0 != 0 goto label1;
+
+        $r2 = "body";
+
+        $z0 = virtualinvoke $r2.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>($r1);
+
+        if $z0 == 0 goto label2;
+
+     label1:
+        return 1;
+
+     label2:
+        return 0;
+    }
+    private boolean isTagStartOrEnd() throws java.io.IOException
+    {
+        org.htmlcleaner.HtmlTokenizer r0;
+        boolean $z0;
+        int $i0;
+
+        r0 := @this: org.htmlcleaner.HtmlTokenizer;
+
+        $z0 = specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: boolean startsWith(java.lang.String)>("</");
+
+        if $z0 != 0 goto label1;
+
+        $z0 = specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: boolean startsWith(java.lang.String)>("<!");
+
+        if $z0 != 0 goto label1;
+
+        $z0 = specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: boolean startsWith(java.lang.String)>("<?");
+
+        if $z0 != 0 goto label1;
+
+        $z0 = specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: boolean startsWith(java.lang.String)>("<");
+
+        if $z0 == 0 goto label2;
+
+        $i0 = r0.<org.htmlcleaner.HtmlTokenizer: int _pos>;
+
+        $i0 = $i0 + 1;
+
+        $z0 = specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: boolean isIdentifierStartChar(int)>($i0);
+
+        if $z0 == 0 goto label2;
+
+     label1:
+        return 1;
+
+     label2:
+        return 0;
+    }
+    private boolean isWhitespace()
+    {
+        org.htmlcleaner.HtmlTokenizer r0;
+        boolean $z0;
+        int $i0;
+
+        r0 := @this: org.htmlcleaner.HtmlTokenizer;
+
+        $i0 = r0.<org.htmlcleaner.HtmlTokenizer: int _pos>;
+
+        $z0 = specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: boolean isWhitespace(int)>($i0);
+
+        return $z0;
+    }
+    private boolean isWhitespace(int)
+    {
+        org.htmlcleaner.HtmlTokenizer r0;
+        int $i0, $i1;
+        boolean $z0;
+        char[] $r1;
+        char $c2;
+
+        r0 := @this: org.htmlcleaner.HtmlTokenizer;
+
+        $i0 := @parameter0: int;
+
+        $i1 = r0.<org.htmlcleaner.HtmlTokenizer: int _len>;
+
+        if $i1 < 0 goto label1;
+
+        $i1 = r0.<org.htmlcleaner.HtmlTokenizer: int _len>;
+
+        if $i0 < $i1 goto label1;
+
+        return 0;
+
+     label1:
+        $r1 = r0.<org.htmlcleaner.HtmlTokenizer: char[] _working>;
+
+        $c2 = $r1[$i0];
+
+        $z0 = staticinvoke <java.lang.Character: boolean isWhitespace(char)>($c2);
+
+        return $z0;
+    }
+    private void readIfNeeded(int) throws java.io.IOException
+    {
+        org.htmlcleaner.HtmlTokenizer r0;
+        int $i0, $i2, i3, i4, i5;
+        char c1;
+        char[] $r1, $r2;
+        java.io.BufferedReader $r3;
+
+        r0 := @this: org.htmlcleaner.HtmlTokenizer;
+
+        $i0 := @parameter0: int;
+
+        $i2 = r0.<org.htmlcleaner.HtmlTokenizer: int _len>;
+
+        if $i2 != -1 goto label9;
+
+        $i2 = r0.<org.htmlcleaner.HtmlTokenizer: int _pos>;
+
+        $i0 = $i2 + $i0;
+
+        if $i0 < 1024 goto label9;
+
+        $i0 = r0.<org.htmlcleaner.HtmlTokenizer: int _pos>;
+
+        $i0 = 1024 - $i0;
+
+        $r2 = r0.<org.htmlcleaner.HtmlTokenizer: char[] _working>;
+
+        $i2 = r0.<org.htmlcleaner.HtmlTokenizer: int _pos>;
+
+        $r1 = r0.<org.htmlcleaner.HtmlTokenizer: char[] _working>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r2, $i2, $r1, 0, $i0);
+
+        r0.<org.htmlcleaner.HtmlTokenizer: int _pos> = 0;
+
+        i3 = 1024 - $i0;
+
+        i4 = 0;
+
+        i5 = $i0;
+
+     label1:
+        $r3 = r0.<org.htmlcleaner.HtmlTokenizer: java.io.BufferedReader _reader>;
+
+        $r1 = r0.<org.htmlcleaner.HtmlTokenizer: char[] _working>;
+
+        $i2 = virtualinvoke $r3.<java.io.BufferedReader: int read(char[],int,int)>($r1, i5, i3);
+
+        if $i2 < 0 goto label2;
+
+        i4 = i4 + $i2;
+
+        i5 = i5 + $i2;
+
+        i3 = i3 - $i2;
+
+     label2:
+        if $i2 < 0 goto label3;
+
+        if i3 > 0 goto label1;
+
+     label3:
+        if i3 <= 0 goto label4;
+
+        $i0 = i4 + $i0;
+
+        r0.<org.htmlcleaner.HtmlTokenizer: int _len> = $i0;
+
+     label4:
+        $i0 = 0;
+
+     label5:
+        $i2 = r0.<org.htmlcleaner.HtmlTokenizer: int _len>;
+
+        if $i2 < 0 goto label8;
+
+        $i2 = r0.<org.htmlcleaner.HtmlTokenizer: int _len>;
+
+     label6:
+        if $i0 >= $i2 goto label9;
+
+        $r1 = r0.<org.htmlcleaner.HtmlTokenizer: char[] _working>;
+
+        c1 = $r1[$i0];
+
+        if c1 < 1 goto label7;
+
+        if c1 > 32 goto label7;
+
+        if c1 == 10 goto label7;
+
+        if c1 == 13 goto label7;
+
+        $r1 = r0.<org.htmlcleaner.HtmlTokenizer: char[] _working>;
+
+        $r1[$i0] = 32;
+
+     label7:
+        $i0 = $i0 + 1;
+
+        goto label5;
+
+     label8:
+        $i2 = 1024;
+
+        goto label6;
+
+     label9:
+        return;
+    }
+    private void save(char)
+    {
+        org.htmlcleaner.HtmlTokenizer r0;
+        char $c0;
+        java.lang.StringBuffer $r1;
+
+        r0 := @this: org.htmlcleaner.HtmlTokenizer;
+
+        $c0 := @parameter0: char;
+
+        specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: void updateCoordinates(char)>($c0);
+
+        $r1 = r0.<org.htmlcleaner.HtmlTokenizer: java.lang.StringBuffer _saved>;
+
+        virtualinvoke $r1.<java.lang.StringBuffer: java.lang.StringBuffer append(char)>($c0);
+
+        return;
+    }
+    private void saveCurrent()
+    {
+        org.htmlcleaner.HtmlTokenizer r0;
+        int $i0;
+        boolean $z0;
+        char[] $r1;
+        char $c1;
+
+        r0 := @this: org.htmlcleaner.HtmlTokenizer;
+
+        $z0 = specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: boolean isAllRead()>();
+
+        if $z0 != 0 goto label1;
+
+        $r1 = r0.<org.htmlcleaner.HtmlTokenizer: char[] _working>;
+
+        $i0 = r0.<org.htmlcleaner.HtmlTokenizer: int _pos>;
+
+        $c1 = $r1[$i0];
+
+        specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: void save(char)>($c1);
+
+     label1:
+        return;
+    }
+    private void saveCurrent(int) throws java.io.IOException
+    {
+        org.htmlcleaner.HtmlTokenizer r0;
+        boolean $z0;
+        int $i0, i1;
+        char[] $r1;
+        char $c2;
+
+        r0 := @this: org.htmlcleaner.HtmlTokenizer;
+
+        $i0 := @parameter0: int;
+
+        specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: void readIfNeeded(int)>($i0);
+
+        i1 = r0.<org.htmlcleaner.HtmlTokenizer: int _pos>;
+
+     label1:
+        $z0 = specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: boolean isAllRead()>();
+
+        if $z0 != 0 goto label2;
+
+        if $i0 <= 0 goto label2;
+
+        $r1 = r0.<org.htmlcleaner.HtmlTokenizer: char[] _working>;
+
+        $c2 = $r1[i1];
+
+        specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: void save(char)>($c2);
+
+        i1 = i1 + 1;
+
+        $i0 = $i0 + -1;
+
+        goto label1;
+
+     label2:
+        return;
+    }
+    private void skipWhitespaces() throws java.io.IOException
+    {
+        org.htmlcleaner.HtmlTokenizer r0;
+        boolean $z0;
+
+        r0 := @this: org.htmlcleaner.HtmlTokenizer;
+
+     label1:
+        $z0 = specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: boolean isAllRead()>();
+
+        if $z0 != 0 goto label2;
+
+        $z0 = specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: boolean isWhitespace()>();
+
+        if $z0 == 0 goto label2;
+
+        specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: void saveCurrent()>();
+
+        specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: void go()>();
+
+        goto label1;
+
+     label2:
+        return;
+    }
+    private boolean startsWith(java.lang.String) throws java.io.IOException
+    {
+        org.htmlcleaner.HtmlTokenizer r0;
+        java.lang.String $r1;
+        int $i0, $i1, $i2;
+        char $c3, $c4;
+        char[] $r2;
+
+        r0 := @this: org.htmlcleaner.HtmlTokenizer;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $i0 = virtualinvoke $r1.<java.lang.String: int length()>();
+
+        specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: void readIfNeeded(int)>($i0);
+
+        $i1 = r0.<org.htmlcleaner.HtmlTokenizer: int _len>;
+
+        if $i1 < 0 goto label1;
+
+        $i1 = r0.<org.htmlcleaner.HtmlTokenizer: int _pos>;
+
+        $i1 = $i1 + $i0;
+
+        $i2 = r0.<org.htmlcleaner.HtmlTokenizer: int _len>;
+
+        if $i1 <= $i2 goto label1;
+
+        return 0;
+
+     label1:
+        $i1 = 0;
+
+     label2:
+        if $i1 >= $i0 goto label3;
+
+        $c3 = virtualinvoke $r1.<java.lang.String: char charAt(int)>($i1);
+
+        $c3 = staticinvoke <java.lang.Character: char toLowerCase(char)>($c3);
+
+        $r2 = r0.<org.htmlcleaner.HtmlTokenizer: char[] _working>;
+
+        $i2 = r0.<org.htmlcleaner.HtmlTokenizer: int _pos>;
+
+        $i2 = $i2 + $i1;
+
+        $c4 = $r2[$i2];
+
+        $c4 = staticinvoke <java.lang.Character: char toLowerCase(char)>($c4);
+
+        if $c3 != $c4 goto label4;
+
+        $i1 = $i1 + 1;
+
+        goto label2;
+
+     label3:
+        return 1;
+
+     label4:
+        return 0;
+    }
+    private void tagAttributes() throws java.io.IOException
+    {
+        org.htmlcleaner.HtmlTokenizer r0;
+        boolean $z0;
+        java.lang.Thread $r1;
+        java.lang.String $r2, $r3, $r6;
+        org.htmlcleaner.TagToken $r4;
+        org.htmlcleaner.CleanerProperties $r5;
+
+        r0 := @this: org.htmlcleaner.HtmlTokenizer;
+
+     label1:
+        $z0 = specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: boolean isAllRead()>();
+
+        if $z0 != 0 goto label9;
+
+        $z0 = r0.<org.htmlcleaner.HtmlTokenizer: boolean _asExpected>;
+
+        if $z0 == 0 goto label9;
+
+        $z0 = specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: boolean isChar(char)>(62);
+
+        if $z0 != 0 goto label9;
+
+        $z0 = specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: boolean startsWith(java.lang.String)>("/>");
+
+        if $z0 != 0 goto label9;
+
+        $r1 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        $z0 = virtualinvoke $r1.<java.lang.Thread: boolean isInterrupted()>();
+
+        if $z0 == 0 goto label2;
+
+        specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: void handleInterruption()>();
+
+        return;
+
+     label2:
+        specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: void skipWhitespaces()>();
+
+        $r2 = specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: java.lang.String identifier()>();
+
+        $z0 = r0.<org.htmlcleaner.HtmlTokenizer: boolean _asExpected>;
+
+        if $z0 != 0 goto label4;
+
+        $z0 = specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: boolean isChar(char)>(60);
+
+        if $z0 != 0 goto label3;
+
+        $z0 = specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: boolean isChar(char)>(62);
+
+        if $z0 != 0 goto label3;
+
+        $z0 = specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: boolean startsWith(java.lang.String)>("/>");
+
+        if $z0 != 0 goto label3;
+
+        specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: void saveCurrent()>();
+
+        specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: void go()>();
+
+     label3:
+        $z0 = specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: boolean isChar(char)>(60);
+
+        if $z0 != 0 goto label1;
+
+        r0.<org.htmlcleaner.HtmlTokenizer: boolean _asExpected> = 1;
+
+        goto label1;
+
+     label4:
+        specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: void skipWhitespaces()>();
+
+        $z0 = specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: boolean isChar(char)>(61);
+
+        if $z0 == 0 goto label6;
+
+        specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: void saveCurrent()>();
+
+        specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: void go()>();
+
+        $r3 = specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: java.lang.String attributeValue()>();
+
+     label5:
+        $z0 = r0.<org.htmlcleaner.HtmlTokenizer: boolean _asExpected>;
+
+        if $z0 == 0 goto label1;
+
+        $r4 = r0.<org.htmlcleaner.HtmlTokenizer: org.htmlcleaner.TagToken _currentTagToken>;
+
+        virtualinvoke $r4.<org.htmlcleaner.TagToken: void addAttribute(java.lang.String,java.lang.String)>($r2, $r3);
+
+        goto label1;
+
+     label6:
+        $r3 = "empty";
+
+        $r5 = r0.<org.htmlcleaner.HtmlTokenizer: org.htmlcleaner.CleanerProperties props>;
+
+        $r6 = virtualinvoke $r5.<org.htmlcleaner.CleanerProperties: java.lang.String getBooleanAttributeValues()>();
+
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>($r6);
+
+        if $z0 == 0 goto label7;
+
+        $r3 = "";
+
+        goto label5;
+
+     label7:
+        $r3 = "true";
+
+        $r5 = r0.<org.htmlcleaner.HtmlTokenizer: org.htmlcleaner.CleanerProperties props>;
+
+        $r6 = virtualinvoke $r5.<org.htmlcleaner.CleanerProperties: java.lang.String getBooleanAttributeValues()>();
+
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>($r6);
+
+        if $z0 == 0 goto label8;
+
+        $r3 = "true";
+
+        goto label5;
+
+     label8:
+        $r3 = $r2;
+
+        goto label5;
+
+     label9:
+        return;
+    }
+    private void tagEnd() throws java.io.IOException
+    {
+        org.htmlcleaner.HtmlTokenizer r0;
+        int $i0;
+        boolean $z0;
+        java.lang.String $r1, r2;
+        org.htmlcleaner.CleanerTransformations $r3;
+        org.htmlcleaner.TagTransformation $r4;
+        org.htmlcleaner.HtmlCleaner $r5;
+        org.htmlcleaner.ITagInfoProvider $r6;
+        org.htmlcleaner.TagInfo $r7;
+        org.htmlcleaner.CleanerProperties $r8;
+        org.htmlcleaner.EndTagToken $r9;
+        org.htmlcleaner.TagToken $r10;
+
+        r0 := @this: org.htmlcleaner.HtmlTokenizer;
+
+        specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: void saveCurrent(int)>(2);
+
+        specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: void go(int)>(2);
+
+        $i0 = r0.<org.htmlcleaner.HtmlTokenizer: int _col>;
+
+        $i0 = $i0 + 2;
+
+        r0.<org.htmlcleaner.HtmlTokenizer: int _col> = $i0;
+
+        $z0 = specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: boolean isAllRead()>();
+
+        if $z0 == 0 goto label01;
+
+        return;
+
+     label01:
+        $r1 = specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: java.lang.String identifier()>();
+
+        r2 = $r1;
+
+        $r3 = r0.<org.htmlcleaner.HtmlTokenizer: org.htmlcleaner.CleanerTransformations transformations>;
+
+        if $r3 == null goto label02;
+
+        $r3 = r0.<org.htmlcleaner.HtmlTokenizer: org.htmlcleaner.CleanerTransformations transformations>;
+
+        $z0 = virtualinvoke $r3.<org.htmlcleaner.CleanerTransformations: boolean hasTransformationForTag(java.lang.String)>($r1);
+
+        if $z0 == 0 goto label02;
+
+        $r3 = r0.<org.htmlcleaner.HtmlTokenizer: org.htmlcleaner.CleanerTransformations transformations>;
+
+        $r4 = virtualinvoke $r3.<org.htmlcleaner.CleanerTransformations: org.htmlcleaner.TagTransformation getTransformation(java.lang.String)>($r1);
+
+        if $r4 == null goto label02;
+
+        r2 = virtualinvoke $r4.<org.htmlcleaner.TagTransformation: java.lang.String getDestTag()>();
+
+     label02:
+        if r2 == null goto label05;
+
+        $r5 = r0.<org.htmlcleaner.HtmlTokenizer: org.htmlcleaner.HtmlCleaner cleaner>;
+
+        $r6 = virtualinvoke $r5.<org.htmlcleaner.HtmlCleaner: org.htmlcleaner.ITagInfoProvider getTagInfoProvider()>();
+
+        $r7 = interfaceinvoke $r6.<org.htmlcleaner.ITagInfoProvider: org.htmlcleaner.TagInfo getTagInfo(java.lang.String)>(r2);
+
+        if $r7 != null goto label03;
+
+        $r8 = r0.<org.htmlcleaner.HtmlTokenizer: org.htmlcleaner.CleanerProperties props>;
+
+        $z0 = virtualinvoke $r8.<org.htmlcleaner.CleanerProperties: boolean isOmitUnknownTags()>();
+
+        if $z0 != 0 goto label03;
+
+        $r8 = r0.<org.htmlcleaner.HtmlTokenizer: org.htmlcleaner.CleanerProperties props>;
+
+        $z0 = virtualinvoke $r8.<org.htmlcleaner.CleanerProperties: boolean isTreatUnknownTagsAsContent()>();
+
+        if $z0 == 0 goto label03;
+
+        $z0 = specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: boolean isReservedTag(java.lang.String)>(r2);
+
+        if $z0 != 0 goto label03;
+
+        $r8 = r0.<org.htmlcleaner.HtmlTokenizer: org.htmlcleaner.CleanerProperties props>;
+
+        $z0 = virtualinvoke $r8.<org.htmlcleaner.CleanerProperties: boolean isNamespacesAware()>();
+
+        if $z0 == 0 goto label04;
+
+     label03:
+        if $r7 == null goto label05;
+
+        $z0 = virtualinvoke $r7.<org.htmlcleaner.TagInfo: boolean isDeprecated()>();
+
+        if $z0 == 0 goto label05;
+
+        $r8 = r0.<org.htmlcleaner.HtmlTokenizer: org.htmlcleaner.CleanerProperties props>;
+
+        $z0 = virtualinvoke $r8.<org.htmlcleaner.CleanerProperties: boolean isOmitDeprecatedTags()>();
+
+        if $z0 != 0 goto label05;
+
+        $r8 = r0.<org.htmlcleaner.HtmlTokenizer: org.htmlcleaner.CleanerProperties props>;
+
+        $z0 = virtualinvoke $r8.<org.htmlcleaner.CleanerProperties: boolean isTreatDeprecatedTagsAsContent()>();
+
+        if $z0 == 0 goto label05;
+
+     label04:
+        specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: boolean content()>();
+
+        return;
+
+     label05:
+        $r9 = new org.htmlcleaner.EndTagToken;
+
+        specialinvoke $r9.<org.htmlcleaner.EndTagToken: void <init>(java.lang.String)>(r2);
+
+        r0.<org.htmlcleaner.HtmlTokenizer: org.htmlcleaner.TagToken _currentTagToken> = $r9;
+
+        $z0 = r0.<org.htmlcleaner.HtmlTokenizer: boolean _asExpected>;
+
+        if $z0 == 0 goto label10;
+
+        specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: void skipWhitespaces()>();
+
+        specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: void tagAttributes()>();
+
+        if r2 == null goto label06;
+
+        $r10 = r0.<org.htmlcleaner.HtmlTokenizer: org.htmlcleaner.TagToken _currentTagToken>;
+
+        specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: void addToken(org.htmlcleaner.BaseToken)>($r10);
+
+     label06:
+        $z0 = specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: boolean isChar(char)>(62);
+
+        if $z0 == 0 goto label07;
+
+        specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: void go()>();
+
+     label07:
+        $r8 = r0.<org.htmlcleaner.HtmlTokenizer: org.htmlcleaner.CleanerProperties props>;
+
+        $z0 = virtualinvoke $r8.<org.htmlcleaner.CleanerProperties: boolean isUseCdataFor(java.lang.String)>(r2);
+
+        if $z0 == 0 goto label08;
+
+        r0.<org.htmlcleaner.HtmlTokenizer: boolean _isSpecialContext> = 0;
+
+        r0.<org.htmlcleaner.HtmlTokenizer: java.lang.String _isSpecialContextName> = r2;
+
+     label08:
+        if r2 == null goto label09;
+
+        $z0 = virtualinvoke r2.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("html");
+
+        if $z0 == 0 goto label09;
+
+        specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: void skipWhitespaces()>();
+
+     label09:
+        r0.<org.htmlcleaner.HtmlTokenizer: org.htmlcleaner.TagToken _currentTagToken> = null;
+
+        return;
+
+     label10:
+        specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: boolean addSavedAsContent()>();
+
+        return;
+    }
+    private void tagStart() throws java.io.IOException
+    {
+        org.htmlcleaner.HtmlTokenizer r0;
+        org.htmlcleaner.TagNode r1;
+        boolean $z0;
+        java.lang.String $r2, $r4;
+        org.htmlcleaner.CleanerTransformations $r3;
+        org.htmlcleaner.HtmlCleaner $r5;
+        org.htmlcleaner.ITagInfoProvider $r6;
+        org.htmlcleaner.TagInfo $r7;
+        org.htmlcleaner.CleanerProperties $r8;
+        java.util.Map $r9;
+        org.htmlcleaner.TagToken $r10;
+        org.htmlcleaner.EndTagToken $r11;
+
+        r0 := @this: org.htmlcleaner.HtmlTokenizer;
+
+        specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: void saveCurrent()>();
+
+        specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: void go()>();
+
+        $z0 = specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: boolean isAllRead()>();
+
+        if $z0 == 0 goto label1;
+
+        return;
+
+     label1:
+        $r2 = specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: java.lang.String identifier()>();
+
+        $r3 = r0.<org.htmlcleaner.HtmlTokenizer: org.htmlcleaner.CleanerTransformations transformations>;
+
+        $r4 = virtualinvoke $r3.<org.htmlcleaner.CleanerTransformations: java.lang.String getTagName(java.lang.String)>($r2);
+
+        if $r4 == null goto label4;
+
+        $r5 = r0.<org.htmlcleaner.HtmlTokenizer: org.htmlcleaner.HtmlCleaner cleaner>;
+
+        $r6 = virtualinvoke $r5.<org.htmlcleaner.HtmlCleaner: org.htmlcleaner.ITagInfoProvider getTagInfoProvider()>();
+
+        $r7 = interfaceinvoke $r6.<org.htmlcleaner.ITagInfoProvider: org.htmlcleaner.TagInfo getTagInfo(java.lang.String)>($r4);
+
+        if $r7 != null goto label2;
+
+        $r8 = r0.<org.htmlcleaner.HtmlTokenizer: org.htmlcleaner.CleanerProperties props>;
+
+        $z0 = virtualinvoke $r8.<org.htmlcleaner.CleanerProperties: boolean isOmitUnknownTags()>();
+
+        if $z0 != 0 goto label2;
+
+        $r8 = r0.<org.htmlcleaner.HtmlTokenizer: org.htmlcleaner.CleanerProperties props>;
+
+        $z0 = virtualinvoke $r8.<org.htmlcleaner.CleanerProperties: boolean isTreatUnknownTagsAsContent()>();
+
+        if $z0 == 0 goto label2;
+
+        $z0 = specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: boolean isReservedTag(java.lang.String)>($r4);
+
+        if $z0 != 0 goto label2;
+
+        $r8 = r0.<org.htmlcleaner.HtmlTokenizer: org.htmlcleaner.CleanerProperties props>;
+
+        $z0 = virtualinvoke $r8.<org.htmlcleaner.CleanerProperties: boolean isNamespacesAware()>();
+
+        if $z0 == 0 goto label3;
+
+     label2:
+        if $r7 == null goto label4;
+
+        $z0 = virtualinvoke $r7.<org.htmlcleaner.TagInfo: boolean isDeprecated()>();
+
+        if $z0 == 0 goto label4;
+
+        $r8 = r0.<org.htmlcleaner.HtmlTokenizer: org.htmlcleaner.CleanerProperties props>;
+
+        $z0 = virtualinvoke $r8.<org.htmlcleaner.CleanerProperties: boolean isOmitDeprecatedTags()>();
+
+        if $z0 != 0 goto label4;
+
+        $r8 = r0.<org.htmlcleaner.HtmlTokenizer: org.htmlcleaner.CleanerProperties props>;
+
+        $z0 = virtualinvoke $r8.<org.htmlcleaner.CleanerProperties: boolean isTreatDeprecatedTagsAsContent()>();
+
+        if $z0 == 0 goto label4;
+
+     label3:
+        specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: boolean content()>();
+
+        return;
+
+     label4:
+        r1 = new org.htmlcleaner.TagNode;
+
+        specialinvoke r1.<org.htmlcleaner.TagNode: void <init>(java.lang.String)>($r4);
+
+        $r8 = r0.<org.htmlcleaner.HtmlTokenizer: org.htmlcleaner.CleanerProperties props>;
+
+        $z0 = virtualinvoke $r8.<org.htmlcleaner.CleanerProperties: boolean isTrimAttributeValues()>();
+
+        virtualinvoke r1.<org.htmlcleaner.TagNode: void setTrimAttributeValues(boolean)>($z0);
+
+        r0.<org.htmlcleaner.HtmlTokenizer: org.htmlcleaner.TagToken _currentTagToken> = r1;
+
+        $z0 = r0.<org.htmlcleaner.HtmlTokenizer: boolean _asExpected>;
+
+        if $z0 == 0 goto label9;
+
+        specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: void skipWhitespaces()>();
+
+        specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: void tagAttributes()>();
+
+        if $r4 == null goto label6;
+
+        $r3 = r0.<org.htmlcleaner.HtmlTokenizer: org.htmlcleaner.CleanerTransformations transformations>;
+
+        if $r3 == null goto label5;
+
+        $r3 = r0.<org.htmlcleaner.HtmlTokenizer: org.htmlcleaner.CleanerTransformations transformations>;
+
+        $r9 = virtualinvoke r1.<org.htmlcleaner.TagNode: java.util.Map getAttributesInLowerCase()>();
+
+        $r9 = virtualinvoke $r3.<org.htmlcleaner.CleanerTransformations: java.util.Map transformAttributes(java.lang.String,java.util.Map)>($r2, $r9);
+
+        virtualinvoke r1.<org.htmlcleaner.TagNode: void setAttributes(java.util.Map)>($r9);
+
+     label5:
+        $r10 = r0.<org.htmlcleaner.HtmlTokenizer: org.htmlcleaner.TagToken _currentTagToken>;
+
+        specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: void addToken(org.htmlcleaner.BaseToken)>($r10);
+
+     label6:
+        $z0 = specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: boolean isChar(char)>(62);
+
+        if $z0 == 0 goto label8;
+
+        specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: void go()>();
+
+        $r8 = r0.<org.htmlcleaner.HtmlTokenizer: org.htmlcleaner.CleanerProperties props>;
+
+        $z0 = virtualinvoke $r8.<org.htmlcleaner.CleanerProperties: boolean isUseCdataFor(java.lang.String)>($r4);
+
+        if $z0 == 0 goto label7;
+
+        r0.<org.htmlcleaner.HtmlTokenizer: boolean _isSpecialContext> = 1;
+
+        r0.<org.htmlcleaner.HtmlTokenizer: java.lang.String _isSpecialContextName> = $r4;
+
+     label7:
+        r0.<org.htmlcleaner.HtmlTokenizer: org.htmlcleaner.TagToken _currentTagToken> = null;
+
+        return;
+
+     label8:
+        $z0 = specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: boolean startsWith(java.lang.String)>("/>");
+
+        if $z0 == 0 goto label7;
+
+        specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: void go(int)>(2);
+
+        $r11 = new org.htmlcleaner.EndTagToken;
+
+        specialinvoke $r11.<org.htmlcleaner.EndTagToken: void <init>(java.lang.String)>($r4);
+
+        specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: void addToken(org.htmlcleaner.BaseToken)>($r11);
+
+        goto label7;
+
+     label9:
+        specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: boolean addSavedAsContent()>();
+
+        return;
+    }
+    private void updateCoordinates(char)
+    {
+        org.htmlcleaner.HtmlTokenizer r0;
+        char $c0;
+        int $i1;
+
+        r0 := @this: org.htmlcleaner.HtmlTokenizer;
+
+        $c0 := @parameter0: char;
+
+        if $c0 != 10 goto label1;
+
+        $i1 = r0.<org.htmlcleaner.HtmlTokenizer: int _row>;
+
+        $i1 = $i1 + 1;
+
+        r0.<org.htmlcleaner.HtmlTokenizer: int _row> = $i1;
+
+        r0.<org.htmlcleaner.HtmlTokenizer: int _col> = 1;
+
+        return;
+
+     label1:
+        $i1 = r0.<org.htmlcleaner.HtmlTokenizer: int _col>;
+
+        $i1 = $i1 + 1;
+
+        r0.<org.htmlcleaner.HtmlTokenizer: int _col> = $i1;
+
+        return;
+    }
+    public org.htmlcleaner.DoctypeToken getDocType()
+    {
+        org.htmlcleaner.HtmlTokenizer r0;
+        org.htmlcleaner.DoctypeToken r1;
+
+        r0 := @this: org.htmlcleaner.HtmlTokenizer;
+
+        r1 = r0.<org.htmlcleaner.HtmlTokenizer: org.htmlcleaner.DoctypeToken _docType>;
+
+        return r1;
+    }
+    java.util.Set getNamespacePrefixes()
+    {
+        org.htmlcleaner.HtmlTokenizer r0;
+        java.util.Set r1;
+
+        r0 := @this: org.htmlcleaner.HtmlTokenizer;
+
+        r1 = r0.<org.htmlcleaner.HtmlTokenizer: java.util.Set _namespacePrefixes>;
+
+        return r1;
+    }
+    java.util.List getTokenList()
+    {
+        org.htmlcleaner.HtmlTokenizer r0;
+        java.util.List r1;
+
+        r0 := @this: org.htmlcleaner.HtmlTokenizer;
+
+        r1 = r0.<org.htmlcleaner.HtmlTokenizer: java.util.List _tokenList>;
+
+        return r1;
+    }
+    void start() throws java.io.IOException
+    {
+        org.htmlcleaner.HtmlTokenizer r0;
+        java.util.List $r1, $r9;
+        java.util.Set $r2;
+        boolean z0, $z1;
+        java.lang.Thread $r3;
+        java.io.BufferedReader $r4;
+        java.lang.StringBuffer $r5, $r6;
+        int $i0, $i1;
+        java.lang.String $r7;
+        java.lang.StringBuilder $r8;
+        java.lang.Object $r10;
+        org.htmlcleaner.BaseToken r11;
+        org.htmlcleaner.CleanerProperties $r12;
+
+        r0 := @this: org.htmlcleaner.HtmlTokenizer;
+
+        r0.<org.htmlcleaner.HtmlTokenizer: org.htmlcleaner.TagToken _currentTagToken> = null;
+
+        $r1 = r0.<org.htmlcleaner.HtmlTokenizer: java.util.List _tokenList>;
+
+        interfaceinvoke $r1.<java.util.List: void clear()>();
+
+        r0.<org.htmlcleaner.HtmlTokenizer: boolean _asExpected> = 1;
+
+        r0.<org.htmlcleaner.HtmlTokenizer: boolean _isSpecialContext> = 0;
+
+        r0.<org.htmlcleaner.HtmlTokenizer: boolean _isLateForDoctype> = 0;
+
+        $r2 = r0.<org.htmlcleaner.HtmlTokenizer: java.util.Set _namespacePrefixes>;
+
+        interfaceinvoke $r2.<java.util.Set: void clear()>();
+
+        r0.<org.htmlcleaner.HtmlTokenizer: int _pos> = 1024;
+
+        specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: void readIfNeeded(int)>(0);
+
+        z0 = 1;
+
+     label01:
+        $z1 = specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: boolean isAllRead()>();
+
+        if $z1 != 0 goto label20;
+
+        $r3 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        $z1 = virtualinvoke $r3.<java.lang.Thread: boolean isInterrupted()>();
+
+        if $z1 == 0 goto label02;
+
+        specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: void handleInterruption()>();
+
+        $r1 = r0.<org.htmlcleaner.HtmlTokenizer: java.util.List _tokenList>;
+
+        interfaceinvoke $r1.<java.util.List: void clear()>();
+
+        $r2 = r0.<org.htmlcleaner.HtmlTokenizer: java.util.Set _namespacePrefixes>;
+
+        interfaceinvoke $r2.<java.util.Set: void clear()>();
+
+        $r4 = r0.<org.htmlcleaner.HtmlTokenizer: java.io.BufferedReader _reader>;
+
+        virtualinvoke $r4.<java.io.BufferedReader: void close()>();
+
+        return;
+
+     label02:
+        $r5 = r0.<org.htmlcleaner.HtmlTokenizer: java.lang.StringBuffer _saved>;
+
+        $r6 = r0.<org.htmlcleaner.HtmlTokenizer: java.lang.StringBuffer _saved>;
+
+        $i0 = virtualinvoke $r6.<java.lang.StringBuffer: int length()>();
+
+        virtualinvoke $r5.<java.lang.StringBuffer: java.lang.StringBuffer delete(int,int)>(0, $i0);
+
+        r0.<org.htmlcleaner.HtmlTokenizer: org.htmlcleaner.TagToken _currentTagToken> = null;
+
+        r0.<org.htmlcleaner.HtmlTokenizer: boolean _asExpected> = 1;
+
+        specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: void readIfNeeded(int)>(10);
+
+        $z1 = r0.<org.htmlcleaner.HtmlTokenizer: boolean _isSpecialContext>;
+
+        if $z1 == 0 goto label09;
+
+        $r7 = r0.<org.htmlcleaner.HtmlTokenizer: java.lang.String _isSpecialContextName>;
+
+        $i0 = virtualinvoke $r7.<java.lang.String: int length()>();
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("</");
+
+        $r7 = r0.<org.htmlcleaner.HtmlTokenizer: java.lang.String _isSpecialContextName>;
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r7);
+
+        $r7 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $z1 = specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: boolean startsWith(java.lang.String)>($r7);
+
+        if $z1 == 0 goto label05;
+
+        $i1 = r0.<org.htmlcleaner.HtmlTokenizer: int _pos>;
+
+        $i1 = $i1 + $i0;
+
+        $i1 = $i1 + 2;
+
+        $z1 = specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: boolean isWhitespace(int)>($i1);
+
+        if $z1 != 0 goto label03;
+
+        $i1 = r0.<org.htmlcleaner.HtmlTokenizer: int _pos>;
+
+        $i0 = $i1 + $i0;
+
+        $i0 = $i0 + 2;
+
+        $z1 = specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: boolean isChar(int,char)>($i0, 62);
+
+        if $z1 == 0 goto label05;
+
+     label03:
+        specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: void tagEnd()>();
+
+     label04:
+        $z1 = r0.<org.htmlcleaner.HtmlTokenizer: boolean _isSpecialContext>;
+
+        if $z1 != 0 goto label01;
+
+        z0 = 1;
+
+        goto label01;
+
+     label05:
+        if z0 == 0 goto label06;
+
+        $z1 = specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: boolean startsWith(java.lang.String)>("<!--");
+
+        if $z1 == 0 goto label06;
+
+        specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: void comment()>();
+
+        goto label04;
+
+     label06:
+        $z1 = specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: boolean startsWith(java.lang.String)>("/*<![CDATA[*/");
+
+        if $z1 != 0 goto label07;
+
+        $z1 = specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: boolean startsWith(java.lang.String)>("<![CDATA[");
+
+        if $z1 != 0 goto label07;
+
+        $z1 = specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: boolean startsWith(java.lang.String)>("//<![CDATA[");
+
+        if $z1 == 0 goto label08;
+
+     label07:
+        specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: void cdata()>();
+
+        goto label04;
+
+     label08:
+        $z1 = specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: boolean content()>();
+
+        if z0 == 0 goto label04;
+
+        if $z1 == 0 goto label04;
+
+        $r1 = r0.<org.htmlcleaner.HtmlTokenizer: java.util.List _tokenList>;
+
+        $r9 = r0.<org.htmlcleaner.HtmlTokenizer: java.util.List _tokenList>;
+
+        $i0 = interfaceinvoke $r9.<java.util.List: int size()>();
+
+        $i0 = $i0 + -1;
+
+        $r10 = interfaceinvoke $r1.<java.util.List: java.lang.Object get(int)>($i0);
+
+        r11 = (org.htmlcleaner.BaseToken) $r10;
+
+        if r11 == null goto label04;
+
+        $r7 = virtualinvoke r11.<java.lang.Object: java.lang.String toString()>();
+
+        if $r7 == null goto label04;
+
+        $r7 = virtualinvoke $r7.<java.lang.String: java.lang.String trim()>();
+
+        $i0 = virtualinvoke $r7.<java.lang.String: int length()>();
+
+        if $i0 <= 0 goto label04;
+
+        z0 = 0;
+
+        goto label04;
+
+     label09:
+        $z1 = specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: boolean startsWith(java.lang.String)>("<!doctype");
+
+        if $z1 == 0 goto label11;
+
+        $z1 = r0.<org.htmlcleaner.HtmlTokenizer: boolean _isLateForDoctype>;
+
+        if $z1 != 0 goto label10;
+
+        specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: void doctype()>();
+
+        r0.<org.htmlcleaner.HtmlTokenizer: boolean _isLateForDoctype> = 1;
+
+        goto label01;
+
+     label10:
+        specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: void ignoreUntil(char)>(60);
+
+        goto label01;
+
+     label11:
+        $z1 = specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: boolean startsWith(java.lang.String)>("</");
+
+        if $z1 == 0 goto label12;
+
+        $i0 = r0.<org.htmlcleaner.HtmlTokenizer: int _pos>;
+
+        $i0 = $i0 + 2;
+
+        $z1 = specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: boolean isIdentifierStartChar(int)>($i0);
+
+        if $z1 == 0 goto label12;
+
+        r0.<org.htmlcleaner.HtmlTokenizer: boolean _isLateForDoctype> = 1;
+
+        specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: void tagEnd()>();
+
+        goto label01;
+
+     label12:
+        $z1 = specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: boolean startsWith(java.lang.String)>("/*<![CDATA[*/");
+
+        if $z1 != 0 goto label13;
+
+        $z1 = specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: boolean startsWith(java.lang.String)>("<![CDATA[");
+
+        if $z1 != 0 goto label13;
+
+        $z1 = specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: boolean startsWith(java.lang.String)>("//<![CDATA[");
+
+        if $z1 == 0 goto label14;
+
+     label13:
+        specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: void cdata()>();
+
+        goto label01;
+
+     label14:
+        $z1 = specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: boolean startsWith(java.lang.String)>("<!--");
+
+        if $z1 == 0 goto label15;
+
+        specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: void comment()>();
+
+        goto label01;
+
+     label15:
+        $z1 = specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: boolean startsWith(java.lang.String)>("<");
+
+        if $z1 == 0 goto label16;
+
+        $i0 = r0.<org.htmlcleaner.HtmlTokenizer: int _pos>;
+
+        $i0 = $i0 + 1;
+
+        $z1 = specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: boolean isIdentifierStartChar(int)>($i0);
+
+        if $z1 == 0 goto label16;
+
+        r0.<org.htmlcleaner.HtmlTokenizer: boolean _isLateForDoctype> = 1;
+
+        specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: void tagStart()>();
+
+        goto label01;
+
+     label16:
+        $r12 = r0.<org.htmlcleaner.HtmlTokenizer: org.htmlcleaner.CleanerProperties props>;
+
+        $z1 = virtualinvoke $r12.<org.htmlcleaner.CleanerProperties: boolean isIgnoreQuestAndExclam()>();
+
+        if $z1 == 0 goto label18;
+
+        $z1 = specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: boolean startsWith(java.lang.String)>("<!");
+
+        if $z1 != 0 goto label17;
+
+        $z1 = specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: boolean startsWith(java.lang.String)>("<?");
+
+        if $z1 == 0 goto label18;
+
+     label17:
+        specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: void ignoreUntil(char)>(60);
+
+        $z1 = specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: boolean isChar(char)>(62);
+
+        if $z1 == 0 goto label01;
+
+        specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: void go()>();
+
+        goto label01;
+
+     label18:
+        $z1 = specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: boolean startsWith(java.lang.String)>("<?xml");
+
+        if $z1 == 0 goto label19;
+
+        specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: void ignoreUntil(char)>(60);
+
+        goto label01;
+
+     label19:
+        specialinvoke r0.<org.htmlcleaner.HtmlTokenizer: boolean content()>();
+
+        goto label01;
+
+     label20:
+        $r4 = r0.<org.htmlcleaner.HtmlTokenizer: java.io.BufferedReader _reader>;
+
+        virtualinvoke $r4.<java.io.BufferedReader: void close()>();
+
+        return;
+    }

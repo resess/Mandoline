@@ -1,0 +1,194 @@
+org.fdroid.fdroid.localrepo.type.BonjourBroadcast extends org.fdroid.fdroid.localrepo.type.SwapType
+private static final java.lang.String TAG
+private javax.jmdns.JmDNS jmdns
+private javax.jmdns.ServiceInfo pairService
+    public void <init>(android.content.Context)
+    {
+        org.fdroid.fdroid.localrepo.type.BonjourBroadcast r0;
+        android.content.Context $r1;
+
+        r0 := @this: org.fdroid.fdroid.localrepo.type.BonjourBroadcast;
+
+        $r1 := @parameter0: android.content.Context;
+
+        specialinvoke r0.<org.fdroid.fdroid.localrepo.type.SwapType: void <init>(android.content.Context)>($r1);
+
+        return;
+    }
+    private void clearCurrentMDNSService()
+    {
+        org.fdroid.fdroid.localrepo.type.BonjourBroadcast r0;
+        javax.jmdns.ServiceInfo $r1;
+        javax.jmdns.JmDNS $r2;
+
+        r0 := @this: org.fdroid.fdroid.localrepo.type.BonjourBroadcast;
+
+        $r2 = r0.<org.fdroid.fdroid.localrepo.type.BonjourBroadcast: javax.jmdns.JmDNS jmdns>;
+
+        if $r2 == null goto label2;
+
+        $r1 = r0.<org.fdroid.fdroid.localrepo.type.BonjourBroadcast: javax.jmdns.ServiceInfo pairService>;
+
+        if $r1 == null goto label1;
+
+        $r2 = r0.<org.fdroid.fdroid.localrepo.type.BonjourBroadcast: javax.jmdns.JmDNS jmdns>;
+
+        $r1 = r0.<org.fdroid.fdroid.localrepo.type.BonjourBroadcast: javax.jmdns.ServiceInfo pairService>;
+
+        virtualinvoke $r2.<javax.jmdns.JmDNS: void unregisterService(javax.jmdns.ServiceInfo)>($r1);
+
+        r0.<org.fdroid.fdroid.localrepo.type.BonjourBroadcast: javax.jmdns.ServiceInfo pairService> = null;
+
+     label1:
+        $r2 = r0.<org.fdroid.fdroid.localrepo.type.BonjourBroadcast: javax.jmdns.JmDNS jmdns>;
+
+        virtualinvoke $r2.<javax.jmdns.JmDNS: void unregisterAllServices()>();
+
+        $r2 = r0.<org.fdroid.fdroid.localrepo.type.BonjourBroadcast: javax.jmdns.JmDNS jmdns>;
+
+        staticinvoke <org.fdroid.fdroid.Utils: void closeQuietly(java.io.Closeable)>($r2);
+
+        r0.<org.fdroid.fdroid.localrepo.type.BonjourBroadcast: javax.jmdns.JmDNS jmdns> = null;
+
+     label2:
+        return;
+    }
+    public java.lang.String getBroadcastAction()
+    {
+        org.fdroid.fdroid.localrepo.type.BonjourBroadcast r0;
+
+        r0 := @this: org.fdroid.fdroid.localrepo.type.BonjourBroadcast;
+
+        return "org.fdroid.fdroid.BONJOUR_STATE_CHANGE";
+    }
+    public void start()
+    {
+        org.fdroid.fdroid.localrepo.type.BonjourBroadcast r0;
+        java.util.HashMap r1;
+        java.io.IOException r2;
+        javax.jmdns.ServiceInfo $r3;
+        javax.jmdns.JmDNS $r4;
+        org.fdroid.fdroid.Preferences $r5;
+        java.lang.String $r6, $r8;
+        org.fdroid.fdroid.data.Repo $r7;
+        boolean $z0;
+        int $i0;
+        java.net.InetAddress $r9;
+
+        r0 := @this: org.fdroid.fdroid.localrepo.type.BonjourBroadcast;
+
+        staticinvoke <org.fdroid.fdroid.Utils: void debugLog(java.lang.String,java.lang.String)>("BonjourBroadcast", "Preparing to start Bonjour service.");
+
+        virtualinvoke r0.<org.fdroid.fdroid.localrepo.type.BonjourBroadcast: void sendBroadcast(java.lang.String)>("STARTING");
+
+        $r3 = r0.<org.fdroid.fdroid.localrepo.type.BonjourBroadcast: javax.jmdns.ServiceInfo pairService>;
+
+        if $r3 != null goto label01;
+
+        $r4 = r0.<org.fdroid.fdroid.localrepo.type.BonjourBroadcast: javax.jmdns.JmDNS jmdns>;
+
+        if $r4 == null goto label02;
+
+     label01:
+        specialinvoke r0.<org.fdroid.fdroid.localrepo.type.BonjourBroadcast: void clearCurrentMDNSService()>();
+
+     label02:
+        $r5 = staticinvoke <org.fdroid.fdroid.Preferences: org.fdroid.fdroid.Preferences get()>();
+
+        $r6 = virtualinvoke $r5.<org.fdroid.fdroid.Preferences: java.lang.String getLocalRepoName()>();
+
+        r1 = new java.util.HashMap;
+
+        specialinvoke r1.<java.util.HashMap: void <init>()>();
+
+        virtualinvoke r1.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>("path", "/fdroid/repo");
+
+        virtualinvoke r1.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>("name", $r6);
+
+        $r7 = <org.fdroid.fdroid.FDroidApp: org.fdroid.fdroid.data.Repo repo>;
+
+        $r8 = $r7.<org.fdroid.fdroid.data.Repo: java.lang.String fingerprint>;
+
+        virtualinvoke r1.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>("fingerprint", $r8);
+
+        $r5 = staticinvoke <org.fdroid.fdroid.Preferences: org.fdroid.fdroid.Preferences get()>();
+
+        $z0 = virtualinvoke $r5.<org.fdroid.fdroid.Preferences: boolean isLocalRepoHttpsEnabled()>();
+
+        if $z0 == 0 goto label11;
+
+        virtualinvoke r1.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>("type", "fdroidrepos");
+
+        $r8 = "_https._tcp.local.";
+
+     label03:
+        staticinvoke <org.fdroid.fdroid.Utils: void debugLog(java.lang.String,java.lang.String)>("BonjourBroadcast", "Starting bonjour service...");
+
+     label04:
+        $i0 = <org.fdroid.fdroid.FDroidApp: int port>;
+
+     label05:
+        $r3 = staticinvoke <javax.jmdns.ServiceInfo: javax.jmdns.ServiceInfo create(java.lang.String,java.lang.String,int,int,int,java.util.Map)>($r8, $r6, $i0, 0, 0, r1);
+
+     label06:
+        r0.<org.fdroid.fdroid.localrepo.type.BonjourBroadcast: javax.jmdns.ServiceInfo pairService> = $r3;
+
+        $r6 = <org.fdroid.fdroid.FDroidApp: java.lang.String ipAddressString>;
+
+     label07:
+        $r9 = staticinvoke <java.net.InetAddress: java.net.InetAddress getByName(java.lang.String)>($r6);
+
+        $r4 = staticinvoke <javax.jmdns.JmDNS: javax.jmdns.JmDNS create(java.net.InetAddress)>($r9);
+
+     label08:
+        r0.<org.fdroid.fdroid.localrepo.type.BonjourBroadcast: javax.jmdns.JmDNS jmdns> = $r4;
+
+        $r4 = r0.<org.fdroid.fdroid.localrepo.type.BonjourBroadcast: javax.jmdns.JmDNS jmdns>;
+
+        $r3 = r0.<org.fdroid.fdroid.localrepo.type.BonjourBroadcast: javax.jmdns.ServiceInfo pairService>;
+
+     label09:
+        virtualinvoke $r4.<javax.jmdns.JmDNS: void registerService(javax.jmdns.ServiceInfo)>($r3);
+
+        virtualinvoke r0.<org.fdroid.fdroid.localrepo.type.BonjourBroadcast: void setConnected(boolean)>(1);
+
+        staticinvoke <org.fdroid.fdroid.Utils: void debugLog(java.lang.String,java.lang.String)>("BonjourBroadcast", "... Bounjour service started.");
+
+     label10:
+        return;
+
+     label11:
+        virtualinvoke r1.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>("type", "fdroidrepo");
+
+        $r8 = "_http._tcp.local.";
+
+        goto label03;
+
+     label12:
+        r2 := @caughtexception;
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String,java.lang.Throwable)>("BonjourBroadcast", "Error while registering jmdns service", r2);
+
+        virtualinvoke r0.<org.fdroid.fdroid.localrepo.type.BonjourBroadcast: void setConnected(boolean)>(0);
+
+        return;
+
+        catch java.io.IOException from label03 to label04 with label12;
+        catch java.io.IOException from label05 to label06 with label12;
+        catch java.io.IOException from label07 to label08 with label12;
+        catch java.io.IOException from label09 to label10 with label12;
+    }
+    public void stop()
+    {
+        org.fdroid.fdroid.localrepo.type.BonjourBroadcast r0;
+
+        r0 := @this: org.fdroid.fdroid.localrepo.type.BonjourBroadcast;
+
+        staticinvoke <org.fdroid.fdroid.Utils: void debugLog(java.lang.String,java.lang.String)>("BonjourBroadcast", "Unregistering MDNS service...");
+
+        specialinvoke r0.<org.fdroid.fdroid.localrepo.type.BonjourBroadcast: void clearCurrentMDNSService()>();
+
+        virtualinvoke r0.<org.fdroid.fdroid.localrepo.type.BonjourBroadcast: void setConnected(boolean)>(0);
+
+        return;
+    }

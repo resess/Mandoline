@@ -1,0 +1,256 @@
+com.facebook.stetho.dumpapp.DumpappSocketLikeHandler extends java.lang.Object implements com.facebook.stetho.server.SocketLikeHandler
+public static final byte[] PROTOCOL_MAGIC
+public static final int PROTOCOL_VERSION
+private final com.facebook.stetho.dumpapp.Dumper mDumper
+    static void <clinit>()
+    {
+        byte[] $r0;
+
+        $r0 = newarray (byte)[4];
+
+        $r0[0] = 68;
+
+        $r0[1] = 85;
+
+        $r0[2] = 77;
+
+        $r0[3] = 80;
+
+        <com.facebook.stetho.dumpapp.DumpappSocketLikeHandler: byte[] PROTOCOL_MAGIC> = $r0;
+
+        return;
+    }
+    public void <init>(com.facebook.stetho.dumpapp.Dumper)
+    {
+        com.facebook.stetho.dumpapp.DumpappSocketLikeHandler r0;
+        com.facebook.stetho.dumpapp.Dumper $r1;
+
+        r0 := @this: com.facebook.stetho.dumpapp.DumpappSocketLikeHandler;
+
+        $r1 := @parameter0: com.facebook.stetho.dumpapp.Dumper;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<com.facebook.stetho.dumpapp.DumpappSocketLikeHandler: com.facebook.stetho.dumpapp.Dumper mDumper> = $r1;
+
+        return;
+    }
+    static void dump(com.facebook.stetho.dumpapp.Dumper, com.facebook.stetho.dumpapp.Framer, java.lang.String[]) throws java.io.IOException
+    {
+        com.facebook.stetho.dumpapp.Dumper $r0;
+        com.facebook.stetho.dumpapp.Framer $r1;
+        java.lang.String[] $r2;
+        java.io.InputStream $r3;
+        java.io.PrintStream $r4, $r5;
+        int $i0;
+        com.facebook.stetho.dumpapp.DumpappOutputBrokenException $r6;
+
+        $r0 := @parameter0: com.facebook.stetho.dumpapp.Dumper;
+
+        $r1 := @parameter1: com.facebook.stetho.dumpapp.Framer;
+
+        $r2 := @parameter2: java.lang.String[];
+
+     label1:
+        $r3 = virtualinvoke $r1.<com.facebook.stetho.dumpapp.Framer: java.io.InputStream getStdin()>();
+
+        $r4 = virtualinvoke $r1.<com.facebook.stetho.dumpapp.Framer: java.io.PrintStream getStdout()>();
+
+        $r5 = virtualinvoke $r1.<com.facebook.stetho.dumpapp.Framer: java.io.PrintStream getStderr()>();
+
+        $i0 = virtualinvoke $r0.<com.facebook.stetho.dumpapp.Dumper: int dump(java.io.InputStream,java.io.PrintStream,java.io.PrintStream,java.lang.String[])>($r3, $r4, $r5, $r2);
+
+        virtualinvoke $r1.<com.facebook.stetho.dumpapp.Framer: void writeExitCode(int)>($i0);
+
+     label2:
+        return;
+
+     label3:
+        $r6 := @caughtexception;
+
+        return;
+
+        catch com.facebook.stetho.dumpapp.DumpappOutputBrokenException from label1 to label2 with label3;
+    }
+    private void establishConversation(java.io.DataInputStream) throws java.io.IOException
+    {
+        com.facebook.stetho.dumpapp.DumpappSocketLikeHandler r0;
+        java.io.DataInputStream $r1;
+        byte[] r2, $r3;
+        boolean $z0;
+        java.io.IOException $r4;
+        int $i0;
+        java.lang.StringBuilder $r5;
+        java.lang.String $r6;
+
+        r0 := @this: com.facebook.stetho.dumpapp.DumpappSocketLikeHandler;
+
+        $r1 := @parameter0: java.io.DataInputStream;
+
+        r2 = newarray (byte)[4];
+
+        virtualinvoke $r1.<java.io.DataInputStream: void readFully(byte[])>(r2);
+
+        $r3 = <com.facebook.stetho.dumpapp.DumpappSocketLikeHandler: byte[] PROTOCOL_MAGIC>;
+
+        $z0 = staticinvoke <java.util.Arrays: boolean equals(byte[],byte[])>($r3, r2);
+
+        if $z0 != 0 goto label1;
+
+        $r4 = staticinvoke <com.facebook.stetho.dumpapp.DumpappSocketLikeHandler: java.io.IOException logAndThrowProtocolException(java.lang.String)>("Incompatible protocol, are you using an old dumpapp script?");
+
+        throw $r4;
+
+     label1:
+        $i0 = virtualinvoke $r1.<java.io.DataInputStream: int readInt()>();
+
+        if $i0 == 1 goto label2;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Expected version=1; got=");
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r4 = staticinvoke <com.facebook.stetho.dumpapp.DumpappSocketLikeHandler: java.io.IOException logAndThrowProtocolException(java.lang.String)>($r6);
+
+        throw $r4;
+
+     label2:
+        return;
+    }
+    private static java.io.IOException logAndThrowProtocolException(java.lang.String) throws java.io.IOException
+    {
+        java.lang.String $r0;
+        java.io.IOException $r1;
+
+        $r0 := @parameter0: java.lang.String;
+
+        staticinvoke <com.facebook.stetho.common.LogUtil: void w(java.lang.String)>($r0);
+
+        $r1 = new java.io.IOException;
+
+        specialinvoke $r1.<java.io.IOException: void <init>(java.lang.String)>($r0);
+
+        throw $r1;
+    }
+    private java.lang.String[] readArgs(com.facebook.stetho.dumpapp.Framer) throws java.io.IOException
+    {
+        com.facebook.stetho.dumpapp.DumpappSocketLikeHandler r0;
+        com.facebook.stetho.dumpapp.Framer $r1;
+        java.lang.String[] r2;
+        byte $b0;
+        com.facebook.stetho.dumpapp.DumpappFramingException $r3;
+        java.lang.StringBuilder $r4;
+        java.lang.String $r5;
+        java.lang.Throwable $r6;
+        int $i1, i2;
+
+        r0 := @this: com.facebook.stetho.dumpapp.DumpappSocketLikeHandler;
+
+        $r1 := @parameter0: com.facebook.stetho.dumpapp.Framer;
+
+        entermonitor $r1;
+
+     label1:
+        $b0 = virtualinvoke $r1.<com.facebook.stetho.dumpapp.Framer: byte readFrameType()>();
+
+        lookupswitch($b0)
+        {
+            case 33: goto label5;
+            default: goto label2;
+        };
+
+     label2:
+        $r3 = new com.facebook.stetho.dumpapp.DumpappFramingException;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Expected enter frame, got: ");
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($b0);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r3.<com.facebook.stetho.dumpapp.DumpappFramingException: void <init>(java.lang.String)>($r5);
+
+        throw $r3;
+
+     label3:
+        $r6 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label4:
+        throw $r6;
+
+     label5:
+        $i1 = virtualinvoke $r1.<com.facebook.stetho.dumpapp.Framer: int readInt()>();
+
+        r2 = newarray (java.lang.String)[$i1];
+
+        i2 = 0;
+
+     label6:
+        if i2 >= $i1 goto label7;
+
+        $r5 = virtualinvoke $r1.<com.facebook.stetho.dumpapp.Framer: java.lang.String readString()>();
+
+        r2[i2] = $r5;
+
+        i2 = i2 + 1;
+
+        goto label6;
+
+     label7:
+        exitmonitor $r1;
+
+     label8:
+        return r2;
+
+        catch java.lang.Throwable from label1 to label4 with label3;
+        catch java.lang.Throwable from label5 to label8 with label3;
+    }
+    public void onAccepted(com.facebook.stetho.server.SocketLike) throws java.io.IOException
+    {
+        com.facebook.stetho.dumpapp.DumpappSocketLikeHandler r0;
+        com.facebook.stetho.server.SocketLike $r1;
+        com.facebook.stetho.dumpapp.Framer r2;
+        java.io.DataInputStream r3;
+        java.io.InputStream $r4;
+        java.io.OutputStream $r5;
+        java.lang.String[] $r6;
+        com.facebook.stetho.dumpapp.Dumper $r7;
+
+        r0 := @this: com.facebook.stetho.dumpapp.DumpappSocketLikeHandler;
+
+        $r1 := @parameter0: com.facebook.stetho.server.SocketLike;
+
+        r3 = new java.io.DataInputStream;
+
+        $r4 = virtualinvoke $r1.<com.facebook.stetho.server.SocketLike: java.io.InputStream getInput()>();
+
+        specialinvoke r3.<java.io.DataInputStream: void <init>(java.io.InputStream)>($r4);
+
+        specialinvoke r0.<com.facebook.stetho.dumpapp.DumpappSocketLikeHandler: void establishConversation(java.io.DataInputStream)>(r3);
+
+        r2 = new com.facebook.stetho.dumpapp.Framer;
+
+        $r5 = virtualinvoke $r1.<com.facebook.stetho.server.SocketLike: java.io.OutputStream getOutput()>();
+
+        specialinvoke r2.<com.facebook.stetho.dumpapp.Framer: void <init>(java.io.InputStream,java.io.OutputStream)>(r3, $r5);
+
+        $r6 = specialinvoke r0.<com.facebook.stetho.dumpapp.DumpappSocketLikeHandler: java.lang.String[] readArgs(com.facebook.stetho.dumpapp.Framer)>(r2);
+
+        $r7 = r0.<com.facebook.stetho.dumpapp.DumpappSocketLikeHandler: com.facebook.stetho.dumpapp.Dumper mDumper>;
+
+        staticinvoke <com.facebook.stetho.dumpapp.DumpappSocketLikeHandler: void dump(com.facebook.stetho.dumpapp.Dumper,com.facebook.stetho.dumpapp.Framer,java.lang.String[])>($r7, r2, $r6);
+
+        return;
+    }

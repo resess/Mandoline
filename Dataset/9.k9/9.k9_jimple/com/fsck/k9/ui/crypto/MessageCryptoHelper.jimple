@@ -1,0 +1,2035 @@
+com.fsck.k9.ui.crypto.MessageCryptoHelper extends java.lang.Object
+private static final int INVALID_OPENPGP_RESULT_CODE
+private static final com.fsck.k9.mail.internet.MimeBodyPart NO_REPLACEMENT_PART
+private static final int REQUEST_CODE_USER_INTERACTION
+private final com.fsck.k9.autocrypt.AutocryptOperations autocryptOperations
+private org.openintents.openpgp.OpenPgpDecryptionResult cachedDecryptionResult
+private com.fsck.k9.ui.crypto.MessageCryptoCallback callback
+private final java.lang.Object callbackLock
+private org.openintents.openpgp.util.OpenPgpApi$CancelableBackgroundOperation cancelableBackgroundOperation
+private final android.content.Context context
+private com.fsck.k9.ui.crypto.MessageCryptoHelper$CryptoPart currentCryptoPart
+private android.content.Intent currentCryptoResult
+private com.fsck.k9.mail.Message currentMessage
+private boolean isCancelled
+private com.fsck.k9.ui.crypto.MessageCryptoAnnotations messageAnnotations
+private org.openintents.openpgp.util.OpenPgpApi openPgpApi
+private com.fsck.k9.ui.crypto.OpenPgpApiFactory openPgpApiFactory
+private final java.lang.String openPgpProviderPackage
+private org.openintents.openpgp.util.OpenPgpServiceConnection openPgpServiceConnection
+private final java.util.Deque partsToProcess
+private boolean processSignedOnly
+private android.app.PendingIntent queuedPendingIntent
+private com.fsck.k9.ui.crypto.MessageCryptoAnnotations queuedResult
+private com.fsck.k9.ui.crypto.MessageCryptoHelper$State state
+private android.content.Intent userInteractionResultIntent
+    static void <clinit>()
+    {
+        <com.fsck.k9.ui.crypto.MessageCryptoHelper: com.fsck.k9.mail.internet.MimeBodyPart NO_REPLACEMENT_PART> = null;
+
+        return;
+    }
+    public void <init>(android.content.Context, com.fsck.k9.ui.crypto.OpenPgpApiFactory, com.fsck.k9.autocrypt.AutocryptOperations)
+    {
+        com.fsck.k9.ui.crypto.MessageCryptoHelper r0;
+        android.content.Context $r1;
+        com.fsck.k9.ui.crypto.OpenPgpApiFactory $r2;
+        com.fsck.k9.autocrypt.AutocryptOperations $r3;
+        java.lang.Object $r4;
+        java.util.ArrayDeque $r5;
+        boolean $z0;
+        java.lang.IllegalStateException $r6;
+        java.lang.String $r7;
+
+        r0 := @this: com.fsck.k9.ui.crypto.MessageCryptoHelper;
+
+        $r1 := @parameter0: android.content.Context;
+
+        $r2 := @parameter1: com.fsck.k9.ui.crypto.OpenPgpApiFactory;
+
+        $r3 := @parameter2: com.fsck.k9.autocrypt.AutocryptOperations;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r4 = new java.lang.Object;
+
+        specialinvoke $r4.<java.lang.Object: void <init>()>();
+
+        r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: java.lang.Object callbackLock> = $r4;
+
+        $r5 = new java.util.ArrayDeque;
+
+        specialinvoke $r5.<java.util.ArrayDeque: void <init>()>();
+
+        r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: java.util.Deque partsToProcess> = $r5;
+
+        $r1 = virtualinvoke $r1.<android.content.Context: android.content.Context getApplicationContext()>();
+
+        r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: android.content.Context context> = $r1;
+
+        $z0 = staticinvoke <com.fsck.k9.K9: boolean isOpenPgpProviderConfigured()>();
+
+        if $z0 != 0 goto label1;
+
+        $r6 = new java.lang.IllegalStateException;
+
+        specialinvoke $r6.<java.lang.IllegalStateException: void <init>(java.lang.String)>("MessageCryptoHelper must only be called with a OpenPGP provider!");
+
+        throw $r6;
+
+     label1:
+        r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: com.fsck.k9.autocrypt.AutocryptOperations autocryptOperations> = $r3;
+
+        r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: com.fsck.k9.ui.crypto.OpenPgpApiFactory openPgpApiFactory> = $r2;
+
+        $r7 = staticinvoke <com.fsck.k9.K9: java.lang.String getOpenPgpProvider()>();
+
+        r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: java.lang.String openPgpProviderPackage> = $r7;
+
+        return;
+    }
+    static org.openintents.openpgp.util.OpenPgpApi access$002(com.fsck.k9.ui.crypto.MessageCryptoHelper, org.openintents.openpgp.util.OpenPgpApi)
+    {
+        com.fsck.k9.ui.crypto.MessageCryptoHelper $r0;
+        org.openintents.openpgp.util.OpenPgpApi $r1;
+
+        $r0 := @parameter0: com.fsck.k9.ui.crypto.MessageCryptoHelper;
+
+        $r1 := @parameter1: org.openintents.openpgp.util.OpenPgpApi;
+
+        $r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: org.openintents.openpgp.util.OpenPgpApi openPgpApi> = $r1;
+
+        return $r1;
+    }
+    static android.content.Context access$100(com.fsck.k9.ui.crypto.MessageCryptoHelper)
+    {
+        com.fsck.k9.ui.crypto.MessageCryptoHelper $r0;
+        android.content.Context r1;
+
+        $r0 := @parameter0: com.fsck.k9.ui.crypto.MessageCryptoHelper;
+
+        r1 = $r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: android.content.Context context>;
+
+        return r1;
+    }
+    static com.fsck.k9.ui.crypto.OpenPgpApiFactory access$200(com.fsck.k9.ui.crypto.MessageCryptoHelper)
+    {
+        com.fsck.k9.ui.crypto.MessageCryptoHelper $r0;
+        com.fsck.k9.ui.crypto.OpenPgpApiFactory r1;
+
+        $r0 := @parameter0: com.fsck.k9.ui.crypto.MessageCryptoHelper;
+
+        r1 = $r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: com.fsck.k9.ui.crypto.OpenPgpApiFactory openPgpApiFactory>;
+
+        return r1;
+    }
+    static void access$300(com.fsck.k9.ui.crypto.MessageCryptoHelper)
+    {
+        com.fsck.k9.ui.crypto.MessageCryptoHelper $r0;
+
+        $r0 := @parameter0: com.fsck.k9.ui.crypto.MessageCryptoHelper;
+
+        specialinvoke $r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: void nextStep()>();
+
+        return;
+    }
+    static void access$400(com.fsck.k9.ui.crypto.MessageCryptoHelper, int, int)
+    {
+        com.fsck.k9.ui.crypto.MessageCryptoHelper $r0;
+        int $i0, $i1;
+
+        $r0 := @parameter0: com.fsck.k9.ui.crypto.MessageCryptoHelper;
+
+        $i0 := @parameter1: int;
+
+        $i1 := @parameter2: int;
+
+        specialinvoke $r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: void callbackProgress(int,int)>($i0, $i1);
+
+        return;
+    }
+    static org.openintents.openpgp.util.OpenPgpApi$CancelableBackgroundOperation access$502(com.fsck.k9.ui.crypto.MessageCryptoHelper, org.openintents.openpgp.util.OpenPgpApi$CancelableBackgroundOperation)
+    {
+        com.fsck.k9.ui.crypto.MessageCryptoHelper $r0;
+        org.openintents.openpgp.util.OpenPgpApi$CancelableBackgroundOperation $r1;
+
+        $r0 := @parameter0: com.fsck.k9.ui.crypto.MessageCryptoHelper;
+
+        $r1 := @parameter1: org.openintents.openpgp.util.OpenPgpApi$CancelableBackgroundOperation;
+
+        $r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: org.openintents.openpgp.util.OpenPgpApi$CancelableBackgroundOperation cancelableBackgroundOperation> = $r1;
+
+        return $r1;
+    }
+    static android.content.Intent access$602(com.fsck.k9.ui.crypto.MessageCryptoHelper, android.content.Intent)
+    {
+        com.fsck.k9.ui.crypto.MessageCryptoHelper $r0;
+        android.content.Intent $r1;
+
+        $r0 := @parameter0: com.fsck.k9.ui.crypto.MessageCryptoHelper;
+
+        $r1 := @parameter1: android.content.Intent;
+
+        $r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: android.content.Intent currentCryptoResult> = $r1;
+
+        return $r1;
+    }
+    static void access$700(com.fsck.k9.ui.crypto.MessageCryptoHelper, com.fsck.k9.mail.internet.MimeBodyPart)
+    {
+        com.fsck.k9.ui.crypto.MessageCryptoHelper $r0;
+        com.fsck.k9.mail.internet.MimeBodyPart $r1;
+
+        $r0 := @parameter0: com.fsck.k9.ui.crypto.MessageCryptoHelper;
+
+        $r1 := @parameter1: com.fsck.k9.mail.internet.MimeBodyPart;
+
+        specialinvoke $r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: void onCryptoOperationReturned(com.fsck.k9.mail.internet.MimeBodyPart)>($r1);
+
+        return;
+    }
+    static com.fsck.k9.ui.crypto.MessageCryptoHelper$CryptoPart access$800(com.fsck.k9.ui.crypto.MessageCryptoHelper)
+    {
+        com.fsck.k9.ui.crypto.MessageCryptoHelper $r0;
+        com.fsck.k9.ui.crypto.MessageCryptoHelper$CryptoPart r1;
+
+        $r0 := @parameter0: com.fsck.k9.ui.crypto.MessageCryptoHelper;
+
+        r1 = $r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: com.fsck.k9.ui.crypto.MessageCryptoHelper$CryptoPart currentCryptoPart>;
+
+        return r1;
+    }
+    private void addCryptoResultAnnotationToMessage(com.fsck.k9.mailstore.CryptoResultAnnotation)
+    {
+        com.fsck.k9.ui.crypto.MessageCryptoHelper r0;
+        com.fsck.k9.mailstore.CryptoResultAnnotation $r1;
+        com.fsck.k9.mail.Part r2;
+        com.fsck.k9.ui.crypto.MessageCryptoHelper$CryptoPart $r3;
+        com.fsck.k9.ui.crypto.MessageCryptoAnnotations $r4;
+
+        r0 := @this: com.fsck.k9.ui.crypto.MessageCryptoHelper;
+
+        $r1 := @parameter0: com.fsck.k9.mailstore.CryptoResultAnnotation;
+
+        $r3 = r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: com.fsck.k9.ui.crypto.MessageCryptoHelper$CryptoPart currentCryptoPart>;
+
+        r2 = $r3.<com.fsck.k9.ui.crypto.MessageCryptoHelper$CryptoPart: com.fsck.k9.mail.Part part>;
+
+        $r4 = r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: com.fsck.k9.ui.crypto.MessageCryptoAnnotations messageAnnotations>;
+
+        virtualinvoke $r4.<com.fsck.k9.ui.crypto.MessageCryptoAnnotations: void put(com.fsck.k9.mail.Part,com.fsck.k9.mailstore.CryptoResultAnnotation)>(r2, $r1);
+
+        specialinvoke r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: void propagateEncapsulatedSignedPart(com.fsck.k9.mailstore.CryptoResultAnnotation,com.fsck.k9.mail.Part)>($r1, r2);
+
+        return;
+    }
+    private void addErrorAnnotation(com.fsck.k9.mail.Part, com.fsck.k9.mailstore.CryptoResultAnnotation$CryptoError, com.fsck.k9.mail.internet.MimeBodyPart)
+    {
+        com.fsck.k9.ui.crypto.MessageCryptoHelper r0;
+        com.fsck.k9.mail.Part $r1;
+        com.fsck.k9.mailstore.CryptoResultAnnotation$CryptoError $r2;
+        com.fsck.k9.mail.internet.MimeBodyPart $r3;
+        com.fsck.k9.ui.crypto.MessageCryptoAnnotations $r4;
+        com.fsck.k9.mailstore.CryptoResultAnnotation $r5;
+
+        r0 := @this: com.fsck.k9.ui.crypto.MessageCryptoHelper;
+
+        $r1 := @parameter0: com.fsck.k9.mail.Part;
+
+        $r2 := @parameter1: com.fsck.k9.mailstore.CryptoResultAnnotation$CryptoError;
+
+        $r3 := @parameter2: com.fsck.k9.mail.internet.MimeBodyPart;
+
+        $r5 = staticinvoke <com.fsck.k9.mailstore.CryptoResultAnnotation: com.fsck.k9.mailstore.CryptoResultAnnotation createErrorAnnotation(com.fsck.k9.mailstore.CryptoResultAnnotation$CryptoError,com.fsck.k9.mail.internet.MimeBodyPart)>($r2, $r3);
+
+        $r4 = r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: com.fsck.k9.ui.crypto.MessageCryptoAnnotations messageAnnotations>;
+
+        virtualinvoke $r4.<com.fsck.k9.ui.crypto.MessageCryptoAnnotations: void put(com.fsck.k9.mail.Part,com.fsck.k9.mailstore.CryptoResultAnnotation)>($r1, $r5);
+
+        return;
+    }
+    private void callAsyncDecrypt(android.content.Intent) throws java.io.IOException
+    {
+        com.fsck.k9.ui.crypto.MessageCryptoHelper r0;
+        android.content.Intent $r1;
+        com.fsck.k9.ui.crypto.MessageCryptoHelper$5 $r2;
+        org.openintents.openpgp.util.OpenPgpApi$OpenPgpDataSource $r3;
+        org.openintents.openpgp.util.OpenPgpApi$OpenPgpDataSink $r4;
+        org.openintents.openpgp.util.OpenPgpApi $r5;
+        org.openintents.openpgp.util.OpenPgpApi$CancelableBackgroundOperation $r6;
+
+        r0 := @this: com.fsck.k9.ui.crypto.MessageCryptoHelper;
+
+        $r1 := @parameter0: android.content.Intent;
+
+        $r3 = specialinvoke r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: org.openintents.openpgp.util.OpenPgpApi$OpenPgpDataSource getDataSourceForEncryptedOrInlineData()>();
+
+        $r4 = specialinvoke r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: org.openintents.openpgp.util.OpenPgpApi$OpenPgpDataSink getDataSinkForDecryptedData()>();
+
+        $r5 = r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: org.openintents.openpgp.util.OpenPgpApi openPgpApi>;
+
+        $r2 = new com.fsck.k9.ui.crypto.MessageCryptoHelper$5;
+
+        specialinvoke $r2.<com.fsck.k9.ui.crypto.MessageCryptoHelper$5: void <init>(com.fsck.k9.ui.crypto.MessageCryptoHelper)>(r0);
+
+        $r6 = virtualinvoke $r5.<org.openintents.openpgp.util.OpenPgpApi: org.openintents.openpgp.util.OpenPgpApi$CancelableBackgroundOperation executeApiAsync(android.content.Intent,org.openintents.openpgp.util.OpenPgpApi$OpenPgpDataSource,org.openintents.openpgp.util.OpenPgpApi$OpenPgpDataSink,org.openintents.openpgp.util.OpenPgpApi$IOpenPgpSinkResultCallback)>($r1, $r3, $r4, $r2);
+
+        r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: org.openintents.openpgp.util.OpenPgpApi$CancelableBackgroundOperation cancelableBackgroundOperation> = $r6;
+
+        return;
+    }
+    private void callAsyncDetachedVerify(android.content.Intent) throws java.io.IOException, com.fsck.k9.mail.MessagingException
+    {
+        com.fsck.k9.ui.crypto.MessageCryptoHelper r0;
+        android.content.Intent $r1;
+        com.fsck.k9.ui.crypto.MessageCryptoHelper$6 $r2;
+        com.fsck.k9.ui.crypto.MessageCryptoHelper$CryptoPart $r3;
+        com.fsck.k9.mail.Part $r4;
+        org.openintents.openpgp.util.OpenPgpApi$OpenPgpDataSource $r5;
+        byte[] $r6;
+        org.openintents.openpgp.util.OpenPgpApi $r7;
+
+        r0 := @this: com.fsck.k9.ui.crypto.MessageCryptoHelper;
+
+        $r1 := @parameter0: android.content.Intent;
+
+        $r3 = r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: com.fsck.k9.ui.crypto.MessageCryptoHelper$CryptoPart currentCryptoPart>;
+
+        $r4 = $r3.<com.fsck.k9.ui.crypto.MessageCryptoHelper$CryptoPart: com.fsck.k9.mail.Part part>;
+
+        $r5 = specialinvoke r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: org.openintents.openpgp.util.OpenPgpApi$OpenPgpDataSource getDataSourceForSignedData(com.fsck.k9.mail.Part)>($r4);
+
+        $r3 = r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: com.fsck.k9.ui.crypto.MessageCryptoHelper$CryptoPart currentCryptoPart>;
+
+        $r4 = $r3.<com.fsck.k9.ui.crypto.MessageCryptoHelper$CryptoPart: com.fsck.k9.mail.Part part>;
+
+        $r6 = staticinvoke <com.fsck.k9.crypto.MessageCryptoStructureDetector: byte[] getSignatureData(com.fsck.k9.mail.Part)>($r4);
+
+        virtualinvoke $r1.<android.content.Intent: android.content.Intent putExtra(java.lang.String,byte[])>("detached_signature", $r6);
+
+        $r7 = r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: org.openintents.openpgp.util.OpenPgpApi openPgpApi>;
+
+        $r2 = new com.fsck.k9.ui.crypto.MessageCryptoHelper$6;
+
+        specialinvoke $r2.<com.fsck.k9.ui.crypto.MessageCryptoHelper$6: void <init>(com.fsck.k9.ui.crypto.MessageCryptoHelper)>(r0);
+
+        virtualinvoke $r7.<org.openintents.openpgp.util.OpenPgpApi: android.os.AsyncTask executeApiAsync(android.content.Intent,org.openintents.openpgp.util.OpenPgpApi$OpenPgpDataSource,org.openintents.openpgp.util.OpenPgpApi$IOpenPgpSinkResultCallback)>($r1, $r5, $r2);
+
+        return;
+    }
+    private void callAsyncInlineOperation(android.content.Intent) throws java.io.IOException
+    {
+        com.fsck.k9.ui.crypto.MessageCryptoHelper r0;
+        android.content.Intent $r1;
+        com.fsck.k9.ui.crypto.MessageCryptoHelper$3 $r2;
+        org.openintents.openpgp.util.OpenPgpApi$OpenPgpDataSource $r3;
+        org.openintents.openpgp.util.OpenPgpApi$OpenPgpDataSink $r4;
+        org.openintents.openpgp.util.OpenPgpApi $r5;
+        org.openintents.openpgp.util.OpenPgpApi$CancelableBackgroundOperation $r6;
+
+        r0 := @this: com.fsck.k9.ui.crypto.MessageCryptoHelper;
+
+        $r1 := @parameter0: android.content.Intent;
+
+        $r3 = specialinvoke r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: org.openintents.openpgp.util.OpenPgpApi$OpenPgpDataSource getDataSourceForEncryptedOrInlineData()>();
+
+        $r4 = specialinvoke r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: org.openintents.openpgp.util.OpenPgpApi$OpenPgpDataSink getDataSinkForDecryptedInlineData()>();
+
+        $r5 = r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: org.openintents.openpgp.util.OpenPgpApi openPgpApi>;
+
+        $r2 = new com.fsck.k9.ui.crypto.MessageCryptoHelper$3;
+
+        specialinvoke $r2.<com.fsck.k9.ui.crypto.MessageCryptoHelper$3: void <init>(com.fsck.k9.ui.crypto.MessageCryptoHelper)>(r0);
+
+        $r6 = virtualinvoke $r5.<org.openintents.openpgp.util.OpenPgpApi: org.openintents.openpgp.util.OpenPgpApi$CancelableBackgroundOperation executeApiAsync(android.content.Intent,org.openintents.openpgp.util.OpenPgpApi$OpenPgpDataSource,org.openintents.openpgp.util.OpenPgpApi$OpenPgpDataSink,org.openintents.openpgp.util.OpenPgpApi$IOpenPgpSinkResultCallback)>($r1, $r3, $r4, $r2);
+
+        r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: org.openintents.openpgp.util.OpenPgpApi$CancelableBackgroundOperation cancelableBackgroundOperation> = $r6;
+
+        return;
+    }
+    private void callbackPendingIntent(android.app.PendingIntent)
+    {
+        com.fsck.k9.ui.crypto.MessageCryptoHelper r0;
+        android.app.PendingIntent $r1;
+        java.lang.Throwable $r2;
+        java.lang.Object $r3;
+
+        r0 := @this: com.fsck.k9.ui.crypto.MessageCryptoHelper;
+
+        $r1 := @parameter0: android.app.PendingIntent;
+
+        $r3 = r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: java.lang.Object callbackLock>;
+
+        entermonitor $r3;
+
+     label1:
+        r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: android.app.PendingIntent queuedPendingIntent> = $r1;
+
+        specialinvoke r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: void deliverResult()>();
+
+        exitmonitor $r3;
+
+     label2:
+        return;
+
+     label3:
+        $r2 := @caughtexception;
+
+        exitmonitor $r3;
+
+     label4:
+        throw $r2;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+    private void callbackProgress(int, int)
+    {
+        com.fsck.k9.ui.crypto.MessageCryptoHelper r0;
+        int $i0, $i1;
+        java.lang.Object $r1;
+        com.fsck.k9.ui.crypto.MessageCryptoCallback $r2;
+        java.lang.Throwable $r3;
+
+        r0 := @this: com.fsck.k9.ui.crypto.MessageCryptoHelper;
+
+        $i0 := @parameter0: int;
+
+        $i1 := @parameter1: int;
+
+        $r1 = r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: java.lang.Object callbackLock>;
+
+        entermonitor $r1;
+
+     label1:
+        $r2 = r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: com.fsck.k9.ui.crypto.MessageCryptoCallback callback>;
+
+        if $r2 == null goto label2;
+
+        $r2 = r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: com.fsck.k9.ui.crypto.MessageCryptoCallback callback>;
+
+        interfaceinvoke $r2.<com.fsck.k9.ui.crypto.MessageCryptoCallback: void onCryptoHelperProgress(int,int)>($i0, $i1);
+
+     label2:
+        exitmonitor $r1;
+
+     label3:
+        return;
+
+     label4:
+        $r3 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label5:
+        throw $r3;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+    private void callbackReturnResult()
+    {
+        com.fsck.k9.ui.crypto.MessageCryptoHelper r0;
+        java.lang.Object $r1;
+        com.fsck.k9.ui.crypto.MessageCryptoAnnotations $r2;
+        java.lang.Throwable $r3;
+
+        r0 := @this: com.fsck.k9.ui.crypto.MessageCryptoHelper;
+
+        $r1 = r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: java.lang.Object callbackLock>;
+
+        entermonitor $r1;
+
+     label1:
+        specialinvoke r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: void cleanupAfterProcessingFinished()>();
+
+        $r2 = r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: com.fsck.k9.ui.crypto.MessageCryptoAnnotations messageAnnotations>;
+
+        r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: com.fsck.k9.ui.crypto.MessageCryptoAnnotations queuedResult> = $r2;
+
+        r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: com.fsck.k9.ui.crypto.MessageCryptoAnnotations messageAnnotations> = null;
+
+        specialinvoke r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: void deliverResult()>();
+
+        exitmonitor $r1;
+
+     label2:
+        return;
+
+     label3:
+        $r3 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label4:
+        throw $r3;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+    private void cleanupAfterProcessingFinished()
+    {
+        com.fsck.k9.ui.crypto.MessageCryptoHelper r0;
+        java.util.Deque $r1;
+        org.openintents.openpgp.util.OpenPgpServiceConnection $r2;
+
+        r0 := @this: com.fsck.k9.ui.crypto.MessageCryptoHelper;
+
+        $r1 = r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: java.util.Deque partsToProcess>;
+
+        interfaceinvoke $r1.<java.util.Deque: void clear()>();
+
+        r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: org.openintents.openpgp.util.OpenPgpApi openPgpApi> = null;
+
+        $r2 = r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: org.openintents.openpgp.util.OpenPgpServiceConnection openPgpServiceConnection>;
+
+        if $r2 == null goto label1;
+
+        $r2 = r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: org.openintents.openpgp.util.OpenPgpServiceConnection openPgpServiceConnection>;
+
+        virtualinvoke $r2.<org.openintents.openpgp.util.OpenPgpServiceConnection: void unbindFromService()>();
+
+     label1:
+        r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: org.openintents.openpgp.util.OpenPgpServiceConnection openPgpServiceConnection> = null;
+
+        return;
+    }
+    private void connectToCryptoProviderService()
+    {
+        com.fsck.k9.ui.crypto.MessageCryptoHelper r0;
+        android.content.Context $r1;
+        java.lang.String $r2;
+        com.fsck.k9.ui.crypto.MessageCryptoHelper$1 $r3;
+        org.openintents.openpgp.util.OpenPgpServiceConnection $r4;
+
+        r0 := @this: com.fsck.k9.ui.crypto.MessageCryptoHelper;
+
+        $r4 = new org.openintents.openpgp.util.OpenPgpServiceConnection;
+
+        $r1 = r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: android.content.Context context>;
+
+        $r2 = r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: java.lang.String openPgpProviderPackage>;
+
+        $r3 = new com.fsck.k9.ui.crypto.MessageCryptoHelper$1;
+
+        specialinvoke $r3.<com.fsck.k9.ui.crypto.MessageCryptoHelper$1: void <init>(com.fsck.k9.ui.crypto.MessageCryptoHelper)>(r0);
+
+        specialinvoke $r4.<org.openintents.openpgp.util.OpenPgpServiceConnection: void <init>(android.content.Context,java.lang.String,org.openintents.openpgp.util.OpenPgpServiceConnection$OnBound)>($r1, $r2, $r3);
+
+        r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: org.openintents.openpgp.util.OpenPgpServiceConnection openPgpServiceConnection> = $r4;
+
+        $r4 = r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: org.openintents.openpgp.util.OpenPgpServiceConnection openPgpServiceConnection>;
+
+        virtualinvoke $r4.<org.openintents.openpgp.util.OpenPgpServiceConnection: void bindToService()>();
+
+        return;
+    }
+    private void decryptOrVerifyCurrentPart()
+    {
+        com.fsck.k9.ui.crypto.MessageCryptoHelper r0;
+        android.content.Intent $r1;
+
+        r0 := @this: com.fsck.k9.ui.crypto.MessageCryptoHelper;
+
+        $r1 = r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: android.content.Intent userInteractionResultIntent>;
+
+        r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: android.content.Intent userInteractionResultIntent> = null;
+
+        if $r1 != null goto label1;
+
+        $r1 = specialinvoke r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: android.content.Intent getDecryptVerifyIntent()>();
+
+     label1:
+        specialinvoke r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: void decryptVerify(android.content.Intent)>($r1);
+
+        return;
+    }
+    private void decryptVerify(android.content.Intent)
+    {
+        com.fsck.k9.ui.crypto.MessageCryptoHelper r0;
+        android.content.Intent $r1;
+        com.fsck.k9.ui.crypto.MessageCryptoHelper$CryptoPartType r2;
+        com.fsck.k9.ui.crypto.MessageCryptoHelper$CryptoPart $r3;
+        int[] $r4;
+        int $i0;
+        java.lang.IllegalStateException $r5;
+        java.lang.StringBuilder $r6;
+        java.lang.String $r7;
+        java.io.IOException r8;
+        java.lang.Object[] $r9;
+        com.fsck.k9.mail.MessagingException r10;
+
+        r0 := @this: com.fsck.k9.ui.crypto.MessageCryptoHelper;
+
+        $r1 := @parameter0: android.content.Intent;
+
+        $r3 = r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: com.fsck.k9.ui.crypto.MessageCryptoHelper$CryptoPart currentCryptoPart>;
+
+        r2 = $r3.<com.fsck.k9.ui.crypto.MessageCryptoHelper$CryptoPart: com.fsck.k9.ui.crypto.MessageCryptoHelper$CryptoPartType type>;
+
+        $r4 = <com.fsck.k9.ui.crypto.MessageCryptoHelper$10: int[] $SwitchMap$com$fsck$k9$ui$crypto$MessageCryptoHelper$CryptoPartType>;
+
+     label01:
+        $i0 = virtualinvoke r2.<com.fsck.k9.ui.crypto.MessageCryptoHelper$CryptoPartType: int ordinal()>();
+
+     label02:
+        $i0 = $r4[$i0];
+
+        lookupswitch($i0)
+        {
+            case 1: goto label07;
+            case 2: goto label10;
+            case 3: goto label12;
+            case 4: goto label14;
+            default: goto label03;
+        };
+
+     label03:
+        $r5 = new java.lang.IllegalStateException;
+
+        $r6 = new java.lang.StringBuilder;
+
+     label04:
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unknown crypto part type: ");
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r2);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r5.<java.lang.IllegalStateException: void <init>(java.lang.String)>($r7);
+
+     label05:
+        throw $r5;
+
+     label06:
+        r8 := @caughtexception;
+
+        $r9 = newarray (java.lang.Object)[0];
+
+        staticinvoke <timber.log.Timber: void e(java.lang.Throwable,java.lang.String,java.lang.Object[])>(r8, "IOException", $r9);
+
+        return;
+
+     label07:
+        specialinvoke r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: void callAsyncDetachedVerify(android.content.Intent)>($r1);
+
+     label08:
+        return;
+
+     label09:
+        r10 := @caughtexception;
+
+        $r9 = newarray (java.lang.Object)[0];
+
+        staticinvoke <timber.log.Timber: void e(java.lang.Throwable,java.lang.String,java.lang.Object[])>(r10, "MessagingException", $r9);
+
+        return;
+
+     label10:
+        specialinvoke r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: void callAsyncDecrypt(android.content.Intent)>($r1);
+
+     label11:
+        return;
+
+     label12:
+        specialinvoke r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: void callAsyncInlineOperation(android.content.Intent)>($r1);
+
+     label13:
+        return;
+
+     label14:
+        $r5 = new java.lang.IllegalStateException;
+
+     label15:
+        specialinvoke $r5.<java.lang.IllegalStateException: void <init>(java.lang.String)>("This part type must have been handled previously!");
+
+     label16:
+        throw $r5;
+
+        catch java.io.IOException from label01 to label02 with label06;
+        catch java.io.IOException from label04 to label05 with label06;
+        catch com.fsck.k9.mail.MessagingException from label01 to label02 with label09;
+        catch com.fsck.k9.mail.MessagingException from label04 to label05 with label09;
+        catch java.io.IOException from label07 to label08 with label06;
+        catch com.fsck.k9.mail.MessagingException from label07 to label08 with label09;
+        catch java.io.IOException from label10 to label11 with label06;
+        catch java.io.IOException from label12 to label13 with label06;
+        catch java.io.IOException from label15 to label16 with label06;
+        catch com.fsck.k9.mail.MessagingException from label10 to label11 with label09;
+        catch com.fsck.k9.mail.MessagingException from label12 to label13 with label09;
+        catch com.fsck.k9.mail.MessagingException from label15 to label16 with label09;
+    }
+    private void deliverResult()
+    {
+        com.fsck.k9.ui.crypto.MessageCryptoHelper r0;
+        android.content.IntentSender $r1;
+        boolean $z0;
+        com.fsck.k9.ui.crypto.MessageCryptoCallback $r2;
+        java.lang.Object[] $r3;
+        com.fsck.k9.ui.crypto.MessageCryptoAnnotations $r4;
+        android.app.PendingIntent $r5;
+        java.lang.IllegalStateException $r6;
+
+        r0 := @this: com.fsck.k9.ui.crypto.MessageCryptoHelper;
+
+        $z0 = r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: boolean isCancelled>;
+
+        if $z0 == 0 goto label1;
+
+        return;
+
+     label1:
+        $r2 = r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: com.fsck.k9.ui.crypto.MessageCryptoCallback callback>;
+
+        if $r2 != null goto label2;
+
+        $r3 = newarray (java.lang.Object)[0];
+
+        staticinvoke <timber.log.Timber: void d(java.lang.String,java.lang.Object[])>("Keeping crypto helper result in queue for later delivery", $r3);
+
+        return;
+
+     label2:
+        $r4 = r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: com.fsck.k9.ui.crypto.MessageCryptoAnnotations queuedResult>;
+
+        if $r4 == null goto label3;
+
+        $r2 = r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: com.fsck.k9.ui.crypto.MessageCryptoCallback callback>;
+
+        $r4 = r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: com.fsck.k9.ui.crypto.MessageCryptoAnnotations queuedResult>;
+
+        interfaceinvoke $r2.<com.fsck.k9.ui.crypto.MessageCryptoCallback: void onCryptoOperationsFinished(com.fsck.k9.ui.crypto.MessageCryptoAnnotations)>($r4);
+
+        return;
+
+     label3:
+        $r5 = r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: android.app.PendingIntent queuedPendingIntent>;
+
+        if $r5 == null goto label4;
+
+        $r2 = r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: com.fsck.k9.ui.crypto.MessageCryptoCallback callback>;
+
+        $r5 = r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: android.app.PendingIntent queuedPendingIntent>;
+
+        $r1 = virtualinvoke $r5.<android.app.PendingIntent: android.content.IntentSender getIntentSender()>();
+
+        interfaceinvoke $r2.<com.fsck.k9.ui.crypto.MessageCryptoCallback: void startPendingIntentForCryptoHelper(android.content.IntentSender,int,android.content.Intent,int,int,int)>($r1, 124, null, 0, 0, 0);
+
+        r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: android.app.PendingIntent queuedPendingIntent> = null;
+
+        return;
+
+     label4:
+        $r6 = new java.lang.IllegalStateException;
+
+        specialinvoke $r6.<java.lang.IllegalStateException: void <init>(java.lang.String)>("deliverResult() called with no result!");
+
+        throw $r6;
+    }
+    private void findPartsForAutocryptPass()
+    {
+        com.fsck.k9.ui.crypto.MessageCryptoHelper r0;
+        com.fsck.k9.ui.crypto.MessageCryptoHelper$CryptoPart r1;
+        com.fsck.k9.ui.crypto.MessageCryptoAnnotations $r2;
+        boolean $z0;
+        com.fsck.k9.autocrypt.AutocryptOperations $r3;
+        com.fsck.k9.mail.Message $r4;
+        com.fsck.k9.ui.crypto.MessageCryptoHelper$CryptoPartType $r5;
+        java.util.Deque $r6;
+
+        r0 := @this: com.fsck.k9.ui.crypto.MessageCryptoHelper;
+
+        $r2 = r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: com.fsck.k9.ui.crypto.MessageCryptoAnnotations messageAnnotations>;
+
+        $z0 = virtualinvoke $r2.<com.fsck.k9.ui.crypto.MessageCryptoAnnotations: boolean isEmpty()>();
+
+        if $z0 != 0 goto label2;
+
+        $z0 = 1;
+
+     label1:
+        if $z0 == 0 goto label3;
+
+        return;
+
+     label2:
+        $z0 = 0;
+
+        goto label1;
+
+     label3:
+        $r3 = r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: com.fsck.k9.autocrypt.AutocryptOperations autocryptOperations>;
+
+        $r4 = r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: com.fsck.k9.mail.Message currentMessage>;
+
+        $z0 = virtualinvoke $r3.<com.fsck.k9.autocrypt.AutocryptOperations: boolean hasAutocryptHeader(com.fsck.k9.mail.Message)>($r4);
+
+        if $z0 == 0 goto label4;
+
+        r1 = new com.fsck.k9.ui.crypto.MessageCryptoHelper$CryptoPart;
+
+        $r5 = <com.fsck.k9.ui.crypto.MessageCryptoHelper$CryptoPartType: com.fsck.k9.ui.crypto.MessageCryptoHelper$CryptoPartType PLAIN_AUTOCRYPT>;
+
+        $r4 = r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: com.fsck.k9.mail.Message currentMessage>;
+
+        specialinvoke r1.<com.fsck.k9.ui.crypto.MessageCryptoHelper$CryptoPart: void <init>(com.fsck.k9.ui.crypto.MessageCryptoHelper$CryptoPartType,com.fsck.k9.mail.Part)>($r5, $r4);
+
+        $r6 = r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: java.util.Deque partsToProcess>;
+
+        interfaceinvoke $r6.<java.util.Deque: boolean add(java.lang.Object)>(r1);
+
+     label4:
+        return;
+    }
+    private void findPartsForMultipartEncryptionPass()
+    {
+        com.fsck.k9.ui.crypto.MessageCryptoHelper r0;
+        com.fsck.k9.ui.crypto.MessageCryptoHelper$CryptoPart r1;
+        com.fsck.k9.mail.Message $r2;
+        java.util.List $r3;
+        java.util.Iterator $r4;
+        boolean $z0;
+        java.lang.Object $r5;
+        com.fsck.k9.mail.Part r6;
+        com.fsck.k9.mailstore.CryptoResultAnnotation$CryptoError $r7;
+        com.fsck.k9.mail.internet.MimeBodyPart $r8;
+        com.fsck.k9.ui.crypto.MessageCryptoHelper$CryptoPartType $r9;
+        java.util.Deque $r10;
+
+        r0 := @this: com.fsck.k9.ui.crypto.MessageCryptoHelper;
+
+        $r2 = r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: com.fsck.k9.mail.Message currentMessage>;
+
+        $r3 = staticinvoke <com.fsck.k9.crypto.MessageCryptoStructureDetector: java.util.List findMultipartEncryptedParts(com.fsck.k9.mail.Part)>($r2);
+
+        $r4 = interfaceinvoke $r3.<java.util.List: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r4.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label4;
+
+        $r5 = interfaceinvoke $r4.<java.util.Iterator: java.lang.Object next()>();
+
+        r6 = (com.fsck.k9.mail.Part) $r5;
+
+        $z0 = staticinvoke <com.fsck.k9.mailstore.MessageHelper: boolean isCompletePartAvailable(com.fsck.k9.mail.Part)>(r6);
+
+        if $z0 != 0 goto label2;
+
+        $r7 = <com.fsck.k9.mailstore.CryptoResultAnnotation$CryptoError: com.fsck.k9.mailstore.CryptoResultAnnotation$CryptoError OPENPGP_ENCRYPTED_BUT_INCOMPLETE>;
+
+        $r8 = staticinvoke <com.fsck.k9.mailstore.MessageHelper: com.fsck.k9.mail.internet.MimeBodyPart createEmptyPart()>();
+
+        specialinvoke r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: void addErrorAnnotation(com.fsck.k9.mail.Part,com.fsck.k9.mailstore.CryptoResultAnnotation$CryptoError,com.fsck.k9.mail.internet.MimeBodyPart)>(r6, $r7, $r8);
+
+        goto label1;
+
+     label2:
+        $z0 = staticinvoke <com.fsck.k9.crypto.MessageCryptoStructureDetector: boolean isMultipartEncryptedOpenPgpProtocol(com.fsck.k9.mail.Part)>(r6);
+
+        if $z0 == 0 goto label3;
+
+        r1 = new com.fsck.k9.ui.crypto.MessageCryptoHelper$CryptoPart;
+
+        $r9 = <com.fsck.k9.ui.crypto.MessageCryptoHelper$CryptoPartType: com.fsck.k9.ui.crypto.MessageCryptoHelper$CryptoPartType PGP_ENCRYPTED>;
+
+        specialinvoke r1.<com.fsck.k9.ui.crypto.MessageCryptoHelper$CryptoPart: void <init>(com.fsck.k9.ui.crypto.MessageCryptoHelper$CryptoPartType,com.fsck.k9.mail.Part)>($r9, r6);
+
+        $r10 = r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: java.util.Deque partsToProcess>;
+
+        interfaceinvoke $r10.<java.util.Deque: boolean add(java.lang.Object)>(r1);
+
+        goto label1;
+
+     label3:
+        $r7 = <com.fsck.k9.mailstore.CryptoResultAnnotation$CryptoError: com.fsck.k9.mailstore.CryptoResultAnnotation$CryptoError ENCRYPTED_BUT_UNSUPPORTED>;
+
+        $r8 = staticinvoke <com.fsck.k9.mailstore.MessageHelper: com.fsck.k9.mail.internet.MimeBodyPart createEmptyPart()>();
+
+        specialinvoke r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: void addErrorAnnotation(com.fsck.k9.mail.Part,com.fsck.k9.mailstore.CryptoResultAnnotation$CryptoError,com.fsck.k9.mail.internet.MimeBodyPart)>(r6, $r7, $r8);
+
+        goto label1;
+
+     label4:
+        return;
+    }
+    private void findPartsForMultipartSignaturePass()
+    {
+        com.fsck.k9.ui.crypto.MessageCryptoHelper r0;
+        com.fsck.k9.ui.crypto.MessageCryptoHelper$CryptoPart r1;
+        com.fsck.k9.mail.Message $r2;
+        com.fsck.k9.ui.crypto.MessageCryptoAnnotations $r3;
+        java.util.List $r4;
+        java.util.Iterator $r5;
+        boolean $z0;
+        java.lang.Object $r6;
+        com.fsck.k9.mail.Part r7, $r8;
+        com.fsck.k9.mail.internet.MimeBodyPart $r9;
+        com.fsck.k9.mailstore.CryptoResultAnnotation$CryptoError $r10;
+        com.fsck.k9.ui.crypto.MessageCryptoHelper$CryptoPartType $r11;
+        java.util.Deque $r12;
+
+        r0 := @this: com.fsck.k9.ui.crypto.MessageCryptoHelper;
+
+        $r2 = r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: com.fsck.k9.mail.Message currentMessage>;
+
+        $r3 = r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: com.fsck.k9.ui.crypto.MessageCryptoAnnotations messageAnnotations>;
+
+        $r4 = staticinvoke <com.fsck.k9.crypto.MessageCryptoStructureDetector: java.util.List findMultipartSignedParts(com.fsck.k9.mail.Part,com.fsck.k9.ui.crypto.MessageCryptoAnnotations)>($r2, $r3);
+
+        $r5 = interfaceinvoke $r4.<java.util.List: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r5.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label7;
+
+        $r6 = interfaceinvoke $r5.<java.util.Iterator: java.lang.Object next()>();
+
+        r7 = (com.fsck.k9.mail.Part) $r6;
+
+        $z0 = r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: boolean processSignedOnly>;
+
+        if $z0 != 0 goto label3;
+
+        $r3 = r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: com.fsck.k9.ui.crypto.MessageCryptoAnnotations messageAnnotations>;
+
+        $r8 = virtualinvoke $r3.<com.fsck.k9.ui.crypto.MessageCryptoAnnotations: com.fsck.k9.mail.Part findKeyForAnnotationWithReplacementPart(com.fsck.k9.mail.Part)>(r7);
+
+        if $r8 == null goto label4;
+
+        $z0 = 1;
+
+     label2:
+        if $z0 == 0 goto label1;
+
+     label3:
+        $z0 = staticinvoke <com.fsck.k9.mailstore.MessageHelper: boolean isCompletePartAvailable(com.fsck.k9.mail.Part)>(r7);
+
+        if $z0 != 0 goto label5;
+
+        $r9 = staticinvoke <com.fsck.k9.ui.crypto.MessageCryptoHelper: com.fsck.k9.mail.internet.MimeBodyPart getMultipartSignedContentPartIfAvailable(com.fsck.k9.mail.Part)>(r7);
+
+        $r10 = <com.fsck.k9.mailstore.CryptoResultAnnotation$CryptoError: com.fsck.k9.mailstore.CryptoResultAnnotation$CryptoError OPENPGP_SIGNED_BUT_INCOMPLETE>;
+
+        specialinvoke r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: void addErrorAnnotation(com.fsck.k9.mail.Part,com.fsck.k9.mailstore.CryptoResultAnnotation$CryptoError,com.fsck.k9.mail.internet.MimeBodyPart)>(r7, $r10, $r9);
+
+        goto label1;
+
+     label4:
+        $z0 = 0;
+
+        goto label2;
+
+     label5:
+        $z0 = staticinvoke <com.fsck.k9.crypto.MessageCryptoStructureDetector: boolean isMultipartSignedOpenPgpProtocol(com.fsck.k9.mail.Part)>(r7);
+
+        if $z0 == 0 goto label6;
+
+        r1 = new com.fsck.k9.ui.crypto.MessageCryptoHelper$CryptoPart;
+
+        $r11 = <com.fsck.k9.ui.crypto.MessageCryptoHelper$CryptoPartType: com.fsck.k9.ui.crypto.MessageCryptoHelper$CryptoPartType PGP_SIGNED>;
+
+        specialinvoke r1.<com.fsck.k9.ui.crypto.MessageCryptoHelper$CryptoPart: void <init>(com.fsck.k9.ui.crypto.MessageCryptoHelper$CryptoPartType,com.fsck.k9.mail.Part)>($r11, r7);
+
+        $r12 = r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: java.util.Deque partsToProcess>;
+
+        interfaceinvoke $r12.<java.util.Deque: boolean add(java.lang.Object)>(r1);
+
+        goto label1;
+
+     label6:
+        $r9 = staticinvoke <com.fsck.k9.ui.crypto.MessageCryptoHelper: com.fsck.k9.mail.internet.MimeBodyPart getMultipartSignedContentPartIfAvailable(com.fsck.k9.mail.Part)>(r7);
+
+        $r10 = <com.fsck.k9.mailstore.CryptoResultAnnotation$CryptoError: com.fsck.k9.mailstore.CryptoResultAnnotation$CryptoError SIGNED_BUT_UNSUPPORTED>;
+
+        specialinvoke r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: void addErrorAnnotation(com.fsck.k9.mail.Part,com.fsck.k9.mailstore.CryptoResultAnnotation$CryptoError,com.fsck.k9.mail.internet.MimeBodyPart)>(r7, $r10, $r9);
+
+        goto label1;
+
+     label7:
+        return;
+    }
+    private void findPartsForNextPass()
+    {
+        com.fsck.k9.ui.crypto.MessageCryptoHelper r0;
+        int $i0;
+        int[] $r1;
+        com.fsck.k9.ui.crypto.MessageCryptoHelper$State $r2;
+        java.lang.IllegalStateException $r3;
+
+        r0 := @this: com.fsck.k9.ui.crypto.MessageCryptoHelper;
+
+        $r1 = <com.fsck.k9.ui.crypto.MessageCryptoHelper$10: int[] $SwitchMap$com$fsck$k9$ui$crypto$MessageCryptoHelper$State>;
+
+        $r2 = r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: com.fsck.k9.ui.crypto.MessageCryptoHelper$State state>;
+
+        $i0 = virtualinvoke $r2.<com.fsck.k9.ui.crypto.MessageCryptoHelper$State: int ordinal()>();
+
+        $i0 = $r1[$i0];
+
+        lookupswitch($i0)
+        {
+            case 1: goto label2;
+            case 2: goto label3;
+            case 3: goto label4;
+            case 4: goto label5;
+            default: goto label1;
+        };
+
+     label1:
+        $r3 = new java.lang.IllegalStateException;
+
+        specialinvoke $r3.<java.lang.IllegalStateException: void <init>(java.lang.String)>("unhandled state");
+
+        throw $r3;
+
+     label2:
+        $r2 = <com.fsck.k9.ui.crypto.MessageCryptoHelper$State: com.fsck.k9.ui.crypto.MessageCryptoHelper$State ENCRYPTION>;
+
+        r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: com.fsck.k9.ui.crypto.MessageCryptoHelper$State state> = $r2;
+
+        specialinvoke r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: void findPartsForMultipartEncryptionPass()>();
+
+        return;
+
+     label3:
+        $r2 = <com.fsck.k9.ui.crypto.MessageCryptoHelper$State: com.fsck.k9.ui.crypto.MessageCryptoHelper$State SIGNATURES_AND_INLINE>;
+
+        r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: com.fsck.k9.ui.crypto.MessageCryptoHelper$State state> = $r2;
+
+        specialinvoke r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: void findPartsForMultipartSignaturePass()>();
+
+        specialinvoke r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: void findPartsForPgpInlinePass()>();
+
+        return;
+
+     label4:
+        $r2 = <com.fsck.k9.ui.crypto.MessageCryptoHelper$State: com.fsck.k9.ui.crypto.MessageCryptoHelper$State AUTOCRYPT>;
+
+        r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: com.fsck.k9.ui.crypto.MessageCryptoHelper$State state> = $r2;
+
+        specialinvoke r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: void findPartsForAutocryptPass()>();
+
+        return;
+
+     label5:
+        $r2 = <com.fsck.k9.ui.crypto.MessageCryptoHelper$State: com.fsck.k9.ui.crypto.MessageCryptoHelper$State FINISHED>;
+
+        r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: com.fsck.k9.ui.crypto.MessageCryptoHelper$State state> = $r2;
+
+        return;
+    }
+    private void findPartsForPgpInlinePass()
+    {
+        com.fsck.k9.ui.crypto.MessageCryptoHelper r0;
+        com.fsck.k9.ui.crypto.MessageCryptoHelper$CryptoPart r1;
+        com.fsck.k9.mail.Message $r2;
+        java.util.List $r3;
+        java.util.Iterator $r4;
+        boolean $z0;
+        java.lang.Object $r5;
+        com.fsck.k9.mail.Part r6;
+        java.util.Set $r7;
+        com.fsck.k9.mail.Flag $r8;
+        com.fsck.k9.mailstore.CryptoResultAnnotation$CryptoError $r9;
+        com.fsck.k9.mail.internet.MimeBodyPart $r10;
+        com.fsck.k9.ui.crypto.MessageCryptoHelper$CryptoPartType $r11;
+        java.util.Deque $r12;
+
+        r0 := @this: com.fsck.k9.ui.crypto.MessageCryptoHelper;
+
+        $r2 = r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: com.fsck.k9.mail.Message currentMessage>;
+
+        $r3 = staticinvoke <com.fsck.k9.crypto.MessageCryptoStructureDetector: java.util.List findPgpInlineParts(com.fsck.k9.mail.Part)>($r2);
+
+        $r4 = interfaceinvoke $r3.<java.util.List: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r4.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label5;
+
+        $r5 = interfaceinvoke $r4.<java.util.Iterator: java.lang.Object next()>();
+
+        r6 = (com.fsck.k9.mail.Part) $r5;
+
+        $z0 = r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: boolean processSignedOnly>;
+
+        if $z0 != 0 goto label2;
+
+        $z0 = staticinvoke <com.fsck.k9.crypto.MessageCryptoStructureDetector: boolean isPartPgpInlineEncrypted(com.fsck.k9.mail.Part)>(r6);
+
+        if $z0 == 0 goto label1;
+
+     label2:
+        $r2 = r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: com.fsck.k9.mail.Message currentMessage>;
+
+        $r7 = virtualinvoke $r2.<com.fsck.k9.mail.Message: java.util.Set getFlags()>();
+
+        $r8 = <com.fsck.k9.mail.Flag: com.fsck.k9.mail.Flag X_DOWNLOADED_FULL>;
+
+        $z0 = interfaceinvoke $r7.<java.util.Set: boolean contains(java.lang.Object)>($r8);
+
+        if $z0 != 0 goto label4;
+
+        $z0 = staticinvoke <com.fsck.k9.crypto.MessageCryptoStructureDetector: boolean isPartPgpInlineEncrypted(com.fsck.k9.mail.Part)>(r6);
+
+        if $z0 == 0 goto label3;
+
+        $r9 = <com.fsck.k9.mailstore.CryptoResultAnnotation$CryptoError: com.fsck.k9.mailstore.CryptoResultAnnotation$CryptoError OPENPGP_ENCRYPTED_BUT_INCOMPLETE>;
+
+        $r10 = <com.fsck.k9.ui.crypto.MessageCryptoHelper: com.fsck.k9.mail.internet.MimeBodyPart NO_REPLACEMENT_PART>;
+
+        specialinvoke r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: void addErrorAnnotation(com.fsck.k9.mail.Part,com.fsck.k9.mailstore.CryptoResultAnnotation$CryptoError,com.fsck.k9.mail.internet.MimeBodyPart)>(r6, $r9, $r10);
+
+        goto label1;
+
+     label3:
+        $r9 = <com.fsck.k9.mailstore.CryptoResultAnnotation$CryptoError: com.fsck.k9.mailstore.CryptoResultAnnotation$CryptoError OPENPGP_SIGNED_BUT_INCOMPLETE>;
+
+        $r10 = <com.fsck.k9.ui.crypto.MessageCryptoHelper: com.fsck.k9.mail.internet.MimeBodyPart NO_REPLACEMENT_PART>;
+
+        specialinvoke r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: void addErrorAnnotation(com.fsck.k9.mail.Part,com.fsck.k9.mailstore.CryptoResultAnnotation$CryptoError,com.fsck.k9.mail.internet.MimeBodyPart)>(r6, $r9, $r10);
+
+        goto label1;
+
+     label4:
+        r1 = new com.fsck.k9.ui.crypto.MessageCryptoHelper$CryptoPart;
+
+        $r11 = <com.fsck.k9.ui.crypto.MessageCryptoHelper$CryptoPartType: com.fsck.k9.ui.crypto.MessageCryptoHelper$CryptoPartType PGP_INLINE>;
+
+        specialinvoke r1.<com.fsck.k9.ui.crypto.MessageCryptoHelper$CryptoPart: void <init>(com.fsck.k9.ui.crypto.MessageCryptoHelper$CryptoPartType,com.fsck.k9.mail.Part)>($r11, r6);
+
+        $r12 = r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: java.util.Deque partsToProcess>;
+
+        interfaceinvoke $r12.<java.util.Deque: boolean add(java.lang.Object)>(r1);
+
+        goto label1;
+
+     label5:
+        return;
+    }
+    private org.openintents.openpgp.util.OpenPgpApi$OpenPgpDataSink getDataSinkForDecryptedData() throws java.io.IOException
+    {
+        com.fsck.k9.ui.crypto.MessageCryptoHelper r0;
+        com.fsck.k9.ui.crypto.MessageCryptoHelper$9 $r1;
+
+        r0 := @this: com.fsck.k9.ui.crypto.MessageCryptoHelper;
+
+        $r1 = new com.fsck.k9.ui.crypto.MessageCryptoHelper$9;
+
+        specialinvoke $r1.<com.fsck.k9.ui.crypto.MessageCryptoHelper$9: void <init>(com.fsck.k9.ui.crypto.MessageCryptoHelper)>(r0);
+
+        return $r1;
+    }
+    private org.openintents.openpgp.util.OpenPgpApi$OpenPgpDataSink getDataSinkForDecryptedInlineData()
+    {
+        com.fsck.k9.ui.crypto.MessageCryptoHelper r0;
+        com.fsck.k9.ui.crypto.MessageCryptoHelper$4 $r1;
+
+        r0 := @this: com.fsck.k9.ui.crypto.MessageCryptoHelper;
+
+        $r1 = new com.fsck.k9.ui.crypto.MessageCryptoHelper$4;
+
+        specialinvoke $r1.<com.fsck.k9.ui.crypto.MessageCryptoHelper$4: void <init>(com.fsck.k9.ui.crypto.MessageCryptoHelper)>(r0);
+
+        return $r1;
+    }
+    private org.openintents.openpgp.util.OpenPgpApi$OpenPgpDataSource getDataSourceForEncryptedOrInlineData() throws java.io.IOException
+    {
+        com.fsck.k9.ui.crypto.MessageCryptoHelper r0;
+        com.fsck.k9.ui.crypto.MessageCryptoHelper$8 $r1;
+
+        r0 := @this: com.fsck.k9.ui.crypto.MessageCryptoHelper;
+
+        $r1 = new com.fsck.k9.ui.crypto.MessageCryptoHelper$8;
+
+        specialinvoke $r1.<com.fsck.k9.ui.crypto.MessageCryptoHelper$8: void <init>(com.fsck.k9.ui.crypto.MessageCryptoHelper)>(r0);
+
+        return $r1;
+    }
+    private org.openintents.openpgp.util.OpenPgpApi$OpenPgpDataSource getDataSourceForSignedData(com.fsck.k9.mail.Part) throws java.io.IOException
+    {
+        com.fsck.k9.ui.crypto.MessageCryptoHelper r0;
+        com.fsck.k9.mail.Part $r1;
+        com.fsck.k9.ui.crypto.MessageCryptoHelper$7 $r2;
+
+        r0 := @this: com.fsck.k9.ui.crypto.MessageCryptoHelper;
+
+        $r1 := @parameter0: com.fsck.k9.mail.Part;
+
+        $r2 = new com.fsck.k9.ui.crypto.MessageCryptoHelper$7;
+
+        specialinvoke $r2.<com.fsck.k9.ui.crypto.MessageCryptoHelper$7: void <init>(com.fsck.k9.ui.crypto.MessageCryptoHelper,com.fsck.k9.mail.Part)>(r0, $r1);
+
+        return $r2;
+    }
+    private android.content.Intent getDecryptVerifyIntent()
+    {
+        com.fsck.k9.ui.crypto.MessageCryptoHelper r0;
+        android.content.Intent r1;
+        com.fsck.k9.mail.Message $r2;
+        com.fsck.k9.mail.Address[] $r3;
+        int $i0;
+        com.fsck.k9.mail.Address $r4;
+        java.lang.String $r5;
+        com.fsck.k9.autocrypt.AutocryptOperations $r6;
+        org.openintents.openpgp.OpenPgpDecryptionResult $r7;
+
+        r0 := @this: com.fsck.k9.ui.crypto.MessageCryptoHelper;
+
+        r1 = new android.content.Intent;
+
+        specialinvoke r1.<android.content.Intent: void <init>(java.lang.String)>("org.openintents.openpgp.action.DECRYPT_VERIFY");
+
+        $r2 = r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: com.fsck.k9.mail.Message currentMessage>;
+
+        $r3 = virtualinvoke $r2.<com.fsck.k9.mail.Message: com.fsck.k9.mail.Address[] getFrom()>();
+
+        $i0 = lengthof $r3;
+
+        if $i0 <= 0 goto label1;
+
+        $r4 = $r3[0];
+
+        $r5 = virtualinvoke $r4.<com.fsck.k9.mail.Address: java.lang.String getAddress()>();
+
+        virtualinvoke r1.<android.content.Intent: android.content.Intent putExtra(java.lang.String,java.lang.String)>("sender_address", $r5);
+
+        $r4 = $r3[0];
+
+        $r5 = virtualinvoke $r4.<com.fsck.k9.mail.Address: java.lang.String getAddress()>();
+
+        virtualinvoke r1.<android.content.Intent: android.content.Intent putExtra(java.lang.String,java.lang.String)>("autocrypt_peer_id", $r5);
+
+     label1:
+        $r6 = r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: com.fsck.k9.autocrypt.AutocryptOperations autocryptOperations>;
+
+        $r2 = r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: com.fsck.k9.mail.Message currentMessage>;
+
+        virtualinvoke $r6.<com.fsck.k9.autocrypt.AutocryptOperations: boolean addAutocryptPeerUpdateToIntentIfPresent(com.fsck.k9.mail.Message,android.content.Intent)>($r2, r1);
+
+        virtualinvoke r1.<android.content.Intent: android.content.Intent putExtra(java.lang.String,boolean)>("support_override_crpto_warning", 1);
+
+        $r7 = r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: org.openintents.openpgp.OpenPgpDecryptionResult cachedDecryptionResult>;
+
+        virtualinvoke r1.<android.content.Intent: android.content.Intent putExtra(java.lang.String,android.os.Parcelable)>("decryption_result", $r7);
+
+        return r1;
+    }
+    private static com.fsck.k9.mail.internet.MimeBodyPart getMultipartSignedContentPartIfAvailable(com.fsck.k9.mail.Part)
+    {
+        com.fsck.k9.mail.Part $r0;
+        com.fsck.k9.mail.internet.MimeBodyPart r1;
+        com.fsck.k9.mail.Body $r2;
+        boolean $z0;
+        com.fsck.k9.mail.internet.MimeMultipart r3;
+        int $i0;
+        com.fsck.k9.mail.BodyPart $r4;
+
+        $r0 := @parameter0: com.fsck.k9.mail.Part;
+
+        r1 = <com.fsck.k9.ui.crypto.MessageCryptoHelper: com.fsck.k9.mail.internet.MimeBodyPart NO_REPLACEMENT_PART>;
+
+        $r2 = interfaceinvoke $r0.<com.fsck.k9.mail.Part: com.fsck.k9.mail.Body getBody()>();
+
+        $z0 = $r2 instanceof com.fsck.k9.mail.internet.MimeMultipart;
+
+        if $z0 == 0 goto label1;
+
+        $r2 = interfaceinvoke $r0.<com.fsck.k9.mail.Part: com.fsck.k9.mail.Body getBody()>();
+
+        r3 = (com.fsck.k9.mail.internet.MimeMultipart) $r2;
+
+        $i0 = virtualinvoke r3.<com.fsck.k9.mail.internet.MimeMultipart: int getCount()>();
+
+        if $i0 < 1 goto label1;
+
+        $r4 = virtualinvoke r3.<com.fsck.k9.mail.internet.MimeMultipart: com.fsck.k9.mail.BodyPart getBodyPart(int)>(0);
+
+        r1 = (com.fsck.k9.mail.internet.MimeBodyPart) $r4;
+
+     label1:
+        return r1;
+    }
+    private void handleCryptoOperationError()
+    {
+        com.fsck.k9.ui.crypto.MessageCryptoHelper r0;
+        android.content.Intent $r1;
+        android.os.Parcelable $r2;
+        org.openintents.openpgp.OpenPgpError r3;
+        java.lang.Object[] $r4;
+        java.lang.String $r5;
+
+        r0 := @this: com.fsck.k9.ui.crypto.MessageCryptoHelper;
+
+        $r1 = r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: android.content.Intent currentCryptoResult>;
+
+        $r2 = virtualinvoke $r1.<android.content.Intent: android.os.Parcelable getParcelableExtra(java.lang.String)>("error");
+
+        r3 = (org.openintents.openpgp.OpenPgpError) $r2;
+
+        $r4 = newarray (java.lang.Object)[1];
+
+        $r5 = virtualinvoke r3.<org.openintents.openpgp.OpenPgpError: java.lang.String getMessage()>();
+
+        $r4[0] = $r5;
+
+        staticinvoke <timber.log.Timber: void w(java.lang.String,java.lang.Object[])>("OpenPGP API error: %s", $r4);
+
+        specialinvoke r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: void onCryptoOperationFailed(org.openintents.openpgp.OpenPgpError)>(r3);
+
+        return;
+    }
+    private void handleCryptoOperationResult(com.fsck.k9.mail.internet.MimeBodyPart)
+    {
+        com.fsck.k9.ui.crypto.MessageCryptoHelper r0;
+        com.fsck.k9.mail.internet.MimeBodyPart $r1;
+        android.content.Intent $r2;
+        int $i0;
+        java.lang.Object[] $r3;
+        java.lang.Integer $r4;
+
+        r0 := @this: com.fsck.k9.ui.crypto.MessageCryptoHelper;
+
+        $r1 := @parameter0: com.fsck.k9.mail.internet.MimeBodyPart;
+
+        $r2 = r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: android.content.Intent currentCryptoResult>;
+
+        $i0 = virtualinvoke $r2.<android.content.Intent: int getIntExtra(java.lang.String,int)>("result_code", -1);
+
+        $r3 = newarray (java.lang.Object)[1];
+
+        $r4 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        $r3[0] = $r4;
+
+        staticinvoke <timber.log.Timber: void d(java.lang.String,java.lang.Object[])>("OpenPGP API decryptVerify result code: %d", $r3);
+
+        lookupswitch($i0)
+        {
+            case -1: goto label2;
+            case 0: goto label4;
+            case 1: goto label5;
+            case 2: goto label3;
+            default: goto label1;
+        };
+
+     label1:
+        return;
+
+     label2:
+        $r3 = newarray (java.lang.Object)[0];
+
+        staticinvoke <timber.log.Timber: void e(java.lang.String,java.lang.Object[])>("Internal error: no result code!", $r3);
+
+        return;
+
+     label3:
+        specialinvoke r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: void handleUserInteractionRequest()>();
+
+        return;
+
+     label4:
+        specialinvoke r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: void handleCryptoOperationError()>();
+
+        return;
+
+     label5:
+        specialinvoke r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: void handleCryptoOperationSuccess(com.fsck.k9.mail.internet.MimeBodyPart)>($r1);
+
+        return;
+    }
+    private void handleCryptoOperationSuccess(com.fsck.k9.mail.internet.MimeBodyPart)
+    {
+        com.fsck.k9.ui.crypto.MessageCryptoHelper r0;
+        com.fsck.k9.mail.internet.MimeBodyPart $r1;
+        android.content.Intent $r2;
+        android.os.Parcelable $r3;
+        org.openintents.openpgp.OpenPgpDecryptionResult r4;
+        org.openintents.openpgp.OpenPgpSignatureResult r5;
+        android.app.PendingIntent r6, r7;
+        boolean $z0;
+        com.fsck.k9.mailstore.CryptoResultAnnotation $r8;
+
+        r0 := @this: com.fsck.k9.ui.crypto.MessageCryptoHelper;
+
+        $r1 := @parameter0: com.fsck.k9.mail.internet.MimeBodyPart;
+
+        $r2 = r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: android.content.Intent currentCryptoResult>;
+
+        $r3 = virtualinvoke $r2.<android.content.Intent: android.os.Parcelable getParcelableExtra(java.lang.String)>("decryption");
+
+        r4 = (org.openintents.openpgp.OpenPgpDecryptionResult) $r3;
+
+        $r2 = r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: android.content.Intent currentCryptoResult>;
+
+        $r3 = virtualinvoke $r2.<android.content.Intent: android.os.Parcelable getParcelableExtra(java.lang.String)>("signature");
+
+        r5 = (org.openintents.openpgp.OpenPgpSignatureResult) $r3;
+
+        $r2 = r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: android.content.Intent currentCryptoResult>;
+
+        $r3 = virtualinvoke $r2.<android.content.Intent: android.os.Parcelable getParcelableExtra(java.lang.String)>("intent");
+
+        r6 = (android.app.PendingIntent) $r3;
+
+        $r2 = r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: android.content.Intent currentCryptoResult>;
+
+        $r3 = virtualinvoke $r2.<android.content.Intent: android.os.Parcelable getParcelableExtra(java.lang.String)>("insecure_detail_intent");
+
+        r7 = (android.app.PendingIntent) $r3;
+
+        $r2 = r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: android.content.Intent currentCryptoResult>;
+
+        $z0 = virtualinvoke $r2.<android.content.Intent: boolean getBooleanExtra(java.lang.String,boolean)>("override_crypto_warning", 0);
+
+        $r8 = staticinvoke <com.fsck.k9.mailstore.CryptoResultAnnotation: com.fsck.k9.mailstore.CryptoResultAnnotation createOpenPgpResultAnnotation(org.openintents.openpgp.OpenPgpDecryptionResult,org.openintents.openpgp.OpenPgpSignatureResult,android.app.PendingIntent,android.app.PendingIntent,com.fsck.k9.mail.internet.MimeBodyPart,boolean)>(r4, r5, r6, r7, $r1, $z0);
+
+        specialinvoke r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: void onCryptoOperationSuccess(com.fsck.k9.mailstore.CryptoResultAnnotation)>($r8);
+
+        return;
+    }
+    private void handleUserInteractionRequest()
+    {
+        com.fsck.k9.ui.crypto.MessageCryptoHelper r0;
+        android.os.Parcelable $r1;
+        android.content.Intent $r2;
+        android.app.PendingIntent r3;
+        java.lang.AssertionError $r4;
+
+        r0 := @this: com.fsck.k9.ui.crypto.MessageCryptoHelper;
+
+        $r2 = r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: android.content.Intent currentCryptoResult>;
+
+        $r1 = virtualinvoke $r2.<android.content.Intent: android.os.Parcelable getParcelableExtra(java.lang.String)>("intent");
+
+        r3 = (android.app.PendingIntent) $r1;
+
+        if r3 != null goto label1;
+
+        $r4 = new java.lang.AssertionError;
+
+        specialinvoke $r4.<java.lang.AssertionError: void <init>(java.lang.Object)>("Expecting PendingIntent on USER_INTERACTION_REQUIRED!");
+
+        throw $r4;
+
+     label1:
+        specialinvoke r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: void callbackPendingIntent(android.app.PendingIntent)>(r3);
+
+        return;
+    }
+    private boolean isBoundToCryptoProviderService()
+    {
+        com.fsck.k9.ui.crypto.MessageCryptoHelper r0;
+        org.openintents.openpgp.util.OpenPgpApi $r1;
+
+        r0 := @this: com.fsck.k9.ui.crypto.MessageCryptoHelper;
+
+        $r1 = r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: org.openintents.openpgp.util.OpenPgpApi openPgpApi>;
+
+        if $r1 == null goto label1;
+
+        return 1;
+
+     label1:
+        return 0;
+    }
+    private void nextStep()
+    {
+        com.fsck.k9.ui.crypto.MessageCryptoHelper r0;
+        boolean $z0;
+        com.fsck.k9.ui.crypto.MessageCryptoHelper$State $r1, $r2;
+        java.util.Deque $r3;
+        java.lang.Object $r4;
+        com.fsck.k9.ui.crypto.MessageCryptoHelper$CryptoPart $r5;
+        com.fsck.k9.ui.crypto.MessageCryptoHelper$CryptoPartType $r6, $r7;
+
+        r0 := @this: com.fsck.k9.ui.crypto.MessageCryptoHelper;
+
+        $z0 = r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: boolean isCancelled>;
+
+        if $z0 == 0 goto label1;
+
+        return;
+
+     label1:
+        $r1 = r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: com.fsck.k9.ui.crypto.MessageCryptoHelper$State state>;
+
+        $r2 = <com.fsck.k9.ui.crypto.MessageCryptoHelper$State: com.fsck.k9.ui.crypto.MessageCryptoHelper$State FINISHED>;
+
+        if $r1 == $r2 goto label2;
+
+        $r3 = r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: java.util.Deque partsToProcess>;
+
+        $z0 = interfaceinvoke $r3.<java.util.Deque: boolean isEmpty()>();
+
+        if $z0 == 0 goto label2;
+
+        specialinvoke r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: void findPartsForNextPass()>();
+
+        goto label1;
+
+     label2:
+        $r1 = r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: com.fsck.k9.ui.crypto.MessageCryptoHelper$State state>;
+
+        $r2 = <com.fsck.k9.ui.crypto.MessageCryptoHelper$State: com.fsck.k9.ui.crypto.MessageCryptoHelper$State FINISHED>;
+
+        if $r1 != $r2 goto label3;
+
+        specialinvoke r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: void callbackReturnResult()>();
+
+        return;
+
+     label3:
+        $z0 = specialinvoke r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: boolean isBoundToCryptoProviderService()>();
+
+        if $z0 != 0 goto label4;
+
+        specialinvoke r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: void connectToCryptoProviderService()>();
+
+        return;
+
+     label4:
+        $r3 = r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: java.util.Deque partsToProcess>;
+
+        $r4 = interfaceinvoke $r3.<java.util.Deque: java.lang.Object peekFirst()>();
+
+        $r5 = (com.fsck.k9.ui.crypto.MessageCryptoHelper$CryptoPart) $r4;
+
+        r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: com.fsck.k9.ui.crypto.MessageCryptoHelper$CryptoPart currentCryptoPart> = $r5;
+
+        $r5 = r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: com.fsck.k9.ui.crypto.MessageCryptoHelper$CryptoPart currentCryptoPart>;
+
+        $r6 = $r5.<com.fsck.k9.ui.crypto.MessageCryptoHelper$CryptoPart: com.fsck.k9.ui.crypto.MessageCryptoHelper$CryptoPartType type>;
+
+        $r7 = <com.fsck.k9.ui.crypto.MessageCryptoHelper$CryptoPartType: com.fsck.k9.ui.crypto.MessageCryptoHelper$CryptoPartType PLAIN_AUTOCRYPT>;
+
+        if $r6 != $r7 goto label5;
+
+        specialinvoke r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: void processAutocryptHeaderForCurrentPart()>();
+
+        return;
+
+     label5:
+        specialinvoke r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: void decryptOrVerifyCurrentPart()>();
+
+        return;
+    }
+    private void onCryptoFinished()
+    {
+        com.fsck.k9.ui.crypto.MessageCryptoHelper r0;
+        java.lang.Object $r1;
+        java.util.Deque $r2;
+        com.fsck.k9.ui.crypto.MessageCryptoHelper$CryptoPart $r3;
+        boolean z0;
+        java.lang.IllegalStateException $r4;
+        java.lang.Throwable $r5;
+        java.lang.Object[] $r6;
+
+        r0 := @this: com.fsck.k9.ui.crypto.MessageCryptoHelper;
+
+        $r2 = r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: java.util.Deque partsToProcess>;
+
+        $r1 = interfaceinvoke $r2.<java.util.Deque: java.lang.Object peekFirst()>();
+
+        $r3 = r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: com.fsck.k9.ui.crypto.MessageCryptoHelper$CryptoPart currentCryptoPart>;
+
+        if $r1 != $r3 goto label2;
+
+        z0 = 1;
+
+     label1:
+        if z0 != 0 goto label3;
+
+        $r4 = new java.lang.IllegalStateException;
+
+        specialinvoke $r4.<java.lang.IllegalStateException: void <init>(java.lang.String)>("Trying to remove part from queue that is not the currently processed one!");
+
+        throw $r4;
+
+     label2:
+        z0 = 0;
+
+        goto label1;
+
+     label3:
+        $r3 = r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: com.fsck.k9.ui.crypto.MessageCryptoHelper$CryptoPart currentCryptoPart>;
+
+        if $r3 == null goto label5;
+
+        $r2 = r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: java.util.Deque partsToProcess>;
+
+        interfaceinvoke $r2.<java.util.Deque: java.lang.Object removeFirst()>();
+
+        r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: com.fsck.k9.ui.crypto.MessageCryptoHelper$CryptoPart currentCryptoPart> = null;
+
+     label4:
+        specialinvoke r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: void nextStep()>();
+
+        return;
+
+     label5:
+        $r5 = new java.lang.Throwable;
+
+        specialinvoke $r5.<java.lang.Throwable: void <init>()>();
+
+        $r6 = newarray (java.lang.Object)[0];
+
+        staticinvoke <timber.log.Timber: void e(java.lang.Throwable,java.lang.String,java.lang.Object[])>($r5, "Got to onCryptoFinished() with no part in processing!", $r6);
+
+        goto label4;
+    }
+    private void onCryptoOperationCanceled()
+    {
+        com.fsck.k9.ui.crypto.MessageCryptoHelper r0;
+        com.fsck.k9.ui.crypto.MessageCryptoHelper$CryptoPart $r1;
+        com.fsck.k9.mailstore.CryptoResultAnnotation $r2;
+
+        r0 := @this: com.fsck.k9.ui.crypto.MessageCryptoHelper;
+
+        $r1 = r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: com.fsck.k9.ui.crypto.MessageCryptoHelper$CryptoPart currentCryptoPart>;
+
+        if $r1 == null goto label1;
+
+        $r2 = staticinvoke <com.fsck.k9.mailstore.CryptoResultAnnotation: com.fsck.k9.mailstore.CryptoResultAnnotation createOpenPgpCanceledAnnotation()>();
+
+        specialinvoke r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: void addCryptoResultAnnotationToMessage(com.fsck.k9.mailstore.CryptoResultAnnotation)>($r2);
+
+     label1:
+        specialinvoke r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: void onCryptoFinished()>();
+
+        return;
+    }
+    private void onCryptoOperationFailed(org.openintents.openpgp.OpenPgpError)
+    {
+        com.fsck.k9.ui.crypto.MessageCryptoHelper r0;
+        org.openintents.openpgp.OpenPgpError $r1;
+        com.fsck.k9.ui.crypto.MessageCryptoHelper$CryptoPartType $r2, $r4;
+        com.fsck.k9.ui.crypto.MessageCryptoHelper$CryptoPart $r3;
+        com.fsck.k9.mail.Part $r5;
+        com.fsck.k9.mail.internet.MimeBodyPart $r6;
+        com.fsck.k9.mailstore.CryptoResultAnnotation $r7;
+
+        r0 := @this: com.fsck.k9.ui.crypto.MessageCryptoHelper;
+
+        $r1 := @parameter0: org.openintents.openpgp.OpenPgpError;
+
+        $r3 = r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: com.fsck.k9.ui.crypto.MessageCryptoHelper$CryptoPart currentCryptoPart>;
+
+        $r4 = $r3.<com.fsck.k9.ui.crypto.MessageCryptoHelper$CryptoPart: com.fsck.k9.ui.crypto.MessageCryptoHelper$CryptoPartType type>;
+
+        $r2 = <com.fsck.k9.ui.crypto.MessageCryptoHelper$CryptoPartType: com.fsck.k9.ui.crypto.MessageCryptoHelper$CryptoPartType PGP_SIGNED>;
+
+        if $r4 != $r2 goto label2;
+
+        $r3 = r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: com.fsck.k9.ui.crypto.MessageCryptoHelper$CryptoPart currentCryptoPart>;
+
+        $r5 = $r3.<com.fsck.k9.ui.crypto.MessageCryptoHelper$CryptoPart: com.fsck.k9.mail.Part part>;
+
+        $r6 = staticinvoke <com.fsck.k9.ui.crypto.MessageCryptoHelper: com.fsck.k9.mail.internet.MimeBodyPart getMultipartSignedContentPartIfAvailable(com.fsck.k9.mail.Part)>($r5);
+
+        $r7 = staticinvoke <com.fsck.k9.mailstore.CryptoResultAnnotation: com.fsck.k9.mailstore.CryptoResultAnnotation createOpenPgpSignatureErrorAnnotation(org.openintents.openpgp.OpenPgpError,com.fsck.k9.mail.internet.MimeBodyPart)>($r1, $r6);
+
+     label1:
+        specialinvoke r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: void addCryptoResultAnnotationToMessage(com.fsck.k9.mailstore.CryptoResultAnnotation)>($r7);
+
+        specialinvoke r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: void onCryptoFinished()>();
+
+        return;
+
+     label2:
+        $r7 = staticinvoke <com.fsck.k9.mailstore.CryptoResultAnnotation: com.fsck.k9.mailstore.CryptoResultAnnotation createOpenPgpEncryptionErrorAnnotation(org.openintents.openpgp.OpenPgpError)>($r1);
+
+        goto label1;
+    }
+    private void onCryptoOperationReturned(com.fsck.k9.mail.internet.MimeBodyPart)
+    {
+        com.fsck.k9.ui.crypto.MessageCryptoHelper r0;
+        com.fsck.k9.mail.internet.MimeBodyPart $r1;
+        android.content.Intent $r2;
+        java.lang.Object[] $r3;
+        java.lang.Throwable $r4;
+
+        r0 := @this: com.fsck.k9.ui.crypto.MessageCryptoHelper;
+
+        $r1 := @parameter0: com.fsck.k9.mail.internet.MimeBodyPart;
+
+        $r2 = r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: android.content.Intent currentCryptoResult>;
+
+        if $r2 != null goto label1;
+
+        $r3 = newarray (java.lang.Object)[0];
+
+        staticinvoke <timber.log.Timber: void e(java.lang.String,java.lang.Object[])>("Internal error: we should have a result here!", $r3);
+
+        return;
+
+     label1:
+        specialinvoke r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: void handleCryptoOperationResult(com.fsck.k9.mail.internet.MimeBodyPart)>($r1);
+
+     label2:
+        r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: android.content.Intent currentCryptoResult> = null;
+
+        return;
+
+     label3:
+        $r4 := @caughtexception;
+
+        r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: android.content.Intent currentCryptoResult> = null;
+
+        throw $r4;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+    private void onCryptoOperationSuccess(com.fsck.k9.mailstore.CryptoResultAnnotation)
+    {
+        com.fsck.k9.ui.crypto.MessageCryptoHelper r0;
+        com.fsck.k9.mailstore.CryptoResultAnnotation $r1;
+
+        r0 := @this: com.fsck.k9.ui.crypto.MessageCryptoHelper;
+
+        $r1 := @parameter0: com.fsck.k9.mailstore.CryptoResultAnnotation;
+
+        specialinvoke r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: void addCryptoResultAnnotationToMessage(com.fsck.k9.mailstore.CryptoResultAnnotation)>($r1);
+
+        specialinvoke r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: void onCryptoFinished()>();
+
+        return;
+    }
+    private void processAutocryptHeaderForCurrentPart()
+    {
+        com.fsck.k9.ui.crypto.MessageCryptoHelper r0;
+        android.content.Intent r1;
+        boolean $z0;
+        com.fsck.k9.autocrypt.AutocryptOperations $r2;
+        com.fsck.k9.ui.crypto.MessageCryptoHelper$CryptoPart $r3;
+        com.fsck.k9.mail.Part $r4;
+        com.fsck.k9.mail.Message $r5;
+        java.lang.Object[] $r6;
+        org.openintents.openpgp.util.OpenPgpApi $r7;
+        com.fsck.k9.ui.crypto.MessageCryptoHelper$2 $r8;
+
+        r0 := @this: com.fsck.k9.ui.crypto.MessageCryptoHelper;
+
+        r1 = new android.content.Intent;
+
+        specialinvoke r1.<android.content.Intent: void <init>(java.lang.String)>("org.openintents.openpgp.action.UPDATE_AUTOCRYPT_PEER");
+
+        $r2 = r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: com.fsck.k9.autocrypt.AutocryptOperations autocryptOperations>;
+
+        $r3 = r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: com.fsck.k9.ui.crypto.MessageCryptoHelper$CryptoPart currentCryptoPart>;
+
+        $r4 = $r3.<com.fsck.k9.ui.crypto.MessageCryptoHelper$CryptoPart: com.fsck.k9.mail.Part part>;
+
+        $r5 = (com.fsck.k9.mail.Message) $r4;
+
+        $z0 = virtualinvoke $r2.<com.fsck.k9.autocrypt.AutocryptOperations: boolean addAutocryptPeerUpdateToIntentIfPresent(com.fsck.k9.mail.Message,android.content.Intent)>($r5, r1);
+
+        if $z0 == 0 goto label1;
+
+        $r6 = newarray (java.lang.Object)[0];
+
+        staticinvoke <timber.log.Timber: void d(java.lang.String,java.lang.Object[])>("Passing autocrypt data from plain mail to OpenPGP API", $r6);
+
+        $r7 = r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: org.openintents.openpgp.util.OpenPgpApi openPgpApi>;
+
+        $r8 = new com.fsck.k9.ui.crypto.MessageCryptoHelper$2;
+
+        specialinvoke $r8.<com.fsck.k9.ui.crypto.MessageCryptoHelper$2: void <init>(com.fsck.k9.ui.crypto.MessageCryptoHelper)>(r0);
+
+        virtualinvoke $r7.<org.openintents.openpgp.util.OpenPgpApi: void executeApiAsync(android.content.Intent,java.io.InputStream,java.io.OutputStream,org.openintents.openpgp.util.OpenPgpApi$IOpenPgpCallback)>(r1, null, null, $r8);
+
+     label1:
+        specialinvoke r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: void onCryptoFinished()>();
+
+        return;
+    }
+    private void propagateEncapsulatedSignedPart(com.fsck.k9.mailstore.CryptoResultAnnotation, com.fsck.k9.mail.Part)
+    {
+        com.fsck.k9.ui.crypto.MessageCryptoHelper r0;
+        com.fsck.k9.mailstore.CryptoResultAnnotation $r1, $r4;
+        com.fsck.k9.mail.Part $r2;
+        com.fsck.k9.ui.crypto.MessageCryptoAnnotations $r3;
+        boolean $z0;
+
+        r0 := @this: com.fsck.k9.ui.crypto.MessageCryptoHelper;
+
+        $r1 := @parameter0: com.fsck.k9.mailstore.CryptoResultAnnotation;
+
+        $r2 := @parameter1: com.fsck.k9.mail.Part;
+
+        $r3 = r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: com.fsck.k9.ui.crypto.MessageCryptoAnnotations messageAnnotations>;
+
+        $r2 = virtualinvoke $r3.<com.fsck.k9.ui.crypto.MessageCryptoAnnotations: com.fsck.k9.mail.Part findKeyForAnnotationWithReplacementPart(com.fsck.k9.mail.Part)>($r2);
+
+        $r3 = r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: com.fsck.k9.ui.crypto.MessageCryptoAnnotations messageAnnotations>;
+
+        $r4 = virtualinvoke $r3.<com.fsck.k9.ui.crypto.MessageCryptoAnnotations: com.fsck.k9.mailstore.CryptoResultAnnotation get(com.fsck.k9.mail.Part)>($r2);
+
+        if $r2 == null goto label1;
+
+        $z0 = virtualinvoke $r1.<com.fsck.k9.mailstore.CryptoResultAnnotation: boolean hasSignatureResult()>();
+
+        if $z0 == 0 goto label1;
+
+        $r1 = virtualinvoke $r4.<com.fsck.k9.mailstore.CryptoResultAnnotation: com.fsck.k9.mailstore.CryptoResultAnnotation withEncapsulatedResult(com.fsck.k9.mailstore.CryptoResultAnnotation)>($r1);
+
+        $r3 = r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: com.fsck.k9.ui.crypto.MessageCryptoAnnotations messageAnnotations>;
+
+        virtualinvoke $r3.<com.fsck.k9.ui.crypto.MessageCryptoAnnotations: void put(com.fsck.k9.mail.Part,com.fsck.k9.mailstore.CryptoResultAnnotation)>($r2, $r1);
+
+     label1:
+        return;
+    }
+    private void reattachCallback(com.fsck.k9.mail.Message, com.fsck.k9.ui.crypto.MessageCryptoCallback)
+    {
+        com.fsck.k9.ui.crypto.MessageCryptoHelper r0;
+        com.fsck.k9.mail.Message $r1, $r3;
+        com.fsck.k9.ui.crypto.MessageCryptoCallback $r2;
+        boolean $z0, z1;
+        java.lang.AssertionError $r4;
+        java.lang.Object $r5;
+        com.fsck.k9.ui.crypto.MessageCryptoAnnotations $r6;
+        android.app.PendingIntent $r7;
+        java.lang.Object[] $r8;
+        java.lang.Throwable $r9;
+
+        r0 := @this: com.fsck.k9.ui.crypto.MessageCryptoHelper;
+
+        $r1 := @parameter0: com.fsck.k9.mail.Message;
+
+        $r2 := @parameter1: com.fsck.k9.ui.crypto.MessageCryptoCallback;
+
+        z1 = 0;
+
+        $r3 = r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: com.fsck.k9.mail.Message currentMessage>;
+
+        $z0 = virtualinvoke $r1.<com.fsck.k9.mail.Message: boolean equals(java.lang.Object)>($r3);
+
+        if $z0 != 0 goto label1;
+
+        $r4 = new java.lang.AssertionError;
+
+        specialinvoke $r4.<java.lang.AssertionError: void <init>(java.lang.Object)>("Callback may only be reattached for the same message!");
+
+        throw $r4;
+
+     label1:
+        $r5 = r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: java.lang.Object callbackLock>;
+
+        entermonitor $r5;
+
+     label2:
+        r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: com.fsck.k9.ui.crypto.MessageCryptoCallback callback> = $r2;
+
+        $r6 = r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: com.fsck.k9.ui.crypto.MessageCryptoAnnotations queuedResult>;
+
+        if $r6 != null goto label3;
+
+        $r7 = r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: android.app.PendingIntent queuedPendingIntent>;
+
+        if $r7 == null goto label4;
+
+     label3:
+        z1 = 1;
+
+     label4:
+        if z1 == 0 goto label5;
+
+        $r8 = newarray (java.lang.Object)[0];
+
+        staticinvoke <timber.log.Timber: void d(java.lang.String,java.lang.Object[])>("Returning cached result or pending intent to reattached callback", $r8);
+
+        specialinvoke r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: void deliverResult()>();
+
+     label5:
+        exitmonitor $r5;
+
+     label6:
+        return;
+
+     label7:
+        $r9 := @caughtexception;
+
+        exitmonitor $r5;
+
+     label8:
+        throw $r9;
+
+        catch java.lang.Throwable from label2 to label6 with label7;
+        catch java.lang.Throwable from label7 to label8 with label7;
+    }
+    public void asyncStartOrResumeProcessingMessage(com.fsck.k9.mail.Message, com.fsck.k9.ui.crypto.MessageCryptoCallback, org.openintents.openpgp.OpenPgpDecryptionResult, boolean)
+    {
+        com.fsck.k9.ui.crypto.MessageCryptoHelper r0;
+        com.fsck.k9.mail.Message $r1, $r4;
+        com.fsck.k9.ui.crypto.MessageCryptoCallback $r2;
+        org.openintents.openpgp.OpenPgpDecryptionResult $r3;
+        boolean $z0;
+        com.fsck.k9.ui.crypto.MessageCryptoAnnotations $r5;
+        com.fsck.k9.ui.crypto.MessageCryptoHelper$State $r6;
+
+        r0 := @this: com.fsck.k9.ui.crypto.MessageCryptoHelper;
+
+        $r1 := @parameter0: com.fsck.k9.mail.Message;
+
+        $r2 := @parameter1: com.fsck.k9.ui.crypto.MessageCryptoCallback;
+
+        $r3 := @parameter2: org.openintents.openpgp.OpenPgpDecryptionResult;
+
+        $z0 := @parameter3: boolean;
+
+        $r4 = r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: com.fsck.k9.mail.Message currentMessage>;
+
+        if $r4 == null goto label1;
+
+        specialinvoke r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: void reattachCallback(com.fsck.k9.mail.Message,com.fsck.k9.ui.crypto.MessageCryptoCallback)>($r1, $r2);
+
+        return;
+
+     label1:
+        $r5 = new com.fsck.k9.ui.crypto.MessageCryptoAnnotations;
+
+        specialinvoke $r5.<com.fsck.k9.ui.crypto.MessageCryptoAnnotations: void <init>()>();
+
+        r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: com.fsck.k9.ui.crypto.MessageCryptoAnnotations messageAnnotations> = $r5;
+
+        $r6 = <com.fsck.k9.ui.crypto.MessageCryptoHelper$State: com.fsck.k9.ui.crypto.MessageCryptoHelper$State START>;
+
+        r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: com.fsck.k9.ui.crypto.MessageCryptoHelper$State state> = $r6;
+
+        r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: com.fsck.k9.mail.Message currentMessage> = $r1;
+
+        r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: org.openintents.openpgp.OpenPgpDecryptionResult cachedDecryptionResult> = $r3;
+
+        r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: com.fsck.k9.ui.crypto.MessageCryptoCallback callback> = $r2;
+
+        r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: boolean processSignedOnly> = $z0;
+
+        specialinvoke r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: void nextStep()>();
+
+        return;
+    }
+    public void cancelIfRunning()
+    {
+        com.fsck.k9.ui.crypto.MessageCryptoHelper r0;
+        org.openintents.openpgp.util.OpenPgpApi$CancelableBackgroundOperation $r1;
+
+        r0 := @this: com.fsck.k9.ui.crypto.MessageCryptoHelper;
+
+        virtualinvoke r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: void detachCallback()>();
+
+        r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: boolean isCancelled> = 1;
+
+        $r1 = r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: org.openintents.openpgp.util.OpenPgpApi$CancelableBackgroundOperation cancelableBackgroundOperation>;
+
+        if $r1 == null goto label1;
+
+        $r1 = r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: org.openintents.openpgp.util.OpenPgpApi$CancelableBackgroundOperation cancelableBackgroundOperation>;
+
+        interfaceinvoke $r1.<org.openintents.openpgp.util.OpenPgpApi$CancelableBackgroundOperation: void cancelOperation()>();
+
+     label1:
+        return;
+    }
+    public void detachCallback()
+    {
+        com.fsck.k9.ui.crypto.MessageCryptoHelper r0;
+        java.lang.Object $r1;
+        java.lang.Throwable $r2;
+
+        r0 := @this: com.fsck.k9.ui.crypto.MessageCryptoHelper;
+
+        $r1 = r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: java.lang.Object callbackLock>;
+
+        entermonitor $r1;
+
+     label1:
+        r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: com.fsck.k9.ui.crypto.MessageCryptoCallback callback> = null;
+
+        exitmonitor $r1;
+
+     label2:
+        return;
+
+     label3:
+        $r2 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label4:
+        throw $r2;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+    public boolean isConfiguredForOutdatedCryptoProvider()
+    {
+        com.fsck.k9.ui.crypto.MessageCryptoHelper r0;
+        java.lang.String $r1, $r2;
+        boolean $z0;
+
+        r0 := @this: com.fsck.k9.ui.crypto.MessageCryptoHelper;
+
+        $r1 = r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: java.lang.String openPgpProviderPackage>;
+
+        $r2 = staticinvoke <com.fsck.k9.K9: java.lang.String getOpenPgpProvider()>();
+
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean equals(java.lang.Object)>($r2);
+
+        if $z0 != 0 goto label1;
+
+        return 1;
+
+     label1:
+        return 0;
+    }
+    public void onActivityResult(int, int, android.content.Intent)
+    {
+        com.fsck.k9.ui.crypto.MessageCryptoHelper r0;
+        int $i0, $i1;
+        android.content.Intent $r1;
+        boolean $z0;
+        java.lang.IllegalStateException $r2;
+
+        r0 := @this: com.fsck.k9.ui.crypto.MessageCryptoHelper;
+
+        $i0 := @parameter0: int;
+
+        $i1 := @parameter1: int;
+
+        $r1 := @parameter2: android.content.Intent;
+
+        $z0 = r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: boolean isCancelled>;
+
+        if $z0 == 0 goto label1;
+
+        return;
+
+     label1:
+        if $i0 == 124 goto label2;
+
+        $r2 = new java.lang.IllegalStateException;
+
+        specialinvoke $r2.<java.lang.IllegalStateException: void <init>(java.lang.String)>("got an activity result that wasn\'t meant for us. this is a bug!");
+
+        throw $r2;
+
+     label2:
+        if $i1 != -1 goto label3;
+
+        r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: android.content.Intent userInteractionResultIntent> = $r1;
+
+        specialinvoke r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: void nextStep()>();
+
+        return;
+
+     label3:
+        specialinvoke r0.<com.fsck.k9.ui.crypto.MessageCryptoHelper: void onCryptoOperationCanceled()>();
+
+        return;
+    }

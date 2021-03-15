@@ -1,0 +1,470 @@
+org.acra.SendWorker extends java.lang.Thread
+private final boolean approvePendingReports
+private final android.content.Context context
+private final org.acra.CrashReportFileNameParser fileNameParser
+private final java.util.List reportSenders
+private final boolean sendOnlySilentReports
+    public void <init>(android.content.Context, java.util.List, boolean, boolean)
+    {
+        org.acra.SendWorker r0;
+        android.content.Context $r1;
+        java.util.List r2;
+        boolean $z0, $z1;
+        org.acra.CrashReportFileNameParser $r3;
+
+        r0 := @this: org.acra.SendWorker;
+
+        $r1 := @parameter0: android.content.Context;
+
+        r2 := @parameter1: java.util.List;
+
+        $z0 := @parameter2: boolean;
+
+        $z1 := @parameter3: boolean;
+
+        specialinvoke r0.<java.lang.Thread: void <init>()>();
+
+        $r3 = new org.acra.CrashReportFileNameParser;
+
+        specialinvoke $r3.<org.acra.CrashReportFileNameParser: void <init>()>();
+
+        r0.<org.acra.SendWorker: org.acra.CrashReportFileNameParser fileNameParser> = $r3;
+
+        r0.<org.acra.SendWorker: android.content.Context context> = $r1;
+
+        r0.<org.acra.SendWorker: java.util.List reportSenders> = r2;
+
+        r0.<org.acra.SendWorker: boolean sendOnlySilentReports> = $z0;
+
+        r0.<org.acra.SendWorker: boolean approvePendingReports> = $z1;
+
+        return;
+    }
+    private void approvePendingReports()
+    {
+        org.acra.SendWorker r0;
+        int i0, i1;
+        java.io.File r1, r2, $r9;
+        java.lang.String r3, $r11;
+        org.acra.CrashReportFinder r4;
+        org.acra.log.ACRALog $r5;
+        android.content.Context $r6;
+        java.lang.String[] $r7;
+        org.acra.CrashReportFileNameParser $r8;
+        boolean $z0;
+        java.lang.StringBuilder $r10;
+
+        r0 := @this: org.acra.SendWorker;
+
+        $r5 = <org.acra.ACRA: org.acra.log.ACRALog log>;
+
+        r3 = <org.acra.ACRA: java.lang.String LOG_TAG>;
+
+        interfaceinvoke $r5.<org.acra.log.ACRALog: int d(java.lang.String,java.lang.String)>(r3, "Mark all pending reports as approved.");
+
+        r4 = new org.acra.CrashReportFinder;
+
+        $r6 = r0.<org.acra.SendWorker: android.content.Context context>;
+
+        specialinvoke r4.<org.acra.CrashReportFinder: void <init>(android.content.Context)>($r6);
+
+        $r7 = virtualinvoke r4.<org.acra.CrashReportFinder: java.lang.String[] getCrashReportFiles()>();
+
+        i0 = lengthof $r7;
+
+        i1 = 0;
+
+     label1:
+        if i1 >= i0 goto label3;
+
+        r3 = $r7[i1];
+
+        $r8 = r0.<org.acra.SendWorker: org.acra.CrashReportFileNameParser fileNameParser>;
+
+        $z0 = virtualinvoke $r8.<org.acra.CrashReportFileNameParser: boolean isApproved(java.lang.String)>(r3);
+
+        if $z0 != 0 goto label2;
+
+        r2 = new java.io.File;
+
+        $r6 = r0.<org.acra.SendWorker: android.content.Context context>;
+
+        r1 = virtualinvoke $r6.<android.content.Context: java.io.File getFilesDir()>();
+
+        specialinvoke r2.<java.io.File: void <init>(java.io.File,java.lang.String)>(r1, r3);
+
+        r3 = virtualinvoke r3.<java.lang.String: java.lang.String replace(java.lang.CharSequence,java.lang.CharSequence)>(".stacktrace", "-approved.stacktrace");
+
+        r1 = new java.io.File;
+
+        $r6 = r0.<org.acra.SendWorker: android.content.Context context>;
+
+        $r9 = virtualinvoke $r6.<android.content.Context: java.io.File getFilesDir()>();
+
+        specialinvoke r1.<java.io.File: void <init>(java.io.File,java.lang.String)>($r9, r3);
+
+        $z0 = virtualinvoke r2.<java.io.File: boolean renameTo(java.io.File)>(r1);
+
+        if $z0 != 0 goto label2;
+
+        $r5 = <org.acra.ACRA: org.acra.log.ACRALog log>;
+
+        r3 = <org.acra.ACRA: java.lang.String LOG_TAG>;
+
+        $r10 = new java.lang.StringBuilder;
+
+        specialinvoke $r10.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Could not rename approved report from ");
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r2);
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" to ");
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r1);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        interfaceinvoke $r5.<org.acra.log.ACRALog: int e(java.lang.String,java.lang.String)>(r3, $r11);
+
+     label2:
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label3:
+        return;
+    }
+    private void checkAndSendReports(android.content.Context, boolean)
+    {
+        org.acra.SendWorker r0;
+        android.content.Context $r1;
+        boolean $z0, $z1;
+        java.lang.String r2, $r8, $r10;
+        int i0, i1, i2;
+        org.acra.CrashReportPersister r3;
+        org.acra.CrashReportFinder r4;
+        org.acra.log.ACRALog $r5;
+        java.lang.String[] $r6;
+        org.acra.CrashReportFileNameParser $r7;
+        java.lang.StringBuilder $r9;
+        org.acra.collector.CrashReportData $r11;
+        java.lang.RuntimeException r12;
+        java.io.IOException r13;
+        org.acra.sender.ReportSenderException r14;
+
+        r0 := @this: org.acra.SendWorker;
+
+        $r1 := @parameter0: android.content.Context;
+
+        $z0 := @parameter1: boolean;
+
+        $r5 = <org.acra.ACRA: org.acra.log.ACRALog log>;
+
+        r2 = <org.acra.ACRA: java.lang.String LOG_TAG>;
+
+        interfaceinvoke $r5.<org.acra.log.ACRALog: int d(java.lang.String,java.lang.String)>(r2, "#checkAndSendReports - start");
+
+        r4 = new org.acra.CrashReportFinder;
+
+        specialinvoke r4.<org.acra.CrashReportFinder: void <init>(android.content.Context)>($r1);
+
+        $r6 = virtualinvoke r4.<org.acra.CrashReportFinder: java.lang.String[] getCrashReportFiles()>();
+
+        staticinvoke <java.util.Arrays: void sort(java.lang.Object[])>($r6);
+
+        i1 = 0;
+
+        i0 = lengthof $r6;
+
+        i2 = 0;
+
+     label01:
+        if i2 >= i0 goto label04;
+
+        r2 = $r6[i2];
+
+        if $z0 == 0 goto label03;
+
+        $r7 = r0.<org.acra.SendWorker: org.acra.CrashReportFileNameParser fileNameParser>;
+
+        $z1 = virtualinvoke $r7.<org.acra.CrashReportFileNameParser: boolean isSilent(java.lang.String)>(r2);
+
+        if $z1 != 0 goto label03;
+
+     label02:
+        i2 = i2 + 1;
+
+        goto label01;
+
+     label03:
+        if i1 < 5 goto label05;
+
+     label04:
+        $r5 = <org.acra.ACRA: org.acra.log.ACRALog log>;
+
+        r2 = <org.acra.ACRA: java.lang.String LOG_TAG>;
+
+        interfaceinvoke $r5.<org.acra.log.ACRALog: int d(java.lang.String,java.lang.String)>(r2, "#checkAndSendReports - finish");
+
+        return;
+
+     label05:
+        $r5 = <org.acra.ACRA: org.acra.log.ACRALog log>;
+
+        $r8 = <org.acra.ACRA: java.lang.String LOG_TAG>;
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Sending file ");
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r2);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        interfaceinvoke $r5.<org.acra.log.ACRALog: int i(java.lang.String,java.lang.String)>($r8, $r10);
+
+        r3 = new org.acra.CrashReportPersister;
+
+     label06:
+        specialinvoke r3.<org.acra.CrashReportPersister: void <init>(android.content.Context)>($r1);
+
+        $r11 = virtualinvoke r3.<org.acra.CrashReportPersister: org.acra.collector.CrashReportData load(java.lang.String)>(r2);
+
+        specialinvoke r0.<org.acra.SendWorker: void sendCrashReport(org.acra.collector.CrashReportData)>($r11);
+
+        specialinvoke r0.<org.acra.SendWorker: void deleteFile(android.content.Context,java.lang.String)>($r1, r2);
+
+     label07:
+        i1 = i1 + 1;
+
+        goto label02;
+
+     label08:
+        r12 := @caughtexception;
+
+        $r5 = <org.acra.ACRA: org.acra.log.ACRALog log>;
+
+        $r8 = <org.acra.ACRA: java.lang.String LOG_TAG>;
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Failed to send crash reports for ");
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r2);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        interfaceinvoke $r5.<org.acra.log.ACRALog: int e(java.lang.String,java.lang.String,java.lang.Throwable)>($r8, $r10, r12);
+
+        specialinvoke r0.<org.acra.SendWorker: void deleteFile(android.content.Context,java.lang.String)>($r1, r2);
+
+        goto label04;
+
+     label09:
+        r13 := @caughtexception;
+
+        $r5 = <org.acra.ACRA: org.acra.log.ACRALog log>;
+
+        $r8 = <org.acra.ACRA: java.lang.String LOG_TAG>;
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Failed to load crash report for ");
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r2);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        interfaceinvoke $r5.<org.acra.log.ACRALog: int e(java.lang.String,java.lang.String,java.lang.Throwable)>($r8, $r10, r13);
+
+        specialinvoke r0.<org.acra.SendWorker: void deleteFile(android.content.Context,java.lang.String)>($r1, r2);
+
+        goto label04;
+
+     label10:
+        r14 := @caughtexception;
+
+        $r5 = <org.acra.ACRA: org.acra.log.ACRALog log>;
+
+        $r8 = <org.acra.ACRA: java.lang.String LOG_TAG>;
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Failed to send crash report for ");
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r2);
+
+        r2 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        interfaceinvoke $r5.<org.acra.log.ACRALog: int e(java.lang.String,java.lang.String,java.lang.Throwable)>($r8, r2, r14);
+
+        goto label07;
+
+        catch java.lang.RuntimeException from label06 to label07 with label08;
+        catch java.io.IOException from label06 to label07 with label09;
+        catch org.acra.sender.ReportSenderException from label06 to label07 with label10;
+    }
+    private void deleteFile(android.content.Context, java.lang.String)
+    {
+        org.acra.SendWorker r0;
+        android.content.Context $r1;
+        java.lang.String $r2, $r4;
+        org.acra.log.ACRALog $r3;
+        boolean $z0;
+        java.lang.StringBuilder $r5;
+
+        r0 := @this: org.acra.SendWorker;
+
+        $r1 := @parameter0: android.content.Context;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $z0 = virtualinvoke $r1.<android.content.Context: boolean deleteFile(java.lang.String)>($r2);
+
+        if $z0 != 0 goto label1;
+
+        $r3 = <org.acra.ACRA: org.acra.log.ACRALog log>;
+
+        $r4 = <org.acra.ACRA: java.lang.String LOG_TAG>;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Could not delete error report : ");
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r2 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        interfaceinvoke $r3.<org.acra.log.ACRALog: int w(java.lang.String,java.lang.String)>($r4, $r2);
+
+     label1:
+        return;
+    }
+    private void sendCrashReport(org.acra.collector.CrashReportData) throws org.acra.sender.ReportSenderException
+    {
+        org.acra.SendWorker r0;
+        org.acra.collector.CrashReportData $r1;
+        org.acra.sender.ReportSenderException r2;
+        java.lang.String $r3, $r13;
+        boolean $z0, $z1;
+        org.acra.ACRAConfiguration $r4;
+        java.util.List $r5;
+        java.util.Iterator $r6;
+        java.lang.Object $r7;
+        org.acra.sender.ReportSender r8;
+        android.content.Context $r9;
+        org.acra.log.ACRALog $r10;
+        java.lang.StringBuilder $r11;
+        java.lang.Class $r12;
+
+        r0 := @this: org.acra.SendWorker;
+
+        $r1 := @parameter0: org.acra.collector.CrashReportData;
+
+        $z0 = staticinvoke <org.acra.ACRA: boolean isDebuggable()>();
+
+        if $z0 == 0 goto label1;
+
+        $r4 = staticinvoke <org.acra.ACRA: org.acra.ACRAConfiguration getConfig()>();
+
+        $z0 = virtualinvoke $r4.<org.acra.ACRAConfiguration: boolean sendReportsInDevMode()>();
+
+        if $z0 == 0 goto label7;
+
+     label1:
+        $z0 = 0;
+
+        $r5 = r0.<org.acra.SendWorker: java.util.List reportSenders>;
+
+        $r6 = interfaceinvoke $r5.<java.util.List: java.util.Iterator iterator()>();
+
+     label2:
+        $z1 = interfaceinvoke $r6.<java.util.Iterator: boolean hasNext()>();
+
+        if $z1 == 0 goto label7;
+
+        $r7 = interfaceinvoke $r6.<java.util.Iterator: java.lang.Object next()>();
+
+        r8 = (org.acra.sender.ReportSender) $r7;
+
+        $r9 = r0.<org.acra.SendWorker: android.content.Context context>;
+
+     label3:
+        interfaceinvoke r8.<org.acra.sender.ReportSender: void send(android.content.Context,org.acra.collector.CrashReportData)>($r9, $r1);
+
+     label4:
+        $z0 = 1;
+
+        goto label2;
+
+     label5:
+        r2 := @caughtexception;
+
+        if $z0 != 0 goto label6;
+
+        throw r2;
+
+     label6:
+        $r10 = <org.acra.ACRA: org.acra.log.ACRALog log>;
+
+        $r3 = <org.acra.ACRA: java.lang.String LOG_TAG>;
+
+        $r11 = new java.lang.StringBuilder;
+
+        specialinvoke $r11.<java.lang.StringBuilder: void <init>()>();
+
+        $r11 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("ReportSender of class ");
+
+        $r12 = virtualinvoke r8.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r13 = virtualinvoke $r12.<java.lang.Class: java.lang.String getName()>();
+
+        $r11 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r13);
+
+        $r11 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" failed but other senders completed their task. ACRA will not send this report again.");
+
+        $r13 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        interfaceinvoke $r10.<org.acra.log.ACRALog: int w(java.lang.String,java.lang.String)>($r3, $r13);
+
+        goto label2;
+
+     label7:
+        return;
+
+        catch org.acra.sender.ReportSenderException from label3 to label4 with label5;
+    }
+    public void run()
+    {
+        org.acra.SendWorker r0;
+        boolean $z0;
+        android.content.Context $r1;
+
+        r0 := @this: org.acra.SendWorker;
+
+        $z0 = r0.<org.acra.SendWorker: boolean approvePendingReports>;
+
+        if $z0 == 0 goto label1;
+
+        specialinvoke r0.<org.acra.SendWorker: void approvePendingReports()>();
+
+     label1:
+        $r1 = r0.<org.acra.SendWorker: android.content.Context context>;
+
+        $z0 = r0.<org.acra.SendWorker: boolean sendOnlySilentReports>;
+
+        specialinvoke r0.<org.acra.SendWorker: void checkAndSendReports(android.content.Context,boolean)>($r1, $z0);
+
+        return;
+    }

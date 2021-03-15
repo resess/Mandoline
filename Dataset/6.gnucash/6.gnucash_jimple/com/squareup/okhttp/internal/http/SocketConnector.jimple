@@ -1,0 +1,673 @@
+com.squareup.okhttp.internal.http.SocketConnector extends java.lang.Object
+private final com.squareup.okhttp.Connection connection
+private final com.squareup.okhttp.ConnectionPool connectionPool
+    public void <init>(com.squareup.okhttp.Connection, com.squareup.okhttp.ConnectionPool)
+    {
+        com.squareup.okhttp.internal.http.SocketConnector r0;
+        com.squareup.okhttp.Connection $r1;
+        com.squareup.okhttp.ConnectionPool $r2;
+
+        r0 := @this: com.squareup.okhttp.internal.http.SocketConnector;
+
+        $r1 := @parameter0: com.squareup.okhttp.Connection;
+
+        $r2 := @parameter1: com.squareup.okhttp.ConnectionPool;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<com.squareup.okhttp.internal.http.SocketConnector: com.squareup.okhttp.Connection connection> = $r1;
+
+        r0.<com.squareup.okhttp.internal.http.SocketConnector: com.squareup.okhttp.ConnectionPool connectionPool> = $r2;
+
+        return;
+    }
+    private java.net.Socket connectRawSocket(int, int, com.squareup.okhttp.Route) throws com.squareup.okhttp.internal.http.RouteException
+    {
+        com.squareup.okhttp.internal.http.SocketConnector r0;
+        int $i0, $i1;
+        com.squareup.okhttp.Route $r1;
+        java.io.IOException r2;
+        com.squareup.okhttp.internal.Platform $r3;
+        java.net.Proxy $r4;
+        com.squareup.okhttp.Address $r5;
+        java.net.Proxy$Type $r6, $r7;
+        javax.net.SocketFactory $r8;
+        java.net.Socket $r9;
+        java.net.InetSocketAddress $r10;
+        com.squareup.okhttp.internal.http.RouteException $r11;
+
+        r0 := @this: com.squareup.okhttp.internal.http.SocketConnector;
+
+        $i0 := @parameter0: int;
+
+        $i1 := @parameter1: int;
+
+        $r1 := @parameter2: com.squareup.okhttp.Route;
+
+        $r3 = staticinvoke <com.squareup.okhttp.internal.Platform: com.squareup.okhttp.internal.Platform get()>();
+
+     label01:
+        $r4 = virtualinvoke $r1.<com.squareup.okhttp.Route: java.net.Proxy getProxy()>();
+
+        $r5 = virtualinvoke $r1.<com.squareup.okhttp.Route: com.squareup.okhttp.Address getAddress()>();
+
+        $r6 = virtualinvoke $r4.<java.net.Proxy: java.net.Proxy$Type type()>();
+
+     label02:
+        $r7 = <java.net.Proxy$Type: java.net.Proxy$Type DIRECT>;
+
+        if $r6 == $r7 goto label05;
+
+     label03:
+        $r6 = virtualinvoke $r4.<java.net.Proxy: java.net.Proxy$Type type()>();
+
+     label04:
+        $r7 = <java.net.Proxy$Type: java.net.Proxy$Type HTTP>;
+
+        if $r6 != $r7 goto label08;
+
+     label05:
+        $r8 = virtualinvoke $r5.<com.squareup.okhttp.Address: javax.net.SocketFactory getSocketFactory()>();
+
+        $r9 = virtualinvoke $r8.<javax.net.SocketFactory: java.net.Socket createSocket()>();
+
+     label06:
+        virtualinvoke $r9.<java.net.Socket: void setSoTimeout(int)>($i0);
+
+        $r10 = virtualinvoke $r1.<com.squareup.okhttp.Route: java.net.InetSocketAddress getSocketAddress()>();
+
+        virtualinvoke $r3.<com.squareup.okhttp.internal.Platform: void connectSocket(java.net.Socket,java.net.InetSocketAddress,int)>($r9, $r10, $i1);
+
+     label07:
+        return $r9;
+
+     label08:
+        $r9 = new java.net.Socket;
+
+     label09:
+        specialinvoke $r9.<java.net.Socket: void <init>(java.net.Proxy)>($r4);
+
+     label10:
+        goto label06;
+
+     label11:
+        r2 := @caughtexception;
+
+        $r11 = new com.squareup.okhttp.internal.http.RouteException;
+
+        specialinvoke $r11.<com.squareup.okhttp.internal.http.RouteException: void <init>(java.io.IOException)>(r2);
+
+        throw $r11;
+
+        catch java.io.IOException from label01 to label02 with label11;
+        catch java.io.IOException from label03 to label04 with label11;
+        catch java.io.IOException from label05 to label06 with label11;
+        catch java.io.IOException from label06 to label07 with label11;
+        catch java.io.IOException from label09 to label10 with label11;
+    }
+    private void createTunnel(int, int, com.squareup.okhttp.Request, com.squareup.okhttp.Route, java.net.Socket) throws com.squareup.okhttp.internal.http.RouteException
+    {
+        com.squareup.okhttp.internal.http.SocketConnector r0;
+        int $i0, $i1;
+        com.squareup.okhttp.Request $r1, $r6;
+        com.squareup.okhttp.Route $r2;
+        java.net.Socket $r3;
+        java.io.IOException r4;
+        com.squareup.okhttp.internal.http.HttpConnection r5;
+        com.squareup.okhttp.ConnectionPool $r7;
+        com.squareup.okhttp.Connection $r8;
+        java.net.URL $r9;
+        java.lang.StringBuilder $r10;
+        java.lang.String $r11;
+        com.squareup.okhttp.Headers $r12;
+        com.squareup.okhttp.Response$Builder $r13;
+        com.squareup.okhttp.Response $r14;
+        long $l2, l3;
+        byte $b4;
+        okio.Source $r15;
+        java.util.concurrent.TimeUnit $r16;
+        com.squareup.okhttp.internal.http.RouteException $r17;
+        com.squareup.okhttp.Address $r18;
+        com.squareup.okhttp.Authenticator $r19;
+        java.net.Proxy $r20;
+
+        r0 := @this: com.squareup.okhttp.internal.http.SocketConnector;
+
+        $i0 := @parameter0: int;
+
+        $i1 := @parameter1: int;
+
+        $r1 := @parameter2: com.squareup.okhttp.Request;
+
+        $r2 := @parameter3: com.squareup.okhttp.Route;
+
+        $r3 := @parameter4: java.net.Socket;
+
+     label01:
+        $r6 = specialinvoke r0.<com.squareup.okhttp.internal.http.SocketConnector: com.squareup.okhttp.Request createTunnelRequest(com.squareup.okhttp.Request)>($r1);
+
+     label02:
+        $r1 = $r6;
+
+        r5 = new com.squareup.okhttp.internal.http.HttpConnection;
+
+        $r7 = r0.<com.squareup.okhttp.internal.http.SocketConnector: com.squareup.okhttp.ConnectionPool connectionPool>;
+
+        $r8 = r0.<com.squareup.okhttp.internal.http.SocketConnector: com.squareup.okhttp.Connection connection>;
+
+     label03:
+        specialinvoke r5.<com.squareup.okhttp.internal.http.HttpConnection: void <init>(com.squareup.okhttp.ConnectionPool,com.squareup.okhttp.Connection,java.net.Socket)>($r7, $r8, $r3);
+
+        virtualinvoke r5.<com.squareup.okhttp.internal.http.HttpConnection: void setTimeouts(int,int)>($i0, $i1);
+
+        $r9 = virtualinvoke $r6.<com.squareup.okhttp.Request: java.net.URL url()>();
+
+     label04:
+        $r10 = new java.lang.StringBuilder;
+
+     label05:
+        specialinvoke $r10.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("CONNECT ");
+
+        $r11 = virtualinvoke $r9.<java.net.URL: java.lang.String getHost()>();
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r11);
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(":");
+
+        $i0 = staticinvoke <com.squareup.okhttp.internal.Util: int getEffectivePort(java.net.URL)>($r9);
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" HTTP/1.1");
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label06:
+        $r12 = virtualinvoke $r1.<com.squareup.okhttp.Request: com.squareup.okhttp.Headers headers()>();
+
+        virtualinvoke r5.<com.squareup.okhttp.internal.http.HttpConnection: void writeRequest(com.squareup.okhttp.Headers,java.lang.String)>($r12, $r11);
+
+        virtualinvoke r5.<com.squareup.okhttp.internal.http.HttpConnection: void flush()>();
+
+        $r13 = virtualinvoke r5.<com.squareup.okhttp.internal.http.HttpConnection: com.squareup.okhttp.Response$Builder readResponse()>();
+
+        $r13 = virtualinvoke $r13.<com.squareup.okhttp.Response$Builder: com.squareup.okhttp.Response$Builder request(com.squareup.okhttp.Request)>($r1);
+
+        $r14 = virtualinvoke $r13.<com.squareup.okhttp.Response$Builder: com.squareup.okhttp.Response build()>();
+
+        $l2 = staticinvoke <com.squareup.okhttp.internal.http.OkHeaders: long contentLength(com.squareup.okhttp.Response)>($r14);
+
+     label07:
+        l3 = $l2;
+
+        $b4 = $l2 cmp -1L;
+
+        if $b4 != 0 goto label08;
+
+        l3 = 0L;
+
+     label08:
+        $r15 = virtualinvoke r5.<com.squareup.okhttp.internal.http.HttpConnection: okio.Source newFixedLengthSource(long)>(l3);
+
+     label09:
+        $r16 = <java.util.concurrent.TimeUnit: java.util.concurrent.TimeUnit MILLISECONDS>;
+
+     label10:
+        staticinvoke <com.squareup.okhttp.internal.Util: boolean skipAll(okio.Source,int,java.util.concurrent.TimeUnit)>($r15, 2147483647, $r16);
+
+        interfaceinvoke $r15.<okio.Source: void close()>();
+
+        $i0 = virtualinvoke $r14.<com.squareup.okhttp.Response: int code()>();
+
+     label11:
+        lookupswitch($i0)
+        {
+            case 200: goto label15;
+            case 407: goto label18;
+            default: goto label12;
+        };
+
+     label12:
+        r4 = new java.io.IOException;
+
+        $r10 = new java.lang.StringBuilder;
+
+     label13:
+        specialinvoke $r10.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unexpected response code for CONNECT: ");
+
+        $i0 = virtualinvoke $r14.<com.squareup.okhttp.Response: int code()>();
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke r4.<java.io.IOException: void <init>(java.lang.String)>($r11);
+
+        throw r4;
+
+     label14:
+        r4 := @caughtexception;
+
+        $r17 = new com.squareup.okhttp.internal.http.RouteException;
+
+        specialinvoke $r17.<com.squareup.okhttp.internal.http.RouteException: void <init>(java.io.IOException)>(r4);
+
+        throw $r17;
+
+     label15:
+        $l2 = virtualinvoke r5.<com.squareup.okhttp.internal.http.HttpConnection: long bufferSize()>();
+
+     label16:
+        $b4 = $l2 cmp 0L;
+
+        if $b4 <= 0 goto label21;
+
+        r4 = new java.io.IOException;
+
+     label17:
+        specialinvoke r4.<java.io.IOException: void <init>(java.lang.String)>("TLS tunnel buffered too many bytes!");
+
+        throw r4;
+
+     label18:
+        $r18 = virtualinvoke $r2.<com.squareup.okhttp.Route: com.squareup.okhttp.Address getAddress()>();
+
+        $r19 = virtualinvoke $r18.<com.squareup.okhttp.Address: com.squareup.okhttp.Authenticator getAuthenticator()>();
+
+        $r20 = virtualinvoke $r2.<com.squareup.okhttp.Route: java.net.Proxy getProxy()>();
+
+        $r6 = staticinvoke <com.squareup.okhttp.internal.http.OkHeaders: com.squareup.okhttp.Request processAuthHeader(com.squareup.okhttp.Authenticator,com.squareup.okhttp.Response,java.net.Proxy)>($r19, $r14, $r20);
+
+     label19:
+        $r1 = $r6;
+
+        if $r6 != null goto label06;
+
+        r4 = new java.io.IOException;
+
+     label20:
+        specialinvoke r4.<java.io.IOException: void <init>(java.lang.String)>("Failed to authenticate with proxy");
+
+        throw r4;
+
+     label21:
+        return;
+
+        catch java.io.IOException from label01 to label02 with label14;
+        catch java.io.IOException from label03 to label04 with label14;
+        catch java.io.IOException from label05 to label07 with label14;
+        catch java.io.IOException from label08 to label09 with label14;
+        catch java.io.IOException from label10 to label11 with label14;
+        catch java.io.IOException from label13 to label14 with label14;
+        catch java.io.IOException from label15 to label16 with label14;
+        catch java.io.IOException from label17 to label19 with label14;
+        catch java.io.IOException from label20 to label21 with label14;
+    }
+    private com.squareup.okhttp.Request createTunnelRequest(com.squareup.okhttp.Request) throws java.io.IOException
+    {
+        com.squareup.okhttp.internal.http.SocketConnector r0;
+        com.squareup.okhttp.Request $r1;
+        java.net.URL $r2;
+        java.lang.String $r3, r4;
+        int $i0, $i1;
+        com.squareup.okhttp.Request$Builder $r5;
+        java.lang.StringBuilder $r6;
+
+        r0 := @this: com.squareup.okhttp.internal.http.SocketConnector;
+
+        $r1 := @parameter0: com.squareup.okhttp.Request;
+
+        $r2 = virtualinvoke $r1.<com.squareup.okhttp.Request: java.net.URL url()>();
+
+        $r3 = virtualinvoke $r2.<java.net.URL: java.lang.String getHost()>();
+
+        $r2 = virtualinvoke $r1.<com.squareup.okhttp.Request: java.net.URL url()>();
+
+        $i0 = staticinvoke <com.squareup.okhttp.internal.Util: int getEffectivePort(java.net.URL)>($r2);
+
+        $i1 = staticinvoke <com.squareup.okhttp.internal.Util: int getDefaultPort(java.lang.String)>("https");
+
+        if $i0 != $i1 goto label4;
+
+        r4 = $r3;
+
+     label1:
+        $r5 = new com.squareup.okhttp.Request$Builder;
+
+        specialinvoke $r5.<com.squareup.okhttp.Request$Builder: void <init>()>();
+
+        $r2 = new java.net.URL;
+
+        specialinvoke $r2.<java.net.URL: void <init>(java.lang.String,java.lang.String,int,java.lang.String)>("https", $r3, $i0, "/");
+
+        $r5 = virtualinvoke $r5.<com.squareup.okhttp.Request$Builder: com.squareup.okhttp.Request$Builder url(java.net.URL)>($r2);
+
+        $r5 = virtualinvoke $r5.<com.squareup.okhttp.Request$Builder: com.squareup.okhttp.Request$Builder header(java.lang.String,java.lang.String)>("Host", r4);
+
+        $r5 = virtualinvoke $r5.<com.squareup.okhttp.Request$Builder: com.squareup.okhttp.Request$Builder header(java.lang.String,java.lang.String)>("Proxy-Connection", "Keep-Alive");
+
+        $r3 = virtualinvoke $r1.<com.squareup.okhttp.Request: java.lang.String header(java.lang.String)>("User-Agent");
+
+        if $r3 == null goto label2;
+
+        virtualinvoke $r5.<com.squareup.okhttp.Request$Builder: com.squareup.okhttp.Request$Builder header(java.lang.String,java.lang.String)>("User-Agent", $r3);
+
+     label2:
+        $r3 = virtualinvoke $r1.<com.squareup.okhttp.Request: java.lang.String header(java.lang.String)>("Proxy-Authorization");
+
+        if $r3 == null goto label3;
+
+        virtualinvoke $r5.<com.squareup.okhttp.Request$Builder: com.squareup.okhttp.Request$Builder header(java.lang.String,java.lang.String)>("Proxy-Authorization", $r3);
+
+     label3:
+        $r1 = virtualinvoke $r5.<com.squareup.okhttp.Request$Builder: com.squareup.okhttp.Request build()>();
+
+        return $r1;
+
+     label4:
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(":");
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        r4 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        goto label1;
+    }
+    public com.squareup.okhttp.internal.http.SocketConnector$ConnectedSocket connectCleartext(int, int, com.squareup.okhttp.Route) throws com.squareup.okhttp.internal.http.RouteException
+    {
+        com.squareup.okhttp.internal.http.SocketConnector r0;
+        int $i0, $i1;
+        com.squareup.okhttp.Route $r1;
+        com.squareup.okhttp.internal.http.SocketConnector$ConnectedSocket $r2;
+        java.net.Socket $r3;
+
+        r0 := @this: com.squareup.okhttp.internal.http.SocketConnector;
+
+        $i0 := @parameter0: int;
+
+        $i1 := @parameter1: int;
+
+        $r1 := @parameter2: com.squareup.okhttp.Route;
+
+        $r3 = specialinvoke r0.<com.squareup.okhttp.internal.http.SocketConnector: java.net.Socket connectRawSocket(int,int,com.squareup.okhttp.Route)>($i1, $i0, $r1);
+
+        $r2 = new com.squareup.okhttp.internal.http.SocketConnector$ConnectedSocket;
+
+        specialinvoke $r2.<com.squareup.okhttp.internal.http.SocketConnector$ConnectedSocket: void <init>(com.squareup.okhttp.Route,java.net.Socket)>($r1, $r3);
+
+        return $r2;
+    }
+    public com.squareup.okhttp.internal.http.SocketConnector$ConnectedSocket connectTls(int, int, int, com.squareup.okhttp.Request, com.squareup.okhttp.Route, java.util.List, boolean) throws com.squareup.okhttp.internal.http.RouteException
+    {
+        com.squareup.okhttp.internal.http.SocketConnector r0;
+        int $i0, $i1, $i2, $i3;
+        com.squareup.okhttp.Request $r1;
+        com.squareup.okhttp.Route $r2;
+        java.util.List r3;
+        boolean $z0, $z1;
+        com.squareup.okhttp.internal.ConnectionSpecSelector r4;
+        java.io.IOException r5;
+        com.squareup.okhttp.Address $r6;
+        com.squareup.okhttp.internal.http.RouteException r7;
+        java.net.Socket $r8, $r12;
+        javax.net.ssl.SSLSocket r9, $r13;
+        javax.net.ssl.SSLSocketFactory $r10;
+        java.lang.String $r11;
+        com.squareup.okhttp.ConnectionSpec $r14;
+        com.squareup.okhttp.internal.Platform $r15;
+        com.squareup.okhttp.Protocol r16;
+        javax.net.ssl.SSLSession $r17;
+        com.squareup.okhttp.Handshake $r18;
+        javax.net.ssl.HostnameVerifier $r19;
+        java.security.cert.Certificate[] $r20;
+        java.security.cert.Certificate r21;
+        java.security.cert.X509Certificate r22;
+        javax.net.ssl.SSLPeerUnverifiedException $r23;
+        java.lang.StringBuilder $r24;
+        java.security.Principal $r25;
+        java.lang.Throwable $r26;
+        com.squareup.okhttp.CertificatePinner $r27;
+        com.squareup.okhttp.internal.http.SocketConnector$ConnectedSocket $r28;
+
+        r0 := @this: com.squareup.okhttp.internal.http.SocketConnector;
+
+        $i0 := @parameter0: int;
+
+        $i1 := @parameter1: int;
+
+        $i2 := @parameter2: int;
+
+        $r1 := @parameter3: com.squareup.okhttp.Request;
+
+        $r2 := @parameter4: com.squareup.okhttp.Route;
+
+        r3 := @parameter5: java.util.List;
+
+        $z0 := @parameter6: boolean;
+
+        $r6 = virtualinvoke $r2.<com.squareup.okhttp.Route: com.squareup.okhttp.Address getAddress()>();
+
+        r4 = new com.squareup.okhttp.internal.ConnectionSpecSelector;
+
+        specialinvoke r4.<com.squareup.okhttp.internal.ConnectionSpecSelector: void <init>(java.util.List)>(r3);
+
+        r7 = null;
+
+     label01:
+        $r8 = specialinvoke r0.<com.squareup.okhttp.internal.http.SocketConnector: java.net.Socket connectRawSocket(int,int,com.squareup.okhttp.Route)>($i1, $i0, $r2);
+
+        $z1 = virtualinvoke $r2.<com.squareup.okhttp.Route: boolean requiresTunnel()>();
+
+        if $z1 == 0 goto label02;
+
+        specialinvoke r0.<com.squareup.okhttp.internal.http.SocketConnector: void createTunnel(int,int,com.squareup.okhttp.Request,com.squareup.okhttp.Route,java.net.Socket)>($i1, $i2, $r1, $r2, $r8);
+
+     label02:
+        r9 = null;
+
+     label03:
+        $r10 = virtualinvoke $r6.<com.squareup.okhttp.Address: javax.net.ssl.SSLSocketFactory getSslSocketFactory()>();
+
+        $r11 = virtualinvoke $r6.<com.squareup.okhttp.Address: java.lang.String getUriHost()>();
+
+        $i3 = virtualinvoke $r6.<com.squareup.okhttp.Address: int getUriPort()>();
+
+        $r12 = virtualinvoke $r10.<javax.net.ssl.SSLSocketFactory: java.net.Socket createSocket(java.net.Socket,java.lang.String,int,boolean)>($r8, $r11, $i3, 1);
+
+     label04:
+        $r13 = (javax.net.ssl.SSLSocket) $r12;
+
+        r9 = $r13;
+
+     label05:
+        $r14 = virtualinvoke r4.<com.squareup.okhttp.internal.ConnectionSpecSelector: com.squareup.okhttp.ConnectionSpec configureSecureSocket(javax.net.ssl.SSLSocket)>($r13);
+
+        $r15 = staticinvoke <com.squareup.okhttp.internal.Platform: com.squareup.okhttp.internal.Platform get()>();
+
+     label06:
+        r16 = null;
+
+     label07:
+        $z1 = virtualinvoke $r14.<com.squareup.okhttp.ConnectionSpec: boolean supportsTlsExtensions()>();
+
+     label08:
+        if $z1 == 0 goto label10;
+
+     label09:
+        $r11 = virtualinvoke $r6.<com.squareup.okhttp.Address: java.lang.String getUriHost()>();
+
+        r3 = virtualinvoke $r6.<com.squareup.okhttp.Address: java.util.List getProtocols()>();
+
+        virtualinvoke $r15.<com.squareup.okhttp.internal.Platform: void configureTlsExtensions(javax.net.ssl.SSLSocket,java.lang.String,java.util.List)>($r13, $r11, r3);
+
+     label10:
+        virtualinvoke $r13.<javax.net.ssl.SSLSocket: void startHandshake()>();
+
+        $r17 = virtualinvoke $r13.<javax.net.ssl.SSLSocket: javax.net.ssl.SSLSession getSession()>();
+
+        $r18 = staticinvoke <com.squareup.okhttp.Handshake: com.squareup.okhttp.Handshake get(javax.net.ssl.SSLSession)>($r17);
+
+        $z1 = virtualinvoke $r14.<com.squareup.okhttp.ConnectionSpec: boolean supportsTlsExtensions()>();
+
+     label11:
+        if $z1 == 0 goto label15;
+
+     label12:
+        $r11 = virtualinvoke $r15.<com.squareup.okhttp.internal.Platform: java.lang.String getSelectedProtocol(javax.net.ssl.SSLSocket)>($r13);
+
+     label13:
+        if $r11 == null goto label15;
+
+     label14:
+        r16 = staticinvoke <com.squareup.okhttp.Protocol: com.squareup.okhttp.Protocol get(java.lang.String)>($r11);
+
+     label15:
+        virtualinvoke $r15.<com.squareup.okhttp.internal.Platform: void afterHandshake(javax.net.ssl.SSLSocket)>($r13);
+
+        $r19 = virtualinvoke $r6.<com.squareup.okhttp.Address: javax.net.ssl.HostnameVerifier getHostnameVerifier()>();
+
+        $r11 = virtualinvoke $r6.<com.squareup.okhttp.Address: java.lang.String getUriHost()>();
+
+        $r17 = virtualinvoke $r13.<javax.net.ssl.SSLSocket: javax.net.ssl.SSLSession getSession()>();
+
+        $z1 = interfaceinvoke $r19.<javax.net.ssl.HostnameVerifier: boolean verify(java.lang.String,javax.net.ssl.SSLSession)>($r11, $r17);
+
+     label16:
+        if $z1 != 0 goto label25;
+
+     label17:
+        $r17 = virtualinvoke $r13.<javax.net.ssl.SSLSocket: javax.net.ssl.SSLSession getSession()>();
+
+        $r20 = interfaceinvoke $r17.<javax.net.ssl.SSLSession: java.security.cert.Certificate[] getPeerCertificates()>();
+
+     label18:
+        r21 = $r20[0];
+
+        r22 = (java.security.cert.X509Certificate) r21;
+
+        $r23 = new javax.net.ssl.SSLPeerUnverifiedException;
+
+        $r24 = new java.lang.StringBuilder;
+
+     label19:
+        specialinvoke $r24.<java.lang.StringBuilder: void <init>()>();
+
+        $r24 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Hostname ");
+
+        $r11 = virtualinvoke $r6.<com.squareup.okhttp.Address: java.lang.String getUriHost()>();
+
+        $r24 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r11);
+
+        $r24 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" not verified:");
+
+        $r24 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\n    certificate: ");
+
+        $r11 = staticinvoke <com.squareup.okhttp.CertificatePinner: java.lang.String pin(java.security.cert.Certificate)>(r22);
+
+        $r24 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r11);
+
+        $r24 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\n    DN: ");
+
+        $r25 = virtualinvoke r22.<java.security.cert.X509Certificate: java.security.Principal getSubjectDN()>();
+
+        $r11 = interfaceinvoke $r25.<java.security.Principal: java.lang.String getName()>();
+
+        $r24 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r11);
+
+        $r24 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\n    subjectAltNames: ");
+
+        r3 = staticinvoke <com.squareup.okhttp.internal.tls.OkHostnameVerifier: java.util.List allSubjectAltNames(java.security.cert.X509Certificate)>(r22);
+
+        $r24 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r3);
+
+        $r11 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r23.<javax.net.ssl.SSLPeerUnverifiedException: void <init>(java.lang.String)>($r11);
+
+        throw $r23;
+
+     label20:
+        r5 := @caughtexception;
+
+        if $z0 == 0 goto label29;
+
+        $z1 = virtualinvoke r4.<com.squareup.okhttp.internal.ConnectionSpecSelector: boolean connectionFailed(java.io.IOException)>(r5);
+
+        if $z1 == 0 goto label29;
+
+        $z1 = 1;
+
+     label21:
+        staticinvoke <com.squareup.okhttp.internal.Util: void closeQuietly(java.net.Socket)>(r9);
+
+        staticinvoke <com.squareup.okhttp.internal.Util: void closeQuietly(java.net.Socket)>($r8);
+
+        if r7 != null goto label30;
+
+        r7 = new com.squareup.okhttp.internal.http.RouteException;
+
+        specialinvoke r7.<com.squareup.okhttp.internal.http.RouteException: void <init>(java.io.IOException)>(r5);
+
+     label22:
+        if $z1 != 0 goto label01;
+
+        throw r7;
+
+     label23:
+        $r26 := @caughtexception;
+
+     label24:
+        virtualinvoke $r15.<com.squareup.okhttp.internal.Platform: void afterHandshake(javax.net.ssl.SSLSocket)>($r13);
+
+        throw $r26;
+
+     label25:
+        $r27 = virtualinvoke $r6.<com.squareup.okhttp.Address: com.squareup.okhttp.CertificatePinner getCertificatePinner()>();
+
+        $r11 = virtualinvoke $r6.<com.squareup.okhttp.Address: java.lang.String getUriHost()>();
+
+        r3 = virtualinvoke $r18.<com.squareup.okhttp.Handshake: java.util.List peerCertificates()>();
+
+        virtualinvoke $r27.<com.squareup.okhttp.CertificatePinner: void check(java.lang.String,java.util.List)>($r11, r3);
+
+     label26:
+        $r28 = new com.squareup.okhttp.internal.http.SocketConnector$ConnectedSocket;
+
+     label27:
+        specialinvoke $r28.<com.squareup.okhttp.internal.http.SocketConnector$ConnectedSocket: void <init>(com.squareup.okhttp.Route,javax.net.ssl.SSLSocket,com.squareup.okhttp.Protocol,com.squareup.okhttp.Handshake)>($r2, $r13, r16, $r18);
+
+     label28:
+        return $r28;
+
+     label29:
+        $z1 = 0;
+
+        goto label21;
+
+     label30:
+        virtualinvoke r7.<com.squareup.okhttp.internal.http.RouteException: void addConnectException(java.io.IOException)>(r5);
+
+        goto label22;
+
+        catch java.io.IOException from label03 to label04 with label20;
+        catch java.io.IOException from label05 to label06 with label20;
+        catch java.lang.Throwable from label07 to label08 with label23;
+        catch java.lang.Throwable from label09 to label11 with label23;
+        catch java.lang.Throwable from label12 to label13 with label23;
+        catch java.lang.Throwable from label14 to label15 with label23;
+        catch java.io.IOException from label15 to label16 with label20;
+        catch java.io.IOException from label17 to label18 with label20;
+        catch java.io.IOException from label19 to label20 with label20;
+        catch java.io.IOException from label24 to label26 with label20;
+        catch java.io.IOException from label27 to label28 with label20;
+    }

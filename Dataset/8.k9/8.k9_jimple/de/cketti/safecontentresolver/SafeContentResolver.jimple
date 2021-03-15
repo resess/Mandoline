@@ -1,0 +1,177 @@
+de.cketti.safecontentresolver.SafeContentResolver extends java.lang.Object
+private final de.cketti.safecontentresolver.Blacklist blacklist
+private final android.content.ContentResolver contentResolver
+    protected void <init>(android.content.Context)
+    {
+        de.cketti.safecontentresolver.SafeContentResolver r0;
+        android.content.Context $r1;
+        android.content.ContentResolver $r2;
+        de.cketti.safecontentresolver.Blacklist $r3;
+
+        r0 := @this: de.cketti.safecontentresolver.SafeContentResolver;
+
+        $r1 := @parameter0: android.content.Context;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r2 = virtualinvoke $r1.<android.content.Context: android.content.ContentResolver getContentResolver()>();
+
+        r0.<de.cketti.safecontentresolver.SafeContentResolver: android.content.ContentResolver contentResolver> = $r2;
+
+        $r3 = new de.cketti.safecontentresolver.Blacklist;
+
+        specialinvoke $r3.<de.cketti.safecontentresolver.Blacklist: void <init>(android.content.Context)>($r1);
+
+        r0.<de.cketti.safecontentresolver.SafeContentResolver: de.cketti.safecontentresolver.Blacklist blacklist> = $r3;
+
+        return;
+    }
+    public static de.cketti.safecontentresolver.SafeContentResolver newInstance(android.content.Context)
+    {
+        android.content.Context $r0;
+        java.lang.NullPointerException $r1;
+        de.cketti.safecontentresolver.SafeContentResolverApi21 $r2;
+
+        $r0 := @parameter0: android.content.Context;
+
+        if $r0 != null goto label1;
+
+        $r1 = new java.lang.NullPointerException;
+
+        specialinvoke $r1.<java.lang.NullPointerException: void <init>(java.lang.String)>("Argument \'context\' must not be null.");
+
+        throw $r1;
+
+     label1:
+        $r2 = new de.cketti.safecontentresolver.SafeContentResolverApi21;
+
+        specialinvoke $r2.<de.cketti.safecontentresolver.SafeContentResolverApi21: void <init>(android.content.Context)>($r0);
+
+        return $r2;
+    }
+protected abstract int getFileUidOrThrow(java.io.FileDescriptor) throws java.io.FileNotFoundException { 
+// no body
+} 
+    public java.io.InputStream openInputStream(android.net.Uri) throws java.io.FileNotFoundException
+    {
+        de.cketti.safecontentresolver.SafeContentResolver r0;
+        android.net.Uri $r1;
+        android.content.res.AssetFileDescriptor r2;
+        java.io.IOException r3;
+        java.io.File r4;
+        java.lang.NullPointerException $r5;
+        java.lang.String $r6, $r7;
+        boolean $z0;
+        de.cketti.safecontentresolver.Blacklist $r8;
+        java.io.FileNotFoundException $r9;
+        java.lang.StringBuilder $r10;
+        android.content.ContentResolver $r11;
+        java.io.InputStream $r12;
+        android.os.ParcelFileDescriptor $r13;
+        java.io.FileDescriptor $r14;
+        int $i0, $i1;
+        java.io.FileInputStream $r15;
+
+        r0 := @this: de.cketti.safecontentresolver.SafeContentResolver;
+
+        $r1 := @parameter0: android.net.Uri;
+
+        if $r1 != null goto label1;
+
+        $r5 = new java.lang.NullPointerException;
+
+        specialinvoke $r5.<java.lang.NullPointerException: void <init>(java.lang.String)>("Argument \'uri\' must not be null");
+
+        throw $r5;
+
+     label1:
+        $r6 = virtualinvoke $r1.<android.net.Uri: java.lang.String getScheme()>();
+
+        $r7 = "content";
+
+        $z0 = virtualinvoke $r7.<java.lang.String: boolean equals(java.lang.Object)>($r6);
+
+        if $z0 == 0 goto label2;
+
+        $r7 = virtualinvoke $r1.<android.net.Uri: java.lang.String getAuthority()>();
+
+        $r8 = r0.<de.cketti.safecontentresolver.SafeContentResolver: de.cketti.safecontentresolver.Blacklist blacklist>;
+
+        $z0 = virtualinvoke $r8.<de.cketti.safecontentresolver.Blacklist: boolean isBlacklisted(java.lang.String)>($r7);
+
+        if $z0 == 0 goto label2;
+
+        $r9 = new java.io.FileNotFoundException;
+
+        $r10 = new java.lang.StringBuilder;
+
+        specialinvoke $r10.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("content URI is owned by the application itself. Content provider is not whitelisted: ");
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r7);
+
+        $r6 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r9.<java.io.FileNotFoundException: void <init>(java.lang.String)>($r6);
+
+        throw $r9;
+
+     label2:
+        $r7 = "file";
+
+        $z0 = virtualinvoke $r7.<java.lang.String: boolean equals(java.lang.Object)>($r6);
+
+        if $z0 != 0 goto label3;
+
+        $r11 = r0.<de.cketti.safecontentresolver.SafeContentResolver: android.content.ContentResolver contentResolver>;
+
+        $r12 = virtualinvoke $r11.<android.content.ContentResolver: java.io.InputStream openInputStream(android.net.Uri)>($r1);
+
+        return $r12;
+
+     label3:
+        r4 = new java.io.File;
+
+        $r6 = virtualinvoke $r1.<android.net.Uri: java.lang.String getPath()>();
+
+        specialinvoke r4.<java.io.File: void <init>(java.lang.String)>($r6);
+
+        $r13 = staticinvoke <android.os.ParcelFileDescriptor: android.os.ParcelFileDescriptor open(java.io.File,int)>(r4, 268435456);
+
+        $r14 = virtualinvoke $r13.<android.os.ParcelFileDescriptor: java.io.FileDescriptor getFileDescriptor()>();
+
+        $i0 = virtualinvoke r0.<de.cketti.safecontentresolver.SafeContentResolver: int getFileUidOrThrow(java.io.FileDescriptor)>($r14);
+
+        $i1 = staticinvoke <android.os.Process: int myUid()>();
+
+        if $i0 != $i1 goto label4;
+
+        $r9 = new java.io.FileNotFoundException;
+
+        specialinvoke $r9.<java.io.FileNotFoundException: void <init>(java.lang.String)>("File is owned by the application itself");
+
+        throw $r9;
+
+     label4:
+        r2 = new android.content.res.AssetFileDescriptor;
+
+        specialinvoke r2.<android.content.res.AssetFileDescriptor: void <init>(android.os.ParcelFileDescriptor,long,long)>($r13, 0L, -1L);
+
+     label5:
+        $r15 = virtualinvoke r2.<android.content.res.AssetFileDescriptor: java.io.FileInputStream createInputStream()>();
+
+     label6:
+        return $r15;
+
+     label7:
+        r3 := @caughtexception;
+
+        $r9 = new java.io.FileNotFoundException;
+
+        specialinvoke $r9.<java.io.FileNotFoundException: void <init>(java.lang.String)>("Unable to create stream");
+
+        throw $r9;
+
+        catch java.io.IOException from label5 to label6 with label7;
+    }

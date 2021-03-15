@@ -1,0 +1,368 @@
+com.fsck.k9.mail.store.imap.ImapPusher extends java.lang.Object implements com.fsck.k9.mail.Pusher
+private final java.util.List folderPushers
+private long lastRefresh
+private final com.fsck.k9.mail.PushReceiver pushReceiver
+private final com.fsck.k9.mail.store.imap.ImapStore store
+    public void <init>(com.fsck.k9.mail.store.imap.ImapStore, com.fsck.k9.mail.PushReceiver)
+    {
+        com.fsck.k9.mail.store.imap.ImapPusher r0;
+        com.fsck.k9.mail.store.imap.ImapStore $r1;
+        com.fsck.k9.mail.PushReceiver $r2;
+        java.util.ArrayList $r3;
+
+        r0 := @this: com.fsck.k9.mail.store.imap.ImapPusher;
+
+        $r1 := @parameter0: com.fsck.k9.mail.store.imap.ImapStore;
+
+        $r2 := @parameter1: com.fsck.k9.mail.PushReceiver;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r3 = new java.util.ArrayList;
+
+        specialinvoke $r3.<java.util.ArrayList: void <init>()>();
+
+        r0.<com.fsck.k9.mail.store.imap.ImapPusher: java.util.List folderPushers> = $r3;
+
+        r0.<com.fsck.k9.mail.store.imap.ImapPusher: long lastRefresh> = -1L;
+
+        r0.<com.fsck.k9.mail.store.imap.ImapPusher: com.fsck.k9.mail.store.imap.ImapStore store> = $r1;
+
+        r0.<com.fsck.k9.mail.store.imap.ImapPusher: com.fsck.k9.mail.PushReceiver pushReceiver> = $r2;
+
+        return;
+    }
+    com.fsck.k9.mail.store.imap.ImapFolderPusher createImapFolderPusher(java.lang.String)
+    {
+        com.fsck.k9.mail.store.imap.ImapPusher r0;
+        java.lang.String $r1;
+        com.fsck.k9.mail.store.imap.ImapFolderPusher $r2;
+        com.fsck.k9.mail.store.imap.ImapStore $r3;
+        com.fsck.k9.mail.PushReceiver $r4;
+
+        r0 := @this: com.fsck.k9.mail.store.imap.ImapPusher;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = new com.fsck.k9.mail.store.imap.ImapFolderPusher;
+
+        $r3 = r0.<com.fsck.k9.mail.store.imap.ImapPusher: com.fsck.k9.mail.store.imap.ImapStore store>;
+
+        $r4 = r0.<com.fsck.k9.mail.store.imap.ImapPusher: com.fsck.k9.mail.PushReceiver pushReceiver>;
+
+        specialinvoke $r2.<com.fsck.k9.mail.store.imap.ImapFolderPusher: void <init>(com.fsck.k9.mail.store.imap.ImapStore,java.lang.String,com.fsck.k9.mail.PushReceiver)>($r3, $r1, $r4);
+
+        return $r2;
+    }
+    long currentTimeMillis()
+    {
+        com.fsck.k9.mail.store.imap.ImapPusher r0;
+        long $l0;
+
+        r0 := @this: com.fsck.k9.mail.store.imap.ImapPusher;
+
+        $l0 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        return $l0;
+    }
+    public long getLastRefresh()
+    {
+        com.fsck.k9.mail.store.imap.ImapPusher r0;
+        long l0;
+
+        r0 := @this: com.fsck.k9.mail.store.imap.ImapPusher;
+
+        l0 = r0.<com.fsck.k9.mail.store.imap.ImapPusher: long lastRefresh>;
+
+        return l0;
+    }
+    public int getRefreshInterval()
+    {
+        com.fsck.k9.mail.store.imap.ImapPusher r0;
+        com.fsck.k9.mail.store.imap.ImapStore $r1;
+        com.fsck.k9.mail.store.StoreConfig $r2;
+        int $i0;
+
+        r0 := @this: com.fsck.k9.mail.store.imap.ImapPusher;
+
+        $r1 = r0.<com.fsck.k9.mail.store.imap.ImapPusher: com.fsck.k9.mail.store.imap.ImapStore store>;
+
+        $r2 = virtualinvoke $r1.<com.fsck.k9.mail.store.imap.ImapStore: com.fsck.k9.mail.store.StoreConfig getStoreConfig()>();
+
+        $i0 = interfaceinvoke $r2.<com.fsck.k9.mail.store.StoreConfig: int getIdleRefreshMinutes()>();
+
+        $i0 = $i0 * 60;
+
+        $i0 = $i0 * 1000;
+
+        return $i0;
+    }
+    public void refresh()
+    {
+        com.fsck.k9.mail.store.imap.ImapPusher r0;
+        java.lang.Exception r1;
+        java.util.List $r2, $r3;
+        java.util.Iterator $r4;
+        boolean $z0;
+        java.lang.Object $r5;
+        com.fsck.k9.mail.store.imap.ImapFolderPusher r6;
+        java.lang.StringBuilder $r7;
+        java.lang.String $r8;
+        java.lang.Throwable $r9;
+
+        r0 := @this: com.fsck.k9.mail.store.imap.ImapPusher;
+
+        $r2 = r0.<com.fsck.k9.mail.store.imap.ImapPusher: java.util.List folderPushers>;
+
+        entermonitor $r2;
+
+     label01:
+        $r3 = r0.<com.fsck.k9.mail.store.imap.ImapPusher: java.util.List folderPushers>;
+
+        $r4 = interfaceinvoke $r3.<java.util.List: java.util.Iterator iterator()>();
+
+     label02:
+        $z0 = interfaceinvoke $r4.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label09;
+
+        $r5 = interfaceinvoke $r4.<java.util.Iterator: java.lang.Object next()>();
+
+        r6 = (com.fsck.k9.mail.store.imap.ImapFolderPusher) $r5;
+
+     label03:
+        virtualinvoke r6.<com.fsck.k9.mail.store.imap.ImapFolderPusher: void refresh()>();
+
+     label04:
+        goto label02;
+
+     label05:
+        r1 := @caughtexception;
+
+     label06:
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Got exception while refreshing for ");
+
+        $r8 = virtualinvoke r6.<com.fsck.k9.mail.store.imap.ImapFolderPusher: java.lang.String getName()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r8);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String,java.lang.Throwable)>("k9", $r8, r1);
+
+        goto label02;
+
+     label07:
+        $r9 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label08:
+        throw $r9;
+
+     label09:
+        exitmonitor $r2;
+
+     label10:
+        return;
+
+        catch java.lang.Throwable from label01 to label03 with label07;
+        catch java.lang.Exception from label03 to label04 with label05;
+        catch java.lang.Throwable from label03 to label04 with label07;
+        catch java.lang.Throwable from label06 to label08 with label07;
+        catch java.lang.Throwable from label09 to label10 with label07;
+    }
+    public void setLastRefresh(long)
+    {
+        com.fsck.k9.mail.store.imap.ImapPusher r0;
+        long $l0;
+
+        r0 := @this: com.fsck.k9.mail.store.imap.ImapPusher;
+
+        $l0 := @parameter0: long;
+
+        r0.<com.fsck.k9.mail.store.imap.ImapPusher: long lastRefresh> = $l0;
+
+        return;
+    }
+    public void start(java.util.List)
+    {
+        com.fsck.k9.mail.store.imap.ImapPusher r0;
+        java.util.List r1, $r2;
+        long $l0;
+        java.util.Iterator $r3;
+        boolean $z0;
+        java.lang.Object $r4;
+        java.lang.String r5;
+        com.fsck.k9.mail.store.imap.ImapFolderPusher $r6;
+        java.lang.Throwable $r7;
+
+        r0 := @this: com.fsck.k9.mail.store.imap.ImapPusher;
+
+        r1 := @parameter0: java.util.List;
+
+        $r2 = r0.<com.fsck.k9.mail.store.imap.ImapPusher: java.util.List folderPushers>;
+
+        entermonitor $r2;
+
+     label1:
+        virtualinvoke r0.<com.fsck.k9.mail.store.imap.ImapPusher: void stop()>();
+
+        $l0 = virtualinvoke r0.<com.fsck.k9.mail.store.imap.ImapPusher: long currentTimeMillis()>();
+
+        virtualinvoke r0.<com.fsck.k9.mail.store.imap.ImapPusher: void setLastRefresh(long)>($l0);
+
+        $r3 = interfaceinvoke r1.<java.util.List: java.util.Iterator iterator()>();
+
+     label2:
+        $z0 = interfaceinvoke $r3.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label5;
+
+        $r4 = interfaceinvoke $r3.<java.util.Iterator: java.lang.Object next()>();
+
+        r5 = (java.lang.String) $r4;
+
+        $r6 = virtualinvoke r0.<com.fsck.k9.mail.store.imap.ImapPusher: com.fsck.k9.mail.store.imap.ImapFolderPusher createImapFolderPusher(java.lang.String)>(r5);
+
+        r1 = r0.<com.fsck.k9.mail.store.imap.ImapPusher: java.util.List folderPushers>;
+
+        interfaceinvoke r1.<java.util.List: boolean add(java.lang.Object)>($r6);
+
+        virtualinvoke $r6.<com.fsck.k9.mail.store.imap.ImapFolderPusher: void start()>();
+
+        goto label2;
+
+     label3:
+        $r7 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label4:
+        throw $r7;
+
+     label5:
+        exitmonitor $r2;
+
+     label6:
+        return;
+
+        catch java.lang.Throwable from label1 to label4 with label3;
+        catch java.lang.Throwable from label5 to label6 with label3;
+    }
+    public void stop()
+    {
+        com.fsck.k9.mail.store.imap.ImapPusher r0;
+        java.lang.Exception r1;
+        boolean $z0;
+        java.util.List $r2, $r3;
+        java.util.Iterator $r4;
+        java.lang.Object $r5;
+        com.fsck.k9.mail.store.imap.ImapFolderPusher r6;
+        java.lang.StringBuilder $r7;
+        java.lang.String $r8;
+        java.lang.Throwable $r9;
+
+        r0 := @this: com.fsck.k9.mail.store.imap.ImapPusher;
+
+        $z0 = staticinvoke <com.fsck.k9.mail.K9MailLib: boolean isDebug()>();
+
+        if $z0 == 0 goto label01;
+
+        staticinvoke <android.util.Log: int i(java.lang.String,java.lang.String)>("k9", "Requested stop of IMAP pusher");
+
+     label01:
+        $r2 = r0.<com.fsck.k9.mail.store.imap.ImapPusher: java.util.List folderPushers>;
+
+        entermonitor $r2;
+
+     label02:
+        $r3 = r0.<com.fsck.k9.mail.store.imap.ImapPusher: java.util.List folderPushers>;
+
+        $r4 = interfaceinvoke $r3.<java.util.List: java.util.Iterator iterator()>();
+
+     label03:
+        $z0 = interfaceinvoke $r4.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label13;
+
+        $r5 = interfaceinvoke $r4.<java.util.Iterator: java.lang.Object next()>();
+
+        r6 = (com.fsck.k9.mail.store.imap.ImapFolderPusher) $r5;
+
+     label04:
+        $z0 = staticinvoke <com.fsck.k9.mail.K9MailLib: boolean isDebug()>();
+
+     label05:
+        if $z0 == 0 goto label07;
+
+        $r7 = new java.lang.StringBuilder;
+
+     label06:
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Requesting stop of IMAP folderPusher ");
+
+        $r8 = virtualinvoke r6.<com.fsck.k9.mail.store.imap.ImapFolderPusher: java.lang.String getName()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r8);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int i(java.lang.String,java.lang.String)>("k9", $r8);
+
+     label07:
+        virtualinvoke r6.<com.fsck.k9.mail.store.imap.ImapFolderPusher: void stop()>();
+
+     label08:
+        goto label03;
+
+     label09:
+        r1 := @caughtexception;
+
+     label10:
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Got exception while stopping ");
+
+        $r8 = virtualinvoke r6.<com.fsck.k9.mail.store.imap.ImapFolderPusher: java.lang.String getName()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r8);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String,java.lang.Throwable)>("k9", $r8, r1);
+
+        goto label03;
+
+     label11:
+        $r9 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label12:
+        throw $r9;
+
+     label13:
+        $r3 = r0.<com.fsck.k9.mail.store.imap.ImapPusher: java.util.List folderPushers>;
+
+        interfaceinvoke $r3.<java.util.List: void clear()>();
+
+        exitmonitor $r2;
+
+     label14:
+        return;
+
+        catch java.lang.Throwable from label02 to label04 with label11;
+        catch java.lang.Exception from label04 to label05 with label09;
+        catch java.lang.Exception from label06 to label08 with label09;
+        catch java.lang.Throwable from label04 to label08 with label11;
+        catch java.lang.Throwable from label10 to label12 with label11;
+        catch java.lang.Throwable from label13 to label14 with label11;
+    }

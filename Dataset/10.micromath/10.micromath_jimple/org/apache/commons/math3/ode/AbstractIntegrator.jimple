@@ -1,0 +1,977 @@
+org.apache.commons.math3.ode.AbstractIntegrator extends java.lang.Object implements org.apache.commons.math3.ode.FirstOrderIntegrator
+private org.apache.commons.math3.util.IntegerSequence$Incrementor evaluations
+private java.util.Collection eventsStates
+private transient org.apache.commons.math3.ode.ExpandableStatefulODE expandable
+protected boolean isLastStep
+private final java.lang.String name
+protected boolean resetOccurred
+private boolean statesInitialized
+protected java.util.Collection stepHandlers
+protected double stepSize
+protected double stepStart
+    protected void <init>()
+    {
+        org.apache.commons.math3.ode.AbstractIntegrator r0;
+
+        r0 := @this: org.apache.commons.math3.ode.AbstractIntegrator;
+
+        specialinvoke r0.<org.apache.commons.math3.ode.AbstractIntegrator: void <init>(java.lang.String)>(null);
+
+        return;
+    }
+    public void <init>(java.lang.String)
+    {
+        org.apache.commons.math3.ode.AbstractIntegrator r0;
+        java.lang.String $r1;
+        java.util.ArrayList $r2;
+        org.apache.commons.math3.util.IntegerSequence$Incrementor $r3;
+
+        r0 := @this: org.apache.commons.math3.ode.AbstractIntegrator;
+
+        $r1 := @parameter0: java.lang.String;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<org.apache.commons.math3.ode.AbstractIntegrator: java.lang.String name> = $r1;
+
+        $r2 = new java.util.ArrayList;
+
+        specialinvoke $r2.<java.util.ArrayList: void <init>()>();
+
+        r0.<org.apache.commons.math3.ode.AbstractIntegrator: java.util.Collection stepHandlers> = $r2;
+
+        r0.<org.apache.commons.math3.ode.AbstractIntegrator: double stepStart> = #NaN;
+
+        r0.<org.apache.commons.math3.ode.AbstractIntegrator: double stepSize> = #NaN;
+
+        $r2 = new java.util.ArrayList;
+
+        specialinvoke $r2.<java.util.ArrayList: void <init>()>();
+
+        r0.<org.apache.commons.math3.ode.AbstractIntegrator: java.util.Collection eventsStates> = $r2;
+
+        r0.<org.apache.commons.math3.ode.AbstractIntegrator: boolean statesInitialized> = 0;
+
+        $r3 = staticinvoke <org.apache.commons.math3.util.IntegerSequence$Incrementor: org.apache.commons.math3.util.IntegerSequence$Incrementor create()>();
+
+        $r3 = virtualinvoke $r3.<org.apache.commons.math3.util.IntegerSequence$Incrementor: org.apache.commons.math3.util.IntegerSequence$Incrementor withMaximalCount(int)>(2147483647);
+
+        r0.<org.apache.commons.math3.ode.AbstractIntegrator: org.apache.commons.math3.util.IntegerSequence$Incrementor evaluations> = $r3;
+
+        return;
+    }
+    protected double acceptStep(org.apache.commons.math3.ode.sampling.AbstractStepInterpolator, double[], double[], double) throws org.apache.commons.math3.exception.MaxCountExceededException, org.apache.commons.math3.exception.DimensionMismatchException, org.apache.commons.math3.exception.NoBracketingException
+    {
+        org.apache.commons.math3.ode.AbstractIntegrator r0;
+        org.apache.commons.math3.ode.sampling.AbstractStepInterpolator $r1;
+        double[] $r2, $r3, r4, $r13;
+        double $d0, $d1, $d2, $d3;
+        java.util.TreeSet r5;
+        boolean $z0;
+        java.util.Collection $r6;
+        java.util.Iterator $r7;
+        java.lang.Object $r8;
+        org.apache.commons.math3.ode.events.EventState r9, r15;
+        byte b0;
+        org.apache.commons.math3.ode.AbstractIntegrator$1 $r10;
+        int $i1, i2, i3;
+        org.apache.commons.math3.ode.ExpandableStatefulODE $r11;
+        org.apache.commons.math3.ode.EquationsMapper $r12;
+        org.apache.commons.math3.ode.EquationsMapper[] $r14;
+        org.apache.commons.math3.ode.sampling.StepHandler r16;
+
+        r0 := @this: org.apache.commons.math3.ode.AbstractIntegrator;
+
+        $r1 := @parameter0: org.apache.commons.math3.ode.sampling.AbstractStepInterpolator;
+
+        $r2 := @parameter1: double[];
+
+        $r3 := @parameter2: double[];
+
+        $d0 := @parameter3: double;
+
+        $d1 = virtualinvoke $r1.<org.apache.commons.math3.ode.sampling.AbstractStepInterpolator: double getGlobalPreviousTime()>();
+
+        $d2 = virtualinvoke $r1.<org.apache.commons.math3.ode.sampling.AbstractStepInterpolator: double getGlobalCurrentTime()>();
+
+        $z0 = r0.<org.apache.commons.math3.ode.AbstractIntegrator: boolean statesInitialized>;
+
+        if $z0 != 0 goto label03;
+
+        $r6 = r0.<org.apache.commons.math3.ode.AbstractIntegrator: java.util.Collection eventsStates>;
+
+        $r7 = interfaceinvoke $r6.<java.util.Collection: java.util.Iterator iterator()>();
+
+     label01:
+        $z0 = interfaceinvoke $r7.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label02;
+
+        $r8 = interfaceinvoke $r7.<java.util.Iterator: java.lang.Object next()>();
+
+        r9 = (org.apache.commons.math3.ode.events.EventState) $r8;
+
+        virtualinvoke r9.<org.apache.commons.math3.ode.events.EventState: void reinitializeBegin(org.apache.commons.math3.ode.sampling.StepInterpolator)>($r1);
+
+        goto label01;
+
+     label02:
+        r0.<org.apache.commons.math3.ode.AbstractIntegrator: boolean statesInitialized> = 1;
+
+     label03:
+        $z0 = virtualinvoke $r1.<org.apache.commons.math3.ode.sampling.AbstractStepInterpolator: boolean isForward()>();
+
+        if $z0 == 0 goto label06;
+
+        b0 = 1;
+
+     label04:
+        r5 = new java.util.TreeSet;
+
+        $r10 = new org.apache.commons.math3.ode.AbstractIntegrator$1;
+
+        specialinvoke $r10.<org.apache.commons.math3.ode.AbstractIntegrator$1: void <init>(org.apache.commons.math3.ode.AbstractIntegrator,int)>(r0, b0);
+
+        specialinvoke r5.<java.util.TreeSet: void <init>(java.util.Comparator)>($r10);
+
+        $r6 = r0.<org.apache.commons.math3.ode.AbstractIntegrator: java.util.Collection eventsStates>;
+
+        $r7 = interfaceinvoke $r6.<java.util.Collection: java.util.Iterator iterator()>();
+
+     label05:
+        $z0 = interfaceinvoke $r7.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label08;
+
+        $r8 = interfaceinvoke $r7.<java.util.Iterator: java.lang.Object next()>();
+
+        r9 = (org.apache.commons.math3.ode.events.EventState) $r8;
+
+        $z0 = virtualinvoke r9.<org.apache.commons.math3.ode.events.EventState: boolean evaluateStep(org.apache.commons.math3.ode.sampling.StepInterpolator)>($r1);
+
+        if $z0 == 0 goto label05;
+
+        interfaceinvoke r5.<java.util.SortedSet: boolean add(java.lang.Object)>(r9);
+
+        goto label05;
+
+     label06:
+        b0 = -1;
+
+        goto label04;
+
+     label07:
+        $d1 = $d3;
+
+        virtualinvoke $r1.<org.apache.commons.math3.ode.sampling.AbstractStepInterpolator: void setSoftPreviousTime(double)>($d3);
+
+        virtualinvoke $r1.<org.apache.commons.math3.ode.sampling.AbstractStepInterpolator: void setSoftCurrentTime(double)>($d2);
+
+        $z0 = virtualinvoke r9.<org.apache.commons.math3.ode.events.EventState: boolean evaluateStep(org.apache.commons.math3.ode.sampling.StepInterpolator)>($r1);
+
+        if $z0 == 0 goto label08;
+
+        interfaceinvoke r5.<java.util.SortedSet: boolean add(java.lang.Object)>(r9);
+
+     label08:
+        $z0 = interfaceinvoke r5.<java.util.SortedSet: boolean isEmpty()>();
+
+        if $z0 != 0 goto label19;
+
+        $r7 = interfaceinvoke r5.<java.util.SortedSet: java.util.Iterator iterator()>();
+
+        $r8 = interfaceinvoke $r7.<java.util.Iterator: java.lang.Object next()>();
+
+        r9 = (org.apache.commons.math3.ode.events.EventState) $r8;
+
+        interfaceinvoke $r7.<java.util.Iterator: void remove()>();
+
+        $d3 = virtualinvoke r9.<org.apache.commons.math3.ode.events.EventState: double getEventTime()>();
+
+        virtualinvoke $r1.<org.apache.commons.math3.ode.sampling.AbstractStepInterpolator: void setSoftPreviousTime(double)>($d1);
+
+        virtualinvoke $r1.<org.apache.commons.math3.ode.sampling.AbstractStepInterpolator: void setSoftCurrentTime(double)>($d3);
+
+        virtualinvoke $r1.<org.apache.commons.math3.ode.sampling.AbstractStepInterpolator: void setInterpolatedTime(double)>($d3);
+
+        $i1 = lengthof $r2;
+
+        r4 = newarray (double)[$i1];
+
+        $r11 = r0.<org.apache.commons.math3.ode.AbstractIntegrator: org.apache.commons.math3.ode.ExpandableStatefulODE expandable>;
+
+        $r12 = virtualinvoke $r11.<org.apache.commons.math3.ode.ExpandableStatefulODE: org.apache.commons.math3.ode.EquationsMapper getPrimaryMapper()>();
+
+        $r13 = virtualinvoke $r1.<org.apache.commons.math3.ode.sampling.AbstractStepInterpolator: double[] getInterpolatedState()>();
+
+        virtualinvoke $r12.<org.apache.commons.math3.ode.EquationsMapper: void insertEquationData(double[],double[])>($r13, r4);
+
+        $r11 = r0.<org.apache.commons.math3.ode.AbstractIntegrator: org.apache.commons.math3.ode.ExpandableStatefulODE expandable>;
+
+        $r14 = virtualinvoke $r11.<org.apache.commons.math3.ode.ExpandableStatefulODE: org.apache.commons.math3.ode.EquationsMapper[] getSecondaryMappers()>();
+
+        $i1 = lengthof $r14;
+
+        i2 = 0;
+
+        i3 = 0;
+
+     label09:
+        if i2 >= $i1 goto label10;
+
+        $r12 = $r14[i2];
+
+        $r13 = virtualinvoke $r1.<org.apache.commons.math3.ode.sampling.AbstractStepInterpolator: double[] getInterpolatedSecondaryState(int)>(i3);
+
+        virtualinvoke $r12.<org.apache.commons.math3.ode.EquationsMapper: void insertEquationData(double[],double[])>($r13, r4);
+
+        i2 = i2 + 1;
+
+        i3 = i3 + 1;
+
+        goto label09;
+
+     label10:
+        $r6 = r0.<org.apache.commons.math3.ode.AbstractIntegrator: java.util.Collection eventsStates>;
+
+        $r7 = interfaceinvoke $r6.<java.util.Collection: java.util.Iterator iterator()>();
+
+     label11:
+        $z0 = interfaceinvoke $r7.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label15;
+
+        $r8 = interfaceinvoke $r7.<java.util.Iterator: java.lang.Object next()>();
+
+        r15 = (org.apache.commons.math3.ode.events.EventState) $r8;
+
+        virtualinvoke r15.<org.apache.commons.math3.ode.events.EventState: void stepAccepted(double,double[])>($d3, r4);
+
+        $z0 = r0.<org.apache.commons.math3.ode.AbstractIntegrator: boolean isLastStep>;
+
+        if $z0 != 0 goto label12;
+
+        $z0 = virtualinvoke r15.<org.apache.commons.math3.ode.events.EventState: boolean stop()>();
+
+        if $z0 == 0 goto label14;
+
+     label12:
+        $z0 = 1;
+
+     label13:
+        r0.<org.apache.commons.math3.ode.AbstractIntegrator: boolean isLastStep> = $z0;
+
+        goto label11;
+
+     label14:
+        $z0 = 0;
+
+        goto label13;
+
+     label15:
+        $r6 = r0.<org.apache.commons.math3.ode.AbstractIntegrator: java.util.Collection stepHandlers>;
+
+        $r7 = interfaceinvoke $r6.<java.util.Collection: java.util.Iterator iterator()>();
+
+     label16:
+        $z0 = interfaceinvoke $r7.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label17;
+
+        $r8 = interfaceinvoke $r7.<java.util.Iterator: java.lang.Object next()>();
+
+        r16 = (org.apache.commons.math3.ode.sampling.StepHandler) $r8;
+
+        $z0 = r0.<org.apache.commons.math3.ode.AbstractIntegrator: boolean isLastStep>;
+
+        interfaceinvoke r16.<org.apache.commons.math3.ode.sampling.StepHandler: void handleStep(org.apache.commons.math3.ode.sampling.StepInterpolator,boolean)>($r1, $z0);
+
+        goto label16;
+
+     label17:
+        $z0 = r0.<org.apache.commons.math3.ode.AbstractIntegrator: boolean isLastStep>;
+
+        if $z0 == 0 goto label18;
+
+        $i1 = lengthof $r2;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r4, 0, $r2, 0, $i1);
+
+        return $d3;
+
+     label18:
+        r0.<org.apache.commons.math3.ode.AbstractIntegrator: boolean resetOccurred> = 0;
+
+        $z0 = virtualinvoke r9.<org.apache.commons.math3.ode.events.EventState: boolean reset(double,double[])>($d3, r4);
+
+        if $z0 == 0 goto label07;
+
+        virtualinvoke $r1.<org.apache.commons.math3.ode.sampling.AbstractStepInterpolator: void setInterpolatedTime(double)>($d3);
+
+        $i1 = lengthof $r2;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r4, 0, $r2, 0, $i1);
+
+        virtualinvoke r0.<org.apache.commons.math3.ode.AbstractIntegrator: void computeDerivatives(double,double[],double[])>($d3, $r2, $r3);
+
+        r0.<org.apache.commons.math3.ode.AbstractIntegrator: boolean resetOccurred> = 1;
+
+        return $d3;
+
+     label19:
+        virtualinvoke $r1.<org.apache.commons.math3.ode.sampling.AbstractStepInterpolator: void setInterpolatedTime(double)>($d2);
+
+        $i1 = lengthof $r2;
+
+        $r2 = newarray (double)[$i1];
+
+        $r11 = r0.<org.apache.commons.math3.ode.AbstractIntegrator: org.apache.commons.math3.ode.ExpandableStatefulODE expandable>;
+
+        $r12 = virtualinvoke $r11.<org.apache.commons.math3.ode.ExpandableStatefulODE: org.apache.commons.math3.ode.EquationsMapper getPrimaryMapper()>();
+
+        $r3 = virtualinvoke $r1.<org.apache.commons.math3.ode.sampling.AbstractStepInterpolator: double[] getInterpolatedState()>();
+
+        virtualinvoke $r12.<org.apache.commons.math3.ode.EquationsMapper: void insertEquationData(double[],double[])>($r3, $r2);
+
+        $r11 = r0.<org.apache.commons.math3.ode.AbstractIntegrator: org.apache.commons.math3.ode.ExpandableStatefulODE expandable>;
+
+        $r14 = virtualinvoke $r11.<org.apache.commons.math3.ode.ExpandableStatefulODE: org.apache.commons.math3.ode.EquationsMapper[] getSecondaryMappers()>();
+
+        $i1 = lengthof $r14;
+
+        i2 = 0;
+
+        i3 = 0;
+
+     label20:
+        if i2 >= $i1 goto label21;
+
+        $r12 = $r14[i2];
+
+        $r3 = virtualinvoke $r1.<org.apache.commons.math3.ode.sampling.AbstractStepInterpolator: double[] getInterpolatedSecondaryState(int)>(i3);
+
+        virtualinvoke $r12.<org.apache.commons.math3.ode.EquationsMapper: void insertEquationData(double[],double[])>($r3, $r2);
+
+        i2 = i2 + 1;
+
+        i3 = i3 + 1;
+
+        goto label20;
+
+     label21:
+        $r6 = r0.<org.apache.commons.math3.ode.AbstractIntegrator: java.util.Collection eventsStates>;
+
+        $r7 = interfaceinvoke $r6.<java.util.Collection: java.util.Iterator iterator()>();
+
+     label22:
+        $z0 = interfaceinvoke $r7.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label26;
+
+        $r8 = interfaceinvoke $r7.<java.util.Iterator: java.lang.Object next()>();
+
+        r9 = (org.apache.commons.math3.ode.events.EventState) $r8;
+
+        virtualinvoke r9.<org.apache.commons.math3.ode.events.EventState: void stepAccepted(double,double[])>($d2, $r2);
+
+        $z0 = r0.<org.apache.commons.math3.ode.AbstractIntegrator: boolean isLastStep>;
+
+        if $z0 != 0 goto label23;
+
+        $z0 = virtualinvoke r9.<org.apache.commons.math3.ode.events.EventState: boolean stop()>();
+
+        if $z0 == 0 goto label25;
+
+     label23:
+        $z0 = 1;
+
+     label24:
+        r0.<org.apache.commons.math3.ode.AbstractIntegrator: boolean isLastStep> = $z0;
+
+        goto label22;
+
+     label25:
+        $z0 = 0;
+
+        goto label24;
+
+     label26:
+        $z0 = r0.<org.apache.commons.math3.ode.AbstractIntegrator: boolean isLastStep>;
+
+        if $z0 != 0 goto label27;
+
+        $z0 = staticinvoke <org.apache.commons.math3.util.Precision: boolean equals(double,double,int)>($d2, $d0, 1);
+
+        if $z0 == 0 goto label30;
+
+     label27:
+        $z0 = 1;
+
+     label28:
+        r0.<org.apache.commons.math3.ode.AbstractIntegrator: boolean isLastStep> = $z0;
+
+        $r6 = r0.<org.apache.commons.math3.ode.AbstractIntegrator: java.util.Collection stepHandlers>;
+
+        $r7 = interfaceinvoke $r6.<java.util.Collection: java.util.Iterator iterator()>();
+
+     label29:
+        $z0 = interfaceinvoke $r7.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label31;
+
+        $r8 = interfaceinvoke $r7.<java.util.Iterator: java.lang.Object next()>();
+
+        r16 = (org.apache.commons.math3.ode.sampling.StepHandler) $r8;
+
+        $z0 = r0.<org.apache.commons.math3.ode.AbstractIntegrator: boolean isLastStep>;
+
+        interfaceinvoke r16.<org.apache.commons.math3.ode.sampling.StepHandler: void handleStep(org.apache.commons.math3.ode.sampling.StepInterpolator,boolean)>($r1, $z0);
+
+        goto label29;
+
+     label30:
+        $z0 = 0;
+
+        goto label28;
+
+     label31:
+        return $d2;
+    }
+    public void addEventHandler(org.apache.commons.math3.ode.events.EventHandler, double, double, int)
+    {
+        org.apache.commons.math3.ode.AbstractIntegrator r0;
+        org.apache.commons.math3.ode.events.EventHandler $r1;
+        double $d0, $d1;
+        int $i0;
+        org.apache.commons.math3.analysis.solvers.BracketingNthOrderBrentSolver $r2;
+
+        r0 := @this: org.apache.commons.math3.ode.AbstractIntegrator;
+
+        $r1 := @parameter0: org.apache.commons.math3.ode.events.EventHandler;
+
+        $d0 := @parameter1: double;
+
+        $d1 := @parameter2: double;
+
+        $i0 := @parameter3: int;
+
+        $r2 = new org.apache.commons.math3.analysis.solvers.BracketingNthOrderBrentSolver;
+
+        specialinvoke $r2.<org.apache.commons.math3.analysis.solvers.BracketingNthOrderBrentSolver: void <init>(double,int)>($d1, 5);
+
+        virtualinvoke r0.<org.apache.commons.math3.ode.AbstractIntegrator: void addEventHandler(org.apache.commons.math3.ode.events.EventHandler,double,double,int,org.apache.commons.math3.analysis.solvers.UnivariateSolver)>($r1, $d0, $d1, $i0, $r2);
+
+        return;
+    }
+    public void addEventHandler(org.apache.commons.math3.ode.events.EventHandler, double, double, int, org.apache.commons.math3.analysis.solvers.UnivariateSolver)
+    {
+        org.apache.commons.math3.ode.AbstractIntegrator r0;
+        org.apache.commons.math3.ode.events.EventHandler $r1;
+        double $d0, $d1;
+        int $i0;
+        org.apache.commons.math3.analysis.solvers.UnivariateSolver $r2;
+        org.apache.commons.math3.ode.events.EventState $r3;
+        java.util.Collection $r4;
+
+        r0 := @this: org.apache.commons.math3.ode.AbstractIntegrator;
+
+        $r1 := @parameter0: org.apache.commons.math3.ode.events.EventHandler;
+
+        $d0 := @parameter1: double;
+
+        $d1 := @parameter2: double;
+
+        $i0 := @parameter3: int;
+
+        $r2 := @parameter4: org.apache.commons.math3.analysis.solvers.UnivariateSolver;
+
+        $r4 = r0.<org.apache.commons.math3.ode.AbstractIntegrator: java.util.Collection eventsStates>;
+
+        $r3 = new org.apache.commons.math3.ode.events.EventState;
+
+        specialinvoke $r3.<org.apache.commons.math3.ode.events.EventState: void <init>(org.apache.commons.math3.ode.events.EventHandler,double,double,int,org.apache.commons.math3.analysis.solvers.UnivariateSolver)>($r1, $d0, $d1, $i0, $r2);
+
+        interfaceinvoke $r4.<java.util.Collection: boolean add(java.lang.Object)>($r3);
+
+        return;
+    }
+    public void addStepHandler(org.apache.commons.math3.ode.sampling.StepHandler)
+    {
+        org.apache.commons.math3.ode.AbstractIntegrator r0;
+        org.apache.commons.math3.ode.sampling.StepHandler $r1;
+        java.util.Collection $r2;
+
+        r0 := @this: org.apache.commons.math3.ode.AbstractIntegrator;
+
+        $r1 := @parameter0: org.apache.commons.math3.ode.sampling.StepHandler;
+
+        $r2 = r0.<org.apache.commons.math3.ode.AbstractIntegrator: java.util.Collection stepHandlers>;
+
+        interfaceinvoke $r2.<java.util.Collection: boolean add(java.lang.Object)>($r1);
+
+        return;
+    }
+    public void clearEventHandlers()
+    {
+        org.apache.commons.math3.ode.AbstractIntegrator r0;
+        java.util.Collection $r1;
+
+        r0 := @this: org.apache.commons.math3.ode.AbstractIntegrator;
+
+        $r1 = r0.<org.apache.commons.math3.ode.AbstractIntegrator: java.util.Collection eventsStates>;
+
+        interfaceinvoke $r1.<java.util.Collection: void clear()>();
+
+        return;
+    }
+    public void clearStepHandlers()
+    {
+        org.apache.commons.math3.ode.AbstractIntegrator r0;
+        java.util.Collection $r1;
+
+        r0 := @this: org.apache.commons.math3.ode.AbstractIntegrator;
+
+        $r1 = r0.<org.apache.commons.math3.ode.AbstractIntegrator: java.util.Collection stepHandlers>;
+
+        interfaceinvoke $r1.<java.util.Collection: void clear()>();
+
+        return;
+    }
+    public void computeDerivatives(double, double[], double[]) throws org.apache.commons.math3.exception.MaxCountExceededException, org.apache.commons.math3.exception.DimensionMismatchException, java.lang.NullPointerException
+    {
+        org.apache.commons.math3.ode.AbstractIntegrator r0;
+        double $d0;
+        double[] $r1, $r2;
+        org.apache.commons.math3.util.IntegerSequence$Incrementor $r3;
+        org.apache.commons.math3.ode.ExpandableStatefulODE $r4;
+
+        r0 := @this: org.apache.commons.math3.ode.AbstractIntegrator;
+
+        $d0 := @parameter0: double;
+
+        $r1 := @parameter1: double[];
+
+        $r2 := @parameter2: double[];
+
+        $r3 = r0.<org.apache.commons.math3.ode.AbstractIntegrator: org.apache.commons.math3.util.IntegerSequence$Incrementor evaluations>;
+
+        virtualinvoke $r3.<org.apache.commons.math3.util.IntegerSequence$Incrementor: void increment()>();
+
+        $r4 = r0.<org.apache.commons.math3.ode.AbstractIntegrator: org.apache.commons.math3.ode.ExpandableStatefulODE expandable>;
+
+        virtualinvoke $r4.<org.apache.commons.math3.ode.ExpandableStatefulODE: void computeDerivatives(double,double[],double[])>($d0, $r1, $r2);
+
+        return;
+    }
+    protected org.apache.commons.math3.util.IntegerSequence$Incrementor getCounter()
+    {
+        org.apache.commons.math3.ode.AbstractIntegrator r0;
+        org.apache.commons.math3.util.IntegerSequence$Incrementor r1;
+
+        r0 := @this: org.apache.commons.math3.ode.AbstractIntegrator;
+
+        r1 = r0.<org.apache.commons.math3.ode.AbstractIntegrator: org.apache.commons.math3.util.IntegerSequence$Incrementor evaluations>;
+
+        return r1;
+    }
+    public double getCurrentSignedStepsize()
+    {
+        org.apache.commons.math3.ode.AbstractIntegrator r0;
+        double d0;
+
+        r0 := @this: org.apache.commons.math3.ode.AbstractIntegrator;
+
+        d0 = r0.<org.apache.commons.math3.ode.AbstractIntegrator: double stepSize>;
+
+        return d0;
+    }
+    public double getCurrentStepStart()
+    {
+        org.apache.commons.math3.ode.AbstractIntegrator r0;
+        double d0;
+
+        r0 := @this: org.apache.commons.math3.ode.AbstractIntegrator;
+
+        d0 = r0.<org.apache.commons.math3.ode.AbstractIntegrator: double stepStart>;
+
+        return d0;
+    }
+    public int getEvaluations()
+    {
+        org.apache.commons.math3.ode.AbstractIntegrator r0;
+        int $i0;
+        org.apache.commons.math3.util.IntegerSequence$Incrementor $r1;
+
+        r0 := @this: org.apache.commons.math3.ode.AbstractIntegrator;
+
+        $r1 = r0.<org.apache.commons.math3.ode.AbstractIntegrator: org.apache.commons.math3.util.IntegerSequence$Incrementor evaluations>;
+
+        $i0 = virtualinvoke $r1.<org.apache.commons.math3.util.IntegerSequence$Incrementor: int getCount()>();
+
+        return $i0;
+    }
+    protected org.apache.commons.math3.util.Incrementor getEvaluationsCounter()
+    {
+        org.apache.commons.math3.ode.AbstractIntegrator r0;
+        org.apache.commons.math3.util.Incrementor $r1;
+        org.apache.commons.math3.util.IntegerSequence$Incrementor $r2;
+
+        r0 := @this: org.apache.commons.math3.ode.AbstractIntegrator;
+
+        $r2 = r0.<org.apache.commons.math3.ode.AbstractIntegrator: org.apache.commons.math3.util.IntegerSequence$Incrementor evaluations>;
+
+        $r1 = staticinvoke <org.apache.commons.math3.util.Incrementor: org.apache.commons.math3.util.Incrementor wrap(org.apache.commons.math3.util.IntegerSequence$Incrementor)>($r2);
+
+        return $r1;
+    }
+    public java.util.Collection getEventHandlers()
+    {
+        org.apache.commons.math3.ode.AbstractIntegrator r0;
+        java.util.ArrayList r1;
+        java.util.Collection $r2;
+        int $i0;
+        java.util.Iterator $r3;
+        boolean $z0;
+        java.lang.Object $r4;
+        org.apache.commons.math3.ode.events.EventState r5;
+        org.apache.commons.math3.ode.events.EventHandler $r6;
+
+        r0 := @this: org.apache.commons.math3.ode.AbstractIntegrator;
+
+        r1 = new java.util.ArrayList;
+
+        $r2 = r0.<org.apache.commons.math3.ode.AbstractIntegrator: java.util.Collection eventsStates>;
+
+        $i0 = interfaceinvoke $r2.<java.util.Collection: int size()>();
+
+        specialinvoke r1.<java.util.ArrayList: void <init>(int)>($i0);
+
+        $r2 = r0.<org.apache.commons.math3.ode.AbstractIntegrator: java.util.Collection eventsStates>;
+
+        $r3 = interfaceinvoke $r2.<java.util.Collection: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r3.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label2;
+
+        $r4 = interfaceinvoke $r3.<java.util.Iterator: java.lang.Object next()>();
+
+        r5 = (org.apache.commons.math3.ode.events.EventState) $r4;
+
+        $r6 = virtualinvoke r5.<org.apache.commons.math3.ode.events.EventState: org.apache.commons.math3.ode.events.EventHandler getEventHandler()>();
+
+        interfaceinvoke r1.<java.util.List: boolean add(java.lang.Object)>($r6);
+
+        goto label1;
+
+     label2:
+        $r2 = staticinvoke <java.util.Collections: java.util.Collection unmodifiableCollection(java.util.Collection)>(r1);
+
+        return $r2;
+    }
+    protected org.apache.commons.math3.ode.ExpandableStatefulODE getExpandable()
+    {
+        org.apache.commons.math3.ode.AbstractIntegrator r0;
+        org.apache.commons.math3.ode.ExpandableStatefulODE r1;
+
+        r0 := @this: org.apache.commons.math3.ode.AbstractIntegrator;
+
+        r1 = r0.<org.apache.commons.math3.ode.AbstractIntegrator: org.apache.commons.math3.ode.ExpandableStatefulODE expandable>;
+
+        return r1;
+    }
+    public int getMaxEvaluations()
+    {
+        org.apache.commons.math3.ode.AbstractIntegrator r0;
+        int $i0;
+        org.apache.commons.math3.util.IntegerSequence$Incrementor $r1;
+
+        r0 := @this: org.apache.commons.math3.ode.AbstractIntegrator;
+
+        $r1 = r0.<org.apache.commons.math3.ode.AbstractIntegrator: org.apache.commons.math3.util.IntegerSequence$Incrementor evaluations>;
+
+        $i0 = virtualinvoke $r1.<org.apache.commons.math3.util.IntegerSequence$Incrementor: int getMaximalCount()>();
+
+        return $i0;
+    }
+    public java.lang.String getName()
+    {
+        org.apache.commons.math3.ode.AbstractIntegrator r0;
+        java.lang.String r1;
+
+        r0 := @this: org.apache.commons.math3.ode.AbstractIntegrator;
+
+        r1 = r0.<org.apache.commons.math3.ode.AbstractIntegrator: java.lang.String name>;
+
+        return r1;
+    }
+    public java.util.Collection getStepHandlers()
+    {
+        org.apache.commons.math3.ode.AbstractIntegrator r0;
+        java.util.Collection $r1;
+
+        r0 := @this: org.apache.commons.math3.ode.AbstractIntegrator;
+
+        $r1 = r0.<org.apache.commons.math3.ode.AbstractIntegrator: java.util.Collection stepHandlers>;
+
+        $r1 = staticinvoke <java.util.Collections: java.util.Collection unmodifiableCollection(java.util.Collection)>($r1);
+
+        return $r1;
+    }
+    protected void initIntegration(double, double[], double)
+    {
+        org.apache.commons.math3.ode.AbstractIntegrator r0;
+        double $d0, $d1;
+        double[] $r1;
+        org.apache.commons.math3.util.IntegerSequence$Incrementor $r2;
+        java.util.Collection $r3;
+        java.util.Iterator $r4;
+        boolean $z0;
+        java.lang.Object $r5;
+        org.apache.commons.math3.ode.events.EventState r6;
+        org.apache.commons.math3.ode.ExpandableStatefulODE $r7;
+        org.apache.commons.math3.ode.events.EventHandler $r8;
+        org.apache.commons.math3.ode.sampling.StepHandler r9;
+
+        r0 := @this: org.apache.commons.math3.ode.AbstractIntegrator;
+
+        $d0 := @parameter0: double;
+
+        $r1 := @parameter1: double[];
+
+        $d1 := @parameter2: double;
+
+        $r2 = r0.<org.apache.commons.math3.ode.AbstractIntegrator: org.apache.commons.math3.util.IntegerSequence$Incrementor evaluations>;
+
+        $r2 = virtualinvoke $r2.<org.apache.commons.math3.util.IntegerSequence$Incrementor: org.apache.commons.math3.util.IntegerSequence$Incrementor withStart(int)>(0);
+
+        r0.<org.apache.commons.math3.ode.AbstractIntegrator: org.apache.commons.math3.util.IntegerSequence$Incrementor evaluations> = $r2;
+
+        $r3 = r0.<org.apache.commons.math3.ode.AbstractIntegrator: java.util.Collection eventsStates>;
+
+        $r4 = interfaceinvoke $r3.<java.util.Collection: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r4.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label2;
+
+        $r5 = interfaceinvoke $r4.<java.util.Iterator: java.lang.Object next()>();
+
+        r6 = (org.apache.commons.math3.ode.events.EventState) $r5;
+
+        $r7 = r0.<org.apache.commons.math3.ode.AbstractIntegrator: org.apache.commons.math3.ode.ExpandableStatefulODE expandable>;
+
+        virtualinvoke r6.<org.apache.commons.math3.ode.events.EventState: void setExpandable(org.apache.commons.math3.ode.ExpandableStatefulODE)>($r7);
+
+        $r8 = virtualinvoke r6.<org.apache.commons.math3.ode.events.EventState: org.apache.commons.math3.ode.events.EventHandler getEventHandler()>();
+
+        interfaceinvoke $r8.<org.apache.commons.math3.ode.events.EventHandler: void init(double,double[],double)>($d0, $r1, $d1);
+
+        goto label1;
+
+     label2:
+        $r3 = r0.<org.apache.commons.math3.ode.AbstractIntegrator: java.util.Collection stepHandlers>;
+
+        $r4 = interfaceinvoke $r3.<java.util.Collection: java.util.Iterator iterator()>();
+
+     label3:
+        $z0 = interfaceinvoke $r4.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label4;
+
+        $r5 = interfaceinvoke $r4.<java.util.Iterator: java.lang.Object next()>();
+
+        r9 = (org.apache.commons.math3.ode.sampling.StepHandler) $r5;
+
+        interfaceinvoke r9.<org.apache.commons.math3.ode.sampling.StepHandler: void init(double,double[],double)>($d0, $r1, $d1);
+
+        goto label3;
+
+     label4:
+        virtualinvoke r0.<org.apache.commons.math3.ode.AbstractIntegrator: void setStateInitialized(boolean)>(0);
+
+        return;
+    }
+    public double integrate(org.apache.commons.math3.ode.FirstOrderDifferentialEquations, double, double[], double, double[]) throws org.apache.commons.math3.exception.DimensionMismatchException, org.apache.commons.math3.exception.NumberIsTooSmallException, org.apache.commons.math3.exception.MaxCountExceededException, org.apache.commons.math3.exception.NoBracketingException
+    {
+        org.apache.commons.math3.ode.AbstractIntegrator r0;
+        org.apache.commons.math3.ode.FirstOrderDifferentialEquations $r1;
+        double $d0, $d1;
+        double[] $r2, $r3;
+        org.apache.commons.math3.ode.ExpandableStatefulODE r4;
+        int $i0, $i1;
+        org.apache.commons.math3.exception.DimensionMismatchException $r5;
+
+        r0 := @this: org.apache.commons.math3.ode.AbstractIntegrator;
+
+        $r1 := @parameter0: org.apache.commons.math3.ode.FirstOrderDifferentialEquations;
+
+        $d0 := @parameter1: double;
+
+        $r2 := @parameter2: double[];
+
+        $d1 := @parameter3: double;
+
+        $r3 := @parameter4: double[];
+
+        $i0 = lengthof $r2;
+
+        $i1 = interfaceinvoke $r1.<org.apache.commons.math3.ode.FirstOrderDifferentialEquations: int getDimension()>();
+
+        if $i0 == $i1 goto label1;
+
+        $r5 = new org.apache.commons.math3.exception.DimensionMismatchException;
+
+        $i0 = lengthof $r2;
+
+        $i1 = interfaceinvoke $r1.<org.apache.commons.math3.ode.FirstOrderDifferentialEquations: int getDimension()>();
+
+        specialinvoke $r5.<org.apache.commons.math3.exception.DimensionMismatchException: void <init>(int,int)>($i0, $i1);
+
+        throw $r5;
+
+     label1:
+        $i0 = lengthof $r3;
+
+        $i1 = interfaceinvoke $r1.<org.apache.commons.math3.ode.FirstOrderDifferentialEquations: int getDimension()>();
+
+        if $i0 == $i1 goto label2;
+
+        $r5 = new org.apache.commons.math3.exception.DimensionMismatchException;
+
+        $i0 = lengthof $r3;
+
+        $i1 = interfaceinvoke $r1.<org.apache.commons.math3.ode.FirstOrderDifferentialEquations: int getDimension()>();
+
+        specialinvoke $r5.<org.apache.commons.math3.exception.DimensionMismatchException: void <init>(int,int)>($i0, $i1);
+
+        throw $r5;
+
+     label2:
+        r4 = new org.apache.commons.math3.ode.ExpandableStatefulODE;
+
+        specialinvoke r4.<org.apache.commons.math3.ode.ExpandableStatefulODE: void <init>(org.apache.commons.math3.ode.FirstOrderDifferentialEquations)>($r1);
+
+        virtualinvoke r4.<org.apache.commons.math3.ode.ExpandableStatefulODE: void setTime(double)>($d0);
+
+        virtualinvoke r4.<org.apache.commons.math3.ode.ExpandableStatefulODE: void setPrimaryState(double[])>($r2);
+
+        virtualinvoke r0.<org.apache.commons.math3.ode.AbstractIntegrator: void integrate(org.apache.commons.math3.ode.ExpandableStatefulODE,double)>(r4, $d1);
+
+        $r2 = virtualinvoke r4.<org.apache.commons.math3.ode.ExpandableStatefulODE: double[] getPrimaryState()>();
+
+        $i0 = lengthof $r3;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r2, 0, $r3, 0, $i0);
+
+        $d0 = virtualinvoke r4.<org.apache.commons.math3.ode.ExpandableStatefulODE: double getTime()>();
+
+        return $d0;
+    }
+public abstract void integrate(org.apache.commons.math3.ode.ExpandableStatefulODE, double) throws org.apache.commons.math3.exception.NumberIsTooSmallException, org.apache.commons.math3.exception.DimensionMismatchException, org.apache.commons.math3.exception.MaxCountExceededException, org.apache.commons.math3.exception.NoBracketingException { 
+// no body
+} 
+    protected void sanityChecks(org.apache.commons.math3.ode.ExpandableStatefulODE, double) throws org.apache.commons.math3.exception.NumberIsTooSmallException, org.apache.commons.math3.exception.DimensionMismatchException
+    {
+        org.apache.commons.math3.ode.AbstractIntegrator r0;
+        org.apache.commons.math3.ode.ExpandableStatefulODE $r1;
+        double $d0, d1, $d2;
+        org.apache.commons.math3.exception.util.LocalizedFormats $r2;
+        byte $b0;
+        org.apache.commons.math3.exception.NumberIsTooSmallException $r3;
+        java.lang.Double $r4, $r5;
+
+        r0 := @this: org.apache.commons.math3.ode.AbstractIntegrator;
+
+        $r1 := @parameter0: org.apache.commons.math3.ode.ExpandableStatefulODE;
+
+        $d0 := @parameter1: double;
+
+        d1 = virtualinvoke $r1.<org.apache.commons.math3.ode.ExpandableStatefulODE: double getTime()>();
+
+        d1 = staticinvoke <org.apache.commons.math3.util.FastMath: double abs(double)>(d1);
+
+        $d2 = staticinvoke <org.apache.commons.math3.util.FastMath: double abs(double)>($d0);
+
+        d1 = staticinvoke <org.apache.commons.math3.util.FastMath: double max(double,double)>(d1, $d2);
+
+        d1 = staticinvoke <org.apache.commons.math3.util.FastMath: double ulp(double)>(d1);
+
+        d1 = 1000.0 * d1;
+
+        $d2 = virtualinvoke $r1.<org.apache.commons.math3.ode.ExpandableStatefulODE: double getTime()>();
+
+        $d0 = $d2 - $d0;
+
+        $d0 = staticinvoke <org.apache.commons.math3.util.FastMath: double abs(double)>($d0);
+
+        $b0 = $d0 cmpg d1;
+
+        if $b0 > 0 goto label1;
+
+        $r3 = new org.apache.commons.math3.exception.NumberIsTooSmallException;
+
+        $r2 = <org.apache.commons.math3.exception.util.LocalizedFormats: org.apache.commons.math3.exception.util.LocalizedFormats TOO_SMALL_INTEGRATION_INTERVAL>;
+
+        $r4 = staticinvoke <java.lang.Double: java.lang.Double valueOf(double)>($d0);
+
+        $r5 = staticinvoke <java.lang.Double: java.lang.Double valueOf(double)>(d1);
+
+        specialinvoke $r3.<org.apache.commons.math3.exception.NumberIsTooSmallException: void <init>(org.apache.commons.math3.exception.util.Localizable,java.lang.Number,java.lang.Number,boolean)>($r2, $r4, $r5, 0);
+
+        throw $r3;
+
+     label1:
+        return;
+    }
+    protected void setEquations(org.apache.commons.math3.ode.ExpandableStatefulODE)
+    {
+        org.apache.commons.math3.ode.AbstractIntegrator r0;
+        org.apache.commons.math3.ode.ExpandableStatefulODE $r1;
+
+        r0 := @this: org.apache.commons.math3.ode.AbstractIntegrator;
+
+        $r1 := @parameter0: org.apache.commons.math3.ode.ExpandableStatefulODE;
+
+        r0.<org.apache.commons.math3.ode.AbstractIntegrator: org.apache.commons.math3.ode.ExpandableStatefulODE expandable> = $r1;
+
+        return;
+    }
+    public void setMaxEvaluations(int)
+    {
+        org.apache.commons.math3.ode.AbstractIntegrator r0;
+        org.apache.commons.math3.util.IntegerSequence$Incrementor $r1;
+        int $i0;
+
+        r0 := @this: org.apache.commons.math3.ode.AbstractIntegrator;
+
+        $i0 := @parameter0: int;
+
+        $r1 = r0.<org.apache.commons.math3.ode.AbstractIntegrator: org.apache.commons.math3.util.IntegerSequence$Incrementor evaluations>;
+
+        if $i0 >= 0 goto label1;
+
+        $i0 = 2147483647;
+
+     label1:
+        $r1 = virtualinvoke $r1.<org.apache.commons.math3.util.IntegerSequence$Incrementor: org.apache.commons.math3.util.IntegerSequence$Incrementor withMaximalCount(int)>($i0);
+
+        r0.<org.apache.commons.math3.ode.AbstractIntegrator: org.apache.commons.math3.util.IntegerSequence$Incrementor evaluations> = $r1;
+
+        return;
+    }
+    protected void setStateInitialized(boolean)
+    {
+        org.apache.commons.math3.ode.AbstractIntegrator r0;
+        boolean $z0;
+
+        r0 := @this: org.apache.commons.math3.ode.AbstractIntegrator;
+
+        $z0 := @parameter0: boolean;
+
+        r0.<org.apache.commons.math3.ode.AbstractIntegrator: boolean statesInitialized> = $z0;
+
+        return;
+    }

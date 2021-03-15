@@ -1,0 +1,492 @@
+com.fsck.k9.ui.messageview.DownloadImageTask extends android.os.AsyncTask
+private static final java.lang.String[] ATTACHMENT_PROJECTION
+private static final java.lang.String DEFAULT_FILE_NAME
+private static final int DISPLAY_NAME_INDEX
+private final android.content.Context context
+    static void <clinit>()
+    {
+        java.lang.String[] $r0;
+
+        $r0 = newarray (java.lang.String)[2];
+
+        $r0[0] = "_id";
+
+        $r0[1] = "_display_name";
+
+        <com.fsck.k9.ui.messageview.DownloadImageTask: java.lang.String[] ATTACHMENT_PROJECTION> = $r0;
+
+        return;
+    }
+    public void <init>(android.content.Context)
+    {
+        com.fsck.k9.ui.messageview.DownloadImageTask r0;
+        android.content.Context $r1;
+
+        r0 := @this: com.fsck.k9.ui.messageview.DownloadImageTask;
+
+        $r1 := @parameter0: android.content.Context;
+
+        specialinvoke r0.<android.os.AsyncTask: void <init>()>();
+
+        $r1 = virtualinvoke $r1.<android.content.Context: android.content.Context getApplicationContext()>();
+
+        r0.<com.fsck.k9.ui.messageview.DownloadImageTask: android.content.Context context> = $r1;
+
+        return;
+    }
+    private java.lang.String downloadAndStoreImage(java.lang.String) throws java.io.IOException
+    {
+        com.fsck.k9.ui.messageview.DownloadImageTask r0;
+        java.lang.String $r1, $r5;
+        java.net.URL r2;
+        java.net.URLConnection $r3;
+        java.io.InputStream $r4;
+        java.lang.Throwable $r6;
+
+        r0 := @this: com.fsck.k9.ui.messageview.DownloadImageTask;
+
+        $r1 := @parameter0: java.lang.String;
+
+        r2 = new java.net.URL;
+
+        specialinvoke r2.<java.net.URL: void <init>(java.lang.String)>($r1);
+
+        $r3 = virtualinvoke r2.<java.net.URL: java.net.URLConnection openConnection()>();
+
+        $r4 = virtualinvoke $r3.<java.net.URLConnection: java.io.InputStream getInputStream()>();
+
+     label1:
+        $r1 = specialinvoke r0.<com.fsck.k9.ui.messageview.DownloadImageTask: java.lang.String getFileNameFromUrl(java.net.URL)>(r2);
+
+        $r5 = specialinvoke r0.<com.fsck.k9.ui.messageview.DownloadImageTask: java.lang.String getMimeType(java.net.URLConnection,java.lang.String)>($r3, $r1);
+
+        $r1 = specialinvoke r0.<com.fsck.k9.ui.messageview.DownloadImageTask: java.lang.String getFileNameWithExtension(java.lang.String,java.lang.String)>($r1, $r5);
+
+        $r1 = specialinvoke r0.<com.fsck.k9.ui.messageview.DownloadImageTask: java.lang.String writeFileToStorage(java.lang.String,java.io.InputStream)>($r1, $r4);
+
+     label2:
+        virtualinvoke $r4.<java.io.InputStream: void close()>();
+
+        return $r1;
+
+     label3:
+        $r6 := @caughtexception;
+
+        virtualinvoke $r4.<java.io.InputStream: void close()>();
+
+        throw $r6;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+    private java.lang.String fetchAndStoreImage(java.lang.String) throws java.io.IOException
+    {
+        com.fsck.k9.ui.messageview.DownloadImageTask r0;
+        java.lang.String $r1, $r5;
+        android.content.Context $r2;
+        android.content.ContentResolver $r3;
+        android.net.Uri $r4;
+        java.io.InputStream $r6;
+        java.lang.Throwable $r7;
+
+        r0 := @this: com.fsck.k9.ui.messageview.DownloadImageTask;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = r0.<com.fsck.k9.ui.messageview.DownloadImageTask: android.content.Context context>;
+
+        $r3 = virtualinvoke $r2.<android.content.Context: android.content.ContentResolver getContentResolver()>();
+
+        $r4 = staticinvoke <android.net.Uri: android.net.Uri parse(java.lang.String)>($r1);
+
+        $r1 = specialinvoke r0.<com.fsck.k9.ui.messageview.DownloadImageTask: java.lang.String getFileNameFromContentProvider(android.content.ContentResolver,android.net.Uri)>($r3, $r4);
+
+        $r5 = specialinvoke r0.<com.fsck.k9.ui.messageview.DownloadImageTask: java.lang.String getMimeType(android.content.ContentResolver,android.net.Uri,java.lang.String)>($r3, $r4, $r1);
+
+        $r6 = virtualinvoke $r3.<android.content.ContentResolver: java.io.InputStream openInputStream(android.net.Uri)>($r4);
+
+     label1:
+        $r1 = specialinvoke r0.<com.fsck.k9.ui.messageview.DownloadImageTask: java.lang.String getFileNameWithExtension(java.lang.String,java.lang.String)>($r1, $r5);
+
+        $r1 = specialinvoke r0.<com.fsck.k9.ui.messageview.DownloadImageTask: java.lang.String writeFileToStorage(java.lang.String,java.io.InputStream)>($r1, $r6);
+
+     label2:
+        virtualinvoke $r6.<java.io.InputStream: void close()>();
+
+        return $r1;
+
+     label3:
+        $r7 := @caughtexception;
+
+        virtualinvoke $r6.<java.io.InputStream: void close()>();
+
+        throw $r7;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+    private java.lang.String getFileNameFromContentProvider(android.content.ContentResolver, android.net.Uri)
+    {
+        com.fsck.k9.ui.messageview.DownloadImageTask r0;
+        android.content.ContentResolver $r1;
+        android.net.Uri $r2;
+        java.lang.String[] $r3;
+        java.lang.String r4;
+        android.database.Cursor $r5;
+        boolean $z0;
+        java.lang.Throwable $r6;
+
+        r0 := @this: com.fsck.k9.ui.messageview.DownloadImageTask;
+
+        $r1 := @parameter0: android.content.ContentResolver;
+
+        $r2 := @parameter1: android.net.Uri;
+
+        r4 = "saved_image";
+
+        $r3 = <com.fsck.k9.ui.messageview.DownloadImageTask: java.lang.String[] ATTACHMENT_PROJECTION>;
+
+        $r5 = virtualinvoke $r1.<android.content.ContentResolver: android.database.Cursor query(android.net.Uri,java.lang.String[],java.lang.String,java.lang.String[],java.lang.String)>($r2, $r3, null, null, null);
+
+        if $r5 == null goto label8;
+
+     label1:
+        $z0 = interfaceinvoke $r5.<android.database.Cursor: boolean moveToNext()>();
+
+     label2:
+        if $z0 == 0 goto label6;
+
+     label3:
+        $z0 = interfaceinvoke $r5.<android.database.Cursor: boolean isNull(int)>(1);
+
+     label4:
+        if $z0 != 0 goto label6;
+
+     label5:
+        r4 = interfaceinvoke $r5.<android.database.Cursor: java.lang.String getString(int)>(1);
+
+     label6:
+        interfaceinvoke $r5.<android.database.Cursor: void close()>();
+
+        return r4;
+
+     label7:
+        $r6 := @caughtexception;
+
+        interfaceinvoke $r5.<android.database.Cursor: void close()>();
+
+        throw $r6;
+
+     label8:
+        return "saved_image";
+
+        catch java.lang.Throwable from label1 to label2 with label7;
+        catch java.lang.Throwable from label3 to label4 with label7;
+        catch java.lang.Throwable from label5 to label6 with label7;
+    }
+    private java.lang.String getFileNameFromUrl(java.net.URL)
+    {
+        com.fsck.k9.ui.messageview.DownloadImageTask r0;
+        java.net.URL $r1;
+        java.lang.String $r2;
+        int $i0, $i1, $i2;
+
+        r0 := @this: com.fsck.k9.ui.messageview.DownloadImageTask;
+
+        $r1 := @parameter0: java.net.URL;
+
+        $r2 = virtualinvoke $r1.<java.net.URL: java.lang.String getPath()>();
+
+        $i0 = virtualinvoke $r2.<java.lang.String: int lastIndexOf(java.lang.String)>("/");
+
+        if $i0 == -1 goto label1;
+
+        $i1 = $i0 + 1;
+
+        $i2 = virtualinvoke $r2.<java.lang.String: int length()>();
+
+        if $i1 >= $i2 goto label1;
+
+        $i0 = $i0 + 1;
+
+        $r2 = virtualinvoke $r2.<java.lang.String: java.lang.String substring(int)>($i0);
+
+        $r2 = staticinvoke <com.fsck.k9.helper.UrlEncodingHelper: java.lang.String decodeUtf8(java.lang.String)>($r2);
+
+        return $r2;
+
+     label1:
+        return "saved_image";
+    }
+    private java.lang.String getFileNameWithExtension(java.lang.String, java.lang.String)
+    {
+        com.fsck.k9.ui.messageview.DownloadImageTask r0;
+        java.lang.String $r1, r2, r3;
+        int $i0;
+        java.lang.StringBuilder $r4;
+
+        r0 := @this: com.fsck.k9.ui.messageview.DownloadImageTask;
+
+        r2 := @parameter0: java.lang.String;
+
+        $r1 := @parameter1: java.lang.String;
+
+        $i0 = virtualinvoke r2.<java.lang.String: int indexOf(int)>(46);
+
+        if $i0 == -1 goto label1;
+
+        return r2;
+
+     label1:
+        r3 = "jpeg";
+
+        if $r1 == null goto label2;
+
+        $r1 = staticinvoke <com.fsck.k9.mail.internet.MimeUtility: java.lang.String getExtensionByMimeType(java.lang.String)>($r1);
+
+        if $r1 == null goto label2;
+
+        r3 = $r1;
+
+     label2:
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r2);
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".");
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r3);
+
+        r2 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return r2;
+    }
+    private java.lang.String getMimeType(android.content.ContentResolver, android.net.Uri, java.lang.String)
+    {
+        com.fsck.k9.ui.messageview.DownloadImageTask r0;
+        android.content.ContentResolver $r1;
+        android.net.Uri $r2;
+        java.lang.String $r3;
+        int $i0;
+
+        r0 := @this: com.fsck.k9.ui.messageview.DownloadImageTask;
+
+        $r1 := @parameter0: android.content.ContentResolver;
+
+        $r2 := @parameter1: android.net.Uri;
+
+        $r3 := @parameter2: java.lang.String;
+
+        $i0 = virtualinvoke $r3.<java.lang.String: int indexOf(int)>(46);
+
+        if $i0 != -1 goto label1;
+
+        $r3 = virtualinvoke $r1.<android.content.ContentResolver: java.lang.String getType(android.net.Uri)>($r2);
+
+        return $r3;
+
+     label1:
+        return null;
+    }
+    private java.lang.String getMimeType(java.net.URLConnection, java.lang.String)
+    {
+        com.fsck.k9.ui.messageview.DownloadImageTask r0;
+        java.net.URLConnection $r1;
+        java.lang.String $r2;
+        int $i0;
+
+        r0 := @this: com.fsck.k9.ui.messageview.DownloadImageTask;
+
+        $r1 := @parameter0: java.net.URLConnection;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $i0 = virtualinvoke $r2.<java.lang.String: int indexOf(int)>(46);
+
+        if $i0 != -1 goto label1;
+
+        $r2 = virtualinvoke $r1.<java.net.URLConnection: java.lang.String getContentType()>();
+
+        return $r2;
+
+     label1:
+        return null;
+    }
+    private java.lang.String writeFileToStorage(java.lang.String, java.io.InputStream) throws java.io.IOException
+    {
+        com.fsck.k9.ui.messageview.DownloadImageTask r0;
+        java.lang.String $r1, $r5;
+        java.io.InputStream $r2;
+        java.io.File r3;
+        java.io.FileOutputStream r4;
+        java.lang.Throwable $r6;
+
+        r0 := @this: com.fsck.k9.ui.messageview.DownloadImageTask;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.io.InputStream;
+
+        $r1 = staticinvoke <com.fsck.k9.helper.FileHelper: java.lang.String sanitizeFilename(java.lang.String)>($r1);
+
+        r3 = new java.io.File;
+
+        $r5 = staticinvoke <com.fsck.k9.K9: java.lang.String getAttachmentDefaultPath()>();
+
+        specialinvoke r3.<java.io.File: void <init>(java.lang.String)>($r5);
+
+        r3 = staticinvoke <com.fsck.k9.helper.FileHelper: java.io.File createUniqueFile(java.io.File,java.lang.String)>(r3, $r1);
+
+        r4 = new java.io.FileOutputStream;
+
+        specialinvoke r4.<java.io.FileOutputStream: void <init>(java.io.File)>(r3);
+
+     label1:
+        staticinvoke <org.apache.commons.io.IOUtils: int copy(java.io.InputStream,java.io.OutputStream)>($r2, r4);
+
+        virtualinvoke r4.<java.io.FileOutputStream: void flush()>();
+
+     label2:
+        virtualinvoke r4.<java.io.FileOutputStream: void close()>();
+
+        $r1 = virtualinvoke r3.<java.io.File: java.lang.String getName()>();
+
+        return $r1;
+
+     label3:
+        $r6 := @caughtexception;
+
+        virtualinvoke r4.<java.io.FileOutputStream: void close()>();
+
+        throw $r6;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+    protected volatile java.lang.Object doInBackground(java.lang.Object[])
+    {
+        com.fsck.k9.ui.messageview.DownloadImageTask r0;
+        java.lang.String $r1;
+        java.lang.Object[] $r2;
+        java.lang.String[] $r3;
+
+        r0 := @this: com.fsck.k9.ui.messageview.DownloadImageTask;
+
+        $r2 := @parameter0: java.lang.Object[];
+
+        $r3 = (java.lang.String[]) $r2;
+
+        $r1 = virtualinvoke r0.<com.fsck.k9.ui.messageview.DownloadImageTask: java.lang.String doInBackground(java.lang.String[])>($r3);
+
+        return $r1;
+    }
+    protected transient java.lang.String doInBackground(java.lang.String[])
+    {
+        com.fsck.k9.ui.messageview.DownloadImageTask r0;
+        java.lang.String[] $r1;
+        java.lang.Exception r2;
+        java.lang.String r3;
+        boolean $z0;
+        java.lang.Object[] $r4;
+
+        r0 := @this: com.fsck.k9.ui.messageview.DownloadImageTask;
+
+        $r1 := @parameter0: java.lang.String[];
+
+        r3 = $r1[0];
+
+     label1:
+        $z0 = virtualinvoke r3.<java.lang.String: boolean startsWith(java.lang.String)>("http");
+
+     label2:
+        if $z0 == 0 goto label5;
+
+     label3:
+        r3 = specialinvoke r0.<com.fsck.k9.ui.messageview.DownloadImageTask: java.lang.String downloadAndStoreImage(java.lang.String)>(r3);
+
+     label4:
+        return r3;
+
+     label5:
+        r3 = specialinvoke r0.<com.fsck.k9.ui.messageview.DownloadImageTask: java.lang.String fetchAndStoreImage(java.lang.String)>(r3);
+
+     label6:
+        return r3;
+
+     label7:
+        r2 := @caughtexception;
+
+        $r4 = newarray (java.lang.Object)[0];
+
+        staticinvoke <timber.log.Timber: void e(java.lang.Throwable,java.lang.String,java.lang.Object[])>(r2, "Error while downloading image", $r4);
+
+        return null;
+
+        catch java.lang.Exception from label1 to label2 with label7;
+        catch java.lang.Exception from label3 to label4 with label7;
+        catch java.lang.Exception from label5 to label6 with label7;
+    }
+    protected volatile void onPostExecute(java.lang.Object)
+    {
+        com.fsck.k9.ui.messageview.DownloadImageTask r0;
+        java.lang.Object $r1;
+        java.lang.String $r2;
+
+        r0 := @this: com.fsck.k9.ui.messageview.DownloadImageTask;
+
+        $r1 := @parameter0: java.lang.Object;
+
+        $r2 = (java.lang.String) $r1;
+
+        virtualinvoke r0.<com.fsck.k9.ui.messageview.DownloadImageTask: void onPostExecute(java.lang.String)>($r2);
+
+        return;
+    }
+    protected void onPostExecute(java.lang.String)
+    {
+        com.fsck.k9.ui.messageview.DownloadImageTask r0;
+        java.lang.String $r1;
+        java.lang.Object[] $r2;
+        boolean z0;
+        android.content.Context $r3;
+        android.widget.Toast $r4;
+
+        r0 := @this: com.fsck.k9.ui.messageview.DownloadImageTask;
+
+        $r1 := @parameter0: java.lang.String;
+
+        if $r1 != null goto label3;
+
+        z0 = 1;
+
+     label1:
+        if z0 == 0 goto label4;
+
+        $r3 = r0.<com.fsck.k9.ui.messageview.DownloadImageTask: android.content.Context context>;
+
+        $r1 = virtualinvoke $r3.<android.content.Context: java.lang.String getString(int)>(2131165808);
+
+     label2:
+        $r3 = r0.<com.fsck.k9.ui.messageview.DownloadImageTask: android.content.Context context>;
+
+        $r4 = staticinvoke <android.widget.Toast: android.widget.Toast makeText(android.content.Context,java.lang.CharSequence,int)>($r3, $r1, 1);
+
+        virtualinvoke $r4.<android.widget.Toast: void show()>();
+
+        return;
+
+     label3:
+        z0 = 0;
+
+        goto label1;
+
+     label4:
+        $r3 = r0.<com.fsck.k9.ui.messageview.DownloadImageTask: android.content.Context context>;
+
+        $r2 = newarray (java.lang.Object)[1];
+
+        $r2[0] = $r1;
+
+        $r1 = virtualinvoke $r3.<android.content.Context: java.lang.String getString(int,java.lang.Object[])>(2131165807, $r2);
+
+        goto label2;
+    }

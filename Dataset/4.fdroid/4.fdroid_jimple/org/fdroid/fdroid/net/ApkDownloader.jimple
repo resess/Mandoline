@@ -1,0 +1,817 @@
+org.fdroid.fdroid.net.ApkDownloader extends java.lang.Object implements org.fdroid.fdroid.net.AsyncDownloader$Listener
+public static final java.lang.String ACTION_STATUS
+public static final int ERROR_DOWNLOAD_FAILED
+public static final int ERROR_HASH_MISMATCH
+public static final java.lang.String EVENT_APK_DOWNLOAD_CANCELLED
+public static final java.lang.String EVENT_APK_DOWNLOAD_COMPLETE
+public static final java.lang.String EVENT_DATA_ERROR_TYPE
+public static final java.lang.String EVENT_ERROR
+private static final java.lang.String EVENT_SOURCE_ID
+public static final java.lang.String EXTRA_TYPE
+public static final java.lang.String EXTRA_URL
+private static final java.lang.String TAG
+private static long downloadIdCounter
+private final org.fdroid.fdroid.data.App app
+private final android.content.Context context
+private org.fdroid.fdroid.data.Credentials credentials
+private final org.fdroid.fdroid.data.Apk curApk
+private org.fdroid.fdroid.net.AsyncDownloader dlWrapper
+private final long id
+private boolean isComplete
+private org.fdroid.fdroid.ProgressListener listener
+private final org.fdroid.fdroid.data.SanitizedFile localFile
+private final org.fdroid.fdroid.data.SanitizedFile potentiallyCachedFile
+private final java.lang.String repoAddress
+    public void <init>(android.content.Context, org.fdroid.fdroid.data.App, org.fdroid.fdroid.data.Apk, java.lang.String)
+    {
+        org.fdroid.fdroid.net.ApkDownloader r0;
+        android.content.Context $r1;
+        org.fdroid.fdroid.data.App $r2;
+        org.fdroid.fdroid.data.Apk $r3;
+        java.lang.String $r4;
+        long $l0;
+        org.fdroid.fdroid.data.SanitizedFile $r5, $r7;
+        java.io.File $r6;
+
+        r0 := @this: org.fdroid.fdroid.net.ApkDownloader;
+
+        $r1 := @parameter0: android.content.Context;
+
+        $r2 := @parameter1: org.fdroid.fdroid.data.App;
+
+        $r3 := @parameter2: org.fdroid.fdroid.data.Apk;
+
+        $r4 := @parameter3: java.lang.String;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $l0 = <org.fdroid.fdroid.net.ApkDownloader: long downloadIdCounter>;
+
+        $l0 = $l0 + 1L;
+
+        <org.fdroid.fdroid.net.ApkDownloader: long downloadIdCounter> = $l0;
+
+        r0.<org.fdroid.fdroid.net.ApkDownloader: long id> = $l0;
+
+        r0.<org.fdroid.fdroid.net.ApkDownloader: android.content.Context context> = $r1;
+
+        r0.<org.fdroid.fdroid.net.ApkDownloader: org.fdroid.fdroid.data.App app> = $r2;
+
+        r0.<org.fdroid.fdroid.net.ApkDownloader: org.fdroid.fdroid.data.Apk curApk> = $r3;
+
+        r0.<org.fdroid.fdroid.net.ApkDownloader: java.lang.String repoAddress> = $r4;
+
+        $r5 = new org.fdroid.fdroid.data.SanitizedFile;
+
+        $r6 = staticinvoke <org.fdroid.fdroid.Utils: java.io.File getApkDownloadDir(android.content.Context)>($r1);
+
+        $r4 = $r3.<org.fdroid.fdroid.data.Apk: java.lang.String apkName>;
+
+        specialinvoke $r5.<org.fdroid.fdroid.data.SanitizedFile: void <init>(java.io.File,java.lang.String)>($r6, $r4);
+
+        r0.<org.fdroid.fdroid.net.ApkDownloader: org.fdroid.fdroid.data.SanitizedFile localFile> = $r5;
+
+        $r5 = new org.fdroid.fdroid.data.SanitizedFile;
+
+        $r7 = staticinvoke <org.fdroid.fdroid.Utils: org.fdroid.fdroid.data.SanitizedFile getApkCacheDir(android.content.Context)>($r1);
+
+        $r4 = $r3.<org.fdroid.fdroid.data.Apk: java.lang.String apkName>;
+
+        specialinvoke $r5.<org.fdroid.fdroid.data.SanitizedFile: void <init>(java.io.File,java.lang.String)>($r7, $r4);
+
+        r0.<org.fdroid.fdroid.net.ApkDownloader: org.fdroid.fdroid.data.SanitizedFile potentiallyCachedFile> = $r5;
+
+        return;
+    }
+    private void cacheIfRequired()
+    {
+        org.fdroid.fdroid.net.ApkDownloader r0;
+        org.fdroid.fdroid.Preferences $r1;
+        boolean $z0;
+        java.lang.StringBuilder $r2;
+        org.fdroid.fdroid.data.SanitizedFile $r3, $r5;
+        java.lang.String $r4;
+
+        r0 := @this: org.fdroid.fdroid.net.ApkDownloader;
+
+        $r1 = staticinvoke <org.fdroid.fdroid.Preferences: org.fdroid.fdroid.Preferences get()>();
+
+        $z0 = virtualinvoke $r1.<org.fdroid.fdroid.Preferences: boolean shouldCacheApks()>();
+
+        if $z0 == 0 goto label1;
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Copying .apk file to cache at ");
+
+        $r3 = r0.<org.fdroid.fdroid.net.ApkDownloader: org.fdroid.fdroid.data.SanitizedFile potentiallyCachedFile>;
+
+        $r4 = virtualinvoke $r3.<org.fdroid.fdroid.data.SanitizedFile: java.lang.String getAbsolutePath()>();
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r4 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <org.fdroid.fdroid.Utils: void debugLog(java.lang.String,java.lang.String)>("ApkDownloader", $r4);
+
+        $r3 = r0.<org.fdroid.fdroid.net.ApkDownloader: org.fdroid.fdroid.data.SanitizedFile localFile>;
+
+        $r5 = r0.<org.fdroid.fdroid.net.ApkDownloader: org.fdroid.fdroid.data.SanitizedFile potentiallyCachedFile>;
+
+        staticinvoke <org.fdroid.fdroid.Utils: boolean copyQuietly(java.io.File,java.io.File)>($r3, $r5);
+
+     label1:
+        return;
+    }
+    private org.fdroid.fdroid.Hasher createHasher(java.io.File)
+    {
+        org.fdroid.fdroid.net.ApkDownloader r0;
+        java.io.File $r1;
+        java.security.NoSuchAlgorithmException r2;
+        org.fdroid.fdroid.Hasher r3;
+        org.fdroid.fdroid.data.Apk $r4;
+        java.lang.String $r5;
+        java.lang.StringBuilder $r6;
+
+        r0 := @this: org.fdroid.fdroid.net.ApkDownloader;
+
+        $r1 := @parameter0: java.io.File;
+
+        r3 = new org.fdroid.fdroid.Hasher;
+
+        $r4 = r0.<org.fdroid.fdroid.net.ApkDownloader: org.fdroid.fdroid.data.Apk curApk>;
+
+        $r5 = $r4.<org.fdroid.fdroid.data.Apk: java.lang.String hashType>;
+
+     label1:
+        specialinvoke r3.<org.fdroid.fdroid.Hasher: void <init>(java.lang.String,java.io.File)>($r5, $r1);
+
+     label2:
+        return r3;
+
+     label3:
+        r2 := @caughtexception;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Error verifying hash of cached apk at ");
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r1);
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(". ");
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("I don\'t understand what the ");
+
+        $r4 = r0.<org.fdroid.fdroid.net.ApkDownloader: org.fdroid.fdroid.data.Apk curApk>;
+
+        $r5 = $r4.<org.fdroid.fdroid.data.Apk: java.lang.String hashType>;
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" hash algorithm is :(");
+
+        $r5 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String)>("ApkDownloader", $r5);
+
+        return null;
+
+        catch java.security.NoSuchAlgorithmException from label1 to label2 with label3;
+    }
+    private void delete(java.io.File)
+    {
+        org.fdroid.fdroid.net.ApkDownloader r0;
+        java.io.File $r1;
+        boolean $z0;
+        java.lang.StringBuilder $r2;
+        java.lang.String $r3;
+
+        r0 := @this: org.fdroid.fdroid.net.ApkDownloader;
+
+        $r1 := @parameter0: java.io.File;
+
+        $z0 = virtualinvoke $r1.<java.io.File: boolean exists()>();
+
+        if $z0 == 0 goto label1;
+
+        $z0 = virtualinvoke $r1.<java.io.File: boolean delete()>();
+
+        if $z0 != 0 goto label1;
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Could not delete file ");
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r1);
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String)>("ApkDownloader", $r3);
+
+     label1:
+        return;
+    }
+    private boolean hashMatches(java.io.File)
+    {
+        org.fdroid.fdroid.net.ApkDownloader r0;
+        java.io.File $r1;
+        boolean $z0;
+        org.fdroid.fdroid.Hasher $r2;
+        org.fdroid.fdroid.data.Apk $r3;
+        java.lang.String $r4;
+
+        r0 := @this: org.fdroid.fdroid.net.ApkDownloader;
+
+        $r1 := @parameter0: java.io.File;
+
+        $z0 = virtualinvoke $r1.<java.io.File: boolean exists()>();
+
+        if $z0 != 0 goto label1;
+
+        return 0;
+
+     label1:
+        $r2 = specialinvoke r0.<org.fdroid.fdroid.net.ApkDownloader: org.fdroid.fdroid.Hasher createHasher(java.io.File)>($r1);
+
+        if $r2 == null goto label2;
+
+        $r3 = r0.<org.fdroid.fdroid.net.ApkDownloader: org.fdroid.fdroid.data.Apk curApk>;
+
+        $r4 = $r3.<org.fdroid.fdroid.data.Apk: java.lang.String hash>;
+
+        $z0 = virtualinvoke $r2.<org.fdroid.fdroid.Hasher: boolean match(java.lang.String)>($r4);
+
+        if $z0 == 0 goto label2;
+
+        return 1;
+
+     label2:
+        return 0;
+    }
+    private void prepareApkFileAndSendCompleteMessage()
+    {
+        org.fdroid.fdroid.net.ApkDownloader r0;
+        org.fdroid.fdroid.data.SanitizedFile $r1;
+
+        r0 := @this: org.fdroid.fdroid.net.ApkDownloader;
+
+        $r1 = r0.<org.fdroid.fdroid.net.ApkDownloader: org.fdroid.fdroid.data.SanitizedFile localFile>;
+
+        staticinvoke <org.fdroid.fdroid.compat.FileCompat: boolean setReadable(org.fdroid.fdroid.data.SanitizedFile,boolean,boolean)>($r1, 1, 0);
+
+        r0.<org.fdroid.fdroid.net.ApkDownloader: boolean isComplete> = 1;
+
+        specialinvoke r0.<org.fdroid.fdroid.net.ApkDownloader: void sendMessage(java.lang.String)>("apkDownloadComplete");
+
+        return;
+    }
+    private void sendError(int)
+    {
+        org.fdroid.fdroid.net.ApkDownloader r0;
+        int $i0;
+        android.os.Bundle r1;
+        org.fdroid.fdroid.ProgressListener$Event $r2;
+
+        r0 := @this: org.fdroid.fdroid.net.ApkDownloader;
+
+        $i0 := @parameter0: int;
+
+        r1 = new android.os.Bundle;
+
+        specialinvoke r1.<android.os.Bundle: void <init>(int)>(1);
+
+        virtualinvoke r1.<android.os.Bundle: void putInt(java.lang.String,int)>("apkDownloadErrorType", $i0);
+
+        $r2 = new org.fdroid.fdroid.ProgressListener$Event;
+
+        specialinvoke $r2.<org.fdroid.fdroid.ProgressListener$Event: void <init>(java.lang.String,android.os.Bundle)>("apkDownloadError", r1);
+
+        specialinvoke r0.<org.fdroid.fdroid.net.ApkDownloader: void sendProgressEvent(org.fdroid.fdroid.ProgressListener$Event)>($r2);
+
+        return;
+    }
+    private void sendMessage(java.lang.String)
+    {
+        org.fdroid.fdroid.net.ApkDownloader r0;
+        java.lang.String $r1;
+        org.fdroid.fdroid.ProgressListener$Event $r2;
+
+        r0 := @this: org.fdroid.fdroid.net.ApkDownloader;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = new org.fdroid.fdroid.ProgressListener$Event;
+
+        specialinvoke $r2.<org.fdroid.fdroid.ProgressListener$Event: void <init>(java.lang.String)>($r1);
+
+        specialinvoke r0.<org.fdroid.fdroid.net.ApkDownloader: void sendProgressEvent(org.fdroid.fdroid.ProgressListener$Event)>($r2);
+
+        return;
+    }
+    private void sendProgressEvent(org.fdroid.fdroid.ProgressListener$Event)
+    {
+        org.fdroid.fdroid.net.ApkDownloader r0;
+        org.fdroid.fdroid.ProgressListener$Event $r1;
+        android.content.Intent r2;
+        org.fdroid.fdroid.data.Apk $r3;
+        long $l0;
+        android.os.Bundle $r4;
+        org.fdroid.fdroid.ProgressListener $r5;
+        java.lang.String $r6;
+        android.content.Context $r7;
+        android.support.v4.content.LocalBroadcastManager $r8;
+
+        r0 := @this: org.fdroid.fdroid.net.ApkDownloader;
+
+        $r1 := @parameter0: org.fdroid.fdroid.ProgressListener$Event;
+
+        $r4 = virtualinvoke $r1.<org.fdroid.fdroid.ProgressListener$Event: android.os.Bundle getData()>();
+
+        $l0 = r0.<org.fdroid.fdroid.net.ApkDownloader: long id>;
+
+        virtualinvoke $r4.<android.os.Bundle: void putLong(java.lang.String,long)>("sourceId", $l0);
+
+        $r5 = r0.<org.fdroid.fdroid.net.ApkDownloader: org.fdroid.fdroid.ProgressListener listener>;
+
+        if $r5 == null goto label1;
+
+        $r5 = r0.<org.fdroid.fdroid.net.ApkDownloader: org.fdroid.fdroid.ProgressListener listener>;
+
+        interfaceinvoke $r5.<org.fdroid.fdroid.ProgressListener: void onProgress(org.fdroid.fdroid.ProgressListener$Event)>($r1);
+
+     label1:
+        r2 = new android.content.Intent;
+
+        specialinvoke r2.<android.content.Intent: void <init>(java.lang.String)>("apkDownloadStatus");
+
+        $r4 = virtualinvoke $r1.<org.fdroid.fdroid.ProgressListener$Event: android.os.Bundle getData()>();
+
+        virtualinvoke r2.<android.content.Intent: android.content.Intent putExtras(android.os.Bundle)>($r4);
+
+        $r6 = $r1.<org.fdroid.fdroid.ProgressListener$Event: java.lang.String type>;
+
+        virtualinvoke r2.<android.content.Intent: android.content.Intent putExtra(java.lang.String,java.lang.String)>("apkDownloadStatusType", $r6);
+
+        $r6 = r0.<org.fdroid.fdroid.net.ApkDownloader: java.lang.String repoAddress>;
+
+        $r3 = r0.<org.fdroid.fdroid.net.ApkDownloader: org.fdroid.fdroid.data.Apk curApk>;
+
+        $r6 = staticinvoke <org.fdroid.fdroid.Utils: java.lang.String getApkUrl(java.lang.String,org.fdroid.fdroid.data.Apk)>($r6, $r3);
+
+        virtualinvoke r2.<android.content.Intent: android.content.Intent putExtra(java.lang.String,java.lang.String)>("apkDownloadUrl", $r6);
+
+        $r7 = r0.<org.fdroid.fdroid.net.ApkDownloader: android.content.Context context>;
+
+        $r8 = staticinvoke <android.support.v4.content.LocalBroadcastManager: android.support.v4.content.LocalBroadcastManager getInstance(android.content.Context)>($r7);
+
+        virtualinvoke $r8.<android.support.v4.content.LocalBroadcastManager: boolean sendBroadcast(android.content.Intent)>(r2);
+
+        return;
+    }
+    private boolean verifyOrDelete(java.io.File)
+    {
+        org.fdroid.fdroid.net.ApkDownloader r0;
+        java.io.File $r1;
+        boolean $z0;
+        java.lang.StringBuilder $r2;
+        java.lang.String $r3;
+
+        r0 := @this: org.fdroid.fdroid.net.ApkDownloader;
+
+        $r1 := @parameter0: java.io.File;
+
+        $z0 = virtualinvoke $r1.<java.io.File: boolean exists()>();
+
+        if $z0 == 0 goto label2;
+
+        $z0 = specialinvoke r0.<org.fdroid.fdroid.net.ApkDownloader: boolean hashMatches(java.io.File)>($r1);
+
+        if $z0 == 0 goto label1;
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Using cached apk at ");
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r1);
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <org.fdroid.fdroid.Utils: void debugLog(java.lang.String,java.lang.String)>("ApkDownloader", $r3);
+
+        return 1;
+
+     label1:
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Not using cached apk at ");
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r1);
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("(hash doesn\'t match, will delete file)");
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <org.fdroid.fdroid.Utils: void debugLog(java.lang.String,java.lang.String)>("ApkDownloader", $r3);
+
+        specialinvoke r0.<org.fdroid.fdroid.net.ApkDownloader: void delete(java.io.File)>($r1);
+
+     label2:
+        return 0;
+    }
+    public void cancel(boolean)
+    {
+        org.fdroid.fdroid.net.ApkDownloader r0;
+        boolean $z0;
+        org.fdroid.fdroid.net.AsyncDownloader $r1;
+
+        r0 := @this: org.fdroid.fdroid.net.ApkDownloader;
+
+        $z0 := @parameter0: boolean;
+
+        $r1 = r0.<org.fdroid.fdroid.net.ApkDownloader: org.fdroid.fdroid.net.AsyncDownloader dlWrapper>;
+
+        if $r1 == null goto label1;
+
+        $r1 = r0.<org.fdroid.fdroid.net.ApkDownloader: org.fdroid.fdroid.net.AsyncDownloader dlWrapper>;
+
+        interfaceinvoke $r1.<org.fdroid.fdroid.net.AsyncDownloader: void attemptCancel(boolean)>($z0);
+
+     label1:
+        return;
+    }
+    public boolean download()
+    {
+        org.fdroid.fdroid.net.ApkDownloader r0;
+        org.fdroid.fdroid.data.Credentials $r1;
+        java.io.IOException r2;
+        org.fdroid.fdroid.data.SanitizedFile $r3, $r4;
+        boolean $z0;
+        java.lang.String $r5, $r8, $r11;
+        org.fdroid.fdroid.data.Apk $r6;
+        java.lang.StringBuilder $r7;
+        android.content.Context $r9;
+        org.fdroid.fdroid.data.App $r10;
+        org.fdroid.fdroid.net.AsyncDownloader $r12;
+
+        r0 := @this: org.fdroid.fdroid.net.ApkDownloader;
+
+        $r3 = r0.<org.fdroid.fdroid.net.ApkDownloader: org.fdroid.fdroid.data.SanitizedFile potentiallyCachedFile>;
+
+        $z0 = specialinvoke r0.<org.fdroid.fdroid.net.ApkDownloader: boolean verifyOrDelete(java.io.File)>($r3);
+
+        if $z0 == 0 goto label01;
+
+        $r3 = r0.<org.fdroid.fdroid.net.ApkDownloader: org.fdroid.fdroid.data.SanitizedFile localFile>;
+
+        specialinvoke r0.<org.fdroid.fdroid.net.ApkDownloader: void delete(java.io.File)>($r3);
+
+        $r3 = r0.<org.fdroid.fdroid.net.ApkDownloader: org.fdroid.fdroid.data.SanitizedFile potentiallyCachedFile>;
+
+        $r4 = r0.<org.fdroid.fdroid.net.ApkDownloader: org.fdroid.fdroid.data.SanitizedFile localFile>;
+
+        staticinvoke <org.fdroid.fdroid.Utils: boolean copyQuietly(java.io.File,java.io.File)>($r3, $r4);
+
+        specialinvoke r0.<org.fdroid.fdroid.net.ApkDownloader: void prepareApkFileAndSendCompleteMessage()>();
+
+        return 0;
+
+     label01:
+        $r5 = r0.<org.fdroid.fdroid.net.ApkDownloader: java.lang.String repoAddress>;
+
+        $r6 = r0.<org.fdroid.fdroid.net.ApkDownloader: org.fdroid.fdroid.data.Apk curApk>;
+
+        $r5 = staticinvoke <org.fdroid.fdroid.Utils: java.lang.String getApkUrl(java.lang.String,org.fdroid.fdroid.data.Apk)>($r5, $r6);
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Downloading apk from ");
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" to ");
+
+        $r3 = r0.<org.fdroid.fdroid.net.ApkDownloader: org.fdroid.fdroid.data.SanitizedFile localFile>;
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r3);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <org.fdroid.fdroid.Utils: void debugLog(java.lang.String,java.lang.String)>("ApkDownloader", $r8);
+
+        $r9 = r0.<org.fdroid.fdroid.net.ApkDownloader: android.content.Context context>;
+
+        $r3 = r0.<org.fdroid.fdroid.net.ApkDownloader: org.fdroid.fdroid.data.SanitizedFile localFile>;
+
+        $r7 = new java.lang.StringBuilder;
+
+     label02:
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+     label03:
+        $r10 = r0.<org.fdroid.fdroid.net.ApkDownloader: org.fdroid.fdroid.data.App app>;
+
+        $r8 = $r10.<org.fdroid.fdroid.data.App: java.lang.String name>;
+
+     label04:
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r8);
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ");
+
+     label05:
+        $r6 = r0.<org.fdroid.fdroid.net.ApkDownloader: org.fdroid.fdroid.data.Apk curApk>;
+
+        $r8 = $r6.<org.fdroid.fdroid.data.Apk: java.lang.String version>;
+
+     label06:
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r8);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label07:
+        $r6 = r0.<org.fdroid.fdroid.net.ApkDownloader: org.fdroid.fdroid.data.Apk curApk>;
+
+        $r11 = $r6.<org.fdroid.fdroid.data.Apk: java.lang.String packageName>;
+
+        $r1 = r0.<org.fdroid.fdroid.net.ApkDownloader: org.fdroid.fdroid.data.Credentials credentials>;
+
+     label08:
+        $r12 = staticinvoke <org.fdroid.fdroid.net.DownloaderFactory: org.fdroid.fdroid.net.AsyncDownloader createAsync(android.content.Context,java.lang.String,java.io.File,java.lang.String,java.lang.String,org.fdroid.fdroid.data.Credentials,org.fdroid.fdroid.net.AsyncDownloader$Listener)>($r9, $r5, $r3, $r8, $r11, $r1, r0);
+
+     label09:
+        r0.<org.fdroid.fdroid.net.ApkDownloader: org.fdroid.fdroid.net.AsyncDownloader dlWrapper> = $r12;
+
+        $r12 = r0.<org.fdroid.fdroid.net.ApkDownloader: org.fdroid.fdroid.net.AsyncDownloader dlWrapper>;
+
+     label10:
+        interfaceinvoke $r12.<org.fdroid.fdroid.net.AsyncDownloader: void download()>();
+
+     label11:
+        return 1;
+
+     label12:
+        r2 := @caughtexception;
+
+        $r5 = virtualinvoke r2.<java.io.IOException: java.lang.String getLocalizedMessage()>();
+
+        virtualinvoke r0.<org.fdroid.fdroid.net.ApkDownloader: void onErrorDownloading(java.lang.String)>($r5);
+
+        return 0;
+
+        catch java.io.IOException from label02 to label03 with label12;
+        catch java.io.IOException from label04 to label05 with label12;
+        catch java.io.IOException from label06 to label07 with label12;
+        catch java.io.IOException from label08 to label09 with label12;
+        catch java.io.IOException from label10 to label11 with label12;
+    }
+    public org.fdroid.fdroid.data.Apk getApk()
+    {
+        org.fdroid.fdroid.net.ApkDownloader r0;
+        org.fdroid.fdroid.data.Apk r1;
+
+        r0 := @this: org.fdroid.fdroid.net.ApkDownloader;
+
+        r1 = r0.<org.fdroid.fdroid.net.ApkDownloader: org.fdroid.fdroid.data.Apk curApk>;
+
+        return r1;
+    }
+    public int getBytesRead()
+    {
+        org.fdroid.fdroid.net.ApkDownloader r0;
+        int $i0;
+        org.fdroid.fdroid.net.AsyncDownloader $r1;
+
+        r0 := @this: org.fdroid.fdroid.net.ApkDownloader;
+
+        $r1 = r0.<org.fdroid.fdroid.net.ApkDownloader: org.fdroid.fdroid.net.AsyncDownloader dlWrapper>;
+
+        if $r1 == null goto label1;
+
+        $r1 = r0.<org.fdroid.fdroid.net.ApkDownloader: org.fdroid.fdroid.net.AsyncDownloader dlWrapper>;
+
+        $i0 = interfaceinvoke $r1.<org.fdroid.fdroid.net.AsyncDownloader: int getBytesRead()>();
+
+        return $i0;
+
+     label1:
+        return 0;
+    }
+    public int getTotalBytes()
+    {
+        org.fdroid.fdroid.net.ApkDownloader r0;
+        int $i0;
+        org.fdroid.fdroid.net.AsyncDownloader $r1;
+
+        r0 := @this: org.fdroid.fdroid.net.ApkDownloader;
+
+        $r1 = r0.<org.fdroid.fdroid.net.ApkDownloader: org.fdroid.fdroid.net.AsyncDownloader dlWrapper>;
+
+        if $r1 == null goto label1;
+
+        $r1 = r0.<org.fdroid.fdroid.net.ApkDownloader: org.fdroid.fdroid.net.AsyncDownloader dlWrapper>;
+
+        $i0 = interfaceinvoke $r1.<org.fdroid.fdroid.net.AsyncDownloader: int getTotalBytes()>();
+
+        return $i0;
+
+     label1:
+        return 0;
+    }
+    public boolean isComplete()
+    {
+        org.fdroid.fdroid.net.ApkDownloader r0;
+        boolean z0;
+
+        r0 := @this: org.fdroid.fdroid.net.ApkDownloader;
+
+        z0 = r0.<org.fdroid.fdroid.net.ApkDownloader: boolean isComplete>;
+
+        return z0;
+    }
+    public boolean isEventFromThis(org.fdroid.fdroid.ProgressListener$Event)
+    {
+        org.fdroid.fdroid.net.ApkDownloader r0;
+        org.fdroid.fdroid.ProgressListener$Event $r1;
+        long $l0, $l1;
+        android.os.Bundle $r2;
+        boolean $z0;
+        byte $b2;
+
+        r0 := @this: org.fdroid.fdroid.net.ApkDownloader;
+
+        $r1 := @parameter0: org.fdroid.fdroid.ProgressListener$Event;
+
+        $r2 = virtualinvoke $r1.<org.fdroid.fdroid.ProgressListener$Event: android.os.Bundle getData()>();
+
+        $z0 = virtualinvoke $r2.<android.os.Bundle: boolean containsKey(java.lang.String)>("sourceId");
+
+        if $z0 == 0 goto label1;
+
+        $r2 = virtualinvoke $r1.<org.fdroid.fdroid.ProgressListener$Event: android.os.Bundle getData()>();
+
+        $l1 = virtualinvoke $r2.<android.os.Bundle: long getLong(java.lang.String)>("sourceId");
+
+        $l0 = r0.<org.fdroid.fdroid.net.ApkDownloader: long id>;
+
+        $b2 = $l1 cmp $l0;
+
+        if $b2 != 0 goto label1;
+
+        return 1;
+
+     label1:
+        return 0;
+    }
+    public org.fdroid.fdroid.data.SanitizedFile localFile()
+    {
+        org.fdroid.fdroid.net.ApkDownloader r0;
+        org.fdroid.fdroid.data.SanitizedFile r1;
+
+        r0 := @this: org.fdroid.fdroid.net.ApkDownloader;
+
+        r1 = r0.<org.fdroid.fdroid.net.ApkDownloader: org.fdroid.fdroid.data.SanitizedFile localFile>;
+
+        return r1;
+    }
+    public void onDownloadCancelled()
+    {
+        org.fdroid.fdroid.net.ApkDownloader r0;
+
+        r0 := @this: org.fdroid.fdroid.net.ApkDownloader;
+
+        specialinvoke r0.<org.fdroid.fdroid.net.ApkDownloader: void sendMessage(java.lang.String)>("apkDownloadCancelled");
+
+        return;
+    }
+    public void onDownloadComplete()
+    {
+        org.fdroid.fdroid.net.ApkDownloader r0;
+        org.fdroid.fdroid.data.SanitizedFile $r1;
+        boolean $z0;
+        java.lang.StringBuilder $r2;
+        java.lang.String $r3;
+
+        r0 := @this: org.fdroid.fdroid.net.ApkDownloader;
+
+        $r1 = r0.<org.fdroid.fdroid.net.ApkDownloader: org.fdroid.fdroid.data.SanitizedFile localFile>;
+
+        $z0 = specialinvoke r0.<org.fdroid.fdroid.net.ApkDownloader: boolean verifyOrDelete(java.io.File)>($r1);
+
+        if $z0 != 0 goto label1;
+
+        specialinvoke r0.<org.fdroid.fdroid.net.ApkDownloader: void sendError(int)>(101);
+
+        return;
+
+     label1:
+        specialinvoke r0.<org.fdroid.fdroid.net.ApkDownloader: void cacheIfRequired()>();
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Download finished: ");
+
+        $r1 = r0.<org.fdroid.fdroid.net.ApkDownloader: org.fdroid.fdroid.data.SanitizedFile localFile>;
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r1);
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <org.fdroid.fdroid.Utils: void debugLog(java.lang.String,java.lang.String)>("ApkDownloader", $r3);
+
+        specialinvoke r0.<org.fdroid.fdroid.net.ApkDownloader: void prepareApkFileAndSendCompleteMessage()>();
+
+        return;
+    }
+    public void onErrorDownloading(java.lang.String)
+    {
+        org.fdroid.fdroid.net.ApkDownloader r0;
+        java.lang.String $r1;
+        java.lang.StringBuilder $r2;
+        org.fdroid.fdroid.data.SanitizedFile $r3;
+
+        r0 := @this: org.fdroid.fdroid.net.ApkDownloader;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Download failed: ");
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r1 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String)>("ApkDownloader", $r1);
+
+        specialinvoke r0.<org.fdroid.fdroid.net.ApkDownloader: void sendError(int)>(102);
+
+        $r3 = r0.<org.fdroid.fdroid.net.ApkDownloader: org.fdroid.fdroid.data.SanitizedFile localFile>;
+
+        specialinvoke r0.<org.fdroid.fdroid.net.ApkDownloader: void delete(java.io.File)>($r3);
+
+        return;
+    }
+    public void onProgress(org.fdroid.fdroid.ProgressListener$Event)
+    {
+        org.fdroid.fdroid.net.ApkDownloader r0;
+        org.fdroid.fdroid.ProgressListener$Event $r1;
+
+        r0 := @this: org.fdroid.fdroid.net.ApkDownloader;
+
+        $r1 := @parameter0: org.fdroid.fdroid.ProgressListener$Event;
+
+        specialinvoke r0.<org.fdroid.fdroid.net.ApkDownloader: void sendProgressEvent(org.fdroid.fdroid.ProgressListener$Event)>($r1);
+
+        return;
+    }
+    public void removeProgressListener()
+    {
+        org.fdroid.fdroid.net.ApkDownloader r0;
+
+        r0 := @this: org.fdroid.fdroid.net.ApkDownloader;
+
+        virtualinvoke r0.<org.fdroid.fdroid.net.ApkDownloader: void setProgressListener(org.fdroid.fdroid.ProgressListener)>(null);
+
+        return;
+    }
+    public void setCredentials(org.fdroid.fdroid.data.Credentials)
+    {
+        org.fdroid.fdroid.net.ApkDownloader r0;
+        org.fdroid.fdroid.data.Credentials $r1;
+
+        r0 := @this: org.fdroid.fdroid.net.ApkDownloader;
+
+        $r1 := @parameter0: org.fdroid.fdroid.data.Credentials;
+
+        r0.<org.fdroid.fdroid.net.ApkDownloader: org.fdroid.fdroid.data.Credentials credentials> = $r1;
+
+        return;
+    }
+    public void setProgressListener(org.fdroid.fdroid.ProgressListener)
+    {
+        org.fdroid.fdroid.net.ApkDownloader r0;
+        org.fdroid.fdroid.ProgressListener $r1;
+
+        r0 := @this: org.fdroid.fdroid.net.ApkDownloader;
+
+        $r1 := @parameter0: org.fdroid.fdroid.ProgressListener;
+
+        r0.<org.fdroid.fdroid.net.ApkDownloader: org.fdroid.fdroid.ProgressListener listener> = $r1;
+
+        return;
+    }

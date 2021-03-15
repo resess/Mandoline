@@ -1,0 +1,1696 @@
+com.fsck.k9.mailstore.migrations.MigrationTo51 extends java.lang.Object
+private static final int DATA_LOCATION__IN_DATABASE
+private static final int DATA_LOCATION__MISSING
+private static final int DATA_LOCATION__ON_DISK
+private static final int MESSAGE_PART_TYPE__HIDDEN_ATTACHMENT
+private static final int MESSAGE_PART_TYPE__UNKNOWN
+    void <init>()
+    {
+        com.fsck.k9.mailstore.migrations.MigrationTo51 r0;
+
+        r0 := @this: com.fsck.k9.mailstore.migrations.MigrationTo51;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+    private static void cleanUpOldAttachmentDirectory(java.io.File)
+    {
+        java.io.File $r0, r1;
+        boolean $z0;
+        java.lang.Object[] $r2;
+        java.lang.String $r3;
+        java.io.File[] $r4;
+        int $i0, $i1;
+
+        $r0 := @parameter0: java.io.File;
+
+        $z0 = virtualinvoke $r0.<java.io.File: boolean exists()>();
+
+        if $z0 != 0 goto label1;
+
+        $r2 = newarray (java.lang.Object)[1];
+
+        $r3 = virtualinvoke $r0.<java.io.File: java.lang.String getAbsolutePath()>();
+
+        $r2[0] = $r3;
+
+        staticinvoke <timber.log.Timber: void d(java.lang.String,java.lang.Object[])>("Old attachment directory doesn\'t exist: %s", $r2);
+
+        return;
+
+     label1:
+        $r4 = virtualinvoke $r0.<java.io.File: java.io.File[] listFiles()>();
+
+        $i0 = lengthof $r4;
+
+        $i1 = 0;
+
+     label2:
+        if $i1 >= $i0 goto label4;
+
+        r1 = $r4[$i1];
+
+        $r2 = newarray (java.lang.Object)[1];
+
+        $r3 = virtualinvoke r1.<java.io.File: java.lang.String getName()>();
+
+        $r2[0] = $r3;
+
+        staticinvoke <timber.log.Timber: void d(java.lang.String,java.lang.Object[])>("deleting stale attachment file: %s", $r2);
+
+        $z0 = virtualinvoke r1.<java.io.File: boolean exists()>();
+
+        if $z0 == 0 goto label3;
+
+        $z0 = virtualinvoke r1.<java.io.File: boolean delete()>();
+
+        if $z0 != 0 goto label3;
+
+        $r2 = newarray (java.lang.Object)[1];
+
+        $r3 = virtualinvoke r1.<java.io.File: java.lang.String getAbsolutePath()>();
+
+        $r2[0] = $r3;
+
+        staticinvoke <timber.log.Timber: void d(java.lang.String,java.lang.Object[])>("Failed to delete stale attachement file: %s", $r2);
+
+     label3:
+        $i1 = $i1 + 1;
+
+        goto label2;
+
+     label4:
+        $r2 = newarray (java.lang.Object)[0];
+
+        staticinvoke <timber.log.Timber: void d(java.lang.String,java.lang.Object[])>("deleting old attachment directory", $r2);
+
+        $z0 = virtualinvoke $r0.<java.io.File: boolean exists()>();
+
+        if $z0 == 0 goto label5;
+
+        $z0 = virtualinvoke $r0.<java.io.File: boolean delete()>();
+
+        if $z0 != 0 goto label5;
+
+        $r2 = newarray (java.lang.Object)[1];
+
+        $r3 = virtualinvoke $r0.<java.io.File: java.lang.String getAbsolutePath()>();
+
+        $r2[0] = $r3;
+
+        staticinvoke <timber.log.Timber: void d(java.lang.String,java.lang.Object[])>("Failed to delete old attachement directory: %s", $r2);
+
+     label5:
+        return;
+    }
+    private static void copyMessageMetadataToNewTable(android.database.sqlite.SQLiteDatabase)
+    {
+        android.database.sqlite.SQLiteDatabase $r0;
+
+        $r0 := @parameter0: android.database.sqlite.SQLiteDatabase;
+
+        virtualinvoke $r0.<android.database.sqlite.SQLiteDatabase: void execSQL(java.lang.String)>("INSERT INTO messages (id, deleted, folder_id, uid, subject, date, sender_list, to_list, cc_list, bcc_list, reply_to_list, attachment_count, internal_date, message_id, preview, mime_type, normalized_subject_hash, empty, read, flagged, answered) SELECT id, deleted, folder_id, uid, subject, date, sender_list, to_list, cc_list, bcc_list, reply_to_list, attachment_count, internal_date, message_id, preview, mime_type, normalized_subject_hash, empty, read, flagged, answered FROM messages_old");
+
+        return;
+    }
+    public static void db51MigrateMessageFormat(android.database.sqlite.SQLiteDatabase, com.fsck.k9.mailstore.migrations.MigrationsHelper)
+    {
+        android.database.sqlite.SQLiteDatabase $r0;
+        com.fsck.k9.mailstore.migrations.MigrationsHelper $r1;
+        android.content.ContentValues r2;
+        java.io.IOException r3;
+        com.fsck.k9.Account $r4;
+        android.app.Application $r5;
+        com.fsck.k9.mailstore.StorageManager $r6;
+        java.lang.String $r7, $r8, $r15, $r16, r17;
+        java.io.File $r9, $r10;
+        java.lang.String[] r11;
+        android.database.Cursor $r12;
+        java.lang.Object[] $r13;
+        int $i0;
+        java.lang.Integer $r14;
+        boolean $z0, $z1;
+        long $l1;
+        com.fsck.k9.mail.internet.MimeHeader $r18;
+        com.fsck.k9.mailstore.migrations.MigrationTo51$MimeStructureState $r19, r20;
+        java.lang.Long $r21;
+        java.lang.Throwable $r22;
+
+        $r0 := @parameter0: android.database.sqlite.SQLiteDatabase;
+
+        $r1 := @parameter1: com.fsck.k9.mailstore.migrations.MigrationsHelper;
+
+        staticinvoke <com.fsck.k9.mailstore.migrations.MigrationTo51: void renameOldMessagesTableAndCreateNew(android.database.sqlite.SQLiteDatabase)>($r0);
+
+        staticinvoke <com.fsck.k9.mailstore.migrations.MigrationTo51: void copyMessageMetadataToNewTable(android.database.sqlite.SQLiteDatabase)>($r0);
+
+        $r4 = interfaceinvoke $r1.<com.fsck.k9.mailstore.migrations.MigrationsHelper: com.fsck.k9.Account getAccount()>();
+
+        $r5 = <com.fsck.k9.K9: android.app.Application app>;
+
+        $r6 = staticinvoke <com.fsck.k9.mailstore.StorageManager: com.fsck.k9.mailstore.StorageManager getInstance(android.content.Context)>($r5);
+
+        $r7 = virtualinvoke $r4.<com.fsck.k9.Account: java.lang.String getUuid()>();
+
+        $r8 = virtualinvoke $r4.<com.fsck.k9.Account: java.lang.String getLocalStorageProviderId()>();
+
+        $r9 = virtualinvoke $r6.<com.fsck.k9.mailstore.StorageManager: java.io.File getAttachmentDirectory(java.lang.String,java.lang.String)>($r7, $r8);
+
+        $r10 = staticinvoke <com.fsck.k9.mailstore.migrations.MigrationTo51: java.io.File renameOldAttachmentDirAndCreateNew(com.fsck.k9.Account,java.io.File)>($r4, $r9);
+
+        r11 = newarray (java.lang.String)[6];
+
+        r11[0] = "id";
+
+        r11[1] = "flags";
+
+        r11[2] = "html_content";
+
+        r11[3] = "text_content";
+
+        r11[4] = "mime_type";
+
+        r11[5] = "attachment_count";
+
+        $r12 = virtualinvoke $r0.<android.database.sqlite.SQLiteDatabase: android.database.Cursor query(java.lang.String,java.lang.String[],java.lang.String,java.lang.String[],java.lang.String,java.lang.String,java.lang.String)>("messages_old", r11, null, null, null, null, null);
+
+     label01:
+        $r13 = newarray (java.lang.Object)[1];
+
+        $i0 = interfaceinvoke $r12.<android.database.Cursor: int getCount()>();
+
+        $r14 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        $r13[0] = $r14;
+
+        staticinvoke <timber.log.Timber: void d(java.lang.String,java.lang.Object[])>("migrating %d messages", $r13);
+
+        r2 = new android.content.ContentValues;
+
+        specialinvoke r2.<android.content.ContentValues: void <init>()>();
+
+     label02:
+        $z0 = interfaceinvoke $r12.<android.database.Cursor: boolean moveToNext()>();
+
+     label03:
+        if $z0 == 0 goto label35;
+
+     label04:
+        $l1 = interfaceinvoke $r12.<android.database.Cursor: long getLong(int)>(0);
+
+        $r7 = interfaceinvoke $r12.<android.database.Cursor: java.lang.String getString(int)>(1);
+
+        $r8 = interfaceinvoke $r12.<android.database.Cursor: java.lang.String getString(int)>(2);
+
+        $r15 = interfaceinvoke $r12.<android.database.Cursor: java.lang.String getString(int)>(3);
+
+        $r16 = interfaceinvoke $r12.<android.database.Cursor: java.lang.String getString(int)>(4);
+
+     label05:
+        r17 = $r16;
+
+     label06:
+        $i0 = interfaceinvoke $r12.<android.database.Cursor: int getInt(int)>(5);
+
+     label07:
+        staticinvoke <com.fsck.k9.mailstore.migrations.MigrationTo51: void updateFlagsForMessage(android.database.sqlite.SQLiteDatabase,long,java.lang.String,com.fsck.k9.mailstore.migrations.MigrationsHelper)>($r0, $l1, $r7, $r1);
+
+        $r18 = staticinvoke <com.fsck.k9.mailstore.migrations.MigrationTo51: com.fsck.k9.mail.internet.MimeHeader loadHeaderFromHeadersTable(android.database.sqlite.SQLiteDatabase,long)>($r0, $l1);
+
+        $r19 = staticinvoke <com.fsck.k9.mailstore.migrations.MigrationTo51$MimeStructureState: com.fsck.k9.mailstore.migrations.MigrationTo51$MimeStructureState getNewRootState()>();
+
+     label08:
+        r20 = $r19;
+
+        $z0 = 0;
+
+        if $i0 != 2 goto label30;
+
+     label09:
+        $z1 = staticinvoke <org.apache.james.mime4j.util.MimeUtil: boolean isSameMimeType(java.lang.String,java.lang.String)>($r16, "multipart/encrypted");
+
+     label10:
+        if $z1 == 0 goto label30;
+
+        $z1 = 1;
+
+     label11:
+        if $z1 == 0 goto label14;
+
+     label12:
+        $r19 = staticinvoke <com.fsck.k9.mailstore.migrations.MigrationTo51: com.fsck.k9.mailstore.migrations.MigrationTo51$MimeStructureState migratePgpMimeEncryptedContent(android.database.sqlite.SQLiteDatabase,long,java.io.File,java.io.File,com.fsck.k9.mail.internet.MimeHeader,com.fsck.k9.mailstore.migrations.MigrationTo51$MimeStructureState)>($r0, $l1, $r10, $r9, $r18, $r19);
+
+     label13:
+        if $r19 == null goto label14;
+
+        r20 = $r19;
+
+        $z0 = 1;
+
+     label14:
+        if $z0 != 0 goto label20;
+
+        if $i0 != 0 goto label31;
+
+     label15:
+        r11 = newarray (java.lang.String)[3];
+
+        r11[0] = "text/plain";
+
+        r11[1] = "text/html";
+
+        r11[2] = "multipart/alternative";
+
+     label16:
+        $z0 = staticinvoke <com.fsck.k9.helper.Utility: boolean isAnyMimeType(java.lang.String,java.lang.String[])>($r16, r11);
+
+     label17:
+        if $z0 == 0 goto label31;
+
+        $z0 = 1;
+
+     label18:
+        if $z0 == 0 goto label32;
+
+     label19:
+        r20 = staticinvoke <com.fsck.k9.mailstore.migrations.MigrationTo51: com.fsck.k9.mailstore.migrations.MigrationTo51$MimeStructureState migrateSimpleMailContent(android.database.sqlite.SQLiteDatabase,java.lang.String,java.lang.String,java.lang.String,com.fsck.k9.mail.internet.MimeHeader,com.fsck.k9.mailstore.migrations.MigrationTo51$MimeStructureState)>($r0, $r8, $r15, $r16, $r18, r20);
+
+     label20:
+        virtualinvoke r2.<android.content.ContentValues: void clear()>();
+
+        virtualinvoke r2.<android.content.ContentValues: void put(java.lang.String,java.lang.String)>("mime_type", r17);
+
+        $r21 = staticinvoke <com.fsck.k9.mailstore.migrations.MigrationTo51$MimeStructureState: java.lang.Long access$000(com.fsck.k9.mailstore.migrations.MigrationTo51$MimeStructureState)>(r20);
+
+        virtualinvoke r2.<android.content.ContentValues: void put(java.lang.String,java.lang.Long)>("message_part_id", $r21);
+
+        $r14 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        virtualinvoke r2.<android.content.ContentValues: void put(java.lang.String,java.lang.Integer)>("attachment_count", $r14);
+
+     label21:
+        r11 = newarray (java.lang.String)[1];
+
+     label22:
+        $r7 = staticinvoke <java.lang.Long: java.lang.String toString(long)>($l1);
+
+     label23:
+        r11[0] = $r7;
+
+     label24:
+        virtualinvoke $r0.<android.database.sqlite.SQLiteDatabase: int update(java.lang.String,android.content.ContentValues,java.lang.String,java.lang.String[])>("messages", r2, "id = ?", r11);
+
+     label25:
+        goto label02;
+
+     label26:
+        r3 := @caughtexception;
+
+     label27:
+        $r13 = newarray (java.lang.Object)[0];
+
+        staticinvoke <timber.log.Timber: void e(java.lang.Throwable,java.lang.String,java.lang.Object[])>(r3, "error inserting into database", $r13);
+
+     label28:
+        goto label02;
+
+     label29:
+        $r22 := @caughtexception;
+
+        interfaceinvoke $r12.<android.database.Cursor: void close()>();
+
+        throw $r22;
+
+     label30:
+        $z1 = 0;
+
+        goto label11;
+
+     label31:
+        $z0 = 0;
+
+        goto label18;
+
+     label32:
+        r17 = "multipart/mixed";
+
+     label33:
+        r20 = staticinvoke <com.fsck.k9.mailstore.migrations.MigrationTo51: com.fsck.k9.mailstore.migrations.MigrationTo51$MimeStructureState migrateComplexMailContent(android.database.sqlite.SQLiteDatabase,java.io.File,java.io.File,long,java.lang.String,java.lang.String,com.fsck.k9.mail.internet.MimeHeader,com.fsck.k9.mailstore.migrations.MigrationTo51$MimeStructureState)>($r0, $r10, $r9, $l1, $r8, $r15, $r18, r20);
+
+     label34:
+        goto label20;
+
+     label35:
+        interfaceinvoke $r12.<android.database.Cursor: void close()>();
+
+        staticinvoke <com.fsck.k9.mailstore.migrations.MigrationTo51: void cleanUpOldAttachmentDirectory(java.io.File)>($r10);
+
+        staticinvoke <com.fsck.k9.mailstore.migrations.MigrationTo51: void dropOldMessagesTable(android.database.sqlite.SQLiteDatabase)>($r0);
+
+        return;
+
+        catch java.lang.Throwable from label01 to label03 with label29;
+        catch java.lang.Throwable from label04 to label05 with label29;
+        catch java.lang.Throwable from label06 to label07 with label29;
+        catch java.io.IOException from label07 to label08 with label26;
+        catch java.io.IOException from label09 to label10 with label26;
+        catch java.io.IOException from label12 to label13 with label26;
+        catch java.io.IOException from label16 to label17 with label26;
+        catch java.io.IOException from label19 to label20 with label26;
+        catch java.io.IOException from label20 to label21 with label26;
+        catch java.io.IOException from label22 to label23 with label26;
+        catch java.io.IOException from label24 to label25 with label26;
+        catch java.lang.Throwable from label07 to label08 with label29;
+        catch java.lang.Throwable from label09 to label10 with label29;
+        catch java.lang.Throwable from label12 to label13 with label29;
+        catch java.lang.Throwable from label15 to label17 with label29;
+        catch java.lang.Throwable from label19 to label20 with label29;
+        catch java.lang.Throwable from label20 to label25 with label29;
+        catch java.lang.Throwable from label27 to label28 with label29;
+        catch java.io.IOException from label33 to label34 with label26;
+        catch java.lang.Throwable from label33 to label34 with label29;
+    }
+    private static void dropOldMessagesTable(android.database.sqlite.SQLiteDatabase)
+    {
+        android.database.sqlite.SQLiteDatabase $r0;
+        java.lang.Object[] $r1;
+
+        $r0 := @parameter0: android.database.sqlite.SQLiteDatabase;
+
+        $r1 = newarray (java.lang.Object)[0];
+
+        staticinvoke <timber.log.Timber: void d(java.lang.String,java.lang.Object[])>("Migration succeeded, dropping old tables.", $r1);
+
+        virtualinvoke $r0.<android.database.sqlite.SQLiteDatabase: void execSQL(java.lang.String)>("DROP TABLE messages_old");
+
+        virtualinvoke $r0.<android.database.sqlite.SQLiteDatabase: void execSQL(java.lang.String)>("DROP TABLE attachments");
+
+        virtualinvoke $r0.<android.database.sqlite.SQLiteDatabase: void execSQL(java.lang.String)>("DROP TABLE headers");
+
+        return;
+    }
+    private static com.fsck.k9.mailstore.migrations.MigrationTo51$MimeStructureState insertAttachments(android.database.sqlite.SQLiteDatabase, java.io.File, java.io.File, long, com.fsck.k9.mailstore.migrations.MigrationTo51$MimeStructureState)
+    {
+        android.database.sqlite.SQLiteDatabase $r0;
+        java.io.File $r1, $r2;
+        long $l0;
+        com.fsck.k9.mailstore.migrations.MigrationTo51$MimeStructureState $r3;
+        java.lang.String[] $r4, r5;
+        java.lang.String $r6, $r8, $r9, $r10, $r11, $r12;
+        android.database.Cursor $r7;
+        boolean $z0;
+        int $i1;
+        java.lang.Throwable $r13;
+
+        $r0 := @parameter0: android.database.sqlite.SQLiteDatabase;
+
+        $r1 := @parameter1: java.io.File;
+
+        $r2 := @parameter2: java.io.File;
+
+        $l0 := @parameter3: long;
+
+        $r3 := @parameter4: com.fsck.k9.mailstore.migrations.MigrationTo51$MimeStructureState;
+
+        $r4 = newarray (java.lang.String)[8];
+
+        $r4[0] = "id";
+
+        $r4[1] = "size";
+
+        $r4[2] = "name";
+
+        $r4[3] = "mime_type";
+
+        $r4[4] = "store_data";
+
+        $r4[5] = "content_uri";
+
+        $r4[6] = "content_id";
+
+        $r4[7] = "content_disposition";
+
+        r5 = newarray (java.lang.String)[1];
+
+        $r6 = staticinvoke <java.lang.Long: java.lang.String toString(long)>($l0);
+
+        r5[0] = $r6;
+
+        $r7 = virtualinvoke $r0.<android.database.sqlite.SQLiteDatabase: android.database.Cursor query(java.lang.String,java.lang.String[],java.lang.String,java.lang.String[],java.lang.String,java.lang.String,java.lang.String)>("attachments", $r4, "message_id = ?", r5, null, null, null);
+
+     label1:
+        $z0 = interfaceinvoke $r7.<android.database.Cursor: boolean moveToNext()>();
+
+     label2:
+        if $z0 == 0 goto label5;
+
+     label3:
+        $l0 = interfaceinvoke $r7.<android.database.Cursor: long getLong(int)>(0);
+
+        $i1 = interfaceinvoke $r7.<android.database.Cursor: int getInt(int)>(1);
+
+        $r6 = interfaceinvoke $r7.<android.database.Cursor: java.lang.String getString(int)>(2);
+
+        $r8 = interfaceinvoke $r7.<android.database.Cursor: java.lang.String getString(int)>(3);
+
+        $r9 = interfaceinvoke $r7.<android.database.Cursor: java.lang.String getString(int)>(4);
+
+        $r10 = interfaceinvoke $r7.<android.database.Cursor: java.lang.String getString(int)>(5);
+
+        $r11 = interfaceinvoke $r7.<android.database.Cursor: java.lang.String getString(int)>(6);
+
+        $r12 = interfaceinvoke $r7.<android.database.Cursor: java.lang.String getString(int)>(7);
+
+        $r3 = staticinvoke <com.fsck.k9.mailstore.migrations.MigrationTo51: com.fsck.k9.mailstore.migrations.MigrationTo51$MimeStructureState insertMimeAttachmentPart(android.database.sqlite.SQLiteDatabase,java.io.File,java.io.File,com.fsck.k9.mailstore.migrations.MigrationTo51$MimeStructureState,long,int,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String)>($r0, $r1, $r2, $r3, $l0, $i1, $r6, $r8, $r9, $r10, $r11, $r12);
+
+     label4:
+        goto label1;
+
+     label5:
+        interfaceinvoke $r7.<android.database.Cursor: void close()>();
+
+        return $r3;
+
+     label6:
+        $r13 := @caughtexception;
+
+        interfaceinvoke $r7.<android.database.Cursor: void close()>();
+
+        throw $r13;
+
+        catch java.lang.Throwable from label1 to label2 with label6;
+        catch java.lang.Throwable from label3 to label4 with label6;
+    }
+    private static com.fsck.k9.mailstore.migrations.MigrationTo51$MimeStructureState insertBodyAsMultipartAlternative(android.database.sqlite.SQLiteDatabase, com.fsck.k9.mailstore.migrations.MigrationTo51$MimeStructureState, com.fsck.k9.mail.internet.MimeHeader, java.lang.String, java.lang.String) throws java.io.IOException
+    {
+        android.database.sqlite.SQLiteDatabase $r0;
+        java.lang.String $r1, $r2, $r7, $r8;
+        android.content.ContentValues r3;
+        java.lang.Object[] $r4;
+        com.fsck.k9.mailstore.migrations.MigrationTo51$MimeStructureState $r5, $r10;
+        com.fsck.k9.mail.internet.MimeHeader r6;
+        boolean $z0;
+        byte b0;
+        java.lang.Integer $r9;
+        long $l1;
+
+        $r0 := @parameter0: android.database.sqlite.SQLiteDatabase;
+
+        $r5 := @parameter1: com.fsck.k9.mailstore.migrations.MigrationTo51$MimeStructureState;
+
+        r6 := @parameter2: com.fsck.k9.mail.internet.MimeHeader;
+
+        $r1 := @parameter3: java.lang.String;
+
+        $r2 := @parameter4: java.lang.String;
+
+        if r6 != null goto label1;
+
+        r6 = new com.fsck.k9.mail.internet.MimeHeader;
+
+        specialinvoke r6.<com.fsck.k9.mail.internet.MimeHeader: void <init>()>();
+
+     label1:
+        $r7 = virtualinvoke r6.<com.fsck.k9.mail.internet.MimeHeader: java.lang.String getFirstHeader(java.lang.String)>("Content-Type");
+
+        $r8 = staticinvoke <com.fsck.k9.mail.internet.MimeUtility: java.lang.String getHeaderParameter(java.lang.String,java.lang.String)>($r7, "boundary");
+
+        $r7 = $r8;
+
+        $z0 = staticinvoke <android.text.TextUtils: boolean isEmpty(java.lang.CharSequence)>($r8);
+
+        if $z0 == 0 goto label2;
+
+        $r7 = staticinvoke <org.apache.james.mime4j.util.MimeUtil: java.lang.String createUniqueBoundary()>();
+
+     label2:
+        $r4 = newarray (java.lang.Object)[1];
+
+        $r4[0] = $r7;
+
+        $r8 = staticinvoke <java.lang.String: java.lang.String format(java.lang.String,java.lang.Object[])>("multipart/alternative; boundary=\"%s\";", $r4);
+
+        virtualinvoke r6.<com.fsck.k9.mail.internet.MimeHeader: void setHeader(java.lang.String,java.lang.String)>("Content-Type", $r8);
+
+        if $r1 != null goto label3;
+
+        if $r2 == null goto label6;
+
+     label3:
+        b0 = 1;
+
+     label4:
+        r3 = new android.content.ContentValues;
+
+        specialinvoke r3.<android.content.ContentValues: void <init>()>();
+
+        $r9 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(0);
+
+        virtualinvoke r3.<android.content.ContentValues: void put(java.lang.String,java.lang.Integer)>("type", $r9);
+
+        $r9 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(b0);
+
+        virtualinvoke r3.<android.content.ContentValues: void put(java.lang.String,java.lang.Integer)>("data_location", $r9);
+
+        virtualinvoke r3.<android.content.ContentValues: void put(java.lang.String,java.lang.String)>("mime_type", "multipart/alternative");
+
+        $r8 = virtualinvoke r6.<com.fsck.k9.mail.internet.MimeHeader: java.lang.String toString()>();
+
+        virtualinvoke r3.<android.content.ContentValues: void put(java.lang.String,java.lang.String)>("header", $r8);
+
+        virtualinvoke r3.<android.content.ContentValues: void put(java.lang.String,java.lang.String)>("boundary", $r7);
+
+        virtualinvoke $r5.<com.fsck.k9.mailstore.migrations.MigrationTo51$MimeStructureState: void applyValues(android.content.ContentValues)>(r3);
+
+        $l1 = virtualinvoke $r0.<android.database.sqlite.SQLiteDatabase: long insertOrThrow(java.lang.String,java.lang.String,android.content.ContentValues)>("message_parts", null, r3);
+
+        $r5 = virtualinvoke $r5.<com.fsck.k9.mailstore.migrations.MigrationTo51$MimeStructureState: com.fsck.k9.mailstore.migrations.MigrationTo51$MimeStructureState nextMultipartChild(long)>($l1);
+
+        $r10 = $r5;
+
+        if $r1 == null goto label5;
+
+        $r10 = staticinvoke <com.fsck.k9.mailstore.migrations.MigrationTo51: com.fsck.k9.mailstore.migrations.MigrationTo51$MimeStructureState insertTextualPartIntoDatabase(android.database.sqlite.SQLiteDatabase,com.fsck.k9.mailstore.migrations.MigrationTo51$MimeStructureState,com.fsck.k9.mail.internet.MimeHeader,java.lang.String,boolean)>($r0, $r5, null, $r1, 0);
+
+     label5:
+        if $r2 == null goto label7;
+
+        $r5 = staticinvoke <com.fsck.k9.mailstore.migrations.MigrationTo51: com.fsck.k9.mailstore.migrations.MigrationTo51$MimeStructureState insertTextualPartIntoDatabase(android.database.sqlite.SQLiteDatabase,com.fsck.k9.mailstore.migrations.MigrationTo51$MimeStructureState,com.fsck.k9.mail.internet.MimeHeader,java.lang.String,boolean)>($r0, $r10, null, $r2, 1);
+
+        return $r5;
+
+     label6:
+        b0 = 0;
+
+        goto label4;
+
+     label7:
+        return $r10;
+    }
+    private static com.fsck.k9.mailstore.migrations.MigrationTo51$MimeStructureState insertMimeAttachmentPart(android.database.sqlite.SQLiteDatabase, java.io.File, java.io.File, com.fsck.k9.mailstore.migrations.MigrationTo51$MimeStructureState, long, int, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String)
+    {
+        android.database.sqlite.SQLiteDatabase $r0;
+        java.io.File $r1, $r2, r8;
+        long $l0, $l2;
+        int $i1;
+        java.lang.String $r3, $r4, $r5, $r6, $r7, $r13, $r16;
+        android.content.ContentValues r9;
+        java.lang.Exception r10;
+        com.fsck.k9.mail.internet.MimeHeader r11;
+        com.fsck.k9.mailstore.migrations.MigrationTo51$MimeStructureState $r12;
+        java.lang.Object[] $r14;
+        java.lang.Long $r15;
+        java.util.Locale $r17;
+        java.lang.Integer $r18;
+        boolean z0, $z1;
+        android.net.Uri $r19;
+        java.util.List $r20;
+        java.lang.Object $r21;
+        byte $b3;
+
+        $r0 := @parameter0: android.database.sqlite.SQLiteDatabase;
+
+        $r1 := @parameter1: java.io.File;
+
+        $r2 := @parameter2: java.io.File;
+
+        $r12 := @parameter3: com.fsck.k9.mailstore.migrations.MigrationTo51$MimeStructureState;
+
+        $l0 := @parameter4: long;
+
+        $i1 := @parameter5: int;
+
+        $r3 := @parameter6: java.lang.String;
+
+        $r4 := @parameter7: java.lang.String;
+
+        $r5 := @parameter8: java.lang.String;
+
+        $r6 := @parameter9: java.lang.String;
+
+        $r7 := @parameter10: java.lang.String;
+
+        $r13 := @parameter11: java.lang.String;
+
+        $r14 = newarray (java.lang.Object)[5];
+
+        $r15 = staticinvoke <java.lang.Long: java.lang.Long valueOf(long)>($l0);
+
+        $r14[0] = $r15;
+
+        $r14[1] = $r3;
+
+        $r14[2] = $r4;
+
+        $r14[3] = $r5;
+
+        $r14[4] = $r6;
+
+        staticinvoke <timber.log.Timber: void d(java.lang.String,java.lang.Object[])>("processing attachment %d, %s, %s, %s, %s", $r14);
+
+        if $r13 != null goto label01;
+
+        $r13 = "attachment";
+
+     label01:
+        r11 = new com.fsck.k9.mail.internet.MimeHeader;
+
+        specialinvoke r11.<com.fsck.k9.mail.internet.MimeHeader: void <init>()>();
+
+        $r14 = newarray (java.lang.Object)[2];
+
+        $r14[0] = $r4;
+
+        $r14[1] = $r3;
+
+        $r16 = staticinvoke <java.lang.String: java.lang.String format(java.lang.String,java.lang.Object[])>("%s;\r\n name=\"%s\"", $r14);
+
+        virtualinvoke r11.<com.fsck.k9.mail.internet.MimeHeader: void setHeader(java.lang.String,java.lang.String)>("Content-Type", $r16);
+
+        $r17 = <java.util.Locale: java.util.Locale US>;
+
+        $r14 = newarray (java.lang.Object)[3];
+
+        $r14[0] = $r13;
+
+        $r14[1] = $r3;
+
+        $r18 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i1);
+
+        $r14[2] = $r18;
+
+        $r16 = staticinvoke <java.lang.String: java.lang.String format(java.util.Locale,java.lang.String,java.lang.Object[])>($r17, "%s;\r\n filename=\"%s\";\r\n size=%d", $r14);
+
+        virtualinvoke r11.<com.fsck.k9.mail.internet.MimeHeader: void setHeader(java.lang.String,java.lang.String)>("Content-Disposition", $r16);
+
+        if $r7 == null goto label02;
+
+        virtualinvoke r11.<com.fsck.k9.mail.internet.MimeHeader: void setHeader(java.lang.String,java.lang.String)>("Content-ID", $r7);
+
+     label02:
+        if $r6 == null goto label16;
+
+        z0 = 1;
+
+     label03:
+        if z0 == 0 goto label23;
+
+     label04:
+        $r19 = staticinvoke <android.net.Uri: android.net.Uri parse(java.lang.String)>($r6);
+
+        $r20 = virtualinvoke $r19.<android.net.Uri: java.util.List getPathSegments()>();
+
+        $r21 = interfaceinvoke $r20.<java.util.List: java.lang.Object get(int)>(1);
+
+        $r6 = (java.lang.String) $r21;
+
+        $l2 = staticinvoke <java.lang.Long: long parseLong(java.lang.String)>($r6);
+
+     label05:
+        $b3 = $l2 cmp $l0;
+
+        if $b3 != 0 goto label17;
+
+        z0 = 1;
+
+     label06:
+        r8 = new java.io.File;
+
+     label07:
+        specialinvoke r8.<java.io.File: void <init>(java.io.File,java.lang.String)>($r1, $r6);
+
+        $z1 = virtualinvoke r8.<java.io.File: boolean exists()>();
+
+     label08:
+        if z0 != 0 goto label18;
+
+     label09:
+        $r14 = newarray (java.lang.Object)[0];
+
+        staticinvoke <timber.log.Timber: void e(java.lang.String,java.lang.Object[])>("mismatched attachment id. mark as missing", $r14);
+
+     label10:
+        $r1 = null;
+
+     label11:
+        if $r1 != null goto label12;
+
+        $r14 = newarray (java.lang.Object)[0];
+
+        staticinvoke <timber.log.Timber: void d(java.lang.String,java.lang.Object[])>("matching attachment is in local cache", $r14);
+
+     label12:
+        z0 = staticinvoke <android.text.TextUtils: boolean isEmpty(java.lang.CharSequence)>($r7);
+
+        if z0 != 0 goto label24;
+
+        $r6 = "inline";
+
+        z0 = virtualinvoke $r6.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>($r13);
+
+        if z0 == 0 goto label24;
+
+        z0 = 1;
+
+     label13:
+        if z0 == 0 goto label25;
+
+        $b3 = 6;
+
+     label14:
+        r9 = new android.content.ContentValues;
+
+        specialinvoke r9.<android.content.ContentValues: void <init>()>();
+
+        $r18 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($b3);
+
+        virtualinvoke r9.<android.content.ContentValues: void put(java.lang.String,java.lang.Integer)>("type", $r18);
+
+        virtualinvoke r9.<android.content.ContentValues: void put(java.lang.String,java.lang.String)>("mime_type", $r4);
+
+        $r18 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i1);
+
+        virtualinvoke r9.<android.content.ContentValues: void put(java.lang.String,java.lang.Integer)>("decoded_body_size", $r18);
+
+        virtualinvoke r9.<android.content.ContentValues: void put(java.lang.String,java.lang.String)>("display_name", $r3);
+
+        $r3 = virtualinvoke r11.<com.fsck.k9.mail.internet.MimeHeader: java.lang.String toString()>();
+
+        virtualinvoke r9.<android.content.ContentValues: void put(java.lang.String,java.lang.String)>("header", $r3);
+
+        virtualinvoke r9.<android.content.ContentValues: void put(java.lang.String,java.lang.String)>("encoding", "binary");
+
+        if $r1 == null goto label26;
+
+        $b3 = 2;
+
+     label15:
+        $r18 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($b3);
+
+        virtualinvoke r9.<android.content.ContentValues: void put(java.lang.String,java.lang.Integer)>("data_location", $r18);
+
+        virtualinvoke r9.<android.content.ContentValues: void put(java.lang.String,java.lang.String)>("content_id", $r7);
+
+        virtualinvoke r9.<android.content.ContentValues: void put(java.lang.String,java.lang.String)>("server_extra", $r5);
+
+        virtualinvoke $r12.<com.fsck.k9.mailstore.migrations.MigrationTo51$MimeStructureState: void applyValues(android.content.ContentValues)>(r9);
+
+        $l0 = virtualinvoke $r0.<android.database.sqlite.SQLiteDatabase: long insertOrThrow(java.lang.String,java.lang.String,android.content.ContentValues)>("message_parts", null, r9);
+
+        $r12 = virtualinvoke $r12.<com.fsck.k9.mailstore.migrations.MigrationTo51$MimeStructureState: com.fsck.k9.mailstore.migrations.MigrationTo51$MimeStructureState nextChild(long)>($l0);
+
+        if $r1 == null goto label27;
+
+        r8 = new java.io.File;
+
+        $r3 = staticinvoke <java.lang.Long: java.lang.String toString(long)>($l0);
+
+        specialinvoke r8.<java.io.File: void <init>(java.io.File,java.lang.String)>($r2, $r3);
+
+        z0 = virtualinvoke $r1.<java.io.File: boolean renameTo(java.io.File)>(r8);
+
+        if z0 != 0 goto label27;
+
+        $r14 = newarray (java.lang.Object)[0];
+
+        staticinvoke <timber.log.Timber: void e(java.lang.String,java.lang.Object[])>("Moving attachment to new dir failed!", $r14);
+
+        return $r12;
+
+     label16:
+        z0 = 0;
+
+        goto label03;
+
+     label17:
+        z0 = 0;
+
+        goto label06;
+
+     label18:
+        if $z1 != 0 goto label21;
+
+     label19:
+        $r14 = newarray (java.lang.Object)[0];
+
+        staticinvoke <timber.log.Timber: void e(java.lang.String,java.lang.Object[])>("attached file doesn\'t exist. mark as missing", $r14);
+
+     label20:
+        $r1 = null;
+
+        goto label11;
+
+     label21:
+        $r1 = r8;
+
+        goto label11;
+
+     label22:
+        r10 := @caughtexception;
+
+        $r1 = null;
+
+        goto label11;
+
+     label23:
+        $r1 = null;
+
+        goto label11;
+
+     label24:
+        z0 = 0;
+
+        goto label13;
+
+     label25:
+        $b3 = 0;
+
+        goto label14;
+
+     label26:
+        $b3 = 0;
+
+        goto label15;
+
+     label27:
+        return $r12;
+
+        catch java.lang.Exception from label04 to label05 with label22;
+        catch java.lang.Exception from label07 to label08 with label22;
+        catch java.lang.Exception from label09 to label10 with label22;
+        catch java.lang.Exception from label19 to label20 with label22;
+    }
+    private static com.fsck.k9.mailstore.migrations.MigrationTo51$MimeStructureState insertTextualPartIntoDatabase(android.database.sqlite.SQLiteDatabase, com.fsck.k9.mailstore.migrations.MigrationTo51$MimeStructureState, com.fsck.k9.mail.internet.MimeHeader, java.lang.String, boolean) throws java.io.IOException
+    {
+        android.database.sqlite.SQLiteDatabase $r0;
+        com.fsck.k9.mailstore.migrations.MigrationTo51$MimeStructureState $r1;
+        java.lang.String $r2, $r7;
+        boolean $z0;
+        java.io.ByteArrayOutputStream r3;
+        android.content.ContentValues r4;
+        org.apache.james.mime4j.codec.QuotedPrintableOutputStream r5;
+        com.fsck.k9.mail.internet.MimeHeader r6;
+        byte[] $r8;
+        byte b0;
+        int $i1;
+        java.lang.Integer $r9;
+        long $l2;
+
+        $r0 := @parameter0: android.database.sqlite.SQLiteDatabase;
+
+        $r1 := @parameter1: com.fsck.k9.mailstore.migrations.MigrationTo51$MimeStructureState;
+
+        r6 := @parameter2: com.fsck.k9.mail.internet.MimeHeader;
+
+        $r2 := @parameter3: java.lang.String;
+
+        $z0 := @parameter4: boolean;
+
+        if r6 != null goto label1;
+
+        r6 = new com.fsck.k9.mail.internet.MimeHeader;
+
+        specialinvoke r6.<com.fsck.k9.mail.internet.MimeHeader: void <init>()>();
+
+     label1:
+        if $z0 == 0 goto label5;
+
+        $r7 = "text/html; charset=\"utf-8\"";
+
+     label2:
+        virtualinvoke r6.<com.fsck.k9.mail.internet.MimeHeader: void setHeader(java.lang.String,java.lang.String)>("Content-Type", $r7);
+
+        virtualinvoke r6.<com.fsck.k9.mail.internet.MimeHeader: void setHeader(java.lang.String,java.lang.String)>("Content-Transfer-Encoding", "quoted-printable");
+
+        if $r2 == null goto label6;
+
+        r3 = new java.io.ByteArrayOutputStream;
+
+        specialinvoke r3.<java.io.ByteArrayOutputStream: void <init>()>();
+
+        r5 = new org.apache.james.mime4j.codec.QuotedPrintableOutputStream;
+
+        specialinvoke r5.<org.apache.james.mime4j.codec.QuotedPrintableOutputStream: void <init>(java.io.OutputStream,boolean)>(r3, 0);
+
+        $r8 = virtualinvoke $r2.<java.lang.String: byte[] getBytes()>();
+
+        virtualinvoke r5.<org.apache.james.mime4j.codec.QuotedPrintableOutputStream: void write(byte[])>($r8);
+
+        virtualinvoke r5.<org.apache.james.mime4j.codec.QuotedPrintableOutputStream: void flush()>();
+
+        b0 = 1;
+
+        $r8 = virtualinvoke r3.<java.io.ByteArrayOutputStream: byte[] toByteArray()>();
+
+        $i1 = virtualinvoke $r2.<java.lang.String: int length()>();
+
+     label3:
+        r4 = new android.content.ContentValues;
+
+        specialinvoke r4.<android.content.ContentValues: void <init>()>();
+
+        $r9 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(0);
+
+        virtualinvoke r4.<android.content.ContentValues: void put(java.lang.String,java.lang.Integer)>("type", $r9);
+
+        $r9 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(b0);
+
+        virtualinvoke r4.<android.content.ContentValues: void put(java.lang.String,java.lang.Integer)>("data_location", $r9);
+
+        if $z0 == 0 goto label7;
+
+        $r2 = "text/html";
+
+     label4:
+        virtualinvoke r4.<android.content.ContentValues: void put(java.lang.String,java.lang.String)>("mime_type", $r2);
+
+        $r2 = virtualinvoke r6.<com.fsck.k9.mail.internet.MimeHeader: java.lang.String toString()>();
+
+        virtualinvoke r4.<android.content.ContentValues: void put(java.lang.String,java.lang.String)>("header", $r2);
+
+        virtualinvoke r4.<android.content.ContentValues: void put(java.lang.String,byte[])>("data", $r8);
+
+        $r9 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i1);
+
+        virtualinvoke r4.<android.content.ContentValues: void put(java.lang.String,java.lang.Integer)>("decoded_body_size", $r9);
+
+        virtualinvoke r4.<android.content.ContentValues: void put(java.lang.String,java.lang.String)>("encoding", "quoted-printable");
+
+        virtualinvoke r4.<android.content.ContentValues: void put(java.lang.String,java.lang.String)>("charset", "utf-8");
+
+        virtualinvoke $r1.<com.fsck.k9.mailstore.migrations.MigrationTo51$MimeStructureState: void applyValues(android.content.ContentValues)>(r4);
+
+        $l2 = virtualinvoke $r0.<android.database.sqlite.SQLiteDatabase: long insertOrThrow(java.lang.String,java.lang.String,android.content.ContentValues)>("message_parts", null, r4);
+
+        $r1 = virtualinvoke $r1.<com.fsck.k9.mailstore.migrations.MigrationTo51$MimeStructureState: com.fsck.k9.mailstore.migrations.MigrationTo51$MimeStructureState nextChild(long)>($l2);
+
+        return $r1;
+
+     label5:
+        $r7 = "text/plain; charset=\"utf-8\"";
+
+        goto label2;
+
+     label6:
+        b0 = 0;
+
+        $r8 = null;
+
+        $i1 = 0;
+
+        goto label3;
+
+     label7:
+        $r2 = "text/plain";
+
+        goto label4;
+    }
+    private static com.fsck.k9.mail.internet.MimeHeader loadHeaderFromHeadersTable(android.database.sqlite.SQLiteDatabase, long)
+    {
+        android.database.sqlite.SQLiteDatabase $r0;
+        long $l0;
+        java.lang.String[] $r1, $r3;
+        com.fsck.k9.mail.internet.MimeHeader r2;
+        java.lang.String $r4, $r6;
+        android.database.Cursor $r5;
+        boolean $z0;
+        java.lang.Throwable $r7;
+
+        $r0 := @parameter0: android.database.sqlite.SQLiteDatabase;
+
+        $l0 := @parameter1: long;
+
+        $r1 = newarray (java.lang.String)[2];
+
+        $r1[0] = "name";
+
+        $r1[1] = "value";
+
+        $r3 = newarray (java.lang.String)[1];
+
+        $r4 = staticinvoke <java.lang.Long: java.lang.String toString(long)>($l0);
+
+        $r3[0] = $r4;
+
+        $r5 = virtualinvoke $r0.<android.database.sqlite.SQLiteDatabase: android.database.Cursor query(java.lang.String,java.lang.String[],java.lang.String,java.lang.String[],java.lang.String,java.lang.String,java.lang.String)>("headers", $r1, "message_id = ?", $r3, null, null, null);
+
+     label1:
+        r2 = new com.fsck.k9.mail.internet.MimeHeader;
+
+        specialinvoke r2.<com.fsck.k9.mail.internet.MimeHeader: void <init>()>();
+
+     label2:
+        $z0 = interfaceinvoke $r5.<android.database.Cursor: boolean moveToNext()>();
+
+     label3:
+        if $z0 == 0 goto label7;
+
+     label4:
+        $r4 = interfaceinvoke $r5.<android.database.Cursor: java.lang.String getString(int)>(0);
+
+        $r6 = interfaceinvoke $r5.<android.database.Cursor: java.lang.String getString(int)>(1);
+
+        virtualinvoke r2.<com.fsck.k9.mail.internet.MimeHeader: void addHeader(java.lang.String,java.lang.String)>($r4, $r6);
+
+     label5:
+        goto label2;
+
+     label6:
+        $r7 := @caughtexception;
+
+        interfaceinvoke $r5.<android.database.Cursor: void close()>();
+
+        throw $r7;
+
+     label7:
+        interfaceinvoke $r5.<android.database.Cursor: void close()>();
+
+        return r2;
+
+        catch java.lang.Throwable from label1 to label3 with label6;
+        catch java.lang.Throwable from label4 to label5 with label6;
+    }
+    private static com.fsck.k9.mailstore.migrations.MigrationTo51$MimeStructureState migrateComplexMailContent(android.database.sqlite.SQLiteDatabase, java.io.File, java.io.File, long, java.lang.String, java.lang.String, com.fsck.k9.mail.internet.MimeHeader, com.fsck.k9.mailstore.migrations.MigrationTo51$MimeStructureState) throws java.io.IOException
+    {
+        android.database.sqlite.SQLiteDatabase $r0;
+        java.io.File $r1, $r2;
+        long $l0, $l1;
+        java.lang.String $r3, $r6, $r9, $r10;
+        com.fsck.k9.mail.internet.MimeHeader $r4;
+        android.content.ContentValues r5;
+        com.fsck.k9.mailstore.migrations.MigrationTo51$MimeStructureState $r7, $r12;
+        java.lang.Object[] $r8;
+        boolean $z0;
+        java.lang.Integer $r11;
+
+        $r0 := @parameter0: android.database.sqlite.SQLiteDatabase;
+
+        $r1 := @parameter1: java.io.File;
+
+        $r2 := @parameter2: java.io.File;
+
+        $l0 := @parameter3: long;
+
+        $r6 := @parameter4: java.lang.String;
+
+        $r3 := @parameter5: java.lang.String;
+
+        $r4 := @parameter6: com.fsck.k9.mail.internet.MimeHeader;
+
+        $r7 := @parameter7: com.fsck.k9.mailstore.migrations.MigrationTo51$MimeStructureState;
+
+        $r8 = newarray (java.lang.Object)[0];
+
+        staticinvoke <timber.log.Timber: void d(java.lang.String,java.lang.Object[])>("Processing mail with complex data structure as multipart/mixed", $r8);
+
+        $r9 = virtualinvoke $r4.<com.fsck.k9.mail.internet.MimeHeader: java.lang.String getFirstHeader(java.lang.String)>("Content-Type");
+
+        $r10 = staticinvoke <com.fsck.k9.mail.internet.MimeUtility: java.lang.String getHeaderParameter(java.lang.String,java.lang.String)>($r9, "boundary");
+
+        $r9 = $r10;
+
+        $z0 = staticinvoke <android.text.TextUtils: boolean isEmpty(java.lang.CharSequence)>($r10);
+
+        if $z0 == 0 goto label1;
+
+        $r9 = staticinvoke <org.apache.james.mime4j.util.MimeUtil: java.lang.String createUniqueBoundary()>();
+
+     label1:
+        $r8 = newarray (java.lang.Object)[1];
+
+        $r8[0] = $r9;
+
+        $r10 = staticinvoke <java.lang.String: java.lang.String format(java.lang.String,java.lang.Object[])>("multipart/mixed; boundary=\"%s\";", $r8);
+
+        virtualinvoke $r4.<com.fsck.k9.mail.internet.MimeHeader: void setHeader(java.lang.String,java.lang.String)>("Content-Type", $r10);
+
+        r5 = new android.content.ContentValues;
+
+        specialinvoke r5.<android.content.ContentValues: void <init>()>();
+
+        $r11 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(0);
+
+        virtualinvoke r5.<android.content.ContentValues: void put(java.lang.String,java.lang.Integer)>("type", $r11);
+
+        $r11 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(1);
+
+        virtualinvoke r5.<android.content.ContentValues: void put(java.lang.String,java.lang.Integer)>("data_location", $r11);
+
+        virtualinvoke r5.<android.content.ContentValues: void put(java.lang.String,java.lang.String)>("mime_type", "multipart/mixed");
+
+        $r10 = virtualinvoke $r4.<com.fsck.k9.mail.internet.MimeHeader: java.lang.String toString()>();
+
+        virtualinvoke r5.<android.content.ContentValues: void put(java.lang.String,java.lang.String)>("header", $r10);
+
+        virtualinvoke r5.<android.content.ContentValues: void put(java.lang.String,java.lang.String)>("boundary", $r9);
+
+        virtualinvoke $r7.<com.fsck.k9.mailstore.migrations.MigrationTo51$MimeStructureState: void applyValues(android.content.ContentValues)>(r5);
+
+        $l1 = virtualinvoke $r0.<android.database.sqlite.SQLiteDatabase: long insertOrThrow(java.lang.String,java.lang.String,android.content.ContentValues)>("message_parts", null, r5);
+
+        $r7 = virtualinvoke $r7.<com.fsck.k9.mailstore.migrations.MigrationTo51$MimeStructureState: com.fsck.k9.mailstore.migrations.MigrationTo51$MimeStructureState nextMultipartChild(long)>($l1);
+
+        $r12 = $r7;
+
+        if $r6 == null goto label2;
+
+        $r6 = staticinvoke <com.fsck.k9.mailstore.migrations.MigrationTo51: java.lang.String replaceContentUriWithContentIdInHtmlPart(android.database.sqlite.SQLiteDatabase,long,java.lang.String)>($r0, $l0, $r6);
+
+     label2:
+        if $r3 == null goto label4;
+
+        if $r6 == null goto label4;
+
+        $r7 = staticinvoke <com.fsck.k9.mailstore.migrations.MigrationTo51: com.fsck.k9.mailstore.migrations.MigrationTo51$MimeStructureState insertBodyAsMultipartAlternative(android.database.sqlite.SQLiteDatabase,com.fsck.k9.mailstore.migrations.MigrationTo51$MimeStructureState,com.fsck.k9.mail.internet.MimeHeader,java.lang.String,java.lang.String)>($r0, $r7, null, $r3, $r6);
+
+        $r12 = virtualinvoke $r7.<com.fsck.k9.mailstore.migrations.MigrationTo51$MimeStructureState: com.fsck.k9.mailstore.migrations.MigrationTo51$MimeStructureState popParent()>();
+
+     label3:
+        $r7 = staticinvoke <com.fsck.k9.mailstore.migrations.MigrationTo51: com.fsck.k9.mailstore.migrations.MigrationTo51$MimeStructureState insertAttachments(android.database.sqlite.SQLiteDatabase,java.io.File,java.io.File,long,com.fsck.k9.mailstore.migrations.MigrationTo51$MimeStructureState)>($r0, $r1, $r2, $l0, $r12);
+
+        return $r7;
+
+     label4:
+        if $r3 == null goto label5;
+
+        $r12 = staticinvoke <com.fsck.k9.mailstore.migrations.MigrationTo51: com.fsck.k9.mailstore.migrations.MigrationTo51$MimeStructureState insertTextualPartIntoDatabase(android.database.sqlite.SQLiteDatabase,com.fsck.k9.mailstore.migrations.MigrationTo51$MimeStructureState,com.fsck.k9.mail.internet.MimeHeader,java.lang.String,boolean)>($r0, $r7, null, $r3, 0);
+
+        goto label3;
+
+     label5:
+        if $r6 == null goto label3;
+
+        $r12 = staticinvoke <com.fsck.k9.mailstore.migrations.MigrationTo51: com.fsck.k9.mailstore.migrations.MigrationTo51$MimeStructureState insertTextualPartIntoDatabase(android.database.sqlite.SQLiteDatabase,com.fsck.k9.mailstore.migrations.MigrationTo51$MimeStructureState,com.fsck.k9.mail.internet.MimeHeader,java.lang.String,boolean)>($r0, $r7, null, $r6, 1);
+
+        goto label3;
+    }
+    private static com.fsck.k9.mailstore.migrations.MigrationTo51$MimeStructureState migratePgpMimeEncryptedContent(android.database.sqlite.SQLiteDatabase, long, java.io.File, java.io.File, com.fsck.k9.mail.internet.MimeHeader, com.fsck.k9.mailstore.migrations.MigrationTo51$MimeStructureState)
+    {
+        android.database.sqlite.SQLiteDatabase $r0;
+        long $l0, $l2, $l4;
+        java.io.File $r1, $r2;
+        com.fsck.k9.mail.internet.MimeHeader $r3;
+        java.lang.String[] $r4, $r8;
+        android.content.ContentValues r5;
+        com.fsck.k9.mailstore.migrations.MigrationTo51$MimeStructureState $r6;
+        java.lang.Object[] $r7;
+        java.lang.String $r9, $r11, $r12, $r13, $r14, $r15, $r16, $r17;
+        android.database.Cursor $r10;
+        int $i1, $i3;
+        boolean $z0;
+        java.lang.Integer $r18;
+        java.lang.Throwable $r19;
+
+        $r0 := @parameter0: android.database.sqlite.SQLiteDatabase;
+
+        $l0 := @parameter1: long;
+
+        $r1 := @parameter2: java.io.File;
+
+        $r2 := @parameter3: java.io.File;
+
+        $r3 := @parameter4: com.fsck.k9.mail.internet.MimeHeader;
+
+        $r6 := @parameter5: com.fsck.k9.mailstore.migrations.MigrationTo51$MimeStructureState;
+
+        $r7 = newarray (java.lang.Object)[0];
+
+        staticinvoke <timber.log.Timber: void d(java.lang.String,java.lang.Object[])>("Attempting to migrate multipart/encrypted as pgp/mime", $r7);
+
+        $r8 = newarray (java.lang.String)[8];
+
+        $r8[0] = "id";
+
+        $r8[1] = "size";
+
+        $r8[2] = "name";
+
+        $r8[3] = "mime_type";
+
+        $r8[4] = "store_data";
+
+        $r8[5] = "content_uri";
+
+        $r8[6] = "content_id";
+
+        $r8[7] = "content_disposition";
+
+        $r4 = newarray (java.lang.String)[1];
+
+        $r9 = staticinvoke <java.lang.Long: java.lang.String toString(long)>($l0);
+
+        $r4[0] = $r9;
+
+        $r10 = virtualinvoke $r0.<android.database.sqlite.SQLiteDatabase: android.database.Cursor query(java.lang.String,java.lang.String[],java.lang.String,java.lang.String[],java.lang.String,java.lang.String,java.lang.String)>("attachments", $r8, "message_id = ?", $r4, null, null, "(mime_type LIKE \'application/pgp-encrypted\') DESC");
+
+     label01:
+        $i1 = interfaceinvoke $r10.<android.database.Cursor: int getCount()>();
+
+     label02:
+        if $i1 == 2 goto label05;
+
+     label03:
+        $r7 = newarray (java.lang.Object)[0];
+
+        staticinvoke <timber.log.Timber: void e(java.lang.String,java.lang.Object[])>("Found multipart/encrypted but bad number of attachments, handling as regular mail", $r7);
+
+     label04:
+        interfaceinvoke $r10.<android.database.Cursor: void close()>();
+
+        return null;
+
+     label05:
+        interfaceinvoke $r10.<android.database.Cursor: boolean moveToFirst()>();
+
+        $l0 = interfaceinvoke $r10.<android.database.Cursor: long getLong(int)>(0);
+
+        $i1 = interfaceinvoke $r10.<android.database.Cursor: int getInt(int)>(1);
+
+        $r9 = interfaceinvoke $r10.<android.database.Cursor: java.lang.String getString(int)>(2);
+
+        $r11 = interfaceinvoke $r10.<android.database.Cursor: java.lang.String getString(int)>(3);
+
+        $r12 = interfaceinvoke $r10.<android.database.Cursor: java.lang.String getString(int)>(4);
+
+        $r13 = interfaceinvoke $r10.<android.database.Cursor: java.lang.String getString(int)>(5);
+
+        $z0 = staticinvoke <org.apache.james.mime4j.util.MimeUtil: boolean isSameMimeType(java.lang.String,java.lang.String)>($r11, "application/pgp-encrypted");
+
+     label06:
+        if $z0 != 0 goto label09;
+
+     label07:
+        $r7 = newarray (java.lang.Object)[0];
+
+        staticinvoke <timber.log.Timber: void e(java.lang.String,java.lang.Object[])>("First part in multipart/encrypted wasn\'t application/pgp-encrypted, not handling as pgp/mime", $r7);
+
+     label08:
+        interfaceinvoke $r10.<android.database.Cursor: void close()>();
+
+        return null;
+
+     label09:
+        interfaceinvoke $r10.<android.database.Cursor: boolean moveToNext()>();
+
+        $l2 = interfaceinvoke $r10.<android.database.Cursor: long getLong(int)>(0);
+
+        $i3 = interfaceinvoke $r10.<android.database.Cursor: int getInt(int)>(1);
+
+        $r11 = interfaceinvoke $r10.<android.database.Cursor: java.lang.String getString(int)>(2);
+
+        $r14 = interfaceinvoke $r10.<android.database.Cursor: java.lang.String getString(int)>(3);
+
+        $r15 = interfaceinvoke $r10.<android.database.Cursor: java.lang.String getString(int)>(4);
+
+        $r16 = interfaceinvoke $r10.<android.database.Cursor: java.lang.String getString(int)>(5);
+
+        $z0 = staticinvoke <org.apache.james.mime4j.util.MimeUtil: boolean isSameMimeType(java.lang.String,java.lang.String)>($r14, "application/octet-stream");
+
+     label10:
+        if $z0 != 0 goto label13;
+
+     label11:
+        $r7 = newarray (java.lang.Object)[0];
+
+        staticinvoke <timber.log.Timber: void e(java.lang.String,java.lang.Object[])>("First part in multipart/encrypted wasn\'t application/octet-stream, not handling as pgp/mime", $r7);
+
+     label12:
+        interfaceinvoke $r10.<android.database.Cursor: void close()>();
+
+        return null;
+
+     label13:
+        $r14 = virtualinvoke $r3.<com.fsck.k9.mail.internet.MimeHeader: java.lang.String getFirstHeader(java.lang.String)>("Content-Type");
+
+        $r17 = staticinvoke <com.fsck.k9.mail.internet.MimeUtility: java.lang.String getHeaderParameter(java.lang.String,java.lang.String)>($r14, "boundary");
+
+     label14:
+        $r14 = $r17;
+
+     label15:
+        $z0 = staticinvoke <android.text.TextUtils: boolean isEmpty(java.lang.CharSequence)>($r17);
+
+     label16:
+        if $z0 == 0 goto label18;
+
+     label17:
+        $r14 = staticinvoke <org.apache.james.mime4j.util.MimeUtil: java.lang.String createUniqueBoundary()>();
+
+     label18:
+        $r7 = newarray (java.lang.Object)[1];
+
+        $r7[0] = $r14;
+
+        $r17 = staticinvoke <java.lang.String: java.lang.String format(java.lang.String,java.lang.Object[])>("multipart/encrypted; boundary=\"%s\"; protocol=\"application/pgp-encrypted\"", $r7);
+
+        virtualinvoke $r3.<com.fsck.k9.mail.internet.MimeHeader: void setHeader(java.lang.String,java.lang.String)>("Content-Type", $r17);
+
+        r5 = new android.content.ContentValues;
+
+        specialinvoke r5.<android.content.ContentValues: void <init>()>();
+
+        $r18 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(0);
+
+        virtualinvoke r5.<android.content.ContentValues: void put(java.lang.String,java.lang.Integer)>("type", $r18);
+
+        $r18 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(1);
+
+        virtualinvoke r5.<android.content.ContentValues: void put(java.lang.String,java.lang.Integer)>("data_location", $r18);
+
+        virtualinvoke r5.<android.content.ContentValues: void put(java.lang.String,java.lang.String)>("mime_type", "multipart/encrypted");
+
+        $r17 = virtualinvoke $r3.<com.fsck.k9.mail.internet.MimeHeader: java.lang.String toString()>();
+
+        virtualinvoke r5.<android.content.ContentValues: void put(java.lang.String,java.lang.String)>("header", $r17);
+
+        virtualinvoke r5.<android.content.ContentValues: void put(java.lang.String,java.lang.String)>("boundary", $r14);
+
+        virtualinvoke $r6.<com.fsck.k9.mailstore.migrations.MigrationTo51$MimeStructureState: void applyValues(android.content.ContentValues)>(r5);
+
+        $l4 = virtualinvoke $r0.<android.database.sqlite.SQLiteDatabase: long insertOrThrow(java.lang.String,java.lang.String,android.content.ContentValues)>("message_parts", null, r5);
+
+        $r6 = virtualinvoke $r6.<com.fsck.k9.mailstore.migrations.MigrationTo51$MimeStructureState: com.fsck.k9.mailstore.migrations.MigrationTo51$MimeStructureState nextMultipartChild(long)>($l4);
+
+        $r6 = staticinvoke <com.fsck.k9.mailstore.migrations.MigrationTo51: com.fsck.k9.mailstore.migrations.MigrationTo51$MimeStructureState insertMimeAttachmentPart(android.database.sqlite.SQLiteDatabase,java.io.File,java.io.File,com.fsck.k9.mailstore.migrations.MigrationTo51$MimeStructureState,long,int,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String)>($r0, $r1, $r2, $r6, $l0, $i1, $r9, "application/pgp-encrypted", $r12, $r13, null, null);
+
+        $r6 = staticinvoke <com.fsck.k9.mailstore.migrations.MigrationTo51: com.fsck.k9.mailstore.migrations.MigrationTo51$MimeStructureState insertMimeAttachmentPart(android.database.sqlite.SQLiteDatabase,java.io.File,java.io.File,com.fsck.k9.mailstore.migrations.MigrationTo51$MimeStructureState,long,int,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String)>($r0, $r1, $r2, $r6, $l2, $i3, $r11, "application/octet-stream", $r15, $r16, null, null);
+
+     label19:
+        interfaceinvoke $r10.<android.database.Cursor: void close()>();
+
+        return $r6;
+
+     label20:
+        $r19 := @caughtexception;
+
+        interfaceinvoke $r10.<android.database.Cursor: void close()>();
+
+        throw $r19;
+
+        catch java.lang.Throwable from label01 to label02 with label20;
+        catch java.lang.Throwable from label03 to label04 with label20;
+        catch java.lang.Throwable from label05 to label06 with label20;
+        catch java.lang.Throwable from label07 to label08 with label20;
+        catch java.lang.Throwable from label09 to label10 with label20;
+        catch java.lang.Throwable from label11 to label12 with label20;
+        catch java.lang.Throwable from label13 to label14 with label20;
+        catch java.lang.Throwable from label15 to label16 with label20;
+        catch java.lang.Throwable from label17 to label18 with label20;
+        catch java.lang.Throwable from label18 to label19 with label20;
+    }
+    private static com.fsck.k9.mailstore.migrations.MigrationTo51$MimeStructureState migrateSimpleMailContent(android.database.sqlite.SQLiteDatabase, java.lang.String, java.lang.String, java.lang.String, com.fsck.k9.mail.internet.MimeHeader, com.fsck.k9.mailstore.migrations.MigrationTo51$MimeStructureState) throws java.io.IOException
+    {
+        android.database.sqlite.SQLiteDatabase $r0;
+        java.lang.String $r1, $r2, $r3;
+        com.fsck.k9.mail.internet.MimeHeader $r4;
+        com.fsck.k9.mailstore.migrations.MigrationTo51$MimeStructureState $r5;
+        java.lang.Object[] $r6;
+        boolean $z0;
+        java.lang.IllegalStateException $r7;
+        java.lang.StringBuilder $r8;
+
+        $r0 := @parameter0: android.database.sqlite.SQLiteDatabase;
+
+        $r1 := @parameter1: java.lang.String;
+
+        $r2 := @parameter2: java.lang.String;
+
+        $r3 := @parameter3: java.lang.String;
+
+        $r4 := @parameter4: com.fsck.k9.mail.internet.MimeHeader;
+
+        $r5 := @parameter5: com.fsck.k9.mailstore.migrations.MigrationTo51$MimeStructureState;
+
+        $r6 = newarray (java.lang.Object)[0];
+
+        staticinvoke <timber.log.Timber: void d(java.lang.String,java.lang.Object[])>("Processing mail with simple structure", $r6);
+
+        $z0 = staticinvoke <org.apache.james.mime4j.util.MimeUtil: boolean isSameMimeType(java.lang.String,java.lang.String)>($r3, "text/plain");
+
+        if $z0 == 0 goto label1;
+
+        $r5 = staticinvoke <com.fsck.k9.mailstore.migrations.MigrationTo51: com.fsck.k9.mailstore.migrations.MigrationTo51$MimeStructureState insertTextualPartIntoDatabase(android.database.sqlite.SQLiteDatabase,com.fsck.k9.mailstore.migrations.MigrationTo51$MimeStructureState,com.fsck.k9.mail.internet.MimeHeader,java.lang.String,boolean)>($r0, $r5, $r4, $r2, 0);
+
+        return $r5;
+
+     label1:
+        $z0 = staticinvoke <org.apache.james.mime4j.util.MimeUtil: boolean isSameMimeType(java.lang.String,java.lang.String)>($r3, "text/html");
+
+        if $z0 == 0 goto label2;
+
+        $r5 = staticinvoke <com.fsck.k9.mailstore.migrations.MigrationTo51: com.fsck.k9.mailstore.migrations.MigrationTo51$MimeStructureState insertTextualPartIntoDatabase(android.database.sqlite.SQLiteDatabase,com.fsck.k9.mailstore.migrations.MigrationTo51$MimeStructureState,com.fsck.k9.mail.internet.MimeHeader,java.lang.String,boolean)>($r0, $r5, $r4, $r1, 1);
+
+        return $r5;
+
+     label2:
+        $z0 = staticinvoke <org.apache.james.mime4j.util.MimeUtil: boolean isSameMimeType(java.lang.String,java.lang.String)>($r3, "multipart/alternative");
+
+        if $z0 == 0 goto label3;
+
+        $r5 = staticinvoke <com.fsck.k9.mailstore.migrations.MigrationTo51: com.fsck.k9.mailstore.migrations.MigrationTo51$MimeStructureState insertBodyAsMultipartAlternative(android.database.sqlite.SQLiteDatabase,com.fsck.k9.mailstore.migrations.MigrationTo51$MimeStructureState,com.fsck.k9.mail.internet.MimeHeader,java.lang.String,java.lang.String)>($r0, $r5, $r4, $r2, $r1);
+
+        return $r5;
+
+     label3:
+        $r7 = new java.lang.IllegalStateException;
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("migrateSimpleMailContent cannot handle mimeType ");
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r1 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r7.<java.lang.IllegalStateException: void <init>(java.lang.String)>($r1);
+
+        throw $r7;
+    }
+    private static java.io.File renameOldAttachmentDirAndCreateNew(com.fsck.k9.Account, java.io.File)
+    {
+        com.fsck.k9.Account $r0;
+        java.io.File $r1, r2;
+        java.lang.String $r3, $r5;
+        java.lang.StringBuilder $r4;
+        long $l0;
+        boolean $z0;
+        java.lang.Object[] $r6;
+
+        $r0 := @parameter0: com.fsck.k9.Account;
+
+        $r1 := @parameter1: java.io.File;
+
+        r2 = new java.io.File;
+
+        $r3 = virtualinvoke $r1.<java.io.File: java.lang.String getParent()>();
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r0.<com.fsck.k9.Account: java.lang.String getUuid()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".old_attach-");
+
+        $l0 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l0);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke r2.<java.io.File: void <init>(java.lang.String,java.lang.String)>($r3, $r5);
+
+        $z0 = virtualinvoke $r1.<java.io.File: boolean renameTo(java.io.File)>(r2);
+
+        if $z0 != 0 goto label1;
+
+        $r6 = newarray (java.lang.Object)[0];
+
+        staticinvoke <timber.log.Timber: void e(java.lang.String,java.lang.Object[])>("Error moving attachment dir! All attachments might be lost!", $r6);
+
+     label1:
+        $z0 = virtualinvoke $r1.<java.io.File: boolean mkdir()>();
+
+        if $z0 != 0 goto label2;
+
+        $r6 = newarray (java.lang.Object)[0];
+
+        staticinvoke <timber.log.Timber: void e(java.lang.String,java.lang.Object[])>("Error creating new attachment dir!", $r6);
+
+     label2:
+        return r2;
+    }
+    private static void renameOldMessagesTableAndCreateNew(android.database.sqlite.SQLiteDatabase)
+    {
+        android.database.sqlite.SQLiteDatabase $r0;
+
+        $r0 := @parameter0: android.database.sqlite.SQLiteDatabase;
+
+        virtualinvoke $r0.<android.database.sqlite.SQLiteDatabase: void execSQL(java.lang.String)>("ALTER TABLE messages RENAME TO messages_old");
+
+        virtualinvoke $r0.<android.database.sqlite.SQLiteDatabase: void execSQL(java.lang.String)>("CREATE TABLE messages (id INTEGER PRIMARY KEY, deleted INTEGER default 0, folder_id INTEGER, uid TEXT, subject TEXT, date INTEGER, flags TEXT, sender_list TEXT, to_list TEXT, cc_list TEXT, bcc_list TEXT, reply_to_list TEXT, attachment_count INTEGER, internal_date INTEGER, message_id TEXT, preview TEXT, mime_type TEXT, normalized_subject_hash INTEGER, empty INTEGER default 0, read INTEGER default 0, flagged INTEGER default 0, answered INTEGER default 0, forwarded INTEGER default 0, message_part_id INTEGER)");
+
+        virtualinvoke $r0.<android.database.sqlite.SQLiteDatabase: void execSQL(java.lang.String)>("CREATE TABLE message_parts (id INTEGER PRIMARY KEY, type INTEGER NOT NULL, root INTEGER, parent INTEGER NOT NULL, seq INTEGER NOT NULL, mime_type TEXT, decoded_body_size INTEGER, display_name TEXT, header TEXT, encoding TEXT, charset TEXT, data_location INTEGER NOT NULL, data BLOB, preamble TEXT, epilogue TEXT, boundary TEXT, content_id TEXT, server_extra TEXT)");
+
+        virtualinvoke $r0.<android.database.sqlite.SQLiteDatabase: void execSQL(java.lang.String)>("CREATE TRIGGER set_message_part_root AFTER INSERT ON message_parts BEGIN UPDATE message_parts SET root=id WHERE root IS NULL AND ROWID = NEW.ROWID; END");
+
+        return;
+    }
+    private static java.lang.String replaceContentUriWithContentIdInHtmlPart(android.database.sqlite.SQLiteDatabase, long, java.lang.String)
+    {
+        android.database.sqlite.SQLiteDatabase $r0;
+        long $l0;
+        java.lang.String $r1, $r4, $r6;
+        java.lang.String[] $r2, $r3;
+        android.database.Cursor $r5;
+        boolean $z0;
+        java.lang.StringBuilder $r7;
+        java.lang.Throwable $r8;
+
+        $r0 := @parameter0: android.database.sqlite.SQLiteDatabase;
+
+        $l0 := @parameter1: long;
+
+        $r1 := @parameter2: java.lang.String;
+
+        $r2 = newarray (java.lang.String)[2];
+
+        $r2[0] = "content_uri";
+
+        $r2[1] = "content_id";
+
+        $r3 = newarray (java.lang.String)[1];
+
+        $r4 = staticinvoke <java.lang.Long: java.lang.String toString(long)>($l0);
+
+        $r3[0] = $r4;
+
+        $r5 = virtualinvoke $r0.<android.database.sqlite.SQLiteDatabase: android.database.Cursor query(java.lang.String,java.lang.String[],java.lang.String,java.lang.String[],java.lang.String,java.lang.String,java.lang.String)>("attachments", $r2, "content_id IS NOT NULL AND message_id = ?", $r3, null, null, null);
+
+     label1:
+        $z0 = interfaceinvoke $r5.<android.database.Cursor: boolean moveToNext()>();
+
+     label2:
+        if $z0 == 0 goto label5;
+
+     label3:
+        $r6 = interfaceinvoke $r5.<android.database.Cursor: java.lang.String getString(int)>(0);
+
+        $r4 = interfaceinvoke $r5.<android.database.Cursor: java.lang.String getString(int)>(1);
+
+        $r6 = staticinvoke <java.util.regex.Pattern: java.lang.String quote(java.lang.String)>($r6);
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("cid:");
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r4 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r1 = virtualinvoke $r1.<java.lang.String: java.lang.String replaceAll(java.lang.String,java.lang.String)>($r6, $r4);
+
+     label4:
+        goto label1;
+
+     label5:
+        interfaceinvoke $r5.<android.database.Cursor: void close()>();
+
+        return $r1;
+
+     label6:
+        $r8 := @caughtexception;
+
+        interfaceinvoke $r5.<android.database.Cursor: void close()>();
+
+        throw $r8;
+
+        catch java.lang.Throwable from label1 to label2 with label6;
+        catch java.lang.Throwable from label3 to label4 with label6;
+    }
+    private static void updateFlagsForMessage(android.database.sqlite.SQLiteDatabase, long, java.lang.String, com.fsck.k9.mailstore.migrations.MigrationsHelper)
+    {
+        android.database.sqlite.SQLiteDatabase $r0;
+        long $l0;
+        java.lang.String $r1;
+        com.fsck.k9.mailstore.migrations.MigrationsHelper $r2;
+        java.util.ArrayList r3;
+        int $i1, $i2;
+        java.lang.String[] $r4;
+        com.fsck.k9.mail.Flag $r5;
+        java.lang.Object[] $r6;
+        java.lang.Long $r7;
+        java.lang.Exception $r8;
+
+        $r0 := @parameter0: android.database.sqlite.SQLiteDatabase;
+
+        $l0 := @parameter1: long;
+
+        $r1 := @parameter2: java.lang.String;
+
+        $r2 := @parameter3: com.fsck.k9.mailstore.migrations.MigrationsHelper;
+
+        r3 = new java.util.ArrayList;
+
+        specialinvoke r3.<java.util.ArrayList: void <init>()>();
+
+        if $r1 == null goto label4;
+
+        $i1 = virtualinvoke $r1.<java.lang.String: int length()>();
+
+        if $i1 <= 0 goto label4;
+
+        $r4 = virtualinvoke $r1.<java.lang.String: java.lang.String[] split(java.lang.String)>(",");
+
+        $i1 = lengthof $r4;
+
+        $i2 = 0;
+
+     label1:
+        if $i2 >= $i1 goto label4;
+
+        $r1 = $r4[$i2];
+
+     label2:
+        $r5 = staticinvoke <com.fsck.k9.mail.Flag: com.fsck.k9.mail.Flag valueOf(java.lang.String)>($r1);
+
+        interfaceinvoke r3.<java.util.List: boolean add(java.lang.Object)>($r5);
+
+     label3:
+        $i2 = $i2 + 1;
+
+        goto label1;
+
+     label4:
+        $r5 = <com.fsck.k9.mail.Flag: com.fsck.k9.mail.Flag X_MIGRATED_FROM_V50>;
+
+        interfaceinvoke r3.<java.util.List: boolean add(java.lang.Object)>($r5);
+
+        $r1 = interfaceinvoke $r2.<com.fsck.k9.mailstore.migrations.MigrationsHelper: java.lang.String serializeFlags(java.util.List)>(r3);
+
+        $r6 = newarray (java.lang.Object)[2];
+
+        $r6[0] = $r1;
+
+        $r7 = staticinvoke <java.lang.Long: java.lang.Long valueOf(long)>($l0);
+
+        $r6[1] = $r7;
+
+        virtualinvoke $r0.<android.database.sqlite.SQLiteDatabase: void execSQL(java.lang.String,java.lang.Object[])>("UPDATE messages SET flags = ? WHERE id = ?", $r6);
+
+        return;
+
+     label5:
+        $r8 := @caughtexception;
+
+        goto label3;
+
+        catch java.lang.Exception from label2 to label3 with label5;
+    }

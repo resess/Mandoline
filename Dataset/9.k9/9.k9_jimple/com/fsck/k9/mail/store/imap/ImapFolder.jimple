@@ -1,0 +1,4467 @@
+com.fsck.k9.mail.store.imap.ImapFolder extends com.fsck.k9.mail.Folder
+private static final int FETCH_WINDOW_SIZE
+private static final int MORE_MESSAGES_WINDOW_SIZE
+private static final java.lang.ThreadLocal RFC3501_DATE
+private boolean canCreateKeywords
+protected volatile com.fsck.k9.mail.store.imap.ImapConnection connection
+private volatile boolean exists
+private final com.fsck.k9.mail.store.imap.FolderNameCodec folderNameCodec
+private boolean inSearch
+protected volatile int messageCount
+private int mode
+protected java.util.Map msgSeqUidMap
+private final java.lang.String name
+protected com.fsck.k9.mail.store.imap.ImapStore store
+protected volatile long uidNext
+    static void <clinit>()
+    {
+        com.fsck.k9.mail.store.imap.ImapFolder$1 $r0;
+
+        $r0 = new com.fsck.k9.mail.store.imap.ImapFolder$1;
+
+        specialinvoke $r0.<com.fsck.k9.mail.store.imap.ImapFolder$1: void <init>()>();
+
+        <com.fsck.k9.mail.store.imap.ImapFolder: java.lang.ThreadLocal RFC3501_DATE> = $r0;
+
+        return;
+    }
+    public void <init>(com.fsck.k9.mail.store.imap.ImapStore, java.lang.String)
+    {
+        com.fsck.k9.mail.store.imap.ImapFolder r0;
+        com.fsck.k9.mail.store.imap.ImapStore $r1;
+        java.lang.String $r2;
+        com.fsck.k9.mail.store.imap.FolderNameCodec $r3;
+
+        r0 := @this: com.fsck.k9.mail.store.imap.ImapFolder;
+
+        $r1 := @parameter0: com.fsck.k9.mail.store.imap.ImapStore;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $r3 = virtualinvoke $r1.<com.fsck.k9.mail.store.imap.ImapStore: com.fsck.k9.mail.store.imap.FolderNameCodec getFolderNameCodec()>();
+
+        specialinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: void <init>(com.fsck.k9.mail.store.imap.ImapStore,java.lang.String,com.fsck.k9.mail.store.imap.FolderNameCodec)>($r1, $r2, $r3);
+
+        return;
+    }
+    void <init>(com.fsck.k9.mail.store.imap.ImapStore, java.lang.String, com.fsck.k9.mail.store.imap.FolderNameCodec)
+    {
+        com.fsck.k9.mail.store.imap.ImapFolder r0;
+        com.fsck.k9.mail.store.imap.ImapStore $r1;
+        java.lang.String $r2;
+        com.fsck.k9.mail.store.imap.FolderNameCodec $r3;
+        java.util.concurrent.ConcurrentHashMap $r4;
+
+        r0 := @this: com.fsck.k9.mail.store.imap.ImapFolder;
+
+        $r1 := @parameter0: com.fsck.k9.mail.store.imap.ImapStore;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $r3 := @parameter2: com.fsck.k9.mail.store.imap.FolderNameCodec;
+
+        specialinvoke r0.<com.fsck.k9.mail.Folder: void <init>()>();
+
+        r0.<com.fsck.k9.mail.store.imap.ImapFolder: int messageCount> = -1;
+
+        r0.<com.fsck.k9.mail.store.imap.ImapFolder: long uidNext> = -1L;
+
+        r0.<com.fsck.k9.mail.store.imap.ImapFolder: com.fsck.k9.mail.store.imap.ImapStore store> = null;
+
+        $r4 = new java.util.concurrent.ConcurrentHashMap;
+
+        specialinvoke $r4.<java.util.concurrent.ConcurrentHashMap: void <init>()>();
+
+        r0.<com.fsck.k9.mail.store.imap.ImapFolder: java.util.Map msgSeqUidMap> = $r4;
+
+        r0.<com.fsck.k9.mail.store.imap.ImapFolder: boolean inSearch> = 0;
+
+        r0.<com.fsck.k9.mail.store.imap.ImapFolder: boolean canCreateKeywords> = 0;
+
+        r0.<com.fsck.k9.mail.store.imap.ImapFolder: com.fsck.k9.mail.store.imap.ImapStore store> = $r1;
+
+        r0.<com.fsck.k9.mail.store.imap.ImapFolder: java.lang.String name> = $r2;
+
+        r0.<com.fsck.k9.mail.store.imap.ImapFolder: com.fsck.k9.mail.store.imap.FolderNameCodec folderNameCodec> = $r3;
+
+        return;
+    }
+    static java.util.List access$000(com.fsck.k9.mail.store.imap.ImapFolder, java.lang.String) throws com.fsck.k9.mail.MessagingException, java.io.IOException
+    {
+        com.fsck.k9.mail.store.imap.ImapFolder $r0;
+        java.lang.String $r1;
+        java.util.List $r2;
+
+        $r0 := @parameter0: com.fsck.k9.mail.store.imap.ImapFolder;
+
+        $r1 := @parameter1: java.lang.String;
+
+        $r2 = specialinvoke $r0.<com.fsck.k9.mail.store.imap.ImapFolder: java.util.List executeSimpleCommand(java.lang.String)>($r1);
+
+        return $r2;
+    }
+    static java.lang.String access$100(java.lang.Object[], char)
+    {
+        java.lang.Object[] $r0;
+        char $c0;
+        java.lang.String $r1;
+
+        $r0 := @parameter0: java.lang.Object[];
+
+        $c0 := @parameter1: char;
+
+        $r1 = staticinvoke <com.fsck.k9.mail.store.imap.ImapFolder: java.lang.String combine(java.lang.Object[],char)>($r0, $c0);
+
+        return $r1;
+    }
+    private void checkOpen() throws com.fsck.k9.mail.MessagingException
+    {
+        com.fsck.k9.mail.store.imap.ImapFolder r0;
+        boolean $z0;
+        com.fsck.k9.mail.MessagingException $r1;
+        java.lang.StringBuilder $r2;
+        java.lang.String $r3;
+
+        r0 := @this: com.fsck.k9.mail.store.imap.ImapFolder;
+
+        $z0 = virtualinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: boolean isOpen()>();
+
+        if $z0 != 0 goto label1;
+
+        $r1 = new com.fsck.k9.mail.MessagingException;
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Folder ");
+
+        $r3 = specialinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: java.lang.String getPrefixedName()>();
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" is not open.");
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r1.<com.fsck.k9.mail.MessagingException: void <init>(java.lang.String)>($r3);
+
+        throw $r1;
+
+     label1:
+        return;
+    }
+    private static java.lang.String combine(java.lang.Object[], char)
+    {
+        java.lang.Object[] $r0;
+        char $c0;
+        java.lang.String $r1;
+
+        $r0 := @parameter0: java.lang.Object[];
+
+        $c0 := @parameter1: char;
+
+        if $r0 != null goto label1;
+
+        return null;
+
+     label1:
+        $r1 = staticinvoke <java.lang.String: java.lang.String valueOf(char)>($c0);
+
+        $r1 = staticinvoke <android.text.TextUtils: java.lang.String join(java.lang.CharSequence,java.lang.Object[])>($r1, $r0);
+
+        return $r1;
+    }
+    private java.lang.String combineFlags(java.lang.Iterable)
+    {
+        com.fsck.k9.mail.store.imap.ImapFolder r0;
+        java.lang.Iterable r1;
+        java.util.ArrayList r2;
+        com.fsck.k9.mail.Flag $r3, $r6;
+        java.util.Iterator $r4;
+        boolean $z0;
+        java.lang.Object $r5;
+        com.fsck.k9.mail.store.imap.ImapStore $r7;
+        java.util.Set $r8;
+        int $i0;
+        java.lang.String[] $r9;
+        java.lang.Object[] $r10;
+        java.lang.String $r11;
+
+        r0 := @this: com.fsck.k9.mail.store.imap.ImapFolder;
+
+        r1 := @parameter0: java.lang.Iterable;
+
+        r2 = new java.util.ArrayList;
+
+        specialinvoke r2.<java.util.ArrayList: void <init>()>();
+
+        $r4 = interfaceinvoke r1.<java.lang.Iterable: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r4.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label7;
+
+        $r5 = interfaceinvoke $r4.<java.util.Iterator: java.lang.Object next()>();
+
+        $r3 = (com.fsck.k9.mail.Flag) $r5;
+
+        $r6 = <com.fsck.k9.mail.Flag: com.fsck.k9.mail.Flag SEEN>;
+
+        if $r3 != $r6 goto label2;
+
+        interfaceinvoke r2.<java.util.List: boolean add(java.lang.Object)>("\\Seen");
+
+        goto label1;
+
+     label2:
+        $r6 = <com.fsck.k9.mail.Flag: com.fsck.k9.mail.Flag DELETED>;
+
+        if $r3 != $r6 goto label3;
+
+        interfaceinvoke r2.<java.util.List: boolean add(java.lang.Object)>("\\Deleted");
+
+        goto label1;
+
+     label3:
+        $r6 = <com.fsck.k9.mail.Flag: com.fsck.k9.mail.Flag ANSWERED>;
+
+        if $r3 != $r6 goto label4;
+
+        interfaceinvoke r2.<java.util.List: boolean add(java.lang.Object)>("\\Answered");
+
+        goto label1;
+
+     label4:
+        $r6 = <com.fsck.k9.mail.Flag: com.fsck.k9.mail.Flag FLAGGED>;
+
+        if $r3 != $r6 goto label5;
+
+        interfaceinvoke r2.<java.util.List: boolean add(java.lang.Object)>("\\Flagged");
+
+        goto label1;
+
+     label5:
+        $r6 = <com.fsck.k9.mail.Flag: com.fsck.k9.mail.Flag FORWARDED>;
+
+        if $r3 != $r6 goto label1;
+
+        $z0 = r0.<com.fsck.k9.mail.store.imap.ImapFolder: boolean canCreateKeywords>;
+
+        if $z0 != 0 goto label6;
+
+        $r7 = r0.<com.fsck.k9.mail.store.imap.ImapFolder: com.fsck.k9.mail.store.imap.ImapStore store>;
+
+        $r8 = virtualinvoke $r7.<com.fsck.k9.mail.store.imap.ImapStore: java.util.Set getPermanentFlagsIndex()>();
+
+        $r3 = <com.fsck.k9.mail.Flag: com.fsck.k9.mail.Flag FORWARDED>;
+
+        $z0 = interfaceinvoke $r8.<java.util.Set: boolean contains(java.lang.Object)>($r3);
+
+        if $z0 == 0 goto label1;
+
+     label6:
+        interfaceinvoke r2.<java.util.List: boolean add(java.lang.Object)>("$Forwarded");
+
+        goto label1;
+
+     label7:
+        $i0 = interfaceinvoke r2.<java.util.List: int size()>();
+
+        $r9 = newarray (java.lang.String)[$i0];
+
+        $r10 = interfaceinvoke r2.<java.util.List: java.lang.Object[] toArray(java.lang.Object[])>($r9);
+
+        $r11 = staticinvoke <com.fsck.k9.mail.store.imap.ImapFolder: java.lang.String combine(java.lang.Object[],char)>($r10, 32);
+
+        return $r11;
+    }
+    private java.util.List executeSimpleCommand(java.lang.String) throws com.fsck.k9.mail.MessagingException, java.io.IOException
+    {
+        com.fsck.k9.mail.store.imap.ImapFolder r0;
+        java.lang.String $r1;
+        com.fsck.k9.mail.store.imap.ImapConnection $r2;
+        java.util.List $r3;
+
+        r0 := @this: com.fsck.k9.mail.store.imap.ImapFolder;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = r0.<com.fsck.k9.mail.store.imap.ImapFolder: com.fsck.k9.mail.store.imap.ImapConnection connection>;
+
+        $r3 = virtualinvoke $r2.<com.fsck.k9.mail.store.imap.ImapConnection: java.util.List executeSimpleCommand(java.lang.String)>($r1);
+
+        $r3 = virtualinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: java.util.List handleUntaggedResponses(java.util.List)>($r3);
+
+        return $r3;
+    }
+    private boolean exists(java.lang.String) throws com.fsck.k9.mail.MessagingException
+    {
+        com.fsck.k9.mail.store.imap.ImapFolder r0;
+        java.lang.String $r1;
+        com.fsck.k9.mail.store.imap.NegativeImapResponseException r2;
+        java.io.IOException r3;
+        com.fsck.k9.mail.store.imap.ImapConnection $r4;
+        java.lang.Object[] $r5;
+        com.fsck.k9.mail.MessagingException $r6;
+
+        r0 := @this: com.fsck.k9.mail.store.imap.ImapFolder;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r4 = r0.<com.fsck.k9.mail.store.imap.ImapFolder: com.fsck.k9.mail.store.imap.ImapConnection connection>;
+
+        $r5 = newarray (java.lang.Object)[1];
+
+        $r5[0] = $r1;
+
+     label1:
+        $r1 = staticinvoke <java.lang.String: java.lang.String format(java.lang.String,java.lang.Object[])>("STATUS %s (RECENT)", $r5);
+
+        virtualinvoke $r4.<com.fsck.k9.mail.store.imap.ImapConnection: java.util.List executeSimpleCommand(java.lang.String)>($r1);
+
+     label2:
+        return 1;
+
+     label3:
+        r3 := @caughtexception;
+
+        $r4 = r0.<com.fsck.k9.mail.store.imap.ImapFolder: com.fsck.k9.mail.store.imap.ImapConnection connection>;
+
+        $r6 = specialinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: com.fsck.k9.mail.MessagingException ioExceptionHandler(com.fsck.k9.mail.store.imap.ImapConnection,java.io.IOException)>($r4, r3);
+
+        throw $r6;
+
+     label4:
+        r2 := @caughtexception;
+
+        return 0;
+
+        catch java.io.IOException from label1 to label2 with label3;
+        catch com.fsck.k9.mail.store.imap.NegativeImapResponseException from label1 to label2 with label4;
+    }
+    private boolean existsNonDeletedMessageInRange(int, int, java.lang.String) throws com.fsck.k9.mail.MessagingException, java.io.IOException
+    {
+        com.fsck.k9.mail.store.imap.ImapFolder r0;
+        int $i0, $i1;
+        java.lang.String $r1;
+        java.util.Locale $r2;
+        java.lang.Object[] $r3;
+        java.lang.Integer $r4;
+        java.util.List $r5;
+        java.util.Iterator $r6;
+        boolean $z0;
+        java.lang.Object $r7;
+        com.fsck.k9.mail.store.imap.ImapResponse r8;
+
+        r0 := @this: com.fsck.k9.mail.store.imap.ImapFolder;
+
+        $i0 := @parameter0: int;
+
+        $i1 := @parameter1: int;
+
+        $r1 := @parameter2: java.lang.String;
+
+        $r2 = <java.util.Locale: java.util.Locale US>;
+
+        $r3 = newarray (java.lang.Object)[3];
+
+        $r4 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        $r3[0] = $r4;
+
+        $r4 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i1);
+
+        $r3[1] = $r4;
+
+        $r3[2] = $r1;
+
+        $r1 = staticinvoke <java.lang.String: java.lang.String format(java.util.Locale,java.lang.String,java.lang.Object[])>($r2, "SEARCH %d:%d%s NOT DELETED", $r3);
+
+        $r5 = specialinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: java.util.List executeSimpleCommand(java.lang.String)>($r1);
+
+        $r6 = interfaceinvoke $r5.<java.util.List: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r6.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label2;
+
+        $r7 = interfaceinvoke $r6.<java.util.Iterator: java.lang.Object next()>();
+
+        r8 = (com.fsck.k9.mail.store.imap.ImapResponse) $r7;
+
+        $r1 = virtualinvoke r8.<com.fsck.k9.mail.store.imap.ImapResponse: java.lang.String getTag()>();
+
+        if $r1 != null goto label1;
+
+        $r7 = virtualinvoke r8.<com.fsck.k9.mail.store.imap.ImapResponse: java.lang.Object get(int)>(0);
+
+        $z0 = staticinvoke <com.fsck.k9.mail.store.imap.ImapResponseParser: boolean equalsIgnoreCase(java.lang.Object,java.lang.String)>($r7, "SEARCH");
+
+        if $z0 == 0 goto label1;
+
+        $i0 = virtualinvoke r8.<com.fsck.k9.mail.store.imap.ImapResponse: int size()>();
+
+        if $i0 <= 1 goto label1;
+
+        return 1;
+
+     label2:
+        return 0;
+    }
+    private long extractHighestUid(com.fsck.k9.mail.store.imap.SearchResponse)
+    {
+        com.fsck.k9.mail.store.imap.ImapFolder r0;
+        com.fsck.k9.mail.store.imap.SearchResponse $r1;
+        java.util.List $r2;
+        boolean $z0;
+        int $i0;
+        java.lang.Object $r3;
+        java.lang.Long $r4;
+        long $l1;
+        java.util.Comparator $r5;
+
+        r0 := @this: com.fsck.k9.mail.store.imap.ImapFolder;
+
+        $r1 := @parameter0: com.fsck.k9.mail.store.imap.SearchResponse;
+
+        $r2 = virtualinvoke $r1.<com.fsck.k9.mail.store.imap.SearchResponse: java.util.List getNumbers()>();
+
+        $z0 = interfaceinvoke $r2.<java.util.List: boolean isEmpty()>();
+
+        if $z0 == 0 goto label1;
+
+        return -1L;
+
+     label1:
+        $i0 = interfaceinvoke $r2.<java.util.List: int size()>();
+
+        if $i0 != 1 goto label2;
+
+        $r3 = interfaceinvoke $r2.<java.util.List: java.lang.Object get(int)>(0);
+
+        $r4 = (java.lang.Long) $r3;
+
+        $l1 = virtualinvoke $r4.<java.lang.Long: long longValue()>();
+
+        return $l1;
+
+     label2:
+        $r5 = staticinvoke <java.util.Collections: java.util.Comparator reverseOrder()>();
+
+        staticinvoke <java.util.Collections: void sort(java.util.List,java.util.Comparator)>($r2, $r5);
+
+        $r3 = interfaceinvoke $r2.<java.util.List: java.lang.Object get(int)>(0);
+
+        $r4 = (java.lang.Long) $r3;
+
+        $l1 = virtualinvoke $r4.<java.lang.Long: long longValue()>();
+
+        return $l1;
+    }
+    private java.lang.String getDateSearchString(java.util.Date)
+    {
+        com.fsck.k9.mail.store.imap.ImapFolder r0;
+        java.util.Date $r1;
+        java.lang.StringBuilder $r2;
+        java.lang.ThreadLocal $r3;
+        java.lang.Object $r4;
+        java.text.SimpleDateFormat $r5;
+        java.lang.String $r6;
+
+        r0 := @this: com.fsck.k9.mail.store.imap.ImapFolder;
+
+        $r1 := @parameter0: java.util.Date;
+
+        if $r1 != null goto label1;
+
+        return "";
+
+     label1:
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" SINCE ");
+
+        $r3 = <com.fsck.k9.mail.store.imap.ImapFolder: java.lang.ThreadLocal RFC3501_DATE>;
+
+        $r4 = virtualinvoke $r3.<java.lang.ThreadLocal: java.lang.Object get()>();
+
+        $r5 = (java.text.SimpleDateFormat) $r4;
+
+        $r6 = virtualinvoke $r5.<java.text.SimpleDateFormat: java.lang.String format(java.util.Date)>($r1);
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r6 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r6;
+    }
+    private java.lang.String getPrefixedName() throws com.fsck.k9.mail.MessagingException
+    {
+        com.fsck.k9.mail.store.imap.ImapFolder r0;
+        java.io.IOException r1;
+        java.lang.String r2, $r5, $r6;
+        com.fsck.k9.mail.store.imap.ImapStore $r3;
+        com.fsck.k9.mail.store.StoreConfig $r4;
+        boolean $z0;
+        com.fsck.k9.mail.store.imap.ImapConnection $r7, $r8;
+        java.lang.StringBuilder $r9;
+        java.lang.Throwable $r10, $r12;
+        com.fsck.k9.mail.MessagingException $r11;
+
+        r0 := @this: com.fsck.k9.mail.store.imap.ImapFolder;
+
+        r2 = "";
+
+        $r3 = r0.<com.fsck.k9.mail.store.imap.ImapFolder: com.fsck.k9.mail.store.imap.ImapStore store>;
+
+        $r4 = virtualinvoke $r3.<com.fsck.k9.mail.store.imap.ImapStore: com.fsck.k9.mail.store.StoreConfig getStoreConfig()>();
+
+        $r5 = interfaceinvoke $r4.<com.fsck.k9.mail.store.StoreConfig: java.lang.String getInboxFolderName()>();
+
+        $r6 = r0.<com.fsck.k9.mail.store.imap.ImapFolder: java.lang.String name>;
+
+        $z0 = virtualinvoke $r5.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>($r6);
+
+        if $z0 != 0 goto label06;
+
+        entermonitor r0;
+
+     label01:
+        $r7 = r0.<com.fsck.k9.mail.store.imap.ImapFolder: com.fsck.k9.mail.store.imap.ImapConnection connection>;
+
+        if $r7 != null goto label07;
+
+        $r3 = r0.<com.fsck.k9.mail.store.imap.ImapFolder: com.fsck.k9.mail.store.imap.ImapStore store>;
+
+        $r7 = virtualinvoke $r3.<com.fsck.k9.mail.store.imap.ImapStore: com.fsck.k9.mail.store.imap.ImapConnection getConnection()>();
+
+     label02:
+        exitmonitor r0;
+
+     label03:
+        virtualinvoke $r7.<com.fsck.k9.mail.store.imap.ImapConnection: void open()>();
+
+     label04:
+        $r8 = r0.<com.fsck.k9.mail.store.imap.ImapFolder: com.fsck.k9.mail.store.imap.ImapConnection connection>;
+
+        if $r8 != null goto label05;
+
+        $r3 = r0.<com.fsck.k9.mail.store.imap.ImapFolder: com.fsck.k9.mail.store.imap.ImapStore store>;
+
+        virtualinvoke $r3.<com.fsck.k9.mail.store.imap.ImapStore: void releaseConnection(com.fsck.k9.mail.store.imap.ImapConnection)>($r7);
+
+     label05:
+        $r3 = r0.<com.fsck.k9.mail.store.imap.ImapFolder: com.fsck.k9.mail.store.imap.ImapStore store>;
+
+        r2 = virtualinvoke $r3.<com.fsck.k9.mail.store.imap.ImapStore: java.lang.String getCombinedPrefix()>();
+
+     label06:
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r2);
+
+        r2 = r0.<com.fsck.k9.mail.store.imap.ImapFolder: java.lang.String name>;
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r2);
+
+        r2 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return r2;
+
+     label07:
+        $r7 = r0.<com.fsck.k9.mail.store.imap.ImapFolder: com.fsck.k9.mail.store.imap.ImapConnection connection>;
+
+        goto label02;
+
+     label08:
+        $r10 := @caughtexception;
+
+        exitmonitor r0;
+
+     label09:
+        throw $r10;
+
+     label10:
+        r1 := @caughtexception;
+
+     label11:
+        $r11 = new com.fsck.k9.mail.MessagingException;
+
+        specialinvoke $r11.<com.fsck.k9.mail.MessagingException: void <init>(java.lang.String,java.lang.Throwable)>("Unable to get IMAP prefix", r1);
+
+        throw $r11;
+
+     label12:
+        $r12 := @caughtexception;
+
+        $r8 = r0.<com.fsck.k9.mail.store.imap.ImapFolder: com.fsck.k9.mail.store.imap.ImapConnection connection>;
+
+        if $r8 != null goto label13;
+
+        $r3 = r0.<com.fsck.k9.mail.store.imap.ImapFolder: com.fsck.k9.mail.store.imap.ImapStore store>;
+
+        virtualinvoke $r3.<com.fsck.k9.mail.store.imap.ImapStore: void releaseConnection(com.fsck.k9.mail.store.imap.ImapConnection)>($r7);
+
+     label13:
+        throw $r12;
+
+        catch java.lang.Throwable from label01 to label03 with label08;
+        catch java.io.IOException from label03 to label04 with label10;
+        catch java.lang.Throwable from label03 to label04 with label12;
+        catch java.lang.Throwable from label07 to label09 with label08;
+        catch java.lang.Throwable from label11 to label12 with label12;
+    }
+    private int getRemoteMessageCount(java.lang.String) throws com.fsck.k9.mail.MessagingException
+    {
+        com.fsck.k9.mail.store.imap.ImapFolder r0;
+        java.lang.String $r1;
+        java.io.IOException r2;
+        int i0, $i1;
+        java.util.Locale $r3;
+        java.lang.Object[] $r4;
+        java.lang.Integer $r5;
+        java.util.List $r6;
+        java.util.Iterator $r7;
+        boolean $z0;
+        java.lang.Object $r8;
+        com.fsck.k9.mail.store.imap.ImapResponse r9;
+        com.fsck.k9.mail.store.imap.ImapConnection $r10;
+        com.fsck.k9.mail.MessagingException $r11;
+
+        r0 := @this: com.fsck.k9.mail.store.imap.ImapFolder;
+
+        $r1 := @parameter0: java.lang.String;
+
+        specialinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: void checkOpen()>();
+
+        i0 = 0;
+
+        $r3 = <java.util.Locale: java.util.Locale US>;
+
+        $r4 = newarray (java.lang.Object)[2];
+
+     label01:
+        $r5 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(1);
+
+     label02:
+        $r4[0] = $r5;
+
+        $r4[1] = $r1;
+
+     label03:
+        $r1 = staticinvoke <java.lang.String: java.lang.String format(java.util.Locale,java.lang.String,java.lang.Object[])>($r3, "SEARCH %d:* %s", $r4);
+
+        $r6 = specialinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: java.util.List executeSimpleCommand(java.lang.String)>($r1);
+
+        $r7 = interfaceinvoke $r6.<java.util.List: java.util.Iterator iterator()>();
+
+     label04:
+        $z0 = interfaceinvoke $r7.<java.util.Iterator: boolean hasNext()>();
+
+     label05:
+        if $z0 == 0 goto label13;
+
+     label06:
+        $r8 = interfaceinvoke $r7.<java.util.Iterator: java.lang.Object next()>();
+
+     label07:
+        r9 = (com.fsck.k9.mail.store.imap.ImapResponse) $r8;
+
+     label08:
+        $r8 = virtualinvoke r9.<com.fsck.k9.mail.store.imap.ImapResponse: java.lang.Object get(int)>(0);
+
+        $z0 = staticinvoke <com.fsck.k9.mail.store.imap.ImapResponseParser: boolean equalsIgnoreCase(java.lang.Object,java.lang.String)>($r8, "SEARCH");
+
+     label09:
+        if $z0 == 0 goto label04;
+
+     label10:
+        $i1 = virtualinvoke r9.<com.fsck.k9.mail.store.imap.ImapResponse: int size()>();
+
+     label11:
+        $i1 = $i1 + -1;
+
+        i0 = i0 + $i1;
+
+        goto label04;
+
+     label12:
+        r2 := @caughtexception;
+
+        $r10 = r0.<com.fsck.k9.mail.store.imap.ImapFolder: com.fsck.k9.mail.store.imap.ImapConnection connection>;
+
+        $r11 = specialinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: com.fsck.k9.mail.MessagingException ioExceptionHandler(com.fsck.k9.mail.store.imap.ImapConnection,java.io.IOException)>($r10, r2);
+
+        throw $r11;
+
+     label13:
+        return i0;
+
+        catch java.io.IOException from label01 to label02 with label12;
+        catch java.io.IOException from label03 to label05 with label12;
+        catch java.io.IOException from label06 to label07 with label12;
+        catch java.io.IOException from label08 to label09 with label12;
+        catch java.io.IOException from label10 to label11 with label12;
+    }
+    private com.fsck.k9.mail.store.imap.ImapStore getStore()
+    {
+        com.fsck.k9.mail.store.imap.ImapFolder r0;
+        com.fsck.k9.mail.store.imap.ImapStore r1;
+
+        r0 := @this: com.fsck.k9.mail.store.imap.ImapFolder;
+
+        r1 = r0.<com.fsck.k9.mail.store.imap.ImapFolder: com.fsck.k9.mail.store.imap.ImapStore store>;
+
+        return r1;
+    }
+    private java.lang.Object handleFetchResponse(com.fsck.k9.mail.store.imap.ImapMessage, com.fsck.k9.mail.store.imap.ImapList) throws com.fsck.k9.mail.MessagingException
+    {
+        com.fsck.k9.mail.store.imap.ImapFolder r0;
+        com.fsck.k9.mail.store.imap.ImapMessage $r1;
+        com.fsck.k9.mail.store.imap.ImapList $r2, $r4;
+        com.fsck.k9.mail.MessagingException r3;
+        int i0, $i1, $i2;
+        boolean $z0;
+        java.lang.String $r5;
+        com.fsck.k9.mail.Flag $r6;
+        com.fsck.k9.mail.store.imap.ImapStore $r7;
+        java.util.Set $r8;
+        java.util.Date $r9;
+        java.lang.Object $r10;
+        java.lang.Object[] $r11;
+
+        r0 := @this: com.fsck.k9.mail.store.imap.ImapFolder;
+
+        $r1 := @parameter0: com.fsck.k9.mail.store.imap.ImapMessage;
+
+        $r2 := @parameter1: com.fsck.k9.mail.store.imap.ImapList;
+
+        $z0 = virtualinvoke $r2.<com.fsck.k9.mail.store.imap.ImapList: boolean containsKey(java.lang.String)>("FLAGS");
+
+        if $z0 == 0 goto label07;
+
+        $r4 = virtualinvoke $r2.<com.fsck.k9.mail.store.imap.ImapList: com.fsck.k9.mail.store.imap.ImapList getKeyedList(java.lang.String)>("FLAGS");
+
+        if $r4 == null goto label07;
+
+        i0 = 0;
+
+        $i1 = virtualinvoke $r4.<com.fsck.k9.mail.store.imap.ImapList: int size()>();
+
+     label01:
+        if i0 >= $i1 goto label07;
+
+        $r5 = virtualinvoke $r4.<com.fsck.k9.mail.store.imap.ImapList: java.lang.String getString(int)>(i0);
+
+        $z0 = virtualinvoke $r5.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("\\Deleted");
+
+        if $z0 == 0 goto label03;
+
+        $r6 = <com.fsck.k9.mail.Flag: com.fsck.k9.mail.Flag DELETED>;
+
+        virtualinvoke $r1.<com.fsck.k9.mail.store.imap.ImapMessage: void setFlagInternal(com.fsck.k9.mail.Flag,boolean)>($r6, 1);
+
+     label02:
+        i0 = i0 + 1;
+
+        goto label01;
+
+     label03:
+        $z0 = virtualinvoke $r5.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("\\Answered");
+
+        if $z0 == 0 goto label04;
+
+        $r6 = <com.fsck.k9.mail.Flag: com.fsck.k9.mail.Flag ANSWERED>;
+
+        virtualinvoke $r1.<com.fsck.k9.mail.store.imap.ImapMessage: void setFlagInternal(com.fsck.k9.mail.Flag,boolean)>($r6, 1);
+
+        goto label02;
+
+     label04:
+        $z0 = virtualinvoke $r5.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("\\Seen");
+
+        if $z0 == 0 goto label05;
+
+        $r6 = <com.fsck.k9.mail.Flag: com.fsck.k9.mail.Flag SEEN>;
+
+        virtualinvoke $r1.<com.fsck.k9.mail.store.imap.ImapMessage: void setFlagInternal(com.fsck.k9.mail.Flag,boolean)>($r6, 1);
+
+        goto label02;
+
+     label05:
+        $z0 = virtualinvoke $r5.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("\\Flagged");
+
+        if $z0 == 0 goto label06;
+
+        $r6 = <com.fsck.k9.mail.Flag: com.fsck.k9.mail.Flag FLAGGED>;
+
+        virtualinvoke $r1.<com.fsck.k9.mail.store.imap.ImapMessage: void setFlagInternal(com.fsck.k9.mail.Flag,boolean)>($r6, 1);
+
+        goto label02;
+
+     label06:
+        $z0 = virtualinvoke $r5.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("$Forwarded");
+
+        if $z0 == 0 goto label02;
+
+        $r6 = <com.fsck.k9.mail.Flag: com.fsck.k9.mail.Flag FORWARDED>;
+
+        virtualinvoke $r1.<com.fsck.k9.mail.store.imap.ImapMessage: void setFlagInternal(com.fsck.k9.mail.Flag,boolean)>($r6, 1);
+
+        $r7 = r0.<com.fsck.k9.mail.store.imap.ImapFolder: com.fsck.k9.mail.store.imap.ImapStore store>;
+
+        $r8 = virtualinvoke $r7.<com.fsck.k9.mail.store.imap.ImapStore: java.util.Set getPermanentFlagsIndex()>();
+
+        $r6 = <com.fsck.k9.mail.Flag: com.fsck.k9.mail.Flag FORWARDED>;
+
+        interfaceinvoke $r8.<java.util.Set: boolean add(java.lang.Object)>($r6);
+
+        goto label02;
+
+     label07:
+        $z0 = virtualinvoke $r2.<com.fsck.k9.mail.store.imap.ImapList: boolean containsKey(java.lang.String)>("INTERNALDATE");
+
+        if $z0 == 0 goto label08;
+
+        $r9 = virtualinvoke $r2.<com.fsck.k9.mail.store.imap.ImapList: java.util.Date getKeyedDate(java.lang.String)>("INTERNALDATE");
+
+        virtualinvoke $r1.<com.fsck.k9.mail.store.imap.ImapMessage: void setInternalDate(java.util.Date)>($r9);
+
+     label08:
+        $z0 = virtualinvoke $r2.<com.fsck.k9.mail.store.imap.ImapList: boolean containsKey(java.lang.String)>("RFC822.SIZE");
+
+        if $z0 == 0 goto label09;
+
+        i0 = virtualinvoke $r2.<com.fsck.k9.mail.store.imap.ImapList: int getKeyedNumber(java.lang.String)>("RFC822.SIZE");
+
+        virtualinvoke $r1.<com.fsck.k9.mail.store.imap.ImapMessage: void setSize(int)>(i0);
+
+     label09:
+        $z0 = virtualinvoke $r2.<com.fsck.k9.mail.store.imap.ImapList: boolean containsKey(java.lang.String)>("BODYSTRUCTURE");
+
+        if $z0 == 0 goto label11;
+
+        $r4 = virtualinvoke $r2.<com.fsck.k9.mail.store.imap.ImapList: com.fsck.k9.mail.store.imap.ImapList getKeyedList(java.lang.String)>("BODYSTRUCTURE");
+
+        if $r4 == null goto label11;
+
+     label10:
+        specialinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: void parseBodyStructure(com.fsck.k9.mail.store.imap.ImapList,com.fsck.k9.mail.Part,java.lang.String)>($r4, $r1, "TEXT");
+
+     label11:
+        $z0 = virtualinvoke $r2.<com.fsck.k9.mail.store.imap.ImapList: boolean containsKey(java.lang.String)>("BODY");
+
+        if $z0 == 0 goto label14;
+
+        i0 = virtualinvoke $r2.<com.fsck.k9.mail.store.imap.ImapList: int getKeyIndex(java.lang.String)>("BODY");
+
+        i0 = i0 + 2;
+
+        $i1 = virtualinvoke $r2.<com.fsck.k9.mail.store.imap.ImapList: int size()>();
+
+        if i0 >= $i1 goto label14;
+
+        $r10 = virtualinvoke $r2.<com.fsck.k9.mail.store.imap.ImapList: java.lang.Object getObject(int)>(i0);
+
+        $z0 = $r10 instanceof java.lang.String;
+
+        if $z0 == 0 goto label15;
+
+        $r5 = (java.lang.String) $r10;
+
+        $z0 = virtualinvoke $r5.<java.lang.String: boolean startsWith(java.lang.String)>("<");
+
+        if $z0 == 0 goto label15;
+
+        $i2 = i0 + 1;
+
+        if $i2 >= $i1 goto label15;
+
+        i0 = i0 + 1;
+
+        $r10 = virtualinvoke $r2.<com.fsck.k9.mail.store.imap.ImapList: java.lang.Object getObject(int)>(i0);
+
+        return $r10;
+
+     label12:
+        r3 := @caughtexception;
+
+        $z0 = staticinvoke <com.fsck.k9.mail.K9MailLib: boolean isDebug()>();
+
+        if $z0 == 0 goto label13;
+
+        $r11 = newarray (java.lang.Object)[1];
+
+        $r5 = virtualinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: java.lang.String getLogId()>();
+
+        $r11[0] = $r5;
+
+        staticinvoke <timber.log.Timber: void d(java.lang.Throwable,java.lang.String,java.lang.Object[])>(r3, "Error handling message for %s", $r11);
+
+     label13:
+        virtualinvoke $r1.<com.fsck.k9.mail.store.imap.ImapMessage: void setBody(com.fsck.k9.mail.Body)>(null);
+
+        goto label11;
+
+     label14:
+        return null;
+
+     label15:
+        return $r10;
+
+        catch com.fsck.k9.mail.MessagingException from label10 to label11 with label12;
+    }
+    private void handlePermanentFlags(com.fsck.k9.mail.store.imap.ImapResponse)
+    {
+        com.fsck.k9.mail.store.imap.ImapFolder r0;
+        com.fsck.k9.mail.store.imap.ImapResponse $r1;
+        com.fsck.k9.mail.store.imap.PermanentFlagsResponse $r2;
+        com.fsck.k9.mail.store.imap.ImapStore $r3;
+        java.util.Set $r4, $r5;
+        boolean $z0;
+
+        r0 := @this: com.fsck.k9.mail.store.imap.ImapFolder;
+
+        $r1 := @parameter0: com.fsck.k9.mail.store.imap.ImapResponse;
+
+        $r2 = staticinvoke <com.fsck.k9.mail.store.imap.PermanentFlagsResponse: com.fsck.k9.mail.store.imap.PermanentFlagsResponse parse(com.fsck.k9.mail.store.imap.ImapResponse)>($r1);
+
+        if $r2 != null goto label1;
+
+        return;
+
+     label1:
+        $r3 = r0.<com.fsck.k9.mail.store.imap.ImapFolder: com.fsck.k9.mail.store.imap.ImapStore store>;
+
+        $r4 = virtualinvoke $r3.<com.fsck.k9.mail.store.imap.ImapStore: java.util.Set getPermanentFlagsIndex()>();
+
+        $r5 = virtualinvoke $r2.<com.fsck.k9.mail.store.imap.PermanentFlagsResponse: java.util.Set getFlags()>();
+
+        interfaceinvoke $r4.<java.util.Set: boolean addAll(java.util.Collection)>($r5);
+
+        $z0 = virtualinvoke $r2.<com.fsck.k9.mail.store.imap.PermanentFlagsResponse: boolean canCreateKeywords()>();
+
+        r0.<com.fsck.k9.mail.store.imap.ImapFolder: boolean canCreateKeywords> = $z0;
+
+        return;
+    }
+    private void handleSelectOrExamineOkResponse(com.fsck.k9.mail.store.imap.ImapResponse)
+    {
+        com.fsck.k9.mail.store.imap.ImapFolder r0;
+        com.fsck.k9.mail.store.imap.ImapResponse $r1;
+        com.fsck.k9.mail.store.imap.SelectOrExamineResponse $r2;
+        boolean $z0;
+        int $i0;
+
+        r0 := @this: com.fsck.k9.mail.store.imap.ImapFolder;
+
+        $r1 := @parameter0: com.fsck.k9.mail.store.imap.ImapResponse;
+
+        $r2 = staticinvoke <com.fsck.k9.mail.store.imap.SelectOrExamineResponse: com.fsck.k9.mail.store.imap.SelectOrExamineResponse parse(com.fsck.k9.mail.store.imap.ImapResponse)>($r1);
+
+        if $r2 != null goto label1;
+
+        return;
+
+     label1:
+        $z0 = virtualinvoke $r2.<com.fsck.k9.mail.store.imap.SelectOrExamineResponse: boolean hasOpenMode()>();
+
+        if $z0 == 0 goto label2;
+
+        $i0 = virtualinvoke $r2.<com.fsck.k9.mail.store.imap.SelectOrExamineResponse: int getOpenMode()>();
+
+        r0.<com.fsck.k9.mail.store.imap.ImapFolder: int mode> = $i0;
+
+     label2:
+        return;
+    }
+    private com.fsck.k9.mail.MessagingException ioExceptionHandler(com.fsck.k9.mail.store.imap.ImapConnection, java.io.IOException)
+    {
+        com.fsck.k9.mail.store.imap.ImapFolder r0;
+        com.fsck.k9.mail.store.imap.ImapConnection $r1;
+        java.io.IOException $r2;
+        java.lang.String $r3;
+        java.lang.Object[] $r4;
+        com.fsck.k9.mail.MessagingException $r5;
+
+        r0 := @this: com.fsck.k9.mail.store.imap.ImapFolder;
+
+        $r1 := @parameter0: com.fsck.k9.mail.store.imap.ImapConnection;
+
+        $r2 := @parameter1: java.io.IOException;
+
+        $r4 = newarray (java.lang.Object)[1];
+
+        $r3 = virtualinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: java.lang.String getLogId()>();
+
+        $r4[0] = $r3;
+
+        staticinvoke <timber.log.Timber: void e(java.lang.Throwable,java.lang.String,java.lang.Object[])>($r2, "IOException for %s", $r4);
+
+        if $r1 == null goto label1;
+
+        virtualinvoke $r1.<com.fsck.k9.mail.store.imap.ImapConnection: void close()>();
+
+     label1:
+        virtualinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: void close()>();
+
+        $r5 = new com.fsck.k9.mail.MessagingException;
+
+        specialinvoke $r5.<com.fsck.k9.mail.MessagingException: void <init>(java.lang.String,java.lang.Throwable)>("IO Error", $r2);
+
+        return $r5;
+    }
+    private void parseBodyStructure(com.fsck.k9.mail.store.imap.ImapList, com.fsck.k9.mail.Part, java.lang.String) throws com.fsck.k9.mail.MessagingException
+    {
+        com.fsck.k9.mail.store.imap.ImapFolder r0;
+        com.fsck.k9.mail.store.imap.ImapList $r1, $r8;
+        com.fsck.k9.mail.Part $r2;
+        java.lang.String $r3, $r9, $r11, $r12, $r14;
+        com.fsck.k9.mail.internet.MimeBodyPart r4;
+        java.lang.StringBuilder r5;
+        java.lang.Object $r6;
+        boolean $z0;
+        com.fsck.k9.mail.internet.MimeMultipart $r7;
+        int i0, $i1, $i2, $i3;
+        java.util.Locale $r10;
+        com.fsck.k9.mail.MessagingException $r13;
+        java.lang.Object[] $r15;
+        java.lang.Integer $r16;
+        com.fsck.k9.mail.store.imap.ImapMessage $r17;
+
+        r0 := @this: com.fsck.k9.mail.store.imap.ImapFolder;
+
+        $r1 := @parameter0: com.fsck.k9.mail.store.imap.ImapList;
+
+        $r2 := @parameter1: com.fsck.k9.mail.Part;
+
+        $r3 := @parameter2: java.lang.String;
+
+        $r6 = virtualinvoke $r1.<com.fsck.k9.mail.store.imap.ImapList: java.lang.Object get(int)>(0);
+
+        $z0 = $r6 instanceof com.fsck.k9.mail.store.imap.ImapList;
+
+        if $z0 == 0 goto label06;
+
+        $r7 = staticinvoke <com.fsck.k9.mail.internet.MimeMultipart: com.fsck.k9.mail.internet.MimeMultipart newInstance()>();
+
+        i0 = 0;
+
+        $i1 = virtualinvoke $r1.<com.fsck.k9.mail.store.imap.ImapList: int size()>();
+
+     label01:
+        if i0 >= $i1 goto label05;
+
+        $r6 = virtualinvoke $r1.<com.fsck.k9.mail.store.imap.ImapList: java.lang.Object get(int)>(i0);
+
+        $z0 = $r6 instanceof com.fsck.k9.mail.store.imap.ImapList;
+
+        if $z0 == 0 goto label04;
+
+        r4 = new com.fsck.k9.mail.internet.MimeBodyPart;
+
+        specialinvoke r4.<com.fsck.k9.mail.internet.MimeBodyPart: void <init>()>();
+
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("TEXT");
+
+        if $z0 == 0 goto label03;
+
+        $r8 = virtualinvoke $r1.<com.fsck.k9.mail.store.imap.ImapList: com.fsck.k9.mail.store.imap.ImapList getList(int)>(i0);
+
+        $i2 = i0 + 1;
+
+        $r9 = staticinvoke <java.lang.Integer: java.lang.String toString(int)>($i2);
+
+        specialinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: void parseBodyStructure(com.fsck.k9.mail.store.imap.ImapList,com.fsck.k9.mail.Part,java.lang.String)>($r8, r4, $r9);
+
+     label02:
+        virtualinvoke $r7.<com.fsck.k9.mail.internet.MimeMultipart: void addBodyPart(com.fsck.k9.mail.BodyPart)>(r4);
+
+        i0 = i0 + 1;
+
+        goto label01;
+
+     label03:
+        $r8 = virtualinvoke $r1.<com.fsck.k9.mail.store.imap.ImapList: com.fsck.k9.mail.store.imap.ImapList getList(int)>(i0);
+
+        r5 = new java.lang.StringBuilder;
+
+        specialinvoke r5.<java.lang.StringBuilder: void <init>()>();
+
+        r5 = virtualinvoke r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        r5 = virtualinvoke r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".");
+
+        $i2 = i0 + 1;
+
+        r5 = virtualinvoke r5.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i2);
+
+        $r9 = virtualinvoke r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: void parseBodyStructure(com.fsck.k9.mail.store.imap.ImapList,com.fsck.k9.mail.Part,java.lang.String)>($r8, r4, $r9);
+
+        goto label02;
+
+     label04:
+        $r3 = virtualinvoke $r1.<com.fsck.k9.mail.store.imap.ImapList: java.lang.String getString(int)>(i0);
+
+        $r10 = <java.util.Locale: java.util.Locale US>;
+
+        $r3 = virtualinvoke $r3.<java.lang.String: java.lang.String toLowerCase(java.util.Locale)>($r10);
+
+        virtualinvoke $r7.<com.fsck.k9.mail.internet.MimeMultipart: void setSubType(java.lang.String)>($r3);
+
+     label05:
+        staticinvoke <com.fsck.k9.mail.internet.MimeMessageHelper: void setBody(com.fsck.k9.mail.Part,com.fsck.k9.mail.Body)>($r2, $r7);
+
+        return;
+
+     label06:
+        $r11 = virtualinvoke $r1.<com.fsck.k9.mail.store.imap.ImapList: java.lang.String getString(int)>(0);
+
+        $r9 = virtualinvoke $r1.<com.fsck.k9.mail.store.imap.ImapList: java.lang.String getString(int)>(1);
+
+        r5 = new java.lang.StringBuilder;
+
+        specialinvoke r5.<java.lang.StringBuilder: void <init>()>();
+
+        r5 = virtualinvoke r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r11);
+
+        r5 = virtualinvoke r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("/");
+
+        r5 = virtualinvoke r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r9);
+
+        $r9 = virtualinvoke r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r10 = <java.util.Locale: java.util.Locale US>;
+
+        $r12 = virtualinvoke $r9.<java.lang.String: java.lang.String toLowerCase(java.util.Locale)>($r10);
+
+        $r8 = null;
+
+        $r6 = virtualinvoke $r1.<com.fsck.k9.mail.store.imap.ImapList: java.lang.Object get(int)>(2);
+
+        $z0 = $r6 instanceof com.fsck.k9.mail.store.imap.ImapList;
+
+        if $z0 == 0 goto label07;
+
+        $r8 = virtualinvoke $r1.<com.fsck.k9.mail.store.imap.ImapList: com.fsck.k9.mail.store.imap.ImapList getList(int)>(2);
+
+     label07:
+        $r9 = virtualinvoke $r1.<com.fsck.k9.mail.store.imap.ImapList: java.lang.String getString(int)>(5);
+
+        i0 = virtualinvoke $r1.<com.fsck.k9.mail.store.imap.ImapList: int getNumber(int)>(6);
+
+        $z0 = staticinvoke <com.fsck.k9.mail.internet.MimeUtility: boolean isMessage(java.lang.String)>($r12);
+
+        if $z0 == 0 goto label08;
+
+        $r13 = new com.fsck.k9.mail.MessagingException;
+
+        specialinvoke $r13.<com.fsck.k9.mail.MessagingException: void <init>(java.lang.String)>("BODYSTRUCTURE message/rfc822 not yet supported.");
+
+        throw $r13;
+
+     label08:
+        r5 = new java.lang.StringBuilder;
+
+        specialinvoke r5.<java.lang.StringBuilder: void <init>()>();
+
+        virtualinvoke r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r12);
+
+        if $r8 == null goto label10;
+
+        $i1 = 0;
+
+        $i2 = virtualinvoke $r8.<com.fsck.k9.mail.store.imap.ImapList: int size()>();
+
+     label09:
+        if $i1 >= $i2 goto label10;
+
+        $r12 = virtualinvoke $r8.<com.fsck.k9.mail.store.imap.ImapList: java.lang.String getString(int)>($i1);
+
+        $i3 = $i1 + 1;
+
+        $r14 = virtualinvoke $r8.<com.fsck.k9.mail.store.imap.ImapList: java.lang.String getString(int)>($i3);
+
+        $r15 = newarray (java.lang.Object)[2];
+
+        $r15[0] = $r12;
+
+        $r15[1] = $r14;
+
+        $r12 = staticinvoke <java.lang.String: java.lang.String format(java.lang.String,java.lang.Object[])>(";\r\n %s=\"%s\"", $r15);
+
+        virtualinvoke r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r12);
+
+        $i1 = $i1 + 2;
+
+        goto label09;
+
+     label10:
+        $r12 = virtualinvoke r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        interfaceinvoke $r2.<com.fsck.k9.mail.Part: void setHeader(java.lang.String,java.lang.String)>("Content-Type", $r12);
+
+        $r8 = null;
+
+        $r12 = "text";
+
+        $z0 = virtualinvoke $r12.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>($r11);
+
+        if $z0 == 0 goto label14;
+
+        $i1 = virtualinvoke $r1.<com.fsck.k9.mail.store.imap.ImapList: int size()>();
+
+        if $i1 <= 9 goto label14;
+
+        $r6 = virtualinvoke $r1.<com.fsck.k9.mail.store.imap.ImapList: java.lang.Object get(int)>(9);
+
+        $z0 = $r6 instanceof com.fsck.k9.mail.store.imap.ImapList;
+
+        if $z0 == 0 goto label14;
+
+        $r8 = virtualinvoke $r1.<com.fsck.k9.mail.store.imap.ImapList: com.fsck.k9.mail.store.imap.ImapList getList(int)>(9);
+
+     label11:
+        r5 = new java.lang.StringBuilder;
+
+        specialinvoke r5.<java.lang.StringBuilder: void <init>()>();
+
+        if $r8 == null goto label15;
+
+        $z0 = virtualinvoke $r8.<com.fsck.k9.mail.store.imap.ImapList: boolean isEmpty()>();
+
+        if $z0 != 0 goto label15;
+
+        $r11 = "NIL";
+
+        $r12 = virtualinvoke $r8.<com.fsck.k9.mail.store.imap.ImapList: java.lang.String getString(int)>(0);
+
+        $z0 = virtualinvoke $r11.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>($r12);
+
+        if $z0 != 0 goto label12;
+
+        $r11 = virtualinvoke $r8.<com.fsck.k9.mail.store.imap.ImapList: java.lang.String getString(int)>(0);
+
+        $r10 = <java.util.Locale: java.util.Locale US>;
+
+        $r11 = virtualinvoke $r11.<java.lang.String: java.lang.String toLowerCase(java.util.Locale)>($r10);
+
+        virtualinvoke r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r11);
+
+     label12:
+        $i1 = virtualinvoke $r8.<com.fsck.k9.mail.store.imap.ImapList: int size()>();
+
+        if $i1 <= 1 goto label15;
+
+        $r6 = virtualinvoke $r8.<com.fsck.k9.mail.store.imap.ImapList: java.lang.Object get(int)>(1);
+
+        $z0 = $r6 instanceof com.fsck.k9.mail.store.imap.ImapList;
+
+        if $z0 == 0 goto label15;
+
+        $r1 = virtualinvoke $r8.<com.fsck.k9.mail.store.imap.ImapList: com.fsck.k9.mail.store.imap.ImapList getList(int)>(1);
+
+        $i1 = 0;
+
+        $i2 = virtualinvoke $r1.<com.fsck.k9.mail.store.imap.ImapList: int size()>();
+
+     label13:
+        if $i1 >= $i2 goto label15;
+
+        $r11 = virtualinvoke $r1.<com.fsck.k9.mail.store.imap.ImapList: java.lang.String getString(int)>($i1);
+
+        $r10 = <java.util.Locale: java.util.Locale US>;
+
+        $r11 = virtualinvoke $r11.<java.lang.String: java.lang.String toLowerCase(java.util.Locale)>($r10);
+
+        $i3 = $i1 + 1;
+
+        $r12 = virtualinvoke $r1.<com.fsck.k9.mail.store.imap.ImapList: java.lang.String getString(int)>($i3);
+
+        $r15 = newarray (java.lang.Object)[2];
+
+        $r15[0] = $r11;
+
+        $r15[1] = $r12;
+
+        $r11 = staticinvoke <java.lang.String: java.lang.String format(java.lang.String,java.lang.Object[])>(";\r\n %s=\"%s\"", $r15);
+
+        virtualinvoke r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r11);
+
+        $i1 = $i1 + 2;
+
+        goto label13;
+
+     label14:
+        $r12 = "text";
+
+        $z0 = virtualinvoke $r12.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>($r11);
+
+        if $z0 != 0 goto label11;
+
+        $i1 = virtualinvoke $r1.<com.fsck.k9.mail.store.imap.ImapList: int size()>();
+
+        if $i1 <= 8 goto label11;
+
+        $r6 = virtualinvoke $r1.<com.fsck.k9.mail.store.imap.ImapList: java.lang.Object get(int)>(8);
+
+        $z0 = $r6 instanceof com.fsck.k9.mail.store.imap.ImapList;
+
+        if $z0 == 0 goto label11;
+
+        $r8 = virtualinvoke $r1.<com.fsck.k9.mail.store.imap.ImapList: com.fsck.k9.mail.store.imap.ImapList getList(int)>(8);
+
+        goto label11;
+
+     label15:
+        $r11 = virtualinvoke r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r11 = staticinvoke <com.fsck.k9.mail.internet.MimeUtility: java.lang.String getHeaderParameter(java.lang.String,java.lang.String)>($r11, "size");
+
+        if $r11 != null goto label16;
+
+        $r10 = <java.util.Locale: java.util.Locale US>;
+
+        $r15 = newarray (java.lang.Object)[1];
+
+        $r16 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(i0);
+
+        $r15[0] = $r16;
+
+        $r11 = staticinvoke <java.lang.String: java.lang.String format(java.util.Locale,java.lang.String,java.lang.Object[])>($r10, ";\r\n size=%d", $r15);
+
+        virtualinvoke r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r11);
+
+     label16:
+        $r11 = virtualinvoke r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        interfaceinvoke $r2.<com.fsck.k9.mail.Part: void setHeader(java.lang.String,java.lang.String)>("Content-Disposition", $r11);
+
+        interfaceinvoke $r2.<com.fsck.k9.mail.Part: void setHeader(java.lang.String,java.lang.String)>("Content-Transfer-Encoding", $r9);
+
+        $z0 = $r2 instanceof com.fsck.k9.mail.store.imap.ImapMessage;
+
+        if $z0 == 0 goto label17;
+
+        $r17 = (com.fsck.k9.mail.store.imap.ImapMessage) $r2;
+
+        virtualinvoke $r17.<com.fsck.k9.mail.store.imap.ImapMessage: void setSize(int)>(i0);
+
+     label17:
+        interfaceinvoke $r2.<com.fsck.k9.mail.Part: void setServerExtra(java.lang.String)>($r3);
+
+        return;
+    }
+    private java.util.List search(com.fsck.k9.mail.store.imap.ImapSearcher, com.fsck.k9.mail.MessageRetrievalListener) throws com.fsck.k9.mail.MessagingException
+    {
+        com.fsck.k9.mail.store.imap.ImapFolder r0;
+        com.fsck.k9.mail.store.imap.ImapSearcher $r1;
+        com.fsck.k9.mail.MessageRetrievalListener r2;
+        java.io.IOException r3;
+        com.fsck.k9.mail.store.imap.ImapMessage r4;
+        java.util.ArrayList r5;
+        java.util.List $r6;
+        com.fsck.k9.mail.store.imap.SearchResponse $r7;
+        java.util.Comparator $r8;
+        int i0, $i1;
+        java.lang.Object $r9;
+        java.lang.Long $r10;
+        java.lang.String $r11;
+        com.fsck.k9.mail.store.imap.ImapConnection $r12;
+        com.fsck.k9.mail.MessagingException $r13;
+
+        r0 := @this: com.fsck.k9.mail.store.imap.ImapFolder;
+
+        $r1 := @parameter0: com.fsck.k9.mail.store.imap.ImapSearcher;
+
+        r2 := @parameter1: com.fsck.k9.mail.MessageRetrievalListener;
+
+        specialinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: void checkOpen()>();
+
+        r5 = new java.util.ArrayList;
+
+        specialinvoke r5.<java.util.ArrayList: void <init>()>();
+
+     label01:
+        $r6 = interfaceinvoke $r1.<com.fsck.k9.mail.store.imap.ImapSearcher: java.util.List search()>();
+
+        $r7 = staticinvoke <com.fsck.k9.mail.store.imap.SearchResponse: com.fsck.k9.mail.store.imap.SearchResponse parse(java.util.List)>($r6);
+
+        $r6 = virtualinvoke $r7.<com.fsck.k9.mail.store.imap.SearchResponse: java.util.List getNumbers()>();
+
+        $r8 = staticinvoke <java.util.Collections: java.util.Comparator reverseOrder()>();
+
+        staticinvoke <java.util.Collections: void sort(java.util.List,java.util.Comparator)>($r6, $r8);
+
+     label02:
+        i0 = 0;
+
+     label03:
+        $i1 = interfaceinvoke $r6.<java.util.List: int size()>();
+
+     label04:
+        if i0 >= $i1 goto label16;
+
+     label05:
+        $r9 = interfaceinvoke $r6.<java.util.List: java.lang.Object get(int)>(i0);
+
+     label06:
+        $r10 = (java.lang.Long) $r9;
+
+     label07:
+        $r11 = virtualinvoke $r10.<java.lang.Long: java.lang.String toString()>();
+
+     label08:
+        if r2 == null goto label10;
+
+     label09:
+        interfaceinvoke r2.<com.fsck.k9.mail.MessageRetrievalListener: void messageStarted(java.lang.String,int,int)>($r11, i0, $i1);
+
+     label10:
+        r4 = new com.fsck.k9.mail.store.imap.ImapMessage;
+
+     label11:
+        specialinvoke r4.<com.fsck.k9.mail.store.imap.ImapMessage: void <init>(java.lang.String,com.fsck.k9.mail.Folder)>($r11, r0);
+
+        interfaceinvoke r5.<java.util.List: boolean add(java.lang.Object)>(r4);
+
+     label12:
+        if r2 == null goto label14;
+
+     label13:
+        interfaceinvoke r2.<com.fsck.k9.mail.MessageRetrievalListener: void messageFinished(com.fsck.k9.mail.Message,int,int)>(r4, i0, $i1);
+
+     label14:
+        i0 = i0 + 1;
+
+        goto label04;
+
+     label15:
+        r3 := @caughtexception;
+
+        $r12 = r0.<com.fsck.k9.mail.store.imap.ImapFolder: com.fsck.k9.mail.store.imap.ImapConnection connection>;
+
+        $r13 = specialinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: com.fsck.k9.mail.MessagingException ioExceptionHandler(com.fsck.k9.mail.store.imap.ImapConnection,java.io.IOException)>($r12, r3);
+
+        throw $r13;
+
+     label16:
+        return r5;
+
+        catch java.io.IOException from label01 to label02 with label15;
+        catch java.io.IOException from label03 to label04 with label15;
+        catch java.io.IOException from label05 to label06 with label15;
+        catch java.io.IOException from label07 to label08 with label15;
+        catch java.io.IOException from label09 to label10 with label15;
+        catch java.io.IOException from label11 to label12 with label15;
+        catch java.io.IOException from label13 to label14 with label15;
+    }
+    public java.util.Map appendMessages(java.util.List) throws com.fsck.k9.mail.MessagingException
+    {
+        com.fsck.k9.mail.store.imap.ImapFolder r0;
+        java.util.List r1;
+        com.fsck.k9.mail.filter.EOLConvertingOutputStream r2;
+        java.io.IOException r3;
+        java.util.HashMap r4;
+        java.util.Iterator $r5;
+        boolean $z0;
+        java.lang.Object $r6;
+        com.fsck.k9.mail.Message r7;
+        long $l0;
+        com.fsck.k9.mail.store.imap.FolderNameCodec $r8;
+        java.lang.String $r9, $r18;
+        java.util.Locale $r10;
+        java.lang.Object[] $r11;
+        java.util.Set $r12;
+        java.lang.Long $r13;
+        com.fsck.k9.mail.store.imap.ImapConnection $r14;
+        com.fsck.k9.mail.store.imap.ImapResponse $r15;
+        java.io.OutputStream $r16;
+        int $i1;
+        com.fsck.k9.mail.store.imap.ImapList $r17;
+        com.fsck.k9.mail.MessagingException $r19;
+
+        r0 := @this: com.fsck.k9.mail.store.imap.ImapFolder;
+
+        r1 := @parameter0: java.util.List;
+
+        virtualinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: void open(int)>(0);
+
+        specialinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: void checkOpen()>();
+
+        r4 = new java.util.HashMap;
+
+     label01:
+        specialinvoke r4.<java.util.HashMap: void <init>()>();
+
+        $r5 = interfaceinvoke r1.<java.util.List: java.util.Iterator iterator()>();
+
+     label02:
+        $z0 = interfaceinvoke $r5.<java.util.Iterator: boolean hasNext()>();
+
+     label03:
+        if $z0 == 0 goto label45;
+
+     label04:
+        $r6 = interfaceinvoke $r5.<java.util.Iterator: java.lang.Object next()>();
+
+     label05:
+        r7 = (com.fsck.k9.mail.Message) $r6;
+
+     label06:
+        $l0 = virtualinvoke r7.<com.fsck.k9.mail.Message: long calculateSize()>();
+
+     label07:
+        $r8 = r0.<com.fsck.k9.mail.store.imap.ImapFolder: com.fsck.k9.mail.store.imap.FolderNameCodec folderNameCodec>;
+
+     label08:
+        $r9 = specialinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: java.lang.String getPrefixedName()>();
+
+        $r9 = virtualinvoke $r8.<com.fsck.k9.mail.store.imap.FolderNameCodec: java.lang.String encode(java.lang.String)>($r9);
+
+        $r9 = staticinvoke <com.fsck.k9.mail.store.imap.ImapUtility: java.lang.String encodeString(java.lang.String)>($r9);
+
+     label09:
+        $r10 = <java.util.Locale: java.util.Locale US>;
+
+        $r11 = newarray (java.lang.Object)[3];
+
+        $r11[0] = $r9;
+
+     label10:
+        $r12 = virtualinvoke r7.<com.fsck.k9.mail.Message: java.util.Set getFlags()>();
+
+        $r9 = specialinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: java.lang.String combineFlags(java.lang.Iterable)>($r12);
+
+     label11:
+        $r11[1] = $r9;
+
+     label12:
+        $r13 = staticinvoke <java.lang.Long: java.lang.Long valueOf(long)>($l0);
+
+     label13:
+        $r11[2] = $r13;
+
+     label14:
+        $r9 = staticinvoke <java.lang.String: java.lang.String format(java.util.Locale,java.lang.String,java.lang.Object[])>($r10, "APPEND %s (%s) {%d}", $r11);
+
+     label15:
+        $r14 = r0.<com.fsck.k9.mail.store.imap.ImapFolder: com.fsck.k9.mail.store.imap.ImapConnection connection>;
+
+     label16:
+        virtualinvoke $r14.<com.fsck.k9.mail.store.imap.ImapConnection: java.lang.String sendCommand(java.lang.String,boolean)>($r9, 0);
+
+     label17:
+        $r14 = r0.<com.fsck.k9.mail.store.imap.ImapFolder: com.fsck.k9.mail.store.imap.ImapConnection connection>;
+
+     label18:
+        $r15 = virtualinvoke $r14.<com.fsck.k9.mail.store.imap.ImapConnection: com.fsck.k9.mail.store.imap.ImapResponse readResponse()>();
+
+        virtualinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: void handleUntaggedResponse(com.fsck.k9.mail.store.imap.ImapResponse)>($r15);
+
+        $z0 = virtualinvoke $r15.<com.fsck.k9.mail.store.imap.ImapResponse: boolean isContinuationRequested()>();
+
+     label19:
+        if $z0 == 0 goto label21;
+
+        r2 = new com.fsck.k9.mail.filter.EOLConvertingOutputStream;
+
+        $r14 = r0.<com.fsck.k9.mail.store.imap.ImapFolder: com.fsck.k9.mail.store.imap.ImapConnection connection>;
+
+     label20:
+        $r16 = virtualinvoke $r14.<com.fsck.k9.mail.store.imap.ImapConnection: java.io.OutputStream getOutputStream()>();
+
+        specialinvoke r2.<com.fsck.k9.mail.filter.EOLConvertingOutputStream: void <init>(java.io.OutputStream)>($r16);
+
+        virtualinvoke r7.<com.fsck.k9.mail.Message: void writeTo(java.io.OutputStream)>(r2);
+
+        virtualinvoke r2.<com.fsck.k9.mail.filter.EOLConvertingOutputStream: void write(int)>(13);
+
+        virtualinvoke r2.<com.fsck.k9.mail.filter.EOLConvertingOutputStream: void write(int)>(10);
+
+        virtualinvoke r2.<com.fsck.k9.mail.filter.EOLConvertingOutputStream: void flush()>();
+
+     label21:
+        $r9 = virtualinvoke $r15.<com.fsck.k9.mail.store.imap.ImapResponse: java.lang.String getTag()>();
+
+     label22:
+        if $r9 == null goto label17;
+
+     label23:
+        $i1 = virtualinvoke $r15.<com.fsck.k9.mail.store.imap.ImapResponse: int size()>();
+
+     label24:
+        if $i1 <= 1 goto label36;
+
+     label25:
+        $r6 = virtualinvoke $r15.<com.fsck.k9.mail.store.imap.ImapResponse: java.lang.Object get(int)>(1);
+
+     label26:
+        $z0 = $r6 instanceof com.fsck.k9.mail.store.imap.ImapList;
+
+        if $z0 == 0 goto label36;
+
+        $r17 = (com.fsck.k9.mail.store.imap.ImapList) $r6;
+
+     label27:
+        $i1 = virtualinvoke $r17.<com.fsck.k9.mail.store.imap.ImapList: int size()>();
+
+     label28:
+        if $i1 < 3 goto label36;
+
+     label29:
+        $r9 = virtualinvoke $r17.<com.fsck.k9.mail.store.imap.ImapList: java.lang.String getString(int)>(0);
+
+        $z0 = virtualinvoke $r9.<java.lang.String: boolean equals(java.lang.Object)>("APPENDUID");
+
+     label30:
+        if $z0 == 0 goto label36;
+
+     label31:
+        $r9 = virtualinvoke $r17.<com.fsck.k9.mail.store.imap.ImapList: java.lang.String getString(int)>(2);
+
+        $z0 = staticinvoke <android.text.TextUtils: boolean isEmpty(java.lang.CharSequence)>($r9);
+
+     label32:
+        if $z0 != 0 goto label36;
+
+     label33:
+        virtualinvoke r7.<com.fsck.k9.mail.Message: void setUid(java.lang.String)>($r9);
+
+        $r18 = virtualinvoke r7.<com.fsck.k9.mail.Message: java.lang.String getUid()>();
+
+        interfaceinvoke r4.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r18, $r9);
+
+     label34:
+        goto label02;
+
+     label35:
+        r3 := @caughtexception;
+
+        $r14 = r0.<com.fsck.k9.mail.store.imap.ImapFolder: com.fsck.k9.mail.store.imap.ImapConnection connection>;
+
+        $r19 = specialinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: com.fsck.k9.mail.MessagingException ioExceptionHandler(com.fsck.k9.mail.store.imap.ImapConnection,java.io.IOException)>($r14, r3);
+
+        throw $r19;
+
+     label36:
+        $r9 = virtualinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: java.lang.String getUidFromMessageId(com.fsck.k9.mail.Message)>(r7);
+
+        $z0 = staticinvoke <com.fsck.k9.mail.K9MailLib: boolean isDebug()>();
+
+     label37:
+        if $z0 == 0 goto label41;
+
+        $r11 = newarray (java.lang.Object)[2];
+
+        $r11[0] = $r9;
+
+     label38:
+        $r18 = virtualinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: java.lang.String getLogId()>();
+
+     label39:
+        $r11[1] = $r18;
+
+     label40:
+        staticinvoke <timber.log.Timber: void d(java.lang.String,java.lang.Object[])>("Got UID %s for message for %s", $r11);
+
+     label41:
+        $z0 = staticinvoke <android.text.TextUtils: boolean isEmpty(java.lang.CharSequence)>($r9);
+
+     label42:
+        if $z0 != 0 goto label02;
+
+     label43:
+        $r18 = virtualinvoke r7.<com.fsck.k9.mail.Message: java.lang.String getUid()>();
+
+        interfaceinvoke r4.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r18, $r9);
+
+        virtualinvoke r7.<com.fsck.k9.mail.Message: void setUid(java.lang.String)>($r9);
+
+     label44:
+        goto label02;
+
+     label45:
+        $z0 = interfaceinvoke r4.<java.util.Map: boolean isEmpty()>();
+
+     label46:
+        if $z0 == 0 goto label47;
+
+        return null;
+
+     label47:
+        return r4;
+
+        catch java.io.IOException from label01 to label03 with label35;
+        catch java.io.IOException from label04 to label05 with label35;
+        catch java.io.IOException from label06 to label07 with label35;
+        catch java.io.IOException from label08 to label09 with label35;
+        catch java.io.IOException from label10 to label11 with label35;
+        catch java.io.IOException from label12 to label13 with label35;
+        catch java.io.IOException from label14 to label15 with label35;
+        catch java.io.IOException from label16 to label17 with label35;
+        catch java.io.IOException from label18 to label19 with label35;
+        catch java.io.IOException from label20 to label22 with label35;
+        catch java.io.IOException from label23 to label24 with label35;
+        catch java.io.IOException from label25 to label26 with label35;
+        catch java.io.IOException from label27 to label28 with label35;
+        catch java.io.IOException from label29 to label30 with label35;
+        catch java.io.IOException from label31 to label32 with label35;
+        catch java.io.IOException from label33 to label34 with label35;
+        catch java.io.IOException from label36 to label37 with label35;
+        catch java.io.IOException from label38 to label39 with label35;
+        catch java.io.IOException from label40 to label42 with label35;
+        catch java.io.IOException from label43 to label44 with label35;
+        catch java.io.IOException from label45 to label46 with label35;
+    }
+    public boolean areMoreMessagesAvailable(int, java.util.Date) throws java.io.IOException, com.fsck.k9.mail.MessagingException
+    {
+        com.fsck.k9.mail.store.imap.ImapFolder r0;
+        int $i0, i1;
+        java.util.Date $r1;
+        java.lang.String $r2;
+        boolean $z0;
+
+        r0 := @this: com.fsck.k9.mail.store.imap.ImapFolder;
+
+        $i0 := @parameter0: int;
+
+        $r1 := @parameter1: java.util.Date;
+
+        specialinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: void checkOpen()>();
+
+        if $i0 != 1 goto label1;
+
+        return 0;
+
+     label1:
+        $r2 = specialinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: java.lang.String getDateSearchString(java.util.Date)>($r1);
+
+        $i0 = $i0 + -1;
+
+     label2:
+        if $i0 <= 0 goto label4;
+
+        i1 = $i0 + -500;
+
+        i1 = staticinvoke <java.lang.Math: int max(int,int)>(0, i1);
+
+        i1 = i1 + 1;
+
+        $z0 = specialinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: boolean existsNonDeletedMessageInRange(int,int,java.lang.String)>(i1, $i0, $r2);
+
+        if $z0 == 0 goto label3;
+
+        return 1;
+
+     label3:
+        $i0 = $i0 + -500;
+
+        goto label2;
+
+     label4:
+        return 0;
+    }
+    public void close()
+    {
+        com.fsck.k9.mail.store.imap.ImapFolder r0;
+        boolean $z0;
+        com.fsck.k9.mail.store.imap.ImapConnection $r1;
+        java.lang.Object[] $r2;
+        java.lang.Throwable $r3;
+        com.fsck.k9.mail.store.imap.ImapStore $r4;
+
+        r0 := @this: com.fsck.k9.mail.store.imap.ImapFolder;
+
+        r0.<com.fsck.k9.mail.store.imap.ImapFolder: int messageCount> = -1;
+
+        $z0 = virtualinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: boolean isOpen()>();
+
+        if $z0 != 0 goto label1;
+
+        return;
+
+     label1:
+        entermonitor r0;
+
+     label2:
+        $z0 = r0.<com.fsck.k9.mail.store.imap.ImapFolder: boolean inSearch>;
+
+        if $z0 == 0 goto label7;
+
+        $r1 = r0.<com.fsck.k9.mail.store.imap.ImapFolder: com.fsck.k9.mail.store.imap.ImapConnection connection>;
+
+        if $r1 == null goto label7;
+
+        $r2 = newarray (java.lang.Object)[0];
+
+        staticinvoke <timber.log.Timber: void i(java.lang.String,java.lang.Object[])>("IMAP search was aborted, shutting down connection.", $r2);
+
+        $r1 = r0.<com.fsck.k9.mail.store.imap.ImapFolder: com.fsck.k9.mail.store.imap.ImapConnection connection>;
+
+        virtualinvoke $r1.<com.fsck.k9.mail.store.imap.ImapConnection: void close()>();
+
+     label3:
+        r0.<com.fsck.k9.mail.store.imap.ImapFolder: com.fsck.k9.mail.store.imap.ImapConnection connection> = null;
+
+        exitmonitor r0;
+
+     label4:
+        return;
+
+     label5:
+        $r3 := @caughtexception;
+
+        exitmonitor r0;
+
+     label6:
+        throw $r3;
+
+     label7:
+        $r4 = r0.<com.fsck.k9.mail.store.imap.ImapFolder: com.fsck.k9.mail.store.imap.ImapStore store>;
+
+        $r1 = r0.<com.fsck.k9.mail.store.imap.ImapFolder: com.fsck.k9.mail.store.imap.ImapConnection connection>;
+
+        virtualinvoke $r4.<com.fsck.k9.mail.store.imap.ImapStore: void releaseConnection(com.fsck.k9.mail.store.imap.ImapConnection)>($r1);
+
+     label8:
+        goto label3;
+
+        catch java.lang.Throwable from label2 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+        catch java.lang.Throwable from label7 to label8 with label5;
+    }
+    public java.util.Map copyMessages(java.util.List, com.fsck.k9.mail.Folder) throws com.fsck.k9.mail.MessagingException
+    {
+        com.fsck.k9.mail.store.imap.ImapFolder r0, r6;
+        java.util.List r1;
+        com.fsck.k9.mail.Folder $r2;
+        java.io.IOException r3;
+        java.lang.String[] r4;
+        boolean $z0;
+        com.fsck.k9.mail.MessagingException $r5;
+        int $i0, $i1;
+        java.lang.Object $r7;
+        com.fsck.k9.mail.Message $r8;
+        java.lang.String $r9, $r12;
+        com.fsck.k9.mail.store.imap.FolderNameCodec $r10;
+        java.lang.Object[] $r11;
+        com.fsck.k9.mail.Folder$FolderType $r13;
+        com.fsck.k9.mail.store.imap.ImapResponse $r14;
+        com.fsck.k9.mail.store.imap.CopyUidResponse $r15;
+        java.util.Map $r16;
+        com.fsck.k9.mail.store.imap.ImapConnection $r17;
+
+        r0 := @this: com.fsck.k9.mail.store.imap.ImapFolder;
+
+        r1 := @parameter0: java.util.List;
+
+        $r2 := @parameter1: com.fsck.k9.mail.Folder;
+
+        $z0 = $r2 instanceof com.fsck.k9.mail.store.imap.ImapFolder;
+
+        if $z0 != 0 goto label01;
+
+        $r5 = new com.fsck.k9.mail.MessagingException;
+
+        specialinvoke $r5.<com.fsck.k9.mail.MessagingException: void <init>(java.lang.String)>("ImapFolder.copyMessages passed non-ImapFolder");
+
+        throw $r5;
+
+     label01:
+        $z0 = interfaceinvoke r1.<java.util.List: boolean isEmpty()>();
+
+        if $z0 == 0 goto label02;
+
+        return null;
+
+     label02:
+        r6 = (com.fsck.k9.mail.store.imap.ImapFolder) $r2;
+
+        specialinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: void checkOpen()>();
+
+        $i0 = interfaceinvoke r1.<java.util.List: int size()>();
+
+        r4 = newarray (java.lang.String)[$i0];
+
+        $i0 = 0;
+
+        $i1 = interfaceinvoke r1.<java.util.List: int size()>();
+
+     label03:
+        if $i0 >= $i1 goto label04;
+
+        $r7 = interfaceinvoke r1.<java.util.List: java.lang.Object get(int)>($i0);
+
+        $r8 = (com.fsck.k9.mail.Message) $r7;
+
+        $r9 = virtualinvoke $r8.<com.fsck.k9.mail.Message: java.lang.String getUid()>();
+
+        r4[$i0] = $r9;
+
+        $i0 = $i0 + 1;
+
+        goto label03;
+
+     label04:
+        $r10 = r0.<com.fsck.k9.mail.store.imap.ImapFolder: com.fsck.k9.mail.store.imap.FolderNameCodec folderNameCodec>;
+
+     label05:
+        $r9 = specialinvoke r6.<com.fsck.k9.mail.store.imap.ImapFolder: java.lang.String getPrefixedName()>();
+
+        $r9 = virtualinvoke $r10.<com.fsck.k9.mail.store.imap.FolderNameCodec: java.lang.String encode(java.lang.String)>($r9);
+
+        $r9 = staticinvoke <com.fsck.k9.mail.store.imap.ImapUtility: java.lang.String encodeString(java.lang.String)>($r9);
+
+        $z0 = specialinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: boolean exists(java.lang.String)>($r9);
+
+     label06:
+        if $z0 != 0 goto label14;
+
+     label07:
+        $z0 = staticinvoke <com.fsck.k9.mail.K9MailLib: boolean isDebug()>();
+
+     label08:
+        if $z0 == 0 goto label12;
+
+        $r11 = newarray (java.lang.Object)[2];
+
+        $r11[0] = $r9;
+
+     label09:
+        $r12 = virtualinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: java.lang.String getLogId()>();
+
+     label10:
+        $r11[1] = $r12;
+
+     label11:
+        staticinvoke <timber.log.Timber: void i(java.lang.String,java.lang.Object[])>("ImapFolder.copyMessages: attempting to create remote folder \'%s\' for %s", $r11);
+
+     label12:
+        $r13 = <com.fsck.k9.mail.Folder$FolderType: com.fsck.k9.mail.Folder$FolderType HOLDS_MESSAGES>;
+
+     label13:
+        virtualinvoke r6.<com.fsck.k9.mail.store.imap.ImapFolder: boolean create(com.fsck.k9.mail.Folder$FolderType)>($r13);
+
+     label14:
+        $r11 = newarray (java.lang.Object)[2];
+
+     label15:
+        $r12 = staticinvoke <com.fsck.k9.mail.store.imap.ImapFolder: java.lang.String combine(java.lang.Object[],char)>(r4, 44);
+
+     label16:
+        $r11[0] = $r12;
+
+        $r11[1] = $r9;
+
+     label17:
+        $r9 = staticinvoke <java.lang.String: java.lang.String format(java.lang.String,java.lang.Object[])>("UID COPY %s %s", $r11);
+
+        r1 = specialinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: java.util.List executeSimpleCommand(java.lang.String)>($r9);
+
+        $r14 = staticinvoke <com.fsck.k9.mail.store.imap.ImapUtility: com.fsck.k9.mail.store.imap.ImapResponse getLastResponse(java.util.List)>(r1);
+
+        $r15 = staticinvoke <com.fsck.k9.mail.store.imap.CopyUidResponse: com.fsck.k9.mail.store.imap.CopyUidResponse parse(com.fsck.k9.mail.store.imap.ImapResponse)>($r14);
+
+     label18:
+        if $r15 != null goto label19;
+
+        return null;
+
+     label19:
+        $r16 = virtualinvoke $r15.<com.fsck.k9.mail.store.imap.CopyUidResponse: java.util.Map getUidMapping()>();
+
+     label20:
+        return $r16;
+
+     label21:
+        r3 := @caughtexception;
+
+        $r17 = r0.<com.fsck.k9.mail.store.imap.ImapFolder: com.fsck.k9.mail.store.imap.ImapConnection connection>;
+
+        $r5 = specialinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: com.fsck.k9.mail.MessagingException ioExceptionHandler(com.fsck.k9.mail.store.imap.ImapConnection,java.io.IOException)>($r17, r3);
+
+        throw $r5;
+
+        catch java.io.IOException from label05 to label06 with label21;
+        catch java.io.IOException from label07 to label08 with label21;
+        catch java.io.IOException from label09 to label10 with label21;
+        catch java.io.IOException from label11 to label12 with label21;
+        catch java.io.IOException from label13 to label14 with label21;
+        catch java.io.IOException from label15 to label16 with label21;
+        catch java.io.IOException from label17 to label18 with label21;
+        catch java.io.IOException from label19 to label20 with label21;
+    }
+    public boolean create(com.fsck.k9.mail.Folder$FolderType) throws com.fsck.k9.mail.MessagingException
+    {
+        com.fsck.k9.mail.store.imap.ImapFolder r0;
+        com.fsck.k9.mail.Folder$FolderType $r1;
+        com.fsck.k9.mail.store.imap.NegativeImapResponseException r2;
+        java.io.IOException r3;
+        com.fsck.k9.mail.store.imap.ImapConnection $r4, $r9;
+        com.fsck.k9.mail.store.imap.ImapStore $r5;
+        com.fsck.k9.mail.store.imap.FolderNameCodec $r6;
+        java.lang.String $r7;
+        java.lang.Object[] $r8;
+        java.lang.Throwable $r10, $r12;
+        com.fsck.k9.mail.MessagingException $r11;
+
+        r0 := @this: com.fsck.k9.mail.store.imap.ImapFolder;
+
+        $r1 := @parameter0: com.fsck.k9.mail.Folder$FolderType;
+
+        entermonitor r0;
+
+     label01:
+        $r4 = r0.<com.fsck.k9.mail.store.imap.ImapFolder: com.fsck.k9.mail.store.imap.ImapConnection connection>;
+
+        if $r4 != null goto label08;
+
+        $r5 = r0.<com.fsck.k9.mail.store.imap.ImapFolder: com.fsck.k9.mail.store.imap.ImapStore store>;
+
+        $r4 = virtualinvoke $r5.<com.fsck.k9.mail.store.imap.ImapStore: com.fsck.k9.mail.store.imap.ImapConnection getConnection()>();
+
+     label02:
+        exitmonitor r0;
+
+     label03:
+        $r6 = r0.<com.fsck.k9.mail.store.imap.ImapFolder: com.fsck.k9.mail.store.imap.FolderNameCodec folderNameCodec>;
+
+     label04:
+        $r7 = specialinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: java.lang.String getPrefixedName()>();
+
+        $r7 = virtualinvoke $r6.<com.fsck.k9.mail.store.imap.FolderNameCodec: java.lang.String encode(java.lang.String)>($r7);
+
+        $r7 = staticinvoke <com.fsck.k9.mail.store.imap.ImapUtility: java.lang.String encodeString(java.lang.String)>($r7);
+
+     label05:
+        $r8 = newarray (java.lang.Object)[1];
+
+        $r8[0] = $r7;
+
+     label06:
+        $r7 = staticinvoke <java.lang.String: java.lang.String format(java.lang.String,java.lang.Object[])>("CREATE %s", $r8);
+
+        virtualinvoke $r4.<com.fsck.k9.mail.store.imap.ImapConnection: java.util.List executeSimpleCommand(java.lang.String)>($r7);
+
+     label07:
+        $r9 = r0.<com.fsck.k9.mail.store.imap.ImapFolder: com.fsck.k9.mail.store.imap.ImapConnection connection>;
+
+        if $r9 != null goto label17;
+
+        $r5 = r0.<com.fsck.k9.mail.store.imap.ImapFolder: com.fsck.k9.mail.store.imap.ImapStore store>;
+
+        virtualinvoke $r5.<com.fsck.k9.mail.store.imap.ImapStore: void releaseConnection(com.fsck.k9.mail.store.imap.ImapConnection)>($r4);
+
+        return 1;
+
+     label08:
+        $r4 = r0.<com.fsck.k9.mail.store.imap.ImapFolder: com.fsck.k9.mail.store.imap.ImapConnection connection>;
+
+        goto label02;
+
+     label09:
+        $r10 := @caughtexception;
+
+        exitmonitor r0;
+
+     label10:
+        throw $r10;
+
+     label11:
+        r2 := @caughtexception;
+
+        $r9 = r0.<com.fsck.k9.mail.store.imap.ImapFolder: com.fsck.k9.mail.store.imap.ImapConnection connection>;
+
+        if $r9 != null goto label12;
+
+        $r5 = r0.<com.fsck.k9.mail.store.imap.ImapFolder: com.fsck.k9.mail.store.imap.ImapStore store>;
+
+        virtualinvoke $r5.<com.fsck.k9.mail.store.imap.ImapStore: void releaseConnection(com.fsck.k9.mail.store.imap.ImapConnection)>($r4);
+
+     label12:
+        return 0;
+
+     label13:
+        r3 := @caughtexception;
+
+     label14:
+        $r9 = r0.<com.fsck.k9.mail.store.imap.ImapFolder: com.fsck.k9.mail.store.imap.ImapConnection connection>;
+
+        $r11 = specialinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: com.fsck.k9.mail.MessagingException ioExceptionHandler(com.fsck.k9.mail.store.imap.ImapConnection,java.io.IOException)>($r9, r3);
+
+        throw $r11;
+
+     label15:
+        $r12 := @caughtexception;
+
+        $r9 = r0.<com.fsck.k9.mail.store.imap.ImapFolder: com.fsck.k9.mail.store.imap.ImapConnection connection>;
+
+        if $r9 != null goto label16;
+
+        $r5 = r0.<com.fsck.k9.mail.store.imap.ImapFolder: com.fsck.k9.mail.store.imap.ImapStore store>;
+
+        virtualinvoke $r5.<com.fsck.k9.mail.store.imap.ImapStore: void releaseConnection(com.fsck.k9.mail.store.imap.ImapConnection)>($r4);
+
+     label16:
+        throw $r12;
+
+     label17:
+        return 1;
+
+        catch java.lang.Throwable from label01 to label03 with label09;
+        catch com.fsck.k9.mail.store.imap.NegativeImapResponseException from label04 to label05 with label11;
+        catch com.fsck.k9.mail.store.imap.NegativeImapResponseException from label06 to label07 with label11;
+        catch java.io.IOException from label04 to label05 with label13;
+        catch java.io.IOException from label06 to label07 with label13;
+        catch java.lang.Throwable from label03 to label07 with label15;
+        catch java.lang.Throwable from label08 to label10 with label09;
+        catch java.lang.Throwable from label14 to label15 with label15;
+    }
+    public void delete(java.util.List, java.lang.String) throws com.fsck.k9.mail.MessagingException
+    {
+        com.fsck.k9.mail.store.imap.ImapFolder r0, $r7;
+        java.util.List r1;
+        java.lang.String $r2, $r3, $r10;
+        boolean $z0;
+        com.fsck.k9.mail.Flag $r4;
+        java.util.Set $r5;
+        com.fsck.k9.mail.store.imap.ImapStore $r6;
+        com.fsck.k9.mail.store.imap.FolderNameCodec $r8;
+        java.lang.Object[] $r9;
+        com.fsck.k9.mail.Folder$FolderType $r11;
+        int $i0;
+        java.lang.Integer $r12;
+        com.fsck.k9.mail.MessagingException $r13;
+        java.lang.StringBuilder $r14;
+
+        r0 := @this: com.fsck.k9.mail.store.imap.ImapFolder;
+
+        r1 := @parameter0: java.util.List;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $z0 = interfaceinvoke r1.<java.util.List: boolean isEmpty()>();
+
+        if $z0 == 0 goto label1;
+
+        return;
+
+     label1:
+        if $r2 == null goto label2;
+
+        $r3 = virtualinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: java.lang.String getName()>();
+
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>($r2);
+
+        if $z0 == 0 goto label3;
+
+     label2:
+        $r4 = <com.fsck.k9.mail.Flag: com.fsck.k9.mail.Flag DELETED>;
+
+        $r5 = staticinvoke <java.util.Collections: java.util.Set singleton(java.lang.Object)>($r4);
+
+        virtualinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: void setFlags(java.util.List,java.util.Set,boolean)>(r1, $r5, 1);
+
+        return;
+
+     label3:
+        $r6 = specialinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: com.fsck.k9.mail.store.imap.ImapStore getStore()>();
+
+        $r7 = virtualinvoke $r6.<com.fsck.k9.mail.store.imap.ImapStore: com.fsck.k9.mail.store.imap.ImapFolder getFolder(java.lang.String)>($r2);
+
+        $r8 = r0.<com.fsck.k9.mail.store.imap.ImapFolder: com.fsck.k9.mail.store.imap.FolderNameCodec folderNameCodec>;
+
+        $r3 = specialinvoke $r7.<com.fsck.k9.mail.store.imap.ImapFolder: java.lang.String getPrefixedName()>();
+
+        $r3 = virtualinvoke $r8.<com.fsck.k9.mail.store.imap.FolderNameCodec: java.lang.String encode(java.lang.String)>($r3);
+
+        $r3 = staticinvoke <com.fsck.k9.mail.store.imap.ImapUtility: java.lang.String encodeString(java.lang.String)>($r3);
+
+        $z0 = specialinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: boolean exists(java.lang.String)>($r3);
+
+        if $z0 != 0 goto label5;
+
+        $z0 = staticinvoke <com.fsck.k9.mail.K9MailLib: boolean isDebug()>();
+
+        if $z0 == 0 goto label4;
+
+        $r9 = newarray (java.lang.Object)[2];
+
+        $r9[0] = $r2;
+
+        $r10 = virtualinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: java.lang.String getLogId()>();
+
+        $r9[1] = $r10;
+
+        staticinvoke <timber.log.Timber: void i(java.lang.String,java.lang.Object[])>("IMAPMessage.delete: attempting to create remote \'%s\' folder for %s", $r9);
+
+     label4:
+        $r11 = <com.fsck.k9.mail.Folder$FolderType: com.fsck.k9.mail.Folder$FolderType HOLDS_MESSAGES>;
+
+        virtualinvoke $r7.<com.fsck.k9.mail.store.imap.ImapFolder: boolean create(com.fsck.k9.mail.Folder$FolderType)>($r11);
+
+     label5:
+        $z0 = specialinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: boolean exists(java.lang.String)>($r3);
+
+        if $z0 == 0 goto label7;
+
+        $z0 = staticinvoke <com.fsck.k9.mail.K9MailLib: boolean isDebug()>();
+
+        if $z0 == 0 goto label6;
+
+        $r9 = newarray (java.lang.Object)[3];
+
+        $i0 = interfaceinvoke r1.<java.util.List: int size()>();
+
+        $r12 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        $r9[0] = $r12;
+
+        $r9[1] = $r2;
+
+        $r2 = virtualinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: java.lang.String getLogId()>();
+
+        $r9[2] = $r2;
+
+        staticinvoke <timber.log.Timber: void d(java.lang.String,java.lang.Object[])>("IMAPMessage.delete: copying remote %d messages to \'%s\' for %s", $r9);
+
+     label6:
+        virtualinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: java.util.Map moveMessages(java.util.List,com.fsck.k9.mail.Folder)>(r1, $r7);
+
+        return;
+
+     label7:
+        $r13 = new com.fsck.k9.mail.MessagingException;
+
+        $r14 = new java.lang.StringBuilder;
+
+        specialinvoke $r14.<java.lang.StringBuilder: void <init>()>();
+
+        $r14 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("IMAPMessage.delete: remote Trash folder ");
+
+        $r14 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r14 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" does not exist and could not be created for ");
+
+        $r2 = virtualinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: java.lang.String getLogId()>();
+
+        $r14 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r2 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r13.<com.fsck.k9.mail.MessagingException: void <init>(java.lang.String,boolean)>($r2, 1);
+
+        throw $r13;
+    }
+    public void delete(boolean) throws com.fsck.k9.mail.MessagingException
+    {
+        com.fsck.k9.mail.store.imap.ImapFolder r0;
+        boolean $z0;
+        java.lang.Error $r1;
+
+        r0 := @this: com.fsck.k9.mail.store.imap.ImapFolder;
+
+        $z0 := @parameter0: boolean;
+
+        $r1 = new java.lang.Error;
+
+        specialinvoke $r1.<java.lang.Error: void <init>(java.lang.String)>("ImapFolder.delete() not yet implemented");
+
+        throw $r1;
+    }
+    public boolean equals(java.lang.Object)
+    {
+        com.fsck.k9.mail.store.imap.ImapFolder r0, r2;
+        java.lang.Object $r1;
+        boolean $z0;
+        java.lang.String $r3, $r4;
+
+        r0 := @this: com.fsck.k9.mail.store.imap.ImapFolder;
+
+        $r1 := @parameter0: java.lang.Object;
+
+        $z0 = $r1 instanceof com.fsck.k9.mail.store.imap.ImapFolder;
+
+        if $z0 == 0 goto label1;
+
+        r2 = (com.fsck.k9.mail.store.imap.ImapFolder) $r1;
+
+        $r3 = virtualinvoke r2.<com.fsck.k9.mail.store.imap.ImapFolder: java.lang.String getName()>();
+
+        $r4 = virtualinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: java.lang.String getName()>();
+
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>($r4);
+
+        return $z0;
+
+     label1:
+        $z0 = specialinvoke r0.<java.lang.Object: boolean equals(java.lang.Object)>($r1);
+
+        return $z0;
+    }
+    public boolean exists() throws com.fsck.k9.mail.MessagingException
+    {
+        com.fsck.k9.mail.store.imap.ImapFolder r0;
+        com.fsck.k9.mail.store.imap.NegativeImapResponseException r1;
+        java.io.IOException r2;
+        boolean $z0;
+        com.fsck.k9.mail.store.imap.ImapConnection $r3, $r8;
+        com.fsck.k9.mail.store.imap.ImapStore $r4;
+        com.fsck.k9.mail.store.imap.FolderNameCodec $r5;
+        java.lang.String $r6;
+        java.lang.Object[] $r7;
+        java.lang.Throwable $r9, $r11;
+        com.fsck.k9.mail.MessagingException $r10;
+
+        r0 := @this: com.fsck.k9.mail.store.imap.ImapFolder;
+
+        $z0 = r0.<com.fsck.k9.mail.store.imap.ImapFolder: boolean exists>;
+
+        if $z0 == 0 goto label01;
+
+        return 1;
+
+     label01:
+        entermonitor r0;
+
+     label02:
+        $r3 = r0.<com.fsck.k9.mail.store.imap.ImapFolder: com.fsck.k9.mail.store.imap.ImapConnection connection>;
+
+        if $r3 != null goto label10;
+
+        $r4 = r0.<com.fsck.k9.mail.store.imap.ImapFolder: com.fsck.k9.mail.store.imap.ImapStore store>;
+
+        $r3 = virtualinvoke $r4.<com.fsck.k9.mail.store.imap.ImapStore: com.fsck.k9.mail.store.imap.ImapConnection getConnection()>();
+
+     label03:
+        exitmonitor r0;
+
+     label04:
+        $r5 = r0.<com.fsck.k9.mail.store.imap.ImapFolder: com.fsck.k9.mail.store.imap.FolderNameCodec folderNameCodec>;
+
+     label05:
+        $r6 = specialinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: java.lang.String getPrefixedName()>();
+
+        $r6 = virtualinvoke $r5.<com.fsck.k9.mail.store.imap.FolderNameCodec: java.lang.String encode(java.lang.String)>($r6);
+
+        $r6 = staticinvoke <com.fsck.k9.mail.store.imap.ImapUtility: java.lang.String encodeString(java.lang.String)>($r6);
+
+     label06:
+        $r7 = newarray (java.lang.Object)[1];
+
+        $r7[0] = $r6;
+
+     label07:
+        $r6 = staticinvoke <java.lang.String: java.lang.String format(java.lang.String,java.lang.Object[])>("STATUS %s (UIDVALIDITY)", $r7);
+
+        virtualinvoke $r3.<com.fsck.k9.mail.store.imap.ImapConnection: java.util.List executeSimpleCommand(java.lang.String)>($r6);
+
+     label08:
+        r0.<com.fsck.k9.mail.store.imap.ImapFolder: boolean exists> = 1;
+
+     label09:
+        $r8 = r0.<com.fsck.k9.mail.store.imap.ImapFolder: com.fsck.k9.mail.store.imap.ImapConnection connection>;
+
+        if $r8 != null goto label19;
+
+        $r4 = r0.<com.fsck.k9.mail.store.imap.ImapFolder: com.fsck.k9.mail.store.imap.ImapStore store>;
+
+        virtualinvoke $r4.<com.fsck.k9.mail.store.imap.ImapStore: void releaseConnection(com.fsck.k9.mail.store.imap.ImapConnection)>($r3);
+
+        return 1;
+
+     label10:
+        $r3 = r0.<com.fsck.k9.mail.store.imap.ImapFolder: com.fsck.k9.mail.store.imap.ImapConnection connection>;
+
+        goto label03;
+
+     label11:
+        $r9 := @caughtexception;
+
+        exitmonitor r0;
+
+     label12:
+        throw $r9;
+
+     label13:
+        r1 := @caughtexception;
+
+        $r8 = r0.<com.fsck.k9.mail.store.imap.ImapFolder: com.fsck.k9.mail.store.imap.ImapConnection connection>;
+
+        if $r8 != null goto label14;
+
+        $r4 = r0.<com.fsck.k9.mail.store.imap.ImapFolder: com.fsck.k9.mail.store.imap.ImapStore store>;
+
+        virtualinvoke $r4.<com.fsck.k9.mail.store.imap.ImapStore: void releaseConnection(com.fsck.k9.mail.store.imap.ImapConnection)>($r3);
+
+     label14:
+        return 0;
+
+     label15:
+        r2 := @caughtexception;
+
+     label16:
+        $r10 = specialinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: com.fsck.k9.mail.MessagingException ioExceptionHandler(com.fsck.k9.mail.store.imap.ImapConnection,java.io.IOException)>($r3, r2);
+
+        throw $r10;
+
+     label17:
+        $r11 := @caughtexception;
+
+        $r8 = r0.<com.fsck.k9.mail.store.imap.ImapFolder: com.fsck.k9.mail.store.imap.ImapConnection connection>;
+
+        if $r8 != null goto label18;
+
+        $r4 = r0.<com.fsck.k9.mail.store.imap.ImapFolder: com.fsck.k9.mail.store.imap.ImapStore store>;
+
+        virtualinvoke $r4.<com.fsck.k9.mail.store.imap.ImapStore: void releaseConnection(com.fsck.k9.mail.store.imap.ImapConnection)>($r3);
+
+     label18:
+        throw $r11;
+
+     label19:
+        return 1;
+
+        catch java.lang.Throwable from label02 to label04 with label11;
+        catch com.fsck.k9.mail.store.imap.NegativeImapResponseException from label05 to label06 with label13;
+        catch com.fsck.k9.mail.store.imap.NegativeImapResponseException from label07 to label08 with label13;
+        catch java.io.IOException from label05 to label06 with label15;
+        catch java.io.IOException from label07 to label08 with label15;
+        catch java.lang.Throwable from label04 to label09 with label17;
+        catch java.lang.Throwable from label10 to label12 with label11;
+        catch java.lang.Throwable from label16 to label17 with label17;
+    }
+    public void expunge() throws com.fsck.k9.mail.MessagingException
+    {
+        com.fsck.k9.mail.store.imap.ImapFolder r0;
+        java.io.IOException r1;
+        com.fsck.k9.mail.MessagingException $r2;
+        com.fsck.k9.mail.store.imap.ImapConnection $r3;
+
+        r0 := @this: com.fsck.k9.mail.store.imap.ImapFolder;
+
+        virtualinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: void open(int)>(0);
+
+        specialinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: void checkOpen()>();
+
+     label1:
+        specialinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: java.util.List executeSimpleCommand(java.lang.String)>("EXPUNGE");
+
+     label2:
+        return;
+
+     label3:
+        r1 := @caughtexception;
+
+        $r3 = r0.<com.fsck.k9.mail.store.imap.ImapFolder: com.fsck.k9.mail.store.imap.ImapConnection connection>;
+
+        $r2 = specialinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: com.fsck.k9.mail.MessagingException ioExceptionHandler(com.fsck.k9.mail.store.imap.ImapConnection,java.io.IOException)>($r3, r1);
+
+        throw $r2;
+
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+    public void fetch(java.util.List, com.fsck.k9.mail.FetchProfile, com.fsck.k9.mail.MessageRetrievalListener) throws com.fsck.k9.mail.MessagingException
+    {
+        com.fsck.k9.mail.store.imap.ImapFolder r0;
+        java.util.List r1, $r21;
+        com.fsck.k9.mail.FetchProfile $r2;
+        com.fsck.k9.mail.MessageRetrievalListener r3;
+        java.io.ByteArrayInputStream r4;
+        java.lang.Exception r5;
+        java.util.LinkedHashSet r6;
+        java.io.IOException r7;
+        java.util.HashMap r8;
+        java.util.ArrayList r9;
+        boolean $z0;
+        int $i0, $i1, $i2, $i4;
+        java.util.Iterator $r10;
+        java.lang.Object $r11;
+        com.fsck.k9.mail.Message r12;
+        java.lang.String $r13, $r22;
+        com.fsck.k9.mail.FetchProfile$Item $r14;
+        com.fsck.k9.mail.store.imap.ImapStore $r15;
+        com.fsck.k9.mail.store.StoreConfig $r16;
+        java.util.Locale $r17;
+        java.lang.Object[] $r18;
+        java.lang.Integer $r19;
+        java.lang.String[] $r20;
+        com.fsck.k9.mail.store.imap.ImapConnection $r23;
+        com.fsck.k9.mail.store.imap.FetchBodyCallback r24;
+        com.fsck.k9.mail.store.imap.ImapResponse $r25;
+        com.fsck.k9.mail.store.imap.ImapList r26;
+        long $l3;
+        java.util.Map $r27;
+        java.lang.Long $r28;
+        com.fsck.k9.mail.MessagingException $r29;
+        com.fsck.k9.mail.store.imap.ImapMessage $r30;
+        byte[] $r31;
+
+        r0 := @this: com.fsck.k9.mail.store.imap.ImapFolder;
+
+        r1 := @parameter0: java.util.List;
+
+        $r2 := @parameter1: com.fsck.k9.mail.FetchProfile;
+
+        r3 := @parameter2: com.fsck.k9.mail.MessageRetrievalListener;
+
+        if r1 == null goto label71;
+
+        $z0 = interfaceinvoke r1.<java.util.List: boolean isEmpty()>();
+
+        if $z0 == 0 goto label01;
+
+        return;
+
+     label01:
+        specialinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: void checkOpen()>();
+
+        r9 = new java.util.ArrayList;
+
+        $i0 = interfaceinvoke r1.<java.util.List: int size()>();
+
+        specialinvoke r9.<java.util.ArrayList: void <init>(int)>($i0);
+
+        r8 = new java.util.HashMap;
+
+        specialinvoke r8.<java.util.HashMap: void <init>()>();
+
+        $r10 = interfaceinvoke r1.<java.util.List: java.util.Iterator iterator()>();
+
+     label02:
+        $z0 = interfaceinvoke $r10.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label03;
+
+        $r11 = interfaceinvoke $r10.<java.util.Iterator: java.lang.Object next()>();
+
+        r12 = (com.fsck.k9.mail.Message) $r11;
+
+        $r13 = virtualinvoke r12.<com.fsck.k9.mail.Message: java.lang.String getUid()>();
+
+        interfaceinvoke r9.<java.util.List: boolean add(java.lang.Object)>($r13);
+
+        virtualinvoke r8.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>($r13, r12);
+
+        goto label02;
+
+     label03:
+        r6 = new java.util.LinkedHashSet;
+
+        specialinvoke r6.<java.util.LinkedHashSet: void <init>()>();
+
+        interfaceinvoke r6.<java.util.Set: boolean add(java.lang.Object)>("UID");
+
+        $r14 = <com.fsck.k9.mail.FetchProfile$Item: com.fsck.k9.mail.FetchProfile$Item FLAGS>;
+
+        $z0 = virtualinvoke $r2.<com.fsck.k9.mail.FetchProfile: boolean contains(java.lang.Object)>($r14);
+
+        if $z0 == 0 goto label04;
+
+        interfaceinvoke r6.<java.util.Set: boolean add(java.lang.Object)>("FLAGS");
+
+     label04:
+        $r14 = <com.fsck.k9.mail.FetchProfile$Item: com.fsck.k9.mail.FetchProfile$Item ENVELOPE>;
+
+        $z0 = virtualinvoke $r2.<com.fsck.k9.mail.FetchProfile: boolean contains(java.lang.Object)>($r14);
+
+        if $z0 == 0 goto label05;
+
+        interfaceinvoke r6.<java.util.Set: boolean add(java.lang.Object)>("INTERNALDATE");
+
+        interfaceinvoke r6.<java.util.Set: boolean add(java.lang.Object)>("RFC822.SIZE");
+
+        interfaceinvoke r6.<java.util.Set: boolean add(java.lang.Object)>("BODY.PEEK[HEADER.FIELDS (date subject from content-type to cc reply-to message-id references in-reply-to X-K9mail-Identity)]");
+
+     label05:
+        $r14 = <com.fsck.k9.mail.FetchProfile$Item: com.fsck.k9.mail.FetchProfile$Item STRUCTURE>;
+
+        $z0 = virtualinvoke $r2.<com.fsck.k9.mail.FetchProfile: boolean contains(java.lang.Object)>($r14);
+
+        if $z0 == 0 goto label06;
+
+        interfaceinvoke r6.<java.util.Set: boolean add(java.lang.Object)>("BODYSTRUCTURE");
+
+     label06:
+        $r14 = <com.fsck.k9.mail.FetchProfile$Item: com.fsck.k9.mail.FetchProfile$Item BODY_SANE>;
+
+        $z0 = virtualinvoke $r2.<com.fsck.k9.mail.FetchProfile: boolean contains(java.lang.Object)>($r14);
+
+        if $z0 == 0 goto label07;
+
+        $r15 = r0.<com.fsck.k9.mail.store.imap.ImapFolder: com.fsck.k9.mail.store.imap.ImapStore store>;
+
+        $r16 = virtualinvoke $r15.<com.fsck.k9.mail.store.imap.ImapStore: com.fsck.k9.mail.store.StoreConfig getStoreConfig()>();
+
+        $i0 = interfaceinvoke $r16.<com.fsck.k9.mail.store.StoreConfig: int getMaximumAutoDownloadMessageSize()>();
+
+        if $i0 <= 0 goto label48;
+
+        $r17 = <java.util.Locale: java.util.Locale US>;
+
+        $r18 = newarray (java.lang.Object)[1];
+
+        $r19 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        $r18[0] = $r19;
+
+        $r13 = staticinvoke <java.lang.String: java.lang.String format(java.util.Locale,java.lang.String,java.lang.Object[])>($r17, "BODY.PEEK[]<0.%d>", $r18);
+
+        interfaceinvoke r6.<java.util.Set: boolean add(java.lang.Object)>($r13);
+
+     label07:
+        $r14 = <com.fsck.k9.mail.FetchProfile$Item: com.fsck.k9.mail.FetchProfile$Item BODY>;
+
+        $z0 = virtualinvoke $r2.<com.fsck.k9.mail.FetchProfile: boolean contains(java.lang.Object)>($r14);
+
+        if $z0 == 0 goto label08;
+
+        interfaceinvoke r6.<java.util.Set: boolean add(java.lang.Object)>("BODY.PEEK[]");
+
+     label08:
+        $i0 = interfaceinvoke r6.<java.util.Set: int size()>();
+
+        $r20 = newarray (java.lang.String)[$i0];
+
+        $r18 = interfaceinvoke r6.<java.util.Set: java.lang.Object[] toArray(java.lang.Object[])>($r20);
+
+        $r13 = staticinvoke <com.fsck.k9.mail.store.imap.ImapFolder: java.lang.String combine(java.lang.Object[],char)>($r18, 32);
+
+        $i0 = 0;
+
+     label09:
+        $i1 = interfaceinvoke r1.<java.util.List: int size()>();
+
+        if $i0 >= $i1 goto label71;
+
+        $i1 = $i0 + 100;
+
+        $i2 = interfaceinvoke r1.<java.util.List: int size()>();
+
+        $i1 = staticinvoke <java.lang.Math: int min(int,int)>($i1, $i2);
+
+        $r21 = interfaceinvoke r9.<java.util.List: java.util.List subList(int,int)>($i0, $i1);
+
+     label10:
+        $i1 = interfaceinvoke $r21.<java.util.List: int size()>();
+
+     label11:
+        $r20 = newarray (java.lang.String)[$i1];
+
+     label12:
+        $r18 = interfaceinvoke $r21.<java.util.List: java.lang.Object[] toArray(java.lang.Object[])>($r20);
+
+        $r22 = staticinvoke <com.fsck.k9.mail.store.imap.ImapFolder: java.lang.String combine(java.lang.Object[],char)>($r18, 44);
+
+     label13:
+        $r18 = newarray (java.lang.Object)[2];
+
+        $r18[0] = $r22;
+
+        $r18[1] = $r13;
+
+     label14:
+        $r22 = staticinvoke <java.lang.String: java.lang.String format(java.lang.String,java.lang.Object[])>("UID FETCH %s (%s)", $r18);
+
+     label15:
+        $r23 = r0.<com.fsck.k9.mail.store.imap.ImapFolder: com.fsck.k9.mail.store.imap.ImapConnection connection>;
+
+     label16:
+        virtualinvoke $r23.<com.fsck.k9.mail.store.imap.ImapConnection: java.lang.String sendCommand(java.lang.String,boolean)>($r22, 0);
+
+     label17:
+        $i1 = 0;
+
+        r24 = null;
+
+        $r14 = <com.fsck.k9.mail.FetchProfile$Item: com.fsck.k9.mail.FetchProfile$Item BODY>;
+
+     label18:
+        $z0 = virtualinvoke $r2.<com.fsck.k9.mail.FetchProfile: boolean contains(java.lang.Object)>($r14);
+
+     label19:
+        if $z0 != 0 goto label22;
+
+        $r14 = <com.fsck.k9.mail.FetchProfile$Item: com.fsck.k9.mail.FetchProfile$Item BODY_SANE>;
+
+     label20:
+        $z0 = virtualinvoke $r2.<com.fsck.k9.mail.FetchProfile: boolean contains(java.lang.Object)>($r14);
+
+     label21:
+        if $z0 == 0 goto label69;
+
+     label22:
+        r24 = new com.fsck.k9.mail.store.imap.FetchBodyCallback;
+
+     label23:
+        specialinvoke r24.<com.fsck.k9.mail.store.imap.FetchBodyCallback: void <init>(java.util.Map)>(r8);
+
+     label24:
+        $i2 = 0;
+
+     label25:
+        $r23 = r0.<com.fsck.k9.mail.store.imap.ImapFolder: com.fsck.k9.mail.store.imap.ImapConnection connection>;
+
+     label26:
+        $r25 = virtualinvoke $r23.<com.fsck.k9.mail.store.imap.ImapConnection: com.fsck.k9.mail.store.imap.ImapResponse readResponse(com.fsck.k9.mail.store.imap.ImapResponseCallback)>(r24);
+
+        $r22 = virtualinvoke $r25.<com.fsck.k9.mail.store.imap.ImapResponse: java.lang.String getTag()>();
+
+     label27:
+        if $r22 != null goto label67;
+
+     label28:
+        $r11 = virtualinvoke $r25.<com.fsck.k9.mail.store.imap.ImapResponse: java.lang.Object get(int)>(1);
+
+        $z0 = staticinvoke <com.fsck.k9.mail.store.imap.ImapResponseParser: boolean equalsIgnoreCase(java.lang.Object,java.lang.String)>($r11, "FETCH");
+
+     label29:
+        if $z0 == 0 goto label67;
+
+     label30:
+        $r11 = virtualinvoke $r25.<com.fsck.k9.mail.store.imap.ImapResponse: java.lang.Object getKeyedValue(java.lang.String)>("FETCH");
+
+     label31:
+        r26 = (com.fsck.k9.mail.store.imap.ImapList) $r11;
+
+     label32:
+        $r22 = virtualinvoke r26.<com.fsck.k9.mail.store.imap.ImapList: java.lang.String getKeyedString(java.lang.String)>("UID");
+
+        $l3 = virtualinvoke $r25.<com.fsck.k9.mail.store.imap.ImapResponse: long getLong(int)>(0);
+
+     label33:
+        if $r22 == null goto label37;
+
+     label34:
+        $r27 = r0.<com.fsck.k9.mail.store.imap.ImapFolder: java.util.Map msgSeqUidMap>;
+
+        $r28 = staticinvoke <java.lang.Long: java.lang.Long valueOf(long)>($l3);
+
+        interfaceinvoke $r27.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r28, $r22);
+
+        $z0 = staticinvoke <com.fsck.k9.mail.K9MailLib: boolean isDebug()>();
+
+     label35:
+        if $z0 == 0 goto label37;
+
+     label36:
+        $r18 = newarray (java.lang.Object)[2];
+
+        $r18[0] = $r22;
+
+        $r28 = staticinvoke <java.lang.Long: java.lang.Long valueOf(long)>($l3);
+
+        $r18[1] = $r28;
+
+        staticinvoke <timber.log.Timber: void v(java.lang.String,java.lang.Object[])>("Stored uid \'%s\' for msgSeq %d into map", $r18);
+
+     label37:
+        $r11 = virtualinvoke r8.<java.util.HashMap: java.lang.Object get(java.lang.Object)>($r22);
+
+     label38:
+        r12 = (com.fsck.k9.mail.Message) $r11;
+
+        if r12 != null goto label55;
+
+     label39:
+        $z0 = staticinvoke <com.fsck.k9.mail.K9MailLib: boolean isDebug()>();
+
+     label40:
+        if $z0 == 0 goto label44;
+
+        $r18 = newarray (java.lang.Object)[2];
+
+        $r18[0] = $r22;
+
+     label41:
+        $r22 = virtualinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: java.lang.String getLogId()>();
+
+     label42:
+        $r18[1] = $r22;
+
+     label43:
+        staticinvoke <timber.log.Timber: void d(java.lang.String,java.lang.Object[])>("Do not have message in messageMap for UID %s for %s", $r18);
+
+     label44:
+        virtualinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: void handleUntaggedResponse(com.fsck.k9.mail.store.imap.ImapResponse)>($r25);
+
+     label45:
+        $i1 = $i2;
+
+     label46:
+        $r22 = virtualinvoke $r25.<com.fsck.k9.mail.store.imap.ImapResponse: java.lang.String getTag()>();
+
+     label47:
+        if $r22 == null goto label69;
+
+        $i0 = $i0 + 100;
+
+        goto label09;
+
+     label48:
+        interfaceinvoke r6.<java.util.Set: boolean add(java.lang.Object)>("BODY.PEEK[]");
+
+        goto label07;
+
+     label49:
+        r5 := @caughtexception;
+
+        $r18 = newarray (java.lang.Object)[2];
+
+        $r18[0] = $r22;
+
+     label50:
+        $r28 = staticinvoke <java.lang.Long: java.lang.Long valueOf(long)>($l3);
+
+     label51:
+        $r18[1] = $r28;
+
+     label52:
+        staticinvoke <timber.log.Timber: void e(java.lang.String,java.lang.Object[])>("Unable to store uid \'%s\' for msgSeq %d", $r18);
+
+     label53:
+        goto label37;
+
+     label54:
+        r7 := @caughtexception;
+
+        $r23 = r0.<com.fsck.k9.mail.store.imap.ImapFolder: com.fsck.k9.mail.store.imap.ImapConnection connection>;
+
+        $r29 = specialinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: com.fsck.k9.mail.MessagingException ioExceptionHandler(com.fsck.k9.mail.store.imap.ImapConnection,java.io.IOException)>($r23, r7);
+
+        throw $r29;
+
+     label55:
+        if r3 == null goto label70;
+
+        $i1 = $i2 + 1;
+
+     label56:
+        $i4 = virtualinvoke r8.<java.util.HashMap: int size()>();
+
+        interfaceinvoke r3.<com.fsck.k9.mail.MessageRetrievalListener: void messageStarted(java.lang.String,int,int)>($r22, $i2, $i4);
+
+     label57:
+        $r30 = (com.fsck.k9.mail.store.imap.ImapMessage) r12;
+
+     label58:
+        $r11 = specialinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: java.lang.Object handleFetchResponse(com.fsck.k9.mail.store.imap.ImapMessage,com.fsck.k9.mail.store.imap.ImapList)>($r30, r26);
+
+     label59:
+        if $r11 == null goto label61;
+
+        $z0 = $r11 instanceof java.lang.String;
+
+        if $z0 == 0 goto label64;
+
+        $r22 = (java.lang.String) $r11;
+
+        r4 = new java.io.ByteArrayInputStream;
+
+     label60:
+        $r31 = virtualinvoke $r22.<java.lang.String: byte[] getBytes()>();
+
+        specialinvoke r4.<java.io.ByteArrayInputStream: void <init>(byte[])>($r31);
+
+        virtualinvoke $r30.<com.fsck.k9.mail.store.imap.ImapMessage: void parse(java.io.InputStream)>(r4);
+
+     label61:
+        if r3 == null goto label46;
+
+     label62:
+        $i2 = virtualinvoke r8.<java.util.HashMap: int size()>();
+
+        interfaceinvoke r3.<com.fsck.k9.mail.MessageRetrievalListener: void messageFinished(com.fsck.k9.mail.Message,int,int)>($r30, $i1, $i2);
+
+     label63:
+        goto label46;
+
+     label64:
+        $z0 = $r11 instanceof java.lang.Integer;
+
+        if $z0 != 0 goto label61;
+
+        $r29 = new com.fsck.k9.mail.MessagingException;
+
+     label65:
+        specialinvoke $r29.<com.fsck.k9.mail.MessagingException: void <init>(java.lang.String)>("Got FETCH response with bogus parameters");
+
+     label66:
+        throw $r29;
+
+     label67:
+        virtualinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: void handleUntaggedResponse(com.fsck.k9.mail.store.imap.ImapResponse)>($r25);
+
+     label68:
+        $i1 = $i2;
+
+        goto label46;
+
+     label69:
+        $i2 = $i1;
+
+        goto label25;
+
+     label70:
+        $i1 = $i2;
+
+        goto label57;
+
+     label71:
+        return;
+
+        catch java.io.IOException from label10 to label11 with label54;
+        catch java.io.IOException from label12 to label13 with label54;
+        catch java.io.IOException from label14 to label15 with label54;
+        catch java.io.IOException from label16 to label17 with label54;
+        catch java.io.IOException from label18 to label19 with label54;
+        catch java.io.IOException from label20 to label21 with label54;
+        catch java.io.IOException from label23 to label24 with label54;
+        catch java.io.IOException from label26 to label27 with label54;
+        catch java.io.IOException from label28 to label29 with label54;
+        catch java.io.IOException from label30 to label31 with label54;
+        catch java.io.IOException from label32 to label33 with label54;
+        catch java.lang.Exception from label34 to label35 with label49;
+        catch java.lang.Exception from label36 to label37 with label49;
+        catch java.io.IOException from label37 to label38 with label54;
+        catch java.io.IOException from label39 to label40 with label54;
+        catch java.io.IOException from label41 to label42 with label54;
+        catch java.io.IOException from label43 to label45 with label54;
+        catch java.io.IOException from label46 to label47 with label54;
+        catch java.io.IOException from label50 to label51 with label54;
+        catch java.io.IOException from label52 to label53 with label54;
+        catch java.io.IOException from label56 to label57 with label54;
+        catch java.io.IOException from label58 to label59 with label54;
+        catch java.io.IOException from label60 to label61 with label54;
+        catch java.io.IOException from label62 to label63 with label54;
+        catch java.io.IOException from label65 to label66 with label54;
+        catch java.io.IOException from label67 to label68 with label54;
+    }
+    public void fetchPart(com.fsck.k9.mail.Message, com.fsck.k9.mail.Part, com.fsck.k9.mail.MessageRetrievalListener, com.fsck.k9.mail.BodyFactory) throws com.fsck.k9.mail.MessagingException
+    {
+        com.fsck.k9.mail.store.imap.ImapFolder r0;
+        com.fsck.k9.mail.Message $r1;
+        com.fsck.k9.mail.Part $r2;
+        com.fsck.k9.mail.MessageRetrievalListener r3;
+        com.fsck.k9.mail.BodyFactory $r4;
+        java.io.ByteArrayInputStream r5;
+        com.fsck.k9.mail.store.imap.FetchPartCallback r6;
+        java.lang.String r7, r8;
+        java.io.IOException r9;
+        boolean $z0;
+        com.fsck.k9.mail.store.imap.ImapStore $r10;
+        com.fsck.k9.mail.store.StoreConfig $r11;
+        int $i0, i1;
+        java.util.Locale $r12;
+        java.lang.Object[] $r13;
+        java.lang.Integer $r14;
+        com.fsck.k9.mail.store.imap.ImapConnection $r15;
+        com.fsck.k9.mail.store.imap.ImapResponse $r16;
+        java.lang.Object $r17;
+        com.fsck.k9.mail.store.imap.ImapList r18;
+        com.fsck.k9.mail.store.imap.ImapMessage $r19;
+        com.fsck.k9.mail.Body r20;
+        com.fsck.k9.mail.MessagingException $r21;
+        byte[] $r22;
+        java.lang.String[] $r23;
+
+        r0 := @this: com.fsck.k9.mail.store.imap.ImapFolder;
+
+        $r1 := @parameter0: com.fsck.k9.mail.Message;
+
+        $r2 := @parameter1: com.fsck.k9.mail.Part;
+
+        r3 := @parameter2: com.fsck.k9.mail.MessageRetrievalListener;
+
+        $r4 := @parameter3: com.fsck.k9.mail.BodyFactory;
+
+        specialinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: void checkOpen()>();
+
+        r7 = interfaceinvoke $r2.<com.fsck.k9.mail.Part: java.lang.String getServerExtra()>();
+
+        r8 = "TEXT";
+
+        $z0 = virtualinvoke r8.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>(r7);
+
+        if $z0 == 0 goto label28;
+
+        $r10 = r0.<com.fsck.k9.mail.store.imap.ImapFolder: com.fsck.k9.mail.store.imap.ImapStore store>;
+
+        $r11 = virtualinvoke $r10.<com.fsck.k9.mail.store.imap.ImapStore: com.fsck.k9.mail.store.StoreConfig getStoreConfig()>();
+
+        $i0 = interfaceinvoke $r11.<com.fsck.k9.mail.store.StoreConfig: int getMaximumAutoDownloadMessageSize()>();
+
+        $r12 = <java.util.Locale: java.util.Locale US>;
+
+        $r13 = newarray (java.lang.Object)[1];
+
+        $r14 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        $r13[0] = $r14;
+
+        r7 = staticinvoke <java.lang.String: java.lang.String format(java.util.Locale,java.lang.String,java.lang.Object[])>($r12, "BODY.PEEK[TEXT]<0.%d>", $r13);
+
+     label01:
+        $r13 = newarray (java.lang.Object)[2];
+
+     label02:
+        r8 = virtualinvoke $r1.<com.fsck.k9.mail.Message: java.lang.String getUid()>();
+
+     label03:
+        $r13[0] = r8;
+
+        $r13[1] = r7;
+
+     label04:
+        r7 = staticinvoke <java.lang.String: java.lang.String format(java.lang.String,java.lang.Object[])>("UID FETCH %s (UID %s)", $r13);
+
+     label05:
+        $r15 = r0.<com.fsck.k9.mail.store.imap.ImapFolder: com.fsck.k9.mail.store.imap.ImapConnection connection>;
+
+     label06:
+        virtualinvoke $r15.<com.fsck.k9.mail.store.imap.ImapConnection: java.lang.String sendCommand(java.lang.String,boolean)>(r7, 0);
+
+     label07:
+        r6 = new com.fsck.k9.mail.store.imap.FetchPartCallback;
+
+     label08:
+        specialinvoke r6.<com.fsck.k9.mail.store.imap.FetchPartCallback: void <init>(com.fsck.k9.mail.Part,com.fsck.k9.mail.BodyFactory)>($r2, $r4);
+
+     label09:
+        $i0 = 0;
+
+     label10:
+        $r15 = r0.<com.fsck.k9.mail.store.imap.ImapFolder: com.fsck.k9.mail.store.imap.ImapConnection connection>;
+
+     label11:
+        $r16 = virtualinvoke $r15.<com.fsck.k9.mail.store.imap.ImapConnection: com.fsck.k9.mail.store.imap.ImapResponse readResponse(com.fsck.k9.mail.store.imap.ImapResponseCallback)>(r6);
+
+        r7 = virtualinvoke $r16.<com.fsck.k9.mail.store.imap.ImapResponse: java.lang.String getTag()>();
+
+     label12:
+        if r7 != null goto label49;
+
+     label13:
+        $r17 = virtualinvoke $r16.<com.fsck.k9.mail.store.imap.ImapResponse: java.lang.Object get(int)>(1);
+
+        $z0 = staticinvoke <com.fsck.k9.mail.store.imap.ImapResponseParser: boolean equalsIgnoreCase(java.lang.Object,java.lang.String)>($r17, "FETCH");
+
+     label14:
+        if $z0 == 0 goto label49;
+
+     label15:
+        $r17 = virtualinvoke $r16.<com.fsck.k9.mail.store.imap.ImapResponse: java.lang.Object getKeyedValue(java.lang.String)>("FETCH");
+
+     label16:
+        r18 = (com.fsck.k9.mail.store.imap.ImapList) $r17;
+
+     label17:
+        r7 = virtualinvoke r18.<com.fsck.k9.mail.store.imap.ImapList: java.lang.String getKeyedString(java.lang.String)>("UID");
+
+        r8 = virtualinvoke $r1.<com.fsck.k9.mail.Message: java.lang.String getUid()>();
+
+        $z0 = virtualinvoke r8.<java.lang.String: boolean equals(java.lang.Object)>(r7);
+
+     label18:
+        if $z0 != 0 goto label29;
+
+     label19:
+        $z0 = staticinvoke <com.fsck.k9.mail.K9MailLib: boolean isDebug()>();
+
+     label20:
+        if $z0 == 0 goto label24;
+
+        $r13 = newarray (java.lang.Object)[2];
+
+        $r13[0] = r7;
+
+     label21:
+        r7 = virtualinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: java.lang.String getLogId()>();
+
+     label22:
+        $r13[1] = r7;
+
+     label23:
+        staticinvoke <timber.log.Timber: void d(java.lang.String,java.lang.Object[])>("Did not ask for UID %s for %s", $r13);
+
+     label24:
+        virtualinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: void handleUntaggedResponse(com.fsck.k9.mail.store.imap.ImapResponse)>($r16);
+
+     label25:
+        i1 = $i0;
+
+     label26:
+        r7 = virtualinvoke $r16.<com.fsck.k9.mail.store.imap.ImapResponse: java.lang.String getTag()>();
+
+     label27:
+        if r7 == null goto label51;
+
+        return;
+
+     label28:
+        $r13 = newarray (java.lang.Object)[1];
+
+        $r13[0] = r7;
+
+        r7 = staticinvoke <java.lang.String: java.lang.String format(java.lang.String,java.lang.Object[])>("BODY.PEEK[%s]", $r13);
+
+        goto label01;
+
+     label29:
+        if r3 == null goto label52;
+
+        i1 = $i0 + 1;
+
+     label30:
+        interfaceinvoke r3.<com.fsck.k9.mail.MessageRetrievalListener: void messageStarted(java.lang.String,int,int)>(r7, $i0, 1);
+
+     label31:
+        $r19 = (com.fsck.k9.mail.store.imap.ImapMessage) $r1;
+
+     label32:
+        $r17 = specialinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: java.lang.Object handleFetchResponse(com.fsck.k9.mail.store.imap.ImapMessage,com.fsck.k9.mail.store.imap.ImapList)>($r19, r18);
+
+     label33:
+        if $r17 == null goto label35;
+
+        $z0 = $r17 instanceof com.fsck.k9.mail.Body;
+
+        if $z0 == 0 goto label39;
+
+        r20 = (com.fsck.k9.mail.Body) $r17;
+
+     label34:
+        staticinvoke <com.fsck.k9.mail.internet.MimeMessageHelper: void setBody(com.fsck.k9.mail.Part,com.fsck.k9.mail.Body)>($r2, r20);
+
+     label35:
+        if r3 == null goto label26;
+
+     label36:
+        interfaceinvoke r3.<com.fsck.k9.mail.MessageRetrievalListener: void messageFinished(com.fsck.k9.mail.Message,int,int)>($r1, i1, 1);
+
+     label37:
+        goto label26;
+
+     label38:
+        r9 := @caughtexception;
+
+        $r15 = r0.<com.fsck.k9.mail.store.imap.ImapFolder: com.fsck.k9.mail.store.imap.ImapConnection connection>;
+
+        $r21 = specialinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: com.fsck.k9.mail.MessagingException ioExceptionHandler(com.fsck.k9.mail.store.imap.ImapConnection,java.io.IOException)>($r15, r9);
+
+        throw $r21;
+
+     label39:
+        $z0 = $r17 instanceof java.lang.String;
+
+        if $z0 == 0 goto label46;
+
+        r7 = (java.lang.String) $r17;
+
+        r5 = new java.io.ByteArrayInputStream;
+
+     label40:
+        $r22 = virtualinvoke r7.<java.lang.String: byte[] getBytes()>();
+
+        specialinvoke r5.<java.io.ByteArrayInputStream: void <init>(byte[])>($r22);
+
+        $r23 = interfaceinvoke $r2.<com.fsck.k9.mail.Part: java.lang.String[] getHeader(java.lang.String)>("Content-Transfer-Encoding");
+
+     label41:
+        r7 = $r23[0];
+
+     label42:
+        $r23 = interfaceinvoke $r2.<com.fsck.k9.mail.Part: java.lang.String[] getHeader(java.lang.String)>("Content-Type");
+
+     label43:
+        r8 = $r23[0];
+
+     label44:
+        r20 = interfaceinvoke $r4.<com.fsck.k9.mail.BodyFactory: com.fsck.k9.mail.Body createBody(java.lang.String,java.lang.String,java.io.InputStream)>(r7, r8, r5);
+
+        staticinvoke <com.fsck.k9.mail.internet.MimeMessageHelper: void setBody(com.fsck.k9.mail.Part,com.fsck.k9.mail.Body)>($r2, r20);
+
+     label45:
+        goto label35;
+
+     label46:
+        $r21 = new com.fsck.k9.mail.MessagingException;
+
+     label47:
+        specialinvoke $r21.<com.fsck.k9.mail.MessagingException: void <init>(java.lang.String)>("Got FETCH response with bogus parameters");
+
+     label48:
+        throw $r21;
+
+     label49:
+        virtualinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: void handleUntaggedResponse(com.fsck.k9.mail.store.imap.ImapResponse)>($r16);
+
+     label50:
+        i1 = $i0;
+
+        goto label26;
+
+     label51:
+        $i0 = i1;
+
+        goto label10;
+
+     label52:
+        i1 = $i0;
+
+        goto label31;
+
+        catch java.io.IOException from label02 to label03 with label38;
+        catch java.io.IOException from label04 to label05 with label38;
+        catch java.io.IOException from label06 to label07 with label38;
+        catch java.io.IOException from label08 to label09 with label38;
+        catch java.io.IOException from label11 to label12 with label38;
+        catch java.io.IOException from label13 to label14 with label38;
+        catch java.io.IOException from label15 to label16 with label38;
+        catch java.io.IOException from label17 to label18 with label38;
+        catch java.io.IOException from label19 to label20 with label38;
+        catch java.io.IOException from label21 to label22 with label38;
+        catch java.io.IOException from label23 to label25 with label38;
+        catch java.io.IOException from label26 to label27 with label38;
+        catch java.io.IOException from label30 to label31 with label38;
+        catch java.io.IOException from label32 to label33 with label38;
+        catch java.io.IOException from label34 to label35 with label38;
+        catch java.io.IOException from label36 to label37 with label38;
+        catch java.io.IOException from label40 to label41 with label38;
+        catch java.io.IOException from label42 to label43 with label38;
+        catch java.io.IOException from label44 to label45 with label38;
+        catch java.io.IOException from label47 to label48 with label38;
+        catch java.io.IOException from label49 to label50 with label38;
+    }
+    public int getFlaggedMessageCount() throws com.fsck.k9.mail.MessagingException
+    {
+        com.fsck.k9.mail.store.imap.ImapFolder r0;
+        int $i0;
+
+        r0 := @this: com.fsck.k9.mail.store.imap.ImapFolder;
+
+        $i0 = specialinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: int getRemoteMessageCount(java.lang.String)>("FLAGGED NOT DELETED");
+
+        return $i0;
+    }
+    protected long getHighestUid() throws com.fsck.k9.mail.MessagingException
+    {
+        com.fsck.k9.mail.store.imap.ImapFolder r0;
+        com.fsck.k9.mail.store.imap.NegativeImapResponseException r1;
+        java.io.IOException r2;
+        java.util.List $r3;
+        com.fsck.k9.mail.store.imap.SearchResponse $r4;
+        long $l0;
+        com.fsck.k9.mail.store.imap.ImapConnection $r5;
+        com.fsck.k9.mail.MessagingException $r6;
+
+        r0 := @this: com.fsck.k9.mail.store.imap.ImapFolder;
+
+     label1:
+        $r3 = specialinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: java.util.List executeSimpleCommand(java.lang.String)>("UID SEARCH *:*");
+
+        $r4 = staticinvoke <com.fsck.k9.mail.store.imap.SearchResponse: com.fsck.k9.mail.store.imap.SearchResponse parse(java.util.List)>($r3);
+
+        $l0 = specialinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: long extractHighestUid(com.fsck.k9.mail.store.imap.SearchResponse)>($r4);
+
+     label2:
+        return $l0;
+
+     label3:
+        r1 := @caughtexception;
+
+        return -1L;
+
+     label4:
+        r2 := @caughtexception;
+
+        $r5 = r0.<com.fsck.k9.mail.store.imap.ImapFolder: com.fsck.k9.mail.store.imap.ImapConnection connection>;
+
+        $r6 = specialinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: com.fsck.k9.mail.MessagingException ioExceptionHandler(com.fsck.k9.mail.store.imap.ImapConnection,java.io.IOException)>($r5, r2);
+
+        throw $r6;
+
+        catch com.fsck.k9.mail.store.imap.NegativeImapResponseException from label1 to label2 with label3;
+        catch java.io.IOException from label1 to label2 with label4;
+    }
+    protected java.lang.String getLogId()
+    {
+        com.fsck.k9.mail.store.imap.ImapFolder r0;
+        java.lang.StringBuilder $r1;
+        com.fsck.k9.mail.store.imap.ImapStore $r2;
+        com.fsck.k9.mail.store.StoreConfig $r3;
+        java.lang.String $r4;
+        java.lang.Thread $r5;
+        com.fsck.k9.mail.store.imap.ImapConnection $r6;
+
+        r0 := @this: com.fsck.k9.mail.store.imap.ImapFolder;
+
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = r0.<com.fsck.k9.mail.store.imap.ImapFolder: com.fsck.k9.mail.store.imap.ImapStore store>;
+
+        $r3 = virtualinvoke $r2.<com.fsck.k9.mail.store.imap.ImapStore: com.fsck.k9.mail.store.StoreConfig getStoreConfig()>();
+
+        $r4 = virtualinvoke $r3.<java.lang.Object: java.lang.String toString()>();
+
+        $r1 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r1 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(":");
+
+        $r4 = virtualinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: java.lang.String getName()>();
+
+        $r1 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r1 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("/");
+
+        $r5 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        $r4 = virtualinvoke $r5.<java.lang.Thread: java.lang.String getName()>();
+
+        $r1 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r4 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r6 = r0.<com.fsck.k9.mail.store.imap.ImapFolder: com.fsck.k9.mail.store.imap.ImapConnection connection>;
+
+        if $r6 == null goto label1;
+
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r1 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r1 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("/");
+
+        $r6 = r0.<com.fsck.k9.mail.store.imap.ImapFolder: com.fsck.k9.mail.store.imap.ImapConnection connection>;
+
+        $r4 = virtualinvoke $r6.<com.fsck.k9.mail.store.imap.ImapConnection: java.lang.String getLogId()>();
+
+        $r1 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r4 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label1:
+        return $r4;
+    }
+    public volatile com.fsck.k9.mail.Message getMessage(java.lang.String) throws com.fsck.k9.mail.MessagingException
+    {
+        com.fsck.k9.mail.store.imap.ImapFolder r0;
+        java.lang.String $r1;
+        com.fsck.k9.mail.store.imap.ImapMessage $r2;
+
+        r0 := @this: com.fsck.k9.mail.store.imap.ImapFolder;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = virtualinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: com.fsck.k9.mail.store.imap.ImapMessage getMessage(java.lang.String)>($r1);
+
+        return $r2;
+    }
+    public com.fsck.k9.mail.store.imap.ImapMessage getMessage(java.lang.String) throws com.fsck.k9.mail.MessagingException
+    {
+        com.fsck.k9.mail.store.imap.ImapFolder r0;
+        java.lang.String $r1;
+        com.fsck.k9.mail.store.imap.ImapMessage $r2;
+
+        r0 := @this: com.fsck.k9.mail.store.imap.ImapFolder;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = new com.fsck.k9.mail.store.imap.ImapMessage;
+
+        specialinvoke $r2.<com.fsck.k9.mail.store.imap.ImapMessage: void <init>(java.lang.String,com.fsck.k9.mail.Folder)>($r1, r0);
+
+        return $r2;
+    }
+    public int getMessageCount()
+    {
+        com.fsck.k9.mail.store.imap.ImapFolder r0;
+        int i0;
+
+        r0 := @this: com.fsck.k9.mail.store.imap.ImapFolder;
+
+        i0 = r0.<com.fsck.k9.mail.store.imap.ImapFolder: int messageCount>;
+
+        return i0;
+    }
+    public java.util.List getMessages(int, int, java.util.Date, com.fsck.k9.mail.MessageRetrievalListener) throws com.fsck.k9.mail.MessagingException
+    {
+        com.fsck.k9.mail.store.imap.ImapFolder r0;
+        int $i0, $i1;
+        java.util.Date $r1;
+        com.fsck.k9.mail.MessageRetrievalListener r2;
+        java.util.List $r3;
+
+        r0 := @this: com.fsck.k9.mail.store.imap.ImapFolder;
+
+        $i0 := @parameter0: int;
+
+        $i1 := @parameter1: int;
+
+        $r1 := @parameter2: java.util.Date;
+
+        r2 := @parameter3: com.fsck.k9.mail.MessageRetrievalListener;
+
+        $r3 = virtualinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: java.util.List getMessages(int,int,java.util.Date,boolean,com.fsck.k9.mail.MessageRetrievalListener)>($i0, $i1, $r1, 0, r2);
+
+        return $r3;
+    }
+    protected java.util.List getMessages(int, int, java.util.Date, boolean, com.fsck.k9.mail.MessageRetrievalListener) throws com.fsck.k9.mail.MessagingException
+    {
+        com.fsck.k9.mail.store.imap.ImapFolder r0;
+        int $i0, $i1;
+        java.util.Date $r1;
+        boolean $z0;
+        com.fsck.k9.mail.MessageRetrievalListener r2;
+        com.fsck.k9.mail.store.imap.ImapFolder$2 r3;
+        com.fsck.k9.mail.MessagingException $r4;
+        java.util.Locale $r5;
+        java.lang.Object[] $r6;
+        java.lang.Integer $r7;
+        java.lang.String $r8;
+        java.util.List $r9;
+
+        r0 := @this: com.fsck.k9.mail.store.imap.ImapFolder;
+
+        $i0 := @parameter0: int;
+
+        $i1 := @parameter1: int;
+
+        $r1 := @parameter2: java.util.Date;
+
+        $z0 := @parameter3: boolean;
+
+        r2 := @parameter4: com.fsck.k9.mail.MessageRetrievalListener;
+
+        if $i0 < 1 goto label1;
+
+        if $i1 < 1 goto label1;
+
+        if $i1 >= $i0 goto label2;
+
+     label1:
+        $r4 = new com.fsck.k9.mail.MessagingException;
+
+        $r5 = <java.util.Locale: java.util.Locale US>;
+
+        $r6 = newarray (java.lang.Object)[2];
+
+        $r7 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        $r6[0] = $r7;
+
+        $r7 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i1);
+
+        $r6[1] = $r7;
+
+        $r8 = staticinvoke <java.lang.String: java.lang.String format(java.util.Locale,java.lang.String,java.lang.Object[])>($r5, "Invalid message set %d %d", $r6);
+
+        specialinvoke $r4.<com.fsck.k9.mail.MessagingException: void <init>(java.lang.String)>($r8);
+
+        throw $r4;
+
+     label2:
+        $r8 = specialinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: java.lang.String getDateSearchString(java.util.Date)>($r1);
+
+        r3 = new com.fsck.k9.mail.store.imap.ImapFolder$2;
+
+        specialinvoke r3.<com.fsck.k9.mail.store.imap.ImapFolder$2: void <init>(com.fsck.k9.mail.store.imap.ImapFolder,int,int,java.lang.String,boolean)>(r0, $i0, $i1, $r8, $z0);
+
+        $r9 = specialinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: java.util.List search(com.fsck.k9.mail.store.imap.ImapSearcher,com.fsck.k9.mail.MessageRetrievalListener)>(r3, r2);
+
+        return $r9;
+    }
+    protected java.util.List getMessages(java.util.List, boolean, com.fsck.k9.mail.MessageRetrievalListener) throws com.fsck.k9.mail.MessagingException
+    {
+        com.fsck.k9.mail.store.imap.ImapFolder r0;
+        java.util.List r1;
+        boolean $z0;
+        com.fsck.k9.mail.MessageRetrievalListener r2;
+        com.fsck.k9.mail.store.imap.ImapFolder$3 r3;
+
+        r0 := @this: com.fsck.k9.mail.store.imap.ImapFolder;
+
+        r1 := @parameter0: java.util.List;
+
+        $z0 := @parameter1: boolean;
+
+        r2 := @parameter2: com.fsck.k9.mail.MessageRetrievalListener;
+
+        r3 = new com.fsck.k9.mail.store.imap.ImapFolder$3;
+
+        specialinvoke r3.<com.fsck.k9.mail.store.imap.ImapFolder$3: void <init>(com.fsck.k9.mail.store.imap.ImapFolder,java.util.List,boolean)>(r0, r1, $z0);
+
+        r1 = specialinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: java.util.List search(com.fsck.k9.mail.store.imap.ImapSearcher,com.fsck.k9.mail.MessageRetrievalListener)>(r3, r2);
+
+        return r1;
+    }
+    protected java.util.List getMessagesFromUids(java.util.List) throws com.fsck.k9.mail.MessagingException
+    {
+        com.fsck.k9.mail.store.imap.ImapFolder r0;
+        java.util.List r1;
+        com.fsck.k9.mail.store.imap.ImapFolder$4 r2;
+
+        r0 := @this: com.fsck.k9.mail.store.imap.ImapFolder;
+
+        r1 := @parameter0: java.util.List;
+
+        r2 = new com.fsck.k9.mail.store.imap.ImapFolder$4;
+
+        specialinvoke r2.<com.fsck.k9.mail.store.imap.ImapFolder$4: void <init>(com.fsck.k9.mail.store.imap.ImapFolder,java.util.List)>(r0, r1);
+
+        r1 = specialinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: java.util.List search(com.fsck.k9.mail.store.imap.ImapSearcher,com.fsck.k9.mail.MessageRetrievalListener)>(r2, null);
+
+        return r1;
+    }
+    public int getMode()
+    {
+        com.fsck.k9.mail.store.imap.ImapFolder r0;
+        int i0;
+
+        r0 := @this: com.fsck.k9.mail.store.imap.ImapFolder;
+
+        i0 = r0.<com.fsck.k9.mail.store.imap.ImapFolder: int mode>;
+
+        return i0;
+    }
+    public java.lang.String getName()
+    {
+        com.fsck.k9.mail.store.imap.ImapFolder r0;
+        java.lang.String r1;
+
+        r0 := @this: com.fsck.k9.mail.store.imap.ImapFolder;
+
+        r1 = r0.<com.fsck.k9.mail.store.imap.ImapFolder: java.lang.String name>;
+
+        return r1;
+    }
+    public java.lang.String getNewPushState(java.lang.String, com.fsck.k9.mail.Message)
+    {
+        com.fsck.k9.mail.store.imap.ImapFolder r0;
+        java.lang.String $r1, $r5;
+        com.fsck.k9.mail.Message $r2;
+        java.lang.Exception r3;
+        com.fsck.k9.mail.store.imap.ImapPushState r4;
+        long l0, $l1;
+        byte $b2;
+        java.lang.Object[] $r6;
+
+        r0 := @this: com.fsck.k9.mail.store.imap.ImapFolder;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: com.fsck.k9.mail.Message;
+
+     label1:
+        $r5 = virtualinvoke $r2.<com.fsck.k9.mail.Message: java.lang.String getUid()>();
+
+        l0 = staticinvoke <java.lang.Long: long parseLong(java.lang.String)>($r5);
+
+        r4 = staticinvoke <com.fsck.k9.mail.store.imap.ImapPushState: com.fsck.k9.mail.store.imap.ImapPushState parse(java.lang.String)>($r1);
+
+        $l1 = r4.<com.fsck.k9.mail.store.imap.ImapPushState: long uidNext>;
+
+     label2:
+        $b2 = l0 cmp $l1;
+
+        if $b2 < 0 goto label6;
+
+        l0 = l0 + 1L;
+
+        r4 = new com.fsck.k9.mail.store.imap.ImapPushState;
+
+     label3:
+        specialinvoke r4.<com.fsck.k9.mail.store.imap.ImapPushState: void <init>(long)>(l0);
+
+        $r1 = virtualinvoke r4.<com.fsck.k9.mail.store.imap.ImapPushState: java.lang.String toString()>();
+
+     label4:
+        return $r1;
+
+     label5:
+        r3 := @caughtexception;
+
+        $r6 = newarray (java.lang.Object)[1];
+
+        $r1 = virtualinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: java.lang.String getLogId()>();
+
+        $r6[0] = $r1;
+
+        staticinvoke <timber.log.Timber: void e(java.lang.Throwable,java.lang.String,java.lang.Object[])>(r3, "Exception while updated push state for %s", $r6);
+
+     label6:
+        return null;
+
+        catch java.lang.Exception from label1 to label2 with label5;
+        catch java.lang.Exception from label3 to label4 with label5;
+    }
+    public java.lang.String getUidFromMessageId(com.fsck.k9.mail.Message) throws com.fsck.k9.mail.MessagingException
+    {
+        com.fsck.k9.mail.store.imap.ImapFolder r0;
+        com.fsck.k9.mail.Message $r1;
+        java.io.IOException r2;
+        java.lang.String r3, $r6;
+        java.lang.String[] $r4;
+        int $i0;
+        boolean $z0;
+        java.lang.Object[] $r5;
+        java.util.List $r7;
+        java.util.Iterator $r8;
+        java.lang.Object $r9;
+        com.fsck.k9.mail.store.imap.ImapResponse r10;
+        com.fsck.k9.mail.MessagingException $r11;
+
+        r0 := @this: com.fsck.k9.mail.store.imap.ImapFolder;
+
+        $r1 := @parameter0: com.fsck.k9.mail.Message;
+
+     label01:
+        $r4 = virtualinvoke $r1.<com.fsck.k9.mail.Message: java.lang.String[] getHeader(java.lang.String)>("Message-ID");
+
+     label02:
+        $i0 = lengthof $r4;
+
+        if $i0 != 0 goto label09;
+
+     label03:
+        $z0 = staticinvoke <com.fsck.k9.mail.K9MailLib: boolean isDebug()>();
+
+     label04:
+        if $z0 == 0 goto label32;
+
+        $r5 = newarray (java.lang.Object)[1];
+
+     label05:
+        r3 = virtualinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: java.lang.String getLogId()>();
+
+     label06:
+        $r5[0] = r3;
+
+     label07:
+        staticinvoke <timber.log.Timber: void d(java.lang.String,java.lang.Object[])>("Did not get a message-id in order to search for UID  for %s", $r5);
+
+     label08:
+        return null;
+
+     label09:
+        r3 = $r4[0];
+
+     label10:
+        $z0 = staticinvoke <com.fsck.k9.mail.K9MailLib: boolean isDebug()>();
+
+     label11:
+        if $z0 == 0 goto label15;
+
+        $r5 = newarray (java.lang.Object)[2];
+
+        $r5[0] = r3;
+
+     label12:
+        $r6 = virtualinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: java.lang.String getLogId()>();
+
+     label13:
+        $r5[1] = $r6;
+
+     label14:
+        staticinvoke <timber.log.Timber: void d(java.lang.String,java.lang.Object[])>("Looking for UID for message with message-id %s for %s", $r5);
+
+     label15:
+        $r5 = newarray (java.lang.Object)[1];
+
+     label16:
+        r3 = staticinvoke <com.fsck.k9.mail.store.imap.ImapUtility: java.lang.String encodeString(java.lang.String)>(r3);
+
+     label17:
+        $r5[0] = r3;
+
+     label18:
+        r3 = staticinvoke <java.lang.String: java.lang.String format(java.lang.String,java.lang.Object[])>("UID SEARCH HEADER MESSAGE-ID %s", $r5);
+
+        $r7 = specialinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: java.util.List executeSimpleCommand(java.lang.String)>(r3);
+
+        $r8 = interfaceinvoke $r7.<java.util.List: java.util.Iterator iterator()>();
+
+     label19:
+        $z0 = interfaceinvoke $r8.<java.util.Iterator: boolean hasNext()>();
+
+     label20:
+        if $z0 == 0 goto label32;
+
+     label21:
+        $r9 = interfaceinvoke $r8.<java.util.Iterator: java.lang.Object next()>();
+
+     label22:
+        r10 = (com.fsck.k9.mail.store.imap.ImapResponse) $r9;
+
+     label23:
+        r3 = virtualinvoke r10.<com.fsck.k9.mail.store.imap.ImapResponse: java.lang.String getTag()>();
+
+     label24:
+        if r3 != null goto label19;
+
+     label25:
+        $r9 = virtualinvoke r10.<com.fsck.k9.mail.store.imap.ImapResponse: java.lang.Object get(int)>(0);
+
+        $z0 = staticinvoke <com.fsck.k9.mail.store.imap.ImapResponseParser: boolean equalsIgnoreCase(java.lang.Object,java.lang.String)>($r9, "SEARCH");
+
+     label26:
+        if $z0 == 0 goto label19;
+
+     label27:
+        $i0 = virtualinvoke r10.<com.fsck.k9.mail.store.imap.ImapResponse: int size()>();
+
+     label28:
+        if $i0 <= 1 goto label19;
+
+     label29:
+        r3 = virtualinvoke r10.<com.fsck.k9.mail.store.imap.ImapResponse: java.lang.String getString(int)>(1);
+
+     label30:
+        return r3;
+
+     label31:
+        r2 := @caughtexception;
+
+        $r11 = new com.fsck.k9.mail.MessagingException;
+
+        specialinvoke $r11.<com.fsck.k9.mail.MessagingException: void <init>(java.lang.String,java.lang.Throwable)>("Could not find UID for message based on Message-ID", r2);
+
+        throw $r11;
+
+     label32:
+        return null;
+
+        catch java.io.IOException from label01 to label02 with label31;
+        catch java.io.IOException from label03 to label04 with label31;
+        catch java.io.IOException from label05 to label06 with label31;
+        catch java.io.IOException from label07 to label08 with label31;
+        catch java.io.IOException from label10 to label11 with label31;
+        catch java.io.IOException from label12 to label13 with label31;
+        catch java.io.IOException from label14 to label15 with label31;
+        catch java.io.IOException from label16 to label17 with label31;
+        catch java.io.IOException from label18 to label20 with label31;
+        catch java.io.IOException from label21 to label22 with label31;
+        catch java.io.IOException from label23 to label24 with label31;
+        catch java.io.IOException from label25 to label26 with label31;
+        catch java.io.IOException from label27 to label28 with label31;
+        catch java.io.IOException from label29 to label30 with label31;
+    }
+    public int getUnreadMessageCount() throws com.fsck.k9.mail.MessagingException
+    {
+        com.fsck.k9.mail.store.imap.ImapFolder r0;
+        int $i0;
+
+        r0 := @this: com.fsck.k9.mail.store.imap.ImapFolder;
+
+        $i0 = specialinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: int getRemoteMessageCount(java.lang.String)>("UNSEEN NOT DELETED");
+
+        return $i0;
+    }
+    protected void handlePossibleUidNext(com.fsck.k9.mail.store.imap.ImapResponse)
+    {
+        com.fsck.k9.mail.store.imap.ImapFolder r0;
+        com.fsck.k9.mail.store.imap.ImapResponse $r1;
+        java.lang.Object $r2;
+        boolean $z0;
+        int $i0;
+        com.fsck.k9.mail.store.imap.ImapList r3;
+        java.lang.String r4, $r5;
+        long $l1;
+        java.lang.Object[] $r6;
+        java.lang.Long $r7;
+
+        r0 := @this: com.fsck.k9.mail.store.imap.ImapFolder;
+
+        $r1 := @parameter0: com.fsck.k9.mail.store.imap.ImapResponse;
+
+        $r2 = virtualinvoke $r1.<com.fsck.k9.mail.store.imap.ImapResponse: java.lang.Object get(int)>(0);
+
+        $z0 = staticinvoke <com.fsck.k9.mail.store.imap.ImapResponseParser: boolean equalsIgnoreCase(java.lang.Object,java.lang.String)>($r2, "OK");
+
+        if $z0 == 0 goto label1;
+
+        $i0 = virtualinvoke $r1.<com.fsck.k9.mail.store.imap.ImapResponse: int size()>();
+
+        if $i0 <= 1 goto label1;
+
+        $r2 = virtualinvoke $r1.<com.fsck.k9.mail.store.imap.ImapResponse: java.lang.Object get(int)>(1);
+
+        $z0 = $r2 instanceof com.fsck.k9.mail.store.imap.ImapList;
+
+        if $z0 == 0 goto label1;
+
+        r3 = (com.fsck.k9.mail.store.imap.ImapList) $r2;
+
+        $i0 = virtualinvoke r3.<com.fsck.k9.mail.store.imap.ImapList: int size()>();
+
+        if $i0 <= 1 goto label1;
+
+        $r2 = virtualinvoke r3.<com.fsck.k9.mail.store.imap.ImapList: java.lang.Object get(int)>(0);
+
+        $z0 = $r2 instanceof java.lang.String;
+
+        if $z0 == 0 goto label1;
+
+        r4 = (java.lang.String) $r2;
+
+        $r5 = "UIDNEXT";
+
+        $z0 = virtualinvoke $r5.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>(r4);
+
+        if $z0 == 0 goto label1;
+
+        $l1 = virtualinvoke r3.<com.fsck.k9.mail.store.imap.ImapList: long getLong(int)>(1);
+
+        r0.<com.fsck.k9.mail.store.imap.ImapFolder: long uidNext> = $l1;
+
+        $z0 = staticinvoke <com.fsck.k9.mail.K9MailLib: boolean isDebug()>();
+
+        if $z0 == 0 goto label1;
+
+        $r6 = newarray (java.lang.Object)[2];
+
+        $l1 = r0.<com.fsck.k9.mail.store.imap.ImapFolder: long uidNext>;
+
+        $r7 = staticinvoke <java.lang.Long: java.lang.Long valueOf(long)>($l1);
+
+        $r6[0] = $r7;
+
+        r4 = virtualinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: java.lang.String getLogId()>();
+
+        $r6[1] = r4;
+
+        staticinvoke <timber.log.Timber: void d(java.lang.String,java.lang.Object[])>("Got UidNext = %s for %s", $r6);
+
+     label1:
+        return;
+    }
+    protected void handleUntaggedResponse(com.fsck.k9.mail.store.imap.ImapResponse)
+    {
+        com.fsck.k9.mail.store.imap.ImapFolder r0;
+        com.fsck.k9.mail.store.imap.ImapResponse $r1;
+        java.lang.String $r2;
+        int $i0;
+        java.lang.Object $r3;
+        boolean $z0;
+        java.lang.Object[] $r4;
+        java.lang.Integer $r5;
+
+        r0 := @this: com.fsck.k9.mail.store.imap.ImapFolder;
+
+        $r1 := @parameter0: com.fsck.k9.mail.store.imap.ImapResponse;
+
+        $r2 = virtualinvoke $r1.<com.fsck.k9.mail.store.imap.ImapResponse: java.lang.String getTag()>();
+
+        if $r2 != null goto label2;
+
+        $i0 = virtualinvoke $r1.<com.fsck.k9.mail.store.imap.ImapResponse: int size()>();
+
+        if $i0 <= 1 goto label2;
+
+        $r3 = virtualinvoke $r1.<com.fsck.k9.mail.store.imap.ImapResponse: java.lang.Object get(int)>(1);
+
+        $z0 = staticinvoke <com.fsck.k9.mail.store.imap.ImapResponseParser: boolean equalsIgnoreCase(java.lang.Object,java.lang.String)>($r3, "EXISTS");
+
+        if $z0 == 0 goto label1;
+
+        $i0 = virtualinvoke $r1.<com.fsck.k9.mail.store.imap.ImapResponse: int getNumber(int)>(0);
+
+        r0.<com.fsck.k9.mail.store.imap.ImapFolder: int messageCount> = $i0;
+
+        $z0 = staticinvoke <com.fsck.k9.mail.K9MailLib: boolean isDebug()>();
+
+        if $z0 == 0 goto label1;
+
+        $r4 = newarray (java.lang.Object)[2];
+
+        $i0 = r0.<com.fsck.k9.mail.store.imap.ImapFolder: int messageCount>;
+
+        $r5 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        $r4[0] = $r5;
+
+        $r2 = virtualinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: java.lang.String getLogId()>();
+
+        $r4[1] = $r2;
+
+        staticinvoke <timber.log.Timber: void d(java.lang.String,java.lang.Object[])>("Got untagged EXISTS with value %d for %s", $r4);
+
+     label1:
+        virtualinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: void handlePossibleUidNext(com.fsck.k9.mail.store.imap.ImapResponse)>($r1);
+
+        $r3 = virtualinvoke $r1.<com.fsck.k9.mail.store.imap.ImapResponse: java.lang.Object get(int)>(1);
+
+        $z0 = staticinvoke <com.fsck.k9.mail.store.imap.ImapResponseParser: boolean equalsIgnoreCase(java.lang.Object,java.lang.String)>($r3, "EXPUNGE");
+
+        if $z0 == 0 goto label2;
+
+        $i0 = r0.<com.fsck.k9.mail.store.imap.ImapFolder: int messageCount>;
+
+        if $i0 <= 0 goto label2;
+
+        $i0 = r0.<com.fsck.k9.mail.store.imap.ImapFolder: int messageCount>;
+
+        $i0 = $i0 + -1;
+
+        r0.<com.fsck.k9.mail.store.imap.ImapFolder: int messageCount> = $i0;
+
+        $z0 = staticinvoke <com.fsck.k9.mail.K9MailLib: boolean isDebug()>();
+
+        if $z0 == 0 goto label2;
+
+        $r4 = newarray (java.lang.Object)[2];
+
+        $i0 = r0.<com.fsck.k9.mail.store.imap.ImapFolder: int messageCount>;
+
+        $r5 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        $r4[0] = $r5;
+
+        $r2 = virtualinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: java.lang.String getLogId()>();
+
+        $r4[1] = $r2;
+
+        staticinvoke <timber.log.Timber: void d(java.lang.String,java.lang.Object[])>("Got untagged EXPUNGE with messageCount %d for %s", $r4);
+
+     label2:
+        return;
+    }
+    protected java.util.List handleUntaggedResponses(java.util.List)
+    {
+        com.fsck.k9.mail.store.imap.ImapFolder r0;
+        java.util.List r1;
+        java.util.Iterator $r2;
+        boolean $z0;
+        java.lang.Object $r3;
+        com.fsck.k9.mail.store.imap.ImapResponse r4;
+
+        r0 := @this: com.fsck.k9.mail.store.imap.ImapFolder;
+
+        r1 := @parameter0: java.util.List;
+
+        $r2 = interfaceinvoke r1.<java.util.List: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r2.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label2;
+
+        $r3 = interfaceinvoke $r2.<java.util.Iterator: java.lang.Object next()>();
+
+        r4 = (com.fsck.k9.mail.store.imap.ImapResponse) $r3;
+
+        virtualinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: void handleUntaggedResponse(com.fsck.k9.mail.store.imap.ImapResponse)>(r4);
+
+        goto label1;
+
+     label2:
+        return r1;
+    }
+    public int hashCode()
+    {
+        com.fsck.k9.mail.store.imap.ImapFolder r0;
+        java.lang.String $r1;
+        int $i0;
+
+        r0 := @this: com.fsck.k9.mail.store.imap.ImapFolder;
+
+        $r1 = virtualinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: java.lang.String getName()>();
+
+        $i0 = virtualinvoke $r1.<java.lang.String: int hashCode()>();
+
+        return $i0;
+    }
+    protected java.util.List internalOpen(int) throws com.fsck.k9.mail.MessagingException
+    {
+        com.fsck.k9.mail.store.imap.ImapFolder r0;
+        int $i0, $i1;
+        com.fsck.k9.mail.MessagingException r1;
+        boolean $z0;
+        java.util.List $r2;
+        java.io.IOException r3, r14;
+        com.fsck.k9.mail.store.imap.ImapConnection $r4;
+        com.fsck.k9.mail.store.imap.ImapStore $r5;
+        java.util.Map $r6;
+        java.lang.String r7, $r9;
+        com.fsck.k9.mail.store.imap.FolderNameCodec $r8;
+        java.lang.Object[] $r10;
+        java.util.Iterator $r11;
+        java.lang.Object $r12;
+        com.fsck.k9.mail.store.imap.ImapResponse r13;
+        java.lang.Throwable $r15;
+
+        r0 := @this: com.fsck.k9.mail.store.imap.ImapFolder;
+
+        $i0 := @parameter0: int;
+
+        $z0 = virtualinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: boolean isOpen()>();
+
+        if $z0 == 0 goto label04;
+
+        $i1 = r0.<com.fsck.k9.mail.store.imap.ImapFolder: int mode>;
+
+        if $i1 != $i0 goto label04;
+
+     label01:
+        $r2 = specialinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: java.util.List executeSimpleCommand(java.lang.String)>("NOOP");
+
+     label02:
+        return $r2;
+
+     label03:
+        r3 := @caughtexception;
+
+        $r4 = r0.<com.fsck.k9.mail.store.imap.ImapFolder: com.fsck.k9.mail.store.imap.ImapConnection connection>;
+
+        specialinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: com.fsck.k9.mail.MessagingException ioExceptionHandler(com.fsck.k9.mail.store.imap.ImapConnection,java.io.IOException)>($r4, r3);
+
+     label04:
+        $r5 = r0.<com.fsck.k9.mail.store.imap.ImapFolder: com.fsck.k9.mail.store.imap.ImapStore store>;
+
+        $r4 = r0.<com.fsck.k9.mail.store.imap.ImapFolder: com.fsck.k9.mail.store.imap.ImapConnection connection>;
+
+        virtualinvoke $r5.<com.fsck.k9.mail.store.imap.ImapStore: void releaseConnection(com.fsck.k9.mail.store.imap.ImapConnection)>($r4);
+
+        entermonitor r0;
+
+     label05:
+        $r5 = r0.<com.fsck.k9.mail.store.imap.ImapFolder: com.fsck.k9.mail.store.imap.ImapStore store>;
+
+        $r4 = virtualinvoke $r5.<com.fsck.k9.mail.store.imap.ImapStore: com.fsck.k9.mail.store.imap.ImapConnection getConnection()>();
+
+        r0.<com.fsck.k9.mail.store.imap.ImapFolder: com.fsck.k9.mail.store.imap.ImapConnection connection> = $r4;
+
+        exitmonitor r0;
+
+     label06:
+        $r6 = r0.<com.fsck.k9.mail.store.imap.ImapFolder: java.util.Map msgSeqUidMap>;
+
+     label07:
+        interfaceinvoke $r6.<java.util.Map: void clear()>();
+
+     label08:
+        if $i0 != 0 goto label25;
+
+        r7 = "SELECT";
+
+     label09:
+        $r8 = r0.<com.fsck.k9.mail.store.imap.ImapFolder: com.fsck.k9.mail.store.imap.FolderNameCodec folderNameCodec>;
+
+     label10:
+        $r9 = specialinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: java.lang.String getPrefixedName()>();
+
+        $r9 = virtualinvoke $r8.<com.fsck.k9.mail.store.imap.FolderNameCodec: java.lang.String encode(java.lang.String)>($r9);
+
+        $r9 = staticinvoke <com.fsck.k9.mail.store.imap.ImapUtility: java.lang.String encodeString(java.lang.String)>($r9);
+
+     label11:
+        $r10 = newarray (java.lang.Object)[2];
+
+        $r10[0] = r7;
+
+        $r10[1] = $r9;
+
+     label12:
+        r7 = staticinvoke <java.lang.String: java.lang.String format(java.lang.String,java.lang.Object[])>("%s %s", $r10);
+
+        $r2 = specialinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: java.util.List executeSimpleCommand(java.lang.String)>(r7);
+
+     label13:
+        r0.<com.fsck.k9.mail.store.imap.ImapFolder: int mode> = $i0;
+
+     label14:
+        $r11 = interfaceinvoke $r2.<java.util.List: java.util.Iterator iterator()>();
+
+     label15:
+        $z0 = interfaceinvoke $r11.<java.util.Iterator: boolean hasNext()>();
+
+     label16:
+        if $z0 == 0 goto label26;
+
+     label17:
+        $r12 = interfaceinvoke $r11.<java.util.Iterator: java.lang.Object next()>();
+
+     label18:
+        r13 = (com.fsck.k9.mail.store.imap.ImapResponse) $r12;
+
+     label19:
+        specialinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: void handlePermanentFlags(com.fsck.k9.mail.store.imap.ImapResponse)>(r13);
+
+     label20:
+        goto label15;
+
+     label21:
+        r14 := @caughtexception;
+
+        $r4 = r0.<com.fsck.k9.mail.store.imap.ImapFolder: com.fsck.k9.mail.store.imap.ImapConnection connection>;
+
+        r1 = specialinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: com.fsck.k9.mail.MessagingException ioExceptionHandler(com.fsck.k9.mail.store.imap.ImapConnection,java.io.IOException)>($r4, r14);
+
+        throw r1;
+
+     label22:
+        $r15 := @caughtexception;
+
+     label23:
+        exitmonitor r0;
+
+     label24:
+        throw $r15;
+
+     label25:
+        r7 = "EXAMINE";
+
+        goto label09;
+
+     label26:
+        r13 = staticinvoke <com.fsck.k9.mail.store.imap.ImapUtility: com.fsck.k9.mail.store.imap.ImapResponse getLastResponse(java.util.List)>($r2);
+
+        specialinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: void handleSelectOrExamineOkResponse(com.fsck.k9.mail.store.imap.ImapResponse)>(r13);
+
+     label27:
+        r0.<com.fsck.k9.mail.store.imap.ImapFolder: boolean exists> = 1;
+
+        return $r2;
+
+     label28:
+        r1 := @caughtexception;
+
+        $r10 = newarray (java.lang.Object)[1];
+
+        r7 = virtualinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: java.lang.String getLogId()>();
+
+        $r10[0] = r7;
+
+        staticinvoke <timber.log.Timber: void e(java.lang.Throwable,java.lang.String,java.lang.Object[])>(r1, "Unable to open connection for %s", $r10);
+
+        throw r1;
+
+        catch java.io.IOException from label01 to label02 with label03;
+        catch java.lang.Throwable from label05 to label06 with label22;
+        catch java.io.IOException from label07 to label08 with label21;
+        catch java.io.IOException from label10 to label11 with label21;
+        catch java.io.IOException from label12 to label13 with label21;
+        catch java.io.IOException from label14 to label16 with label21;
+        catch java.io.IOException from label17 to label18 with label21;
+        catch java.io.IOException from label19 to label20 with label21;
+        catch com.fsck.k9.mail.MessagingException from label07 to label08 with label28;
+        catch com.fsck.k9.mail.MessagingException from label10 to label11 with label28;
+        catch com.fsck.k9.mail.MessagingException from label12 to label13 with label28;
+        catch com.fsck.k9.mail.MessagingException from label14 to label16 with label28;
+        catch com.fsck.k9.mail.MessagingException from label17 to label18 with label28;
+        catch com.fsck.k9.mail.MessagingException from label19 to label20 with label28;
+        catch java.lang.Throwable from label23 to label24 with label22;
+        catch java.io.IOException from label26 to label27 with label21;
+        catch com.fsck.k9.mail.MessagingException from label26 to label27 with label28;
+    }
+    public boolean isOpen()
+    {
+        com.fsck.k9.mail.store.imap.ImapFolder r0;
+        com.fsck.k9.mail.store.imap.ImapConnection $r1;
+
+        r0 := @this: com.fsck.k9.mail.store.imap.ImapFolder;
+
+        $r1 = r0.<com.fsck.k9.mail.store.imap.ImapFolder: com.fsck.k9.mail.store.imap.ImapConnection connection>;
+
+        if $r1 == null goto label1;
+
+        return 1;
+
+     label1:
+        return 0;
+    }
+    public java.util.Map moveMessages(java.util.List, com.fsck.k9.mail.Folder) throws com.fsck.k9.mail.MessagingException
+    {
+        com.fsck.k9.mail.store.imap.ImapFolder r0;
+        java.util.List r1;
+        com.fsck.k9.mail.Folder $r2;
+        boolean $z0;
+        java.util.Map $r3;
+        com.fsck.k9.mail.Flag $r4;
+        java.util.Set $r5;
+
+        r0 := @this: com.fsck.k9.mail.store.imap.ImapFolder;
+
+        r1 := @parameter0: java.util.List;
+
+        $r2 := @parameter1: com.fsck.k9.mail.Folder;
+
+        $z0 = interfaceinvoke r1.<java.util.List: boolean isEmpty()>();
+
+        if $z0 == 0 goto label1;
+
+        return null;
+
+     label1:
+        $r3 = virtualinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: java.util.Map copyMessages(java.util.List,com.fsck.k9.mail.Folder)>(r1, $r2);
+
+        $r4 = <com.fsck.k9.mail.Flag: com.fsck.k9.mail.Flag DELETED>;
+
+        $r5 = staticinvoke <java.util.Collections: java.util.Set singleton(java.lang.Object)>($r4);
+
+        virtualinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: void setFlags(java.util.List,java.util.Set,boolean)>(r1, $r5, 1);
+
+        return $r3;
+    }
+    public void open(int) throws com.fsck.k9.mail.MessagingException
+    {
+        com.fsck.k9.mail.store.imap.ImapFolder r0;
+        int $i0;
+        com.fsck.k9.mail.MessagingException $r1;
+
+        r0 := @this: com.fsck.k9.mail.store.imap.ImapFolder;
+
+        $i0 := @parameter0: int;
+
+        virtualinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: java.util.List internalOpen(int)>($i0);
+
+        $i0 = r0.<com.fsck.k9.mail.store.imap.ImapFolder: int messageCount>;
+
+        if $i0 != -1 goto label1;
+
+        $r1 = new com.fsck.k9.mail.MessagingException;
+
+        specialinvoke $r1.<com.fsck.k9.mail.MessagingException: void <init>(java.lang.String)>("Did not find message count during open");
+
+        throw $r1;
+
+     label1:
+        return;
+    }
+    public java.util.List search(java.lang.String, java.util.Set, java.util.Set) throws com.fsck.k9.mail.MessagingException
+    {
+        com.fsck.k9.mail.store.imap.ImapFolder r0;
+        java.lang.String $r1;
+        java.util.Set r2, r3;
+        com.fsck.k9.mail.store.imap.ImapFolder$5 r4;
+        com.fsck.k9.mail.store.imap.ImapStore $r5;
+        com.fsck.k9.mail.store.StoreConfig $r6;
+        boolean $z0;
+        com.fsck.k9.mail.MessagingException $r7;
+        java.util.List $r8;
+        java.lang.Throwable $r9;
+
+        r0 := @this: com.fsck.k9.mail.store.imap.ImapFolder;
+
+        $r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.util.Set;
+
+        r3 := @parameter2: java.util.Set;
+
+        $r5 = r0.<com.fsck.k9.mail.store.imap.ImapFolder: com.fsck.k9.mail.store.imap.ImapStore store>;
+
+        $r6 = virtualinvoke $r5.<com.fsck.k9.mail.store.imap.ImapStore: com.fsck.k9.mail.store.StoreConfig getStoreConfig()>();
+
+        $z0 = interfaceinvoke $r6.<com.fsck.k9.mail.store.StoreConfig: boolean allowRemoteSearch()>();
+
+        if $z0 != 0 goto label1;
+
+        $r7 = new com.fsck.k9.mail.MessagingException;
+
+        specialinvoke $r7.<com.fsck.k9.mail.MessagingException: void <init>(java.lang.String)>("Your settings do not allow remote searching of this account");
+
+        throw $r7;
+
+     label1:
+        r4 = new com.fsck.k9.mail.store.imap.ImapFolder$5;
+
+        specialinvoke r4.<com.fsck.k9.mail.store.imap.ImapFolder$5: void <init>(com.fsck.k9.mail.store.imap.ImapFolder,java.util.Set,java.util.Set,java.lang.String)>(r0, r2, r3, $r1);
+
+     label2:
+        virtualinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: void open(int)>(1);
+
+        specialinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: void checkOpen()>();
+
+        r0.<com.fsck.k9.mail.store.imap.ImapFolder: boolean inSearch> = 1;
+
+        $r8 = specialinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: java.util.List search(com.fsck.k9.mail.store.imap.ImapSearcher,com.fsck.k9.mail.MessageRetrievalListener)>(r4, null);
+
+     label3:
+        r0.<com.fsck.k9.mail.store.imap.ImapFolder: boolean inSearch> = 0;
+
+        return $r8;
+
+     label4:
+        $r9 := @caughtexception;
+
+        r0.<com.fsck.k9.mail.store.imap.ImapFolder: boolean inSearch> = 0;
+
+        throw $r9;
+
+        catch java.lang.Throwable from label2 to label3 with label4;
+    }
+    public void setFlags(java.util.List, java.util.Set, boolean) throws com.fsck.k9.mail.MessagingException
+    {
+        com.fsck.k9.mail.store.imap.ImapFolder r0;
+        java.util.List r1;
+        java.util.Set r2;
+        boolean $z0;
+        java.io.IOException r3;
+        java.lang.String[] r4;
+        java.lang.Object[] $r5;
+        int $i0, $i1;
+        java.lang.Object $r6;
+        com.fsck.k9.mail.Message $r7;
+        java.lang.String $r8;
+        com.fsck.k9.mail.store.imap.ImapConnection $r9;
+        com.fsck.k9.mail.MessagingException $r10;
+
+        r0 := @this: com.fsck.k9.mail.store.imap.ImapFolder;
+
+        r1 := @parameter0: java.util.List;
+
+        r2 := @parameter1: java.util.Set;
+
+        $z0 := @parameter2: boolean;
+
+        virtualinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: void open(int)>(0);
+
+        specialinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: void checkOpen()>();
+
+        $i0 = interfaceinvoke r1.<java.util.List: int size()>();
+
+        r4 = newarray (java.lang.String)[$i0];
+
+        $i0 = 0;
+
+        $i1 = interfaceinvoke r1.<java.util.List: int size()>();
+
+     label01:
+        if $i0 >= $i1 goto label02;
+
+        $r6 = interfaceinvoke r1.<java.util.List: java.lang.Object get(int)>($i0);
+
+        $r7 = (com.fsck.k9.mail.Message) $r6;
+
+        $r8 = virtualinvoke $r7.<com.fsck.k9.mail.Message: java.lang.String getUid()>();
+
+        r4[$i0] = $r8;
+
+        $i0 = $i0 + 1;
+
+        goto label01;
+
+     label02:
+        $r5 = newarray (java.lang.Object)[3];
+
+     label03:
+        $r8 = staticinvoke <com.fsck.k9.mail.store.imap.ImapFolder: java.lang.String combine(java.lang.Object[],char)>(r4, 44);
+
+     label04:
+        $r5[0] = $r8;
+
+        if $z0 == 0 goto label10;
+
+        $r8 = "+";
+
+     label05:
+        $r5[1] = $r8;
+
+     label06:
+        $r8 = specialinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: java.lang.String combineFlags(java.lang.Iterable)>(r2);
+
+     label07:
+        $r5[2] = $r8;
+
+     label08:
+        $r8 = staticinvoke <java.lang.String: java.lang.String format(java.lang.String,java.lang.Object[])>("UID STORE %s %sFLAGS.SILENT (%s)", $r5);
+
+        specialinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: java.util.List executeSimpleCommand(java.lang.String)>($r8);
+
+     label09:
+        return;
+
+     label10:
+        $r8 = "-";
+
+        goto label05;
+
+     label11:
+        r3 := @caughtexception;
+
+        $r9 = r0.<com.fsck.k9.mail.store.imap.ImapFolder: com.fsck.k9.mail.store.imap.ImapConnection connection>;
+
+        $r10 = specialinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: com.fsck.k9.mail.MessagingException ioExceptionHandler(com.fsck.k9.mail.store.imap.ImapConnection,java.io.IOException)>($r9, r3);
+
+        throw $r10;
+
+        catch java.io.IOException from label03 to label04 with label11;
+        catch java.io.IOException from label06 to label07 with label11;
+        catch java.io.IOException from label08 to label09 with label11;
+    }
+    public void setFlags(java.util.Set, boolean) throws com.fsck.k9.mail.MessagingException
+    {
+        com.fsck.k9.mail.store.imap.ImapFolder r0;
+        java.util.Set r1;
+        boolean $z0;
+        java.io.IOException r2;
+        java.lang.Object[] $r3;
+        java.lang.String $r4;
+        com.fsck.k9.mail.store.imap.ImapConnection $r5;
+        com.fsck.k9.mail.MessagingException $r6;
+
+        r0 := @this: com.fsck.k9.mail.store.imap.ImapFolder;
+
+        r1 := @parameter0: java.util.Set;
+
+        $z0 := @parameter1: boolean;
+
+        virtualinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: void open(int)>(0);
+
+        specialinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: void checkOpen()>();
+
+        $r3 = newarray (java.lang.Object)[2];
+
+        if $z0 == 0 goto label6;
+
+        $r4 = "+";
+
+     label1:
+        $r3[0] = $r4;
+
+     label2:
+        $r4 = specialinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: java.lang.String combineFlags(java.lang.Iterable)>(r1);
+
+     label3:
+        $r3[1] = $r4;
+
+     label4:
+        $r4 = staticinvoke <java.lang.String: java.lang.String format(java.lang.String,java.lang.Object[])>("UID STORE 1:* %sFLAGS.SILENT (%s)", $r3);
+
+        specialinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: java.util.List executeSimpleCommand(java.lang.String)>($r4);
+
+     label5:
+        return;
+
+     label6:
+        $r4 = "-";
+
+        goto label1;
+
+     label7:
+        r2 := @caughtexception;
+
+        $r5 = r0.<com.fsck.k9.mail.store.imap.ImapFolder: com.fsck.k9.mail.store.imap.ImapConnection connection>;
+
+        $r6 = specialinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: com.fsck.k9.mail.MessagingException ioExceptionHandler(com.fsck.k9.mail.store.imap.ImapConnection,java.io.IOException)>($r5, r2);
+
+        throw $r6;
+
+        catch java.io.IOException from label2 to label3 with label7;
+        catch java.io.IOException from label4 to label5 with label7;
+    }

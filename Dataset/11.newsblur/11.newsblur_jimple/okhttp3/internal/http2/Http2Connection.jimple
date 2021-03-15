@@ -1,0 +1,1870 @@
+okhttp3.internal.http2.Http2Connection extends java.lang.Object implements java.io.Closeable
+static final boolean $assertionsDisabled
+private static final int OKHTTP_CLIENT_WINDOW_SIZE
+static final java.util.concurrent.ExecutorService executor
+long bytesLeftInWriteWindow
+final boolean client
+final java.util.Set currentPushRequests
+final java.lang.String hostname
+int lastGoodStreamId
+final okhttp3.internal.http2.Http2Connection$Listener listener
+private int nextPingId
+int nextStreamId
+okhttp3.internal.http2.Settings okHttpSettings
+final okhttp3.internal.http2.Settings peerSettings
+private java.util.Map pings
+private final java.util.concurrent.ExecutorService pushExecutor
+final okhttp3.internal.http2.PushObserver pushObserver
+final okhttp3.internal.http2.Http2Connection$ReaderRunnable readerRunnable
+boolean receivedInitialPeerSettings
+boolean shutdown
+final java.net.Socket socket
+final java.util.Map streams
+long unacknowledgedBytesRead
+final okhttp3.internal.http2.Http2Writer writer
+    static void <clinit>()
+    {
+        java.util.concurrent.ThreadPoolExecutor $r0;
+        java.util.concurrent.TimeUnit $r1;
+        java.util.concurrent.SynchronousQueue $r2;
+        java.lang.Class $r3;
+        boolean $z0;
+        java.util.concurrent.ThreadFactory $r4;
+
+        $r3 = class "Lokhttp3/internal/http2/Http2Connection;";
+
+        $z0 = virtualinvoke $r3.<java.lang.Class: boolean desiredAssertionStatus()>();
+
+        if $z0 != 0 goto label2;
+
+        $z0 = 1;
+
+     label1:
+        <okhttp3.internal.http2.Http2Connection: boolean $assertionsDisabled> = $z0;
+
+        $r0 = new java.util.concurrent.ThreadPoolExecutor;
+
+        $r1 = <java.util.concurrent.TimeUnit: java.util.concurrent.TimeUnit SECONDS>;
+
+        $r2 = new java.util.concurrent.SynchronousQueue;
+
+        specialinvoke $r2.<java.util.concurrent.SynchronousQueue: void <init>()>();
+
+        $r4 = staticinvoke <okhttp3.internal.Util: java.util.concurrent.ThreadFactory threadFactory(java.lang.String,boolean)>("OkHttp Http2Connection", 1);
+
+        specialinvoke $r0.<java.util.concurrent.ThreadPoolExecutor: void <init>(int,int,long,java.util.concurrent.TimeUnit,java.util.concurrent.BlockingQueue,java.util.concurrent.ThreadFactory)>(0, 2147483647, 60L, $r1, $r2, $r4);
+
+        <okhttp3.internal.http2.Http2Connection: java.util.concurrent.ExecutorService executor> = $r0;
+
+        return;
+
+     label2:
+        $z0 = 0;
+
+        goto label1;
+    }
+    void <init>(okhttp3.internal.http2.Http2Connection$Builder)
+    {
+        okhttp3.internal.http2.Http2Connection r0;
+        okhttp3.internal.http2.Http2Connection$Builder $r1;
+        java.util.concurrent.TimeUnit $r2;
+        java.util.concurrent.LinkedBlockingQueue $r3;
+        java.lang.String $r4;
+        byte $b0, $b1;
+        java.util.LinkedHashMap $r5;
+        okhttp3.internal.http2.Settings $r6;
+        java.util.LinkedHashSet $r7;
+        okhttp3.internal.http2.PushObserver $r8;
+        boolean $z0;
+        okhttp3.internal.http2.Http2Connection$Listener $r9;
+        int $i2;
+        java.util.concurrent.ThreadPoolExecutor $r10;
+        java.lang.Object[] $r11;
+        java.util.concurrent.ThreadFactory $r12;
+        long $l3;
+        java.net.Socket $r13;
+        okhttp3.internal.http2.Http2Writer $r14;
+        okio.BufferedSink $r15;
+        okhttp3.internal.http2.Http2Connection$ReaderRunnable $r16;
+        okhttp3.internal.http2.Http2Reader $r17;
+        okio.BufferedSource $r18;
+
+        r0 := @this: okhttp3.internal.http2.Http2Connection;
+
+        $r1 := @parameter0: okhttp3.internal.http2.Http2Connection$Builder;
+
+        $b0 = 2;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r5 = new java.util.LinkedHashMap;
+
+        specialinvoke $r5.<java.util.LinkedHashMap: void <init>()>();
+
+        r0.<okhttp3.internal.http2.Http2Connection: java.util.Map streams> = $r5;
+
+        r0.<okhttp3.internal.http2.Http2Connection: long unacknowledgedBytesRead> = 0L;
+
+        $r6 = new okhttp3.internal.http2.Settings;
+
+        specialinvoke $r6.<okhttp3.internal.http2.Settings: void <init>()>();
+
+        r0.<okhttp3.internal.http2.Http2Connection: okhttp3.internal.http2.Settings okHttpSettings> = $r6;
+
+        $r6 = new okhttp3.internal.http2.Settings;
+
+        specialinvoke $r6.<okhttp3.internal.http2.Settings: void <init>()>();
+
+        r0.<okhttp3.internal.http2.Http2Connection: okhttp3.internal.http2.Settings peerSettings> = $r6;
+
+        r0.<okhttp3.internal.http2.Http2Connection: boolean receivedInitialPeerSettings> = 0;
+
+        $r7 = new java.util.LinkedHashSet;
+
+        specialinvoke $r7.<java.util.LinkedHashSet: void <init>()>();
+
+        r0.<okhttp3.internal.http2.Http2Connection: java.util.Set currentPushRequests> = $r7;
+
+        $r8 = $r1.<okhttp3.internal.http2.Http2Connection$Builder: okhttp3.internal.http2.PushObserver pushObserver>;
+
+        r0.<okhttp3.internal.http2.Http2Connection: okhttp3.internal.http2.PushObserver pushObserver> = $r8;
+
+        $z0 = $r1.<okhttp3.internal.http2.Http2Connection$Builder: boolean client>;
+
+        r0.<okhttp3.internal.http2.Http2Connection: boolean client> = $z0;
+
+        $r9 = $r1.<okhttp3.internal.http2.Http2Connection$Builder: okhttp3.internal.http2.Http2Connection$Listener listener>;
+
+        r0.<okhttp3.internal.http2.Http2Connection: okhttp3.internal.http2.Http2Connection$Listener listener> = $r9;
+
+        $z0 = $r1.<okhttp3.internal.http2.Http2Connection$Builder: boolean client>;
+
+        if $z0 == 0 goto label5;
+
+        $b1 = 1;
+
+     label1:
+        r0.<okhttp3.internal.http2.Http2Connection: int nextStreamId> = $b1;
+
+        $z0 = $r1.<okhttp3.internal.http2.Http2Connection$Builder: boolean client>;
+
+        if $z0 == 0 goto label2;
+
+        $i2 = r0.<okhttp3.internal.http2.Http2Connection: int nextStreamId>;
+
+        $i2 = $i2 + 2;
+
+        r0.<okhttp3.internal.http2.Http2Connection: int nextStreamId> = $i2;
+
+     label2:
+        $z0 = $r1.<okhttp3.internal.http2.Http2Connection$Builder: boolean client>;
+
+        if $z0 == 0 goto label3;
+
+        $b0 = 1;
+
+     label3:
+        r0.<okhttp3.internal.http2.Http2Connection: int nextPingId> = $b0;
+
+        $z0 = $r1.<okhttp3.internal.http2.Http2Connection$Builder: boolean client>;
+
+        if $z0 == 0 goto label4;
+
+        $r6 = r0.<okhttp3.internal.http2.Http2Connection: okhttp3.internal.http2.Settings okHttpSettings>;
+
+        virtualinvoke $r6.<okhttp3.internal.http2.Settings: okhttp3.internal.http2.Settings set(int,int)>(7, 16777216);
+
+     label4:
+        $r4 = $r1.<okhttp3.internal.http2.Http2Connection$Builder: java.lang.String hostname>;
+
+        r0.<okhttp3.internal.http2.Http2Connection: java.lang.String hostname> = $r4;
+
+        $r10 = new java.util.concurrent.ThreadPoolExecutor;
+
+        $r2 = <java.util.concurrent.TimeUnit: java.util.concurrent.TimeUnit SECONDS>;
+
+        $r3 = new java.util.concurrent.LinkedBlockingQueue;
+
+        specialinvoke $r3.<java.util.concurrent.LinkedBlockingQueue: void <init>()>();
+
+        $r11 = newarray (java.lang.Object)[1];
+
+        $r4 = r0.<okhttp3.internal.http2.Http2Connection: java.lang.String hostname>;
+
+        $r11[0] = $r4;
+
+        $r4 = staticinvoke <okhttp3.internal.Util: java.lang.String format(java.lang.String,java.lang.Object[])>("OkHttp %s Push Observer", $r11);
+
+        $r12 = staticinvoke <okhttp3.internal.Util: java.util.concurrent.ThreadFactory threadFactory(java.lang.String,boolean)>($r4, 1);
+
+        specialinvoke $r10.<java.util.concurrent.ThreadPoolExecutor: void <init>(int,int,long,java.util.concurrent.TimeUnit,java.util.concurrent.BlockingQueue,java.util.concurrent.ThreadFactory)>(0, 1, 60L, $r2, $r3, $r12);
+
+        r0.<okhttp3.internal.http2.Http2Connection: java.util.concurrent.ExecutorService pushExecutor> = $r10;
+
+        $r6 = r0.<okhttp3.internal.http2.Http2Connection: okhttp3.internal.http2.Settings peerSettings>;
+
+        virtualinvoke $r6.<okhttp3.internal.http2.Settings: okhttp3.internal.http2.Settings set(int,int)>(7, 65535);
+
+        $r6 = r0.<okhttp3.internal.http2.Http2Connection: okhttp3.internal.http2.Settings peerSettings>;
+
+        virtualinvoke $r6.<okhttp3.internal.http2.Settings: okhttp3.internal.http2.Settings set(int,int)>(5, 16384);
+
+        $r6 = r0.<okhttp3.internal.http2.Http2Connection: okhttp3.internal.http2.Settings peerSettings>;
+
+        $i2 = virtualinvoke $r6.<okhttp3.internal.http2.Settings: int getInitialWindowSize()>();
+
+        $l3 = (long) $i2;
+
+        r0.<okhttp3.internal.http2.Http2Connection: long bytesLeftInWriteWindow> = $l3;
+
+        $r13 = $r1.<okhttp3.internal.http2.Http2Connection$Builder: java.net.Socket socket>;
+
+        r0.<okhttp3.internal.http2.Http2Connection: java.net.Socket socket> = $r13;
+
+        $r14 = new okhttp3.internal.http2.Http2Writer;
+
+        $r15 = $r1.<okhttp3.internal.http2.Http2Connection$Builder: okio.BufferedSink sink>;
+
+        $z0 = r0.<okhttp3.internal.http2.Http2Connection: boolean client>;
+
+        specialinvoke $r14.<okhttp3.internal.http2.Http2Writer: void <init>(okio.BufferedSink,boolean)>($r15, $z0);
+
+        r0.<okhttp3.internal.http2.Http2Connection: okhttp3.internal.http2.Http2Writer writer> = $r14;
+
+        $r16 = new okhttp3.internal.http2.Http2Connection$ReaderRunnable;
+
+        $r17 = new okhttp3.internal.http2.Http2Reader;
+
+        $r18 = $r1.<okhttp3.internal.http2.Http2Connection$Builder: okio.BufferedSource source>;
+
+        $z0 = r0.<okhttp3.internal.http2.Http2Connection: boolean client>;
+
+        specialinvoke $r17.<okhttp3.internal.http2.Http2Reader: void <init>(okio.BufferedSource,boolean)>($r18, $z0);
+
+        specialinvoke $r16.<okhttp3.internal.http2.Http2Connection$ReaderRunnable: void <init>(okhttp3.internal.http2.Http2Connection,okhttp3.internal.http2.Http2Reader)>(r0, $r17);
+
+        r0.<okhttp3.internal.http2.Http2Connection: okhttp3.internal.http2.Http2Connection$ReaderRunnable readerRunnable> = $r16;
+
+        return;
+
+     label5:
+        $b1 = 2;
+
+        goto label1;
+    }
+    private okhttp3.internal.http2.Http2Stream newStream(int, java.util.List, boolean) throws java.io.IOException
+    {
+        okhttp3.internal.http2.Http2Connection r0;
+        int $i0, i1, $i2;
+        java.util.List r1;
+        boolean $z0, z1, $z2;
+        okhttp3.internal.http2.Http2Stream r2;
+        okhttp3.internal.http2.Http2Writer $r3, $r9;
+        okhttp3.internal.http2.ConnectionShutdownException $r4;
+        java.lang.Throwable $r5, $r6;
+        long $l3;
+        byte $b4;
+        java.util.Map $r7;
+        java.lang.Integer $r8;
+        java.lang.IllegalArgumentException $r10;
+
+        r0 := @this: okhttp3.internal.http2.Http2Connection;
+
+        $i0 := @parameter0: int;
+
+        r1 := @parameter1: java.util.List;
+
+        $z0 := @parameter2: boolean;
+
+        if $z0 != 0 goto label08;
+
+        z1 = 1;
+
+     label01:
+        $r3 = r0.<okhttp3.internal.http2.Http2Connection: okhttp3.internal.http2.Http2Writer writer>;
+
+        entermonitor $r3;
+
+     label02:
+        entermonitor r0;
+
+     label03:
+        $z2 = r0.<okhttp3.internal.http2.Http2Connection: boolean shutdown>;
+
+        if $z2 == 0 goto label09;
+
+        $r4 = new okhttp3.internal.http2.ConnectionShutdownException;
+
+        specialinvoke $r4.<okhttp3.internal.http2.ConnectionShutdownException: void <init>()>();
+
+        throw $r4;
+
+     label04:
+        $r5 := @caughtexception;
+
+        exitmonitor r0;
+
+     label05:
+        throw $r5;
+
+     label06:
+        $r6 := @caughtexception;
+
+        exitmonitor $r3;
+
+     label07:
+        throw $r6;
+
+     label08:
+        z1 = 0;
+
+        goto label01;
+
+     label09:
+        i1 = r0.<okhttp3.internal.http2.Http2Connection: int nextStreamId>;
+
+        $i2 = r0.<okhttp3.internal.http2.Http2Connection: int nextStreamId>;
+
+        $i2 = $i2 + 2;
+
+        r0.<okhttp3.internal.http2.Http2Connection: int nextStreamId> = $i2;
+
+        r2 = new okhttp3.internal.http2.Http2Stream;
+
+        specialinvoke r2.<okhttp3.internal.http2.Http2Stream: void <init>(int,okhttp3.internal.http2.Http2Connection,boolean,boolean,java.util.List)>(i1, r0, z1, 0, r1);
+
+        if $z0 == 0 goto label10;
+
+        $l3 = r0.<okhttp3.internal.http2.Http2Connection: long bytesLeftInWriteWindow>;
+
+        $b4 = $l3 cmp 0L;
+
+        if $b4 == 0 goto label10;
+
+        $l3 = r2.<okhttp3.internal.http2.Http2Stream: long bytesLeftInWriteWindow>;
+
+        $b4 = $l3 cmp 0L;
+
+        if $b4 != 0 goto label17;
+
+     label10:
+        $z0 = 1;
+
+     label11:
+        $z2 = virtualinvoke r2.<okhttp3.internal.http2.Http2Stream: boolean isOpen()>();
+
+        if $z2 == 0 goto label12;
+
+        $r7 = r0.<okhttp3.internal.http2.Http2Connection: java.util.Map streams>;
+
+        $r8 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(i1);
+
+        interfaceinvoke $r7.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r8, r2);
+
+     label12:
+        exitmonitor r0;
+
+     label13:
+        if $i0 != 0 goto label18;
+
+     label14:
+        $r9 = r0.<okhttp3.internal.http2.Http2Connection: okhttp3.internal.http2.Http2Writer writer>;
+
+        virtualinvoke $r9.<okhttp3.internal.http2.Http2Writer: void synStream(boolean,int,int,java.util.List)>(z1, i1, $i0, r1);
+
+     label15:
+        exitmonitor $r3;
+
+     label16:
+        if $z0 == 0 goto label21;
+
+        $r3 = r0.<okhttp3.internal.http2.Http2Connection: okhttp3.internal.http2.Http2Writer writer>;
+
+        virtualinvoke $r3.<okhttp3.internal.http2.Http2Writer: void flush()>();
+
+        return r2;
+
+     label17:
+        $z0 = 0;
+
+        goto label11;
+
+     label18:
+        z1 = r0.<okhttp3.internal.http2.Http2Connection: boolean client>;
+
+        if z1 == 0 goto label19;
+
+        $r10 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r10.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("client streams shouldn\'t have associated stream IDs");
+
+        throw $r10;
+
+     label19:
+        $r9 = r0.<okhttp3.internal.http2.Http2Connection: okhttp3.internal.http2.Http2Writer writer>;
+
+        virtualinvoke $r9.<okhttp3.internal.http2.Http2Writer: void pushPromise(int,int,java.util.List)>($i0, i1, r1);
+
+     label20:
+        goto label15;
+
+     label21:
+        return r2;
+
+        catch java.lang.Throwable from label02 to label03 with label06;
+        catch java.lang.Throwable from label03 to label05 with label04;
+        catch java.lang.Throwable from label05 to label07 with label06;
+        catch java.lang.Throwable from label09 to label13 with label04;
+        catch java.lang.Throwable from label14 to label16 with label06;
+        catch java.lang.Throwable from label18 to label20 with label06;
+    }
+    void addBytesToWriteWindow(long)
+    {
+        okhttp3.internal.http2.Http2Connection r0;
+        long $l0, $l1;
+        byte $b2;
+
+        r0 := @this: okhttp3.internal.http2.Http2Connection;
+
+        $l0 := @parameter0: long;
+
+        $l1 = r0.<okhttp3.internal.http2.Http2Connection: long bytesLeftInWriteWindow>;
+
+        $l1 = $l1 + $l0;
+
+        r0.<okhttp3.internal.http2.Http2Connection: long bytesLeftInWriteWindow> = $l1;
+
+        $b2 = $l0 cmp 0L;
+
+        if $b2 <= 0 goto label1;
+
+        virtualinvoke r0.<java.lang.Object: void notifyAll()>();
+
+     label1:
+        return;
+    }
+    public void close() throws java.io.IOException
+    {
+        okhttp3.internal.http2.Http2Connection r0;
+        okhttp3.internal.http2.ErrorCode $r1, $r2;
+
+        r0 := @this: okhttp3.internal.http2.Http2Connection;
+
+        $r1 = <okhttp3.internal.http2.ErrorCode: okhttp3.internal.http2.ErrorCode NO_ERROR>;
+
+        $r2 = <okhttp3.internal.http2.ErrorCode: okhttp3.internal.http2.ErrorCode CANCEL>;
+
+        virtualinvoke r0.<okhttp3.internal.http2.Http2Connection: void close(okhttp3.internal.http2.ErrorCode,okhttp3.internal.http2.ErrorCode)>($r1, $r2);
+
+        return;
+    }
+    void close(okhttp3.internal.http2.ErrorCode, okhttp3.internal.http2.ErrorCode) throws java.io.IOException
+    {
+        okhttp3.internal.http2.Http2Connection r0;
+        okhttp3.internal.http2.ErrorCode $r1, $r2;
+        okhttp3.internal.http2.Ping r3;
+        okhttp3.internal.http2.Http2Stream r4;
+        boolean $z0;
+        java.lang.AssertionError $r5;
+        java.io.IOException r6, r13, r16, r17;
+        okhttp3.internal.http2.Http2Stream[] r7;
+        okhttp3.internal.http2.Ping[] r8;
+        java.util.Map $r9;
+        java.util.Collection $r10;
+        int $i0, $i1;
+        java.lang.Object[] $r11;
+        java.lang.Throwable $r12;
+        okhttp3.internal.http2.Http2Writer $r14;
+        java.net.Socket $r15;
+
+        r0 := @this: okhttp3.internal.http2.Http2Connection;
+
+        $r1 := @parameter0: okhttp3.internal.http2.ErrorCode;
+
+        $r2 := @parameter1: okhttp3.internal.http2.ErrorCode;
+
+        $z0 = <okhttp3.internal.http2.Http2Connection: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label01;
+
+        $z0 = staticinvoke <java.lang.Thread: boolean holdsLock(java.lang.Object)>(r0);
+
+        if $z0 == 0 goto label01;
+
+        $r5 = new java.lang.AssertionError;
+
+        specialinvoke $r5.<java.lang.AssertionError: void <init>()>();
+
+        throw $r5;
+
+     label01:
+        r6 = null;
+
+     label02:
+        virtualinvoke r0.<okhttp3.internal.http2.Http2Connection: void shutdown(okhttp3.internal.http2.ErrorCode)>($r1);
+
+     label03:
+        r7 = null;
+
+        r8 = null;
+
+        entermonitor r0;
+
+     label04:
+        $r9 = r0.<okhttp3.internal.http2.Http2Connection: java.util.Map streams>;
+
+        $z0 = interfaceinvoke $r9.<java.util.Map: boolean isEmpty()>();
+
+        if $z0 != 0 goto label05;
+
+        $r9 = r0.<okhttp3.internal.http2.Http2Connection: java.util.Map streams>;
+
+        $r10 = interfaceinvoke $r9.<java.util.Map: java.util.Collection values()>();
+
+        $r9 = r0.<okhttp3.internal.http2.Http2Connection: java.util.Map streams>;
+
+        $i0 = interfaceinvoke $r9.<java.util.Map: int size()>();
+
+        r7 = newarray (okhttp3.internal.http2.Http2Stream)[$i0];
+
+        $r11 = interfaceinvoke $r10.<java.util.Collection: java.lang.Object[] toArray(java.lang.Object[])>(r7);
+
+        r7 = (okhttp3.internal.http2.Http2Stream[]) $r11;
+
+        $r9 = r0.<okhttp3.internal.http2.Http2Connection: java.util.Map streams>;
+
+        interfaceinvoke $r9.<java.util.Map: void clear()>();
+
+     label05:
+        $r9 = r0.<okhttp3.internal.http2.Http2Connection: java.util.Map pings>;
+
+        if $r9 == null goto label06;
+
+        $r9 = r0.<okhttp3.internal.http2.Http2Connection: java.util.Map pings>;
+
+        $r10 = interfaceinvoke $r9.<java.util.Map: java.util.Collection values()>();
+
+        $r9 = r0.<okhttp3.internal.http2.Http2Connection: java.util.Map pings>;
+
+        $i0 = interfaceinvoke $r9.<java.util.Map: int size()>();
+
+        r8 = newarray (okhttp3.internal.http2.Ping)[$i0];
+
+        $r11 = interfaceinvoke $r10.<java.util.Collection: java.lang.Object[] toArray(java.lang.Object[])>(r8);
+
+        r8 = (okhttp3.internal.http2.Ping[]) $r11;
+
+        r0.<okhttp3.internal.http2.Http2Connection: java.util.Map pings> = null;
+
+     label06:
+        exitmonitor r0;
+
+     label07:
+        if r7 == null goto label16;
+
+        $i0 = lengthof r7;
+
+        $i1 = 0;
+
+     label08:
+        if $i1 >= $i0 goto label16;
+
+        r4 = r7[$i1];
+
+     label09:
+        virtualinvoke r4.<okhttp3.internal.http2.Http2Stream: void close(okhttp3.internal.http2.ErrorCode)>($r2);
+
+     label10:
+        $i1 = $i1 + 1;
+
+        goto label08;
+
+     label11:
+        r6 := @caughtexception;
+
+        goto label03;
+
+     label12:
+        $r12 := @caughtexception;
+
+     label13:
+        exitmonitor r0;
+
+     label14:
+        throw $r12;
+
+     label15:
+        r13 := @caughtexception;
+
+        if r6 == null goto label10;
+
+        r6 = r13;
+
+        goto label10;
+
+     label16:
+        if r8 == null goto label18;
+
+        $i0 = lengthof r8;
+
+        $i1 = 0;
+
+     label17:
+        if $i1 >= $i0 goto label18;
+
+        r3 = r8[$i1];
+
+        virtualinvoke r3.<okhttp3.internal.http2.Ping: void cancel()>();
+
+        $i1 = $i1 + 1;
+
+        goto label17;
+
+     label18:
+        $r14 = r0.<okhttp3.internal.http2.Http2Connection: okhttp3.internal.http2.Http2Writer writer>;
+
+     label19:
+        virtualinvoke $r14.<okhttp3.internal.http2.Http2Writer: void close()>();
+
+     label20:
+        $r15 = r0.<okhttp3.internal.http2.Http2Connection: java.net.Socket socket>;
+
+     label21:
+        virtualinvoke $r15.<java.net.Socket: void close()>();
+
+     label22:
+        if r6 == null goto label25;
+
+        throw r6;
+
+     label23:
+        r16 := @caughtexception;
+
+        if r6 != null goto label20;
+
+        r6 = r16;
+
+        goto label20;
+
+     label24:
+        r17 := @caughtexception;
+
+        r6 = r17;
+
+        goto label22;
+
+     label25:
+        return;
+
+        catch java.io.IOException from label02 to label03 with label11;
+        catch java.lang.Throwable from label04 to label07 with label12;
+        catch java.io.IOException from label09 to label10 with label15;
+        catch java.lang.Throwable from label13 to label14 with label12;
+        catch java.io.IOException from label19 to label20 with label23;
+        catch java.io.IOException from label21 to label22 with label24;
+    }
+    public void flush() throws java.io.IOException
+    {
+        okhttp3.internal.http2.Http2Connection r0;
+        okhttp3.internal.http2.Http2Writer $r1;
+
+        r0 := @this: okhttp3.internal.http2.Http2Connection;
+
+        $r1 = r0.<okhttp3.internal.http2.Http2Connection: okhttp3.internal.http2.Http2Writer writer>;
+
+        virtualinvoke $r1.<okhttp3.internal.http2.Http2Writer: void flush()>();
+
+        return;
+    }
+    public okhttp3.Protocol getProtocol()
+    {
+        okhttp3.internal.http2.Http2Connection r0;
+        okhttp3.Protocol r1;
+
+        r0 := @this: okhttp3.internal.http2.Http2Connection;
+
+        r1 = <okhttp3.Protocol: okhttp3.Protocol HTTP_2>;
+
+        return r1;
+    }
+    okhttp3.internal.http2.Http2Stream getStream(int)
+    {
+        okhttp3.internal.http2.Http2Connection r0;
+        int $i0;
+        java.util.Map $r1;
+        java.lang.Integer $r2;
+        java.lang.Object $r3;
+        okhttp3.internal.http2.Http2Stream $r4;
+        java.lang.Throwable $r5;
+
+        r0 := @this: okhttp3.internal.http2.Http2Connection;
+
+        $i0 := @parameter0: int;
+
+        entermonitor r0;
+
+     label1:
+        $r1 = r0.<okhttp3.internal.http2.Http2Connection: java.util.Map streams>;
+
+        $r2 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        $r3 = interfaceinvoke $r1.<java.util.Map: java.lang.Object get(java.lang.Object)>($r2);
+
+        $r4 = (okhttp3.internal.http2.Http2Stream) $r3;
+
+     label2:
+        exitmonitor r0;
+
+        return $r4;
+
+     label3:
+        $r5 := @caughtexception;
+
+        exitmonitor r0;
+
+        throw $r5;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+    public boolean isShutdown()
+    {
+        okhttp3.internal.http2.Http2Connection r0;
+        java.lang.Throwable $r1;
+        boolean z0;
+
+        r0 := @this: okhttp3.internal.http2.Http2Connection;
+
+        entermonitor r0;
+
+     label1:
+        z0 = r0.<okhttp3.internal.http2.Http2Connection: boolean shutdown>;
+
+     label2:
+        exitmonitor r0;
+
+        return z0;
+
+     label3:
+        $r1 := @caughtexception;
+
+        exitmonitor r0;
+
+        throw $r1;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+    public int maxConcurrentStreams()
+    {
+        okhttp3.internal.http2.Http2Connection r0;
+        int $i0;
+        okhttp3.internal.http2.Settings $r1;
+        java.lang.Throwable $r2;
+
+        r0 := @this: okhttp3.internal.http2.Http2Connection;
+
+        entermonitor r0;
+
+     label1:
+        $r1 = r0.<okhttp3.internal.http2.Http2Connection: okhttp3.internal.http2.Settings peerSettings>;
+
+        $i0 = virtualinvoke $r1.<okhttp3.internal.http2.Settings: int getMaxConcurrentStreams(int)>(2147483647);
+
+     label2:
+        exitmonitor r0;
+
+        return $i0;
+
+     label3:
+        $r2 := @caughtexception;
+
+        exitmonitor r0;
+
+        throw $r2;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+    public okhttp3.internal.http2.Http2Stream newStream(java.util.List, boolean) throws java.io.IOException
+    {
+        okhttp3.internal.http2.Http2Connection r0;
+        java.util.List r1;
+        boolean $z0;
+        okhttp3.internal.http2.Http2Stream $r2;
+
+        r0 := @this: okhttp3.internal.http2.Http2Connection;
+
+        r1 := @parameter0: java.util.List;
+
+        $z0 := @parameter1: boolean;
+
+        $r2 = specialinvoke r0.<okhttp3.internal.http2.Http2Connection: okhttp3.internal.http2.Http2Stream newStream(int,java.util.List,boolean)>(0, r1, $z0);
+
+        return $r2;
+    }
+    public int openStreamCount()
+    {
+        okhttp3.internal.http2.Http2Connection r0;
+        int $i0;
+        java.util.Map $r1;
+        java.lang.Throwable $r2;
+
+        r0 := @this: okhttp3.internal.http2.Http2Connection;
+
+        entermonitor r0;
+
+     label1:
+        $r1 = r0.<okhttp3.internal.http2.Http2Connection: java.util.Map streams>;
+
+        $i0 = interfaceinvoke $r1.<java.util.Map: int size()>();
+
+     label2:
+        exitmonitor r0;
+
+        return $i0;
+
+     label3:
+        $r2 := @caughtexception;
+
+        exitmonitor r0;
+
+        throw $r2;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+    public okhttp3.internal.http2.Ping ping() throws java.io.IOException
+    {
+        okhttp3.internal.http2.Http2Connection r0;
+        okhttp3.internal.http2.Ping r1;
+        int i0, $i1;
+        java.lang.Integer $r2;
+        boolean $z0;
+        okhttp3.internal.http2.ConnectionShutdownException $r3;
+        java.lang.Throwable $r4;
+        java.util.Map $r5;
+        java.util.LinkedHashMap $r6;
+
+        r0 := @this: okhttp3.internal.http2.Http2Connection;
+
+        r1 = new okhttp3.internal.http2.Ping;
+
+        specialinvoke r1.<okhttp3.internal.http2.Ping: void <init>()>();
+
+        entermonitor r0;
+
+     label1:
+        $z0 = r0.<okhttp3.internal.http2.Http2Connection: boolean shutdown>;
+
+        if $z0 == 0 goto label4;
+
+        $r3 = new okhttp3.internal.http2.ConnectionShutdownException;
+
+        specialinvoke $r3.<okhttp3.internal.http2.ConnectionShutdownException: void <init>()>();
+
+        throw $r3;
+
+     label2:
+        $r4 := @caughtexception;
+
+        exitmonitor r0;
+
+     label3:
+        throw $r4;
+
+     label4:
+        i0 = r0.<okhttp3.internal.http2.Http2Connection: int nextPingId>;
+
+        $i1 = r0.<okhttp3.internal.http2.Http2Connection: int nextPingId>;
+
+        $i1 = $i1 + 2;
+
+        r0.<okhttp3.internal.http2.Http2Connection: int nextPingId> = $i1;
+
+        $r5 = r0.<okhttp3.internal.http2.Http2Connection: java.util.Map pings>;
+
+        if $r5 != null goto label5;
+
+        $r6 = new java.util.LinkedHashMap;
+
+        specialinvoke $r6.<java.util.LinkedHashMap: void <init>()>();
+
+        r0.<okhttp3.internal.http2.Http2Connection: java.util.Map pings> = $r6;
+
+     label5:
+        $r5 = r0.<okhttp3.internal.http2.Http2Connection: java.util.Map pings>;
+
+        $r2 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(i0);
+
+        interfaceinvoke $r5.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r2, r1);
+
+        exitmonitor r0;
+
+     label6:
+        virtualinvoke r0.<okhttp3.internal.http2.Http2Connection: void writePing(boolean,int,int,okhttp3.internal.http2.Ping)>(0, i0, 1330343787, r1);
+
+        return r1;
+
+        catch java.lang.Throwable from label1 to label3 with label2;
+        catch java.lang.Throwable from label4 to label6 with label2;
+    }
+    void pushDataLater(int, okio.BufferedSource, int, boolean) throws java.io.IOException
+    {
+        okhttp3.internal.http2.Http2Connection r0;
+        int $i0, $i1;
+        okio.BufferedSource $r1;
+        boolean $z0;
+        java.lang.Object[] $r2;
+        okio.Buffer r3;
+        java.util.concurrent.ExecutorService $r4;
+        long $l2, $l3;
+        byte $b4;
+        java.io.IOException $r5;
+        java.lang.StringBuilder $r6;
+        java.lang.String $r7;
+        okhttp3.internal.http2.Http2Connection$6 $r8;
+        java.lang.Integer $r9;
+
+        r0 := @this: okhttp3.internal.http2.Http2Connection;
+
+        $i0 := @parameter0: int;
+
+        $r1 := @parameter1: okio.BufferedSource;
+
+        $i1 := @parameter2: int;
+
+        $z0 := @parameter3: boolean;
+
+        r3 = new okio.Buffer;
+
+        specialinvoke r3.<okio.Buffer: void <init>()>();
+
+        $l2 = (long) $i1;
+
+        interfaceinvoke $r1.<okio.BufferedSource: void require(long)>($l2);
+
+        $l2 = (long) $i1;
+
+        interfaceinvoke $r1.<okio.BufferedSource: long read(okio.Buffer,long)>(r3, $l2);
+
+        $l2 = virtualinvoke r3.<okio.Buffer: long size()>();
+
+        $l3 = (long) $i1;
+
+        $b4 = $l2 cmp $l3;
+
+        if $b4 == 0 goto label1;
+
+        $r5 = new java.io.IOException;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $l2 = virtualinvoke r3.<okio.Buffer: long size()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l2);
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" != ");
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i1);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r5.<java.io.IOException: void <init>(java.lang.String)>($r7);
+
+        throw $r5;
+
+     label1:
+        $r4 = r0.<okhttp3.internal.http2.Http2Connection: java.util.concurrent.ExecutorService pushExecutor>;
+
+        $r8 = new okhttp3.internal.http2.Http2Connection$6;
+
+        $r2 = newarray (java.lang.Object)[2];
+
+        $r7 = r0.<okhttp3.internal.http2.Http2Connection: java.lang.String hostname>;
+
+        $r2[0] = $r7;
+
+        $r9 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        $r2[1] = $r9;
+
+        specialinvoke $r8.<okhttp3.internal.http2.Http2Connection$6: void <init>(okhttp3.internal.http2.Http2Connection,java.lang.String,java.lang.Object[],int,okio.Buffer,int,boolean)>(r0, "OkHttp %s Push Data[%s]", $r2, $i0, r3, $i1, $z0);
+
+        interfaceinvoke $r4.<java.util.concurrent.ExecutorService: void execute(java.lang.Runnable)>($r8);
+
+        return;
+    }
+    void pushHeadersLater(int, java.util.List, boolean)
+    {
+        okhttp3.internal.http2.Http2Connection r0;
+        int $i0;
+        java.util.List r1;
+        boolean $z0;
+        okhttp3.internal.http2.Http2Connection$5 $r2;
+        java.lang.Object[] $r3;
+        java.util.concurrent.ExecutorService $r4;
+        java.lang.Integer $r5;
+        java.lang.String $r6;
+
+        r0 := @this: okhttp3.internal.http2.Http2Connection;
+
+        $i0 := @parameter0: int;
+
+        r1 := @parameter1: java.util.List;
+
+        $z0 := @parameter2: boolean;
+
+        $r4 = r0.<okhttp3.internal.http2.Http2Connection: java.util.concurrent.ExecutorService pushExecutor>;
+
+        $r2 = new okhttp3.internal.http2.Http2Connection$5;
+
+        $r3 = newarray (java.lang.Object)[2];
+
+        $r6 = r0.<okhttp3.internal.http2.Http2Connection: java.lang.String hostname>;
+
+        $r3[0] = $r6;
+
+        $r5 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        $r3[1] = $r5;
+
+        specialinvoke $r2.<okhttp3.internal.http2.Http2Connection$5: void <init>(okhttp3.internal.http2.Http2Connection,java.lang.String,java.lang.Object[],int,java.util.List,boolean)>(r0, "OkHttp %s Push Headers[%s]", $r3, $i0, r1, $z0);
+
+        interfaceinvoke $r4.<java.util.concurrent.ExecutorService: void execute(java.lang.Runnable)>($r2);
+
+        return;
+    }
+    void pushRequestLater(int, java.util.List)
+    {
+        okhttp3.internal.http2.Http2Connection r0;
+        int $i0;
+        java.util.List r1;
+        java.lang.Object[] $r2;
+        java.util.concurrent.ExecutorService $r3;
+        java.util.Set $r4;
+        java.lang.Integer $r5;
+        boolean $z0;
+        okhttp3.internal.http2.ErrorCode $r6;
+        okhttp3.internal.http2.Http2Connection$4 $r7;
+        java.lang.String $r8;
+        java.lang.Throwable $r9;
+
+        r0 := @this: okhttp3.internal.http2.Http2Connection;
+
+        $i0 := @parameter0: int;
+
+        r1 := @parameter1: java.util.List;
+
+        entermonitor r0;
+
+     label1:
+        $r4 = r0.<okhttp3.internal.http2.Http2Connection: java.util.Set currentPushRequests>;
+
+        $r5 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        $z0 = interfaceinvoke $r4.<java.util.Set: boolean contains(java.lang.Object)>($r5);
+
+        if $z0 == 0 goto label3;
+
+        $r6 = <okhttp3.internal.http2.ErrorCode: okhttp3.internal.http2.ErrorCode PROTOCOL_ERROR>;
+
+        virtualinvoke r0.<okhttp3.internal.http2.Http2Connection: void writeSynResetLater(int,okhttp3.internal.http2.ErrorCode)>($i0, $r6);
+
+        exitmonitor r0;
+
+     label2:
+        return;
+
+     label3:
+        $r4 = r0.<okhttp3.internal.http2.Http2Connection: java.util.Set currentPushRequests>;
+
+        $r5 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        interfaceinvoke $r4.<java.util.Set: boolean add(java.lang.Object)>($r5);
+
+        exitmonitor r0;
+
+     label4:
+        $r3 = r0.<okhttp3.internal.http2.Http2Connection: java.util.concurrent.ExecutorService pushExecutor>;
+
+        $r7 = new okhttp3.internal.http2.Http2Connection$4;
+
+        $r2 = newarray (java.lang.Object)[2];
+
+        $r8 = r0.<okhttp3.internal.http2.Http2Connection: java.lang.String hostname>;
+
+        $r2[0] = $r8;
+
+        $r5 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        $r2[1] = $r5;
+
+        specialinvoke $r7.<okhttp3.internal.http2.Http2Connection$4: void <init>(okhttp3.internal.http2.Http2Connection,java.lang.String,java.lang.Object[],int,java.util.List)>(r0, "OkHttp %s Push Request[%s]", $r2, $i0, r1);
+
+        interfaceinvoke $r3.<java.util.concurrent.ExecutorService: void execute(java.lang.Runnable)>($r7);
+
+        return;
+
+     label5:
+        $r9 := @caughtexception;
+
+     label6:
+        exitmonitor r0;
+
+     label7:
+        throw $r9;
+
+        catch java.lang.Throwable from label1 to label2 with label5;
+        catch java.lang.Throwable from label3 to label4 with label5;
+        catch java.lang.Throwable from label6 to label7 with label5;
+    }
+    void pushResetLater(int, okhttp3.internal.http2.ErrorCode)
+    {
+        okhttp3.internal.http2.Http2Connection r0;
+        int $i0;
+        okhttp3.internal.http2.ErrorCode $r1;
+        okhttp3.internal.http2.Http2Connection$7 $r2;
+        java.lang.Object[] $r3;
+        java.util.concurrent.ExecutorService $r4;
+        java.lang.Integer $r5;
+        java.lang.String $r6;
+
+        r0 := @this: okhttp3.internal.http2.Http2Connection;
+
+        $i0 := @parameter0: int;
+
+        $r1 := @parameter1: okhttp3.internal.http2.ErrorCode;
+
+        $r4 = r0.<okhttp3.internal.http2.Http2Connection: java.util.concurrent.ExecutorService pushExecutor>;
+
+        $r2 = new okhttp3.internal.http2.Http2Connection$7;
+
+        $r3 = newarray (java.lang.Object)[2];
+
+        $r6 = r0.<okhttp3.internal.http2.Http2Connection: java.lang.String hostname>;
+
+        $r3[0] = $r6;
+
+        $r5 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        $r3[1] = $r5;
+
+        specialinvoke $r2.<okhttp3.internal.http2.Http2Connection$7: void <init>(okhttp3.internal.http2.Http2Connection,java.lang.String,java.lang.Object[],int,okhttp3.internal.http2.ErrorCode)>(r0, "OkHttp %s Push Reset[%s]", $r3, $i0, $r1);
+
+        interfaceinvoke $r4.<java.util.concurrent.ExecutorService: void execute(java.lang.Runnable)>($r2);
+
+        return;
+    }
+    public okhttp3.internal.http2.Http2Stream pushStream(int, java.util.List, boolean) throws java.io.IOException
+    {
+        okhttp3.internal.http2.Http2Connection r0;
+        int $i0;
+        java.util.List r1;
+        boolean $z0, $z1;
+        okhttp3.internal.http2.Http2Stream $r2;
+        java.lang.IllegalStateException $r3;
+
+        r0 := @this: okhttp3.internal.http2.Http2Connection;
+
+        $i0 := @parameter0: int;
+
+        r1 := @parameter1: java.util.List;
+
+        $z0 := @parameter2: boolean;
+
+        $z1 = r0.<okhttp3.internal.http2.Http2Connection: boolean client>;
+
+        if $z1 == 0 goto label1;
+
+        $r3 = new java.lang.IllegalStateException;
+
+        specialinvoke $r3.<java.lang.IllegalStateException: void <init>(java.lang.String)>("Client cannot push requests.");
+
+        throw $r3;
+
+     label1:
+        $r2 = specialinvoke r0.<okhttp3.internal.http2.Http2Connection: okhttp3.internal.http2.Http2Stream newStream(int,java.util.List,boolean)>($i0, r1, $z0);
+
+        return $r2;
+    }
+    boolean pushedStream(int)
+    {
+        okhttp3.internal.http2.Http2Connection r0;
+        int $i0;
+
+        r0 := @this: okhttp3.internal.http2.Http2Connection;
+
+        $i0 := @parameter0: int;
+
+        if $i0 == 0 goto label1;
+
+        $i0 = $i0 & 1;
+
+        if $i0 != 0 goto label1;
+
+        return 1;
+
+     label1:
+        return 0;
+    }
+    okhttp3.internal.http2.Ping removePing(int)
+    {
+        okhttp3.internal.http2.Http2Connection r0;
+        int $i0;
+        java.util.Map $r1;
+        java.lang.Integer $r2;
+        java.lang.Object $r3;
+        okhttp3.internal.http2.Ping $r4;
+        java.lang.Throwable $r5;
+
+        r0 := @this: okhttp3.internal.http2.Http2Connection;
+
+        $i0 := @parameter0: int;
+
+        entermonitor r0;
+
+     label1:
+        $r1 = r0.<okhttp3.internal.http2.Http2Connection: java.util.Map pings>;
+
+        if $r1 == null goto label3;
+
+        $r1 = r0.<okhttp3.internal.http2.Http2Connection: java.util.Map pings>;
+
+        $r2 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        $r3 = interfaceinvoke $r1.<java.util.Map: java.lang.Object remove(java.lang.Object)>($r2);
+
+        $r4 = (okhttp3.internal.http2.Ping) $r3;
+
+     label2:
+        exitmonitor r0;
+
+        return $r4;
+
+     label3:
+        $r4 = null;
+
+        goto label2;
+
+     label4:
+        $r5 := @caughtexception;
+
+        exitmonitor r0;
+
+        throw $r5;
+
+        catch java.lang.Throwable from label1 to label2 with label4;
+    }
+    okhttp3.internal.http2.Http2Stream removeStream(int)
+    {
+        okhttp3.internal.http2.Http2Connection r0;
+        int $i0;
+        java.util.Map $r1;
+        java.lang.Integer $r2;
+        java.lang.Object $r3;
+        okhttp3.internal.http2.Http2Stream r4;
+        java.lang.Throwable $r5;
+
+        r0 := @this: okhttp3.internal.http2.Http2Connection;
+
+        $i0 := @parameter0: int;
+
+        entermonitor r0;
+
+     label1:
+        $r1 = r0.<okhttp3.internal.http2.Http2Connection: java.util.Map streams>;
+
+        $r2 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        $r3 = interfaceinvoke $r1.<java.util.Map: java.lang.Object remove(java.lang.Object)>($r2);
+
+        r4 = (okhttp3.internal.http2.Http2Stream) $r3;
+
+        virtualinvoke r0.<java.lang.Object: void notifyAll()>();
+
+     label2:
+        exitmonitor r0;
+
+        return r4;
+
+     label3:
+        $r5 := @caughtexception;
+
+        exitmonitor r0;
+
+        throw $r5;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+    public void setSettings(okhttp3.internal.http2.Settings) throws java.io.IOException
+    {
+        okhttp3.internal.http2.Http2Connection r0;
+        okhttp3.internal.http2.Settings $r1, $r6;
+        okhttp3.internal.http2.Http2Writer $r2, $r7;
+        boolean $z0;
+        okhttp3.internal.http2.ConnectionShutdownException $r3;
+        java.lang.Throwable $r4, $r5;
+
+        r0 := @this: okhttp3.internal.http2.Http2Connection;
+
+        $r1 := @parameter0: okhttp3.internal.http2.Settings;
+
+        $r2 = r0.<okhttp3.internal.http2.Http2Connection: okhttp3.internal.http2.Http2Writer writer>;
+
+        entermonitor $r2;
+
+     label1:
+        entermonitor r0;
+
+     label2:
+        $z0 = r0.<okhttp3.internal.http2.Http2Connection: boolean shutdown>;
+
+        if $z0 == 0 goto label7;
+
+        $r3 = new okhttp3.internal.http2.ConnectionShutdownException;
+
+        specialinvoke $r3.<okhttp3.internal.http2.ConnectionShutdownException: void <init>()>();
+
+        throw $r3;
+
+     label3:
+        $r4 := @caughtexception;
+
+        exitmonitor r0;
+
+     label4:
+        throw $r4;
+
+     label5:
+        $r5 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label6:
+        throw $r5;
+
+     label7:
+        $r6 = r0.<okhttp3.internal.http2.Http2Connection: okhttp3.internal.http2.Settings okHttpSettings>;
+
+        virtualinvoke $r6.<okhttp3.internal.http2.Settings: void merge(okhttp3.internal.http2.Settings)>($r1);
+
+        $r7 = r0.<okhttp3.internal.http2.Http2Connection: okhttp3.internal.http2.Http2Writer writer>;
+
+        virtualinvoke $r7.<okhttp3.internal.http2.Http2Writer: void settings(okhttp3.internal.http2.Settings)>($r1);
+
+        exitmonitor r0;
+
+     label8:
+        exitmonitor $r2;
+
+     label9:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label5;
+        catch java.lang.Throwable from label2 to label4 with label3;
+        catch java.lang.Throwable from label4 to label6 with label5;
+        catch java.lang.Throwable from label7 to label8 with label3;
+        catch java.lang.Throwable from label8 to label9 with label5;
+    }
+    public void shutdown(okhttp3.internal.http2.ErrorCode) throws java.io.IOException
+    {
+        okhttp3.internal.http2.Http2Connection r0;
+        okhttp3.internal.http2.ErrorCode $r1;
+        int i0;
+        okhttp3.internal.http2.Http2Writer $r2, $r4;
+        byte[] $r3;
+        boolean $z0;
+        java.lang.Throwable $r5, $r6;
+
+        r0 := @this: okhttp3.internal.http2.Http2Connection;
+
+        $r1 := @parameter0: okhttp3.internal.http2.ErrorCode;
+
+        $r2 = r0.<okhttp3.internal.http2.Http2Connection: okhttp3.internal.http2.Http2Writer writer>;
+
+        entermonitor $r2;
+
+     label01:
+        entermonitor r0;
+
+     label02:
+        $z0 = r0.<okhttp3.internal.http2.Http2Connection: boolean shutdown>;
+
+        if $z0 == 0 goto label05;
+
+        exitmonitor r0;
+
+     label03:
+        exitmonitor $r2;
+
+     label04:
+        return;
+
+     label05:
+        r0.<okhttp3.internal.http2.Http2Connection: boolean shutdown> = 1;
+
+        i0 = r0.<okhttp3.internal.http2.Http2Connection: int lastGoodStreamId>;
+
+        exitmonitor r0;
+
+     label06:
+        $r4 = r0.<okhttp3.internal.http2.Http2Connection: okhttp3.internal.http2.Http2Writer writer>;
+
+        $r3 = <okhttp3.internal.Util: byte[] EMPTY_BYTE_ARRAY>;
+
+        virtualinvoke $r4.<okhttp3.internal.http2.Http2Writer: void goAway(int,okhttp3.internal.http2.ErrorCode,byte[])>(i0, $r1, $r3);
+
+        exitmonitor $r2;
+
+     label07:
+        return;
+
+     label08:
+        $r5 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label09:
+        throw $r5;
+
+     label10:
+        $r6 := @caughtexception;
+
+     label11:
+        exitmonitor r0;
+
+     label12:
+        throw $r6;
+
+     label13:
+        nop;
+
+        catch java.lang.Throwable from label01 to label02 with label08;
+        catch java.lang.Throwable from label02 to label03 with label10;
+        catch java.lang.Throwable from label03 to label04 with label08;
+        catch java.lang.Throwable from label05 to label06 with label10;
+        catch java.lang.Throwable from label06 to label07 with label08;
+        catch java.lang.Throwable from label08 to label09 with label08;
+        catch java.lang.Throwable from label11 to label12 with label10;
+        catch java.lang.Throwable from label12 to label13 with label08;
+    }
+    public void start() throws java.io.IOException
+    {
+        okhttp3.internal.http2.Http2Connection r0;
+
+        r0 := @this: okhttp3.internal.http2.Http2Connection;
+
+        virtualinvoke r0.<okhttp3.internal.http2.Http2Connection: void start(boolean)>(1);
+
+        return;
+    }
+    void start(boolean) throws java.io.IOException
+    {
+        okhttp3.internal.http2.Http2Connection r0;
+        boolean $z0;
+        long $l0;
+        int $i1;
+        okhttp3.internal.http2.Http2Writer $r1;
+        okhttp3.internal.http2.Settings $r2;
+        java.lang.Thread $r3;
+        okhttp3.internal.http2.Http2Connection$ReaderRunnable $r4;
+
+        r0 := @this: okhttp3.internal.http2.Http2Connection;
+
+        $z0 := @parameter0: boolean;
+
+        if $z0 == 0 goto label1;
+
+        $r1 = r0.<okhttp3.internal.http2.Http2Connection: okhttp3.internal.http2.Http2Writer writer>;
+
+        virtualinvoke $r1.<okhttp3.internal.http2.Http2Writer: void connectionPreface()>();
+
+        $r1 = r0.<okhttp3.internal.http2.Http2Connection: okhttp3.internal.http2.Http2Writer writer>;
+
+        $r2 = r0.<okhttp3.internal.http2.Http2Connection: okhttp3.internal.http2.Settings okHttpSettings>;
+
+        virtualinvoke $r1.<okhttp3.internal.http2.Http2Writer: void settings(okhttp3.internal.http2.Settings)>($r2);
+
+        $r2 = r0.<okhttp3.internal.http2.Http2Connection: okhttp3.internal.http2.Settings okHttpSettings>;
+
+        $i1 = virtualinvoke $r2.<okhttp3.internal.http2.Settings: int getInitialWindowSize()>();
+
+        if $i1 == 65535 goto label1;
+
+        $r1 = r0.<okhttp3.internal.http2.Http2Connection: okhttp3.internal.http2.Http2Writer writer>;
+
+        $i1 = $i1 - 65535;
+
+        $l0 = (long) $i1;
+
+        virtualinvoke $r1.<okhttp3.internal.http2.Http2Writer: void windowUpdate(int,long)>(0, $l0);
+
+     label1:
+        $r3 = new java.lang.Thread;
+
+        $r4 = r0.<okhttp3.internal.http2.Http2Connection: okhttp3.internal.http2.Http2Connection$ReaderRunnable readerRunnable>;
+
+        specialinvoke $r3.<java.lang.Thread: void <init>(java.lang.Runnable)>($r4);
+
+        virtualinvoke $r3.<java.lang.Thread: void start()>();
+
+        return;
+    }
+    public void writeData(int, boolean, okio.Buffer, long) throws java.io.IOException
+    {
+        okhttp3.internal.http2.Http2Connection r0;
+        int $i0, i4, $i5;
+        boolean $z0, $z1;
+        okio.Buffer $r1;
+        java.lang.InterruptedException r2;
+        long $l1, $l2, $l6;
+        byte $b3;
+        okhttp3.internal.http2.Http2Writer $r3;
+        java.util.Map $r4;
+        java.lang.Integer $r5;
+        java.io.IOException $r6;
+        java.io.InterruptedIOException $r7;
+        java.lang.Throwable $r8;
+
+        r0 := @this: okhttp3.internal.http2.Http2Connection;
+
+        $i0 := @parameter0: int;
+
+        $z0 := @parameter1: boolean;
+
+        $r1 := @parameter2: okio.Buffer;
+
+        $l2 := @parameter3: long;
+
+        $b3 = $l2 cmp 0L;
+
+        if $b3 != 0 goto label04;
+
+        $r3 = r0.<okhttp3.internal.http2.Http2Connection: okhttp3.internal.http2.Http2Writer writer>;
+
+        virtualinvoke $r3.<okhttp3.internal.http2.Http2Writer: void data(boolean,int,okio.Buffer,int)>($z0, $i0, $r1, 0);
+
+        return;
+
+     label01:
+        $l1 = r0.<okhttp3.internal.http2.Http2Connection: long bytesLeftInWriteWindow>;
+
+        $l1 = staticinvoke <java.lang.Math: long min(long,long)>($l2, $l1);
+
+        i4 = (int) $l1;
+
+        $r3 = r0.<okhttp3.internal.http2.Http2Connection: okhttp3.internal.http2.Http2Writer writer>;
+
+        $i5 = virtualinvoke $r3.<okhttp3.internal.http2.Http2Writer: int maxDataLength()>();
+
+        i4 = staticinvoke <java.lang.Math: int min(int,int)>(i4, $i5);
+
+        $l6 = r0.<okhttp3.internal.http2.Http2Connection: long bytesLeftInWriteWindow>;
+
+        $l1 = (long) i4;
+
+        $l1 = $l6 - $l1;
+
+        r0.<okhttp3.internal.http2.Http2Connection: long bytesLeftInWriteWindow> = $l1;
+
+        exitmonitor r0;
+
+     label02:
+        $l1 = (long) i4;
+
+        $l2 = $l2 - $l1;
+
+        $r3 = r0.<okhttp3.internal.http2.Http2Connection: okhttp3.internal.http2.Http2Writer writer>;
+
+        if $z0 == 0 goto label16;
+
+        $b3 = $l2 cmp 0L;
+
+        if $b3 != 0 goto label16;
+
+        $z1 = 1;
+
+     label03:
+        virtualinvoke $r3.<okhttp3.internal.http2.Http2Writer: void data(boolean,int,okio.Buffer,int)>($z1, $i0, $r1, i4);
+
+     label04:
+        $b3 = $l2 cmp 0L;
+
+        if $b3 <= 0 goto label17;
+
+        entermonitor r0;
+
+     label05:
+        $l1 = r0.<okhttp3.internal.http2.Http2Connection: long bytesLeftInWriteWindow>;
+
+        $b3 = $l1 cmp 0L;
+
+        if $b3 > 0 goto label01;
+
+        $r4 = r0.<okhttp3.internal.http2.Http2Connection: java.util.Map streams>;
+
+     label06:
+        $r5 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        $z1 = interfaceinvoke $r4.<java.util.Map: boolean containsKey(java.lang.Object)>($r5);
+
+     label07:
+        if $z1 != 0 goto label14;
+
+        $r6 = new java.io.IOException;
+
+     label08:
+        specialinvoke $r6.<java.io.IOException: void <init>(java.lang.String)>("stream closed");
+
+     label09:
+        throw $r6;
+
+     label10:
+        r2 := @caughtexception;
+
+     label11:
+        $r7 = new java.io.InterruptedIOException;
+
+        specialinvoke $r7.<java.io.InterruptedIOException: void <init>()>();
+
+        throw $r7;
+
+     label12:
+        $r8 := @caughtexception;
+
+        exitmonitor r0;
+
+     label13:
+        throw $r8;
+
+     label14:
+        virtualinvoke r0.<java.lang.Object: void wait()>();
+
+     label15:
+        goto label05;
+
+     label16:
+        $z1 = 0;
+
+        goto label03;
+
+     label17:
+        return;
+
+        catch java.lang.Throwable from label01 to label02 with label12;
+        catch java.lang.InterruptedException from label06 to label07 with label10;
+        catch java.lang.InterruptedException from label08 to label09 with label10;
+        catch java.lang.Throwable from label05 to label10 with label12;
+        catch java.lang.Throwable from label11 to label13 with label12;
+        catch java.lang.InterruptedException from label14 to label15 with label10;
+        catch java.lang.Throwable from label14 to label15 with label12;
+    }
+    void writePing(boolean, int, int, okhttp3.internal.http2.Ping) throws java.io.IOException
+    {
+        okhttp3.internal.http2.Http2Connection r0;
+        boolean $z0;
+        int $i0, $i1;
+        okhttp3.internal.http2.Ping $r1;
+        okhttp3.internal.http2.Http2Writer $r2, $r3;
+        java.lang.Throwable $r4;
+
+        r0 := @this: okhttp3.internal.http2.Http2Connection;
+
+        $z0 := @parameter0: boolean;
+
+        $i0 := @parameter1: int;
+
+        $i1 := @parameter2: int;
+
+        $r1 := @parameter3: okhttp3.internal.http2.Ping;
+
+        $r2 = r0.<okhttp3.internal.http2.Http2Connection: okhttp3.internal.http2.Http2Writer writer>;
+
+        entermonitor $r2;
+
+        if $r1 == null goto label2;
+
+     label1:
+        virtualinvoke $r1.<okhttp3.internal.http2.Ping: void send()>();
+
+     label2:
+        $r3 = r0.<okhttp3.internal.http2.Http2Connection: okhttp3.internal.http2.Http2Writer writer>;
+
+        virtualinvoke $r3.<okhttp3.internal.http2.Http2Writer: void ping(boolean,int,int)>($z0, $i0, $i1);
+
+        exitmonitor $r2;
+
+     label3:
+        return;
+
+     label4:
+        $r4 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label5:
+        throw $r4;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+    void writePingLater(boolean, int, int, okhttp3.internal.http2.Ping)
+    {
+        okhttp3.internal.http2.Http2Connection r0;
+        boolean $z0;
+        int $i0, $i1;
+        okhttp3.internal.http2.Ping $r1;
+        okhttp3.internal.http2.Http2Connection$3 $r2;
+        java.lang.Object[] $r3;
+        java.util.concurrent.ExecutorService $r4;
+        java.lang.String $r5;
+        java.lang.Integer $r6;
+
+        r0 := @this: okhttp3.internal.http2.Http2Connection;
+
+        $z0 := @parameter0: boolean;
+
+        $i0 := @parameter1: int;
+
+        $i1 := @parameter2: int;
+
+        $r1 := @parameter3: okhttp3.internal.http2.Ping;
+
+        $r4 = <okhttp3.internal.http2.Http2Connection: java.util.concurrent.ExecutorService executor>;
+
+        $r2 = new okhttp3.internal.http2.Http2Connection$3;
+
+        $r3 = newarray (java.lang.Object)[3];
+
+        $r5 = r0.<okhttp3.internal.http2.Http2Connection: java.lang.String hostname>;
+
+        $r3[0] = $r5;
+
+        $r6 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        $r3[1] = $r6;
+
+        $r6 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i1);
+
+        $r3[2] = $r6;
+
+        specialinvoke $r2.<okhttp3.internal.http2.Http2Connection$3: void <init>(okhttp3.internal.http2.Http2Connection,java.lang.String,java.lang.Object[],boolean,int,int,okhttp3.internal.http2.Ping)>(r0, "OkHttp %s ping %08x%08x", $r3, $z0, $i0, $i1, $r1);
+
+        interfaceinvoke $r4.<java.util.concurrent.ExecutorService: void execute(java.lang.Runnable)>($r2);
+
+        return;
+    }
+    void writeSynReply(int, boolean, java.util.List) throws java.io.IOException
+    {
+        okhttp3.internal.http2.Http2Connection r0;
+        int $i0;
+        boolean $z0;
+        java.util.List r1;
+        okhttp3.internal.http2.Http2Writer $r2;
+
+        r0 := @this: okhttp3.internal.http2.Http2Connection;
+
+        $i0 := @parameter0: int;
+
+        $z0 := @parameter1: boolean;
+
+        r1 := @parameter2: java.util.List;
+
+        $r2 = r0.<okhttp3.internal.http2.Http2Connection: okhttp3.internal.http2.Http2Writer writer>;
+
+        virtualinvoke $r2.<okhttp3.internal.http2.Http2Writer: void synReply(boolean,int,java.util.List)>($z0, $i0, r1);
+
+        return;
+    }
+    void writeSynReset(int, okhttp3.internal.http2.ErrorCode) throws java.io.IOException
+    {
+        okhttp3.internal.http2.Http2Connection r0;
+        int $i0;
+        okhttp3.internal.http2.ErrorCode $r1;
+        okhttp3.internal.http2.Http2Writer $r2;
+
+        r0 := @this: okhttp3.internal.http2.Http2Connection;
+
+        $i0 := @parameter0: int;
+
+        $r1 := @parameter1: okhttp3.internal.http2.ErrorCode;
+
+        $r2 = r0.<okhttp3.internal.http2.Http2Connection: okhttp3.internal.http2.Http2Writer writer>;
+
+        virtualinvoke $r2.<okhttp3.internal.http2.Http2Writer: void rstStream(int,okhttp3.internal.http2.ErrorCode)>($i0, $r1);
+
+        return;
+    }
+    void writeSynResetLater(int, okhttp3.internal.http2.ErrorCode)
+    {
+        okhttp3.internal.http2.Http2Connection r0;
+        int $i0;
+        okhttp3.internal.http2.ErrorCode $r1;
+        okhttp3.internal.http2.Http2Connection$1 $r2;
+        java.lang.Object[] $r3;
+        java.util.concurrent.ExecutorService $r4;
+        java.lang.Integer $r5;
+        java.lang.String $r6;
+
+        r0 := @this: okhttp3.internal.http2.Http2Connection;
+
+        $i0 := @parameter0: int;
+
+        $r1 := @parameter1: okhttp3.internal.http2.ErrorCode;
+
+        $r4 = <okhttp3.internal.http2.Http2Connection: java.util.concurrent.ExecutorService executor>;
+
+        $r2 = new okhttp3.internal.http2.Http2Connection$1;
+
+        $r3 = newarray (java.lang.Object)[2];
+
+        $r6 = r0.<okhttp3.internal.http2.Http2Connection: java.lang.String hostname>;
+
+        $r3[0] = $r6;
+
+        $r5 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        $r3[1] = $r5;
+
+        specialinvoke $r2.<okhttp3.internal.http2.Http2Connection$1: void <init>(okhttp3.internal.http2.Http2Connection,java.lang.String,java.lang.Object[],int,okhttp3.internal.http2.ErrorCode)>(r0, "OkHttp %s stream %d", $r3, $i0, $r1);
+
+        interfaceinvoke $r4.<java.util.concurrent.ExecutorService: void execute(java.lang.Runnable)>($r2);
+
+        return;
+    }
+    void writeWindowUpdateLater(int, long)
+    {
+        okhttp3.internal.http2.Http2Connection r0;
+        int $i0;
+        long $l1;
+        java.util.concurrent.ExecutorService $r1;
+        okhttp3.internal.http2.Http2Connection$2 $r2;
+        java.lang.Object[] $r3;
+        java.lang.Integer $r4;
+        java.lang.String $r5;
+
+        r0 := @this: okhttp3.internal.http2.Http2Connection;
+
+        $i0 := @parameter0: int;
+
+        $l1 := @parameter1: long;
+
+        $r1 = <okhttp3.internal.http2.Http2Connection: java.util.concurrent.ExecutorService executor>;
+
+        $r2 = new okhttp3.internal.http2.Http2Connection$2;
+
+        $r3 = newarray (java.lang.Object)[2];
+
+        $r5 = r0.<okhttp3.internal.http2.Http2Connection: java.lang.String hostname>;
+
+        $r3[0] = $r5;
+
+        $r4 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        $r3[1] = $r4;
+
+        specialinvoke $r2.<okhttp3.internal.http2.Http2Connection$2: void <init>(okhttp3.internal.http2.Http2Connection,java.lang.String,java.lang.Object[],int,long)>(r0, "OkHttp Window Update %s stream %d", $r3, $i0, $l1);
+
+        interfaceinvoke $r1.<java.util.concurrent.ExecutorService: void execute(java.lang.Runnable)>($r2);
+
+        return;
+    }

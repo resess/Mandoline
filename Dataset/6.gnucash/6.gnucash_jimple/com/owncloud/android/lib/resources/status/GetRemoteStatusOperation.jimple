@@ -1,0 +1,723 @@
+com.owncloud.android.lib.resources.status.GetRemoteStatusOperation extends com.owncloud.android.lib.common.operations.RemoteOperation
+private static final java.lang.String NODE_INSTALLED
+private static final java.lang.String NODE_VERSION
+private static final java.lang.String TAG
+public static final int TRY_CONNECTION_TIMEOUT
+private android.content.Context mContext
+private com.owncloud.android.lib.common.operations.RemoteOperationResult mLatestResult
+    static void <clinit>()
+    {
+        java.lang.String $r0;
+        java.lang.Class $r1;
+
+        $r1 = class "Lcom/owncloud/android/lib/resources/status/GetRemoteStatusOperation;";
+
+        $r0 = virtualinvoke $r1.<java.lang.Class: java.lang.String getSimpleName()>();
+
+        <com.owncloud.android.lib.resources.status.GetRemoteStatusOperation: java.lang.String TAG> = $r0;
+
+        return;
+    }
+    public void <init>(android.content.Context)
+    {
+        com.owncloud.android.lib.resources.status.GetRemoteStatusOperation r0;
+        android.content.Context $r1;
+
+        r0 := @this: com.owncloud.android.lib.resources.status.GetRemoteStatusOperation;
+
+        $r1 := @parameter0: android.content.Context;
+
+        specialinvoke r0.<com.owncloud.android.lib.common.operations.RemoteOperation: void <init>()>();
+
+        r0.<com.owncloud.android.lib.resources.status.GetRemoteStatusOperation: android.content.Context mContext> = $r1;
+
+        return;
+    }
+    private boolean isOnline()
+    {
+        com.owncloud.android.lib.resources.status.GetRemoteStatusOperation r0;
+        android.content.Context $r1;
+        java.lang.Object $r2;
+        android.net.ConnectivityManager r3;
+        android.net.NetworkInfo $r4;
+        boolean $z0;
+
+        r0 := @this: com.owncloud.android.lib.resources.status.GetRemoteStatusOperation;
+
+        $r1 = r0.<com.owncloud.android.lib.resources.status.GetRemoteStatusOperation: android.content.Context mContext>;
+
+        $r2 = virtualinvoke $r1.<android.content.Context: java.lang.Object getSystemService(java.lang.String)>("connectivity");
+
+        r3 = (android.net.ConnectivityManager) $r2;
+
+        if r3 == null goto label1;
+
+        $r4 = virtualinvoke r3.<android.net.ConnectivityManager: android.net.NetworkInfo getActiveNetworkInfo()>();
+
+        if $r4 == null goto label1;
+
+        $r4 = virtualinvoke r3.<android.net.ConnectivityManager: android.net.NetworkInfo getActiveNetworkInfo()>();
+
+        $z0 = virtualinvoke $r4.<android.net.NetworkInfo: boolean isConnectedOrConnecting()>();
+
+        if $z0 == 0 goto label1;
+
+        return 1;
+
+     label1:
+        return 0;
+    }
+    private boolean tryConnection(com.owncloud.android.lib.common.OwnCloudClient)
+    {
+        com.owncloud.android.lib.resources.status.GetRemoteStatusOperation r0;
+        com.owncloud.android.lib.common.OwnCloudClient $r1;
+        java.util.ArrayList r2;
+        org.json.JSONObject r3;
+        com.owncloud.android.lib.resources.status.OwnCloudVersion r4;
+        boolean z0, $z1;
+        org.apache.commons.httpclient.methods.GetMethod r5, r8;
+        android.net.Uri $r6;
+        java.lang.String $r7, $r10;
+        java.lang.StringBuilder $r9;
+        org.apache.commons.httpclient.params.HttpParams $r11;
+        org.apache.commons.httpclient.params.HttpMethodParams $r12;
+        int i0, $i1, i2;
+        com.owncloud.android.lib.common.operations.RemoteOperationResult $r13;
+        org.apache.commons.httpclient.Header[] $r14;
+        byte $b3;
+        com.owncloud.android.lib.common.operations.RemoteOperationResult$ResultCode $r15;
+        org.json.JSONException r16, r20;
+        java.lang.Exception r17, $r19;
+        java.lang.Throwable $r18;
+
+        r0 := @this: com.owncloud.android.lib.resources.status.GetRemoteStatusOperation;
+
+        $r1 := @parameter0: com.owncloud.android.lib.common.OwnCloudClient;
+
+        z0 = 0;
+
+        r5 = null;
+
+        $r6 = virtualinvoke $r1.<com.owncloud.android.lib.common.OwnCloudClient: android.net.Uri getBaseUri()>();
+
+        $r7 = virtualinvoke $r6.<android.net.Uri: java.lang.String toString()>();
+
+     label01:
+        r8 = new org.apache.commons.httpclient.methods.GetMethod;
+
+        $r9 = new java.lang.StringBuilder;
+
+     label02:
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r7);
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("/status.php");
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke r8.<org.apache.commons.httpclient.methods.GetMethod: void <init>(java.lang.String)>($r10);
+
+     label03:
+        virtualinvoke r8.<org.apache.commons.httpclient.methods.GetMethod: org.apache.commons.httpclient.params.HttpMethodParams getParams()>();
+
+        $r11 = staticinvoke <org.apache.commons.httpclient.params.HttpMethodParams: org.apache.commons.httpclient.params.HttpParams getDefaultParams()>();
+
+        $r10 = staticinvoke <com.owncloud.android.lib.common.OwnCloudClientManagerFactory: java.lang.String getUserAgent()>();
+
+        interfaceinvoke $r11.<org.apache.commons.httpclient.params.HttpParams: void setParameter(java.lang.String,java.lang.Object)>("http.useragent", $r10);
+
+        $r12 = virtualinvoke r8.<org.apache.commons.httpclient.methods.GetMethod: org.apache.commons.httpclient.params.HttpMethodParams getParams()>();
+
+        virtualinvoke $r12.<org.apache.commons.httpclient.params.HttpMethodParams: void setDefaults(org.apache.commons.httpclient.params.HttpParams)>($r11);
+
+        virtualinvoke $r1.<com.owncloud.android.lib.common.OwnCloudClient: void setFollowRedirects(boolean)>(0);
+
+     label04:
+        i0 = 0;
+
+     label05:
+        $i1 = virtualinvoke $r1.<com.owncloud.android.lib.common.OwnCloudClient: int executeMethod(org.apache.commons.httpclient.HttpMethodBase,int,int)>(r8, 5000, 5000);
+
+     label06:
+        i2 = $i1;
+
+     label07:
+        $r13 = new com.owncloud.android.lib.common.operations.RemoteOperationResult;
+
+     label08:
+        if $i1 != 200 goto label34;
+
+        $z1 = 1;
+
+     label09:
+        $r14 = virtualinvoke r8.<org.apache.commons.httpclient.methods.GetMethod: org.apache.commons.httpclient.Header[] getResponseHeaders()>();
+
+        specialinvoke $r13.<com.owncloud.android.lib.common.operations.RemoteOperationResult: void <init>(boolean,int,org.apache.commons.httpclient.Header[])>($z1, $i1, $r14);
+
+     label10:
+        r0.<com.owncloud.android.lib.resources.status.GetRemoteStatusOperation: com.owncloud.android.lib.common.operations.RemoteOperationResult mLatestResult> = $r13;
+
+        $r13 = r0.<com.owncloud.android.lib.resources.status.GetRemoteStatusOperation: com.owncloud.android.lib.common.operations.RemoteOperationResult mLatestResult>;
+
+     label11:
+        $r10 = virtualinvoke $r13.<com.owncloud.android.lib.common.operations.RemoteOperationResult: java.lang.String getRedirectedLocation()>();
+
+     label12:
+        if $r10 == null goto label37;
+
+     label13:
+        $i1 = virtualinvoke $r10.<java.lang.String: int length()>();
+
+     label14:
+        if $i1 <= 0 goto label37;
+
+     label15:
+        $r13 = r0.<com.owncloud.android.lib.resources.status.GetRemoteStatusOperation: com.owncloud.android.lib.common.operations.RemoteOperationResult mLatestResult>;
+
+     label16:
+        $z1 = virtualinvoke $r13.<com.owncloud.android.lib.common.operations.RemoteOperationResult: boolean isSuccess()>();
+
+     label17:
+        if $z1 != 0 goto label37;
+
+     label18:
+        $z1 = virtualinvoke $r7.<java.lang.String: boolean startsWith(java.lang.String)>("https://");
+
+     label19:
+        if $z1 == 0 goto label35;
+
+     label20:
+        $z1 = virtualinvoke $r10.<java.lang.String: boolean startsWith(java.lang.String)>("http://");
+
+     label21:
+        if $z1 == 0 goto label35;
+
+        $b3 = 1;
+
+     label22:
+        i0 = i0 | $b3;
+
+     label23:
+        virtualinvoke r8.<org.apache.commons.httpclient.methods.GetMethod: void releaseConnection()>();
+
+     label24:
+        r5 = new org.apache.commons.httpclient.methods.GetMethod;
+
+     label25:
+        specialinvoke r5.<org.apache.commons.httpclient.methods.GetMethod: void <init>(java.lang.String)>($r10);
+
+     label26:
+        $i1 = virtualinvoke $r1.<com.owncloud.android.lib.common.OwnCloudClient: int executeMethod(org.apache.commons.httpclient.HttpMethodBase,int,int)>(r5, 5000, 5000);
+
+     label27:
+        i2 = $i1;
+
+     label28:
+        $r13 = new com.owncloud.android.lib.common.operations.RemoteOperationResult;
+
+     label29:
+        if $i1 != 200 goto label36;
+
+        $z1 = 1;
+
+     label30:
+        $r14 = virtualinvoke r5.<org.apache.commons.httpclient.methods.GetMethod: org.apache.commons.httpclient.Header[] getResponseHeaders()>();
+
+        specialinvoke $r13.<com.owncloud.android.lib.common.operations.RemoteOperationResult: void <init>(boolean,int,org.apache.commons.httpclient.Header[])>($z1, $i1, $r14);
+
+     label31:
+        r0.<com.owncloud.android.lib.resources.status.GetRemoteStatusOperation: com.owncloud.android.lib.common.operations.RemoteOperationResult mLatestResult> = $r13;
+
+        $r13 = r0.<com.owncloud.android.lib.resources.status.GetRemoteStatusOperation: com.owncloud.android.lib.common.operations.RemoteOperationResult mLatestResult>;
+
+     label32:
+        $r10 = virtualinvoke $r13.<com.owncloud.android.lib.common.operations.RemoteOperationResult: java.lang.String getRedirectedLocation()>();
+
+     label33:
+        r8 = r5;
+
+        goto label12;
+
+     label34:
+        $z1 = 0;
+
+        goto label09;
+
+     label35:
+        $b3 = 0;
+
+        goto label22;
+
+     label36:
+        $z1 = 0;
+
+        goto label30;
+
+     label37:
+        $r10 = virtualinvoke r8.<org.apache.commons.httpclient.methods.GetMethod: java.lang.String getResponseBodyAsString()>();
+
+     label38:
+        if i2 != 200 goto label79;
+
+     label39:
+        r3 = new org.json.JSONObject;
+
+     label40:
+        specialinvoke r3.<org.json.JSONObject: void <init>(java.lang.String)>($r10);
+
+        $z1 = virtualinvoke r3.<org.json.JSONObject: boolean getBoolean(java.lang.String)>("installed");
+
+     label41:
+        if $z1 != 0 goto label47;
+
+     label42:
+        $r13 = new com.owncloud.android.lib.common.operations.RemoteOperationResult;
+
+        $r15 = <com.owncloud.android.lib.common.operations.RemoteOperationResult$ResultCode: com.owncloud.android.lib.common.operations.RemoteOperationResult$ResultCode INSTANCE_NOT_CONFIGURED>;
+
+     label43:
+        specialinvoke $r13.<com.owncloud.android.lib.common.operations.RemoteOperationResult: void <init>(com.owncloud.android.lib.common.operations.RemoteOperationResult$ResultCode)>($r15);
+
+     label44:
+        r0.<com.owncloud.android.lib.resources.status.GetRemoteStatusOperation: com.owncloud.android.lib.common.operations.RemoteOperationResult mLatestResult> = $r13;
+
+     label45:
+        if r8 == null goto label91;
+
+        virtualinvoke r8.<org.apache.commons.httpclient.methods.GetMethod: void releaseConnection()>();
+
+     label46:
+        $r13 = r0.<com.owncloud.android.lib.resources.status.GetRemoteStatusOperation: com.owncloud.android.lib.common.operations.RemoteOperationResult mLatestResult>;
+
+        $z1 = virtualinvoke $r13.<com.owncloud.android.lib.common.operations.RemoteOperationResult: boolean isSuccess()>();
+
+        if $z1 == 0 goto label86;
+
+        $r10 = <com.owncloud.android.lib.resources.status.GetRemoteStatusOperation: java.lang.String TAG>;
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Connection check at ");
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r7);
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(": ");
+
+        $r13 = r0.<com.owncloud.android.lib.resources.status.GetRemoteStatusOperation: com.owncloud.android.lib.common.operations.RemoteOperationResult mLatestResult>;
+
+        $r7 = virtualinvoke $r13.<com.owncloud.android.lib.common.operations.RemoteOperationResult: java.lang.String getLogMessage()>();
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r7);
+
+        $r7 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.owncloud.android.lib.common.utils.Log_OC: void i(java.lang.String,java.lang.String)>($r10, $r7);
+
+        return z0;
+
+     label47:
+        $r10 = virtualinvoke r3.<org.json.JSONObject: java.lang.String getString(java.lang.String)>("version");
+
+     label48:
+        r4 = new com.owncloud.android.lib.resources.status.OwnCloudVersion;
+
+     label49:
+        specialinvoke r4.<com.owncloud.android.lib.resources.status.OwnCloudVersion: void <init>(java.lang.String)>($r10);
+
+        $z1 = virtualinvoke r4.<com.owncloud.android.lib.resources.status.OwnCloudVersion: boolean isVersionValid()>();
+
+     label50:
+        if $z1 != 0 goto label58;
+
+     label51:
+        $r13 = new com.owncloud.android.lib.common.operations.RemoteOperationResult;
+
+        $r15 = <com.owncloud.android.lib.common.operations.RemoteOperationResult$ResultCode: com.owncloud.android.lib.common.operations.RemoteOperationResult$ResultCode BAD_OC_VERSION>;
+
+     label52:
+        specialinvoke $r13.<com.owncloud.android.lib.common.operations.RemoteOperationResult: void <init>(com.owncloud.android.lib.common.operations.RemoteOperationResult$ResultCode)>($r15);
+
+     label53:
+        r0.<com.owncloud.android.lib.resources.status.GetRemoteStatusOperation: com.owncloud.android.lib.common.operations.RemoteOperationResult mLatestResult> = $r13;
+
+     label54:
+        goto label45;
+
+     label55:
+        r16 := @caughtexception;
+
+        r5 = r8;
+
+     label56:
+        $r13 = new com.owncloud.android.lib.common.operations.RemoteOperationResult;
+
+        $r15 = <com.owncloud.android.lib.common.operations.RemoteOperationResult$ResultCode: com.owncloud.android.lib.common.operations.RemoteOperationResult$ResultCode INSTANCE_NOT_CONFIGURED>;
+
+        specialinvoke $r13.<com.owncloud.android.lib.common.operations.RemoteOperationResult: void <init>(com.owncloud.android.lib.common.operations.RemoteOperationResult$ResultCode)>($r15);
+
+        r0.<com.owncloud.android.lib.resources.status.GetRemoteStatusOperation: com.owncloud.android.lib.common.operations.RemoteOperationResult mLatestResult> = $r13;
+
+     label57:
+        if r5 == null goto label46;
+
+        virtualinvoke r5.<org.apache.commons.httpclient.methods.GetMethod: void releaseConnection()>();
+
+        goto label46;
+
+     label58:
+        if i0 == 0 goto label67;
+
+     label59:
+        $r13 = new com.owncloud.android.lib.common.operations.RemoteOperationResult;
+
+        $r15 = <com.owncloud.android.lib.common.operations.RemoteOperationResult$ResultCode: com.owncloud.android.lib.common.operations.RemoteOperationResult$ResultCode OK_REDIRECT_TO_NON_SECURE_CONNECTION>;
+
+     label60:
+        specialinvoke $r13.<com.owncloud.android.lib.common.operations.RemoteOperationResult: void <init>(com.owncloud.android.lib.common.operations.RemoteOperationResult$ResultCode)>($r15);
+
+     label61:
+        r0.<com.owncloud.android.lib.resources.status.GetRemoteStatusOperation: com.owncloud.android.lib.common.operations.RemoteOperationResult mLatestResult> = $r13;
+
+     label62:
+        r2 = new java.util.ArrayList;
+
+     label63:
+        specialinvoke r2.<java.util.ArrayList: void <init>()>();
+
+        virtualinvoke r2.<java.util.ArrayList: boolean add(java.lang.Object)>(r4);
+
+     label64:
+        $r13 = r0.<com.owncloud.android.lib.resources.status.GetRemoteStatusOperation: com.owncloud.android.lib.common.operations.RemoteOperationResult mLatestResult>;
+
+     label65:
+        virtualinvoke $r13.<com.owncloud.android.lib.common.operations.RemoteOperationResult: void setData(java.util.ArrayList)>(r2);
+
+     label66:
+        z0 = 1;
+
+        goto label45;
+
+     label67:
+        $r13 = new com.owncloud.android.lib.common.operations.RemoteOperationResult;
+
+     label68:
+        $z1 = virtualinvoke $r7.<java.lang.String: boolean startsWith(java.lang.String)>("https://");
+
+     label69:
+        if $z1 == 0 goto label77;
+
+     label70:
+        $r15 = <com.owncloud.android.lib.common.operations.RemoteOperationResult$ResultCode: com.owncloud.android.lib.common.operations.RemoteOperationResult$ResultCode OK_SSL>;
+
+     label71:
+        specialinvoke $r13.<com.owncloud.android.lib.common.operations.RemoteOperationResult: void <init>(com.owncloud.android.lib.common.operations.RemoteOperationResult$ResultCode)>($r15);
+
+     label72:
+        r0.<com.owncloud.android.lib.resources.status.GetRemoteStatusOperation: com.owncloud.android.lib.common.operations.RemoteOperationResult mLatestResult> = $r13;
+
+     label73:
+        goto label62;
+
+     label74:
+        r17 := @caughtexception;
+
+        r5 = r8;
+
+     label75:
+        $r13 = new com.owncloud.android.lib.common.operations.RemoteOperationResult;
+
+        specialinvoke $r13.<com.owncloud.android.lib.common.operations.RemoteOperationResult: void <init>(java.lang.Exception)>(r17);
+
+        r0.<com.owncloud.android.lib.resources.status.GetRemoteStatusOperation: com.owncloud.android.lib.common.operations.RemoteOperationResult mLatestResult> = $r13;
+
+     label76:
+        if r5 == null goto label46;
+
+        virtualinvoke r5.<org.apache.commons.httpclient.methods.GetMethod: void releaseConnection()>();
+
+        goto label46;
+
+     label77:
+        $r15 = <com.owncloud.android.lib.common.operations.RemoteOperationResult$ResultCode: com.owncloud.android.lib.common.operations.RemoteOperationResult$ResultCode OK_NO_SSL>;
+
+     label78:
+        goto label71;
+
+     label79:
+        $r13 = new com.owncloud.android.lib.common.operations.RemoteOperationResult;
+
+     label80:
+        $r14 = virtualinvoke r8.<org.apache.commons.httpclient.methods.GetMethod: org.apache.commons.httpclient.Header[] getResponseHeaders()>();
+
+        specialinvoke $r13.<com.owncloud.android.lib.common.operations.RemoteOperationResult: void <init>(boolean,int,org.apache.commons.httpclient.Header[])>(0, i2, $r14);
+
+     label81:
+        r0.<com.owncloud.android.lib.resources.status.GetRemoteStatusOperation: com.owncloud.android.lib.common.operations.RemoteOperationResult mLatestResult> = $r13;
+
+     label82:
+        goto label45;
+
+     label83:
+        $r18 := @caughtexception;
+
+        r5 = r8;
+
+     label84:
+        if r5 == null goto label85;
+
+        virtualinvoke r5.<org.apache.commons.httpclient.methods.GetMethod: void releaseConnection()>();
+
+     label85:
+        throw $r18;
+
+     label86:
+        $r13 = r0.<com.owncloud.android.lib.resources.status.GetRemoteStatusOperation: com.owncloud.android.lib.common.operations.RemoteOperationResult mLatestResult>;
+
+        $r19 = virtualinvoke $r13.<com.owncloud.android.lib.common.operations.RemoteOperationResult: java.lang.Exception getException()>();
+
+        if $r19 == null goto label87;
+
+        $r10 = <com.owncloud.android.lib.resources.status.GetRemoteStatusOperation: java.lang.String TAG>;
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Connection check at ");
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r7);
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(": ");
+
+        $r13 = r0.<com.owncloud.android.lib.resources.status.GetRemoteStatusOperation: com.owncloud.android.lib.common.operations.RemoteOperationResult mLatestResult>;
+
+        $r7 = virtualinvoke $r13.<com.owncloud.android.lib.common.operations.RemoteOperationResult: java.lang.String getLogMessage()>();
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r7);
+
+        $r7 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r13 = r0.<com.owncloud.android.lib.resources.status.GetRemoteStatusOperation: com.owncloud.android.lib.common.operations.RemoteOperationResult mLatestResult>;
+
+        $r19 = virtualinvoke $r13.<com.owncloud.android.lib.common.operations.RemoteOperationResult: java.lang.Exception getException()>();
+
+        staticinvoke <com.owncloud.android.lib.common.utils.Log_OC: void e(java.lang.String,java.lang.String,java.lang.Throwable)>($r10, $r7, $r19);
+
+        return z0;
+
+     label87:
+        $r10 = <com.owncloud.android.lib.resources.status.GetRemoteStatusOperation: java.lang.String TAG>;
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Connection check at ");
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r7);
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(": ");
+
+        $r13 = r0.<com.owncloud.android.lib.resources.status.GetRemoteStatusOperation: com.owncloud.android.lib.common.operations.RemoteOperationResult mLatestResult>;
+
+        $r7 = virtualinvoke $r13.<com.owncloud.android.lib.common.operations.RemoteOperationResult: java.lang.String getLogMessage()>();
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r7);
+
+        $r7 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.owncloud.android.lib.common.utils.Log_OC: void e(java.lang.String,java.lang.String)>($r10, $r7);
+
+        return z0;
+
+     label88:
+        $r18 := @caughtexception;
+
+        goto label84;
+
+     label89:
+        r17 := @caughtexception;
+
+        goto label75;
+
+     label90:
+        r20 := @caughtexception;
+
+        goto label56;
+
+     label91:
+        goto label46;
+
+        catch org.json.JSONException from label02 to label03 with label90;
+        catch java.lang.Exception from label02 to label03 with label89;
+        catch java.lang.Throwable from label01 to label03 with label88;
+        catch org.json.JSONException from label03 to label04 with label55;
+        catch org.json.JSONException from label05 to label06 with label55;
+        catch org.json.JSONException from label09 to label10 with label55;
+        catch org.json.JSONException from label11 to label12 with label55;
+        catch org.json.JSONException from label13 to label14 with label55;
+        catch org.json.JSONException from label16 to label17 with label55;
+        catch org.json.JSONException from label18 to label19 with label55;
+        catch org.json.JSONException from label20 to label21 with label55;
+        catch org.json.JSONException from label23 to label24 with label55;
+        catch org.json.JSONException from label25 to label26 with label55;
+        catch java.lang.Exception from label03 to label04 with label74;
+        catch java.lang.Exception from label05 to label06 with label74;
+        catch java.lang.Exception from label09 to label12 with label74;
+        catch java.lang.Exception from label13 to label14 with label74;
+        catch java.lang.Exception from label15 to label17 with label74;
+        catch java.lang.Exception from label18 to label19 with label74;
+        catch java.lang.Exception from label20 to label21 with label74;
+        catch java.lang.Exception from label23 to label24 with label74;
+        catch java.lang.Exception from label25 to label26 with label74;
+        catch java.lang.Throwable from label03 to label04 with label83;
+        catch java.lang.Throwable from label05 to label06 with label83;
+        catch java.lang.Throwable from label07 to label08 with label83;
+        catch java.lang.Throwable from label09 to label12 with label83;
+        catch java.lang.Throwable from label13 to label14 with label83;
+        catch java.lang.Throwable from label15 to label17 with label83;
+        catch java.lang.Throwable from label18 to label19 with label83;
+        catch java.lang.Throwable from label20 to label21 with label83;
+        catch java.lang.Throwable from label23 to label26 with label83;
+        catch org.json.JSONException from label26 to label27 with label90;
+        catch org.json.JSONException from label30 to label31 with label90;
+        catch org.json.JSONException from label32 to label33 with label90;
+        catch java.lang.Exception from label26 to label27 with label89;
+        catch java.lang.Exception from label30 to label33 with label89;
+        catch java.lang.Throwable from label26 to label27 with label88;
+        catch java.lang.Throwable from label28 to label29 with label88;
+        catch java.lang.Throwable from label30 to label33 with label88;
+        catch org.json.JSONException from label37 to label38 with label55;
+        catch org.json.JSONException from label40 to label41 with label55;
+        catch org.json.JSONException from label43 to label44 with label55;
+        catch java.lang.Exception from label37 to label38 with label74;
+        catch java.lang.Exception from label40 to label41 with label74;
+        catch java.lang.Exception from label43 to label45 with label74;
+        catch java.lang.Throwable from label37 to label38 with label83;
+        catch java.lang.Throwable from label39 to label41 with label83;
+        catch java.lang.Throwable from label42 to label45 with label83;
+        catch org.json.JSONException from label47 to label48 with label55;
+        catch org.json.JSONException from label49 to label50 with label55;
+        catch org.json.JSONException from label52 to label53 with label55;
+        catch java.lang.Exception from label47 to label48 with label74;
+        catch java.lang.Exception from label49 to label50 with label74;
+        catch java.lang.Exception from label52 to label54 with label74;
+        catch java.lang.Throwable from label47 to label50 with label83;
+        catch java.lang.Throwable from label51 to label54 with label83;
+        catch java.lang.Throwable from label56 to label57 with label88;
+        catch org.json.JSONException from label60 to label61 with label55;
+        catch org.json.JSONException from label63 to label64 with label55;
+        catch org.json.JSONException from label65 to label66 with label55;
+        catch org.json.JSONException from label68 to label69 with label55;
+        catch org.json.JSONException from label71 to label72 with label55;
+        catch java.lang.Exception from label60 to label62 with label74;
+        catch java.lang.Exception from label63 to label66 with label74;
+        catch java.lang.Exception from label68 to label69 with label74;
+        catch java.lang.Exception from label71 to label73 with label74;
+        catch java.lang.Throwable from label59 to label66 with label83;
+        catch java.lang.Throwable from label67 to label69 with label83;
+        catch java.lang.Throwable from label70 to label73 with label83;
+        catch java.lang.Throwable from label75 to label76 with label88;
+        catch org.json.JSONException from label80 to label81 with label55;
+        catch java.lang.Exception from label80 to label82 with label74;
+        catch java.lang.Throwable from label77 to label78 with label83;
+        catch java.lang.Throwable from label79 to label82 with label83;
+    }
+    protected com.owncloud.android.lib.common.operations.RemoteOperationResult run(com.owncloud.android.lib.common.OwnCloudClient)
+    {
+        com.owncloud.android.lib.resources.status.GetRemoteStatusOperation r0;
+        com.owncloud.android.lib.common.OwnCloudClient $r1;
+        boolean $z0;
+        com.owncloud.android.lib.common.operations.RemoteOperationResult $r2;
+        com.owncloud.android.lib.common.operations.RemoteOperationResult$ResultCode $r3;
+        android.net.Uri $r4;
+        java.lang.String $r5, $r7;
+        java.lang.StringBuilder $r6;
+
+        r0 := @this: com.owncloud.android.lib.resources.status.GetRemoteStatusOperation;
+
+        $r1 := @parameter0: com.owncloud.android.lib.common.OwnCloudClient;
+
+        $z0 = specialinvoke r0.<com.owncloud.android.lib.resources.status.GetRemoteStatusOperation: boolean isOnline()>();
+
+        if $z0 != 0 goto label1;
+
+        $r2 = new com.owncloud.android.lib.common.operations.RemoteOperationResult;
+
+        $r3 = <com.owncloud.android.lib.common.operations.RemoteOperationResult$ResultCode: com.owncloud.android.lib.common.operations.RemoteOperationResult$ResultCode NO_NETWORK_CONNECTION>;
+
+        specialinvoke $r2.<com.owncloud.android.lib.common.operations.RemoteOperationResult: void <init>(com.owncloud.android.lib.common.operations.RemoteOperationResult$ResultCode)>($r3);
+
+        return $r2;
+
+     label1:
+        $r4 = virtualinvoke $r1.<com.owncloud.android.lib.common.OwnCloudClient: android.net.Uri getBaseUri()>();
+
+        $r5 = virtualinvoke $r4.<android.net.Uri: java.lang.String toString()>();
+
+        $z0 = virtualinvoke $r5.<java.lang.String: boolean startsWith(java.lang.String)>("http://");
+
+        if $z0 != 0 goto label2;
+
+        $z0 = virtualinvoke $r5.<java.lang.String: boolean startsWith(java.lang.String)>("https://");
+
+        if $z0 == 0 goto label4;
+
+     label2:
+        specialinvoke r0.<com.owncloud.android.lib.resources.status.GetRemoteStatusOperation: boolean tryConnection(com.owncloud.android.lib.common.OwnCloudClient)>($r1);
+
+     label3:
+        $r2 = r0.<com.owncloud.android.lib.resources.status.GetRemoteStatusOperation: com.owncloud.android.lib.common.operations.RemoteOperationResult mLatestResult>;
+
+        return $r2;
+
+     label4:
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("https://");
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r4 = staticinvoke <android.net.Uri: android.net.Uri parse(java.lang.String)>($r7);
+
+        virtualinvoke $r1.<com.owncloud.android.lib.common.OwnCloudClient: void setBaseUri(android.net.Uri)>($r4);
+
+        $z0 = specialinvoke r0.<com.owncloud.android.lib.resources.status.GetRemoteStatusOperation: boolean tryConnection(com.owncloud.android.lib.common.OwnCloudClient)>($r1);
+
+        if $z0 != 0 goto label3;
+
+        $r2 = r0.<com.owncloud.android.lib.resources.status.GetRemoteStatusOperation: com.owncloud.android.lib.common.operations.RemoteOperationResult mLatestResult>;
+
+        $z0 = virtualinvoke $r2.<com.owncloud.android.lib.common.operations.RemoteOperationResult: boolean isSslRecoverableException()>();
+
+        if $z0 != 0 goto label3;
+
+        $r7 = <com.owncloud.android.lib.resources.status.GetRemoteStatusOperation: java.lang.String TAG>;
+
+        staticinvoke <com.owncloud.android.lib.common.utils.Log_OC: void d(java.lang.String,java.lang.String)>($r7, "establishing secure connection failed, trying non secure connection");
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("http://");
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r5 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r4 = staticinvoke <android.net.Uri: android.net.Uri parse(java.lang.String)>($r5);
+
+        virtualinvoke $r1.<com.owncloud.android.lib.common.OwnCloudClient: void setBaseUri(android.net.Uri)>($r4);
+
+        specialinvoke r0.<com.owncloud.android.lib.resources.status.GetRemoteStatusOperation: boolean tryConnection(com.owncloud.android.lib.common.OwnCloudClient)>($r1);
+
+        goto label3;
+    }

@@ -1,0 +1,727 @@
+org.gnucash.android.export.qif.QifExporter extends org.gnucash.android.export.Exporter
+    public void <init>(org.gnucash.android.export.ExportParams)
+    {
+        org.gnucash.android.export.qif.QifExporter r0;
+        org.gnucash.android.export.ExportParams $r1;
+
+        r0 := @this: org.gnucash.android.export.qif.QifExporter;
+
+        $r1 := @parameter0: org.gnucash.android.export.ExportParams;
+
+        specialinvoke r0.<org.gnucash.android.export.Exporter: void <init>(org.gnucash.android.export.ExportParams,android.database.sqlite.SQLiteDatabase)>($r1, null);
+
+        <org.gnucash.android.export.qif.QifExporter: java.lang.String LOG_TAG> = "QifExporter";
+
+        return;
+    }
+    public java.util.List generateExport() throws org.gnucash.android.export.Exporter$ExporterException
+    {
+        org.gnucash.android.export.qif.QifExporter r0;
+        android.content.ContentValues r1;
+        java.io.IOException r2;
+        java.io.File r3;
+        java.io.BufferedWriter r4;
+        org.gnucash.android.db.TransactionsDbAdapter $r5;
+        org.gnucash.android.export.ExportParams $r6;
+        java.sql.Timestamp $r7;
+        java.lang.String $r8, r14, r15, $r16, $r17, $r18;
+        java.lang.String[] $r9;
+        java.lang.StringBuilder $r10;
+        android.database.Cursor $r11;
+        java.io.OutputStreamWriter $r12;
+        java.io.FileOutputStream $r13;
+        boolean $z0;
+        int $i0;
+        java.io.Writer $r19;
+        long $l1;
+        double $d0, $d1;
+        java.math.BigDecimal $r20, $r21;
+        java.util.Currency $r22;
+        java.lang.Double $r23, $r26;
+        byte b2;
+        org.gnucash.android.export.Exporter$ExporterException $r24;
+        java.lang.Throwable $r25;
+        java.lang.Object[] $r27;
+        java.lang.Integer $r28;
+        android.content.Context $r29;
+        android.content.SharedPreferences $r30;
+        android.content.SharedPreferences$Editor $r31;
+        java.util.List $r32;
+
+        r0 := @this: org.gnucash.android.export.qif.QifExporter;
+
+        $r5 = r0.<org.gnucash.android.export.qif.QifExporter: org.gnucash.android.db.TransactionsDbAdapter mTransactionsDbAdapter>;
+
+        $r6 = r0.<org.gnucash.android.export.qif.QifExporter: org.gnucash.android.export.ExportParams mExportParams>;
+
+     label01:
+        $r7 = virtualinvoke $r6.<org.gnucash.android.export.ExportParams: java.sql.Timestamp getExportStartTime()>();
+
+        $r8 = virtualinvoke $r7.<java.sql.Timestamp: java.lang.String toString()>();
+
+     label02:
+        $r9 = newarray (java.lang.String)[14];
+
+        $r9[0] = "transactions_uid AS trans_uid";
+
+        $r9[1] = "transactions_timestamp AS trans_time";
+
+        $r9[2] = "transactions_name AS trans_desc";
+
+        $r9[3] = "splits_quantity_num AS split_quantity_num";
+
+        $r9[4] = "splits_quantity_denom AS split_quantity_denom";
+
+        $r9[5] = "splits_type AS split_type";
+
+        $r9[6] = "splits_memo AS split_memo";
+
+        $r9[7] = "trans_extra_info.trans_acct_balance AS trans_acct_balance";
+
+        $r9[8] = "trans_extra_info.trans_split_count AS trans_split_count";
+
+        $r9[9] = "account1.uid AS acct1_uid";
+
+        $r9[10] = "account1.full_name AS acct1_full_name";
+
+        $r9[11] = "account1.currency_code AS acct1_currency";
+
+        $r9[12] = "account1.type AS acct1_type";
+
+        $r9[13] = "accounts_full_name AS acct2_full_name";
+
+        $r10 = new java.lang.StringBuilder;
+
+     label03:
+        specialinvoke $r10.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("transactions_is_template == 0 AND trans_extra_info.trans_currency_count = 1 AND ( accounts_uid != account1.uid OR trans_split_count == 1 )");
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" AND transactions_modified_at > \"");
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r8);
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\"");
+
+        $r8 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r11 = virtualinvoke $r5.<org.gnucash.android.db.TransactionsDbAdapter: android.database.Cursor fetchTransactionsWithSplitsWithTransactionAccount(java.lang.String[],java.lang.String,java.lang.String[],java.lang.String)>($r9, $r8, null, "acct1_currency ASC, trans_time ASC, trans_uid ASC");
+
+     label04:
+        r3 = new java.io.File;
+
+     label05:
+        $r8 = virtualinvoke r0.<org.gnucash.android.export.qif.QifExporter: java.lang.String getExportCacheFilePath()>();
+
+        specialinvoke r3.<java.io.File: void <init>(java.lang.String)>($r8);
+
+     label06:
+        r4 = new java.io.BufferedWriter;
+
+        $r12 = new java.io.OutputStreamWriter;
+
+        $r13 = new java.io.FileOutputStream;
+
+     label07:
+        specialinvoke $r13.<java.io.FileOutputStream: void <init>(java.io.File)>(r3);
+
+        specialinvoke $r12.<java.io.OutputStreamWriter: void <init>(java.io.OutputStream,java.lang.String)>($r13, "UTF-8");
+
+        specialinvoke r4.<java.io.BufferedWriter: void <init>(java.io.Writer)>($r12);
+
+     label08:
+        $r8 = "";
+
+        r14 = "";
+
+        r15 = "";
+
+     label09:
+        $z0 = interfaceinvoke $r11.<android.database.Cursor: boolean moveToNext()>();
+
+     label10:
+        if $z0 == 0 goto label55;
+
+     label11:
+        $i0 = interfaceinvoke $r11.<android.database.Cursor: int getColumnIndexOrThrow(java.lang.String)>("acct1_currency");
+
+        $r16 = interfaceinvoke $r11.<android.database.Cursor: java.lang.String getString(int)>($i0);
+
+        $i0 = interfaceinvoke $r11.<android.database.Cursor: int getColumnIndexOrThrow(java.lang.String)>("acct1_uid");
+
+        $r17 = interfaceinvoke $r11.<android.database.Cursor: java.lang.String getString(int)>($i0);
+
+        $i0 = interfaceinvoke $r11.<android.database.Cursor: int getColumnIndexOrThrow(java.lang.String)>("trans_uid");
+
+        $r18 = interfaceinvoke $r11.<android.database.Cursor: java.lang.String getString(int)>($i0);
+
+        $z0 = virtualinvoke $r18.<java.lang.String: boolean equals(java.lang.Object)>(r15);
+
+     label12:
+        if $z0 != 0 goto label27;
+
+     label13:
+        $z0 = virtualinvoke r15.<java.lang.String: boolean equals(java.lang.Object)>("");
+
+     label14:
+        if $z0 != 0 goto label16;
+
+     label15:
+        $r19 = virtualinvoke r4.<java.io.BufferedWriter: java.io.Writer append(java.lang.CharSequence)>("^");
+
+        virtualinvoke $r19.<java.io.Writer: java.io.Writer append(java.lang.CharSequence)>("\n");
+
+     label16:
+        $z0 = virtualinvoke $r17.<java.lang.String: boolean equals(java.lang.Object)>(r14);
+
+     label17:
+        if $z0 != 0 goto label23;
+
+     label18:
+        $z0 = virtualinvoke $r16.<java.lang.String: boolean equals(java.lang.Object)>($r8);
+
+     label19:
+        if $z0 != 0 goto label21;
+
+        $r8 = $r16;
+
+     label20:
+        $r19 = virtualinvoke r4.<java.io.BufferedWriter: java.io.Writer append(java.lang.CharSequence)>("*");
+
+        $r19 = virtualinvoke $r19.<java.io.Writer: java.io.Writer append(java.lang.CharSequence)>($r16);
+
+        virtualinvoke $r19.<java.io.Writer: java.io.Writer append(java.lang.CharSequence)>("\n");
+
+     label21:
+        r14 = $r17;
+
+     label22:
+        $r19 = virtualinvoke r4.<java.io.BufferedWriter: java.io.Writer append(java.lang.CharSequence)>("!Account");
+
+        virtualinvoke $r19.<java.io.Writer: java.io.Writer append(java.lang.CharSequence)>("\n");
+
+        $r19 = virtualinvoke r4.<java.io.BufferedWriter: java.io.Writer append(java.lang.CharSequence)>("N");
+
+        $i0 = interfaceinvoke $r11.<android.database.Cursor: int getColumnIndexOrThrow(java.lang.String)>("acct1_full_name");
+
+        r15 = interfaceinvoke $r11.<android.database.Cursor: java.lang.String getString(int)>($i0);
+
+        $r19 = virtualinvoke $r19.<java.io.Writer: java.io.Writer append(java.lang.CharSequence)>(r15);
+
+        virtualinvoke $r19.<java.io.Writer: java.io.Writer append(java.lang.CharSequence)>("\n");
+
+        $r19 = virtualinvoke r4.<java.io.BufferedWriter: java.io.Writer append(java.lang.CharSequence)>("^");
+
+        virtualinvoke $r19.<java.io.Writer: java.io.Writer append(java.lang.CharSequence)>("\n");
+
+        $i0 = interfaceinvoke $r11.<android.database.Cursor: int getColumnIndexOrThrow(java.lang.String)>("acct1_type");
+
+        r15 = interfaceinvoke $r11.<android.database.Cursor: java.lang.String getString(int)>($i0);
+
+        r15 = staticinvoke <org.gnucash.android.export.qif.QifHelper: java.lang.String getQifHeader(java.lang.String)>(r15);
+
+        $r19 = virtualinvoke r4.<java.io.BufferedWriter: java.io.Writer append(java.lang.CharSequence)>(r15);
+
+        virtualinvoke $r19.<java.io.Writer: java.io.Writer append(java.lang.CharSequence)>("\n");
+
+     label23:
+        r15 = $r18;
+
+     label24:
+        $r19 = virtualinvoke r4.<java.io.BufferedWriter: java.io.Writer append(java.lang.CharSequence)>("D");
+
+        $i0 = interfaceinvoke $r11.<android.database.Cursor: int getColumnIndexOrThrow(java.lang.String)>("trans_time");
+
+        $l1 = interfaceinvoke $r11.<android.database.Cursor: long getLong(int)>($i0);
+
+        $r18 = staticinvoke <org.gnucash.android.export.qif.QifHelper: java.lang.String formatDate(long)>($l1);
+
+        $r19 = virtualinvoke $r19.<java.io.Writer: java.io.Writer append(java.lang.CharSequence)>($r18);
+
+        virtualinvoke $r19.<java.io.Writer: java.io.Writer append(java.lang.CharSequence)>("\n");
+
+        $r19 = virtualinvoke r4.<java.io.BufferedWriter: java.io.Writer append(java.lang.CharSequence)>("M");
+
+        $i0 = interfaceinvoke $r11.<android.database.Cursor: int getColumnIndexOrThrow(java.lang.String)>("trans_desc");
+
+        $r18 = interfaceinvoke $r11.<android.database.Cursor: java.lang.String getString(int)>($i0);
+
+        $r19 = virtualinvoke $r19.<java.io.Writer: java.io.Writer append(java.lang.CharSequence)>($r18);
+
+        virtualinvoke $r19.<java.io.Writer: java.io.Writer append(java.lang.CharSequence)>("\n");
+
+        $i0 = interfaceinvoke $r11.<android.database.Cursor: int getColumnIndexOrThrow(java.lang.String)>("trans_acct_balance");
+
+        $d0 = interfaceinvoke $r11.<android.database.Cursor: double getDouble(int)>($i0);
+
+        $r20 = staticinvoke <java.math.BigDecimal: java.math.BigDecimal valueOf(double)>($d0);
+
+        $r20 = virtualinvoke $r20.<java.math.BigDecimal: java.math.BigDecimal setScale(int,int)>(2, 4);
+
+        $r21 = <java.math.BigDecimal: java.math.BigDecimal ZERO>;
+
+        $i0 = virtualinvoke $r20.<java.math.BigDecimal: int compareTo(java.math.BigDecimal)>($r21);
+
+     label25:
+        if $i0 == 0 goto label27;
+
+     label26:
+        $r19 = virtualinvoke r4.<java.io.BufferedWriter: java.io.Writer append(java.lang.CharSequence)>("S");
+
+        $i0 = interfaceinvoke $r11.<android.database.Cursor: int getColumnIndexOrThrow(java.lang.String)>("acct1_currency");
+
+        $r18 = interfaceinvoke $r11.<android.database.Cursor: java.lang.String getString(int)>($i0);
+
+        $r22 = staticinvoke <java.util.Currency: java.util.Currency getInstance(java.lang.String)>($r18);
+
+        $r18 = staticinvoke <org.gnucash.android.db.AccountsDbAdapter: java.lang.String getImbalanceAccountName(java.util.Currency)>($r22);
+
+        $r19 = virtualinvoke $r19.<java.io.Writer: java.io.Writer append(java.lang.CharSequence)>($r18);
+
+        virtualinvoke $r19.<java.io.Writer: java.io.Writer append(java.lang.CharSequence)>("\n");
+
+        $r19 = virtualinvoke r4.<java.io.BufferedWriter: java.io.Writer append(java.lang.CharSequence)>("$");
+
+        $r18 = virtualinvoke $r20.<java.math.BigDecimal: java.lang.String toPlainString()>();
+
+        $r19 = virtualinvoke $r19.<java.io.Writer: java.io.Writer append(java.lang.CharSequence)>($r18);
+
+        virtualinvoke $r19.<java.io.Writer: java.io.Writer append(java.lang.CharSequence)>("\n");
+
+     label27:
+        $i0 = interfaceinvoke $r11.<android.database.Cursor: int getColumnIndexOrThrow(java.lang.String)>("trans_split_count");
+
+        $i0 = interfaceinvoke $r11.<android.database.Cursor: int getInt(int)>($i0);
+
+     label28:
+        if $i0 == 1 goto label09;
+
+     label29:
+        $r19 = virtualinvoke r4.<java.io.BufferedWriter: java.io.Writer append(java.lang.CharSequence)>("S");
+
+        $i0 = interfaceinvoke $r11.<android.database.Cursor: int getColumnIndexOrThrow(java.lang.String)>("acct2_full_name");
+
+        $r18 = interfaceinvoke $r11.<android.database.Cursor: java.lang.String getString(int)>($i0);
+
+        $r19 = virtualinvoke $r19.<java.io.Writer: java.io.Writer append(java.lang.CharSequence)>($r18);
+
+        virtualinvoke $r19.<java.io.Writer: java.io.Writer append(java.lang.CharSequence)>("\n");
+
+        $i0 = interfaceinvoke $r11.<android.database.Cursor: int getColumnIndexOrThrow(java.lang.String)>("split_memo");
+
+        $r18 = interfaceinvoke $r11.<android.database.Cursor: java.lang.String getString(int)>($i0);
+
+     label30:
+        if $r18 == null goto label34;
+
+     label31:
+        $i0 = virtualinvoke $r18.<java.lang.String: int length()>();
+
+     label32:
+        if $i0 <= 0 goto label34;
+
+     label33:
+        $r19 = virtualinvoke r4.<java.io.BufferedWriter: java.io.Writer append(java.lang.CharSequence)>("E");
+
+        $r19 = virtualinvoke $r19.<java.io.Writer: java.io.Writer append(java.lang.CharSequence)>($r18);
+
+        virtualinvoke $r19.<java.io.Writer: java.io.Writer append(java.lang.CharSequence)>("\n");
+
+     label34:
+        $i0 = interfaceinvoke $r11.<android.database.Cursor: int getColumnIndexOrThrow(java.lang.String)>("split_type");
+
+        $r18 = interfaceinvoke $r11.<android.database.Cursor: java.lang.String getString(int)>($i0);
+
+        $i0 = interfaceinvoke $r11.<android.database.Cursor: int getColumnIndexOrThrow(java.lang.String)>("split_quantity_num");
+
+        $d0 = interfaceinvoke $r11.<android.database.Cursor: double getDouble(int)>($i0);
+
+        $r23 = staticinvoke <java.lang.Double: java.lang.Double valueOf(double)>($d0);
+
+        $i0 = interfaceinvoke $r11.<android.database.Cursor: int getColumnIndexOrThrow(java.lang.String)>("split_quantity_denom");
+
+        $i0 = interfaceinvoke $r11.<android.database.Cursor: int getInt(int)>($i0);
+
+     label35:
+        b2 = 0;
+
+        lookupswitch($i0)
+        {
+            case 0: goto label41;
+            case 1: goto label40;
+            case 10: goto label51;
+            case 100: goto label52;
+            case 1000: goto label53;
+            default: goto label36;
+        };
+
+     label36:
+        $r24 = new org.gnucash.android.export.Exporter$ExporterException;
+
+        $r6 = r0.<org.gnucash.android.export.qif.QifExporter: org.gnucash.android.export.ExportParams mExportParams>;
+
+        $r10 = new java.lang.StringBuilder;
+
+        specialinvoke $r10.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("split quantity has illegal denominator: ");
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r8 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r24.<org.gnucash.android.export.Exporter$ExporterException: void <init>(org.gnucash.android.export.ExportParams,java.lang.String)>($r6, $r8);
+
+        throw $r24;
+
+     label37:
+        $r25 := @caughtexception;
+
+     label38:
+        interfaceinvoke $r11.<android.database.Cursor: void close()>();
+
+        virtualinvoke r4.<java.io.BufferedWriter: void close()>();
+
+        throw $r25;
+
+     label39:
+        r2 := @caughtexception;
+
+        $r24 = new org.gnucash.android.export.Exporter$ExporterException;
+
+        $r6 = r0.<org.gnucash.android.export.qif.QifExporter: org.gnucash.android.export.ExportParams mExportParams>;
+
+        specialinvoke $r24.<org.gnucash.android.export.Exporter$ExporterException: void <init>(org.gnucash.android.export.ExportParams,java.lang.Throwable)>($r6, r2);
+
+        throw $r24;
+
+     label40:
+        b2 = 0;
+
+     label41:
+        $r26 = staticinvoke <java.lang.Double: java.lang.Double valueOf(double)>(0.0);
+
+     label42:
+        if $i0 == 0 goto label47;
+
+     label43:
+        $d0 = virtualinvoke $r23.<java.lang.Double: double doubleValue()>();
+
+     label44:
+        $d1 = (double) $i0;
+
+        $d0 = $d0 / $d1;
+
+     label45:
+        $r23 = staticinvoke <java.lang.Double: java.lang.Double valueOf(double)>($d0);
+
+     label46:
+        $r26 = $r23;
+
+     label47:
+        $r19 = virtualinvoke r4.<java.io.BufferedWriter: java.io.Writer append(java.lang.CharSequence)>("$");
+
+        $z0 = virtualinvoke $r18.<java.lang.String: boolean equals(java.lang.Object)>("DEBIT");
+
+     label48:
+        if $z0 == 0 goto label54;
+
+        $r18 = "-";
+
+     label49:
+        $r19 = virtualinvoke $r19.<java.io.Writer: java.io.Writer append(java.lang.CharSequence)>($r18);
+
+        $r10 = new java.lang.StringBuilder;
+
+        specialinvoke $r10.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("%.");
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(b2);
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("f");
+
+        $r18 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r27 = newarray (java.lang.Object)[1];
+
+        $r27[0] = $r26;
+
+        $r18 = staticinvoke <java.lang.String: java.lang.String format(java.lang.String,java.lang.Object[])>($r18, $r27);
+
+        $r19 = virtualinvoke $r19.<java.io.Writer: java.io.Writer append(java.lang.CharSequence)>($r18);
+
+        virtualinvoke $r19.<java.io.Writer: java.io.Writer append(java.lang.CharSequence)>("\n");
+
+     label50:
+        goto label09;
+
+     label51:
+        b2 = 1;
+
+        goto label41;
+
+     label52:
+        b2 = 2;
+
+        goto label41;
+
+     label53:
+        b2 = 3;
+
+        goto label41;
+
+     label54:
+        $r18 = "";
+
+        goto label49;
+
+     label55:
+        $z0 = virtualinvoke r15.<java.lang.String: boolean equals(java.lang.Object)>("");
+
+     label56:
+        if $z0 != 0 goto label58;
+
+     label57:
+        $r19 = virtualinvoke r4.<java.io.BufferedWriter: java.io.Writer append(java.lang.CharSequence)>("^");
+
+        virtualinvoke $r19.<java.io.Writer: java.io.Writer append(java.lang.CharSequence)>("\n");
+
+     label58:
+        virtualinvoke r4.<java.io.BufferedWriter: void flush()>();
+
+     label59:
+        interfaceinvoke $r11.<android.database.Cursor: void close()>();
+
+        virtualinvoke r4.<java.io.BufferedWriter: void close()>();
+
+     label60:
+        r1 = new android.content.ContentValues;
+
+     label61:
+        specialinvoke r1.<android.content.ContentValues: void <init>()>();
+
+        $r28 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(1);
+
+        virtualinvoke r1.<android.content.ContentValues: void put(java.lang.String,java.lang.Integer)>("is_exported", $r28);
+
+        virtualinvoke $r5.<org.gnucash.android.db.TransactionsDbAdapter: int updateTransaction(android.content.ContentValues,java.lang.String,java.lang.String[])>(r1, null, null);
+
+     label62:
+        $r7 = new java.sql.Timestamp;
+
+     label63:
+        $l1 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        specialinvoke $r7.<java.sql.Timestamp: void <init>(long)>($l1);
+
+        $r8 = virtualinvoke $r7.<java.sql.Timestamp: java.lang.String toString()>();
+
+     label64:
+        $r29 = r0.<org.gnucash.android.export.qif.QifExporter: android.content.Context mContext>;
+
+     label65:
+        $r30 = staticinvoke <android.preference.PreferenceManager: android.content.SharedPreferences getDefaultSharedPreferences(android.content.Context)>($r29);
+
+        $r31 = interfaceinvoke $r30.<android.content.SharedPreferences: android.content.SharedPreferences$Editor edit()>();
+
+        $r31 = interfaceinvoke $r31.<android.content.SharedPreferences$Editor: android.content.SharedPreferences$Editor putString(java.lang.String,java.lang.String)>("last_export_time", $r8);
+
+        interfaceinvoke $r31.<android.content.SharedPreferences$Editor: void apply()>();
+
+        $r32 = virtualinvoke r0.<org.gnucash.android.export.qif.QifExporter: java.util.List splitQIF(java.io.File)>(r3);
+
+     label66:
+        return $r32;
+
+        catch java.io.IOException from label01 to label02 with label39;
+        catch java.io.IOException from label03 to label04 with label39;
+        catch java.io.IOException from label05 to label06 with label39;
+        catch java.io.IOException from label07 to label08 with label39;
+        catch java.lang.Throwable from label09 to label10 with label37;
+        catch java.lang.Throwable from label11 to label12 with label37;
+        catch java.lang.Throwable from label13 to label14 with label37;
+        catch java.lang.Throwable from label15 to label17 with label37;
+        catch java.lang.Throwable from label18 to label19 with label37;
+        catch java.lang.Throwable from label20 to label21 with label37;
+        catch java.lang.Throwable from label22 to label23 with label37;
+        catch java.lang.Throwable from label24 to label25 with label37;
+        catch java.lang.Throwable from label26 to label28 with label37;
+        catch java.lang.Throwable from label29 to label30 with label37;
+        catch java.lang.Throwable from label31 to label32 with label37;
+        catch java.lang.Throwable from label33 to label35 with label37;
+        catch java.lang.Throwable from label36 to label37 with label37;
+        catch java.io.IOException from label38 to label39 with label39;
+        catch java.lang.Throwable from label41 to label42 with label37;
+        catch java.lang.Throwable from label43 to label44 with label37;
+        catch java.lang.Throwable from label45 to label46 with label37;
+        catch java.lang.Throwable from label47 to label48 with label37;
+        catch java.lang.Throwable from label49 to label50 with label37;
+        catch java.lang.Throwable from label55 to label56 with label37;
+        catch java.lang.Throwable from label57 to label59 with label37;
+        catch java.io.IOException from label59 to label60 with label39;
+        catch java.io.IOException from label61 to label62 with label39;
+        catch java.io.IOException from label63 to label64 with label39;
+        catch java.io.IOException from label65 to label66 with label39;
+    }
+    public java.lang.String getExportMimeType()
+    {
+        org.gnucash.android.export.qif.QifExporter r0;
+
+        r0 := @this: org.gnucash.android.export.qif.QifExporter;
+
+        return "text/plain";
+    }
+    public java.util.List splitQIF(java.io.File) throws java.io.IOException
+    {
+        org.gnucash.android.export.qif.QifExporter r0;
+        java.io.File $r1;
+        java.io.BufferedReader r2;
+        java.util.ArrayList r3;
+        java.lang.String $r4, $r9;
+        java.lang.String[] $r5;
+        java.io.FileReader $r6;
+        java.io.BufferedWriter r7, r10;
+        boolean $z0;
+        java.lang.StringBuilder $r8;
+        java.io.FileWriter $r11;
+        java.lang.IllegalArgumentException $r12;
+        java.lang.Throwable $r13;
+        java.io.Writer $r14;
+
+        r0 := @this: org.gnucash.android.export.qif.QifExporter;
+
+        $r1 := @parameter0: java.io.File;
+
+        $r4 = virtualinvoke $r1.<java.io.File: java.lang.String getPath()>();
+
+        $r5 = virtualinvoke $r4.<java.lang.String: java.lang.String[] split(java.lang.String)>("(?=\\.[^\\.]+$)");
+
+        r3 = new java.util.ArrayList;
+
+        specialinvoke r3.<java.util.ArrayList: void <init>()>();
+
+        r2 = new java.io.BufferedReader;
+
+        $r6 = new java.io.FileReader;
+
+        specialinvoke $r6.<java.io.FileReader: void <init>(java.io.File)>($r1);
+
+        specialinvoke r2.<java.io.BufferedReader: void <init>(java.io.Reader)>($r6);
+
+        r7 = null;
+
+     label01:
+        $r4 = virtualinvoke r2.<java.io.BufferedReader: java.lang.String readLine()>();
+
+     label02:
+        if $r4 == null goto label16;
+
+     label03:
+        $z0 = virtualinvoke $r4.<java.lang.String: boolean startsWith(java.lang.String)>("*");
+
+     label04:
+        if $z0 == 0 goto label10;
+
+     label05:
+        $r4 = virtualinvoke $r4.<java.lang.String: java.lang.String substring(int)>(1);
+
+     label06:
+        if r7 == null goto label08;
+
+     label07:
+        virtualinvoke r7.<java.io.BufferedWriter: void close()>();
+
+     label08:
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = $r5[0];
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r9);
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("_");
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r4 = $r5[1];
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r4 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r3.<java.util.ArrayList: boolean add(java.lang.Object)>($r4);
+
+        r10 = new java.io.BufferedWriter;
+
+        $r11 = new java.io.FileWriter;
+
+        specialinvoke $r11.<java.io.FileWriter: void <init>(java.lang.String)>($r4);
+
+        specialinvoke r10.<java.io.BufferedWriter: void <init>(java.io.Writer)>($r11);
+
+     label09:
+        r7 = r10;
+
+        goto label01;
+
+     label10:
+        if r7 != null goto label14;
+
+     label11:
+        $r12 = new java.lang.IllegalArgumentException;
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r1.<java.io.File: java.lang.String getPath()>();
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" format is not correct");
+
+        $r4 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r12.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r4);
+
+        throw $r12;
+
+     label12:
+        $r13 := @caughtexception;
+
+        virtualinvoke r2.<java.io.BufferedReader: void close()>();
+
+        if r7 == null goto label13;
+
+        virtualinvoke r7.<java.io.BufferedWriter: void close()>();
+
+     label13:
+        throw $r13;
+
+     label14:
+        $r14 = virtualinvoke r7.<java.io.BufferedWriter: java.io.Writer append(java.lang.CharSequence)>($r4);
+
+        virtualinvoke $r14.<java.io.Writer: java.io.Writer append(char)>(10);
+
+     label15:
+        goto label01;
+
+     label16:
+        virtualinvoke r2.<java.io.BufferedReader: void close()>();
+
+        if r7 == null goto label17;
+
+        virtualinvoke r7.<java.io.BufferedWriter: void close()>();
+
+     label17:
+        return r3;
+
+        catch java.lang.Throwable from label01 to label02 with label12;
+        catch java.lang.Throwable from label03 to label04 with label12;
+        catch java.lang.Throwable from label05 to label06 with label12;
+        catch java.lang.Throwable from label07 to label09 with label12;
+        catch java.lang.Throwable from label11 to label12 with label12;
+        catch java.lang.Throwable from label14 to label15 with label12;
+    }

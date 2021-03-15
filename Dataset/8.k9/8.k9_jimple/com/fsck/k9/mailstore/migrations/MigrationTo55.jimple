@@ -1,0 +1,194 @@
+com.fsck.k9.mailstore.migrations.MigrationTo55 extends java.lang.Object
+    public void <init>()
+    {
+        com.fsck.k9.mailstore.migrations.MigrationTo55 r0;
+
+        r0 := @this: com.fsck.k9.mailstore.migrations.MigrationTo55;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+    public static void createFtsSearchTable(android.database.sqlite.SQLiteDatabase, com.fsck.k9.mailstore.migrations.MigrationsHelper)
+    {
+        android.database.sqlite.SQLiteDatabase $r0;
+        com.fsck.k9.mailstore.migrations.MigrationsHelper $r1;
+        android.content.ContentValues r2;
+        com.fsck.k9.mail.MessagingException r3;
+        com.fsck.k9.mail.FetchProfile r4;
+        com.fsck.k9.mailstore.LocalStore $r5;
+        com.fsck.k9.message.extractors.MessageFulltextCreator $r6;
+        java.util.List $r7;
+        com.fsck.k9.mail.FetchProfile$Item $r8;
+        java.util.Iterator $r9, $r13;
+        boolean $z0;
+        java.lang.Object $r10;
+        com.fsck.k9.mailstore.LocalFolder r11;
+        java.util.ArrayList $r12;
+        com.fsck.k9.mailstore.LocalMessage r14;
+        java.lang.String $r15, $r17;
+        java.lang.StringBuilder $r16;
+        long $l0;
+        int $i1;
+        java.lang.Long $r18;
+
+        $r0 := @parameter0: android.database.sqlite.SQLiteDatabase;
+
+        $r1 := @parameter1: com.fsck.k9.mailstore.migrations.MigrationsHelper;
+
+        virtualinvoke $r0.<android.database.sqlite.SQLiteDatabase: void execSQL(java.lang.String)>("CREATE VIRTUAL TABLE messages_fulltext USING fts4 (fulltext)");
+
+        $r5 = interfaceinvoke $r1.<com.fsck.k9.mailstore.migrations.MigrationsHelper: com.fsck.k9.mailstore.LocalStore getLocalStore()>();
+
+        $r6 = virtualinvoke $r5.<com.fsck.k9.mailstore.LocalStore: com.fsck.k9.message.extractors.MessageFulltextCreator getMessageFulltextCreator()>();
+
+     label01:
+        $r7 = virtualinvoke $r5.<com.fsck.k9.mailstore.LocalStore: java.util.List getPersonalNamespaces(boolean)>(1);
+
+     label02:
+        r2 = new android.content.ContentValues;
+
+     label03:
+        specialinvoke r2.<android.content.ContentValues: void <init>()>();
+
+     label04:
+        r4 = new com.fsck.k9.mail.FetchProfile;
+
+     label05:
+        specialinvoke r4.<com.fsck.k9.mail.FetchProfile: void <init>()>();
+
+     label06:
+        $r8 = <com.fsck.k9.mail.FetchProfile$Item: com.fsck.k9.mail.FetchProfile$Item BODY>;
+
+     label07:
+        virtualinvoke r4.<com.fsck.k9.mail.FetchProfile: boolean add(java.lang.Object)>($r8);
+
+        $r9 = interfaceinvoke $r7.<java.util.List: java.util.Iterator iterator()>();
+
+     label08:
+        $z0 = interfaceinvoke $r9.<java.util.Iterator: boolean hasNext()>();
+
+     label09:
+        if $z0 == 0 goto label25;
+
+     label10:
+        $r10 = interfaceinvoke $r9.<java.util.Iterator: java.lang.Object next()>();
+
+     label11:
+        r11 = (com.fsck.k9.mailstore.LocalFolder) $r10;
+
+        $r12 = new java.util.ArrayList;
+
+     label12:
+        $r7 = virtualinvoke r11.<com.fsck.k9.mailstore.LocalFolder: java.util.List getMessages(com.fsck.k9.mail.MessageRetrievalListener,boolean)>(null, 0);
+
+        specialinvoke $r12.<java.util.ArrayList: void <init>(java.util.Collection)>($r7);
+
+        $r13 = virtualinvoke $r12.<java.util.ArrayList: java.util.Iterator iterator()>();
+
+     label13:
+        $z0 = interfaceinvoke $r13.<java.util.Iterator: boolean hasNext()>();
+
+     label14:
+        if $z0 == 0 goto label08;
+
+     label15:
+        $r10 = interfaceinvoke $r13.<java.util.Iterator: java.lang.Object next()>();
+
+     label16:
+        r14 = (com.fsck.k9.mailstore.LocalMessage) $r10;
+
+     label17:
+        interfaceinvoke $r13.<java.util.Iterator: void remove()>();
+
+        $r7 = staticinvoke <java.util.Collections: java.util.List singletonList(java.lang.Object)>(r14);
+
+        virtualinvoke r11.<com.fsck.k9.mailstore.LocalFolder: void fetch(java.util.List,com.fsck.k9.mail.FetchProfile,com.fsck.k9.mail.MessageRetrievalListener)>($r7, r4, null);
+
+        $r15 = virtualinvoke $r6.<com.fsck.k9.message.extractors.MessageFulltextCreator: java.lang.String createFulltext(com.fsck.k9.mail.Message)>(r14);
+
+        $z0 = staticinvoke <android.text.TextUtils: boolean isEmpty(java.lang.CharSequence)>($r15);
+
+     label18:
+        if $z0 != 0 goto label22;
+
+        $r16 = new java.lang.StringBuilder;
+
+     label19:
+        specialinvoke $r16.<java.lang.StringBuilder: void <init>()>();
+
+        $r16 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("fulltext for msg id ");
+
+        $l0 = virtualinvoke r14.<com.fsck.k9.mailstore.LocalMessage: long getId()>();
+
+        $r16 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l0);
+
+        $r16 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" is ");
+
+        $i1 = virtualinvoke $r15.<java.lang.String: int length()>();
+
+        $r16 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i1);
+
+        $r16 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" chars long");
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("k9", $r17);
+
+        virtualinvoke r2.<android.content.ContentValues: void clear()>();
+
+        $l0 = virtualinvoke r14.<com.fsck.k9.mailstore.LocalMessage: long getId()>();
+
+        $r18 = staticinvoke <java.lang.Long: java.lang.Long valueOf(long)>($l0);
+
+        virtualinvoke r2.<android.content.ContentValues: void put(java.lang.String,java.lang.Long)>("docid", $r18);
+
+        virtualinvoke r2.<android.content.ContentValues: void put(java.lang.String,java.lang.String)>("fulltext", $r15);
+
+        virtualinvoke $r0.<android.database.sqlite.SQLiteDatabase: long insert(java.lang.String,java.lang.String,android.content.ContentValues)>("messages_fulltext", null, r2);
+
+     label20:
+        goto label13;
+
+     label21:
+        r3 := @caughtexception;
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String,java.lang.Throwable)>("k9", "error indexing fulltext - skipping rest, fts index is incomplete!", r3);
+
+        return;
+
+     label22:
+        $r16 = new java.lang.StringBuilder;
+
+     label23:
+        specialinvoke $r16.<java.lang.StringBuilder: void <init>()>();
+
+        $r16 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("no fulltext for msg id ");
+
+        $l0 = virtualinvoke r14.<com.fsck.k9.mailstore.LocalMessage: long getId()>();
+
+        $r16 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l0);
+
+        $r16 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" :(");
+
+        $r15 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("k9", $r15);
+
+     label24:
+        goto label13;
+
+     label25:
+        return;
+
+        catch com.fsck.k9.mail.MessagingException from label01 to label02 with label21;
+        catch com.fsck.k9.mail.MessagingException from label03 to label04 with label21;
+        catch com.fsck.k9.mail.MessagingException from label05 to label06 with label21;
+        catch com.fsck.k9.mail.MessagingException from label07 to label09 with label21;
+        catch com.fsck.k9.mail.MessagingException from label10 to label11 with label21;
+        catch com.fsck.k9.mail.MessagingException from label12 to label14 with label21;
+        catch com.fsck.k9.mail.MessagingException from label15 to label16 with label21;
+        catch com.fsck.k9.mail.MessagingException from label17 to label18 with label21;
+        catch com.fsck.k9.mail.MessagingException from label19 to label20 with label21;
+        catch com.fsck.k9.mail.MessagingException from label23 to label24 with label21;
+    }

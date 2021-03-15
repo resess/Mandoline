@@ -1,0 +1,146 @@
+com.ichi2.widget.WidgetStatus extends java.lang.Object
+private static boolean sNotificationEnabled
+private static boolean sSmallWidgetEnabled
+private static android.os.AsyncTask sUpdateDeckStatusAsyncTask
+    static void <clinit>()
+    {
+        <com.ichi2.widget.WidgetStatus: boolean sSmallWidgetEnabled> = 0;
+
+        <com.ichi2.widget.WidgetStatus: boolean sNotificationEnabled> = 0;
+
+        return;
+    }
+    private void <init>()
+    {
+        com.ichi2.widget.WidgetStatus r0;
+
+        r0 := @this: com.ichi2.widget.WidgetStatus;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+    static boolean access$100()
+    {
+        boolean z0;
+
+        z0 = <com.ichi2.widget.WidgetStatus: boolean sSmallWidgetEnabled>;
+
+        return z0;
+    }
+    static boolean access$200()
+    {
+        boolean z0;
+
+        z0 = <com.ichi2.widget.WidgetStatus: boolean sNotificationEnabled>;
+
+        return z0;
+    }
+    public static int fetchDue(android.content.Context)
+    {
+        android.content.Context $r0;
+        int $i0;
+
+        $r0 := @parameter0: android.content.Context;
+
+        $i0 = staticinvoke <com.ichi2.anki.MetaDB: int getNotificationStatus(android.content.Context)>($r0);
+
+        return $i0;
+    }
+    public static int[] fetchSmall(android.content.Context)
+    {
+        android.content.Context $r0;
+        int[] $r1;
+
+        $r0 := @parameter0: android.content.Context;
+
+        $r1 = staticinvoke <com.ichi2.anki.MetaDB: int[] getWidgetSmallStatus(android.content.Context)>($r0);
+
+        return $r1;
+    }
+    public static void update(android.content.Context)
+    {
+        android.content.Context $r0;
+        android.content.SharedPreferences $r1;
+        boolean $z0;
+        java.lang.String $r2;
+        int $i0;
+        android.os.AsyncTask $r3;
+        android.os.AsyncTask$Status $r4, $r5;
+        java.lang.Object[] $r6;
+        com.ichi2.widget.WidgetStatus$UpdateDeckStatusAsyncTask $r7;
+        android.content.Context[] $r8;
+
+        $r0 := @parameter0: android.content.Context;
+
+        $r1 = staticinvoke <com.ichi2.anki.AnkiDroidApp: android.content.SharedPreferences getSharedPrefs(android.content.Context)>($r0);
+
+        $z0 = interfaceinvoke $r1.<android.content.SharedPreferences: boolean getBoolean(java.lang.String,boolean)>("widgetSmallEnabled", 0);
+
+        <com.ichi2.widget.WidgetStatus: boolean sSmallWidgetEnabled> = $z0;
+
+        $r2 = interfaceinvoke $r1.<android.content.SharedPreferences: java.lang.String getString(java.lang.String,java.lang.String)>("minimumCardsDueForNotification", "1000001");
+
+        $i0 = staticinvoke <java.lang.Integer: int parseInt(java.lang.String)>($r2);
+
+        if $i0 >= 1000000 goto label4;
+
+        $z0 = 1;
+
+     label1:
+        <com.ichi2.widget.WidgetStatus: boolean sNotificationEnabled> = $z0;
+
+        $z0 = <com.ichi2.widget.WidgetStatus: boolean sSmallWidgetEnabled>;
+
+        if $z0 != 0 goto label2;
+
+        $z0 = <com.ichi2.widget.WidgetStatus: boolean sNotificationEnabled>;
+
+        if $z0 == 0 goto label5;
+
+     label2:
+        $r3 = <com.ichi2.widget.WidgetStatus: android.os.AsyncTask sUpdateDeckStatusAsyncTask>;
+
+        if $r3 == null goto label3;
+
+        $r3 = <com.ichi2.widget.WidgetStatus: android.os.AsyncTask sUpdateDeckStatusAsyncTask>;
+
+        $r4 = virtualinvoke $r3.<android.os.AsyncTask: android.os.AsyncTask$Status getStatus()>();
+
+        $r5 = <android.os.AsyncTask$Status: android.os.AsyncTask$Status FINISHED>;
+
+        if $r4 != $r5 goto label5;
+
+     label3:
+        $r6 = newarray (java.lang.Object)[0];
+
+        staticinvoke <timber.log.Timber: void d(java.lang.String,java.lang.Object[])>("WidgetStatus.update(): updating", $r6);
+
+        $r7 = new com.ichi2.widget.WidgetStatus$UpdateDeckStatusAsyncTask;
+
+        specialinvoke $r7.<com.ichi2.widget.WidgetStatus$UpdateDeckStatusAsyncTask: void <init>(com.ichi2.widget.WidgetStatus$1)>(null);
+
+        <com.ichi2.widget.WidgetStatus: android.os.AsyncTask sUpdateDeckStatusAsyncTask> = $r7;
+
+        $r3 = <com.ichi2.widget.WidgetStatus: android.os.AsyncTask sUpdateDeckStatusAsyncTask>;
+
+        $r8 = newarray (android.content.Context)[1];
+
+        $r8[0] = $r0;
+
+        virtualinvoke $r3.<android.os.AsyncTask: android.os.AsyncTask execute(java.lang.Object[])>($r8);
+
+        return;
+
+     label4:
+        $z0 = 0;
+
+        goto label1;
+
+     label5:
+        $r6 = newarray (java.lang.Object)[0];
+
+        staticinvoke <timber.log.Timber: void d(java.lang.String,java.lang.Object[])>("WidgetStatus.update(): already running or not enabled", $r6);
+
+        return;
+    }

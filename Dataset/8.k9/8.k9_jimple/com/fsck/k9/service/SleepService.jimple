@@ -1,0 +1,568 @@
+com.fsck.k9.service.SleepService extends com.fsck.k9.service.CoreService
+private static java.lang.String ALARM_FIRED
+private static java.lang.String LATCH_ID
+private static java.util.concurrent.atomic.AtomicInteger latchId
+private static java.util.concurrent.ConcurrentHashMap sleepData
+    static void <clinit>()
+    {
+        java.util.concurrent.ConcurrentHashMap $r0;
+        java.util.concurrent.atomic.AtomicInteger $r1;
+
+        <com.fsck.k9.service.SleepService: java.lang.String ALARM_FIRED> = "com.fsck.k9.service.SleepService.ALARM_FIRED";
+
+        <com.fsck.k9.service.SleepService: java.lang.String LATCH_ID> = "com.fsck.k9.service.SleepService.LATCH_ID_EXTRA";
+
+        $r0 = new java.util.concurrent.ConcurrentHashMap;
+
+        specialinvoke $r0.<java.util.concurrent.ConcurrentHashMap: void <init>()>();
+
+        <com.fsck.k9.service.SleepService: java.util.concurrent.ConcurrentHashMap sleepData> = $r0;
+
+        $r1 = new java.util.concurrent.atomic.AtomicInteger;
+
+        specialinvoke $r1.<java.util.concurrent.atomic.AtomicInteger: void <init>()>();
+
+        <com.fsck.k9.service.SleepService: java.util.concurrent.atomic.AtomicInteger latchId> = $r1;
+
+        return;
+    }
+    public void <init>()
+    {
+        com.fsck.k9.service.SleepService r0;
+
+        r0 := @this: com.fsck.k9.service.SleepService;
+
+        specialinvoke r0.<com.fsck.k9.service.CoreService: void <init>()>();
+
+        return;
+    }
+    private static void endSleep(java.lang.Integer)
+    {
+        java.lang.Integer $r0;
+        java.util.concurrent.CountDownLatch r1;
+        int $i0;
+        java.util.concurrent.ConcurrentHashMap $r2;
+        java.lang.Object $r3;
+        com.fsck.k9.service.SleepService$SleepDatum r4;
+        java.lang.StringBuilder $r5;
+        java.lang.String $r6;
+        boolean $z0;
+
+        $r0 := @parameter0: java.lang.Integer;
+
+        $i0 = virtualinvoke $r0.<java.lang.Integer: int intValue()>();
+
+        if $i0 == -1 goto label5;
+
+        $r2 = <com.fsck.k9.service.SleepService: java.util.concurrent.ConcurrentHashMap sleepData>;
+
+        $r3 = virtualinvoke $r2.<java.util.concurrent.ConcurrentHashMap: java.lang.Object remove(java.lang.Object)>($r0);
+
+        r4 = (com.fsck.k9.service.SleepService$SleepDatum) $r3;
+
+        if r4 == null goto label4;
+
+        r1 = r4.<com.fsck.k9.service.SleepService$SleepDatum: java.util.concurrent.CountDownLatch latch>;
+
+        if r1 != null goto label2;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("SleepService No CountDownLatch available with id = ");
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r0);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String)>("k9", $r6);
+
+     label1:
+        staticinvoke <com.fsck.k9.service.SleepService: void reacquireWakeLock(com.fsck.k9.service.SleepService$SleepDatum)>(r4);
+
+        r1 = r4.<com.fsck.k9.service.SleepService$SleepDatum: java.util.concurrent.CountDownLatch reacquireLatch>;
+
+        virtualinvoke r1.<java.util.concurrent.CountDownLatch: void countDown()>();
+
+        return;
+
+     label2:
+        $z0 = <com.fsck.k9.K9: boolean DEBUG>;
+
+        if $z0 == 0 goto label3;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("SleepService Counting down CountDownLatch with id = ");
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r0);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("k9", $r6);
+
+     label3:
+        virtualinvoke r1.<java.util.concurrent.CountDownLatch: void countDown()>();
+
+        goto label1;
+
+     label4:
+        $z0 = <com.fsck.k9.K9: boolean DEBUG>;
+
+        if $z0 == 0 goto label5;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("SleepService Sleep for id ");
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r0);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" already finished");
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("k9", $r6);
+
+     label5:
+        return;
+    }
+    private static void reacquireWakeLock(com.fsck.k9.service.SleepService$SleepDatum)
+    {
+        com.fsck.k9.service.SleepService$SleepDatum $r0;
+        long l0;
+        com.fsck.k9.mail.power.TracingPowerManager$TracingWakeLock r1;
+        boolean $z0;
+        java.lang.StringBuilder $r2;
+        java.lang.String $r3;
+        java.lang.Throwable $r4;
+
+        $r0 := @parameter0: com.fsck.k9.service.SleepService$SleepDatum;
+
+        r1 = $r0.<com.fsck.k9.service.SleepService$SleepDatum: com.fsck.k9.mail.power.TracingPowerManager$TracingWakeLock wakeLock>;
+
+        if r1 == null goto label6;
+
+        entermonitor r1;
+
+     label1:
+        l0 = $r0.<com.fsck.k9.service.SleepService$SleepDatum: long timeout>;
+
+        $z0 = <com.fsck.k9.K9: boolean DEBUG>;
+
+        if $z0 == 0 goto label2;
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("SleepService Acquiring wakeLock for ");
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>(l0);
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("ms");
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("k9", $r3);
+
+     label2:
+        virtualinvoke r1.<com.fsck.k9.mail.power.TracingPowerManager$TracingWakeLock: void acquire(long)>(l0);
+
+        exitmonitor r1;
+
+     label3:
+        return;
+
+     label4:
+        $r4 := @caughtexception;
+
+        exitmonitor r1;
+
+     label5:
+        throw $r4;
+
+     label6:
+        return;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+    public static void sleep(android.content.Context, long, com.fsck.k9.mail.power.TracingPowerManager$TracingWakeLock, long)
+    {
+        android.content.Context $r0;
+        long $l0, $l1, l2, $l4;
+        com.fsck.k9.mail.power.TracingPowerManager$TracingWakeLock $r1;
+        android.content.Intent r2;
+        java.util.concurrent.CountDownLatch r3, $r11;
+        com.fsck.k9.service.SleepService$SleepDatum r4, r14;
+        java.util.concurrent.TimeUnit $r5;
+        java.util.concurrent.atomic.AtomicInteger $r6;
+        int $i3;
+        java.lang.Integer $r7;
+        boolean $z0;
+        java.lang.StringBuilder $r8;
+        java.lang.Thread $r9;
+        java.lang.String $r10;
+        java.util.concurrent.ConcurrentHashMap $r12;
+        java.lang.Object $r13;
+        byte $b5;
+        java.lang.InterruptedException r15, r16;
+
+        $r0 := @parameter0: android.content.Context;
+
+        $l0 := @parameter1: long;
+
+        $r1 := @parameter2: com.fsck.k9.mail.power.TracingPowerManager$TracingWakeLock;
+
+        $l1 := @parameter3: long;
+
+        $r6 = <com.fsck.k9.service.SleepService: java.util.concurrent.atomic.AtomicInteger latchId>;
+
+        $i3 = virtualinvoke $r6.<java.util.concurrent.atomic.AtomicInteger: int getAndIncrement()>();
+
+        $r7 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i3);
+
+        $z0 = <com.fsck.k9.K9: boolean DEBUG>;
+
+        if $z0 == 0 goto label01;
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("SleepService Preparing CountDownLatch with id = ");
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r7);
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", thread ");
+
+        $r9 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        $r10 = virtualinvoke $r9.<java.lang.Thread: java.lang.String getName()>();
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r10);
+
+        $r10 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("k9", $r10);
+
+     label01:
+        r4 = new com.fsck.k9.service.SleepService$SleepDatum;
+
+        specialinvoke r4.<com.fsck.k9.service.SleepService$SleepDatum: void <init>(com.fsck.k9.service.SleepService$1)>(null);
+
+        r3 = new java.util.concurrent.CountDownLatch;
+
+        specialinvoke r3.<java.util.concurrent.CountDownLatch: void <init>(int)>(1);
+
+        r4.<com.fsck.k9.service.SleepService$SleepDatum: java.util.concurrent.CountDownLatch latch> = r3;
+
+        $r11 = new java.util.concurrent.CountDownLatch;
+
+        specialinvoke $r11.<java.util.concurrent.CountDownLatch: void <init>(int)>(1);
+
+        r4.<com.fsck.k9.service.SleepService$SleepDatum: java.util.concurrent.CountDownLatch reacquireLatch> = $r11;
+
+        $r12 = <com.fsck.k9.service.SleepService: java.util.concurrent.ConcurrentHashMap sleepData>;
+
+        virtualinvoke $r12.<java.util.concurrent.ConcurrentHashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>($r7, r4);
+
+        r2 = new android.content.Intent;
+
+        specialinvoke r2.<android.content.Intent: void <init>(android.content.Context,java.lang.Class)>($r0, class "Lcom/fsck/k9/service/SleepService;");
+
+        $r10 = <com.fsck.k9.service.SleepService: java.lang.String LATCH_ID>;
+
+        virtualinvoke r2.<android.content.Intent: android.content.Intent putExtra(java.lang.String,java.io.Serializable)>($r10, $r7);
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = <com.fsck.k9.service.SleepService: java.lang.String ALARM_FIRED>;
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r10);
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".");
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r7);
+
+        $r10 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r2.<android.content.Intent: android.content.Intent setAction(java.lang.String)>($r10);
+
+        $l4 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        l2 = $l4 + $l0;
+
+        staticinvoke <com.fsck.k9.service.BootReceiver: void scheduleIntent(android.content.Context,long,android.content.Intent)>($r0, l2, r2);
+
+        if $r1 == null goto label02;
+
+        r4.<com.fsck.k9.service.SleepService$SleepDatum: com.fsck.k9.mail.power.TracingPowerManager$TracingWakeLock wakeLock> = $r1;
+
+        r4.<com.fsck.k9.service.SleepService$SleepDatum: long timeout> = $l1;
+
+        virtualinvoke $r1.<com.fsck.k9.mail.power.TracingPowerManager$TracingWakeLock: void release()>();
+
+     label02:
+        $r5 = <java.util.concurrent.TimeUnit: java.util.concurrent.TimeUnit MILLISECONDS>;
+
+     label03:
+        $z0 = virtualinvoke r3.<java.util.concurrent.CountDownLatch: boolean await(long,java.util.concurrent.TimeUnit)>($l0, $r5);
+
+     label04:
+        if $z0 != 0 goto label06;
+
+        $z0 = <com.fsck.k9.K9: boolean DEBUG>;
+
+        if $z0 == 0 goto label06;
+
+        $r8 = new java.lang.StringBuilder;
+
+     label05:
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("SleepService latch timed out for id = ");
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r7);
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", thread ");
+
+        $r9 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        $r10 = virtualinvoke $r9.<java.lang.Thread: java.lang.String getName()>();
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r10);
+
+        $r10 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("k9", $r10);
+
+     label06:
+        $r12 = <com.fsck.k9.service.SleepService: java.util.concurrent.ConcurrentHashMap sleepData>;
+
+        $r13 = virtualinvoke $r12.<java.util.concurrent.ConcurrentHashMap: java.lang.Object remove(java.lang.Object)>($r7);
+
+        r14 = (com.fsck.k9.service.SleepService$SleepDatum) $r13;
+
+        if r14 != null goto label18;
+
+        $z0 = <com.fsck.k9.K9: boolean DEBUG>;
+
+        if $z0 == 0 goto label08;
+
+        $r8 = new java.lang.StringBuilder;
+
+     label07:
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("SleepService waiting for reacquireLatch for id = ");
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r7);
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", thread ");
+
+        $r9 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        $r10 = virtualinvoke $r9.<java.lang.Thread: java.lang.String getName()>();
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r10);
+
+        $r10 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("k9", $r10);
+
+     label08:
+        r3 = r4.<com.fsck.k9.service.SleepService$SleepDatum: java.util.concurrent.CountDownLatch reacquireLatch>;
+
+        $r5 = <java.util.concurrent.TimeUnit: java.util.concurrent.TimeUnit MILLISECONDS>;
+
+     label09:
+        $z0 = virtualinvoke r3.<java.util.concurrent.CountDownLatch: boolean await(long,java.util.concurrent.TimeUnit)>(5000L, $r5);
+
+     label10:
+        if $z0 != 0 goto label14;
+
+        $r8 = new java.lang.StringBuilder;
+
+     label11:
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("SleepService reacquireLatch timed out for id = ");
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r7);
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", thread ");
+
+        $r9 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        $r10 = virtualinvoke $r9.<java.lang.Thread: java.lang.String getName()>();
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r10);
+
+        $r10 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String)>("k9", $r10);
+
+     label12:
+        $l1 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        $l1 = $l1 - $l4;
+
+        $b5 = $l1 cmp $l0;
+
+        if $b5 >= 0 goto label19;
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("SleepService sleep time too short: requested was ");
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l0);
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", actual was ");
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l1);
+
+        $r10 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String)>("k9", $r10);
+
+        return;
+
+     label13:
+        r15 := @caughtexception;
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String,java.lang.Throwable)>("k9", "SleepService Interrupted while awaiting latch", r15);
+
+        goto label06;
+
+     label14:
+        $z0 = <com.fsck.k9.K9: boolean DEBUG>;
+
+        if $z0 == 0 goto label12;
+
+        $r8 = new java.lang.StringBuilder;
+
+     label15:
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("SleepService reacquireLatch finished for id = ");
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r7);
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", thread ");
+
+        $r9 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        $r10 = virtualinvoke $r9.<java.lang.Thread: java.lang.String getName()>();
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r10);
+
+        $r10 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("k9", $r10);
+
+     label16:
+        goto label12;
+
+     label17:
+        r16 := @caughtexception;
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String,java.lang.Throwable)>("k9", "SleepService Interrupted while awaiting reacquireLatch", r16);
+
+        goto label12;
+
+     label18:
+        staticinvoke <com.fsck.k9.service.SleepService: void reacquireWakeLock(com.fsck.k9.service.SleepService$SleepDatum)>(r14);
+
+        goto label12;
+
+     label19:
+        $z0 = <com.fsck.k9.K9: boolean DEBUG>;
+
+        if $z0 == 0 goto label20;
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("SleepService requested sleep time was ");
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l0);
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", actual was ");
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l1);
+
+        $r10 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("k9", $r10);
+
+     label20:
+        return;
+
+        catch java.lang.InterruptedException from label03 to label04 with label13;
+        catch java.lang.InterruptedException from label05 to label06 with label13;
+        catch java.lang.InterruptedException from label07 to label08 with label17;
+        catch java.lang.InterruptedException from label09 to label10 with label17;
+        catch java.lang.InterruptedException from label11 to label12 with label17;
+        catch java.lang.InterruptedException from label15 to label16 with label17;
+    }
+    public int startService(android.content.Intent, int)
+    {
+        com.fsck.k9.service.SleepService r0;
+        android.content.Intent $r1;
+        int $i0, $i1;
+        java.lang.String $r2, $r3;
+        boolean $z0;
+        java.lang.Integer $r4;
+        java.lang.Throwable $r5;
+
+        r0 := @this: com.fsck.k9.service.SleepService;
+
+        $r1 := @parameter0: android.content.Intent;
+
+        $i0 := @parameter1: int;
+
+     label1:
+        $r2 = virtualinvoke $r1.<android.content.Intent: java.lang.String getAction()>();
+
+        $r3 = <com.fsck.k9.service.SleepService: java.lang.String ALARM_FIRED>;
+
+        $z0 = virtualinvoke $r2.<java.lang.String: boolean startsWith(java.lang.String)>($r3);
+
+     label2:
+        if $z0 == 0 goto label4;
+
+     label3:
+        $r2 = <com.fsck.k9.service.SleepService: java.lang.String LATCH_ID>;
+
+        $i1 = virtualinvoke $r1.<android.content.Intent: int getIntExtra(java.lang.String,int)>($r2, -1);
+
+        $r4 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i1);
+
+        staticinvoke <com.fsck.k9.service.SleepService: void endSleep(java.lang.Integer)>($r4);
+
+     label4:
+        virtualinvoke r0.<com.fsck.k9.service.SleepService: void stopSelf(int)>($i0);
+
+        return 2;
+
+     label5:
+        $r5 := @caughtexception;
+
+        virtualinvoke r0.<com.fsck.k9.service.SleepService: void stopSelf(int)>($i0);
+
+        throw $r5;
+
+        catch java.lang.Throwable from label1 to label2 with label5;
+        catch java.lang.Throwable from label3 to label4 with label5;
+    }

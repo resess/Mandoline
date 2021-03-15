@@ -1,0 +1,950 @@
+io.requery.android.database.sqlite.SQLiteQueryBuilder extends java.lang.Object
+private static final java.lang.String TAG
+private static final java.util.regex.Pattern sLimitPattern
+private boolean mDistinct
+private io.requery.android.database.sqlite.SQLiteDatabase$CursorFactory mFactory
+private java.util.Map mProjectionMap
+private boolean mStrict
+private java.lang.String mTables
+private java.lang.StringBuilder mWhereClause
+    static void <clinit>()
+    {
+        java.util.regex.Pattern $r0;
+
+        $r0 = staticinvoke <java.util.regex.Pattern: java.util.regex.Pattern compile(java.lang.String)>("\\s*\\d+\\s*(,\\s*\\d+\\s*)?");
+
+        <io.requery.android.database.sqlite.SQLiteQueryBuilder: java.util.regex.Pattern sLimitPattern> = $r0;
+
+        return;
+    }
+    public void <init>()
+    {
+        io.requery.android.database.sqlite.SQLiteQueryBuilder r0;
+
+        r0 := @this: io.requery.android.database.sqlite.SQLiteQueryBuilder;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<io.requery.android.database.sqlite.SQLiteQueryBuilder: java.util.Map mProjectionMap> = null;
+
+        r0.<io.requery.android.database.sqlite.SQLiteQueryBuilder: java.lang.String mTables> = "";
+
+        r0.<io.requery.android.database.sqlite.SQLiteQueryBuilder: java.lang.StringBuilder mWhereClause> = null;
+
+        r0.<io.requery.android.database.sqlite.SQLiteQueryBuilder: boolean mDistinct> = 0;
+
+        r0.<io.requery.android.database.sqlite.SQLiteQueryBuilder: io.requery.android.database.sqlite.SQLiteDatabase$CursorFactory mFactory> = null;
+
+        return;
+    }
+    private static void appendClause(java.lang.StringBuilder, java.lang.String, java.lang.String)
+    {
+        java.lang.StringBuilder $r0;
+        java.lang.String $r1, $r2;
+        boolean $z0;
+
+        $r0 := @parameter0: java.lang.StringBuilder;
+
+        $r1 := @parameter1: java.lang.String;
+
+        $r2 := @parameter2: java.lang.String;
+
+        $z0 = staticinvoke <android.text.TextUtils: boolean isEmpty(java.lang.CharSequence)>($r2);
+
+        if $z0 != 0 goto label1;
+
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+     label1:
+        return;
+    }
+    public static void appendColumns(java.lang.StringBuilder, java.lang.String[])
+    {
+        java.lang.StringBuilder $r0;
+        java.lang.String[] $r1;
+        java.lang.String r2;
+        int i0, i1;
+
+        $r0 := @parameter0: java.lang.StringBuilder;
+
+        $r1 := @parameter1: java.lang.String[];
+
+        i0 = lengthof $r1;
+
+        i1 = 0;
+
+     label1:
+        if i1 >= i0 goto label4;
+
+        r2 = $r1[i1];
+
+        if r2 == null goto label3;
+
+        if i1 <= 0 goto label2;
+
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", ");
+
+     label2:
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r2);
+
+     label3:
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label4:
+        virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(32);
+
+        return;
+    }
+    public static java.lang.String buildQueryString(boolean, java.lang.String, java.lang.String[], java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String)
+    {
+        boolean $z0, $z1;
+        java.lang.String $r0, $r2, $r3, $r4, $r5, $r6;
+        java.lang.String[] $r1;
+        java.lang.StringBuilder r7;
+        java.lang.IllegalArgumentException $r8;
+        java.util.regex.Pattern $r9;
+        java.util.regex.Matcher $r10;
+        int $i0;
+
+        $z0 := @parameter0: boolean;
+
+        $r0 := @parameter1: java.lang.String;
+
+        $r1 := @parameter2: java.lang.String[];
+
+        $r2 := @parameter3: java.lang.String;
+
+        $r3 := @parameter4: java.lang.String;
+
+        $r4 := @parameter5: java.lang.String;
+
+        $r5 := @parameter6: java.lang.String;
+
+        $r6 := @parameter7: java.lang.String;
+
+        $z1 = staticinvoke <android.text.TextUtils: boolean isEmpty(java.lang.CharSequence)>($r3);
+
+        if $z1 == 0 goto label1;
+
+        $z1 = staticinvoke <android.text.TextUtils: boolean isEmpty(java.lang.CharSequence)>($r4);
+
+        if $z1 != 0 goto label1;
+
+        $r8 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r8.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("HAVING clauses are only permitted when using a groupBy clause");
+
+        throw $r8;
+
+     label1:
+        $z1 = staticinvoke <android.text.TextUtils: boolean isEmpty(java.lang.CharSequence)>($r6);
+
+        if $z1 != 0 goto label2;
+
+        $r9 = <io.requery.android.database.sqlite.SQLiteQueryBuilder: java.util.regex.Pattern sLimitPattern>;
+
+        $r10 = virtualinvoke $r9.<java.util.regex.Pattern: java.util.regex.Matcher matcher(java.lang.CharSequence)>($r6);
+
+        $z1 = virtualinvoke $r10.<java.util.regex.Matcher: boolean matches()>();
+
+        if $z1 != 0 goto label2;
+
+        $r8 = new java.lang.IllegalArgumentException;
+
+        r7 = new java.lang.StringBuilder;
+
+        specialinvoke r7.<java.lang.StringBuilder: void <init>()>();
+
+        r7 = virtualinvoke r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("invalid LIMIT clauses:");
+
+        r7 = virtualinvoke r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r0 = virtualinvoke r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r8.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r0);
+
+        throw $r8;
+
+     label2:
+        r7 = new java.lang.StringBuilder;
+
+        specialinvoke r7.<java.lang.StringBuilder: void <init>(int)>(120);
+
+        virtualinvoke r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("SELECT ");
+
+        if $z0 == 0 goto label3;
+
+        virtualinvoke r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("DISTINCT ");
+
+     label3:
+        if $r1 == null goto label5;
+
+        $i0 = lengthof $r1;
+
+        if $i0 == 0 goto label5;
+
+        staticinvoke <io.requery.android.database.sqlite.SQLiteQueryBuilder: void appendColumns(java.lang.StringBuilder,java.lang.String[])>(r7, $r1);
+
+     label4:
+        virtualinvoke r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("FROM ");
+
+        virtualinvoke r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r0);
+
+        staticinvoke <io.requery.android.database.sqlite.SQLiteQueryBuilder: void appendClause(java.lang.StringBuilder,java.lang.String,java.lang.String)>(r7, " WHERE ", $r2);
+
+        staticinvoke <io.requery.android.database.sqlite.SQLiteQueryBuilder: void appendClause(java.lang.StringBuilder,java.lang.String,java.lang.String)>(r7, " GROUP BY ", $r3);
+
+        staticinvoke <io.requery.android.database.sqlite.SQLiteQueryBuilder: void appendClause(java.lang.StringBuilder,java.lang.String,java.lang.String)>(r7, " HAVING ", $r4);
+
+        staticinvoke <io.requery.android.database.sqlite.SQLiteQueryBuilder: void appendClause(java.lang.StringBuilder,java.lang.String,java.lang.String)>(r7, " ORDER BY ", $r5);
+
+        staticinvoke <io.requery.android.database.sqlite.SQLiteQueryBuilder: void appendClause(java.lang.StringBuilder,java.lang.String,java.lang.String)>(r7, " LIMIT ", $r6);
+
+        $r0 = virtualinvoke r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r0;
+
+     label5:
+        virtualinvoke r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("* ");
+
+        goto label4;
+    }
+    private java.lang.String[] computeProjection(java.lang.String[])
+    {
+        io.requery.android.database.sqlite.SQLiteQueryBuilder r0;
+        java.lang.String[] $r1, r4;
+        int i0, i1;
+        java.lang.String r2, r6;
+        java.util.Map $r3;
+        java.lang.Object $r5;
+        boolean $z0;
+        java.lang.IllegalArgumentException $r7;
+        java.lang.StringBuilder $r8;
+        java.util.Set $r9;
+        java.util.Iterator $r10;
+        java.util.Map$Entry r11;
+
+        r0 := @this: io.requery.android.database.sqlite.SQLiteQueryBuilder;
+
+        $r1 := @parameter0: java.lang.String[];
+
+        if $r1 == null goto label07;
+
+        i0 = lengthof $r1;
+
+        if i0 <= 0 goto label07;
+
+        $r3 = r0.<io.requery.android.database.sqlite.SQLiteQueryBuilder: java.util.Map mProjectionMap>;
+
+        if $r3 == null goto label06;
+
+        i0 = lengthof $r1;
+
+        r4 = newarray (java.lang.String)[i0];
+
+        i0 = lengthof $r1;
+
+        i1 = 0;
+
+     label01:
+        if i1 >= i0 goto label10;
+
+        r2 = $r1[i1];
+
+        $r3 = r0.<io.requery.android.database.sqlite.SQLiteQueryBuilder: java.util.Map mProjectionMap>;
+
+        $r5 = interfaceinvoke $r3.<java.util.Map: java.lang.Object get(java.lang.Object)>(r2);
+
+        r6 = (java.lang.String) $r5;
+
+        if r6 == null goto label03;
+
+        r4[i1] = r6;
+
+     label02:
+        i1 = i1 + 1;
+
+        goto label01;
+
+     label03:
+        $z0 = r0.<io.requery.android.database.sqlite.SQLiteQueryBuilder: boolean mStrict>;
+
+        if $z0 != 0 goto label05;
+
+        $z0 = virtualinvoke r2.<java.lang.String: boolean contains(java.lang.CharSequence)>(" AS ");
+
+        if $z0 != 0 goto label04;
+
+        $z0 = virtualinvoke r2.<java.lang.String: boolean contains(java.lang.CharSequence)>(" as ");
+
+        if $z0 == 0 goto label05;
+
+     label04:
+        r4[i1] = r2;
+
+        goto label02;
+
+     label05:
+        $r7 = new java.lang.IllegalArgumentException;
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Invalid column ");
+
+        r2 = $r1[i1];
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r2);
+
+        r2 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r7.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>(r2);
+
+        throw $r7;
+
+     label06:
+        return $r1;
+
+     label07:
+        $r3 = r0.<io.requery.android.database.sqlite.SQLiteQueryBuilder: java.util.Map mProjectionMap>;
+
+        if $r3 == null goto label09;
+
+        $r3 = r0.<io.requery.android.database.sqlite.SQLiteQueryBuilder: java.util.Map mProjectionMap>;
+
+        $r9 = interfaceinvoke $r3.<java.util.Map: java.util.Set entrySet()>();
+
+        i0 = interfaceinvoke $r9.<java.util.Set: int size()>();
+
+        $r1 = newarray (java.lang.String)[i0];
+
+        $r10 = interfaceinvoke $r9.<java.util.Set: java.util.Iterator iterator()>();
+
+        i1 = 0;
+
+     label08:
+        $z0 = interfaceinvoke $r10.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label11;
+
+        $r5 = interfaceinvoke $r10.<java.util.Iterator: java.lang.Object next()>();
+
+        r11 = (java.util.Map$Entry) $r5;
+
+        $r5 = interfaceinvoke r11.<java.util.Map$Entry: java.lang.Object getKey()>();
+
+        r2 = (java.lang.String) $r5;
+
+        $z0 = virtualinvoke r2.<java.lang.String: boolean equals(java.lang.Object)>("_count");
+
+        if $z0 != 0 goto label08;
+
+        $r5 = interfaceinvoke r11.<java.util.Map$Entry: java.lang.Object getValue()>();
+
+        r2 = (java.lang.String) $r5;
+
+        $r1[i1] = r2;
+
+        i1 = i1 + 1;
+
+        goto label08;
+
+     label09:
+        return null;
+
+     label10:
+        return r4;
+
+     label11:
+        return $r1;
+    }
+    private void validateQuerySql(io.requery.android.database.sqlite.SQLiteDatabase, java.lang.String, android.support.v4.os.CancellationSignal)
+    {
+        io.requery.android.database.sqlite.SQLiteQueryBuilder r0;
+        io.requery.android.database.sqlite.SQLiteDatabase $r1;
+        java.lang.String $r2;
+        android.support.v4.os.CancellationSignal $r3;
+        io.requery.android.database.sqlite.SQLiteSession $r4;
+        int $i0;
+
+        r0 := @this: io.requery.android.database.sqlite.SQLiteQueryBuilder;
+
+        $r1 := @parameter0: io.requery.android.database.sqlite.SQLiteDatabase;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $r3 := @parameter2: android.support.v4.os.CancellationSignal;
+
+        $r4 = virtualinvoke $r1.<io.requery.android.database.sqlite.SQLiteDatabase: io.requery.android.database.sqlite.SQLiteSession getThreadSession()>();
+
+        $i0 = virtualinvoke $r1.<io.requery.android.database.sqlite.SQLiteDatabase: int getThreadDefaultConnectionFlags(boolean)>(1);
+
+        virtualinvoke $r4.<io.requery.android.database.sqlite.SQLiteSession: void prepare(java.lang.String,int,android.support.v4.os.CancellationSignal,io.requery.android.database.sqlite.SQLiteStatementInfo)>($r2, $i0, $r3, null);
+
+        return;
+    }
+    public void appendWhere(java.lang.CharSequence)
+    {
+        io.requery.android.database.sqlite.SQLiteQueryBuilder r0;
+        java.lang.CharSequence $r1;
+        java.lang.StringBuilder $r2;
+        int $i0;
+
+        r0 := @this: io.requery.android.database.sqlite.SQLiteQueryBuilder;
+
+        $r1 := @parameter0: java.lang.CharSequence;
+
+        $r2 = r0.<io.requery.android.database.sqlite.SQLiteQueryBuilder: java.lang.StringBuilder mWhereClause>;
+
+        if $r2 != null goto label1;
+
+        $r2 = new java.lang.StringBuilder;
+
+        $i0 = interfaceinvoke $r1.<java.lang.CharSequence: int length()>();
+
+        $i0 = $i0 + 16;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>(int)>($i0);
+
+        r0.<io.requery.android.database.sqlite.SQLiteQueryBuilder: java.lang.StringBuilder mWhereClause> = $r2;
+
+     label1:
+        $r2 = r0.<io.requery.android.database.sqlite.SQLiteQueryBuilder: java.lang.StringBuilder mWhereClause>;
+
+        $i0 = virtualinvoke $r2.<java.lang.StringBuilder: int length()>();
+
+        if $i0 != 0 goto label2;
+
+        $r2 = r0.<io.requery.android.database.sqlite.SQLiteQueryBuilder: java.lang.StringBuilder mWhereClause>;
+
+        virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(40);
+
+     label2:
+        $r2 = r0.<io.requery.android.database.sqlite.SQLiteQueryBuilder: java.lang.StringBuilder mWhereClause>;
+
+        virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.CharSequence)>($r1);
+
+        return;
+    }
+    public void appendWhereEscapeString(java.lang.String)
+    {
+        io.requery.android.database.sqlite.SQLiteQueryBuilder r0;
+        java.lang.String $r1;
+        java.lang.StringBuilder $r2;
+        int $i0;
+
+        r0 := @this: io.requery.android.database.sqlite.SQLiteQueryBuilder;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = r0.<io.requery.android.database.sqlite.SQLiteQueryBuilder: java.lang.StringBuilder mWhereClause>;
+
+        if $r2 != null goto label1;
+
+        $r2 = new java.lang.StringBuilder;
+
+        $i0 = virtualinvoke $r1.<java.lang.String: int length()>();
+
+        $i0 = $i0 + 16;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>(int)>($i0);
+
+        r0.<io.requery.android.database.sqlite.SQLiteQueryBuilder: java.lang.StringBuilder mWhereClause> = $r2;
+
+     label1:
+        $r2 = r0.<io.requery.android.database.sqlite.SQLiteQueryBuilder: java.lang.StringBuilder mWhereClause>;
+
+        $i0 = virtualinvoke $r2.<java.lang.StringBuilder: int length()>();
+
+        if $i0 != 0 goto label2;
+
+        $r2 = r0.<io.requery.android.database.sqlite.SQLiteQueryBuilder: java.lang.StringBuilder mWhereClause>;
+
+        virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(40);
+
+     label2:
+        $r2 = r0.<io.requery.android.database.sqlite.SQLiteQueryBuilder: java.lang.StringBuilder mWhereClause>;
+
+        staticinvoke <android.database.DatabaseUtils: void appendEscapedSQLString(java.lang.StringBuilder,java.lang.String)>($r2, $r1);
+
+        return;
+    }
+    public java.lang.String buildQuery(java.lang.String[], java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String)
+    {
+        io.requery.android.database.sqlite.SQLiteQueryBuilder r0;
+        java.lang.String[] $r1;
+        java.lang.String $r2, $r3, $r4, $r5, $r6, $r9;
+        java.lang.StringBuilder r7, $r8;
+        int $i0;
+        boolean z0;
+
+        r0 := @this: io.requery.android.database.sqlite.SQLiteQueryBuilder;
+
+        $r1 := @parameter0: java.lang.String[];
+
+        $r2 := @parameter1: java.lang.String;
+
+        $r3 := @parameter2: java.lang.String;
+
+        $r4 := @parameter3: java.lang.String;
+
+        $r5 := @parameter4: java.lang.String;
+
+        $r6 := @parameter5: java.lang.String;
+
+        $r1 = specialinvoke r0.<io.requery.android.database.sqlite.SQLiteQueryBuilder: java.lang.String[] computeProjection(java.lang.String[])>($r1);
+
+        r7 = new java.lang.StringBuilder;
+
+        specialinvoke r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = r0.<io.requery.android.database.sqlite.SQLiteQueryBuilder: java.lang.StringBuilder mWhereClause>;
+
+        if $r8 == null goto label5;
+
+        $r8 = r0.<io.requery.android.database.sqlite.SQLiteQueryBuilder: java.lang.StringBuilder mWhereClause>;
+
+        $i0 = virtualinvoke $r8.<java.lang.StringBuilder: int length()>();
+
+        if $i0 <= 0 goto label5;
+
+        z0 = 1;
+
+     label1:
+        if z0 == 0 goto label2;
+
+        $r8 = r0.<io.requery.android.database.sqlite.SQLiteQueryBuilder: java.lang.StringBuilder mWhereClause>;
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r9);
+
+        virtualinvoke r7.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(41);
+
+     label2:
+        if $r2 == null goto label4;
+
+        $i0 = virtualinvoke $r2.<java.lang.String: int length()>();
+
+        if $i0 <= 0 goto label4;
+
+        if z0 == 0 goto label3;
+
+        virtualinvoke r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" AND ");
+
+     label3:
+        virtualinvoke r7.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(40);
+
+        virtualinvoke r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        virtualinvoke r7.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(41);
+
+     label4:
+        z0 = r0.<io.requery.android.database.sqlite.SQLiteQueryBuilder: boolean mDistinct>;
+
+        $r2 = r0.<io.requery.android.database.sqlite.SQLiteQueryBuilder: java.lang.String mTables>;
+
+        $r9 = virtualinvoke r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r2 = staticinvoke <io.requery.android.database.sqlite.SQLiteQueryBuilder: java.lang.String buildQueryString(boolean,java.lang.String,java.lang.String[],java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String)>(z0, $r2, $r1, $r9, $r3, $r4, $r5, $r6);
+
+        return $r2;
+
+     label5:
+        z0 = 0;
+
+        goto label1;
+    }
+    public java.lang.String buildUnionQuery(java.lang.String[], java.lang.String, java.lang.String)
+    {
+        io.requery.android.database.sqlite.SQLiteQueryBuilder r0;
+        java.lang.String[] $r1;
+        java.lang.String $r2, $r3, r5, $r6;
+        java.lang.StringBuilder r4;
+        int i0, i1;
+        boolean $z0;
+
+        r0 := @this: io.requery.android.database.sqlite.SQLiteQueryBuilder;
+
+        $r1 := @parameter0: java.lang.String[];
+
+        $r2 := @parameter1: java.lang.String;
+
+        $r3 := @parameter2: java.lang.String;
+
+        r4 = new java.lang.StringBuilder;
+
+        specialinvoke r4.<java.lang.StringBuilder: void <init>(int)>(128);
+
+        i0 = lengthof $r1;
+
+        $z0 = r0.<io.requery.android.database.sqlite.SQLiteQueryBuilder: boolean mDistinct>;
+
+        if $z0 == 0 goto label4;
+
+        r5 = " UNION ";
+
+     label1:
+        i1 = 0;
+
+     label2:
+        if i1 >= i0 goto label5;
+
+        if i1 <= 0 goto label3;
+
+        virtualinvoke r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r5);
+
+     label3:
+        $r6 = $r1[i1];
+
+        virtualinvoke r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        i1 = i1 + 1;
+
+        goto label2;
+
+     label4:
+        r5 = " UNION ALL ";
+
+        goto label1;
+
+     label5:
+        staticinvoke <io.requery.android.database.sqlite.SQLiteQueryBuilder: void appendClause(java.lang.StringBuilder,java.lang.String,java.lang.String)>(r4, " ORDER BY ", $r2);
+
+        staticinvoke <io.requery.android.database.sqlite.SQLiteQueryBuilder: void appendClause(java.lang.StringBuilder,java.lang.String,java.lang.String)>(r4, " LIMIT ", $r3);
+
+        $r2 = virtualinvoke r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r2;
+    }
+    public java.lang.String buildUnionSubQuery(java.lang.String, java.lang.String[], java.util.Set, int, java.lang.String, java.lang.String, java.lang.String, java.lang.String)
+    {
+        io.requery.android.database.sqlite.SQLiteQueryBuilder r0;
+        java.lang.String $r1, $r4, $r5, $r6, $r7, r9;
+        java.lang.String[] $r2, r8;
+        java.util.Set r3;
+        int $i0, i1, i2;
+        boolean $z0;
+        java.lang.StringBuilder $r10;
+
+        r0 := @this: io.requery.android.database.sqlite.SQLiteQueryBuilder;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.lang.String[];
+
+        r3 := @parameter2: java.util.Set;
+
+        $i0 := @parameter3: int;
+
+        $r4 := @parameter4: java.lang.String;
+
+        $r5 := @parameter5: java.lang.String;
+
+        $r6 := @parameter6: java.lang.String;
+
+        $r7 := @parameter7: java.lang.String;
+
+        i1 = lengthof $r2;
+
+        r8 = newarray (java.lang.String)[i1];
+
+        i2 = 0;
+
+     label1:
+        if i2 >= i1 goto label6;
+
+        r9 = $r2[i2];
+
+        $z0 = virtualinvoke r9.<java.lang.String: boolean equals(java.lang.Object)>($r1);
+
+        if $z0 == 0 goto label3;
+
+        $r10 = new java.lang.StringBuilder;
+
+        specialinvoke $r10.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\'");
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\' AS ");
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        r9 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        r8[i2] = r9;
+
+     label2:
+        i2 = i2 + 1;
+
+        goto label1;
+
+     label3:
+        if i2 <= $i0 goto label4;
+
+        $z0 = interfaceinvoke r3.<java.util.Set: boolean contains(java.lang.Object)>(r9);
+
+        if $z0 == 0 goto label5;
+
+     label4:
+        r8[i2] = r9;
+
+        goto label2;
+
+     label5:
+        $r10 = new java.lang.StringBuilder;
+
+        specialinvoke $r10.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("NULL AS ");
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r9);
+
+        r9 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        r8[i2] = r9;
+
+        goto label2;
+
+     label6:
+        $r1 = virtualinvoke r0.<io.requery.android.database.sqlite.SQLiteQueryBuilder: java.lang.String buildQuery(java.lang.String[],java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String)>(r8, $r5, $r6, $r7, null, null);
+
+        return $r1;
+    }
+    public java.lang.String getTables()
+    {
+        io.requery.android.database.sqlite.SQLiteQueryBuilder r0;
+        java.lang.String r1;
+
+        r0 := @this: io.requery.android.database.sqlite.SQLiteQueryBuilder;
+
+        r1 = r0.<io.requery.android.database.sqlite.SQLiteQueryBuilder: java.lang.String mTables>;
+
+        return r1;
+    }
+    public android.database.Cursor query(io.requery.android.database.sqlite.SQLiteDatabase, java.lang.String[], java.lang.String, java.lang.String[], java.lang.String, java.lang.String, java.lang.String)
+    {
+        io.requery.android.database.sqlite.SQLiteQueryBuilder r0;
+        io.requery.android.database.sqlite.SQLiteDatabase $r1;
+        java.lang.String[] $r2, $r4;
+        java.lang.String $r3, $r5, $r6, $r7;
+        android.database.Cursor $r8;
+
+        r0 := @this: io.requery.android.database.sqlite.SQLiteQueryBuilder;
+
+        $r1 := @parameter0: io.requery.android.database.sqlite.SQLiteDatabase;
+
+        $r2 := @parameter1: java.lang.String[];
+
+        $r3 := @parameter2: java.lang.String;
+
+        $r4 := @parameter3: java.lang.String[];
+
+        $r5 := @parameter4: java.lang.String;
+
+        $r6 := @parameter5: java.lang.String;
+
+        $r7 := @parameter6: java.lang.String;
+
+        $r8 = virtualinvoke r0.<io.requery.android.database.sqlite.SQLiteQueryBuilder: android.database.Cursor query(io.requery.android.database.sqlite.SQLiteDatabase,java.lang.String[],java.lang.String,java.lang.String[],java.lang.String,java.lang.String,java.lang.String,java.lang.String,android.support.v4.os.CancellationSignal)>($r1, $r2, $r3, $r4, $r5, $r6, $r7, null, null);
+
+        return $r8;
+    }
+    public android.database.Cursor query(io.requery.android.database.sqlite.SQLiteDatabase, java.lang.String[], java.lang.String, java.lang.String[], java.lang.String, java.lang.String, java.lang.String, java.lang.String)
+    {
+        io.requery.android.database.sqlite.SQLiteQueryBuilder r0;
+        io.requery.android.database.sqlite.SQLiteDatabase $r1;
+        java.lang.String[] $r2, $r4;
+        java.lang.String $r3, $r5, $r6, $r7, $r8;
+        android.database.Cursor $r9;
+
+        r0 := @this: io.requery.android.database.sqlite.SQLiteQueryBuilder;
+
+        $r1 := @parameter0: io.requery.android.database.sqlite.SQLiteDatabase;
+
+        $r2 := @parameter1: java.lang.String[];
+
+        $r3 := @parameter2: java.lang.String;
+
+        $r4 := @parameter3: java.lang.String[];
+
+        $r5 := @parameter4: java.lang.String;
+
+        $r6 := @parameter5: java.lang.String;
+
+        $r7 := @parameter6: java.lang.String;
+
+        $r8 := @parameter7: java.lang.String;
+
+        $r9 = virtualinvoke r0.<io.requery.android.database.sqlite.SQLiteQueryBuilder: android.database.Cursor query(io.requery.android.database.sqlite.SQLiteDatabase,java.lang.String[],java.lang.String,java.lang.String[],java.lang.String,java.lang.String,java.lang.String,java.lang.String,android.support.v4.os.CancellationSignal)>($r1, $r2, $r3, $r4, $r5, $r6, $r7, $r8, null);
+
+        return $r9;
+    }
+    public android.database.Cursor query(io.requery.android.database.sqlite.SQLiteDatabase, java.lang.String[], java.lang.String, java.lang.String[], java.lang.String, java.lang.String, java.lang.String, java.lang.String, android.support.v4.os.CancellationSignal)
+    {
+        io.requery.android.database.sqlite.SQLiteQueryBuilder r0;
+        io.requery.android.database.sqlite.SQLiteDatabase $r1;
+        java.lang.String[] $r2, $r4;
+        java.lang.String $r3, $r5, $r6, $r7, $r8, $r10;
+        android.support.v4.os.CancellationSignal $r9;
+        boolean $z0;
+        int $i0;
+        java.lang.StringBuilder $r11;
+        io.requery.android.database.sqlite.SQLiteDatabase$CursorFactory $r12;
+        android.database.Cursor $r13;
+
+        r0 := @this: io.requery.android.database.sqlite.SQLiteQueryBuilder;
+
+        $r1 := @parameter0: io.requery.android.database.sqlite.SQLiteDatabase;
+
+        $r2 := @parameter1: java.lang.String[];
+
+        $r3 := @parameter2: java.lang.String;
+
+        $r4 := @parameter3: java.lang.String[];
+
+        $r5 := @parameter4: java.lang.String;
+
+        $r6 := @parameter5: java.lang.String;
+
+        $r7 := @parameter6: java.lang.String;
+
+        $r8 := @parameter7: java.lang.String;
+
+        $r9 := @parameter8: android.support.v4.os.CancellationSignal;
+
+        $r10 = r0.<io.requery.android.database.sqlite.SQLiteQueryBuilder: java.lang.String mTables>;
+
+        if $r10 != null goto label1;
+
+        return null;
+
+     label1:
+        $z0 = r0.<io.requery.android.database.sqlite.SQLiteQueryBuilder: boolean mStrict>;
+
+        if $z0 == 0 goto label2;
+
+        if $r3 == null goto label2;
+
+        $i0 = virtualinvoke $r3.<java.lang.String: int length()>();
+
+        if $i0 <= 0 goto label2;
+
+        $r11 = new java.lang.StringBuilder;
+
+        specialinvoke $r11.<java.lang.StringBuilder: void <init>()>();
+
+        $r11 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("(");
+
+        $r11 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r11 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(")");
+
+        $r10 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r10 = virtualinvoke r0.<io.requery.android.database.sqlite.SQLiteQueryBuilder: java.lang.String buildQuery(java.lang.String[],java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String)>($r2, $r10, $r5, $r6, $r7, $r8);
+
+        specialinvoke r0.<io.requery.android.database.sqlite.SQLiteQueryBuilder: void validateQuerySql(io.requery.android.database.sqlite.SQLiteDatabase,java.lang.String,android.support.v4.os.CancellationSignal)>($r1, $r10, $r9);
+
+     label2:
+        $r3 = virtualinvoke r0.<io.requery.android.database.sqlite.SQLiteQueryBuilder: java.lang.String buildQuery(java.lang.String[],java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String)>($r2, $r3, $r5, $r6, $r7, $r8);
+
+        $z0 = staticinvoke <android.util.Log: boolean isLoggable(java.lang.String,int)>("SQLiteQueryBuilder", 3);
+
+        if $z0 == 0 goto label3;
+
+        $r11 = new java.lang.StringBuilder;
+
+        specialinvoke $r11.<java.lang.StringBuilder: void <init>()>();
+
+        $r11 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Performing query: ");
+
+        $r11 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r5 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("SQLiteQueryBuilder", $r5);
+
+     label3:
+        $r12 = r0.<io.requery.android.database.sqlite.SQLiteQueryBuilder: io.requery.android.database.sqlite.SQLiteDatabase$CursorFactory mFactory>;
+
+        $r5 = r0.<io.requery.android.database.sqlite.SQLiteQueryBuilder: java.lang.String mTables>;
+
+        $r5 = staticinvoke <io.requery.android.database.sqlite.SQLiteDatabase: java.lang.String findEditTable(java.lang.String)>($r5);
+
+        $r13 = virtualinvoke $r1.<io.requery.android.database.sqlite.SQLiteDatabase: android.database.Cursor rawQueryWithFactory(io.requery.android.database.sqlite.SQLiteDatabase$CursorFactory,java.lang.String,java.lang.Object[],java.lang.String,android.support.v4.os.CancellationSignal)>($r12, $r3, $r4, $r5, $r9);
+
+        return $r13;
+    }
+    public void setCursorFactory(io.requery.android.database.sqlite.SQLiteDatabase$CursorFactory)
+    {
+        io.requery.android.database.sqlite.SQLiteQueryBuilder r0;
+        io.requery.android.database.sqlite.SQLiteDatabase$CursorFactory $r1;
+
+        r0 := @this: io.requery.android.database.sqlite.SQLiteQueryBuilder;
+
+        $r1 := @parameter0: io.requery.android.database.sqlite.SQLiteDatabase$CursorFactory;
+
+        r0.<io.requery.android.database.sqlite.SQLiteQueryBuilder: io.requery.android.database.sqlite.SQLiteDatabase$CursorFactory mFactory> = $r1;
+
+        return;
+    }
+    public void setDistinct(boolean)
+    {
+        io.requery.android.database.sqlite.SQLiteQueryBuilder r0;
+        boolean $z0;
+
+        r0 := @this: io.requery.android.database.sqlite.SQLiteQueryBuilder;
+
+        $z0 := @parameter0: boolean;
+
+        r0.<io.requery.android.database.sqlite.SQLiteQueryBuilder: boolean mDistinct> = $z0;
+
+        return;
+    }
+    public void setProjectionMap(java.util.Map)
+    {
+        io.requery.android.database.sqlite.SQLiteQueryBuilder r0;
+        java.util.Map r1;
+
+        r0 := @this: io.requery.android.database.sqlite.SQLiteQueryBuilder;
+
+        r1 := @parameter0: java.util.Map;
+
+        r0.<io.requery.android.database.sqlite.SQLiteQueryBuilder: java.util.Map mProjectionMap> = r1;
+
+        return;
+    }
+    public void setStrict(boolean)
+    {
+        io.requery.android.database.sqlite.SQLiteQueryBuilder r0;
+        boolean $z0;
+
+        r0 := @this: io.requery.android.database.sqlite.SQLiteQueryBuilder;
+
+        $z0 := @parameter0: boolean;
+
+        r0.<io.requery.android.database.sqlite.SQLiteQueryBuilder: boolean mStrict> = $z0;
+
+        return;
+    }
+    public void setTables(java.lang.String)
+    {
+        io.requery.android.database.sqlite.SQLiteQueryBuilder r0;
+        java.lang.String $r1;
+
+        r0 := @this: io.requery.android.database.sqlite.SQLiteQueryBuilder;
+
+        $r1 := @parameter0: java.lang.String;
+
+        r0.<io.requery.android.database.sqlite.SQLiteQueryBuilder: java.lang.String mTables> = $r1;
+
+        return;
+    }

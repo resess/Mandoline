@@ -1,0 +1,1226 @@
+com.fsck.k9.helper.QuotedMessageHelper extends java.lang.Object
+private static final java.util.regex.Pattern BLOCKQUOTE_END
+private static final java.util.regex.Pattern BLOCKQUOTE_START
+private static final java.util.regex.Pattern DASH_SIGNATURE_HTML
+private static final java.util.regex.Pattern DASH_SIGNATURE_PLAIN
+private static final java.util.regex.Pattern FIND_INSERTION_POINT_BODY
+private static final java.util.regex.Pattern FIND_INSERTION_POINT_BODY_END
+private static final int FIND_INSERTION_POINT_FIRST_GROUP
+private static final java.util.regex.Pattern FIND_INSERTION_POINT_HEAD
+private static final java.lang.String FIND_INSERTION_POINT_HEAD_CONTENT
+private static final java.util.regex.Pattern FIND_INSERTION_POINT_HTML
+private static final java.lang.String FIND_INSERTION_POINT_HTML_CONTENT
+private static final java.util.regex.Pattern FIND_INSERTION_POINT_HTML_END
+private static final java.lang.String FIND_INSERTION_POINT_HTML_END_CONTENT
+private static final int FIND_INSERTION_POINT_START_OF_STRING
+private static final int QUOTE_BUFFER_LENGTH
+private static final int REPLY_WRAP_LINE_WIDTH
+    static void <clinit>()
+    {
+        java.util.regex.Pattern $r0;
+
+        $r0 = staticinvoke <java.util.regex.Pattern: java.util.regex.Pattern compile(java.lang.String)>("(?si:.*?(<html(?:>|\\s+[^>]*>)).*)");
+
+        <com.fsck.k9.helper.QuotedMessageHelper: java.util.regex.Pattern FIND_INSERTION_POINT_HTML> = $r0;
+
+        $r0 = staticinvoke <java.util.regex.Pattern: java.util.regex.Pattern compile(java.lang.String)>("(?si:.*?(<head(?:>|\\s+[^>]*>)).*)");
+
+        <com.fsck.k9.helper.QuotedMessageHelper: java.util.regex.Pattern FIND_INSERTION_POINT_HEAD> = $r0;
+
+        $r0 = staticinvoke <java.util.regex.Pattern: java.util.regex.Pattern compile(java.lang.String)>("(?si:.*?(<body(?:>|\\s+[^>]*>)).*)");
+
+        <com.fsck.k9.helper.QuotedMessageHelper: java.util.regex.Pattern FIND_INSERTION_POINT_BODY> = $r0;
+
+        $r0 = staticinvoke <java.util.regex.Pattern: java.util.regex.Pattern compile(java.lang.String)>("(?si:.*(</html>).*?)");
+
+        <com.fsck.k9.helper.QuotedMessageHelper: java.util.regex.Pattern FIND_INSERTION_POINT_HTML_END> = $r0;
+
+        $r0 = staticinvoke <java.util.regex.Pattern: java.util.regex.Pattern compile(java.lang.String)>("(?si:.*(</body>).*?)");
+
+        <com.fsck.k9.helper.QuotedMessageHelper: java.util.regex.Pattern FIND_INSERTION_POINT_BODY_END> = $r0;
+
+        $r0 = staticinvoke <java.util.regex.Pattern: java.util.regex.Pattern compile(java.lang.String,int)>("(<br( /)?>|\r?\n)-- <br( /)?>", 2);
+
+        <com.fsck.k9.helper.QuotedMessageHelper: java.util.regex.Pattern DASH_SIGNATURE_HTML> = $r0;
+
+        $r0 = staticinvoke <java.util.regex.Pattern: java.util.regex.Pattern compile(java.lang.String,int)>("<blockquote", 2);
+
+        <com.fsck.k9.helper.QuotedMessageHelper: java.util.regex.Pattern BLOCKQUOTE_START> = $r0;
+
+        $r0 = staticinvoke <java.util.regex.Pattern: java.util.regex.Pattern compile(java.lang.String,int)>("</blockquote>", 2);
+
+        <com.fsck.k9.helper.QuotedMessageHelper: java.util.regex.Pattern BLOCKQUOTE_END> = $r0;
+
+        $r0 = staticinvoke <java.util.regex.Pattern: java.util.regex.Pattern compile(java.lang.String,int)>("\r\n-- \r\n.*", 32);
+
+        <com.fsck.k9.helper.QuotedMessageHelper: java.util.regex.Pattern DASH_SIGNATURE_PLAIN> = $r0;
+
+        return;
+    }
+    public void <init>()
+    {
+        com.fsck.k9.helper.QuotedMessageHelper r0;
+
+        r0 := @this: com.fsck.k9.helper.QuotedMessageHelper;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+    private static com.fsck.k9.message.InsertableHtmlContent findInsertionPoints(java.lang.String)
+    {
+        java.lang.String $r0, $r7;
+        com.fsck.k9.message.InsertableHtmlContent r1;
+        boolean $z0, z1, z2, $z3;
+        java.util.regex.Pattern $r2;
+        java.util.regex.Matcher $r3, $r4, $r5;
+        java.lang.StringBuilder $r6;
+        int $i0, $i1;
+
+        $r0 := @parameter0: java.lang.String;
+
+        r1 = new com.fsck.k9.message.InsertableHtmlContent;
+
+        specialinvoke r1.<com.fsck.k9.message.InsertableHtmlContent: void <init>()>();
+
+        if $r0 == null goto label15;
+
+        $z0 = virtualinvoke $r0.<java.lang.String: boolean equals(java.lang.Object)>("");
+
+        if $z0 == 0 goto label01;
+
+        return r1;
+
+     label01:
+        $z0 = 0;
+
+        z1 = 0;
+
+        z2 = 0;
+
+        $r2 = <com.fsck.k9.helper.QuotedMessageHelper: java.util.regex.Pattern FIND_INSERTION_POINT_HTML>;
+
+        $r3 = virtualinvoke $r2.<java.util.regex.Pattern: java.util.regex.Matcher matcher(java.lang.CharSequence)>($r0);
+
+        $z3 = virtualinvoke $r3.<java.util.regex.Matcher: boolean matches()>();
+
+        if $z3 == 0 goto label02;
+
+        $z0 = 1;
+
+     label02:
+        $r2 = <com.fsck.k9.helper.QuotedMessageHelper: java.util.regex.Pattern FIND_INSERTION_POINT_HEAD>;
+
+        $r4 = virtualinvoke $r2.<java.util.regex.Pattern: java.util.regex.Matcher matcher(java.lang.CharSequence)>($r0);
+
+        $z3 = virtualinvoke $r4.<java.util.regex.Matcher: boolean matches()>();
+
+        if $z3 == 0 goto label03;
+
+        z1 = 1;
+
+     label03:
+        $r2 = <com.fsck.k9.helper.QuotedMessageHelper: java.util.regex.Pattern FIND_INSERTION_POINT_BODY>;
+
+        $r5 = virtualinvoke $r2.<java.util.regex.Pattern: java.util.regex.Matcher matcher(java.lang.CharSequence)>($r0);
+
+        $z3 = virtualinvoke $r5.<java.util.regex.Matcher: boolean matches()>();
+
+        if $z3 == 0 goto label04;
+
+        z2 = 1;
+
+     label04:
+        $z3 = <com.fsck.k9.K9: boolean DEBUG>;
+
+        if $z3 == 0 goto label05;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Open: hasHtmlTag:");
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>($z0);
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" hasHeadTag:");
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>(z1);
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" hasBodyTag:");
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>(z2);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("k9", $r7);
+
+     label05:
+        if z2 == 0 goto label10;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>(java.lang.String)>($r0);
+
+        virtualinvoke r1.<com.fsck.k9.message.InsertableHtmlContent: void setQuotedContent(java.lang.StringBuilder)>($r6);
+
+        $i0 = virtualinvoke $r5.<java.util.regex.Matcher: int end(int)>(1);
+
+        virtualinvoke r1.<com.fsck.k9.message.InsertableHtmlContent: void setHeaderInsertionPoint(int)>($i0);
+
+     label06:
+        $z0 = 0;
+
+        z1 = 0;
+
+        $r2 = <com.fsck.k9.helper.QuotedMessageHelper: java.util.regex.Pattern FIND_INSERTION_POINT_HTML_END>;
+
+        $r0 = virtualinvoke r1.<com.fsck.k9.message.InsertableHtmlContent: java.lang.String getQuotedContent()>();
+
+        $r3 = virtualinvoke $r2.<java.util.regex.Pattern: java.util.regex.Matcher matcher(java.lang.CharSequence)>($r0);
+
+        z2 = virtualinvoke $r3.<java.util.regex.Matcher: boolean matches()>();
+
+        if z2 == 0 goto label07;
+
+        $z0 = 1;
+
+     label07:
+        $r2 = <com.fsck.k9.helper.QuotedMessageHelper: java.util.regex.Pattern FIND_INSERTION_POINT_BODY_END>;
+
+        $r0 = virtualinvoke r1.<com.fsck.k9.message.InsertableHtmlContent: java.lang.String getQuotedContent()>();
+
+        $r4 = virtualinvoke $r2.<java.util.regex.Pattern: java.util.regex.Matcher matcher(java.lang.CharSequence)>($r0);
+
+        z2 = virtualinvoke $r4.<java.util.regex.Matcher: boolean matches()>();
+
+        if z2 == 0 goto label08;
+
+        z1 = 1;
+
+     label08:
+        z2 = <com.fsck.k9.K9: boolean DEBUG>;
+
+        if z2 == 0 goto label09;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Close: hasHtmlEndTag:");
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>($z0);
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" hasBodyEndTag:");
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>(z1);
+
+        $r0 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("k9", $r0);
+
+     label09:
+        if z1 == 0 goto label13;
+
+        $i0 = virtualinvoke $r4.<java.util.regex.Matcher: int start(int)>(1);
+
+        virtualinvoke r1.<com.fsck.k9.message.InsertableHtmlContent: void setFooterInsertionPoint(int)>($i0);
+
+        return r1;
+
+     label10:
+        if z1 == 0 goto label11;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>(java.lang.String)>($r0);
+
+        virtualinvoke r1.<com.fsck.k9.message.InsertableHtmlContent: void setQuotedContent(java.lang.StringBuilder)>($r6);
+
+        $i0 = virtualinvoke $r4.<java.util.regex.Matcher: int end(int)>(1);
+
+        virtualinvoke r1.<com.fsck.k9.message.InsertableHtmlContent: void setHeaderInsertionPoint(int)>($i0);
+
+        goto label06;
+
+     label11:
+        if $z0 == 0 goto label12;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>(java.lang.String)>($r0);
+
+        $i0 = virtualinvoke $r3.<java.util.regex.Matcher: int end(int)>(1);
+
+        virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder insert(int,java.lang.String)>($i0, "<head><meta content=\"text/html; charset=utf-8\" http-equiv=\"Content-Type\"></head>");
+
+        virtualinvoke r1.<com.fsck.k9.message.InsertableHtmlContent: void setQuotedContent(java.lang.StringBuilder)>($r6);
+
+        $i0 = virtualinvoke $r3.<java.util.regex.Matcher: int end(int)>(1);
+
+        $r0 = "<head><meta content=\"text/html; charset=utf-8\" http-equiv=\"Content-Type\"></head>";
+
+        $i1 = virtualinvoke $r0.<java.lang.String: int length()>();
+
+        $i0 = $i0 + $i1;
+
+        virtualinvoke r1.<com.fsck.k9.message.InsertableHtmlContent: void setHeaderInsertionPoint(int)>($i0);
+
+        goto label06;
+
+     label12:
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>(java.lang.String)>($r0);
+
+        virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder insert(int,java.lang.String)>(0, "<head><meta content=\"text/html; charset=utf-8\" http-equiv=\"Content-Type\"></head>");
+
+        virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder insert(int,java.lang.String)>(0, "<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.0 Transitional//EN\">\r\n<html>");
+
+        virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("</html>");
+
+        virtualinvoke r1.<com.fsck.k9.message.InsertableHtmlContent: void setQuotedContent(java.lang.StringBuilder)>($r6);
+
+        $r0 = "<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.0 Transitional//EN\">\r\n<html>";
+
+        $i0 = virtualinvoke $r0.<java.lang.String: int length()>();
+
+        $r0 = "<head><meta content=\"text/html; charset=utf-8\" http-equiv=\"Content-Type\"></head>";
+
+        $i1 = virtualinvoke $r0.<java.lang.String: int length()>();
+
+        $i0 = $i0 + $i1;
+
+        virtualinvoke r1.<com.fsck.k9.message.InsertableHtmlContent: void setHeaderInsertionPoint(int)>($i0);
+
+        goto label06;
+
+     label13:
+        if $z0 == 0 goto label14;
+
+        $i0 = virtualinvoke $r3.<java.util.regex.Matcher: int start(int)>(1);
+
+        virtualinvoke r1.<com.fsck.k9.message.InsertableHtmlContent: void setFooterInsertionPoint(int)>($i0);
+
+        return r1;
+
+     label14:
+        $r0 = virtualinvoke r1.<com.fsck.k9.message.InsertableHtmlContent: java.lang.String getQuotedContent()>();
+
+        $i0 = virtualinvoke $r0.<java.lang.String: int length()>();
+
+        virtualinvoke r1.<com.fsck.k9.message.InsertableHtmlContent: void setFooterInsertionPoint(int)>($i0);
+
+     label15:
+        return r1;
+    }
+    public static java.lang.String getBodyTextFromMessage(com.fsck.k9.mail.Part, com.fsck.k9.message.SimpleMessageFormat)
+    {
+        com.fsck.k9.mail.Part $r0, $r3;
+        com.fsck.k9.message.SimpleMessageFormat $r1, $r2;
+        boolean $z0;
+        java.lang.String $r4;
+
+        $r0 := @parameter0: com.fsck.k9.mail.Part;
+
+        $r1 := @parameter1: com.fsck.k9.message.SimpleMessageFormat;
+
+        $r2 = <com.fsck.k9.message.SimpleMessageFormat: com.fsck.k9.message.SimpleMessageFormat HTML>;
+
+        if $r1 != $r2 goto label4;
+
+        $r3 = staticinvoke <com.fsck.k9.mail.internet.MimeUtility: com.fsck.k9.mail.Part findFirstPartByMimeType(com.fsck.k9.mail.Part,java.lang.String)>($r0, "text/html");
+
+        if $r3 == null goto label2;
+
+        $z0 = <com.fsck.k9.K9: boolean DEBUG>;
+
+        if $z0 == 0 goto label1;
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("k9", "getBodyTextFromMessage: HTML requested, HTML found.");
+
+     label1:
+        $r4 = staticinvoke <com.fsck.k9.mail.internet.MessageExtractor: java.lang.String getTextFromPart(com.fsck.k9.mail.Part)>($r3);
+
+        return $r4;
+
+     label2:
+        $r0 = staticinvoke <com.fsck.k9.mail.internet.MimeUtility: com.fsck.k9.mail.Part findFirstPartByMimeType(com.fsck.k9.mail.Part,java.lang.String)>($r0, "text/plain");
+
+        if $r0 == null goto label8;
+
+        $z0 = <com.fsck.k9.K9: boolean DEBUG>;
+
+        if $z0 == 0 goto label3;
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("k9", "getBodyTextFromMessage: HTML requested, text found.");
+
+     label3:
+        $r4 = staticinvoke <com.fsck.k9.mail.internet.MessageExtractor: java.lang.String getTextFromPart(com.fsck.k9.mail.Part)>($r0);
+
+        $r4 = staticinvoke <com.fsck.k9.helper.HtmlConverter: java.lang.String textToHtml(java.lang.String)>($r4);
+
+        return $r4;
+
+     label4:
+        $r2 = <com.fsck.k9.message.SimpleMessageFormat: com.fsck.k9.message.SimpleMessageFormat TEXT>;
+
+        if $r1 != $r2 goto label8;
+
+        $r3 = staticinvoke <com.fsck.k9.mail.internet.MimeUtility: com.fsck.k9.mail.Part findFirstPartByMimeType(com.fsck.k9.mail.Part,java.lang.String)>($r0, "text/plain");
+
+        if $r3 == null goto label6;
+
+        $z0 = <com.fsck.k9.K9: boolean DEBUG>;
+
+        if $z0 == 0 goto label5;
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("k9", "getBodyTextFromMessage: Text requested, text found.");
+
+     label5:
+        $r4 = staticinvoke <com.fsck.k9.mail.internet.MessageExtractor: java.lang.String getTextFromPart(com.fsck.k9.mail.Part)>($r3);
+
+        return $r4;
+
+     label6:
+        $r0 = staticinvoke <com.fsck.k9.mail.internet.MimeUtility: com.fsck.k9.mail.Part findFirstPartByMimeType(com.fsck.k9.mail.Part,java.lang.String)>($r0, "text/html");
+
+        if $r0 == null goto label8;
+
+        $z0 = <com.fsck.k9.K9: boolean DEBUG>;
+
+        if $z0 == 0 goto label7;
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("k9", "getBodyTextFromMessage: Text requested, HTML found.");
+
+     label7:
+        $r4 = staticinvoke <com.fsck.k9.mail.internet.MessageExtractor: java.lang.String getTextFromPart(com.fsck.k9.mail.Part)>($r0);
+
+        $r4 = staticinvoke <com.fsck.k9.helper.HtmlConverter: java.lang.String htmlToText(java.lang.String)>($r4);
+
+        return $r4;
+
+     label8:
+        return "";
+    }
+    private static java.lang.String getSentDateText(android.content.res.Resources, com.fsck.k9.mail.Message)
+    {
+        android.content.res.Resources $r0;
+        com.fsck.k9.mail.Message $r1;
+        java.lang.Exception r2;
+        java.util.Locale r3;
+        java.util.Date $r4;
+        android.content.res.Configuration $r5;
+        java.text.DateFormat $r6;
+        java.lang.String $r7;
+
+        $r0 := @parameter0: android.content.res.Resources;
+
+        $r1 := @parameter1: com.fsck.k9.mail.Message;
+
+     label1:
+        $r4 = virtualinvoke $r1.<com.fsck.k9.mail.Message: java.util.Date getSentDate()>();
+
+        $r5 = virtualinvoke $r0.<android.content.res.Resources: android.content.res.Configuration getConfiguration()>();
+
+        r3 = $r5.<android.content.res.Configuration: java.util.Locale locale>;
+
+        $r6 = staticinvoke <java.text.DateFormat: java.text.DateFormat getDateTimeInstance(int,int,java.util.Locale)>(1, 1, r3);
+
+        $r7 = virtualinvoke $r6.<java.text.DateFormat: java.lang.String format(java.util.Date)>($r4);
+
+     label2:
+        return $r7;
+
+     label3:
+        r2 := @caughtexception;
+
+        return "";
+
+        catch java.lang.Exception from label1 to label2 with label3;
+    }
+    public static com.fsck.k9.message.InsertableHtmlContent quoteOriginalHtmlMessage(android.content.res.Resources, com.fsck.k9.mail.Message, java.lang.String, com.fsck.k9.Account$QuoteStyle) throws com.fsck.k9.mail.MessagingException
+    {
+        android.content.res.Resources $r0;
+        com.fsck.k9.mail.Message $r1;
+        java.lang.String $r2, $r6, $r9;
+        com.fsck.k9.Account$QuoteStyle $r3, $r7;
+        com.fsck.k9.message.InsertableHtmlContent $r4;
+        com.fsck.k9.mail.Address[] $r5;
+        java.lang.StringBuilder r8, $r11;
+        int $i0;
+        java.lang.Object[] $r10;
+        com.fsck.k9.mail.Message$RecipientType $r12;
+
+        $r0 := @parameter0: android.content.res.Resources;
+
+        $r1 := @parameter1: com.fsck.k9.mail.Message;
+
+        $r2 := @parameter2: java.lang.String;
+
+        $r3 := @parameter3: com.fsck.k9.Account$QuoteStyle;
+
+        $r4 = staticinvoke <com.fsck.k9.helper.QuotedMessageHelper: com.fsck.k9.message.InsertableHtmlContent findInsertionPoints(java.lang.String)>($r2);
+
+        $r2 = staticinvoke <com.fsck.k9.helper.QuotedMessageHelper: java.lang.String getSentDateText(android.content.res.Resources,com.fsck.k9.mail.Message)>($r0, $r1);
+
+        $r5 = virtualinvoke $r1.<com.fsck.k9.mail.Message: com.fsck.k9.mail.Address[] getFrom()>();
+
+        $r6 = staticinvoke <com.fsck.k9.mail.Address: java.lang.String toString(com.fsck.k9.mail.Address[])>($r5);
+
+        $r7 = <com.fsck.k9.Account$QuoteStyle: com.fsck.k9.Account$QuoteStyle PREFIX>;
+
+        if $r3 != $r7 goto label3;
+
+        r8 = new java.lang.StringBuilder;
+
+        specialinvoke r8.<java.lang.StringBuilder: void <init>(int)>(512);
+
+        virtualinvoke r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("<div class=\"gmail_quote\">");
+
+        $i0 = virtualinvoke $r2.<java.lang.String: int length()>();
+
+        if $i0 == 0 goto label2;
+
+        $r9 = virtualinvoke $r0.<android.content.res.Resources: java.lang.String getString(int)>(2131100483);
+
+        $r10 = newarray (java.lang.Object)[2];
+
+        $r10[0] = $r2;
+
+        $r10[1] = $r6;
+
+        $r2 = staticinvoke <java.lang.String: java.lang.String format(java.lang.String,java.lang.Object[])>($r9, $r10);
+
+        $r2 = staticinvoke <com.fsck.k9.helper.HtmlConverter: java.lang.String textToHtmlFragment(java.lang.String)>($r2);
+
+        virtualinvoke r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+     label1:
+        virtualinvoke r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("<blockquote class=\"gmail_quote\" style=\"margin: 0pt 0pt 0pt 0.8ex; border-left: 1px solid rgb(204, 204, 204); padding-left: 1ex;\">\r\n");
+
+        $r2 = virtualinvoke r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r4.<com.fsck.k9.message.InsertableHtmlContent: void insertIntoQuotedHeader(java.lang.String)>($r2);
+
+        virtualinvoke $r4.<com.fsck.k9.message.InsertableHtmlContent: void insertIntoQuotedFooter(java.lang.String)>("</blockquote></div>");
+
+        return $r4;
+
+     label2:
+        $r2 = virtualinvoke $r0.<android.content.res.Resources: java.lang.String getString(int)>(2131100191);
+
+        $r10 = newarray (java.lang.Object)[1];
+
+        $r10[0] = $r6;
+
+        $r2 = staticinvoke <java.lang.String: java.lang.String format(java.lang.String,java.lang.Object[])>($r2, $r10);
+
+        $r2 = staticinvoke <com.fsck.k9.helper.HtmlConverter: java.lang.String textToHtmlFragment(java.lang.String)>($r2);
+
+        virtualinvoke r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        goto label1;
+
+     label3:
+        $r7 = <com.fsck.k9.Account$QuoteStyle: com.fsck.k9.Account$QuoteStyle HEADER>;
+
+        if $r3 != $r7 goto label9;
+
+        r8 = new java.lang.StringBuilder;
+
+        specialinvoke r8.<java.lang.StringBuilder: void <init>()>();
+
+        virtualinvoke r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("<div style=\'font-size:10.0pt;font-family:\"Tahoma\",\"sans-serif\";padding:3.0pt 0in 0in 0in\'>\r\n");
+
+        virtualinvoke r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("<hr style=\'border:none;border-top:solid #E1E1E1 1.0pt\'>\r\n");
+
+        $r5 = virtualinvoke $r1.<com.fsck.k9.mail.Message: com.fsck.k9.mail.Address[] getFrom()>();
+
+        if $r5 == null goto label4;
+
+        $i0 = virtualinvoke $r6.<java.lang.String: int length()>();
+
+        if $i0 == 0 goto label4;
+
+        $r11 = virtualinvoke r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("<b>");
+
+        $r9 = virtualinvoke $r0.<android.content.res.Resources: java.lang.String getString(int)>(2131100186);
+
+        $r11 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r9);
+
+        $r11 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("</b> ");
+
+        $r6 = staticinvoke <com.fsck.k9.helper.HtmlConverter: java.lang.String textToHtmlFragment(java.lang.String)>($r6);
+
+        $r11 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("<br>\r\n");
+
+     label4:
+        $i0 = virtualinvoke $r2.<java.lang.String: int length()>();
+
+        if $i0 == 0 goto label5;
+
+        $r11 = virtualinvoke r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("<b>");
+
+        $r6 = virtualinvoke $r0.<android.content.res.Resources: java.lang.String getString(int)>(2131100187);
+
+        $r11 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r11 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("</b> ");
+
+        $r11 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("<br>\r\n");
+
+     label5:
+        $r12 = <com.fsck.k9.mail.Message$RecipientType: com.fsck.k9.mail.Message$RecipientType TO>;
+
+        $r5 = virtualinvoke $r1.<com.fsck.k9.mail.Message: com.fsck.k9.mail.Address[] getRecipients(com.fsck.k9.mail.Message$RecipientType)>($r12);
+
+        if $r5 == null goto label6;
+
+        $r12 = <com.fsck.k9.mail.Message$RecipientType: com.fsck.k9.mail.Message$RecipientType TO>;
+
+        $r5 = virtualinvoke $r1.<com.fsck.k9.mail.Message: com.fsck.k9.mail.Address[] getRecipients(com.fsck.k9.mail.Message$RecipientType)>($r12);
+
+        $i0 = lengthof $r5;
+
+        if $i0 == 0 goto label6;
+
+        $r11 = virtualinvoke r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("<b>");
+
+        $r2 = virtualinvoke $r0.<android.content.res.Resources: java.lang.String getString(int)>(2131100190);
+
+        $r11 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r11 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("</b> ");
+
+        $r12 = <com.fsck.k9.mail.Message$RecipientType: com.fsck.k9.mail.Message$RecipientType TO>;
+
+        $r5 = virtualinvoke $r1.<com.fsck.k9.mail.Message: com.fsck.k9.mail.Address[] getRecipients(com.fsck.k9.mail.Message$RecipientType)>($r12);
+
+        $r2 = staticinvoke <com.fsck.k9.mail.Address: java.lang.String toString(com.fsck.k9.mail.Address[])>($r5);
+
+        $r2 = staticinvoke <com.fsck.k9.helper.HtmlConverter: java.lang.String textToHtmlFragment(java.lang.String)>($r2);
+
+        $r11 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("<br>\r\n");
+
+     label6:
+        $r12 = <com.fsck.k9.mail.Message$RecipientType: com.fsck.k9.mail.Message$RecipientType CC>;
+
+        $r5 = virtualinvoke $r1.<com.fsck.k9.mail.Message: com.fsck.k9.mail.Address[] getRecipients(com.fsck.k9.mail.Message$RecipientType)>($r12);
+
+        if $r5 == null goto label7;
+
+        $r12 = <com.fsck.k9.mail.Message$RecipientType: com.fsck.k9.mail.Message$RecipientType CC>;
+
+        $r5 = virtualinvoke $r1.<com.fsck.k9.mail.Message: com.fsck.k9.mail.Address[] getRecipients(com.fsck.k9.mail.Message$RecipientType)>($r12);
+
+        $i0 = lengthof $r5;
+
+        if $i0 == 0 goto label7;
+
+        $r11 = virtualinvoke r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("<b>");
+
+        $r2 = virtualinvoke $r0.<android.content.res.Resources: java.lang.String getString(int)>(2131100185);
+
+        $r11 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r11 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("</b> ");
+
+        $r12 = <com.fsck.k9.mail.Message$RecipientType: com.fsck.k9.mail.Message$RecipientType CC>;
+
+        $r5 = virtualinvoke $r1.<com.fsck.k9.mail.Message: com.fsck.k9.mail.Address[] getRecipients(com.fsck.k9.mail.Message$RecipientType)>($r12);
+
+        $r2 = staticinvoke <com.fsck.k9.mail.Address: java.lang.String toString(com.fsck.k9.mail.Address[])>($r5);
+
+        $r2 = staticinvoke <com.fsck.k9.helper.HtmlConverter: java.lang.String textToHtmlFragment(java.lang.String)>($r2);
+
+        $r11 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("<br>\r\n");
+
+     label7:
+        $r2 = virtualinvoke $r1.<com.fsck.k9.mail.Message: java.lang.String getSubject()>();
+
+        if $r2 == null goto label8;
+
+        $r11 = virtualinvoke r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("<b>");
+
+        $r2 = virtualinvoke $r0.<android.content.res.Resources: java.lang.String getString(int)>(2131100189);
+
+        $r11 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r11 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("</b> ");
+
+        $r2 = virtualinvoke $r1.<com.fsck.k9.mail.Message: java.lang.String getSubject()>();
+
+        $r2 = staticinvoke <com.fsck.k9.helper.HtmlConverter: java.lang.String textToHtmlFragment(java.lang.String)>($r2);
+
+        $r11 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("<br>\r\n");
+
+     label8:
+        virtualinvoke r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("</div>\r\n");
+
+        virtualinvoke r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("<br>\r\n");
+
+        $r2 = virtualinvoke r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r4.<com.fsck.k9.message.InsertableHtmlContent: void insertIntoQuotedHeader(java.lang.String)>($r2);
+
+     label9:
+        return $r4;
+    }
+    public static java.lang.String quoteOriginalTextMessage(android.content.res.Resources, com.fsck.k9.mail.Message, java.lang.String, com.fsck.k9.Account$QuoteStyle, java.lang.String) throws com.fsck.k9.mail.MessagingException
+    {
+        android.content.res.Resources $r0;
+        com.fsck.k9.mail.Message $r1;
+        java.lang.String $r2, $r4, $r5, $r9;
+        com.fsck.k9.Account$QuoteStyle $r3, $r6;
+        java.lang.StringBuilder r7, $r8;
+        int $i0;
+        java.lang.Object[] $r10;
+        com.fsck.k9.mail.Address[] $r11;
+        com.fsck.k9.mail.Message$RecipientType $r12;
+
+        $r0 := @parameter0: android.content.res.Resources;
+
+        $r1 := @parameter1: com.fsck.k9.mail.Message;
+
+        $r2 := @parameter2: java.lang.String;
+
+        $r3 := @parameter3: com.fsck.k9.Account$QuoteStyle;
+
+        $r4 := @parameter4: java.lang.String;
+
+        if $r2 != null goto label03;
+
+        $r2 = "";
+
+     label01:
+        $r5 = staticinvoke <com.fsck.k9.helper.QuotedMessageHelper: java.lang.String getSentDateText(android.content.res.Resources,com.fsck.k9.mail.Message)>($r0, $r1);
+
+        $r6 = <com.fsck.k9.Account$QuoteStyle: com.fsck.k9.Account$QuoteStyle PREFIX>;
+
+        if $r3 != $r6 goto label05;
+
+        r7 = new java.lang.StringBuilder;
+
+        $i0 = virtualinvoke $r2.<java.lang.String: int length()>();
+
+        $i0 = $i0 + 512;
+
+        specialinvoke r7.<java.lang.StringBuilder: void <init>(int)>($i0);
+
+        $i0 = virtualinvoke $r5.<java.lang.String: int length()>();
+
+        if $i0 == 0 goto label04;
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r0.<android.content.res.Resources: java.lang.String getString(int)>(2131100483);
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r9);
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\r\n");
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r10 = newarray (java.lang.Object)[2];
+
+        $r10[0] = $r5;
+
+        $r11 = virtualinvoke $r1.<com.fsck.k9.mail.Message: com.fsck.k9.mail.Address[] getFrom()>();
+
+        $r5 = staticinvoke <com.fsck.k9.mail.Address: java.lang.String toString(com.fsck.k9.mail.Address[])>($r11);
+
+        $r10[1] = $r5;
+
+        $r5 = staticinvoke <java.lang.String: java.lang.String format(java.lang.String,java.lang.Object[])>($r9, $r10);
+
+        virtualinvoke r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+     label02:
+        $i0 = virtualinvoke $r4.<java.lang.String: int length()>();
+
+        $i0 = 72 - $i0;
+
+        $r2 = staticinvoke <com.fsck.k9.helper.Utility: java.lang.String wrap(java.lang.String,int)>($r2, $i0);
+
+        $r4 = virtualinvoke $r4.<java.lang.String: java.lang.String replaceAll(java.lang.String,java.lang.String)>("(\\\\|\\$)", "\\\\$1");
+
+        $r2 = virtualinvoke $r2.<java.lang.String: java.lang.String replaceAll(java.lang.String,java.lang.String)>("(?m)^", $r4);
+
+        virtualinvoke r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r2 = virtualinvoke r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r2 = virtualinvoke $r2.<java.lang.String: java.lang.String replaceAll(java.lang.String,java.lang.String)>("\\\r", "");
+
+        return $r2;
+
+     label03:
+        goto label01;
+
+     label04:
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r0.<android.content.res.Resources: java.lang.String getString(int)>(2131100191);
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\r\n");
+
+        $r5 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r10 = newarray (java.lang.Object)[1];
+
+        $r11 = virtualinvoke $r1.<com.fsck.k9.mail.Message: com.fsck.k9.mail.Address[] getFrom()>();
+
+        $r9 = staticinvoke <com.fsck.k9.mail.Address: java.lang.String toString(com.fsck.k9.mail.Address[])>($r11);
+
+        $r10[0] = $r9;
+
+        $r5 = staticinvoke <java.lang.String: java.lang.String format(java.lang.String,java.lang.Object[])>($r5, $r10);
+
+        virtualinvoke r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        goto label02;
+
+     label05:
+        $r6 = <com.fsck.k9.Account$QuoteStyle: com.fsck.k9.Account$QuoteStyle HEADER>;
+
+        if $r3 != $r6 goto label11;
+
+        r7 = new java.lang.StringBuilder;
+
+        $i0 = virtualinvoke $r2.<java.lang.String: int length()>();
+
+        $i0 = $i0 + 512;
+
+        specialinvoke r7.<java.lang.StringBuilder: void <init>(int)>($i0);
+
+        virtualinvoke r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\r\n");
+
+        $r4 = virtualinvoke $r0.<android.content.res.Resources: java.lang.String getString(int)>(2131100188);
+
+        $r8 = virtualinvoke r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\r\n");
+
+        $r11 = virtualinvoke $r1.<com.fsck.k9.mail.Message: com.fsck.k9.mail.Address[] getFrom()>();
+
+        if $r11 == null goto label06;
+
+        $r11 = virtualinvoke $r1.<com.fsck.k9.mail.Message: com.fsck.k9.mail.Address[] getFrom()>();
+
+        $r4 = staticinvoke <com.fsck.k9.mail.Address: java.lang.String toString(com.fsck.k9.mail.Address[])>($r11);
+
+        $i0 = virtualinvoke $r4.<java.lang.String: int length()>();
+
+        if $i0 == 0 goto label06;
+
+        $r4 = virtualinvoke $r0.<android.content.res.Resources: java.lang.String getString(int)>(2131100186);
+
+        $r8 = virtualinvoke r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ");
+
+        $r11 = virtualinvoke $r1.<com.fsck.k9.mail.Message: com.fsck.k9.mail.Address[] getFrom()>();
+
+        $r4 = staticinvoke <com.fsck.k9.mail.Address: java.lang.String toString(com.fsck.k9.mail.Address[])>($r11);
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\r\n");
+
+     label06:
+        $i0 = virtualinvoke $r5.<java.lang.String: int length()>();
+
+        if $i0 == 0 goto label07;
+
+        $r4 = virtualinvoke $r0.<android.content.res.Resources: java.lang.String getString(int)>(2131100187);
+
+        $r8 = virtualinvoke r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ");
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\r\n");
+
+     label07:
+        $r12 = <com.fsck.k9.mail.Message$RecipientType: com.fsck.k9.mail.Message$RecipientType TO>;
+
+        $r11 = virtualinvoke $r1.<com.fsck.k9.mail.Message: com.fsck.k9.mail.Address[] getRecipients(com.fsck.k9.mail.Message$RecipientType)>($r12);
+
+        if $r11 == null goto label08;
+
+        $r12 = <com.fsck.k9.mail.Message$RecipientType: com.fsck.k9.mail.Message$RecipientType TO>;
+
+        $r11 = virtualinvoke $r1.<com.fsck.k9.mail.Message: com.fsck.k9.mail.Address[] getRecipients(com.fsck.k9.mail.Message$RecipientType)>($r12);
+
+        $i0 = lengthof $r11;
+
+        if $i0 == 0 goto label08;
+
+        $r4 = virtualinvoke $r0.<android.content.res.Resources: java.lang.String getString(int)>(2131100190);
+
+        $r8 = virtualinvoke r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ");
+
+        $r12 = <com.fsck.k9.mail.Message$RecipientType: com.fsck.k9.mail.Message$RecipientType TO>;
+
+        $r11 = virtualinvoke $r1.<com.fsck.k9.mail.Message: com.fsck.k9.mail.Address[] getRecipients(com.fsck.k9.mail.Message$RecipientType)>($r12);
+
+        $r4 = staticinvoke <com.fsck.k9.mail.Address: java.lang.String toString(com.fsck.k9.mail.Address[])>($r11);
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\r\n");
+
+     label08:
+        $r12 = <com.fsck.k9.mail.Message$RecipientType: com.fsck.k9.mail.Message$RecipientType CC>;
+
+        $r11 = virtualinvoke $r1.<com.fsck.k9.mail.Message: com.fsck.k9.mail.Address[] getRecipients(com.fsck.k9.mail.Message$RecipientType)>($r12);
+
+        if $r11 == null goto label09;
+
+        $r12 = <com.fsck.k9.mail.Message$RecipientType: com.fsck.k9.mail.Message$RecipientType CC>;
+
+        $r11 = virtualinvoke $r1.<com.fsck.k9.mail.Message: com.fsck.k9.mail.Address[] getRecipients(com.fsck.k9.mail.Message$RecipientType)>($r12);
+
+        $i0 = lengthof $r11;
+
+        if $i0 == 0 goto label09;
+
+        $r4 = virtualinvoke $r0.<android.content.res.Resources: java.lang.String getString(int)>(2131100185);
+
+        $r8 = virtualinvoke r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ");
+
+        $r12 = <com.fsck.k9.mail.Message$RecipientType: com.fsck.k9.mail.Message$RecipientType CC>;
+
+        $r11 = virtualinvoke $r1.<com.fsck.k9.mail.Message: com.fsck.k9.mail.Address[] getRecipients(com.fsck.k9.mail.Message$RecipientType)>($r12);
+
+        $r4 = staticinvoke <com.fsck.k9.mail.Address: java.lang.String toString(com.fsck.k9.mail.Address[])>($r11);
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\r\n");
+
+     label09:
+        $r4 = virtualinvoke $r1.<com.fsck.k9.mail.Message: java.lang.String getSubject()>();
+
+        if $r4 == null goto label10;
+
+        $r4 = virtualinvoke $r0.<android.content.res.Resources: java.lang.String getString(int)>(2131100189);
+
+        $r8 = virtualinvoke r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ");
+
+        $r4 = virtualinvoke $r1.<com.fsck.k9.mail.Message: java.lang.String getSubject()>();
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\r\n");
+
+     label10:
+        virtualinvoke r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\r\n");
+
+        virtualinvoke r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r2 = virtualinvoke r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label11:
+        return $r2;
+    }
+    public static java.lang.String stripSignatureForHtmlMessage(java.lang.String)
+    {
+        org.htmlcleaner.HtmlCleaner r0;
+        java.util.ArrayList r1, r3;
+        org.htmlcleaner.SimpleHtmlSerializer r2;
+        java.lang.String $r4, $r11;
+        java.util.regex.Pattern $r5;
+        java.util.regex.Matcher $r6, $r7, $r8;
+        boolean $z0;
+        int $i0, $i1, $i2;
+        java.lang.Integer $r9;
+        java.lang.StringBuilder $r10;
+        org.htmlcleaner.CleanerProperties $r12;
+        org.htmlcleaner.TagNode $r13;
+        java.lang.Object $r14;
+
+        $r4 := @parameter0: java.lang.String;
+
+        $r5 = <com.fsck.k9.helper.QuotedMessageHelper: java.util.regex.Pattern DASH_SIGNATURE_HTML>;
+
+        $r6 = virtualinvoke $r5.<java.util.regex.Pattern: java.util.regex.Matcher matcher(java.lang.CharSequence)>($r4);
+
+        $z0 = virtualinvoke $r6.<java.util.regex.Matcher: boolean find()>();
+
+        if $z0 == 0 goto label04;
+
+        $r5 = <com.fsck.k9.helper.QuotedMessageHelper: java.util.regex.Pattern BLOCKQUOTE_START>;
+
+        $r7 = virtualinvoke $r5.<java.util.regex.Pattern: java.util.regex.Matcher matcher(java.lang.CharSequence)>($r4);
+
+        $r5 = <com.fsck.k9.helper.QuotedMessageHelper: java.util.regex.Pattern BLOCKQUOTE_END>;
+
+        $r8 = virtualinvoke $r5.<java.util.regex.Pattern: java.util.regex.Matcher matcher(java.lang.CharSequence)>($r4);
+
+        r3 = new java.util.ArrayList;
+
+        specialinvoke r3.<java.util.ArrayList: void <init>()>();
+
+        r1 = new java.util.ArrayList;
+
+        specialinvoke r1.<java.util.ArrayList: void <init>()>();
+
+     label01:
+        $z0 = virtualinvoke $r7.<java.util.regex.Matcher: boolean find()>();
+
+        if $z0 == 0 goto label02;
+
+        $i0 = virtualinvoke $r7.<java.util.regex.Matcher: int start()>();
+
+        $r9 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        interfaceinvoke r3.<java.util.List: boolean add(java.lang.Object)>($r9);
+
+        goto label01;
+
+     label02:
+        $z0 = virtualinvoke $r8.<java.util.regex.Matcher: boolean find()>();
+
+        if $z0 == 0 goto label03;
+
+        $i0 = virtualinvoke $r8.<java.util.regex.Matcher: int start()>();
+
+        $r9 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        interfaceinvoke r1.<java.util.List: boolean add(java.lang.Object)>($r9);
+
+        goto label02;
+
+     label03:
+        $i0 = interfaceinvoke r3.<java.util.List: int size()>();
+
+        $i1 = interfaceinvoke r1.<java.util.List: int size()>();
+
+        if $i0 == $i1 goto label05;
+
+        $r10 = new java.lang.StringBuilder;
+
+        specialinvoke $r10.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("There are ");
+
+        $i0 = interfaceinvoke r3.<java.util.List: int size()>();
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" <blockquote> tags, but ");
+
+        $i0 = interfaceinvoke r1.<java.util.List: int size()>();
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" </blockquote> tags. Refusing to strip.");
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("k9", $r11);
+
+     label04:
+        r0 = new org.htmlcleaner.HtmlCleaner;
+
+        specialinvoke r0.<org.htmlcleaner.HtmlCleaner: void <init>()>();
+
+        $r12 = virtualinvoke r0.<org.htmlcleaner.HtmlCleaner: org.htmlcleaner.CleanerProperties getProperties()>();
+
+        virtualinvoke $r12.<org.htmlcleaner.CleanerProperties: void setNamespacesAware(boolean)>(0);
+
+        virtualinvoke $r12.<org.htmlcleaner.CleanerProperties: void setAdvancedXmlEscape(boolean)>(0);
+
+        virtualinvoke $r12.<org.htmlcleaner.CleanerProperties: void setOmitXmlDeclaration(boolean)>(1);
+
+        virtualinvoke $r12.<org.htmlcleaner.CleanerProperties: void setOmitDoctypeDeclaration(boolean)>(0);
+
+        virtualinvoke $r12.<org.htmlcleaner.CleanerProperties: void setTranslateSpecialEntities(boolean)>(0);
+
+        virtualinvoke $r12.<org.htmlcleaner.CleanerProperties: void setRecognizeUnicodeChars(boolean)>(0);
+
+        $r13 = virtualinvoke r0.<org.htmlcleaner.HtmlCleaner: org.htmlcleaner.TagNode clean(java.lang.String)>($r4);
+
+        r2 = new org.htmlcleaner.SimpleHtmlSerializer;
+
+        specialinvoke r2.<org.htmlcleaner.SimpleHtmlSerializer: void <init>(org.htmlcleaner.CleanerProperties)>($r12);
+
+        $r4 = virtualinvoke r2.<org.htmlcleaner.SimpleHtmlSerializer: java.lang.String getAsString(org.htmlcleaner.TagNode,java.lang.String)>($r13, "UTF8");
+
+        return $r4;
+
+     label05:
+        $i0 = interfaceinvoke r3.<java.util.List: int size()>();
+
+        if $i0 <= 0 goto label10;
+
+        $r14 = interfaceinvoke r3.<java.util.List: java.lang.Object get(int)>(0);
+
+        $r9 = (java.lang.Integer) $r14;
+
+        $i0 = virtualinvoke $r9.<java.lang.Integer: int intValue()>();
+
+        virtualinvoke $r6.<java.util.regex.Matcher: java.util.regex.Matcher region(int,int)>(0, $i0);
+
+        $z0 = virtualinvoke $r6.<java.util.regex.Matcher: boolean find()>();
+
+        if $z0 == 0 goto label06;
+
+        $i0 = virtualinvoke $r6.<java.util.regex.Matcher: int start()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.String: java.lang.String substring(int,int)>(0, $i0);
+
+        goto label04;
+
+     label06:
+        $i0 = 0;
+
+     label07:
+        $i1 = interfaceinvoke r3.<java.util.List: int size()>();
+
+        $i1 = $i1 + -1;
+
+        if $i0 >= $i1 goto label08;
+
+        $r14 = interfaceinvoke r1.<java.util.List: java.lang.Object get(int)>($i0);
+
+        $r9 = (java.lang.Integer) $r14;
+
+        $i1 = virtualinvoke $r9.<java.lang.Integer: int intValue()>();
+
+        $i2 = $i0 + 1;
+
+        $r14 = interfaceinvoke r3.<java.util.List: java.lang.Object get(int)>($i2);
+
+        $r9 = (java.lang.Integer) $r14;
+
+        $i2 = virtualinvoke $r9.<java.lang.Integer: int intValue()>();
+
+        if $i1 >= $i2 goto label09;
+
+        $r14 = interfaceinvoke r1.<java.util.List: java.lang.Object get(int)>($i0);
+
+        $r9 = (java.lang.Integer) $r14;
+
+        $i1 = virtualinvoke $r9.<java.lang.Integer: int intValue()>();
+
+        $i2 = $i0 + 1;
+
+        $r14 = interfaceinvoke r3.<java.util.List: java.lang.Object get(int)>($i2);
+
+        $r9 = (java.lang.Integer) $r14;
+
+        $i2 = virtualinvoke $r9.<java.lang.Integer: int intValue()>();
+
+        virtualinvoke $r6.<java.util.regex.Matcher: java.util.regex.Matcher region(int,int)>($i1, $i2);
+
+        $z0 = virtualinvoke $r6.<java.util.regex.Matcher: boolean find()>();
+
+        if $z0 == 0 goto label09;
+
+        $i0 = virtualinvoke $r6.<java.util.regex.Matcher: int start()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.String: java.lang.String substring(int,int)>(0, $i0);
+
+     label08:
+        $i0 = interfaceinvoke r1.<java.util.List: int size()>();
+
+        $i0 = $i0 + -1;
+
+        $r14 = interfaceinvoke r1.<java.util.List: java.lang.Object get(int)>($i0);
+
+        $r9 = (java.lang.Integer) $r14;
+
+        $i0 = virtualinvoke $r9.<java.lang.Integer: int intValue()>();
+
+        $i1 = virtualinvoke $r4.<java.lang.String: int length()>();
+
+        if $i0 >= $i1 goto label04;
+
+        $i0 = interfaceinvoke r1.<java.util.List: int size()>();
+
+        $i0 = $i0 + -1;
+
+        $r14 = interfaceinvoke r1.<java.util.List: java.lang.Object get(int)>($i0);
+
+        $r9 = (java.lang.Integer) $r14;
+
+        $i0 = virtualinvoke $r9.<java.lang.Integer: int intValue()>();
+
+        $i1 = virtualinvoke $r4.<java.lang.String: int length()>();
+
+        virtualinvoke $r6.<java.util.regex.Matcher: java.util.regex.Matcher region(int,int)>($i0, $i1);
+
+        $z0 = virtualinvoke $r6.<java.util.regex.Matcher: boolean find()>();
+
+        if $z0 == 0 goto label04;
+
+        $i0 = virtualinvoke $r6.<java.util.regex.Matcher: int start()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.String: java.lang.String substring(int,int)>(0, $i0);
+
+        goto label04;
+
+     label09:
+        $i0 = $i0 + 1;
+
+        goto label07;
+
+     label10:
+        $i0 = virtualinvoke $r6.<java.util.regex.Matcher: int start()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.String: java.lang.String substring(int,int)>(0, $i0);
+
+        goto label04;
+    }
+    public static java.lang.String stripSignatureForTextMessage(java.lang.String)
+    {
+        java.lang.String $r0;
+        java.util.regex.Pattern $r1;
+        java.util.regex.Matcher $r2;
+        boolean $z0;
+
+        $r0 := @parameter0: java.lang.String;
+
+        $r1 = <com.fsck.k9.helper.QuotedMessageHelper: java.util.regex.Pattern DASH_SIGNATURE_PLAIN>;
+
+        $r2 = virtualinvoke $r1.<java.util.regex.Pattern: java.util.regex.Matcher matcher(java.lang.CharSequence)>($r0);
+
+        $z0 = virtualinvoke $r2.<java.util.regex.Matcher: boolean find()>();
+
+        if $z0 == 0 goto label1;
+
+        $r1 = <com.fsck.k9.helper.QuotedMessageHelper: java.util.regex.Pattern DASH_SIGNATURE_PLAIN>;
+
+        $r2 = virtualinvoke $r1.<java.util.regex.Pattern: java.util.regex.Matcher matcher(java.lang.CharSequence)>($r0);
+
+        $r0 = virtualinvoke $r2.<java.util.regex.Matcher: java.lang.String replaceFirst(java.lang.String)>("\r\n");
+
+     label1:
+        return $r0;
+    }

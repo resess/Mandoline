@@ -1,0 +1,135 @@
+com.facebook.stetho.server.SecureSocketHandler extends java.lang.Object implements com.facebook.stetho.server.SocketHandler
+private final android.content.Context mContext
+    public void <init>(android.content.Context)
+    {
+        com.facebook.stetho.server.SecureSocketHandler r0;
+        android.content.Context $r1;
+
+        r0 := @this: com.facebook.stetho.server.SecureSocketHandler;
+
+        $r1 := @parameter0: android.content.Context;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<com.facebook.stetho.server.SecureSocketHandler: android.content.Context mContext> = $r1;
+
+        return;
+    }
+    private static void enforcePermission(android.content.Context, android.net.LocalSocket) throws java.io.IOException, com.facebook.stetho.server.PeerAuthorizationException
+    {
+        android.content.Context $r0;
+        android.net.LocalSocket $r1;
+        android.net.Credentials $r2;
+        int $i0, $i1, $i2;
+        boolean $z0;
+        java.lang.Object[] $r3;
+        java.lang.Integer $r4;
+        com.facebook.stetho.server.PeerAuthorizationException $r5;
+        java.lang.StringBuilder $r6;
+        java.lang.String $r7;
+
+        $r0 := @parameter0: android.content.Context;
+
+        $r1 := @parameter1: android.net.LocalSocket;
+
+        $r2 = virtualinvoke $r1.<android.net.LocalSocket: android.net.Credentials getPeerCredentials()>();
+
+        $i0 = virtualinvoke $r2.<android.net.Credentials: int getUid()>();
+
+        $i1 = virtualinvoke $r2.<android.net.Credentials: int getPid()>();
+
+        $z0 = staticinvoke <com.facebook.stetho.common.LogUtil: boolean isLoggable(int)>(2);
+
+        if $z0 == 0 goto label1;
+
+        $r3 = newarray (java.lang.Object)[2];
+
+        $r4 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        $r3[0] = $r4;
+
+        $r4 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i1);
+
+        $r3[1] = $r4;
+
+        staticinvoke <com.facebook.stetho.common.LogUtil: void v(java.lang.String,java.lang.Object[])>("Got request from uid=%d, pid=%d", $r3);
+
+     label1:
+        $i2 = virtualinvoke $r0.<android.content.Context: int checkPermission(java.lang.String,int,int)>("android.permission.DUMP", $i1, $i0);
+
+        if $i2 == 0 goto label2;
+
+        $r5 = new com.facebook.stetho.server.PeerAuthorizationException;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Peer pid=");
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i1);
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", uid=");
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" does not have ");
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("android.permission.DUMP");
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r5.<com.facebook.stetho.server.PeerAuthorizationException: void <init>(java.lang.String)>($r7);
+
+        throw $r5;
+
+     label2:
+        return;
+    }
+    public final void onAccepted(android.net.LocalSocket) throws java.io.IOException
+    {
+        com.facebook.stetho.server.SecureSocketHandler r0;
+        android.net.LocalSocket $r1;
+        com.facebook.stetho.server.PeerAuthorizationException r2;
+        android.content.Context $r3;
+        java.lang.StringBuilder $r4;
+        java.lang.String $r5;
+
+        r0 := @this: com.facebook.stetho.server.SecureSocketHandler;
+
+        $r1 := @parameter0: android.net.LocalSocket;
+
+        $r3 = r0.<com.facebook.stetho.server.SecureSocketHandler: android.content.Context mContext>;
+
+     label1:
+        staticinvoke <com.facebook.stetho.server.SecureSocketHandler: void enforcePermission(android.content.Context,android.net.LocalSocket)>($r3, $r1);
+
+        virtualinvoke r0.<com.facebook.stetho.server.SecureSocketHandler: void onSecured(android.net.LocalSocket)>($r1);
+
+     label2:
+        return;
+
+     label3:
+        r2 := @caughtexception;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unauthorized request: ");
+
+        $r5 = virtualinvoke r2.<com.facebook.stetho.server.PeerAuthorizationException: java.lang.String getMessage()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.facebook.stetho.common.LogUtil: void e(java.lang.String)>($r5);
+
+        return;
+
+        catch com.facebook.stetho.server.PeerAuthorizationException from label1 to label2 with label3;
+    }
+protected abstract void onSecured(android.net.LocalSocket) throws java.io.IOException { 
+// no body
+} 

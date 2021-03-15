@@ -1,0 +1,1727 @@
+org.spongycastle.crypto.tls.DTLSClientProtocol extends org.spongycastle.crypto.tls.DTLSProtocol
+    public void <init>(java.security.SecureRandom)
+    {
+        org.spongycastle.crypto.tls.DTLSClientProtocol r0;
+        java.security.SecureRandom $r1;
+
+        r0 := @this: org.spongycastle.crypto.tls.DTLSClientProtocol;
+
+        $r1 := @parameter0: java.security.SecureRandom;
+
+        specialinvoke r0.<org.spongycastle.crypto.tls.DTLSProtocol: void <init>(java.security.SecureRandom)>($r1);
+
+        return;
+    }
+    protected static byte[] patchClientHelloWithCookie(byte[], byte[]) throws java.io.IOException
+    {
+        byte[] $r0, $r1, r2;
+        int i0, i1, $i3, $i4;
+        short $s2;
+
+        $r0 := @parameter0: byte[];
+
+        $r1 := @parameter1: byte[];
+
+        $s2 = staticinvoke <org.spongycastle.crypto.tls.TlsUtils: short readUint8(byte[],int)>($r0, 34);
+
+        i0 = $s2 + 35;
+
+        i1 = i0 + 1;
+
+        $i3 = lengthof $r0;
+
+        $i4 = lengthof $r1;
+
+        $i3 = $i3 + $i4;
+
+        r2 = newarray (byte)[$i3];
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r0, 0, r2, 0, i0);
+
+        $i3 = lengthof $r1;
+
+        staticinvoke <org.spongycastle.crypto.tls.TlsUtils: void checkUint8(int)>($i3);
+
+        $i3 = lengthof $r1;
+
+        staticinvoke <org.spongycastle.crypto.tls.TlsUtils: void writeUint8(int,byte[],int)>($i3, r2, i0);
+
+        i0 = lengthof $r1;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r1, 0, r2, i1, i0);
+
+        i0 = lengthof $r1;
+
+        i0 = i0 + i1;
+
+        $i3 = lengthof $r0;
+
+        $i3 = $i3 - i1;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r0, i1, r2, i0, $i3);
+
+        return r2;
+    }
+    protected org.spongycastle.crypto.tls.DTLSTransport clientHandshake(org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState, org.spongycastle.crypto.tls.DTLSRecordLayer) throws java.io.IOException
+    {
+        org.spongycastle.crypto.tls.DTLSClientProtocol r0;
+        org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState $r1;
+        org.spongycastle.crypto.tls.DTLSRecordLayer $r2;
+        org.spongycastle.crypto.tls.DigitallySigned r3;
+        org.spongycastle.crypto.tls.DTLSReliableHandshake r4;
+        org.spongycastle.crypto.tls.TlsClientContextImpl $r5, $r16;
+        org.spongycastle.crypto.tls.SecurityParameters $r6;
+        org.spongycastle.crypto.tls.TlsClient $r7;
+        byte[] $r8, $r13;
+        org.spongycastle.crypto.tls.DTLSReliableHandshake$Message $r9, r21;
+        short $s0;
+        org.spongycastle.crypto.tls.ProtocolVersion $r10, $r11;
+        boolean $z0;
+        org.spongycastle.crypto.tls.TlsFatalAlert $r12;
+        org.spongycastle.crypto.tls.SessionParameters $r14;
+        org.spongycastle.crypto.tls.TlsCipher $r15;
+        org.spongycastle.crypto.tls.TlsHandshakeHash $r17;
+        org.spongycastle.crypto.tls.TlsSession $r18;
+        org.spongycastle.crypto.tls.DTLSTransport $r19;
+        int $i1;
+        org.spongycastle.crypto.tls.TlsSessionImpl $r20;
+        org.spongycastle.crypto.tls.TlsKeyExchange $r22;
+        org.spongycastle.crypto.tls.Certificate r23, r28;
+        org.spongycastle.crypto.tls.CertificateRequest $r24;
+        java.util.Vector $r25;
+        org.spongycastle.crypto.tls.TlsAuthentication $r26;
+        org.spongycastle.crypto.tls.TlsCredentials $r27;
+        org.spongycastle.crypto.tls.TlsSignerCredentials r29;
+        org.spongycastle.crypto.tls.SignatureAndHashAlgorithm $r30;
+        org.spongycastle.crypto.tls.SessionParameters$Builder $r31;
+        java.util.Hashtable $r32;
+
+        r0 := @this: org.spongycastle.crypto.tls.DTLSClientProtocol;
+
+        $r1 := @parameter0: org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState;
+
+        $r2 := @parameter1: org.spongycastle.crypto.tls.DTLSRecordLayer;
+
+        $r5 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: org.spongycastle.crypto.tls.TlsClientContextImpl clientContext>;
+
+        $r6 = virtualinvoke $r5.<org.spongycastle.crypto.tls.TlsClientContextImpl: org.spongycastle.crypto.tls.SecurityParameters getSecurityParameters()>();
+
+        r4 = new org.spongycastle.crypto.tls.DTLSReliableHandshake;
+
+        $r5 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: org.spongycastle.crypto.tls.TlsClientContextImpl clientContext>;
+
+        specialinvoke r4.<org.spongycastle.crypto.tls.DTLSReliableHandshake: void <init>(org.spongycastle.crypto.tls.TlsContext,org.spongycastle.crypto.tls.DTLSRecordLayer)>($r5, $r2);
+
+        $r7 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: org.spongycastle.crypto.tls.TlsClient client>;
+
+        $r8 = virtualinvoke r0.<org.spongycastle.crypto.tls.DTLSClientProtocol: byte[] generateClientHello(org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState,org.spongycastle.crypto.tls.TlsClient)>($r1, $r7);
+
+        virtualinvoke r4.<org.spongycastle.crypto.tls.DTLSReliableHandshake: void sendMessage(short,byte[])>(1, $r8);
+
+        $r9 = virtualinvoke r4.<org.spongycastle.crypto.tls.DTLSReliableHandshake: org.spongycastle.crypto.tls.DTLSReliableHandshake$Message receiveMessage()>();
+
+     label01:
+        $s0 = virtualinvoke $r9.<org.spongycastle.crypto.tls.DTLSReliableHandshake$Message: short getType()>();
+
+        if $s0 != 3 goto label03;
+
+        $r10 = virtualinvoke $r2.<org.spongycastle.crypto.tls.DTLSRecordLayer: org.spongycastle.crypto.tls.ProtocolVersion resetDiscoveredPeerVersion()>();
+
+        $r5 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: org.spongycastle.crypto.tls.TlsClientContextImpl clientContext>;
+
+        $r11 = virtualinvoke $r5.<org.spongycastle.crypto.tls.TlsClientContextImpl: org.spongycastle.crypto.tls.ProtocolVersion getClientVersion()>();
+
+        $z0 = virtualinvoke $r10.<org.spongycastle.crypto.tls.ProtocolVersion: boolean isEqualOrEarlierVersionOf(org.spongycastle.crypto.tls.ProtocolVersion)>($r11);
+
+        if $z0 != 0 goto label02;
+
+        $r12 = new org.spongycastle.crypto.tls.TlsFatalAlert;
+
+        specialinvoke $r12.<org.spongycastle.crypto.tls.TlsFatalAlert: void <init>(short)>(47);
+
+        throw $r12;
+
+     label02:
+        $r13 = virtualinvoke $r9.<org.spongycastle.crypto.tls.DTLSReliableHandshake$Message: byte[] getBody()>();
+
+        $r13 = virtualinvoke r0.<org.spongycastle.crypto.tls.DTLSClientProtocol: byte[] processHelloVerifyRequest(org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState,byte[])>($r1, $r13);
+
+        $r13 = staticinvoke <org.spongycastle.crypto.tls.DTLSClientProtocol: byte[] patchClientHelloWithCookie(byte[],byte[])>($r8, $r13);
+
+        virtualinvoke r4.<org.spongycastle.crypto.tls.DTLSReliableHandshake: void resetHandshakeMessagesDigest()>();
+
+        virtualinvoke r4.<org.spongycastle.crypto.tls.DTLSReliableHandshake: void sendMessage(short,byte[])>(1, $r13);
+
+        $r9 = virtualinvoke r4.<org.spongycastle.crypto.tls.DTLSReliableHandshake: org.spongycastle.crypto.tls.DTLSReliableHandshake$Message receiveMessage()>();
+
+        goto label01;
+
+     label03:
+        $s0 = virtualinvoke $r9.<org.spongycastle.crypto.tls.DTLSReliableHandshake$Message: short getType()>();
+
+        if $s0 != 2 goto label04;
+
+        $r10 = virtualinvoke $r2.<org.spongycastle.crypto.tls.DTLSRecordLayer: org.spongycastle.crypto.tls.ProtocolVersion getDiscoveredPeerVersion()>();
+
+        virtualinvoke r0.<org.spongycastle.crypto.tls.DTLSClientProtocol: void reportServerVersion(org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState,org.spongycastle.crypto.tls.ProtocolVersion)>($r1, $r10);
+
+        $r8 = virtualinvoke $r9.<org.spongycastle.crypto.tls.DTLSReliableHandshake$Message: byte[] getBody()>();
+
+        virtualinvoke r0.<org.spongycastle.crypto.tls.DTLSClientProtocol: void processServerHello(org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState,byte[])>($r1, $r8);
+
+        virtualinvoke r4.<org.spongycastle.crypto.tls.DTLSReliableHandshake: void notifyHelloComplete()>();
+
+        $s0 = $r6.<org.spongycastle.crypto.tls.SecurityParameters: short maxFragmentLength>;
+
+        staticinvoke <org.spongycastle.crypto.tls.DTLSClientProtocol: void applyMaxFragmentLengthExtension(org.spongycastle.crypto.tls.DTLSRecordLayer,short)>($r2, $s0);
+
+        $z0 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: boolean resumedSession>;
+
+        if $z0 == 0 goto label05;
+
+        $r14 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: org.spongycastle.crypto.tls.SessionParameters sessionParameters>;
+
+        $r8 = virtualinvoke $r14.<org.spongycastle.crypto.tls.SessionParameters: byte[] getMasterSecret()>();
+
+        $r8 = staticinvoke <org.spongycastle.util.Arrays: byte[] clone(byte[])>($r8);
+
+        $r6.<org.spongycastle.crypto.tls.SecurityParameters: byte[] masterSecret> = $r8;
+
+        $r7 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: org.spongycastle.crypto.tls.TlsClient client>;
+
+        $r15 = interfaceinvoke $r7.<org.spongycastle.crypto.tls.TlsClient: org.spongycastle.crypto.tls.TlsCipher getCipher()>();
+
+        virtualinvoke $r2.<org.spongycastle.crypto.tls.DTLSRecordLayer: void initPendingEpoch(org.spongycastle.crypto.tls.TlsCipher)>($r15);
+
+        $r5 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: org.spongycastle.crypto.tls.TlsClientContextImpl clientContext>;
+
+        $r16 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: org.spongycastle.crypto.tls.TlsClientContextImpl clientContext>;
+
+        $r17 = virtualinvoke r4.<org.spongycastle.crypto.tls.DTLSReliableHandshake: org.spongycastle.crypto.tls.TlsHandshakeHash getHandshakeHash()>();
+
+        $r8 = staticinvoke <org.spongycastle.crypto.tls.TlsProtocol: byte[] getCurrentPRFHash(org.spongycastle.crypto.tls.TlsContext,org.spongycastle.crypto.tls.TlsHandshakeHash,byte[])>($r16, $r17, null);
+
+        $r8 = staticinvoke <org.spongycastle.crypto.tls.TlsUtils: byte[] calculateVerifyData(org.spongycastle.crypto.tls.TlsContext,java.lang.String,byte[])>($r5, "server finished", $r8);
+
+        $r13 = virtualinvoke r4.<org.spongycastle.crypto.tls.DTLSReliableHandshake: byte[] receiveMessageBody(short)>(20);
+
+        virtualinvoke r0.<org.spongycastle.crypto.tls.DTLSClientProtocol: void processFinished(byte[],byte[])>($r13, $r8);
+
+        $r5 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: org.spongycastle.crypto.tls.TlsClientContextImpl clientContext>;
+
+        $r16 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: org.spongycastle.crypto.tls.TlsClientContextImpl clientContext>;
+
+        $r17 = virtualinvoke r4.<org.spongycastle.crypto.tls.DTLSReliableHandshake: org.spongycastle.crypto.tls.TlsHandshakeHash getHandshakeHash()>();
+
+        $r8 = staticinvoke <org.spongycastle.crypto.tls.TlsProtocol: byte[] getCurrentPRFHash(org.spongycastle.crypto.tls.TlsContext,org.spongycastle.crypto.tls.TlsHandshakeHash,byte[])>($r16, $r17, null);
+
+        $r8 = staticinvoke <org.spongycastle.crypto.tls.TlsUtils: byte[] calculateVerifyData(org.spongycastle.crypto.tls.TlsContext,java.lang.String,byte[])>($r5, "client finished", $r8);
+
+        virtualinvoke r4.<org.spongycastle.crypto.tls.DTLSReliableHandshake: void sendMessage(short,byte[])>(20, $r8);
+
+        virtualinvoke r4.<org.spongycastle.crypto.tls.DTLSReliableHandshake: void finish()>();
+
+        $r5 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: org.spongycastle.crypto.tls.TlsClientContextImpl clientContext>;
+
+        $r18 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: org.spongycastle.crypto.tls.TlsSession tlsSession>;
+
+        virtualinvoke $r5.<org.spongycastle.crypto.tls.TlsClientContextImpl: void setResumableSession(org.spongycastle.crypto.tls.TlsSession)>($r18);
+
+        $r7 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: org.spongycastle.crypto.tls.TlsClient client>;
+
+        interfaceinvoke $r7.<org.spongycastle.crypto.tls.TlsClient: void notifyHandshakeComplete()>();
+
+        $r19 = new org.spongycastle.crypto.tls.DTLSTransport;
+
+        specialinvoke $r19.<org.spongycastle.crypto.tls.DTLSTransport: void <init>(org.spongycastle.crypto.tls.DTLSRecordLayer)>($r2);
+
+        return $r19;
+
+     label04:
+        $r12 = new org.spongycastle.crypto.tls.TlsFatalAlert;
+
+        specialinvoke $r12.<org.spongycastle.crypto.tls.TlsFatalAlert: void <init>(short)>(10);
+
+        throw $r12;
+
+     label05:
+        virtualinvoke r0.<org.spongycastle.crypto.tls.DTLSClientProtocol: void invalidateSession(org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState)>($r1);
+
+        $r8 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: byte[] selectedSessionID>;
+
+        $i1 = lengthof $r8;
+
+        if $i1 <= 0 goto label06;
+
+        $r20 = new org.spongycastle.crypto.tls.TlsSessionImpl;
+
+        $r8 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: byte[] selectedSessionID>;
+
+        specialinvoke $r20.<org.spongycastle.crypto.tls.TlsSessionImpl: void <init>(byte[],org.spongycastle.crypto.tls.SessionParameters)>($r8, null);
+
+        $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: org.spongycastle.crypto.tls.TlsSession tlsSession> = $r20;
+
+     label06:
+        $r9 = virtualinvoke r4.<org.spongycastle.crypto.tls.DTLSReliableHandshake: org.spongycastle.crypto.tls.DTLSReliableHandshake$Message receiveMessage()>();
+
+        r21 = $r9;
+
+        $s0 = virtualinvoke $r9.<org.spongycastle.crypto.tls.DTLSReliableHandshake$Message: short getType()>();
+
+        if $s0 != 23 goto label14;
+
+        $r8 = virtualinvoke $r9.<org.spongycastle.crypto.tls.DTLSReliableHandshake$Message: byte[] getBody()>();
+
+        virtualinvoke r0.<org.spongycastle.crypto.tls.DTLSClientProtocol: void processServerSupplementalData(org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState,byte[])>($r1, $r8);
+
+        r21 = virtualinvoke r4.<org.spongycastle.crypto.tls.DTLSReliableHandshake: org.spongycastle.crypto.tls.DTLSReliableHandshake$Message receiveMessage()>();
+
+     label07:
+        $r7 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: org.spongycastle.crypto.tls.TlsClient client>;
+
+        $r22 = interfaceinvoke $r7.<org.spongycastle.crypto.tls.TlsClient: org.spongycastle.crypto.tls.TlsKeyExchange getKeyExchange()>();
+
+        $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: org.spongycastle.crypto.tls.TlsKeyExchange keyExchange> = $r22;
+
+        $r22 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: org.spongycastle.crypto.tls.TlsKeyExchange keyExchange>;
+
+        $r5 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: org.spongycastle.crypto.tls.TlsClientContextImpl clientContext>;
+
+        interfaceinvoke $r22.<org.spongycastle.crypto.tls.TlsKeyExchange: void init(org.spongycastle.crypto.tls.TlsContext)>($r5);
+
+        r23 = null;
+
+        $s0 = virtualinvoke r21.<org.spongycastle.crypto.tls.DTLSReliableHandshake$Message: short getType()>();
+
+        if $s0 != 11 goto label15;
+
+        $r8 = virtualinvoke r21.<org.spongycastle.crypto.tls.DTLSReliableHandshake$Message: byte[] getBody()>();
+
+        r23 = virtualinvoke r0.<org.spongycastle.crypto.tls.DTLSClientProtocol: org.spongycastle.crypto.tls.Certificate processServerCertificate(org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState,byte[])>($r1, $r8);
+
+        r21 = virtualinvoke r4.<org.spongycastle.crypto.tls.DTLSReliableHandshake: org.spongycastle.crypto.tls.DTLSReliableHandshake$Message receiveMessage()>();
+
+     label08:
+        if r23 == null goto label09;
+
+        $z0 = virtualinvoke r23.<org.spongycastle.crypto.tls.Certificate: boolean isEmpty()>();
+
+        if $z0 == 0 goto label10;
+
+     label09:
+        $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: boolean allowCertificateStatus> = 0;
+
+     label10:
+        $s0 = virtualinvoke r21.<org.spongycastle.crypto.tls.DTLSReliableHandshake$Message: short getType()>();
+
+        if $s0 != 22 goto label11;
+
+        $r8 = virtualinvoke r21.<org.spongycastle.crypto.tls.DTLSReliableHandshake$Message: byte[] getBody()>();
+
+        virtualinvoke r0.<org.spongycastle.crypto.tls.DTLSClientProtocol: void processCertificateStatus(org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState,byte[])>($r1, $r8);
+
+        r21 = virtualinvoke r4.<org.spongycastle.crypto.tls.DTLSReliableHandshake: org.spongycastle.crypto.tls.DTLSReliableHandshake$Message receiveMessage()>();
+
+     label11:
+        $s0 = virtualinvoke r21.<org.spongycastle.crypto.tls.DTLSReliableHandshake$Message: short getType()>();
+
+        if $s0 != 12 goto label16;
+
+        $r8 = virtualinvoke r21.<org.spongycastle.crypto.tls.DTLSReliableHandshake$Message: byte[] getBody()>();
+
+        virtualinvoke r0.<org.spongycastle.crypto.tls.DTLSClientProtocol: void processServerKeyExchange(org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState,byte[])>($r1, $r8);
+
+        r21 = virtualinvoke r4.<org.spongycastle.crypto.tls.DTLSReliableHandshake: org.spongycastle.crypto.tls.DTLSReliableHandshake$Message receiveMessage()>();
+
+     label12:
+        $s0 = virtualinvoke r21.<org.spongycastle.crypto.tls.DTLSReliableHandshake$Message: short getType()>();
+
+        if $s0 != 13 goto label13;
+
+        $r8 = virtualinvoke r21.<org.spongycastle.crypto.tls.DTLSReliableHandshake$Message: byte[] getBody()>();
+
+        virtualinvoke r0.<org.spongycastle.crypto.tls.DTLSClientProtocol: void processCertificateRequest(org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState,byte[])>($r1, $r8);
+
+        $r17 = virtualinvoke r4.<org.spongycastle.crypto.tls.DTLSReliableHandshake: org.spongycastle.crypto.tls.TlsHandshakeHash getHandshakeHash()>();
+
+        $r24 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: org.spongycastle.crypto.tls.CertificateRequest certificateRequest>;
+
+        $r25 = virtualinvoke $r24.<org.spongycastle.crypto.tls.CertificateRequest: java.util.Vector getSupportedSignatureAlgorithms()>();
+
+        staticinvoke <org.spongycastle.crypto.tls.TlsUtils: void trackHashAlgorithms(org.spongycastle.crypto.tls.TlsHandshakeHash,java.util.Vector)>($r17, $r25);
+
+        r21 = virtualinvoke r4.<org.spongycastle.crypto.tls.DTLSReliableHandshake: org.spongycastle.crypto.tls.DTLSReliableHandshake$Message receiveMessage()>();
+
+     label13:
+        $s0 = virtualinvoke r21.<org.spongycastle.crypto.tls.DTLSReliableHandshake$Message: short getType()>();
+
+        if $s0 != 14 goto label17;
+
+        $r8 = virtualinvoke r21.<org.spongycastle.crypto.tls.DTLSReliableHandshake$Message: byte[] getBody()>();
+
+        $i1 = lengthof $r8;
+
+        if $i1 == 0 goto label18;
+
+        $r12 = new org.spongycastle.crypto.tls.TlsFatalAlert;
+
+        specialinvoke $r12.<org.spongycastle.crypto.tls.TlsFatalAlert: void <init>(short)>(50);
+
+        throw $r12;
+
+     label14:
+        $r7 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: org.spongycastle.crypto.tls.TlsClient client>;
+
+        interfaceinvoke $r7.<org.spongycastle.crypto.tls.TlsClient: void processServerSupplementalData(java.util.Vector)>(null);
+
+        goto label07;
+
+     label15:
+        $r22 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: org.spongycastle.crypto.tls.TlsKeyExchange keyExchange>;
+
+        interfaceinvoke $r22.<org.spongycastle.crypto.tls.TlsKeyExchange: void skipServerCredentials()>();
+
+        goto label08;
+
+     label16:
+        $r22 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: org.spongycastle.crypto.tls.TlsKeyExchange keyExchange>;
+
+        interfaceinvoke $r22.<org.spongycastle.crypto.tls.TlsKeyExchange: void skipServerKeyExchange()>();
+
+        goto label12;
+
+     label17:
+        $r12 = new org.spongycastle.crypto.tls.TlsFatalAlert;
+
+        specialinvoke $r12.<org.spongycastle.crypto.tls.TlsFatalAlert: void <init>(short)>(10);
+
+        throw $r12;
+
+     label18:
+        $r17 = virtualinvoke r4.<org.spongycastle.crypto.tls.DTLSReliableHandshake: org.spongycastle.crypto.tls.TlsHandshakeHash getHandshakeHash()>();
+
+        interfaceinvoke $r17.<org.spongycastle.crypto.tls.TlsHandshakeHash: void sealHashAlgorithms()>();
+
+        $r7 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: org.spongycastle.crypto.tls.TlsClient client>;
+
+        $r25 = interfaceinvoke $r7.<org.spongycastle.crypto.tls.TlsClient: java.util.Vector getClientSupplementalData()>();
+
+        if $r25 == null goto label19;
+
+        $r8 = staticinvoke <org.spongycastle.crypto.tls.DTLSClientProtocol: byte[] generateSupplementalData(java.util.Vector)>($r25);
+
+        virtualinvoke r4.<org.spongycastle.crypto.tls.DTLSReliableHandshake: void sendMessage(short,byte[])>(23, $r8);
+
+     label19:
+        $r24 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: org.spongycastle.crypto.tls.CertificateRequest certificateRequest>;
+
+        if $r24 == null goto label22;
+
+        $r26 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: org.spongycastle.crypto.tls.TlsAuthentication authentication>;
+
+        $r24 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: org.spongycastle.crypto.tls.CertificateRequest certificateRequest>;
+
+        $r27 = interfaceinvoke $r26.<org.spongycastle.crypto.tls.TlsAuthentication: org.spongycastle.crypto.tls.TlsCredentials getClientCredentials(org.spongycastle.crypto.tls.CertificateRequest)>($r24);
+
+        $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: org.spongycastle.crypto.tls.TlsCredentials clientCredentials> = $r27;
+
+        r28 = null;
+
+        $r27 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: org.spongycastle.crypto.tls.TlsCredentials clientCredentials>;
+
+        if $r27 == null goto label20;
+
+        $r27 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: org.spongycastle.crypto.tls.TlsCredentials clientCredentials>;
+
+        r28 = interfaceinvoke $r27.<org.spongycastle.crypto.tls.TlsCredentials: org.spongycastle.crypto.tls.Certificate getCertificate()>();
+
+     label20:
+        if r28 != null goto label21;
+
+        r28 = <org.spongycastle.crypto.tls.Certificate: org.spongycastle.crypto.tls.Certificate EMPTY_CHAIN>;
+
+     label21:
+        $r8 = staticinvoke <org.spongycastle.crypto.tls.DTLSClientProtocol: byte[] generateCertificate(org.spongycastle.crypto.tls.Certificate)>(r28);
+
+        virtualinvoke r4.<org.spongycastle.crypto.tls.DTLSReliableHandshake: void sendMessage(short,byte[])>(11, $r8);
+
+     label22:
+        $r27 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: org.spongycastle.crypto.tls.TlsCredentials clientCredentials>;
+
+        if $r27 == null goto label28;
+
+        $r22 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: org.spongycastle.crypto.tls.TlsKeyExchange keyExchange>;
+
+        $r27 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: org.spongycastle.crypto.tls.TlsCredentials clientCredentials>;
+
+        interfaceinvoke $r22.<org.spongycastle.crypto.tls.TlsKeyExchange: void processClientCredentials(org.spongycastle.crypto.tls.TlsCredentials)>($r27);
+
+     label23:
+        $r8 = virtualinvoke r0.<org.spongycastle.crypto.tls.DTLSClientProtocol: byte[] generateClientKeyExchange(org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState)>($r1);
+
+        virtualinvoke r4.<org.spongycastle.crypto.tls.DTLSReliableHandshake: void sendMessage(short,byte[])>(16, $r8);
+
+        $r17 = virtualinvoke r4.<org.spongycastle.crypto.tls.DTLSReliableHandshake: org.spongycastle.crypto.tls.TlsHandshakeHash prepareToFinish()>();
+
+        $r5 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: org.spongycastle.crypto.tls.TlsClientContextImpl clientContext>;
+
+        $r8 = staticinvoke <org.spongycastle.crypto.tls.TlsProtocol: byte[] getCurrentPRFHash(org.spongycastle.crypto.tls.TlsContext,org.spongycastle.crypto.tls.TlsHandshakeHash,byte[])>($r5, $r17, null);
+
+        $r6.<org.spongycastle.crypto.tls.SecurityParameters: byte[] sessionHash> = $r8;
+
+        $r5 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: org.spongycastle.crypto.tls.TlsClientContextImpl clientContext>;
+
+        $r22 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: org.spongycastle.crypto.tls.TlsKeyExchange keyExchange>;
+
+        staticinvoke <org.spongycastle.crypto.tls.TlsProtocol: void establishMasterSecret(org.spongycastle.crypto.tls.TlsContext,org.spongycastle.crypto.tls.TlsKeyExchange)>($r5, $r22);
+
+        $r7 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: org.spongycastle.crypto.tls.TlsClient client>;
+
+        $r15 = interfaceinvoke $r7.<org.spongycastle.crypto.tls.TlsClient: org.spongycastle.crypto.tls.TlsCipher getCipher()>();
+
+        virtualinvoke $r2.<org.spongycastle.crypto.tls.DTLSRecordLayer: void initPendingEpoch(org.spongycastle.crypto.tls.TlsCipher)>($r15);
+
+        $r27 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: org.spongycastle.crypto.tls.TlsCredentials clientCredentials>;
+
+        if $r27 == null goto label25;
+
+        $r27 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: org.spongycastle.crypto.tls.TlsCredentials clientCredentials>;
+
+        $z0 = $r27 instanceof org.spongycastle.crypto.tls.TlsSignerCredentials;
+
+        if $z0 == 0 goto label25;
+
+        $r27 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: org.spongycastle.crypto.tls.TlsCredentials clientCredentials>;
+
+        r29 = (org.spongycastle.crypto.tls.TlsSignerCredentials) $r27;
+
+        $r5 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: org.spongycastle.crypto.tls.TlsClientContextImpl clientContext>;
+
+        $r30 = staticinvoke <org.spongycastle.crypto.tls.TlsUtils: org.spongycastle.crypto.tls.SignatureAndHashAlgorithm getSignatureAndHashAlgorithm(org.spongycastle.crypto.tls.TlsContext,org.spongycastle.crypto.tls.TlsSignerCredentials)>($r5, r29);
+
+        if $r30 != null goto label29;
+
+        $r8 = virtualinvoke $r6.<org.spongycastle.crypto.tls.SecurityParameters: byte[] getSessionHash()>();
+
+     label24:
+        $r8 = interfaceinvoke r29.<org.spongycastle.crypto.tls.TlsSignerCredentials: byte[] generateCertificateSignature(byte[])>($r8);
+
+        r3 = new org.spongycastle.crypto.tls.DigitallySigned;
+
+        specialinvoke r3.<org.spongycastle.crypto.tls.DigitallySigned: void <init>(org.spongycastle.crypto.tls.SignatureAndHashAlgorithm,byte[])>($r30, $r8);
+
+        $r8 = virtualinvoke r0.<org.spongycastle.crypto.tls.DTLSClientProtocol: byte[] generateCertificateVerify(org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState,org.spongycastle.crypto.tls.DigitallySigned)>($r1, r3);
+
+        virtualinvoke r4.<org.spongycastle.crypto.tls.DTLSReliableHandshake: void sendMessage(short,byte[])>(15, $r8);
+
+     label25:
+        $r5 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: org.spongycastle.crypto.tls.TlsClientContextImpl clientContext>;
+
+        $r16 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: org.spongycastle.crypto.tls.TlsClientContextImpl clientContext>;
+
+        $r17 = virtualinvoke r4.<org.spongycastle.crypto.tls.DTLSReliableHandshake: org.spongycastle.crypto.tls.TlsHandshakeHash getHandshakeHash()>();
+
+        $r8 = staticinvoke <org.spongycastle.crypto.tls.TlsProtocol: byte[] getCurrentPRFHash(org.spongycastle.crypto.tls.TlsContext,org.spongycastle.crypto.tls.TlsHandshakeHash,byte[])>($r16, $r17, null);
+
+        $r8 = staticinvoke <org.spongycastle.crypto.tls.TlsUtils: byte[] calculateVerifyData(org.spongycastle.crypto.tls.TlsContext,java.lang.String,byte[])>($r5, "client finished", $r8);
+
+        virtualinvoke r4.<org.spongycastle.crypto.tls.DTLSReliableHandshake: void sendMessage(short,byte[])>(20, $r8);
+
+        $z0 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: boolean expectSessionTicket>;
+
+        if $z0 == 0 goto label26;
+
+        $r9 = virtualinvoke r4.<org.spongycastle.crypto.tls.DTLSReliableHandshake: org.spongycastle.crypto.tls.DTLSReliableHandshake$Message receiveMessage()>();
+
+        $s0 = virtualinvoke $r9.<org.spongycastle.crypto.tls.DTLSReliableHandshake$Message: short getType()>();
+
+        if $s0 != 4 goto label30;
+
+        $r8 = virtualinvoke $r9.<org.spongycastle.crypto.tls.DTLSReliableHandshake$Message: byte[] getBody()>();
+
+        virtualinvoke r0.<org.spongycastle.crypto.tls.DTLSClientProtocol: void processNewSessionTicket(org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState,byte[])>($r1, $r8);
+
+     label26:
+        $r5 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: org.spongycastle.crypto.tls.TlsClientContextImpl clientContext>;
+
+        $r16 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: org.spongycastle.crypto.tls.TlsClientContextImpl clientContext>;
+
+        $r17 = virtualinvoke r4.<org.spongycastle.crypto.tls.DTLSReliableHandshake: org.spongycastle.crypto.tls.TlsHandshakeHash getHandshakeHash()>();
+
+        $r8 = staticinvoke <org.spongycastle.crypto.tls.TlsProtocol: byte[] getCurrentPRFHash(org.spongycastle.crypto.tls.TlsContext,org.spongycastle.crypto.tls.TlsHandshakeHash,byte[])>($r16, $r17, null);
+
+        $r8 = staticinvoke <org.spongycastle.crypto.tls.TlsUtils: byte[] calculateVerifyData(org.spongycastle.crypto.tls.TlsContext,java.lang.String,byte[])>($r5, "server finished", $r8);
+
+        $r13 = virtualinvoke r4.<org.spongycastle.crypto.tls.DTLSReliableHandshake: byte[] receiveMessageBody(short)>(20);
+
+        virtualinvoke r0.<org.spongycastle.crypto.tls.DTLSClientProtocol: void processFinished(byte[],byte[])>($r13, $r8);
+
+        virtualinvoke r4.<org.spongycastle.crypto.tls.DTLSReliableHandshake: void finish()>();
+
+        $r18 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: org.spongycastle.crypto.tls.TlsSession tlsSession>;
+
+        if $r18 == null goto label27;
+
+        $r31 = new org.spongycastle.crypto.tls.SessionParameters$Builder;
+
+        specialinvoke $r31.<org.spongycastle.crypto.tls.SessionParameters$Builder: void <init>()>();
+
+        $i1 = virtualinvoke $r6.<org.spongycastle.crypto.tls.SecurityParameters: int getCipherSuite()>();
+
+        $r31 = virtualinvoke $r31.<org.spongycastle.crypto.tls.SessionParameters$Builder: org.spongycastle.crypto.tls.SessionParameters$Builder setCipherSuite(int)>($i1);
+
+        $s0 = virtualinvoke $r6.<org.spongycastle.crypto.tls.SecurityParameters: short getCompressionAlgorithm()>();
+
+        $r31 = virtualinvoke $r31.<org.spongycastle.crypto.tls.SessionParameters$Builder: org.spongycastle.crypto.tls.SessionParameters$Builder setCompressionAlgorithm(short)>($s0);
+
+        $r8 = virtualinvoke $r6.<org.spongycastle.crypto.tls.SecurityParameters: byte[] getMasterSecret()>();
+
+        $r31 = virtualinvoke $r31.<org.spongycastle.crypto.tls.SessionParameters$Builder: org.spongycastle.crypto.tls.SessionParameters$Builder setMasterSecret(byte[])>($r8);
+
+        $r31 = virtualinvoke $r31.<org.spongycastle.crypto.tls.SessionParameters$Builder: org.spongycastle.crypto.tls.SessionParameters$Builder setPeerCertificate(org.spongycastle.crypto.tls.Certificate)>(r23);
+
+        $r8 = virtualinvoke $r6.<org.spongycastle.crypto.tls.SecurityParameters: byte[] getPSKIdentity()>();
+
+        $r31 = virtualinvoke $r31.<org.spongycastle.crypto.tls.SessionParameters$Builder: org.spongycastle.crypto.tls.SessionParameters$Builder setPSKIdentity(byte[])>($r8);
+
+        $r8 = virtualinvoke $r6.<org.spongycastle.crypto.tls.SecurityParameters: byte[] getSRPIdentity()>();
+
+        $r31 = virtualinvoke $r31.<org.spongycastle.crypto.tls.SessionParameters$Builder: org.spongycastle.crypto.tls.SessionParameters$Builder setSRPIdentity(byte[])>($r8);
+
+        $r32 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: java.util.Hashtable serverExtensions>;
+
+        $r31 = virtualinvoke $r31.<org.spongycastle.crypto.tls.SessionParameters$Builder: org.spongycastle.crypto.tls.SessionParameters$Builder setServerExtensions(java.util.Hashtable)>($r32);
+
+        $r14 = virtualinvoke $r31.<org.spongycastle.crypto.tls.SessionParameters$Builder: org.spongycastle.crypto.tls.SessionParameters build()>();
+
+        $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: org.spongycastle.crypto.tls.SessionParameters sessionParameters> = $r14;
+
+        $r18 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: org.spongycastle.crypto.tls.TlsSession tlsSession>;
+
+        $r8 = interfaceinvoke $r18.<org.spongycastle.crypto.tls.TlsSession: byte[] getSessionID()>();
+
+        $r14 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: org.spongycastle.crypto.tls.SessionParameters sessionParameters>;
+
+        $r18 = staticinvoke <org.spongycastle.crypto.tls.TlsUtils: org.spongycastle.crypto.tls.TlsSession importSession(byte[],org.spongycastle.crypto.tls.SessionParameters)>($r8, $r14);
+
+        $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: org.spongycastle.crypto.tls.TlsSession tlsSession> = $r18;
+
+        $r5 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: org.spongycastle.crypto.tls.TlsClientContextImpl clientContext>;
+
+        $r18 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: org.spongycastle.crypto.tls.TlsSession tlsSession>;
+
+        virtualinvoke $r5.<org.spongycastle.crypto.tls.TlsClientContextImpl: void setResumableSession(org.spongycastle.crypto.tls.TlsSession)>($r18);
+
+     label27:
+        $r7 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: org.spongycastle.crypto.tls.TlsClient client>;
+
+        interfaceinvoke $r7.<org.spongycastle.crypto.tls.TlsClient: void notifyHandshakeComplete()>();
+
+        $r19 = new org.spongycastle.crypto.tls.DTLSTransport;
+
+        specialinvoke $r19.<org.spongycastle.crypto.tls.DTLSTransport: void <init>(org.spongycastle.crypto.tls.DTLSRecordLayer)>($r2);
+
+        return $r19;
+
+     label28:
+        $r22 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: org.spongycastle.crypto.tls.TlsKeyExchange keyExchange>;
+
+        interfaceinvoke $r22.<org.spongycastle.crypto.tls.TlsKeyExchange: void skipClientCredentials()>();
+
+        goto label23;
+
+     label29:
+        $s0 = virtualinvoke $r30.<org.spongycastle.crypto.tls.SignatureAndHashAlgorithm: short getHash()>();
+
+        $r8 = interfaceinvoke $r17.<org.spongycastle.crypto.tls.TlsHandshakeHash: byte[] getFinalHash(short)>($s0);
+
+        goto label24;
+
+     label30:
+        $r12 = new org.spongycastle.crypto.tls.TlsFatalAlert;
+
+        specialinvoke $r12.<org.spongycastle.crypto.tls.TlsFatalAlert: void <init>(short)>(10);
+
+        throw $r12;
+    }
+    public org.spongycastle.crypto.tls.DTLSTransport connect(org.spongycastle.crypto.tls.TlsClient, org.spongycastle.crypto.tls.DatagramTransport) throws java.io.IOException
+    {
+        org.spongycastle.crypto.tls.DTLSClientProtocol r0;
+        org.spongycastle.crypto.tls.TlsClient $r1;
+        org.spongycastle.crypto.tls.DatagramTransport $r2;
+        org.spongycastle.crypto.tls.TlsFatalAlert r3;
+        org.spongycastle.crypto.tls.DTLSRecordLayer r4;
+        org.spongycastle.crypto.tls.SecurityParameters r5;
+        org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState r6;
+        java.lang.IllegalArgumentException $r7;
+        org.spongycastle.crypto.tls.TlsClientContextImpl $r8;
+        java.security.SecureRandom $r9;
+        boolean $z0;
+        org.spongycastle.crypto.prng.RandomGenerator $r10;
+        byte[] $r11;
+        org.spongycastle.crypto.tls.TlsSession $r12;
+        org.spongycastle.crypto.tls.SessionParameters $r13;
+        org.spongycastle.crypto.tls.DTLSTransport $r14;
+        short $s0;
+        java.io.IOException r15;
+        java.lang.RuntimeException r16;
+
+        r0 := @this: org.spongycastle.crypto.tls.DTLSClientProtocol;
+
+        $r1 := @parameter0: org.spongycastle.crypto.tls.TlsClient;
+
+        $r2 := @parameter1: org.spongycastle.crypto.tls.DatagramTransport;
+
+        if $r1 != null goto label1;
+
+        $r7 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r7.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("\'client\' cannot be null");
+
+        throw $r7;
+
+     label1:
+        if $r2 != null goto label2;
+
+        $r7 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r7.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("\'transport\' cannot be null");
+
+        throw $r7;
+
+     label2:
+        r5 = new org.spongycastle.crypto.tls.SecurityParameters;
+
+        specialinvoke r5.<org.spongycastle.crypto.tls.SecurityParameters: void <init>()>();
+
+        r5.<org.spongycastle.crypto.tls.SecurityParameters: int entity> = 1;
+
+        r6 = new org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState;
+
+        specialinvoke r6.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: void <init>()>();
+
+        r6.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: org.spongycastle.crypto.tls.TlsClient client> = $r1;
+
+        $r8 = new org.spongycastle.crypto.tls.TlsClientContextImpl;
+
+        $r9 = r0.<org.spongycastle.crypto.tls.DTLSClientProtocol: java.security.SecureRandom secureRandom>;
+
+        specialinvoke $r8.<org.spongycastle.crypto.tls.TlsClientContextImpl: void <init>(java.security.SecureRandom,org.spongycastle.crypto.tls.SecurityParameters)>($r9, r5);
+
+        r6.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: org.spongycastle.crypto.tls.TlsClientContextImpl clientContext> = $r8;
+
+        $z0 = interfaceinvoke $r1.<org.spongycastle.crypto.tls.TlsClient: boolean shouldUseGMTUnixTime()>();
+
+        $r8 = r6.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: org.spongycastle.crypto.tls.TlsClientContextImpl clientContext>;
+
+        $r10 = virtualinvoke $r8.<org.spongycastle.crypto.tls.TlsClientContextImpl: org.spongycastle.crypto.prng.RandomGenerator getNonceRandomGenerator()>();
+
+        $r11 = staticinvoke <org.spongycastle.crypto.tls.TlsProtocol: byte[] createRandomBlock(boolean,org.spongycastle.crypto.prng.RandomGenerator)>($z0, $r10);
+
+        r5.<org.spongycastle.crypto.tls.SecurityParameters: byte[] clientRandom> = $r11;
+
+        $r8 = r6.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: org.spongycastle.crypto.tls.TlsClientContextImpl clientContext>;
+
+        interfaceinvoke $r1.<org.spongycastle.crypto.tls.TlsClient: void init(org.spongycastle.crypto.tls.TlsClientContext)>($r8);
+
+        r4 = new org.spongycastle.crypto.tls.DTLSRecordLayer;
+
+        $r8 = r6.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: org.spongycastle.crypto.tls.TlsClientContextImpl clientContext>;
+
+        specialinvoke r4.<org.spongycastle.crypto.tls.DTLSRecordLayer: void <init>(org.spongycastle.crypto.tls.DatagramTransport,org.spongycastle.crypto.tls.TlsContext,org.spongycastle.crypto.tls.TlsPeer,short)>($r2, $r8, $r1, 22);
+
+        $r1 = r6.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: org.spongycastle.crypto.tls.TlsClient client>;
+
+        $r12 = interfaceinvoke $r1.<org.spongycastle.crypto.tls.TlsClient: org.spongycastle.crypto.tls.TlsSession getSessionToResume()>();
+
+        if $r12 == null goto label3;
+
+        $z0 = interfaceinvoke $r12.<org.spongycastle.crypto.tls.TlsSession: boolean isResumable()>();
+
+        if $z0 == 0 goto label3;
+
+        $r13 = interfaceinvoke $r12.<org.spongycastle.crypto.tls.TlsSession: org.spongycastle.crypto.tls.SessionParameters exportSessionParameters()>();
+
+        if $r13 == null goto label3;
+
+        r6.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: org.spongycastle.crypto.tls.TlsSession tlsSession> = $r12;
+
+        r6.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: org.spongycastle.crypto.tls.SessionParameters sessionParameters> = $r13;
+
+     label3:
+        $r14 = virtualinvoke r0.<org.spongycastle.crypto.tls.DTLSClientProtocol: org.spongycastle.crypto.tls.DTLSTransport clientHandshake(org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState,org.spongycastle.crypto.tls.DTLSRecordLayer)>(r6, r4);
+
+     label4:
+        return $r14;
+
+     label5:
+        r3 := @caughtexception;
+
+        $s0 = virtualinvoke r3.<org.spongycastle.crypto.tls.TlsFatalAlert: short getAlertDescription()>();
+
+        virtualinvoke r4.<org.spongycastle.crypto.tls.DTLSRecordLayer: void fail(short)>($s0);
+
+        throw r3;
+
+     label6:
+        r15 := @caughtexception;
+
+        virtualinvoke r4.<org.spongycastle.crypto.tls.DTLSRecordLayer: void fail(short)>(80);
+
+        throw r15;
+
+     label7:
+        r16 := @caughtexception;
+
+        virtualinvoke r4.<org.spongycastle.crypto.tls.DTLSRecordLayer: void fail(short)>(80);
+
+        r3 = new org.spongycastle.crypto.tls.TlsFatalAlert;
+
+        specialinvoke r3.<org.spongycastle.crypto.tls.TlsFatalAlert: void <init>(short,java.lang.Throwable)>(80, r16);
+
+        throw r3;
+
+        catch org.spongycastle.crypto.tls.TlsFatalAlert from label3 to label4 with label5;
+        catch java.io.IOException from label3 to label4 with label6;
+        catch java.lang.RuntimeException from label3 to label4 with label7;
+    }
+    protected byte[] generateCertificateVerify(org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState, org.spongycastle.crypto.tls.DigitallySigned) throws java.io.IOException
+    {
+        org.spongycastle.crypto.tls.DTLSClientProtocol r0;
+        org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState $r1;
+        org.spongycastle.crypto.tls.DigitallySigned $r2;
+        java.io.ByteArrayOutputStream r3;
+        byte[] $r4;
+
+        r0 := @this: org.spongycastle.crypto.tls.DTLSClientProtocol;
+
+        $r1 := @parameter0: org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState;
+
+        $r2 := @parameter1: org.spongycastle.crypto.tls.DigitallySigned;
+
+        r3 = new java.io.ByteArrayOutputStream;
+
+        specialinvoke r3.<java.io.ByteArrayOutputStream: void <init>()>();
+
+        virtualinvoke $r2.<org.spongycastle.crypto.tls.DigitallySigned: void encode(java.io.OutputStream)>(r3);
+
+        $r4 = virtualinvoke r3.<java.io.ByteArrayOutputStream: byte[] toByteArray()>();
+
+        return $r4;
+    }
+    protected byte[] generateClientHello(org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState, org.spongycastle.crypto.tls.TlsClient) throws java.io.IOException
+    {
+        org.spongycastle.crypto.tls.DTLSClientProtocol r0;
+        org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState $r1;
+        org.spongycastle.crypto.tls.TlsClient $r2;
+        java.io.ByteArrayOutputStream r3;
+        org.spongycastle.crypto.tls.TlsClientContextImpl r4;
+        org.spongycastle.crypto.tls.ProtocolVersion $r5;
+        boolean $z0, z1, $z2;
+        org.spongycastle.crypto.tls.TlsFatalAlert $r6;
+        org.spongycastle.crypto.tls.SecurityParameters $r7;
+        byte[] $r8, $r10;
+        org.spongycastle.crypto.tls.TlsSession $r9;
+        int $i0;
+        int[] $r11;
+        java.util.Hashtable $r12;
+        java.lang.Integer $r13;
+        short[] $r14;
+
+        r0 := @this: org.spongycastle.crypto.tls.DTLSClientProtocol;
+
+        $r1 := @parameter0: org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState;
+
+        $r2 := @parameter1: org.spongycastle.crypto.tls.TlsClient;
+
+        r3 = new java.io.ByteArrayOutputStream;
+
+        specialinvoke r3.<java.io.ByteArrayOutputStream: void <init>()>();
+
+        $r5 = interfaceinvoke $r2.<org.spongycastle.crypto.tls.TlsClient: org.spongycastle.crypto.tls.ProtocolVersion getClientVersion()>();
+
+        $z0 = virtualinvoke $r5.<org.spongycastle.crypto.tls.ProtocolVersion: boolean isDTLS()>();
+
+        if $z0 != 0 goto label01;
+
+        $r6 = new org.spongycastle.crypto.tls.TlsFatalAlert;
+
+        specialinvoke $r6.<org.spongycastle.crypto.tls.TlsFatalAlert: void <init>(short)>(80);
+
+        throw $r6;
+
+     label01:
+        r4 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: org.spongycastle.crypto.tls.TlsClientContextImpl clientContext>;
+
+        virtualinvoke r4.<org.spongycastle.crypto.tls.TlsClientContextImpl: void setClientVersion(org.spongycastle.crypto.tls.ProtocolVersion)>($r5);
+
+        staticinvoke <org.spongycastle.crypto.tls.TlsUtils: void writeVersion(org.spongycastle.crypto.tls.ProtocolVersion,java.io.OutputStream)>($r5, r3);
+
+        $r7 = virtualinvoke r4.<org.spongycastle.crypto.tls.TlsClientContextImpl: org.spongycastle.crypto.tls.SecurityParameters getSecurityParameters()>();
+
+        $r8 = virtualinvoke $r7.<org.spongycastle.crypto.tls.SecurityParameters: byte[] getClientRandom()>();
+
+        virtualinvoke r3.<java.io.ByteArrayOutputStream: void write(byte[])>($r8);
+
+        $r8 = <org.spongycastle.crypto.tls.TlsUtils: byte[] EMPTY_BYTES>;
+
+        $r9 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: org.spongycastle.crypto.tls.TlsSession tlsSession>;
+
+        if $r9 == null goto label03;
+
+        $r9 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: org.spongycastle.crypto.tls.TlsSession tlsSession>;
+
+        $r10 = interfaceinvoke $r9.<org.spongycastle.crypto.tls.TlsSession: byte[] getSessionID()>();
+
+        $r8 = $r10;
+
+        if $r10 == null goto label02;
+
+        $i0 = lengthof $r10;
+
+        if $i0 <= 32 goto label03;
+
+     label02:
+        $r8 = <org.spongycastle.crypto.tls.TlsUtils: byte[] EMPTY_BYTES>;
+
+     label03:
+        staticinvoke <org.spongycastle.crypto.tls.TlsUtils: void writeOpaque8(byte[],java.io.OutputStream)>($r8, r3);
+
+        $r8 = <org.spongycastle.crypto.tls.TlsUtils: byte[] EMPTY_BYTES>;
+
+        staticinvoke <org.spongycastle.crypto.tls.TlsUtils: void writeOpaque8(byte[],java.io.OutputStream)>($r8, r3);
+
+        $z0 = interfaceinvoke $r2.<org.spongycastle.crypto.tls.TlsClient: boolean isFallback()>();
+
+        $r11 = interfaceinvoke $r2.<org.spongycastle.crypto.tls.TlsClient: int[] getCipherSuites()>();
+
+        $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: int[] offeredCipherSuites> = $r11;
+
+        $r12 = interfaceinvoke $r2.<org.spongycastle.crypto.tls.TlsClient: java.util.Hashtable getClientExtensions()>();
+
+        $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: java.util.Hashtable clientExtensions> = $r12;
+
+        $r12 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: java.util.Hashtable clientExtensions>;
+
+        $r13 = <org.spongycastle.crypto.tls.TlsProtocol: java.lang.Integer EXT_RenegotiationInfo>;
+
+        $r8 = staticinvoke <org.spongycastle.crypto.tls.TlsUtils: byte[] getExtensionData(java.util.Hashtable,java.lang.Integer)>($r12, $r13);
+
+        if $r8 != null goto label09;
+
+        z1 = 1;
+
+     label04:
+        $r11 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: int[] offeredCipherSuites>;
+
+        $z2 = staticinvoke <org.spongycastle.util.Arrays: boolean contains(int[],int)>($r11, 255);
+
+        if $z2 != 0 goto label10;
+
+        $z2 = 1;
+
+     label05:
+        if z1 == 0 goto label06;
+
+        if $z2 == 0 goto label06;
+
+        $r11 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: int[] offeredCipherSuites>;
+
+        $r11 = staticinvoke <org.spongycastle.util.Arrays: int[] append(int[],int)>($r11, 255);
+
+        $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: int[] offeredCipherSuites> = $r11;
+
+     label06:
+        if $z0 == 0 goto label07;
+
+        $r11 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: int[] offeredCipherSuites>;
+
+        $z0 = staticinvoke <org.spongycastle.util.Arrays: boolean contains(int[],int)>($r11, 22016);
+
+        if $z0 != 0 goto label07;
+
+        $r11 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: int[] offeredCipherSuites>;
+
+        $r11 = staticinvoke <org.spongycastle.util.Arrays: int[] append(int[],int)>($r11, 22016);
+
+        $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: int[] offeredCipherSuites> = $r11;
+
+     label07:
+        $r11 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: int[] offeredCipherSuites>;
+
+        staticinvoke <org.spongycastle.crypto.tls.TlsUtils: void writeUint16ArrayWithUint16Length(int[],java.io.OutputStream)>($r11, r3);
+
+        $r14 = newarray (short)[1];
+
+        $r14[0] = 0;
+
+        $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: short[] offeredCompressionMethods> = $r14;
+
+        $r14 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: short[] offeredCompressionMethods>;
+
+        staticinvoke <org.spongycastle.crypto.tls.TlsUtils: void writeUint8ArrayWithUint8Length(short[],java.io.OutputStream)>($r14, r3);
+
+        $r12 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: java.util.Hashtable clientExtensions>;
+
+        if $r12 == null goto label08;
+
+        $r12 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: java.util.Hashtable clientExtensions>;
+
+        staticinvoke <org.spongycastle.crypto.tls.TlsProtocol: void writeExtensions(java.io.OutputStream,java.util.Hashtable)>(r3, $r12);
+
+     label08:
+        $r8 = virtualinvoke r3.<java.io.ByteArrayOutputStream: byte[] toByteArray()>();
+
+        return $r8;
+
+     label09:
+        z1 = 0;
+
+        goto label04;
+
+     label10:
+        $z2 = 0;
+
+        goto label05;
+    }
+    protected byte[] generateClientKeyExchange(org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState) throws java.io.IOException
+    {
+        org.spongycastle.crypto.tls.DTLSClientProtocol r0;
+        org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState $r1;
+        java.io.ByteArrayOutputStream r2;
+        byte[] $r3;
+        org.spongycastle.crypto.tls.TlsKeyExchange $r4;
+
+        r0 := @this: org.spongycastle.crypto.tls.DTLSClientProtocol;
+
+        $r1 := @parameter0: org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState;
+
+        r2 = new java.io.ByteArrayOutputStream;
+
+        specialinvoke r2.<java.io.ByteArrayOutputStream: void <init>()>();
+
+        $r4 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: org.spongycastle.crypto.tls.TlsKeyExchange keyExchange>;
+
+        interfaceinvoke $r4.<org.spongycastle.crypto.tls.TlsKeyExchange: void generateClientKeyExchange(java.io.OutputStream)>(r2);
+
+        $r3 = virtualinvoke r2.<java.io.ByteArrayOutputStream: byte[] toByteArray()>();
+
+        return $r3;
+    }
+    protected void invalidateSession(org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState)
+    {
+        org.spongycastle.crypto.tls.DTLSClientProtocol r0;
+        org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState $r1;
+        org.spongycastle.crypto.tls.SessionParameters $r2;
+        org.spongycastle.crypto.tls.TlsSession $r3;
+
+        r0 := @this: org.spongycastle.crypto.tls.DTLSClientProtocol;
+
+        $r1 := @parameter0: org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState;
+
+        $r2 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: org.spongycastle.crypto.tls.SessionParameters sessionParameters>;
+
+        if $r2 == null goto label1;
+
+        $r2 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: org.spongycastle.crypto.tls.SessionParameters sessionParameters>;
+
+        virtualinvoke $r2.<org.spongycastle.crypto.tls.SessionParameters: void clear()>();
+
+        $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: org.spongycastle.crypto.tls.SessionParameters sessionParameters> = null;
+
+     label1:
+        $r3 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: org.spongycastle.crypto.tls.TlsSession tlsSession>;
+
+        if $r3 == null goto label2;
+
+        $r3 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: org.spongycastle.crypto.tls.TlsSession tlsSession>;
+
+        interfaceinvoke $r3.<org.spongycastle.crypto.tls.TlsSession: void invalidate()>();
+
+        $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: org.spongycastle.crypto.tls.TlsSession tlsSession> = null;
+
+     label2:
+        return;
+    }
+    protected void processCertificateRequest(org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState, byte[]) throws java.io.IOException
+    {
+        org.spongycastle.crypto.tls.DTLSClientProtocol r0;
+        org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState $r1;
+        byte[] $r2;
+        java.io.ByteArrayInputStream r3;
+        org.spongycastle.crypto.tls.CertificateRequest $r4;
+        org.spongycastle.crypto.tls.TlsAuthentication $r5;
+        org.spongycastle.crypto.tls.TlsFatalAlert $r6;
+        org.spongycastle.crypto.tls.TlsClientContextImpl $r7;
+        org.spongycastle.crypto.tls.TlsKeyExchange $r8;
+
+        r0 := @this: org.spongycastle.crypto.tls.DTLSClientProtocol;
+
+        $r1 := @parameter0: org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState;
+
+        $r2 := @parameter1: byte[];
+
+        $r5 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: org.spongycastle.crypto.tls.TlsAuthentication authentication>;
+
+        if $r5 != null goto label1;
+
+        $r6 = new org.spongycastle.crypto.tls.TlsFatalAlert;
+
+        specialinvoke $r6.<org.spongycastle.crypto.tls.TlsFatalAlert: void <init>(short)>(40);
+
+        throw $r6;
+
+     label1:
+        r3 = new java.io.ByteArrayInputStream;
+
+        specialinvoke r3.<java.io.ByteArrayInputStream: void <init>(byte[])>($r2);
+
+        $r7 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: org.spongycastle.crypto.tls.TlsClientContextImpl clientContext>;
+
+        $r4 = staticinvoke <org.spongycastle.crypto.tls.CertificateRequest: org.spongycastle.crypto.tls.CertificateRequest parse(org.spongycastle.crypto.tls.TlsContext,java.io.InputStream)>($r7, r3);
+
+        $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: org.spongycastle.crypto.tls.CertificateRequest certificateRequest> = $r4;
+
+        staticinvoke <org.spongycastle.crypto.tls.TlsProtocol: void assertEmpty(java.io.ByteArrayInputStream)>(r3);
+
+        $r8 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: org.spongycastle.crypto.tls.TlsKeyExchange keyExchange>;
+
+        $r4 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: org.spongycastle.crypto.tls.CertificateRequest certificateRequest>;
+
+        interfaceinvoke $r8.<org.spongycastle.crypto.tls.TlsKeyExchange: void validateCertificateRequest(org.spongycastle.crypto.tls.CertificateRequest)>($r4);
+
+        return;
+    }
+    protected void processCertificateStatus(org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState, byte[]) throws java.io.IOException
+    {
+        org.spongycastle.crypto.tls.DTLSClientProtocol r0;
+        org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState $r1;
+        byte[] $r2;
+        java.io.ByteArrayInputStream r3;
+        org.spongycastle.crypto.tls.CertificateStatus $r4;
+        boolean $z0;
+        org.spongycastle.crypto.tls.TlsFatalAlert $r5;
+
+        r0 := @this: org.spongycastle.crypto.tls.DTLSClientProtocol;
+
+        $r1 := @parameter0: org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState;
+
+        $r2 := @parameter1: byte[];
+
+        $z0 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: boolean allowCertificateStatus>;
+
+        if $z0 != 0 goto label1;
+
+        $r5 = new org.spongycastle.crypto.tls.TlsFatalAlert;
+
+        specialinvoke $r5.<org.spongycastle.crypto.tls.TlsFatalAlert: void <init>(short)>(10);
+
+        throw $r5;
+
+     label1:
+        r3 = new java.io.ByteArrayInputStream;
+
+        specialinvoke r3.<java.io.ByteArrayInputStream: void <init>(byte[])>($r2);
+
+        $r4 = staticinvoke <org.spongycastle.crypto.tls.CertificateStatus: org.spongycastle.crypto.tls.CertificateStatus parse(java.io.InputStream)>(r3);
+
+        $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: org.spongycastle.crypto.tls.CertificateStatus certificateStatus> = $r4;
+
+        staticinvoke <org.spongycastle.crypto.tls.TlsProtocol: void assertEmpty(java.io.ByteArrayInputStream)>(r3);
+
+        return;
+    }
+    protected byte[] processHelloVerifyRequest(org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState, byte[]) throws java.io.IOException
+    {
+        org.spongycastle.crypto.tls.DTLSClientProtocol r0;
+        org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState $r1;
+        byte[] $r2;
+        java.io.ByteArrayInputStream r3;
+        org.spongycastle.crypto.tls.ProtocolVersion $r4, $r6;
+        org.spongycastle.crypto.tls.TlsClientContextImpl $r5;
+        boolean $z0;
+        org.spongycastle.crypto.tls.TlsFatalAlert $r7;
+        int $i0;
+
+        r0 := @this: org.spongycastle.crypto.tls.DTLSClientProtocol;
+
+        $r1 := @parameter0: org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState;
+
+        $r2 := @parameter1: byte[];
+
+        r3 = new java.io.ByteArrayInputStream;
+
+        specialinvoke r3.<java.io.ByteArrayInputStream: void <init>(byte[])>($r2);
+
+        $r4 = staticinvoke <org.spongycastle.crypto.tls.TlsUtils: org.spongycastle.crypto.tls.ProtocolVersion readVersion(java.io.InputStream)>(r3);
+
+        $r2 = staticinvoke <org.spongycastle.crypto.tls.TlsUtils: byte[] readOpaque8(java.io.InputStream)>(r3);
+
+        staticinvoke <org.spongycastle.crypto.tls.TlsProtocol: void assertEmpty(java.io.ByteArrayInputStream)>(r3);
+
+        $r5 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: org.spongycastle.crypto.tls.TlsClientContextImpl clientContext>;
+
+        $r6 = virtualinvoke $r5.<org.spongycastle.crypto.tls.TlsClientContextImpl: org.spongycastle.crypto.tls.ProtocolVersion getClientVersion()>();
+
+        $z0 = virtualinvoke $r4.<org.spongycastle.crypto.tls.ProtocolVersion: boolean isEqualOrEarlierVersionOf(org.spongycastle.crypto.tls.ProtocolVersion)>($r6);
+
+        if $z0 != 0 goto label1;
+
+        $r7 = new org.spongycastle.crypto.tls.TlsFatalAlert;
+
+        specialinvoke $r7.<org.spongycastle.crypto.tls.TlsFatalAlert: void <init>(short)>(47);
+
+        throw $r7;
+
+     label1:
+        $r6 = <org.spongycastle.crypto.tls.ProtocolVersion: org.spongycastle.crypto.tls.ProtocolVersion DTLSv12>;
+
+        $z0 = virtualinvoke $r6.<org.spongycastle.crypto.tls.ProtocolVersion: boolean isEqualOrEarlierVersionOf(org.spongycastle.crypto.tls.ProtocolVersion)>($r4);
+
+        if $z0 != 0 goto label2;
+
+        $i0 = lengthof $r2;
+
+        if $i0 <= 32 goto label2;
+
+        $r7 = new org.spongycastle.crypto.tls.TlsFatalAlert;
+
+        specialinvoke $r7.<org.spongycastle.crypto.tls.TlsFatalAlert: void <init>(short)>(47);
+
+        throw $r7;
+
+     label2:
+        return $r2;
+    }
+    protected void processNewSessionTicket(org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState, byte[]) throws java.io.IOException
+    {
+        org.spongycastle.crypto.tls.DTLSClientProtocol r0;
+        org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState $r1;
+        byte[] $r2;
+        java.io.ByteArrayInputStream r3;
+        org.spongycastle.crypto.tls.TlsClient $r4;
+        org.spongycastle.crypto.tls.NewSessionTicket $r5;
+
+        r0 := @this: org.spongycastle.crypto.tls.DTLSClientProtocol;
+
+        $r1 := @parameter0: org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState;
+
+        $r2 := @parameter1: byte[];
+
+        r3 = new java.io.ByteArrayInputStream;
+
+        specialinvoke r3.<java.io.ByteArrayInputStream: void <init>(byte[])>($r2);
+
+        $r5 = staticinvoke <org.spongycastle.crypto.tls.NewSessionTicket: org.spongycastle.crypto.tls.NewSessionTicket parse(java.io.InputStream)>(r3);
+
+        staticinvoke <org.spongycastle.crypto.tls.TlsProtocol: void assertEmpty(java.io.ByteArrayInputStream)>(r3);
+
+        $r4 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: org.spongycastle.crypto.tls.TlsClient client>;
+
+        interfaceinvoke $r4.<org.spongycastle.crypto.tls.TlsClient: void notifyNewSessionTicket(org.spongycastle.crypto.tls.NewSessionTicket)>($r5);
+
+        return;
+    }
+    protected org.spongycastle.crypto.tls.Certificate processServerCertificate(org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState, byte[]) throws java.io.IOException
+    {
+        org.spongycastle.crypto.tls.DTLSClientProtocol r0;
+        org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState $r1;
+        byte[] $r2;
+        java.io.ByteArrayInputStream r3;
+        org.spongycastle.crypto.tls.Certificate $r4;
+        org.spongycastle.crypto.tls.TlsKeyExchange $r5;
+        org.spongycastle.crypto.tls.TlsClient $r6;
+        org.spongycastle.crypto.tls.TlsAuthentication $r7;
+
+        r0 := @this: org.spongycastle.crypto.tls.DTLSClientProtocol;
+
+        $r1 := @parameter0: org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState;
+
+        $r2 := @parameter1: byte[];
+
+        r3 = new java.io.ByteArrayInputStream;
+
+        specialinvoke r3.<java.io.ByteArrayInputStream: void <init>(byte[])>($r2);
+
+        $r4 = staticinvoke <org.spongycastle.crypto.tls.Certificate: org.spongycastle.crypto.tls.Certificate parse(java.io.InputStream)>(r3);
+
+        staticinvoke <org.spongycastle.crypto.tls.TlsProtocol: void assertEmpty(java.io.ByteArrayInputStream)>(r3);
+
+        $r5 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: org.spongycastle.crypto.tls.TlsKeyExchange keyExchange>;
+
+        interfaceinvoke $r5.<org.spongycastle.crypto.tls.TlsKeyExchange: void processServerCertificate(org.spongycastle.crypto.tls.Certificate)>($r4);
+
+        $r6 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: org.spongycastle.crypto.tls.TlsClient client>;
+
+        $r7 = interfaceinvoke $r6.<org.spongycastle.crypto.tls.TlsClient: org.spongycastle.crypto.tls.TlsAuthentication getAuthentication()>();
+
+        $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: org.spongycastle.crypto.tls.TlsAuthentication authentication> = $r7;
+
+        $r7 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: org.spongycastle.crypto.tls.TlsAuthentication authentication>;
+
+        interfaceinvoke $r7.<org.spongycastle.crypto.tls.TlsAuthentication: void notifyServerCertificate(org.spongycastle.crypto.tls.Certificate)>($r4);
+
+        return $r4;
+    }
+    protected void processServerHello(org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState, byte[]) throws java.io.IOException
+    {
+        org.spongycastle.crypto.tls.DTLSClientProtocol r0;
+        org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState $r1;
+        byte[] $r2, $r10;
+        java.io.ByteArrayInputStream r3;
+        org.spongycastle.crypto.tls.TlsClientContextImpl $r4;
+        org.spongycastle.crypto.tls.SecurityParameters $r5;
+        org.spongycastle.crypto.tls.ProtocolVersion $r6;
+        int $i0, $i2;
+        org.spongycastle.crypto.tls.TlsFatalAlert $r7;
+        org.spongycastle.crypto.tls.TlsClient $r8;
+        org.spongycastle.crypto.tls.TlsSession $r9;
+        boolean $z0, $z1;
+        int[] $r11;
+        short $s1, $s3;
+        short[] $r12;
+        java.util.Hashtable $r13, r18;
+        java.util.Enumeration $r14;
+        java.lang.Object $r15;
+        java.lang.Integer r16, $r17;
+        org.spongycastle.crypto.tls.SessionParameters $r19;
+
+        r0 := @this: org.spongycastle.crypto.tls.DTLSClientProtocol;
+
+        $r1 := @parameter0: org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState;
+
+        $r2 := @parameter1: byte[];
+
+        $r4 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: org.spongycastle.crypto.tls.TlsClientContextImpl clientContext>;
+
+        $r5 = virtualinvoke $r4.<org.spongycastle.crypto.tls.TlsClientContextImpl: org.spongycastle.crypto.tls.SecurityParameters getSecurityParameters()>();
+
+        r3 = new java.io.ByteArrayInputStream;
+
+        specialinvoke r3.<java.io.ByteArrayInputStream: void <init>(byte[])>($r2);
+
+        $r6 = staticinvoke <org.spongycastle.crypto.tls.TlsUtils: org.spongycastle.crypto.tls.ProtocolVersion readVersion(java.io.InputStream)>(r3);
+
+        virtualinvoke r0.<org.spongycastle.crypto.tls.DTLSClientProtocol: void reportServerVersion(org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState,org.spongycastle.crypto.tls.ProtocolVersion)>($r1, $r6);
+
+        $r2 = staticinvoke <org.spongycastle.crypto.tls.TlsUtils: byte[] readFully(int,java.io.InputStream)>(32, r3);
+
+        $r5.<org.spongycastle.crypto.tls.SecurityParameters: byte[] serverRandom> = $r2;
+
+        $r2 = staticinvoke <org.spongycastle.crypto.tls.TlsUtils: byte[] readOpaque8(java.io.InputStream)>(r3);
+
+        $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: byte[] selectedSessionID> = $r2;
+
+        $r2 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: byte[] selectedSessionID>;
+
+        $i0 = lengthof $r2;
+
+        if $i0 <= 32 goto label01;
+
+        $r7 = new org.spongycastle.crypto.tls.TlsFatalAlert;
+
+        specialinvoke $r7.<org.spongycastle.crypto.tls.TlsFatalAlert: void <init>(short)>(47);
+
+        throw $r7;
+
+     label01:
+        $r8 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: org.spongycastle.crypto.tls.TlsClient client>;
+
+        $r2 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: byte[] selectedSessionID>;
+
+        interfaceinvoke $r8.<org.spongycastle.crypto.tls.TlsClient: void notifySessionID(byte[])>($r2);
+
+        $r2 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: byte[] selectedSessionID>;
+
+        $i0 = lengthof $r2;
+
+        if $i0 <= 0 goto label04;
+
+        $r9 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: org.spongycastle.crypto.tls.TlsSession tlsSession>;
+
+        if $r9 == null goto label04;
+
+        $r2 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: byte[] selectedSessionID>;
+
+        $r9 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: org.spongycastle.crypto.tls.TlsSession tlsSession>;
+
+        $r10 = interfaceinvoke $r9.<org.spongycastle.crypto.tls.TlsSession: byte[] getSessionID()>();
+
+        $z0 = staticinvoke <org.spongycastle.util.Arrays: boolean areEqual(byte[],byte[])>($r2, $r10);
+
+        if $z0 == 0 goto label04;
+
+        $z0 = 1;
+
+     label02:
+        $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: boolean resumedSession> = $z0;
+
+        $i0 = staticinvoke <org.spongycastle.crypto.tls.TlsUtils: int readUint16(java.io.InputStream)>(r3);
+
+        $r11 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: int[] offeredCipherSuites>;
+
+        $z0 = staticinvoke <org.spongycastle.util.Arrays: boolean contains(int[],int)>($r11, $i0);
+
+        if $z0 == 0 goto label03;
+
+        if $i0 == 0 goto label03;
+
+        $z0 = staticinvoke <org.spongycastle.crypto.tls.CipherSuite: boolean isSCSV(int)>($i0);
+
+        if $z0 != 0 goto label03;
+
+        $r4 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: org.spongycastle.crypto.tls.TlsClientContextImpl clientContext>;
+
+        $r6 = virtualinvoke $r4.<org.spongycastle.crypto.tls.TlsClientContextImpl: org.spongycastle.crypto.tls.ProtocolVersion getServerVersion()>();
+
+        $z0 = staticinvoke <org.spongycastle.crypto.tls.TlsUtils: boolean isValidCipherSuiteForVersion(int,org.spongycastle.crypto.tls.ProtocolVersion)>($i0, $r6);
+
+        if $z0 != 0 goto label05;
+
+     label03:
+        $r7 = new org.spongycastle.crypto.tls.TlsFatalAlert;
+
+        specialinvoke $r7.<org.spongycastle.crypto.tls.TlsFatalAlert: void <init>(short)>(47);
+
+        throw $r7;
+
+     label04:
+        $z0 = 0;
+
+        goto label02;
+
+     label05:
+        staticinvoke <org.spongycastle.crypto.tls.DTLSClientProtocol: void validateSelectedCipherSuite(int,short)>($i0, 47);
+
+        $r8 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: org.spongycastle.crypto.tls.TlsClient client>;
+
+        interfaceinvoke $r8.<org.spongycastle.crypto.tls.TlsClient: void notifySelectedCipherSuite(int)>($i0);
+
+        $s1 = staticinvoke <org.spongycastle.crypto.tls.TlsUtils: short readUint8(java.io.InputStream)>(r3);
+
+        $r12 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: short[] offeredCompressionMethods>;
+
+        $z0 = staticinvoke <org.spongycastle.util.Arrays: boolean contains(short[],short)>($r12, $s1);
+
+        if $z0 != 0 goto label06;
+
+        $r7 = new org.spongycastle.crypto.tls.TlsFatalAlert;
+
+        specialinvoke $r7.<org.spongycastle.crypto.tls.TlsFatalAlert: void <init>(short)>(47);
+
+        throw $r7;
+
+     label06:
+        $r8 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: org.spongycastle.crypto.tls.TlsClient client>;
+
+        interfaceinvoke $r8.<org.spongycastle.crypto.tls.TlsClient: void notifySelectedCompressionMethod(short)>($s1);
+
+        $r13 = staticinvoke <org.spongycastle.crypto.tls.TlsProtocol: java.util.Hashtable readExtensions(java.io.ByteArrayInputStream)>(r3);
+
+        $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: java.util.Hashtable serverExtensions> = $r13;
+
+        $r13 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: java.util.Hashtable serverExtensions>;
+
+        if $r13 == null goto label09;
+
+        $r13 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: java.util.Hashtable serverExtensions>;
+
+        $r14 = virtualinvoke $r13.<java.util.Hashtable: java.util.Enumeration keys()>();
+
+     label07:
+        $z0 = interfaceinvoke $r14.<java.util.Enumeration: boolean hasMoreElements()>();
+
+        if $z0 == 0 goto label09;
+
+        $r15 = interfaceinvoke $r14.<java.util.Enumeration: java.lang.Object nextElement()>();
+
+        r16 = (java.lang.Integer) $r15;
+
+        $r17 = <org.spongycastle.crypto.tls.TlsProtocol: java.lang.Integer EXT_RenegotiationInfo>;
+
+        $z0 = virtualinvoke r16.<java.lang.Integer: boolean equals(java.lang.Object)>($r17);
+
+        if $z0 != 0 goto label07;
+
+        $r13 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: java.util.Hashtable clientExtensions>;
+
+        $r2 = staticinvoke <org.spongycastle.crypto.tls.TlsUtils: byte[] getExtensionData(java.util.Hashtable,java.lang.Integer)>($r13, r16);
+
+        if $r2 != null goto label08;
+
+        $r7 = new org.spongycastle.crypto.tls.TlsFatalAlert;
+
+        specialinvoke $r7.<org.spongycastle.crypto.tls.TlsFatalAlert: void <init>(short)>(110);
+
+        throw $r7;
+
+     label08:
+        $z0 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: boolean resumedSession>;
+
+        if $z0 == 0 goto label07;
+
+        goto label07;
+
+     label09:
+        $r13 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: java.util.Hashtable serverExtensions>;
+
+        r16 = <org.spongycastle.crypto.tls.TlsProtocol: java.lang.Integer EXT_RenegotiationInfo>;
+
+        $r2 = staticinvoke <org.spongycastle.crypto.tls.TlsUtils: byte[] getExtensionData(java.util.Hashtable,java.lang.Integer)>($r13, r16);
+
+        if $r2 == null goto label10;
+
+        $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: boolean secure_renegotiation> = 1;
+
+        $r10 = <org.spongycastle.crypto.tls.TlsUtils: byte[] EMPTY_BYTES>;
+
+        $r10 = staticinvoke <org.spongycastle.crypto.tls.TlsProtocol: byte[] createRenegotiationInfo(byte[])>($r10);
+
+        $z0 = staticinvoke <org.spongycastle.util.Arrays: boolean constantTimeAreEqual(byte[],byte[])>($r2, $r10);
+
+        if $z0 != 0 goto label10;
+
+        $r7 = new org.spongycastle.crypto.tls.TlsFatalAlert;
+
+        specialinvoke $r7.<org.spongycastle.crypto.tls.TlsFatalAlert: void <init>(short)>(40);
+
+        throw $r7;
+
+     label10:
+        $r8 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: org.spongycastle.crypto.tls.TlsClient client>;
+
+        $z0 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: boolean secure_renegotiation>;
+
+        interfaceinvoke $r8.<org.spongycastle.crypto.tls.TlsClient: void notifySecureRenegotiation(boolean)>($z0);
+
+        $r13 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: java.util.Hashtable clientExtensions>;
+
+        r18 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: java.util.Hashtable serverExtensions>;
+
+        $z0 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: boolean resumedSession>;
+
+        if $z0 == 0 goto label13;
+
+        $r19 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: org.spongycastle.crypto.tls.SessionParameters sessionParameters>;
+
+        $i2 = virtualinvoke $r19.<org.spongycastle.crypto.tls.SessionParameters: int getCipherSuite()>();
+
+        if $i0 != $i2 goto label11;
+
+        $r19 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: org.spongycastle.crypto.tls.SessionParameters sessionParameters>;
+
+        $s3 = virtualinvoke $r19.<org.spongycastle.crypto.tls.SessionParameters: short getCompressionAlgorithm()>();
+
+        if $s1 == $s3 goto label12;
+
+     label11:
+        $r7 = new org.spongycastle.crypto.tls.TlsFatalAlert;
+
+        specialinvoke $r7.<org.spongycastle.crypto.tls.TlsFatalAlert: void <init>(short)>(47);
+
+        throw $r7;
+
+     label12:
+        $r13 = null;
+
+        $r19 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: org.spongycastle.crypto.tls.SessionParameters sessionParameters>;
+
+        r18 = virtualinvoke $r19.<org.spongycastle.crypto.tls.SessionParameters: java.util.Hashtable readServerExtensions()>();
+
+     label13:
+        $r5.<org.spongycastle.crypto.tls.SecurityParameters: int cipherSuite> = $i0;
+
+        $r5.<org.spongycastle.crypto.tls.SecurityParameters: short compressionAlgorithm> = $s1;
+
+        if r18 == null goto label17;
+
+        $z0 = staticinvoke <org.spongycastle.crypto.tls.TlsExtensionsUtils: boolean hasEncryptThenMACExtension(java.util.Hashtable)>(r18);
+
+        if $z0 == 0 goto label14;
+
+        $i0 = virtualinvoke $r5.<org.spongycastle.crypto.tls.SecurityParameters: int getCipherSuite()>();
+
+        $z1 = staticinvoke <org.spongycastle.crypto.tls.TlsUtils: boolean isBlockCipherSuite(int)>($i0);
+
+        if $z1 != 0 goto label14;
+
+        $r7 = new org.spongycastle.crypto.tls.TlsFatalAlert;
+
+        specialinvoke $r7.<org.spongycastle.crypto.tls.TlsFatalAlert: void <init>(short)>(47);
+
+        throw $r7;
+
+     label14:
+        $r5.<org.spongycastle.crypto.tls.SecurityParameters: boolean encryptThenMAC> = $z0;
+
+        $z0 = staticinvoke <org.spongycastle.crypto.tls.TlsExtensionsUtils: boolean hasExtendedMasterSecretExtension(java.util.Hashtable)>(r18);
+
+        $r5.<org.spongycastle.crypto.tls.SecurityParameters: boolean extendedMasterSecret> = $z0;
+
+        $z0 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: boolean resumedSession>;
+
+        $s1 = staticinvoke <org.spongycastle.crypto.tls.DTLSClientProtocol: short evaluateMaxFragmentLengthExtension(boolean,java.util.Hashtable,java.util.Hashtable,short)>($z0, $r13, r18, 47);
+
+        $r5.<org.spongycastle.crypto.tls.SecurityParameters: short maxFragmentLength> = $s1;
+
+        $z0 = staticinvoke <org.spongycastle.crypto.tls.TlsExtensionsUtils: boolean hasTruncatedHMacExtension(java.util.Hashtable)>(r18);
+
+        $r5.<org.spongycastle.crypto.tls.SecurityParameters: boolean truncatedHMac> = $z0;
+
+        $z0 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: boolean resumedSession>;
+
+        if $z0 != 0 goto label19;
+
+        r16 = <org.spongycastle.crypto.tls.TlsExtensionsUtils: java.lang.Integer EXT_status_request>;
+
+        $z0 = staticinvoke <org.spongycastle.crypto.tls.TlsUtils: boolean hasExpectedEmptyExtensionData(java.util.Hashtable,java.lang.Integer,short)>(r18, r16, 47);
+
+        if $z0 == 0 goto label19;
+
+        $z0 = 1;
+
+     label15:
+        $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: boolean allowCertificateStatus> = $z0;
+
+        $z0 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: boolean resumedSession>;
+
+        if $z0 != 0 goto label20;
+
+        r16 = <org.spongycastle.crypto.tls.TlsProtocol: java.lang.Integer EXT_SessionTicket>;
+
+        $z0 = staticinvoke <org.spongycastle.crypto.tls.TlsUtils: boolean hasExpectedEmptyExtensionData(java.util.Hashtable,java.lang.Integer,short)>(r18, r16, 47);
+
+        if $z0 == 0 goto label20;
+
+        $z0 = 1;
+
+     label16:
+        $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: boolean expectSessionTicket> = $z0;
+
+     label17:
+        if $r13 == null goto label18;
+
+        $r8 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: org.spongycastle.crypto.tls.TlsClient client>;
+
+        interfaceinvoke $r8.<org.spongycastle.crypto.tls.TlsClient: void processServerExtensions(java.util.Hashtable)>(r18);
+
+     label18:
+        $r4 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: org.spongycastle.crypto.tls.TlsClientContextImpl clientContext>;
+
+        $i0 = virtualinvoke $r5.<org.spongycastle.crypto.tls.SecurityParameters: int getCipherSuite()>();
+
+        $i0 = staticinvoke <org.spongycastle.crypto.tls.TlsProtocol: int getPRFAlgorithm(org.spongycastle.crypto.tls.TlsContext,int)>($r4, $i0);
+
+        $r5.<org.spongycastle.crypto.tls.SecurityParameters: int prfAlgorithm> = $i0;
+
+        $r5.<org.spongycastle.crypto.tls.SecurityParameters: int verifyDataLength> = 12;
+
+        return;
+
+     label19:
+        $z0 = 0;
+
+        goto label15;
+
+     label20:
+        $z0 = 0;
+
+        goto label16;
+    }
+    protected void processServerKeyExchange(org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState, byte[]) throws java.io.IOException
+    {
+        org.spongycastle.crypto.tls.DTLSClientProtocol r0;
+        org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState $r1;
+        byte[] $r2;
+        java.io.ByteArrayInputStream r3;
+        org.spongycastle.crypto.tls.TlsKeyExchange $r4;
+
+        r0 := @this: org.spongycastle.crypto.tls.DTLSClientProtocol;
+
+        $r1 := @parameter0: org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState;
+
+        $r2 := @parameter1: byte[];
+
+        r3 = new java.io.ByteArrayInputStream;
+
+        specialinvoke r3.<java.io.ByteArrayInputStream: void <init>(byte[])>($r2);
+
+        $r4 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: org.spongycastle.crypto.tls.TlsKeyExchange keyExchange>;
+
+        interfaceinvoke $r4.<org.spongycastle.crypto.tls.TlsKeyExchange: void processServerKeyExchange(java.io.InputStream)>(r3);
+
+        staticinvoke <org.spongycastle.crypto.tls.TlsProtocol: void assertEmpty(java.io.ByteArrayInputStream)>(r3);
+
+        return;
+    }
+    protected void processServerSupplementalData(org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState, byte[]) throws java.io.IOException
+    {
+        org.spongycastle.crypto.tls.DTLSClientProtocol r0;
+        org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState $r1;
+        byte[] $r2;
+        java.io.ByteArrayInputStream r3;
+        org.spongycastle.crypto.tls.TlsClient $r4;
+        java.util.Vector $r5;
+
+        r0 := @this: org.spongycastle.crypto.tls.DTLSClientProtocol;
+
+        $r1 := @parameter0: org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState;
+
+        $r2 := @parameter1: byte[];
+
+        r3 = new java.io.ByteArrayInputStream;
+
+        specialinvoke r3.<java.io.ByteArrayInputStream: void <init>(byte[])>($r2);
+
+        $r5 = staticinvoke <org.spongycastle.crypto.tls.TlsProtocol: java.util.Vector readSupplementalDataMessage(java.io.ByteArrayInputStream)>(r3);
+
+        $r4 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: org.spongycastle.crypto.tls.TlsClient client>;
+
+        interfaceinvoke $r4.<org.spongycastle.crypto.tls.TlsClient: void processServerSupplementalData(java.util.Vector)>($r5);
+
+        return;
+    }
+    protected void reportServerVersion(org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState, org.spongycastle.crypto.tls.ProtocolVersion) throws java.io.IOException
+    {
+        org.spongycastle.crypto.tls.DTLSClientProtocol r0;
+        org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState $r1;
+        org.spongycastle.crypto.tls.ProtocolVersion $r2, $r4;
+        org.spongycastle.crypto.tls.TlsClientContextImpl r3;
+        org.spongycastle.crypto.tls.TlsClient $r5;
+        boolean $z0;
+        org.spongycastle.crypto.tls.TlsFatalAlert $r6;
+
+        r0 := @this: org.spongycastle.crypto.tls.DTLSClientProtocol;
+
+        $r1 := @parameter0: org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState;
+
+        $r2 := @parameter1: org.spongycastle.crypto.tls.ProtocolVersion;
+
+        r3 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: org.spongycastle.crypto.tls.TlsClientContextImpl clientContext>;
+
+        $r4 = virtualinvoke r3.<org.spongycastle.crypto.tls.TlsClientContextImpl: org.spongycastle.crypto.tls.ProtocolVersion getServerVersion()>();
+
+        if $r4 != null goto label1;
+
+        virtualinvoke r3.<org.spongycastle.crypto.tls.TlsClientContextImpl: void setServerVersion(org.spongycastle.crypto.tls.ProtocolVersion)>($r2);
+
+        $r5 = $r1.<org.spongycastle.crypto.tls.DTLSClientProtocol$ClientHandshakeState: org.spongycastle.crypto.tls.TlsClient client>;
+
+        interfaceinvoke $r5.<org.spongycastle.crypto.tls.TlsClient: void notifyServerVersion(org.spongycastle.crypto.tls.ProtocolVersion)>($r2);
+
+        return;
+
+     label1:
+        $z0 = virtualinvoke $r4.<org.spongycastle.crypto.tls.ProtocolVersion: boolean equals(org.spongycastle.crypto.tls.ProtocolVersion)>($r2);
+
+        if $z0 != 0 goto label2;
+
+        $r6 = new org.spongycastle.crypto.tls.TlsFatalAlert;
+
+        specialinvoke $r6.<org.spongycastle.crypto.tls.TlsFatalAlert: void <init>(short)>(47);
+
+        throw $r6;
+
+     label2:
+        return;
+    }

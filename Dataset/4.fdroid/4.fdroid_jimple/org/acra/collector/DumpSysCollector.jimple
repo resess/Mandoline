@@ -1,0 +1,115 @@
+org.acra.collector.DumpSysCollector extends java.lang.Object
+    public static java.lang.String collectMemInfo()
+    {
+        java.io.BufferedReader r0, r3;
+        java.util.ArrayList r1;
+        java.lang.StringBuilder r2;
+        int $i0;
+        java.lang.String $r4;
+        java.lang.Runtime $r5;
+        java.lang.String[] $r6;
+        java.lang.Object[] $r7;
+        java.lang.Process $r8;
+        java.io.InputStreamReader $r9;
+        java.io.InputStream $r10;
+        java.io.IOException r11;
+        org.acra.log.ACRALog $r12;
+
+        r2 = new java.lang.StringBuilder;
+
+        specialinvoke r2.<java.lang.StringBuilder: void <init>()>();
+
+        r3 = null;
+
+        r1 = new java.util.ArrayList;
+
+     label01:
+        specialinvoke r1.<java.util.ArrayList: void <init>()>();
+
+        interfaceinvoke r1.<java.util.List: boolean add(java.lang.Object)>("dumpsys");
+
+        interfaceinvoke r1.<java.util.List: boolean add(java.lang.Object)>("meminfo");
+
+        $i0 = staticinvoke <android.os.Process: int myPid()>();
+
+        $r4 = staticinvoke <java.lang.Integer: java.lang.String toString(int)>($i0);
+
+        interfaceinvoke r1.<java.util.List: boolean add(java.lang.Object)>($r4);
+
+        $r5 = staticinvoke <java.lang.Runtime: java.lang.Runtime getRuntime()>();
+
+        $i0 = interfaceinvoke r1.<java.util.List: int size()>();
+
+     label02:
+        $r6 = newarray (java.lang.String)[$i0];
+
+     label03:
+        $r7 = interfaceinvoke r1.<java.util.List: java.lang.Object[] toArray(java.lang.Object[])>($r6);
+
+     label04:
+        $r6 = (java.lang.String[]) $r7;
+
+     label05:
+        $r8 = virtualinvoke $r5.<java.lang.Runtime: java.lang.Process exec(java.lang.String[])>($r6);
+
+     label06:
+        r0 = new java.io.BufferedReader;
+
+        $r9 = new java.io.InputStreamReader;
+
+     label07:
+        $r10 = virtualinvoke $r8.<java.lang.Process: java.io.InputStream getInputStream()>();
+
+        specialinvoke $r9.<java.io.InputStreamReader: void <init>(java.io.InputStream)>($r10);
+
+        specialinvoke r0.<java.io.BufferedReader: void <init>(java.io.Reader,int)>($r9, 8192);
+
+     label08:
+        $r4 = virtualinvoke r0.<java.io.BufferedReader: java.lang.String readLine()>();
+
+     label09:
+        if $r4 != null goto label11;
+
+        r3 = r0;
+
+     label10:
+        staticinvoke <org.acra.collector.CollectorUtil: void safeClose(java.io.Reader)>(r3);
+
+        $r4 = virtualinvoke r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r4;
+
+     label11:
+        virtualinvoke r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        virtualinvoke r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\n");
+
+     label12:
+        goto label08;
+
+     label13:
+        r11 := @caughtexception;
+
+        r3 = r0;
+
+     label14:
+        $r12 = <org.acra.ACRA: org.acra.log.ACRALog log>;
+
+        $r4 = <org.acra.ACRA: java.lang.String LOG_TAG>;
+
+        interfaceinvoke $r12.<org.acra.log.ACRALog: int e(java.lang.String,java.lang.String,java.lang.Throwable)>($r4, "DumpSysCollector.meminfo could not retrieve data", r11);
+
+        goto label10;
+
+     label15:
+        r11 := @caughtexception;
+
+        goto label14;
+
+        catch java.io.IOException from label01 to label02 with label15;
+        catch java.io.IOException from label03 to label04 with label15;
+        catch java.io.IOException from label05 to label06 with label15;
+        catch java.io.IOException from label07 to label08 with label15;
+        catch java.io.IOException from label08 to label09 with label13;
+        catch java.io.IOException from label11 to label12 with label13;
+    }

@@ -1,0 +1,815 @@
+org.spongycastle.crypto.engines.IDEAEngine extends java.lang.Object implements org.spongycastle.crypto.BlockCipher
+private static final int BASE
+protected static final int BLOCK_SIZE
+private static final int MASK
+private int[] workingKey
+    public void <init>()
+    {
+        org.spongycastle.crypto.engines.IDEAEngine r0;
+
+        r0 := @this: org.spongycastle.crypto.engines.IDEAEngine;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<org.spongycastle.crypto.engines.IDEAEngine: int[] workingKey> = null;
+
+        return;
+    }
+    private int bytesToWord(byte[], int)
+    {
+        org.spongycastle.crypto.engines.IDEAEngine r0;
+        byte[] $r1;
+        int $i0, $i2;
+        byte $b1;
+
+        r0 := @this: org.spongycastle.crypto.engines.IDEAEngine;
+
+        $r1 := @parameter0: byte[];
+
+        $i0 := @parameter1: int;
+
+        $b1 = $r1[$i0];
+
+        $i2 = $b1 << 8;
+
+        $i2 = $i2 & 65280;
+
+        $i0 = $i0 + 1;
+
+        $b1 = $r1[$i0];
+
+        $i0 = $b1 & 255;
+
+        $i0 = $i2 + $i0;
+
+        return $i0;
+    }
+    private int[] expandKey(byte[])
+    {
+        org.spongycastle.crypto.engines.IDEAEngine r0;
+        int[] r1;
+        byte[] r2, $r3;
+        int $i0, $i1, $i2;
+
+        r0 := @this: org.spongycastle.crypto.engines.IDEAEngine;
+
+        $r3 := @parameter0: byte[];
+
+        r1 = newarray (int)[52];
+
+        $i1 = lengthof $r3;
+
+        if $i1 >= 16 goto label1;
+
+        r2 = newarray (byte)[16];
+
+        $i1 = lengthof r2;
+
+        $i0 = lengthof $r3;
+
+        $i1 = $i1 - $i0;
+
+        $i0 = lengthof $r3;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r3, 0, r2, $i1, $i0);
+
+        $r3 = r2;
+
+     label1:
+        $i1 = 0;
+
+     label2:
+        if $i1 >= 8 goto label3;
+
+        $i0 = $i1 * 2;
+
+        $i0 = specialinvoke r0.<org.spongycastle.crypto.engines.IDEAEngine: int bytesToWord(byte[],int)>($r3, $i0);
+
+        r1[$i1] = $i0;
+
+        $i1 = $i1 + 1;
+
+        goto label2;
+
+     label3:
+        $i1 = 8;
+
+     label4:
+        if $i1 >= 52 goto label8;
+
+        $i0 = $i1 & 7;
+
+        if $i0 >= 6 goto label6;
+
+        $i0 = $i1 + -7;
+
+        $i0 = r1[$i0];
+
+        $i0 = $i0 & 127;
+
+        $i0 = $i0 << 9;
+
+        $i2 = $i1 + -6;
+
+        $i2 = r1[$i2];
+
+        $i2 = $i2 >> 7;
+
+        $i0 = $i0 | $i2;
+
+        $i0 = $i0 & 65535;
+
+        r1[$i1] = $i0;
+
+     label5:
+        $i1 = $i1 + 1;
+
+        goto label4;
+
+     label6:
+        $i0 = $i1 & 7;
+
+        if $i0 != 6 goto label7;
+
+        $i0 = $i1 + -7;
+
+        $i0 = r1[$i0];
+
+        $i0 = $i0 & 127;
+
+        $i0 = $i0 << 9;
+
+        $i2 = $i1 + -14;
+
+        $i2 = r1[$i2];
+
+        $i2 = $i2 >> 7;
+
+        $i0 = $i0 | $i2;
+
+        $i0 = $i0 & 65535;
+
+        r1[$i1] = $i0;
+
+        goto label5;
+
+     label7:
+        $i0 = $i1 + -15;
+
+        $i0 = r1[$i0];
+
+        $i0 = $i0 & 127;
+
+        $i0 = $i0 << 9;
+
+        $i2 = $i1 + -14;
+
+        $i2 = r1[$i2];
+
+        $i2 = $i2 >> 7;
+
+        $i0 = $i0 | $i2;
+
+        $i0 = $i0 & 65535;
+
+        r1[$i1] = $i0;
+
+        goto label5;
+
+     label8:
+        return r1;
+    }
+    private int[] generateWorkingKey(boolean, byte[])
+    {
+        org.spongycastle.crypto.engines.IDEAEngine r0;
+        boolean $z0;
+        byte[] $r1;
+        int[] $r2;
+
+        r0 := @this: org.spongycastle.crypto.engines.IDEAEngine;
+
+        $z0 := @parameter0: boolean;
+
+        $r1 := @parameter1: byte[];
+
+        if $z0 == 0 goto label1;
+
+        $r2 = specialinvoke r0.<org.spongycastle.crypto.engines.IDEAEngine: int[] expandKey(byte[])>($r1);
+
+        return $r2;
+
+     label1:
+        $r2 = specialinvoke r0.<org.spongycastle.crypto.engines.IDEAEngine: int[] expandKey(byte[])>($r1);
+
+        $r2 = specialinvoke r0.<org.spongycastle.crypto.engines.IDEAEngine: int[] invertKey(int[])>($r2);
+
+        return $r2;
+    }
+    private void ideaFunc(int[], byte[], int, byte[], int)
+    {
+        org.spongycastle.crypto.engines.IDEAEngine r0;
+        int[] $r1;
+        byte[] $r2, $r3;
+        int $i0, $i1, $i2, i3, i4, i5, i6, i7, i8, i9;
+
+        r0 := @this: org.spongycastle.crypto.engines.IDEAEngine;
+
+        $r1 := @parameter0: int[];
+
+        $r2 := @parameter1: byte[];
+
+        $i0 := @parameter2: int;
+
+        $r3 := @parameter3: byte[];
+
+        $i1 := @parameter4: int;
+
+        i3 = specialinvoke r0.<org.spongycastle.crypto.engines.IDEAEngine: int bytesToWord(byte[],int)>($r2, $i0);
+
+        $i2 = $i0 + 2;
+
+        i4 = specialinvoke r0.<org.spongycastle.crypto.engines.IDEAEngine: int bytesToWord(byte[],int)>($r2, $i2);
+
+        $i2 = $i0 + 4;
+
+        i5 = specialinvoke r0.<org.spongycastle.crypto.engines.IDEAEngine: int bytesToWord(byte[],int)>($r2, $i2);
+
+        $i0 = $i0 + 6;
+
+        $i0 = specialinvoke r0.<org.spongycastle.crypto.engines.IDEAEngine: int bytesToWord(byte[],int)>($r2, $i0);
+
+        $i2 = 0;
+
+        i6 = 0;
+
+     label1:
+        if $i2 >= 8 goto label2;
+
+        i7 = i6 + 1;
+
+        i6 = $r1[i6];
+
+        i3 = specialinvoke r0.<org.spongycastle.crypto.engines.IDEAEngine: int mul(int,int)>(i3, i6);
+
+        i6 = i7 + 1;
+
+        i7 = $r1[i7];
+
+        i4 = i4 + i7;
+
+        i7 = i4 & 65535;
+
+        i8 = i6 + 1;
+
+        i4 = $r1[i6];
+
+        i4 = i5 + i4;
+
+        i4 = i4 & 65535;
+
+        i6 = i8 + 1;
+
+        i5 = $r1[i8];
+
+        $i0 = specialinvoke r0.<org.spongycastle.crypto.engines.IDEAEngine: int mul(int,int)>($i0, i5);
+
+        i8 = i4 ^ i3;
+
+        i9 = i7 ^ $i0;
+
+        i5 = i6 + 1;
+
+        i6 = $r1[i6];
+
+        i8 = specialinvoke r0.<org.spongycastle.crypto.engines.IDEAEngine: int mul(int,int)>(i8, i6);
+
+        i6 = i9 + i8;
+
+        i9 = i6 & 65535;
+
+        i6 = i5 + 1;
+
+        i5 = $r1[i5];
+
+        i5 = specialinvoke r0.<org.spongycastle.crypto.engines.IDEAEngine: int mul(int,int)>(i9, i5);
+
+        i8 = i8 + i5;
+
+        i8 = i8 & 65535;
+
+        i3 = i3 ^ i5;
+
+        $i0 = $i0 ^ i8;
+
+        i4 = i5 ^ i4;
+
+        i5 = i8 ^ i7;
+
+        $i2 = $i2 + 1;
+
+        goto label1;
+
+     label2:
+        $i2 = i6 + 1;
+
+        i7 = $r1[i6];
+
+        i3 = specialinvoke r0.<org.spongycastle.crypto.engines.IDEAEngine: int mul(int,int)>(i3, i7);
+
+        specialinvoke r0.<org.spongycastle.crypto.engines.IDEAEngine: void wordToBytes(int,byte[],int)>(i3, $r3, $i1);
+
+        i3 = $i2 + 1;
+
+        $i2 = $r1[$i2];
+
+        $i2 = $i2 + i5;
+
+        i7 = $i1 + 2;
+
+        specialinvoke r0.<org.spongycastle.crypto.engines.IDEAEngine: void wordToBytes(int,byte[],int)>($i2, $r3, i7);
+
+        $i2 = i3 + 1;
+
+        i3 = $r1[i3];
+
+        i3 = i3 + i4;
+
+        i4 = $i1 + 4;
+
+        specialinvoke r0.<org.spongycastle.crypto.engines.IDEAEngine: void wordToBytes(int,byte[],int)>(i3, $r3, i4);
+
+        $i2 = $r1[$i2];
+
+        $i0 = specialinvoke r0.<org.spongycastle.crypto.engines.IDEAEngine: int mul(int,int)>($i0, $i2);
+
+        $i1 = $i1 + 6;
+
+        specialinvoke r0.<org.spongycastle.crypto.engines.IDEAEngine: void wordToBytes(int,byte[],int)>($i0, $r3, $i1);
+
+        return;
+    }
+    private int[] invertKey(int[])
+    {
+        org.spongycastle.crypto.engines.IDEAEngine r0;
+        int[] $r1, r2;
+        int i0, $i1, i2, i3, i4, i5, i6;
+
+        r0 := @this: org.spongycastle.crypto.engines.IDEAEngine;
+
+        $r1 := @parameter0: int[];
+
+        r2 = newarray (int)[52];
+
+        $i1 = $r1[0];
+
+        $i1 = specialinvoke r0.<org.spongycastle.crypto.engines.IDEAEngine: int mulInv(int)>($i1);
+
+        i2 = 1 + 1;
+
+        i0 = $r1[1];
+
+        i0 = virtualinvoke r0.<org.spongycastle.crypto.engines.IDEAEngine: int addInv(int)>(i0);
+
+        i3 = i2 + 1;
+
+        i2 = $r1[i2];
+
+        i2 = virtualinvoke r0.<org.spongycastle.crypto.engines.IDEAEngine: int addInv(int)>(i2);
+
+        i4 = i3 + 1;
+
+        i3 = $r1[i3];
+
+        i3 = specialinvoke r0.<org.spongycastle.crypto.engines.IDEAEngine: int mulInv(int)>(i3);
+
+        i5 = 52 + -1;
+
+        r2[i5] = i3;
+
+        i3 = i5 + -1;
+
+        r2[i3] = i2;
+
+        i2 = i3 + -1;
+
+        r2[i2] = i0;
+
+        i2 = i2 + -1;
+
+        r2[i2] = $i1;
+
+        $i1 = 1;
+
+     label1:
+        if $i1 >= 8 goto label2;
+
+        i3 = i4 + 1;
+
+        i4 = $r1[i4];
+
+        i0 = i3 + 1;
+
+        i3 = $r1[i3];
+
+        i2 = i2 + -1;
+
+        r2[i2] = i3;
+
+        i2 = i2 + -1;
+
+        r2[i2] = i4;
+
+        i3 = i0 + 1;
+
+        i0 = $r1[i0];
+
+        i0 = specialinvoke r0.<org.spongycastle.crypto.engines.IDEAEngine: int mulInv(int)>(i0);
+
+        i4 = i3 + 1;
+
+        i3 = $r1[i3];
+
+        i3 = virtualinvoke r0.<org.spongycastle.crypto.engines.IDEAEngine: int addInv(int)>(i3);
+
+        i6 = i4 + 1;
+
+        i4 = $r1[i4];
+
+        i5 = virtualinvoke r0.<org.spongycastle.crypto.engines.IDEAEngine: int addInv(int)>(i4);
+
+        i4 = i6 + 1;
+
+        i6 = $r1[i6];
+
+        i6 = specialinvoke r0.<org.spongycastle.crypto.engines.IDEAEngine: int mulInv(int)>(i6);
+
+        i2 = i2 + -1;
+
+        r2[i2] = i6;
+
+        i2 = i2 + -1;
+
+        r2[i2] = i3;
+
+        i2 = i2 + -1;
+
+        r2[i2] = i5;
+
+        i2 = i2 + -1;
+
+        r2[i2] = i0;
+
+        $i1 = $i1 + 1;
+
+        goto label1;
+
+     label2:
+        i0 = i4 + 1;
+
+        i4 = $r1[i4];
+
+        $i1 = i0 + 1;
+
+        i0 = $r1[i0];
+
+        i2 = i2 + -1;
+
+        r2[i2] = i0;
+
+        i0 = i2 + -1;
+
+        r2[i0] = i4;
+
+        i2 = $i1 + 1;
+
+        $i1 = $r1[$i1];
+
+        $i1 = specialinvoke r0.<org.spongycastle.crypto.engines.IDEAEngine: int mulInv(int)>($i1);
+
+        i4 = i2 + 1;
+
+        i2 = $r1[i2];
+
+        i2 = virtualinvoke r0.<org.spongycastle.crypto.engines.IDEAEngine: int addInv(int)>(i2);
+
+        i3 = i4 + 1;
+
+        i4 = $r1[i4];
+
+        i4 = virtualinvoke r0.<org.spongycastle.crypto.engines.IDEAEngine: int addInv(int)>(i4);
+
+        i3 = $r1[i3];
+
+        i3 = specialinvoke r0.<org.spongycastle.crypto.engines.IDEAEngine: int mulInv(int)>(i3);
+
+        i0 = i0 + -1;
+
+        r2[i0] = i3;
+
+        i0 = i0 + -1;
+
+        r2[i0] = i4;
+
+        i0 = i0 + -1;
+
+        r2[i0] = i2;
+
+        i0 = i0 + -1;
+
+        r2[i0] = $i1;
+
+        return r2;
+    }
+    private int mul(int, int)
+    {
+        org.spongycastle.crypto.engines.IDEAEngine r0;
+        int i0, $i1, $i2;
+        byte $b3;
+
+        r0 := @this: org.spongycastle.crypto.engines.IDEAEngine;
+
+        $i1 := @parameter0: int;
+
+        i0 := @parameter1: int;
+
+        if $i1 != 0 goto label2;
+
+        $i1 = 65537 - i0;
+
+     label1:
+        $i1 = $i1 & 65535;
+
+        return $i1;
+
+     label2:
+        if i0 != 0 goto label3;
+
+        $i1 = 65537 - $i1;
+
+        goto label1;
+
+     label3:
+        i0 = $i1 * i0;
+
+        $i1 = i0 & 65535;
+
+        $i2 = i0 >>> 16;
+
+        i0 = $i1 - $i2;
+
+        if $i1 >= $i2 goto label5;
+
+        $b3 = 1;
+
+     label4:
+        $i1 = i0 + $b3;
+
+        goto label1;
+
+     label5:
+        $b3 = 0;
+
+        goto label4;
+    }
+    private int mulInv(int)
+    {
+        org.spongycastle.crypto.engines.IDEAEngine r0;
+        int $i0, i1, i2, i3, i4;
+
+        r0 := @this: org.spongycastle.crypto.engines.IDEAEngine;
+
+        $i0 := @parameter0: int;
+
+        if $i0 >= 2 goto label1;
+
+        return $i0;
+
+     label1:
+        i1 = 1;
+
+        i2 = 65537 / $i0;
+
+        i3 = 65537 % $i0;
+
+     label2:
+        if i3 == 1 goto label3;
+
+        i4 = $i0 / i3;
+
+        $i0 = $i0 % i3;
+
+        i4 = i2 * i4;
+
+        i1 = i4 + i1;
+
+        i1 = i1 & 65535;
+
+        if $i0 == 1 goto label4;
+
+        i4 = i3 / $i0;
+
+        i3 = i3 % $i0;
+
+        i4 = i1 * i4;
+
+        i2 = i4 + i2;
+
+        i2 = i2 & 65535;
+
+        goto label2;
+
+     label3:
+        $i0 = 1 - i2;
+
+        $i0 = $i0 & 65535;
+
+        return $i0;
+
+     label4:
+        return i1;
+    }
+    private void wordToBytes(int, byte[], int)
+    {
+        org.spongycastle.crypto.engines.IDEAEngine r0;
+        int $i0, $i1, $i3;
+        byte[] $r1;
+        byte $b2;
+
+        r0 := @this: org.spongycastle.crypto.engines.IDEAEngine;
+
+        $i0 := @parameter0: int;
+
+        $r1 := @parameter1: byte[];
+
+        $i1 := @parameter2: int;
+
+        $i3 = $i0 >>> 8;
+
+        $b2 = (byte) $i3;
+
+        $r1[$i1] = $b2;
+
+        $i1 = $i1 + 1;
+
+        $b2 = (byte) $i0;
+
+        $r1[$i1] = $b2;
+
+        return;
+    }
+    int addInv(int)
+    {
+        org.spongycastle.crypto.engines.IDEAEngine r0;
+        int $i0;
+
+        r0 := @this: org.spongycastle.crypto.engines.IDEAEngine;
+
+        $i0 := @parameter0: int;
+
+        $i0 = 0 - $i0;
+
+        $i0 = $i0 & 65535;
+
+        return $i0;
+    }
+    public java.lang.String getAlgorithmName()
+    {
+        org.spongycastle.crypto.engines.IDEAEngine r0;
+
+        r0 := @this: org.spongycastle.crypto.engines.IDEAEngine;
+
+        return "IDEA";
+    }
+    public int getBlockSize()
+    {
+        org.spongycastle.crypto.engines.IDEAEngine r0;
+
+        r0 := @this: org.spongycastle.crypto.engines.IDEAEngine;
+
+        return 8;
+    }
+    public void init(boolean, org.spongycastle.crypto.CipherParameters)
+    {
+        org.spongycastle.crypto.engines.IDEAEngine r0;
+        boolean $z0, $z1;
+        org.spongycastle.crypto.CipherParameters r1;
+        org.spongycastle.crypto.params.KeyParameter r2;
+        byte[] $r3;
+        int[] $r4;
+        java.lang.IllegalArgumentException $r5;
+        java.lang.StringBuilder $r6;
+        java.lang.Class $r7;
+        java.lang.String $r8;
+
+        r0 := @this: org.spongycastle.crypto.engines.IDEAEngine;
+
+        $z0 := @parameter0: boolean;
+
+        r1 := @parameter1: org.spongycastle.crypto.CipherParameters;
+
+        $z1 = r1 instanceof org.spongycastle.crypto.params.KeyParameter;
+
+        if $z1 == 0 goto label1;
+
+        r2 = (org.spongycastle.crypto.params.KeyParameter) r1;
+
+        $r3 = virtualinvoke r2.<org.spongycastle.crypto.params.KeyParameter: byte[] getKey()>();
+
+        $r4 = specialinvoke r0.<org.spongycastle.crypto.engines.IDEAEngine: int[] generateWorkingKey(boolean,byte[])>($z0, $r3);
+
+        r0.<org.spongycastle.crypto.engines.IDEAEngine: int[] workingKey> = $r4;
+
+        return;
+
+     label1:
+        $r5 = new java.lang.IllegalArgumentException;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("invalid parameter passed to IDEA init - ");
+
+        $r7 = virtualinvoke r1.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r8 = virtualinvoke $r7.<java.lang.Class: java.lang.String getName()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r8);
+
+        $r8 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r5.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r8);
+
+        throw $r5;
+    }
+    public int processBlock(byte[], int, byte[], int)
+    {
+        org.spongycastle.crypto.engines.IDEAEngine r0;
+        byte[] $r1, $r2;
+        int $i0, $i1, $i2, $i3;
+        int[] $r3;
+        java.lang.IllegalStateException $r4;
+        org.spongycastle.crypto.DataLengthException $r5;
+        org.spongycastle.crypto.OutputLengthException $r6;
+
+        r0 := @this: org.spongycastle.crypto.engines.IDEAEngine;
+
+        $r1 := @parameter0: byte[];
+
+        $i0 := @parameter1: int;
+
+        $r2 := @parameter2: byte[];
+
+        $i1 := @parameter3: int;
+
+        $r3 = r0.<org.spongycastle.crypto.engines.IDEAEngine: int[] workingKey>;
+
+        if $r3 != null goto label1;
+
+        $r4 = new java.lang.IllegalStateException;
+
+        specialinvoke $r4.<java.lang.IllegalStateException: void <init>(java.lang.String)>("IDEA engine not initialised");
+
+        throw $r4;
+
+     label1:
+        $i2 = $i0 + 8;
+
+        $i3 = lengthof $r1;
+
+        if $i2 <= $i3 goto label2;
+
+        $r5 = new org.spongycastle.crypto.DataLengthException;
+
+        specialinvoke $r5.<org.spongycastle.crypto.DataLengthException: void <init>(java.lang.String)>("input buffer too short");
+
+        throw $r5;
+
+     label2:
+        $i2 = $i1 + 8;
+
+        $i3 = lengthof $r2;
+
+        if $i2 <= $i3 goto label3;
+
+        $r6 = new org.spongycastle.crypto.OutputLengthException;
+
+        specialinvoke $r6.<org.spongycastle.crypto.OutputLengthException: void <init>(java.lang.String)>("output buffer too short");
+
+        throw $r6;
+
+     label3:
+        $r3 = r0.<org.spongycastle.crypto.engines.IDEAEngine: int[] workingKey>;
+
+        specialinvoke r0.<org.spongycastle.crypto.engines.IDEAEngine: void ideaFunc(int[],byte[],int,byte[],int)>($r3, $r1, $i0, $r2, $i1);
+
+        return 8;
+    }
+    public void reset()
+    {
+        org.spongycastle.crypto.engines.IDEAEngine r0;
+
+        r0 := @this: org.spongycastle.crypto.engines.IDEAEngine;
+
+        return;
+    }

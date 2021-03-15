@@ -1,0 +1,368 @@
+com.fsck.k9.mailstore.migrations.MigrationTo41 extends java.lang.Object
+    void <init>()
+    {
+        com.fsck.k9.mailstore.migrations.MigrationTo41 r0;
+
+        r0 := @this: com.fsck.k9.mailstore.migrations.MigrationTo41;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+    public static void db41FoldersAddClassColumns(android.database.sqlite.SQLiteDatabase)
+    {
+        android.database.sqlite.SQLiteDatabase $r0;
+        android.database.sqlite.SQLiteException r1;
+        java.lang.String $r2;
+        boolean $z0;
+
+        $r0 := @parameter0: android.database.sqlite.SQLiteDatabase;
+
+     label1:
+        virtualinvoke $r0.<android.database.sqlite.SQLiteDatabase: void execSQL(java.lang.String)>("ALTER TABLE folders ADD integrate INTEGER");
+
+        virtualinvoke $r0.<android.database.sqlite.SQLiteDatabase: void execSQL(java.lang.String)>("ALTER TABLE folders ADD top_group INTEGER");
+
+        virtualinvoke $r0.<android.database.sqlite.SQLiteDatabase: void execSQL(java.lang.String)>("ALTER TABLE folders ADD poll_class TEXT");
+
+        virtualinvoke $r0.<android.database.sqlite.SQLiteDatabase: void execSQL(java.lang.String)>("ALTER TABLE folders ADD push_class TEXT");
+
+        virtualinvoke $r0.<android.database.sqlite.SQLiteDatabase: void execSQL(java.lang.String)>("ALTER TABLE folders ADD display_class TEXT");
+
+     label2:
+        return;
+
+     label3:
+        r1 := @caughtexception;
+
+        $r2 = virtualinvoke r1.<android.database.sqlite.SQLiteException: java.lang.String getMessage()>();
+
+        $z0 = virtualinvoke $r2.<java.lang.String: boolean startsWith(java.lang.String)>("duplicate column name:");
+
+        if $z0 != 0 goto label4;
+
+        throw r1;
+
+     label4:
+        return;
+
+        catch android.database.sqlite.SQLiteException from label1 to label2 with label3;
+    }
+    public static void db41UpdateFolderMetadata(android.database.sqlite.SQLiteDatabase, com.fsck.k9.mailstore.migrations.MigrationsHelper)
+    {
+        android.database.sqlite.SQLiteDatabase $r0;
+        com.fsck.k9.mailstore.migrations.MigrationsHelper $r1;
+        android.database.Cursor r2, $r3;
+        boolean $z0;
+        int $i0;
+        java.lang.String $r4;
+        java.lang.Exception r5;
+        java.lang.Object[] $r6;
+        android.database.sqlite.SQLiteException r7;
+        java.lang.Throwable $r8;
+
+        $r0 := @parameter0: android.database.sqlite.SQLiteDatabase;
+
+        $r1 := @parameter1: com.fsck.k9.mailstore.migrations.MigrationsHelper;
+
+        r2 = null;
+
+     label01:
+        $r3 = virtualinvoke $r0.<android.database.sqlite.SQLiteDatabase: android.database.Cursor rawQuery(java.lang.String,java.lang.String[])>("SELECT id, name FROM folders", null);
+
+     label02:
+        r2 = $r3;
+
+     label03:
+        $z0 = interfaceinvoke $r3.<android.database.Cursor: boolean moveToNext()>();
+
+     label04:
+        if $z0 == 0 goto label14;
+
+     label05:
+        $i0 = interfaceinvoke $r3.<android.database.Cursor: int getInt(int)>(0);
+
+        $r4 = interfaceinvoke $r3.<android.database.Cursor: java.lang.String getString(int)>(1);
+
+        staticinvoke <com.fsck.k9.mailstore.migrations.MigrationTo41: void update41Metadata(android.database.sqlite.SQLiteDatabase,com.fsck.k9.mailstore.migrations.MigrationsHelper,int,java.lang.String)>($r0, $r1, $i0, $r4);
+
+     label06:
+        goto label03;
+
+     label07:
+        r5 := @caughtexception;
+
+     label08:
+        $r6 = newarray (java.lang.Object)[0];
+
+     label09:
+        staticinvoke <timber.log.Timber: void e(java.lang.Throwable,java.lang.String,java.lang.Object[])>(r5, " error trying to ugpgrade a folder class", $r6);
+
+     label10:
+        goto label03;
+
+     label11:
+        r7 := @caughtexception;
+
+     label12:
+        $r6 = newarray (java.lang.Object)[0];
+
+        staticinvoke <timber.log.Timber: void e(java.lang.Throwable,java.lang.String,java.lang.Object[])>(r7, "Exception while upgrading database to v41. folder classes may have vanished", $r6);
+
+     label13:
+        staticinvoke <com.fsck.k9.helper.Utility: void closeQuietly(android.database.Cursor)>(r2);
+
+        return;
+
+     label14:
+        staticinvoke <com.fsck.k9.helper.Utility: void closeQuietly(android.database.Cursor)>($r3);
+
+        return;
+
+     label15:
+        $r8 := @caughtexception;
+
+        staticinvoke <com.fsck.k9.helper.Utility: void closeQuietly(android.database.Cursor)>(r2);
+
+        throw $r8;
+
+        catch android.database.sqlite.SQLiteException from label01 to label02 with label11;
+        catch android.database.sqlite.SQLiteException from label03 to label04 with label11;
+        catch java.lang.Throwable from label01 to label02 with label15;
+        catch java.lang.Throwable from label03 to label04 with label15;
+        catch java.lang.Exception from label05 to label06 with label07;
+        catch java.lang.Throwable from label05 to label06 with label15;
+        catch android.database.sqlite.SQLiteException from label09 to label10 with label11;
+        catch java.lang.Throwable from label08 to label10 with label15;
+        catch java.lang.Throwable from label12 to label13 with label15;
+    }
+    private static void update41Metadata(android.database.sqlite.SQLiteDatabase, com.fsck.k9.mailstore.migrations.MigrationsHelper, int, java.lang.String)
+    {
+        android.database.sqlite.SQLiteDatabase $r0;
+        com.fsck.k9.mailstore.migrations.MigrationsHelper $r1;
+        int $i0;
+        java.lang.String $r2, $r6, $r10, $r12;
+        java.lang.Exception r3;
+        com.fsck.k9.preferences.Storage $r4;
+        com.fsck.k9.Account $r5;
+        com.fsck.k9.mail.Folder$FolderClass r7, r8, r9, $r13;
+        boolean z0, z1, $z2;
+        java.lang.StringBuilder $r11;
+        java.lang.Object[] $r14;
+        java.lang.Boolean $r15;
+        java.lang.Integer $r16;
+
+        $r0 := @parameter0: android.database.sqlite.SQLiteDatabase;
+
+        $r1 := @parameter1: com.fsck.k9.mailstore.migrations.MigrationsHelper;
+
+        $i0 := @parameter2: int;
+
+        $r2 := @parameter3: java.lang.String;
+
+        $r4 = interfaceinvoke $r1.<com.fsck.k9.mailstore.migrations.MigrationsHelper: com.fsck.k9.preferences.Storage getStorage()>();
+
+        $r5 = interfaceinvoke $r1.<com.fsck.k9.mailstore.migrations.MigrationsHelper: com.fsck.k9.Account getAccount()>();
+
+        $r6 = virtualinvoke $r5.<com.fsck.k9.Account: java.lang.String getUuid()>();
+
+        r7 = <com.fsck.k9.mail.Folder$FolderClass: com.fsck.k9.mail.Folder$FolderClass NO_CLASS>;
+
+        r8 = <com.fsck.k9.mail.Folder$FolderClass: com.fsck.k9.mail.Folder$FolderClass INHERITED>;
+
+        r9 = <com.fsck.k9.mail.Folder$FolderClass: com.fsck.k9.mail.Folder$FolderClass SECOND_CLASS>;
+
+        z0 = 0;
+
+        z1 = 0;
+
+        $r10 = virtualinvoke $r5.<com.fsck.k9.Account: java.lang.String getInboxFolderName()>();
+
+        $z2 = virtualinvoke $r10.<java.lang.String: boolean equals(java.lang.Object)>($r2);
+
+        if $z2 == 0 goto label01;
+
+        r7 = <com.fsck.k9.mail.Folder$FolderClass: com.fsck.k9.mail.Folder$FolderClass FIRST_CLASS>;
+
+        r8 = <com.fsck.k9.mail.Folder$FolderClass: com.fsck.k9.mail.Folder$FolderClass FIRST_CLASS>;
+
+        r9 = <com.fsck.k9.mail.Folder$FolderClass: com.fsck.k9.mail.Folder$FolderClass FIRST_CLASS>;
+
+        z0 = 1;
+
+        z1 = 1;
+
+     label01:
+        $r11 = new java.lang.StringBuilder;
+
+     label02:
+        specialinvoke $r11.<java.lang.StringBuilder: void <init>()>();
+
+        $r11 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r11 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".");
+
+        $r11 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r11 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".displayMode");
+
+        $r10 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r12 = virtualinvoke r7.<com.fsck.k9.mail.Folder$FolderClass: java.lang.String name()>();
+
+        $r10 = virtualinvoke $r4.<com.fsck.k9.preferences.Storage: java.lang.String getString(java.lang.String,java.lang.String)>($r10, $r12);
+
+        $r13 = staticinvoke <com.fsck.k9.mail.Folder$FolderClass: com.fsck.k9.mail.Folder$FolderClass valueOf(java.lang.String)>($r10);
+
+     label03:
+        r7 = $r13;
+
+        $r11 = new java.lang.StringBuilder;
+
+     label04:
+        specialinvoke $r11.<java.lang.StringBuilder: void <init>()>();
+
+        $r11 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r11 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".");
+
+        $r11 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r11 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".syncMode");
+
+        $r10 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r12 = virtualinvoke r8.<com.fsck.k9.mail.Folder$FolderClass: java.lang.String name()>();
+
+        $r10 = virtualinvoke $r4.<com.fsck.k9.preferences.Storage: java.lang.String getString(java.lang.String,java.lang.String)>($r10, $r12);
+
+        $r13 = staticinvoke <com.fsck.k9.mail.Folder$FolderClass: com.fsck.k9.mail.Folder$FolderClass valueOf(java.lang.String)>($r10);
+
+     label05:
+        r8 = $r13;
+
+        $r11 = new java.lang.StringBuilder;
+
+     label06:
+        specialinvoke $r11.<java.lang.StringBuilder: void <init>()>();
+
+        $r11 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r11 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".");
+
+        $r11 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r11 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".pushMode");
+
+        $r10 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r12 = virtualinvoke r9.<com.fsck.k9.mail.Folder$FolderClass: java.lang.String name()>();
+
+        $r10 = virtualinvoke $r4.<com.fsck.k9.preferences.Storage: java.lang.String getString(java.lang.String,java.lang.String)>($r10, $r12);
+
+        $r13 = staticinvoke <com.fsck.k9.mail.Folder$FolderClass: com.fsck.k9.mail.Folder$FolderClass valueOf(java.lang.String)>($r10);
+
+     label07:
+        r9 = $r13;
+
+        $r11 = new java.lang.StringBuilder;
+
+     label08:
+        specialinvoke $r11.<java.lang.StringBuilder: void <init>()>();
+
+        $r11 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r11 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".");
+
+        $r11 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r11 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".inTopGroup");
+
+        $r10 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $z2 = virtualinvoke $r4.<com.fsck.k9.preferences.Storage: boolean getBoolean(java.lang.String,boolean)>($r10, z0);
+
+     label09:
+        z0 = $z2;
+
+        $r11 = new java.lang.StringBuilder;
+
+     label10:
+        specialinvoke $r11.<java.lang.StringBuilder: void <init>()>();
+
+        $r11 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r11 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".");
+
+        $r11 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r11 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".integrate");
+
+        $r2 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $z2 = virtualinvoke $r4.<com.fsck.k9.preferences.Storage: boolean getBoolean(java.lang.String,boolean)>($r2, z1);
+
+     label11:
+        z1 = $z2;
+
+     label12:
+        $r13 = <com.fsck.k9.mail.Folder$FolderClass: com.fsck.k9.mail.Folder$FolderClass NONE>;
+
+        if r7 != $r13 goto label13;
+
+        r7 = <com.fsck.k9.mail.Folder$FolderClass: com.fsck.k9.mail.Folder$FolderClass NO_CLASS>;
+
+     label13:
+        $r13 = <com.fsck.k9.mail.Folder$FolderClass: com.fsck.k9.mail.Folder$FolderClass NONE>;
+
+        if r8 != $r13 goto label14;
+
+        r8 = <com.fsck.k9.mail.Folder$FolderClass: com.fsck.k9.mail.Folder$FolderClass INHERITED>;
+
+     label14:
+        $r13 = <com.fsck.k9.mail.Folder$FolderClass: com.fsck.k9.mail.Folder$FolderClass NONE>;
+
+        if r9 != $r13 goto label15;
+
+        r9 = <com.fsck.k9.mail.Folder$FolderClass: com.fsck.k9.mail.Folder$FolderClass INHERITED>;
+
+     label15:
+        $r14 = newarray (java.lang.Object)[6];
+
+        $r15 = staticinvoke <java.lang.Boolean: java.lang.Boolean valueOf(boolean)>(z1);
+
+        $r14[0] = $r15;
+
+        $r15 = staticinvoke <java.lang.Boolean: java.lang.Boolean valueOf(boolean)>(z0);
+
+        $r14[1] = $r15;
+
+        $r14[2] = r8;
+
+        $r14[3] = r9;
+
+        $r14[4] = r7;
+
+        $r16 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        $r14[5] = $r16;
+
+        virtualinvoke $r0.<android.database.sqlite.SQLiteDatabase: void execSQL(java.lang.String,java.lang.Object[])>("UPDATE folders SET integrate = ?, top_group = ?, poll_class=?, push_class =?, display_class = ? WHERE id = ?", $r14);
+
+        return;
+
+     label16:
+        r3 := @caughtexception;
+
+        $r14 = newarray (java.lang.Object)[0];
+
+        staticinvoke <timber.log.Timber: void e(java.lang.Throwable,java.lang.String,java.lang.Object[])>(r3, " Throwing away an error while trying to upgrade folder metadata", $r14);
+
+        goto label12;
+
+        catch java.lang.Exception from label02 to label03 with label16;
+        catch java.lang.Exception from label04 to label05 with label16;
+        catch java.lang.Exception from label06 to label07 with label16;
+        catch java.lang.Exception from label08 to label09 with label16;
+        catch java.lang.Exception from label10 to label11 with label16;
+    }

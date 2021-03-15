@@ -1,0 +1,1378 @@
+org.spongycastle.crypto.signers.ISO9796d2Signer extends java.lang.Object implements org.spongycastle.crypto.SignerWithRecovery
+public static final int TRAILER_IMPLICIT
+public static final int TRAILER_RIPEMD128
+public static final int TRAILER_RIPEMD160
+public static final int TRAILER_SHA1
+public static final int TRAILER_SHA256
+public static final int TRAILER_SHA384
+public static final int TRAILER_SHA512
+public static final int TRAILER_WHIRLPOOL
+private byte[] block
+private org.spongycastle.crypto.AsymmetricBlockCipher cipher
+private org.spongycastle.crypto.Digest digest
+private boolean fullMessage
+private int keyBits
+private byte[] mBuf
+private int messageLength
+private byte[] preBlock
+private byte[] preSig
+private byte[] recoveredMessage
+private int trailer
+    public void <init>(org.spongycastle.crypto.AsymmetricBlockCipher, org.spongycastle.crypto.Digest)
+    {
+        org.spongycastle.crypto.signers.ISO9796d2Signer r0;
+        org.spongycastle.crypto.AsymmetricBlockCipher $r1;
+        org.spongycastle.crypto.Digest $r2;
+
+        r0 := @this: org.spongycastle.crypto.signers.ISO9796d2Signer;
+
+        $r1 := @parameter0: org.spongycastle.crypto.AsymmetricBlockCipher;
+
+        $r2 := @parameter1: org.spongycastle.crypto.Digest;
+
+        specialinvoke r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: void <init>(org.spongycastle.crypto.AsymmetricBlockCipher,org.spongycastle.crypto.Digest,boolean)>($r1, $r2, 0);
+
+        return;
+    }
+    public void <init>(org.spongycastle.crypto.AsymmetricBlockCipher, org.spongycastle.crypto.Digest, boolean)
+    {
+        org.spongycastle.crypto.signers.ISO9796d2Signer r0;
+        org.spongycastle.crypto.AsymmetricBlockCipher $r1;
+        org.spongycastle.crypto.Digest $r2;
+        boolean $z0;
+        java.lang.Integer $r3;
+        int $i0;
+        java.lang.IllegalArgumentException $r4;
+        java.lang.StringBuilder $r5;
+        java.lang.String $r6;
+
+        r0 := @this: org.spongycastle.crypto.signers.ISO9796d2Signer;
+
+        $r1 := @parameter0: org.spongycastle.crypto.AsymmetricBlockCipher;
+
+        $r2 := @parameter1: org.spongycastle.crypto.Digest;
+
+        $z0 := @parameter2: boolean;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: org.spongycastle.crypto.AsymmetricBlockCipher cipher> = $r1;
+
+        r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: org.spongycastle.crypto.Digest digest> = $r2;
+
+        if $z0 == 0 goto label1;
+
+        r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: int trailer> = 188;
+
+        return;
+
+     label1:
+        $r3 = staticinvoke <org.spongycastle.crypto.signers.ISOTrailers: java.lang.Integer getTrailer(org.spongycastle.crypto.Digest)>($r2);
+
+        if $r3 == null goto label2;
+
+        $i0 = virtualinvoke $r3.<java.lang.Integer: int intValue()>();
+
+        r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: int trailer> = $i0;
+
+        return;
+
+     label2:
+        $r4 = new java.lang.IllegalArgumentException;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("no valid trailer for digest: ");
+
+        $r6 = interfaceinvoke $r2.<org.spongycastle.crypto.Digest: java.lang.String getAlgorithmName()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r4.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r6);
+
+        throw $r4;
+    }
+    private void clearBlock(byte[])
+    {
+        org.spongycastle.crypto.signers.ISO9796d2Signer r0;
+        byte[] $r1;
+        int i0, $i1;
+
+        r0 := @this: org.spongycastle.crypto.signers.ISO9796d2Signer;
+
+        $r1 := @parameter0: byte[];
+
+        i0 = 0;
+
+     label1:
+        $i1 = lengthof $r1;
+
+        if i0 == $i1 goto label2;
+
+        $r1[i0] = 0;
+
+        i0 = i0 + 1;
+
+        goto label1;
+
+     label2:
+        return;
+    }
+    private boolean isSameAs(byte[], byte[])
+    {
+        org.spongycastle.crypto.signers.ISO9796d2Signer r0;
+        byte[] $r1, $r2, $r3;
+        boolean z0;
+        int $i0, $i1;
+        byte $b2, $b3;
+
+        r0 := @this: org.spongycastle.crypto.signers.ISO9796d2Signer;
+
+        $r1 := @parameter0: byte[];
+
+        $r2 := @parameter1: byte[];
+
+        z0 = 1;
+
+        $i0 = r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: int messageLength>;
+
+        $r3 = r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: byte[] mBuf>;
+
+        $i1 = lengthof $r3;
+
+        if $i0 <= $i1 goto label4;
+
+        $r3 = r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: byte[] mBuf>;
+
+        $i0 = lengthof $r3;
+
+        $i1 = lengthof $r2;
+
+        if $i0 <= $i1 goto label1;
+
+        z0 = 0;
+
+     label1:
+        $i0 = 0;
+
+     label2:
+        $r3 = r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: byte[] mBuf>;
+
+        $i1 = lengthof $r3;
+
+        if $i0 == $i1 goto label8;
+
+        $b2 = $r1[$i0];
+
+        $b3 = $r2[$i0];
+
+        if $b2 == $b3 goto label3;
+
+        z0 = 0;
+
+     label3:
+        $i0 = $i0 + 1;
+
+        goto label2;
+
+     label4:
+        $i0 = r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: int messageLength>;
+
+        $i1 = lengthof $r2;
+
+        if $i0 == $i1 goto label5;
+
+        z0 = 0;
+
+     label5:
+        $i0 = 0;
+
+     label6:
+        $i1 = lengthof $r2;
+
+        if $i0 == $i1 goto label8;
+
+        $b2 = $r1[$i0];
+
+        $b3 = $r2[$i0];
+
+        if $b2 == $b3 goto label7;
+
+        z0 = 0;
+
+     label7:
+        $i0 = $i0 + 1;
+
+        goto label6;
+
+     label8:
+        return z0;
+    }
+    private boolean returnFalse(byte[])
+    {
+        org.spongycastle.crypto.signers.ISO9796d2Signer r0;
+        byte[] $r1, $r2;
+
+        r0 := @this: org.spongycastle.crypto.signers.ISO9796d2Signer;
+
+        $r1 := @parameter0: byte[];
+
+        $r2 = r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: byte[] mBuf>;
+
+        specialinvoke r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: void clearBlock(byte[])>($r2);
+
+        specialinvoke r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: void clearBlock(byte[])>($r1);
+
+        return 0;
+    }
+    public byte[] generateSignature() throws org.spongycastle.crypto.CryptoException
+    {
+        org.spongycastle.crypto.signers.ISO9796d2Signer r0;
+        int i0, i1, $i2, $i4;
+        org.spongycastle.crypto.Digest $r1;
+        byte b3, $b5;
+        byte[] $r2, $r3, $r5, $r6;
+        org.spongycastle.crypto.AsymmetricBlockCipher $r4;
+        boolean $z0;
+
+        r0 := @this: org.spongycastle.crypto.signers.ISO9796d2Signer;
+
+        $r1 = r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: org.spongycastle.crypto.Digest digest>;
+
+        i0 = interfaceinvoke $r1.<org.spongycastle.crypto.Digest: int getDigestSize()>();
+
+        $i2 = r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: int trailer>;
+
+        if $i2 != 188 goto label04;
+
+        b3 = 8;
+
+        $r2 = r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: byte[] block>;
+
+        $i2 = lengthof $r2;
+
+        $i2 = $i2 - i0;
+
+        $i2 = $i2 + -1;
+
+        $r1 = r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: org.spongycastle.crypto.Digest digest>;
+
+        $r2 = r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: byte[] block>;
+
+        interfaceinvoke $r1.<org.spongycastle.crypto.Digest: int doFinal(byte[],int)>($r2, $i2);
+
+        $r2 = r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: byte[] block>;
+
+        $r3 = r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: byte[] block>;
+
+        i1 = lengthof $r3;
+
+        i1 = i1 + -1;
+
+        $r2[i1] = -68;
+
+     label01:
+        i1 = r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: int messageLength>;
+
+        i0 = i1 + i0;
+
+        i0 = i0 * 8;
+
+        i0 = i0 + b3;
+
+        i0 = i0 + 4;
+
+        i1 = r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: int keyBits>;
+
+        i1 = i0 - i1;
+
+        if i1 <= 0 goto label05;
+
+        i0 = r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: int messageLength>;
+
+        i1 = i1 + 7;
+
+        i1 = i1 / 8;
+
+        i0 = i0 - i1;
+
+        b3 = 96;
+
+        $i2 = $i2 - i0;
+
+        $r2 = r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: byte[] mBuf>;
+
+        $r3 = r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: byte[] block>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r2, 0, $r3, $i2, i0);
+
+        $r2 = newarray (byte)[i0];
+
+        r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: byte[] recoveredMessage> = $r2;
+
+     label02:
+        i0 = $i2 + -1;
+
+        if i0 <= 0 goto label09;
+
+        i0 = $i2 + -1;
+
+     label03:
+        if i0 == 0 goto label06;
+
+        $r2 = r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: byte[] block>;
+
+        $r2[i0] = -69;
+
+        i0 = i0 + -1;
+
+        goto label03;
+
+     label04:
+        b3 = 16;
+
+        $r2 = r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: byte[] block>;
+
+        $i2 = lengthof $r2;
+
+        $i2 = $i2 - i0;
+
+        $i2 = $i2 + -2;
+
+        $r1 = r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: org.spongycastle.crypto.Digest digest>;
+
+        $r2 = r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: byte[] block>;
+
+        interfaceinvoke $r1.<org.spongycastle.crypto.Digest: int doFinal(byte[],int)>($r2, $i2);
+
+        $r2 = r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: byte[] block>;
+
+        $r3 = r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: byte[] block>;
+
+        i1 = lengthof $r3;
+
+        i1 = i1 + -2;
+
+        $i4 = r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: int trailer>;
+
+        $i4 = $i4 >>> 8;
+
+        $b5 = (byte) $i4;
+
+        $r2[i1] = $b5;
+
+        $r2 = r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: byte[] block>;
+
+        $r3 = r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: byte[] block>;
+
+        i1 = lengthof $r3;
+
+        i1 = i1 + -1;
+
+        $i4 = r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: int trailer>;
+
+        $b5 = (byte) $i4;
+
+        $r2[i1] = $b5;
+
+        goto label01;
+
+     label05:
+        b3 = 64;
+
+        i0 = r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: int messageLength>;
+
+        $i2 = $i2 - i0;
+
+        $r2 = r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: byte[] mBuf>;
+
+        $r3 = r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: byte[] block>;
+
+        i0 = r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: int messageLength>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r2, 0, $r3, $i2, i0);
+
+        i0 = r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: int messageLength>;
+
+        $r2 = newarray (byte)[i0];
+
+        r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: byte[] recoveredMessage> = $r2;
+
+        goto label02;
+
+     label06:
+        $r2 = r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: byte[] block>;
+
+        $i2 = $i2 + -1;
+
+        $b5 = $r2[$i2];
+
+        i0 = $b5 ^ 1;
+
+        $b5 = (byte) i0;
+
+        $r2[$i2] = $b5;
+
+        $r2 = r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: byte[] block>;
+
+        $r2[0] = 11;
+
+        $r2 = r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: byte[] block>;
+
+        $b5 = $r2[0];
+
+        $i2 = $b5 | b3;
+
+        $b5 = (byte) $i2;
+
+        $r2[0] = $b5;
+
+     label07:
+        $r4 = r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: org.spongycastle.crypto.AsymmetricBlockCipher cipher>;
+
+        $r2 = r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: byte[] block>;
+
+        $r3 = r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: byte[] block>;
+
+        $i2 = lengthof $r3;
+
+        $r2 = interfaceinvoke $r4.<org.spongycastle.crypto.AsymmetricBlockCipher: byte[] processBlock(byte[],int,int)>($r2, 0, $i2);
+
+        $i2 = b3 & 32;
+
+        if $i2 != 0 goto label10;
+
+        $z0 = 1;
+
+     label08:
+        r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: boolean fullMessage> = $z0;
+
+        $r3 = r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: byte[] mBuf>;
+
+        $r5 = r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: byte[] recoveredMessage>;
+
+        $r6 = r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: byte[] recoveredMessage>;
+
+        $i2 = lengthof $r6;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r3, 0, $r5, 0, $i2);
+
+        $r3 = r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: byte[] mBuf>;
+
+        specialinvoke r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: void clearBlock(byte[])>($r3);
+
+        $r3 = r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: byte[] block>;
+
+        specialinvoke r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: void clearBlock(byte[])>($r3);
+
+        return $r2;
+
+     label09:
+        $r2 = r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: byte[] block>;
+
+        $r2[0] = 10;
+
+        $r2 = r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: byte[] block>;
+
+        $b5 = $r2[0];
+
+        $i2 = $b5 | b3;
+
+        $b5 = (byte) $i2;
+
+        $r2[0] = $b5;
+
+        goto label07;
+
+     label10:
+        $z0 = 0;
+
+        goto label08;
+    }
+    public byte[] getRecoveredMessage()
+    {
+        org.spongycastle.crypto.signers.ISO9796d2Signer r0;
+        byte[] r1;
+
+        r0 := @this: org.spongycastle.crypto.signers.ISO9796d2Signer;
+
+        r1 = r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: byte[] recoveredMessage>;
+
+        return r1;
+    }
+    public boolean hasFullMessage()
+    {
+        org.spongycastle.crypto.signers.ISO9796d2Signer r0;
+        boolean z0;
+
+        r0 := @this: org.spongycastle.crypto.signers.ISO9796d2Signer;
+
+        z0 = r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: boolean fullMessage>;
+
+        return z0;
+    }
+    public void init(boolean, org.spongycastle.crypto.CipherParameters)
+    {
+        org.spongycastle.crypto.signers.ISO9796d2Signer r0;
+        boolean $z0;
+        org.spongycastle.crypto.CipherParameters $r1;
+        org.spongycastle.crypto.params.RSAKeyParameters r2;
+        org.spongycastle.crypto.AsymmetricBlockCipher $r3;
+        java.math.BigInteger $r4;
+        int $i0, $i1;
+        byte[] $r5;
+        org.spongycastle.crypto.Digest $r6;
+
+        r0 := @this: org.spongycastle.crypto.signers.ISO9796d2Signer;
+
+        $z0 := @parameter0: boolean;
+
+        $r1 := @parameter1: org.spongycastle.crypto.CipherParameters;
+
+        r2 = (org.spongycastle.crypto.params.RSAKeyParameters) $r1;
+
+        $r3 = r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: org.spongycastle.crypto.AsymmetricBlockCipher cipher>;
+
+        interfaceinvoke $r3.<org.spongycastle.crypto.AsymmetricBlockCipher: void init(boolean,org.spongycastle.crypto.CipherParameters)>($z0, r2);
+
+        $r4 = virtualinvoke r2.<org.spongycastle.crypto.params.RSAKeyParameters: java.math.BigInteger getModulus()>();
+
+        $i0 = virtualinvoke $r4.<java.math.BigInteger: int bitLength()>();
+
+        r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: int keyBits> = $i0;
+
+        $i0 = r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: int keyBits>;
+
+        $i0 = $i0 + 7;
+
+        $i0 = $i0 / 8;
+
+        $r5 = newarray (byte)[$i0];
+
+        r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: byte[] block> = $r5;
+
+        $i0 = r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: int trailer>;
+
+        if $i0 != 188 goto label2;
+
+        $r5 = r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: byte[] block>;
+
+        $i0 = lengthof $r5;
+
+        $r6 = r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: org.spongycastle.crypto.Digest digest>;
+
+        $i1 = interfaceinvoke $r6.<org.spongycastle.crypto.Digest: int getDigestSize()>();
+
+        $i0 = $i0 - $i1;
+
+        $i0 = $i0 + -2;
+
+        $r5 = newarray (byte)[$i0];
+
+        r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: byte[] mBuf> = $r5;
+
+     label1:
+        virtualinvoke r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: void reset()>();
+
+        return;
+
+     label2:
+        $r5 = r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: byte[] block>;
+
+        $i0 = lengthof $r5;
+
+        $r6 = r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: org.spongycastle.crypto.Digest digest>;
+
+        $i1 = interfaceinvoke $r6.<org.spongycastle.crypto.Digest: int getDigestSize()>();
+
+        $i0 = $i0 - $i1;
+
+        $i0 = $i0 + -3;
+
+        $r5 = newarray (byte)[$i0];
+
+        r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: byte[] mBuf> = $r5;
+
+        goto label1;
+    }
+    public void reset()
+    {
+        org.spongycastle.crypto.signers.ISO9796d2Signer r0;
+        org.spongycastle.crypto.Digest $r1;
+        byte[] $r2;
+
+        r0 := @this: org.spongycastle.crypto.signers.ISO9796d2Signer;
+
+        $r1 = r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: org.spongycastle.crypto.Digest digest>;
+
+        interfaceinvoke $r1.<org.spongycastle.crypto.Digest: void reset()>();
+
+        r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: int messageLength> = 0;
+
+        $r2 = r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: byte[] mBuf>;
+
+        specialinvoke r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: void clearBlock(byte[])>($r2);
+
+        $r2 = r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: byte[] recoveredMessage>;
+
+        if $r2 == null goto label1;
+
+        $r2 = r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: byte[] recoveredMessage>;
+
+        specialinvoke r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: void clearBlock(byte[])>($r2);
+
+     label1:
+        r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: byte[] recoveredMessage> = null;
+
+        r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: boolean fullMessage> = 0;
+
+        $r2 = r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: byte[] preSig>;
+
+        if $r2 == null goto label2;
+
+        r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: byte[] preSig> = null;
+
+        $r2 = r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: byte[] preBlock>;
+
+        specialinvoke r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: void clearBlock(byte[])>($r2);
+
+        r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: byte[] preBlock> = null;
+
+     label2:
+        return;
+    }
+    public void update(byte)
+    {
+        org.spongycastle.crypto.signers.ISO9796d2Signer r0;
+        byte $b0;
+        org.spongycastle.crypto.Digest $r1;
+        int $i1, $i2;
+        byte[] $r2;
+
+        r0 := @this: org.spongycastle.crypto.signers.ISO9796d2Signer;
+
+        $b0 := @parameter0: byte;
+
+        $r1 = r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: org.spongycastle.crypto.Digest digest>;
+
+        interfaceinvoke $r1.<org.spongycastle.crypto.Digest: void update(byte)>($b0);
+
+        $i1 = r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: int messageLength>;
+
+        $r2 = r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: byte[] mBuf>;
+
+        $i2 = lengthof $r2;
+
+        if $i1 >= $i2 goto label1;
+
+        $r2 = r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: byte[] mBuf>;
+
+        $i1 = r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: int messageLength>;
+
+        $r2[$i1] = $b0;
+
+     label1:
+        $i1 = r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: int messageLength>;
+
+        $i1 = $i1 + 1;
+
+        r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: int messageLength> = $i1;
+
+        return;
+    }
+    public void update(byte[], int, int)
+    {
+        org.spongycastle.crypto.signers.ISO9796d2Signer r0;
+        byte[] $r1, $r2;
+        int $i0, $i1, $i2, $i3;
+        byte $b4;
+        org.spongycastle.crypto.Digest $r3;
+
+        r0 := @this: org.spongycastle.crypto.signers.ISO9796d2Signer;
+
+        $r1 := @parameter0: byte[];
+
+        $i0 := @parameter1: int;
+
+        $i1 := @parameter2: int;
+
+     label1:
+        if $i1 <= 0 goto label2;
+
+        $i2 = r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: int messageLength>;
+
+        $r2 = r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: byte[] mBuf>;
+
+        $i3 = lengthof $r2;
+
+        if $i2 >= $i3 goto label2;
+
+        $b4 = $r1[$i0];
+
+        virtualinvoke r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: void update(byte)>($b4);
+
+        $i0 = $i0 + 1;
+
+        $i1 = $i1 + -1;
+
+        goto label1;
+
+     label2:
+        $r3 = r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: org.spongycastle.crypto.Digest digest>;
+
+        interfaceinvoke $r3.<org.spongycastle.crypto.Digest: void update(byte[],int,int)>($r1, $i0, $i1);
+
+        $i0 = r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: int messageLength>;
+
+        $i0 = $i0 + $i1;
+
+        r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: int messageLength> = $i0;
+
+        return;
+    }
+    public void updateWithRecoveredMessage(byte[]) throws org.spongycastle.crypto.InvalidCipherTextException
+    {
+        org.spongycastle.crypto.signers.ISO9796d2Signer r0;
+        byte[] $r1, $r3, $r11, $r12;
+        int i0, i1, $i3;
+        org.spongycastle.crypto.AsymmetricBlockCipher $r2;
+        byte $b2;
+        org.spongycastle.crypto.InvalidCipherTextException $r4;
+        org.spongycastle.crypto.Digest $r5;
+        java.lang.Integer $r6;
+        java.lang.IllegalStateException $r7;
+        java.lang.StringBuilder $r8;
+        java.lang.String $r9;
+        java.lang.IllegalArgumentException $r10;
+
+        r0 := @this: org.spongycastle.crypto.signers.ISO9796d2Signer;
+
+        $r1 := @parameter0: byte[];
+
+        $r2 = r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: org.spongycastle.crypto.AsymmetricBlockCipher cipher>;
+
+        i1 = lengthof $r1;
+
+        $r3 = interfaceinvoke $r2.<org.spongycastle.crypto.AsymmetricBlockCipher: byte[] processBlock(byte[],int,int)>($r1, 0, i1);
+
+        $b2 = $r3[0];
+
+        i1 = $b2 & 192;
+
+        i1 = i1 ^ 64;
+
+        if i1 == 0 goto label01;
+
+        $r4 = new org.spongycastle.crypto.InvalidCipherTextException;
+
+        specialinvoke $r4.<org.spongycastle.crypto.InvalidCipherTextException: void <init>(java.lang.String)>("malformed signature");
+
+        throw $r4;
+
+     label01:
+        i1 = lengthof $r3;
+
+        i1 = i1 + -1;
+
+        $b2 = $r3[i1];
+
+        i1 = $b2 & 15;
+
+        i1 = i1 ^ 12;
+
+        if i1 == 0 goto label02;
+
+        $r4 = new org.spongycastle.crypto.InvalidCipherTextException;
+
+        specialinvoke $r4.<org.spongycastle.crypto.InvalidCipherTextException: void <init>(java.lang.String)>("malformed signature");
+
+        throw $r4;
+
+     label02:
+        i1 = lengthof $r3;
+
+        i1 = i1 + -1;
+
+        $b2 = $r3[i1];
+
+        i1 = $b2 & 255;
+
+        i1 = i1 ^ 188;
+
+        if i1 != 0 goto label06;
+
+        i0 = 1;
+
+     label03:
+        i1 = 0;
+
+     label04:
+        $i3 = lengthof $r3;
+
+        if i1 == $i3 goto label05;
+
+        $b2 = $r3[i1];
+
+        $i3 = $b2 & 15;
+
+        $i3 = $i3 ^ 10;
+
+        if $i3 != 0 goto label09;
+
+     label05:
+        i1 = i1 + 1;
+
+        $i3 = lengthof $r3;
+
+        i0 = $i3 - i0;
+
+        $r5 = r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: org.spongycastle.crypto.Digest digest>;
+
+        $i3 = interfaceinvoke $r5.<org.spongycastle.crypto.Digest: int getDigestSize()>();
+
+        i0 = i0 - $i3;
+
+        $i3 = i0 - i1;
+
+        if $i3 > 0 goto label10;
+
+        $r4 = new org.spongycastle.crypto.InvalidCipherTextException;
+
+        specialinvoke $r4.<org.spongycastle.crypto.InvalidCipherTextException: void <init>(java.lang.String)>("malformed block");
+
+        throw $r4;
+
+     label06:
+        i1 = lengthof $r3;
+
+        i1 = i1 + -2;
+
+        $b2 = $r3[i1];
+
+        i1 = $b2 & 255;
+
+        i1 = i1 << 8;
+
+        i0 = lengthof $r3;
+
+        i0 = i0 + -1;
+
+        $b2 = $r3[i0];
+
+        i0 = $b2 & 255;
+
+        i1 = i1 | i0;
+
+        $r5 = r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: org.spongycastle.crypto.Digest digest>;
+
+        $r6 = staticinvoke <org.spongycastle.crypto.signers.ISOTrailers: java.lang.Integer getTrailer(org.spongycastle.crypto.Digest)>($r5);
+
+        if $r6 == null goto label07;
+
+        i0 = virtualinvoke $r6.<java.lang.Integer: int intValue()>();
+
+        if i1 == i0 goto label08;
+
+        $r7 = new java.lang.IllegalStateException;
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("signer initialised with wrong digest for trailer ");
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i1);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r7.<java.lang.IllegalStateException: void <init>(java.lang.String)>($r9);
+
+        throw $r7;
+
+     label07:
+        $r10 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r10.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("unrecognised hash in signature");
+
+        throw $r10;
+
+     label08:
+        i0 = 2;
+
+        goto label03;
+
+     label09:
+        i1 = i1 + 1;
+
+        goto label04;
+
+     label10:
+        $b2 = $r3[0];
+
+        $i3 = $b2 & 32;
+
+        if $i3 != 0 goto label12;
+
+        r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: boolean fullMessage> = 1;
+
+        i0 = i0 - i1;
+
+        $r11 = newarray (byte)[i0];
+
+        r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: byte[] recoveredMessage> = $r11;
+
+        $r11 = r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: byte[] recoveredMessage>;
+
+        $r12 = r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: byte[] recoveredMessage>;
+
+        i0 = lengthof $r12;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r3, i1, $r11, 0, i0);
+
+     label11:
+        r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: byte[] preSig> = $r1;
+
+        r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: byte[] preBlock> = $r3;
+
+        $r5 = r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: org.spongycastle.crypto.Digest digest>;
+
+        $r1 = r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: byte[] recoveredMessage>;
+
+        $r3 = r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: byte[] recoveredMessage>;
+
+        i1 = lengthof $r3;
+
+        interfaceinvoke $r5.<org.spongycastle.crypto.Digest: void update(byte[],int,int)>($r1, 0, i1);
+
+        $r1 = r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: byte[] recoveredMessage>;
+
+        i1 = lengthof $r1;
+
+        r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: int messageLength> = i1;
+
+        $r1 = r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: byte[] recoveredMessage>;
+
+        $r3 = r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: byte[] mBuf>;
+
+        $r11 = r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: byte[] recoveredMessage>;
+
+        i1 = lengthof $r11;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r1, 0, $r3, 0, i1);
+
+        return;
+
+     label12:
+        r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: boolean fullMessage> = 0;
+
+        i0 = i0 - i1;
+
+        $r11 = newarray (byte)[i0];
+
+        r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: byte[] recoveredMessage> = $r11;
+
+        $r11 = r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: byte[] recoveredMessage>;
+
+        $r12 = r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: byte[] recoveredMessage>;
+
+        i0 = lengthof $r12;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r3, i1, $r11, 0, i0);
+
+        goto label11;
+    }
+    public boolean verifySignature(byte[])
+    {
+        org.spongycastle.crypto.signers.ISO9796d2Signer r0;
+        byte[] $r1, r3, $r11;
+        java.lang.Exception r2;
+        int i0, i1, $i3, $i4, $i6;
+        org.spongycastle.crypto.AsymmetricBlockCipher $r4;
+        byte $b2, $b5;
+        boolean $z0;
+        java.lang.IllegalStateException $r5;
+        org.spongycastle.crypto.Digest $r6;
+        java.lang.Integer $r7;
+        java.lang.StringBuilder $r8;
+        java.lang.String $r9;
+        java.lang.IllegalArgumentException $r10;
+
+        r0 := @this: org.spongycastle.crypto.signers.ISO9796d2Signer;
+
+        $r1 := @parameter0: byte[];
+
+        r3 = r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: byte[] preSig>;
+
+        if r3 != null goto label04;
+
+     label01:
+        $r4 = r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: org.spongycastle.crypto.AsymmetricBlockCipher cipher>;
+
+        i1 = lengthof $r1;
+
+        $r1 = interfaceinvoke $r4.<org.spongycastle.crypto.AsymmetricBlockCipher: byte[] processBlock(byte[],int,int)>($r1, 0, i1);
+
+     label02:
+        $b2 = $r1[0];
+
+        i1 = $b2 & 192;
+
+        i1 = i1 ^ 64;
+
+        if i1 == 0 goto label06;
+
+        $z0 = specialinvoke r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: boolean returnFalse(byte[])>($r1);
+
+        return $z0;
+
+     label03:
+        r2 := @caughtexception;
+
+        return 0;
+
+     label04:
+        r3 = r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: byte[] preSig>;
+
+        $z0 = staticinvoke <org.spongycastle.util.Arrays: boolean areEqual(byte[],byte[])>(r3, $r1);
+
+        if $z0 != 0 goto label05;
+
+        $r5 = new java.lang.IllegalStateException;
+
+        specialinvoke $r5.<java.lang.IllegalStateException: void <init>(java.lang.String)>("updateWithRecoveredMessage called on different signature");
+
+        throw $r5;
+
+     label05:
+        $r1 = r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: byte[] preBlock>;
+
+        r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: byte[] preSig> = null;
+
+        r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: byte[] preBlock> = null;
+
+        goto label02;
+
+     label06:
+        i1 = lengthof $r1;
+
+        i1 = i1 + -1;
+
+        $b2 = $r1[i1];
+
+        i1 = $b2 & 15;
+
+        i1 = i1 ^ 12;
+
+        if i1 == 0 goto label07;
+
+        $z0 = specialinvoke r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: boolean returnFalse(byte[])>($r1);
+
+        return $z0;
+
+     label07:
+        i1 = lengthof $r1;
+
+        i1 = i1 + -1;
+
+        $b2 = $r1[i1];
+
+        i1 = $b2 & 255;
+
+        i1 = i1 ^ 188;
+
+        if i1 != 0 goto label11;
+
+        i0 = 1;
+
+     label08:
+        i1 = 0;
+
+     label09:
+        $i3 = lengthof $r1;
+
+        if i1 == $i3 goto label10;
+
+        $b2 = $r1[i1];
+
+        $i3 = $b2 & 15;
+
+        $i3 = $i3 ^ 10;
+
+        if $i3 != 0 goto label14;
+
+     label10:
+        i1 = i1 + 1;
+
+        $r6 = r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: org.spongycastle.crypto.Digest digest>;
+
+        $i3 = interfaceinvoke $r6.<org.spongycastle.crypto.Digest: int getDigestSize()>();
+
+        r3 = newarray (byte)[$i3];
+
+        $i3 = lengthof $r1;
+
+        i0 = $i3 - i0;
+
+        $i3 = lengthof r3;
+
+        i0 = i0 - $i3;
+
+        $i3 = i0 - i1;
+
+        if $i3 > 0 goto label15;
+
+        $z0 = specialinvoke r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: boolean returnFalse(byte[])>($r1);
+
+        return $z0;
+
+     label11:
+        i1 = lengthof $r1;
+
+        i1 = i1 + -2;
+
+        $b2 = $r1[i1];
+
+        i1 = $b2 & 255;
+
+        i1 = i1 << 8;
+
+        i0 = lengthof $r1;
+
+        i0 = i0 + -1;
+
+        $b2 = $r1[i0];
+
+        i0 = $b2 & 255;
+
+        i1 = i1 | i0;
+
+        $r6 = r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: org.spongycastle.crypto.Digest digest>;
+
+        $r7 = staticinvoke <org.spongycastle.crypto.signers.ISOTrailers: java.lang.Integer getTrailer(org.spongycastle.crypto.Digest)>($r6);
+
+        if $r7 == null goto label12;
+
+        i0 = virtualinvoke $r7.<java.lang.Integer: int intValue()>();
+
+        if i1 == i0 goto label13;
+
+        $r5 = new java.lang.IllegalStateException;
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("signer initialised with wrong digest for trailer ");
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i1);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r5.<java.lang.IllegalStateException: void <init>(java.lang.String)>($r9);
+
+        throw $r5;
+
+     label12:
+        $r10 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r10.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("unrecognised hash in signature");
+
+        throw $r10;
+
+     label13:
+        i0 = 2;
+
+        goto label08;
+
+     label14:
+        i1 = i1 + 1;
+
+        goto label09;
+
+     label15:
+        $b2 = $r1[0];
+
+        $i3 = $b2 & 32;
+
+        if $i3 != 0 goto label22;
+
+        r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: boolean fullMessage> = 1;
+
+        $i3 = r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: int messageLength>;
+
+        $i4 = i0 - i1;
+
+        if $i3 <= $i4 goto label16;
+
+        $z0 = specialinvoke r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: boolean returnFalse(byte[])>($r1);
+
+        return $z0;
+
+     label16:
+        $r6 = r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: org.spongycastle.crypto.Digest digest>;
+
+        interfaceinvoke $r6.<org.spongycastle.crypto.Digest: void reset()>();
+
+        $r6 = r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: org.spongycastle.crypto.Digest digest>;
+
+        $i3 = i0 - i1;
+
+        interfaceinvoke $r6.<org.spongycastle.crypto.Digest: void update(byte[],int,int)>($r1, i1, $i3);
+
+        $r6 = r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: org.spongycastle.crypto.Digest digest>;
+
+        interfaceinvoke $r6.<org.spongycastle.crypto.Digest: int doFinal(byte[],int)>(r3, 0);
+
+        $z0 = 1;
+
+        $i3 = 0;
+
+     label17:
+        $i4 = lengthof r3;
+
+        if $i3 == $i4 goto label19;
+
+        $i4 = i0 + $i3;
+
+        $b2 = $r1[$i4];
+
+        $b5 = r3[$i3];
+
+        $i6 = $b2 ^ $b5;
+
+        $b2 = (byte) $i6;
+
+        $r1[$i4] = $b2;
+
+        $i4 = i0 + $i3;
+
+        $b2 = $r1[$i4];
+
+        if $b2 == 0 goto label18;
+
+        $z0 = 0;
+
+     label18:
+        $i3 = $i3 + 1;
+
+        goto label17;
+
+     label19:
+        if $z0 != 0 goto label20;
+
+        $z0 = specialinvoke r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: boolean returnFalse(byte[])>($r1);
+
+        return $z0;
+
+     label20:
+        i0 = i0 - i1;
+
+        r3 = newarray (byte)[i0];
+
+        r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: byte[] recoveredMessage> = r3;
+
+        r3 = r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: byte[] recoveredMessage>;
+
+        $r11 = r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: byte[] recoveredMessage>;
+
+        i0 = lengthof $r11;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r1, i1, r3, 0, i0);
+
+     label21:
+        i1 = r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: int messageLength>;
+
+        if i1 == 0 goto label27;
+
+        r3 = r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: byte[] mBuf>;
+
+        $r11 = r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: byte[] recoveredMessage>;
+
+        $z0 = specialinvoke r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: boolean isSameAs(byte[],byte[])>(r3, $r11);
+
+        if $z0 != 0 goto label27;
+
+        $z0 = specialinvoke r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: boolean returnFalse(byte[])>($r1);
+
+        return $z0;
+
+     label22:
+        r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: boolean fullMessage> = 0;
+
+        $r6 = r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: org.spongycastle.crypto.Digest digest>;
+
+        interfaceinvoke $r6.<org.spongycastle.crypto.Digest: int doFinal(byte[],int)>(r3, 0);
+
+        $z0 = 1;
+
+        $i3 = 0;
+
+     label23:
+        $i4 = lengthof r3;
+
+        if $i3 == $i4 goto label25;
+
+        $i4 = i0 + $i3;
+
+        $b2 = $r1[$i4];
+
+        $b5 = r3[$i3];
+
+        $i6 = $b2 ^ $b5;
+
+        $b2 = (byte) $i6;
+
+        $r1[$i4] = $b2;
+
+        $i4 = i0 + $i3;
+
+        $b2 = $r1[$i4];
+
+        if $b2 == 0 goto label24;
+
+        $z0 = 0;
+
+     label24:
+        $i3 = $i3 + 1;
+
+        goto label23;
+
+     label25:
+        if $z0 != 0 goto label26;
+
+        $z0 = specialinvoke r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: boolean returnFalse(byte[])>($r1);
+
+        return $z0;
+
+     label26:
+        i0 = i0 - i1;
+
+        r3 = newarray (byte)[i0];
+
+        r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: byte[] recoveredMessage> = r3;
+
+        r3 = r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: byte[] recoveredMessage>;
+
+        $r11 = r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: byte[] recoveredMessage>;
+
+        i0 = lengthof $r11;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r1, i1, r3, 0, i0);
+
+        goto label21;
+
+     label27:
+        r3 = r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: byte[] mBuf>;
+
+        specialinvoke r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: void clearBlock(byte[])>(r3);
+
+        specialinvoke r0.<org.spongycastle.crypto.signers.ISO9796d2Signer: void clearBlock(byte[])>($r1);
+
+        return 1;
+
+        catch java.lang.Exception from label01 to label02 with label03;
+    }

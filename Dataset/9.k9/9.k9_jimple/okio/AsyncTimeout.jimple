@@ -1,0 +1,511 @@
+okio.AsyncTimeout extends okio.Timeout
+private static final long IDLE_TIMEOUT_MILLIS
+private static final long IDLE_TIMEOUT_NANOS
+private static final int TIMEOUT_WRITE_SIZE
+private static okio.AsyncTimeout head
+private boolean inQueue
+private okio.AsyncTimeout next
+private long timeoutAt
+    static void <clinit>()
+    {
+        java.util.concurrent.TimeUnit $r0;
+        long $l0;
+
+        $r0 = <java.util.concurrent.TimeUnit: java.util.concurrent.TimeUnit SECONDS>;
+
+        $l0 = virtualinvoke $r0.<java.util.concurrent.TimeUnit: long toMillis(long)>(60L);
+
+        <okio.AsyncTimeout: long IDLE_TIMEOUT_MILLIS> = $l0;
+
+        $r0 = <java.util.concurrent.TimeUnit: java.util.concurrent.TimeUnit MILLISECONDS>;
+
+        $l0 = <okio.AsyncTimeout: long IDLE_TIMEOUT_MILLIS>;
+
+        $l0 = virtualinvoke $r0.<java.util.concurrent.TimeUnit: long toNanos(long)>($l0);
+
+        <okio.AsyncTimeout: long IDLE_TIMEOUT_NANOS> = $l0;
+
+        return;
+    }
+    public void <init>()
+    {
+        okio.AsyncTimeout r0;
+
+        r0 := @this: okio.AsyncTimeout;
+
+        specialinvoke r0.<okio.Timeout: void <init>()>();
+
+        return;
+    }
+    static okio.AsyncTimeout access$000()
+    {
+        okio.AsyncTimeout r0;
+
+        r0 = <okio.AsyncTimeout: okio.AsyncTimeout head>;
+
+        return r0;
+    }
+    static okio.AsyncTimeout access$002(okio.AsyncTimeout)
+    {
+        okio.AsyncTimeout $r0;
+
+        $r0 := @parameter0: okio.AsyncTimeout;
+
+        <okio.AsyncTimeout: okio.AsyncTimeout head> = $r0;
+
+        return $r0;
+    }
+    static okio.AsyncTimeout awaitTimeout() throws java.lang.InterruptedException
+    {
+        okio.AsyncTimeout r0, $r2, $r3;
+        long l0, $l1, $l3;
+        java.lang.Class $r1;
+        byte $b2;
+        int $i4;
+
+        r0 = <okio.AsyncTimeout: okio.AsyncTimeout head>;
+
+        r0 = r0.<okio.AsyncTimeout: okio.AsyncTimeout next>;
+
+        if r0 != null goto label1;
+
+        l0 = staticinvoke <java.lang.System: long nanoTime()>();
+
+        $r1 = class "Lokio/AsyncTimeout;";
+
+        $l1 = <okio.AsyncTimeout: long IDLE_TIMEOUT_MILLIS>;
+
+        virtualinvoke $r1.<java.lang.Object: void wait(long)>($l1);
+
+        r0 = <okio.AsyncTimeout: okio.AsyncTimeout head>;
+
+        r0 = r0.<okio.AsyncTimeout: okio.AsyncTimeout next>;
+
+        if r0 != null goto label3;
+
+        $l1 = staticinvoke <java.lang.System: long nanoTime()>();
+
+        l0 = $l1 - l0;
+
+        $l1 = <okio.AsyncTimeout: long IDLE_TIMEOUT_NANOS>;
+
+        $b2 = l0 cmp $l1;
+
+        if $b2 < 0 goto label3;
+
+        r0 = <okio.AsyncTimeout: okio.AsyncTimeout head>;
+
+        return r0;
+
+     label1:
+        l0 = staticinvoke <java.lang.System: long nanoTime()>();
+
+        $l1 = specialinvoke r0.<okio.AsyncTimeout: long remainingNanos(long)>(l0);
+
+        $b2 = $l1 cmp 0L;
+
+        if $b2 <= 0 goto label2;
+
+        l0 = $l1 / 1000000L;
+
+        $l3 = l0 * 1000000L;
+
+        $l1 = $l1 - $l3;
+
+        $r1 = class "Lokio/AsyncTimeout;";
+
+        $i4 = (int) $l1;
+
+        virtualinvoke $r1.<java.lang.Object: void wait(long,int)>(l0, $i4);
+
+        return null;
+
+     label2:
+        $r2 = <okio.AsyncTimeout: okio.AsyncTimeout head>;
+
+        $r3 = r0.<okio.AsyncTimeout: okio.AsyncTimeout next>;
+
+        $r2.<okio.AsyncTimeout: okio.AsyncTimeout next> = $r3;
+
+        r0.<okio.AsyncTimeout: okio.AsyncTimeout next> = null;
+
+        return r0;
+
+     label3:
+        return null;
+    }
+    private static boolean cancelScheduledTimeout(okio.AsyncTimeout)
+    {
+        okio.AsyncTimeout $r0, r1, $r2;
+        boolean $z0;
+        java.lang.Throwable $r3;
+
+        $r0 := @parameter0: okio.AsyncTimeout;
+
+        entermonitor class "Lokio/AsyncTimeout;";
+
+     label1:
+        r1 = <okio.AsyncTimeout: okio.AsyncTimeout head>;
+
+     label2:
+        if r1 == null goto label7;
+
+        $r2 = r1.<okio.AsyncTimeout: okio.AsyncTimeout next>;
+
+        if $r2 != $r0 goto label5;
+
+        $r2 = $r0.<okio.AsyncTimeout: okio.AsyncTimeout next>;
+
+        r1.<okio.AsyncTimeout: okio.AsyncTimeout next> = $r2;
+
+        $r0.<okio.AsyncTimeout: okio.AsyncTimeout next> = null;
+
+     label3:
+        $z0 = 0;
+
+     label4:
+        exitmonitor class "Lokio/AsyncTimeout;";
+
+        return $z0;
+
+     label5:
+        r1 = r1.<okio.AsyncTimeout: okio.AsyncTimeout next>;
+
+     label6:
+        goto label2;
+
+     label7:
+        $z0 = 1;
+
+        goto label4;
+
+     label8:
+        $r3 := @caughtexception;
+
+        exitmonitor class "Lokio/AsyncTimeout;";
+
+        throw $r3;
+
+        catch java.lang.Throwable from label1 to label3 with label8;
+        catch java.lang.Throwable from label5 to label6 with label8;
+    }
+    private long remainingNanos(long)
+    {
+        okio.AsyncTimeout r0;
+        long $l0, $l1;
+
+        r0 := @this: okio.AsyncTimeout;
+
+        $l0 := @parameter0: long;
+
+        $l1 = r0.<okio.AsyncTimeout: long timeoutAt>;
+
+        $l0 = $l1 - $l0;
+
+        return $l0;
+    }
+    private static void scheduleTimeout(okio.AsyncTimeout, long, boolean)
+    {
+        okio.AsyncTimeout $r0, $r1, $r3;
+        long $l0, $l1, $l3;
+        boolean $z0;
+        okio.AsyncTimeout$Watchdog $r2;
+        byte $b2;
+        java.lang.Class $r4;
+        java.lang.Throwable $r5;
+        java.lang.AssertionError $r6;
+
+        $r0 := @parameter0: okio.AsyncTimeout;
+
+        $l0 := @parameter1: long;
+
+        $z0 := @parameter2: boolean;
+
+        entermonitor class "Lokio/AsyncTimeout;";
+
+     label01:
+        $r1 = <okio.AsyncTimeout: okio.AsyncTimeout head>;
+
+        if $r1 != null goto label02;
+
+        $r1 = new okio.AsyncTimeout;
+
+        specialinvoke $r1.<okio.AsyncTimeout: void <init>()>();
+
+        <okio.AsyncTimeout: okio.AsyncTimeout head> = $r1;
+
+        $r2 = new okio.AsyncTimeout$Watchdog;
+
+        specialinvoke $r2.<okio.AsyncTimeout$Watchdog: void <init>()>();
+
+        virtualinvoke $r2.<okio.AsyncTimeout$Watchdog: void start()>();
+
+     label02:
+        $l1 = staticinvoke <java.lang.System: long nanoTime()>();
+
+        $b2 = $l0 cmp 0L;
+
+        if $b2 == 0 goto label07;
+
+        if $z0 == 0 goto label07;
+
+        $l3 = virtualinvoke $r0.<okio.AsyncTimeout: long deadlineNanoTime()>();
+
+        $l3 = $l3 - $l1;
+
+        $l0 = staticinvoke <java.lang.Math: long min(long,long)>($l0, $l3);
+
+        $l0 = $l0 + $l1;
+
+        $r0.<okio.AsyncTimeout: long timeoutAt> = $l0;
+
+     label03:
+        $l0 = specialinvoke $r0.<okio.AsyncTimeout: long remainingNanos(long)>($l1);
+
+        $r1 = <okio.AsyncTimeout: okio.AsyncTimeout head>;
+
+     label04:
+        $r3 = $r1.<okio.AsyncTimeout: okio.AsyncTimeout next>;
+
+        if $r3 == null goto label05;
+
+        $r3 = $r1.<okio.AsyncTimeout: okio.AsyncTimeout next>;
+
+        $l3 = specialinvoke $r3.<okio.AsyncTimeout: long remainingNanos(long)>($l1);
+
+        $b2 = $l0 cmp $l3;
+
+        if $b2 >= 0 goto label14;
+
+     label05:
+        $r3 = $r1.<okio.AsyncTimeout: okio.AsyncTimeout next>;
+
+        $r0.<okio.AsyncTimeout: okio.AsyncTimeout next> = $r3;
+
+        $r1.<okio.AsyncTimeout: okio.AsyncTimeout next> = $r0;
+
+        $r0 = <okio.AsyncTimeout: okio.AsyncTimeout head>;
+
+        if $r1 != $r0 goto label06;
+
+        $r4 = class "Lokio/AsyncTimeout;";
+
+        virtualinvoke $r4.<java.lang.Object: void notify()>();
+
+     label06:
+        exitmonitor class "Lokio/AsyncTimeout;";
+
+        return;
+
+     label07:
+        $b2 = $l0 cmp 0L;
+
+        if $b2 == 0 goto label11;
+
+        $l0 = $l1 + $l0;
+
+     label08:
+        $r0.<okio.AsyncTimeout: long timeoutAt> = $l0;
+
+     label09:
+        goto label03;
+
+     label10:
+        $r5 := @caughtexception;
+
+        exitmonitor class "Lokio/AsyncTimeout;";
+
+        throw $r5;
+
+     label11:
+        if $z0 == 0 goto label13;
+
+     label12:
+        $l0 = virtualinvoke $r0.<okio.AsyncTimeout: long deadlineNanoTime()>();
+
+        $r0.<okio.AsyncTimeout: long timeoutAt> = $l0;
+
+        goto label03;
+
+     label13:
+        $r6 = new java.lang.AssertionError;
+
+        specialinvoke $r6.<java.lang.AssertionError: void <init>()>();
+
+        throw $r6;
+
+     label14:
+        $r1 = $r1.<okio.AsyncTimeout: okio.AsyncTimeout next>;
+
+     label15:
+        goto label04;
+
+        catch java.lang.Throwable from label01 to label06 with label10;
+        catch java.lang.Throwable from label08 to label09 with label10;
+        catch java.lang.Throwable from label12 to label15 with label10;
+    }
+    public final void enter()
+    {
+        okio.AsyncTimeout r0;
+        boolean $z0;
+        java.lang.IllegalStateException $r1;
+        long $l0;
+        byte $b1;
+
+        r0 := @this: okio.AsyncTimeout;
+
+        $z0 = r0.<okio.AsyncTimeout: boolean inQueue>;
+
+        if $z0 == 0 goto label1;
+
+        $r1 = new java.lang.IllegalStateException;
+
+        specialinvoke $r1.<java.lang.IllegalStateException: void <init>(java.lang.String)>("Unbalanced enter/exit");
+
+        throw $r1;
+
+     label1:
+        $l0 = virtualinvoke r0.<okio.AsyncTimeout: long timeoutNanos()>();
+
+        $z0 = virtualinvoke r0.<okio.AsyncTimeout: boolean hasDeadline()>();
+
+        $b1 = $l0 cmp 0L;
+
+        if $b1 != 0 goto label2;
+
+        if $z0 != 0 goto label2;
+
+        return;
+
+     label2:
+        r0.<okio.AsyncTimeout: boolean inQueue> = 1;
+
+        staticinvoke <okio.AsyncTimeout: void scheduleTimeout(okio.AsyncTimeout,long,boolean)>(r0, $l0, $z0);
+
+        return;
+    }
+    final java.io.IOException exit(java.io.IOException) throws java.io.IOException
+    {
+        okio.AsyncTimeout r0;
+        java.io.IOException r1;
+        boolean $z0;
+
+        r0 := @this: okio.AsyncTimeout;
+
+        r1 := @parameter0: java.io.IOException;
+
+        $z0 = virtualinvoke r0.<okio.AsyncTimeout: boolean exit()>();
+
+        if $z0 != 0 goto label1;
+
+        return r1;
+
+     label1:
+        r1 = virtualinvoke r0.<okio.AsyncTimeout: java.io.IOException newTimeoutException(java.io.IOException)>(r1);
+
+        return r1;
+    }
+    final void exit(boolean) throws java.io.IOException
+    {
+        okio.AsyncTimeout r0;
+        boolean $z0, $z1;
+        java.io.IOException $r1;
+
+        r0 := @this: okio.AsyncTimeout;
+
+        $z0 := @parameter0: boolean;
+
+        $z1 = virtualinvoke r0.<okio.AsyncTimeout: boolean exit()>();
+
+        if $z1 == 0 goto label1;
+
+        if $z0 == 0 goto label1;
+
+        $r1 = virtualinvoke r0.<okio.AsyncTimeout: java.io.IOException newTimeoutException(java.io.IOException)>(null);
+
+        throw $r1;
+
+     label1:
+        return;
+    }
+    public final boolean exit()
+    {
+        okio.AsyncTimeout r0;
+        boolean $z0;
+
+        r0 := @this: okio.AsyncTimeout;
+
+        $z0 = r0.<okio.AsyncTimeout: boolean inQueue>;
+
+        if $z0 != 0 goto label1;
+
+        return 0;
+
+     label1:
+        r0.<okio.AsyncTimeout: boolean inQueue> = 0;
+
+        $z0 = staticinvoke <okio.AsyncTimeout: boolean cancelScheduledTimeout(okio.AsyncTimeout)>(r0);
+
+        return $z0;
+    }
+    protected java.io.IOException newTimeoutException(java.io.IOException)
+    {
+        okio.AsyncTimeout r0;
+        java.io.IOException $r1;
+        java.io.InterruptedIOException r2;
+
+        r0 := @this: okio.AsyncTimeout;
+
+        $r1 := @parameter0: java.io.IOException;
+
+        r2 = new java.io.InterruptedIOException;
+
+        specialinvoke r2.<java.io.InterruptedIOException: void <init>(java.lang.String)>("timeout");
+
+        if $r1 == null goto label1;
+
+        virtualinvoke r2.<java.io.InterruptedIOException: java.lang.Throwable initCause(java.lang.Throwable)>($r1);
+
+     label1:
+        return r2;
+    }
+    public final okio.Sink sink(okio.Sink)
+    {
+        okio.AsyncTimeout r0;
+        okio.Sink $r1;
+        okio.AsyncTimeout$1 $r2;
+
+        r0 := @this: okio.AsyncTimeout;
+
+        $r1 := @parameter0: okio.Sink;
+
+        $r2 = new okio.AsyncTimeout$1;
+
+        specialinvoke $r2.<okio.AsyncTimeout$1: void <init>(okio.AsyncTimeout,okio.Sink)>(r0, $r1);
+
+        return $r2;
+    }
+    public final okio.Source source(okio.Source)
+    {
+        okio.AsyncTimeout r0;
+        okio.Source $r1;
+        okio.AsyncTimeout$2 $r2;
+
+        r0 := @this: okio.AsyncTimeout;
+
+        $r1 := @parameter0: okio.Source;
+
+        $r2 = new okio.AsyncTimeout$2;
+
+        specialinvoke $r2.<okio.AsyncTimeout$2: void <init>(okio.AsyncTimeout,okio.Source)>(r0, $r1);
+
+        return $r2;
+    }
+    protected void timedOut()
+    {
+        okio.AsyncTimeout r0;
+
+        r0 := @this: okio.AsyncTimeout;
+
+        return;
+    }

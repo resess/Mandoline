@@ -1,0 +1,565 @@
+com.getkeepsafe.relinker.elf.ElfParser extends java.lang.Object implements java.io.Closeable com.getkeepsafe.relinker.elf.Elf
+private final int MAGIC
+private final java.nio.channels.FileChannel channel
+    public void <init>(java.io.File) throws java.io.FileNotFoundException
+    {
+        com.getkeepsafe.relinker.elf.ElfParser r0;
+        java.io.File $r1;
+        java.io.FileInputStream r2;
+        boolean $z0;
+        java.lang.IllegalArgumentException $r3;
+        java.nio.channels.FileChannel $r4;
+
+        r0 := @this: com.getkeepsafe.relinker.elf.ElfParser;
+
+        $r1 := @parameter0: java.io.File;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<com.getkeepsafe.relinker.elf.ElfParser: int MAGIC> = 1179403647;
+
+        if $r1 == null goto label1;
+
+        $z0 = virtualinvoke $r1.<java.io.File: boolean exists()>();
+
+        if $z0 != 0 goto label2;
+
+     label1:
+        $r3 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r3.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("File is null or does not exist");
+
+        throw $r3;
+
+     label2:
+        r2 = new java.io.FileInputStream;
+
+        specialinvoke r2.<java.io.FileInputStream: void <init>(java.io.File)>($r1);
+
+        $r4 = virtualinvoke r2.<java.io.FileInputStream: java.nio.channels.FileChannel getChannel()>();
+
+        r0.<com.getkeepsafe.relinker.elf.ElfParser: java.nio.channels.FileChannel channel> = $r4;
+
+        return;
+    }
+    private long offsetFromVma(com.getkeepsafe.relinker.elf.Elf$Header, long, long) throws java.io.IOException
+    {
+        com.getkeepsafe.relinker.elf.ElfParser r0;
+        com.getkeepsafe.relinker.elf.Elf$Header $r1;
+        long $l0, $l1, l2, $l4, $l5;
+        com.getkeepsafe.relinker.elf.Elf$ProgramHeader $r2;
+        byte $b3;
+        java.lang.IllegalStateException $r3;
+
+        r0 := @this: com.getkeepsafe.relinker.elf.ElfParser;
+
+        $r1 := @parameter0: com.getkeepsafe.relinker.elf.Elf$Header;
+
+        $l0 := @parameter1: long;
+
+        $l1 := @parameter2: long;
+
+        l2 = 0L;
+
+     label1:
+        $b3 = l2 cmp $l0;
+
+        if $b3 >= 0 goto label3;
+
+        $r2 = virtualinvoke $r1.<com.getkeepsafe.relinker.elf.Elf$Header: com.getkeepsafe.relinker.elf.Elf$ProgramHeader getProgramHeader(long)>(l2);
+
+        $l4 = $r2.<com.getkeepsafe.relinker.elf.Elf$ProgramHeader: long type>;
+
+        $b3 = $l4 cmp 1L;
+
+        if $b3 != 0 goto label2;
+
+        $l4 = $r2.<com.getkeepsafe.relinker.elf.Elf$ProgramHeader: long vaddr>;
+
+        $b3 = $l4 cmp $l1;
+
+        if $b3 > 0 goto label2;
+
+        $l4 = $r2.<com.getkeepsafe.relinker.elf.Elf$ProgramHeader: long vaddr>;
+
+        $l5 = $r2.<com.getkeepsafe.relinker.elf.Elf$ProgramHeader: long memsz>;
+
+        $l4 = $l4 + $l5;
+
+        $b3 = $l1 cmp $l4;
+
+        if $b3 > 0 goto label2;
+
+        $l0 = $r2.<com.getkeepsafe.relinker.elf.Elf$ProgramHeader: long vaddr>;
+
+        $l0 = $l1 - $l0;
+
+        $l1 = $r2.<com.getkeepsafe.relinker.elf.Elf$ProgramHeader: long offset>;
+
+        $l0 = $l0 + $l1;
+
+        return $l0;
+
+     label2:
+        l2 = l2 + 1L;
+
+        goto label1;
+
+     label3:
+        $r3 = new java.lang.IllegalStateException;
+
+        specialinvoke $r3.<java.lang.IllegalStateException: void <init>(java.lang.String)>("Could not map vma to file offset!");
+
+        throw $r3;
+    }
+    public void close() throws java.io.IOException
+    {
+        com.getkeepsafe.relinker.elf.ElfParser r0;
+        java.nio.channels.FileChannel $r1;
+
+        r0 := @this: com.getkeepsafe.relinker.elf.ElfParser;
+
+        $r1 = r0.<com.getkeepsafe.relinker.elf.ElfParser: java.nio.channels.FileChannel channel>;
+
+        virtualinvoke $r1.<java.nio.channels.FileChannel: void close()>();
+
+        return;
+    }
+    public com.getkeepsafe.relinker.elf.Elf$Header parseHeader() throws java.io.IOException
+    {
+        com.getkeepsafe.relinker.elf.ElfParser r0;
+        java.nio.channels.FileChannel $r1;
+        java.nio.ByteBuffer $r2;
+        java.nio.ByteOrder $r3;
+        long $l0;
+        byte $b1;
+        java.lang.IllegalArgumentException $r4;
+        short $s2, $s3;
+        boolean z0;
+        com.getkeepsafe.relinker.elf.Elf32Header $r5;
+        com.getkeepsafe.relinker.elf.Elf64Header $r6;
+        java.lang.IllegalStateException $r7;
+
+        r0 := @this: com.getkeepsafe.relinker.elf.ElfParser;
+
+        $r1 = r0.<com.getkeepsafe.relinker.elf.ElfParser: java.nio.channels.FileChannel channel>;
+
+        virtualinvoke $r1.<java.nio.channels.FileChannel: java.nio.channels.FileChannel position(long)>(0L);
+
+        $r2 = staticinvoke <java.nio.ByteBuffer: java.nio.ByteBuffer allocate(int)>(8);
+
+        $r3 = <java.nio.ByteOrder: java.nio.ByteOrder LITTLE_ENDIAN>;
+
+        virtualinvoke $r2.<java.nio.ByteBuffer: java.nio.ByteBuffer order(java.nio.ByteOrder)>($r3);
+
+        $l0 = virtualinvoke r0.<com.getkeepsafe.relinker.elf.ElfParser: long readWord(java.nio.ByteBuffer,long)>($r2, 0L);
+
+        $b1 = $l0 cmp 1179403647L;
+
+        if $b1 == 0 goto label1;
+
+        $r4 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r4.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Invalid ELF Magic!");
+
+        throw $r4;
+
+     label1:
+        $s2 = virtualinvoke r0.<com.getkeepsafe.relinker.elf.ElfParser: short readByte(java.nio.ByteBuffer,long)>($r2, 4L);
+
+        $s3 = virtualinvoke r0.<com.getkeepsafe.relinker.elf.ElfParser: short readByte(java.nio.ByteBuffer,long)>($r2, 5L);
+
+        if $s3 != 2 goto label3;
+
+        z0 = 1;
+
+     label2:
+        if $s2 != 1 goto label4;
+
+        $r5 = new com.getkeepsafe.relinker.elf.Elf32Header;
+
+        specialinvoke $r5.<com.getkeepsafe.relinker.elf.Elf32Header: void <init>(boolean,com.getkeepsafe.relinker.elf.ElfParser)>(z0, r0);
+
+        return $r5;
+
+     label3:
+        z0 = 0;
+
+        goto label2;
+
+     label4:
+        if $s2 != 2 goto label5;
+
+        $r6 = new com.getkeepsafe.relinker.elf.Elf64Header;
+
+        specialinvoke $r6.<com.getkeepsafe.relinker.elf.Elf64Header: void <init>(boolean,com.getkeepsafe.relinker.elf.ElfParser)>(z0, r0);
+
+        return $r6;
+
+     label5:
+        $r7 = new java.lang.IllegalStateException;
+
+        specialinvoke $r7.<java.lang.IllegalStateException: void <init>(java.lang.String)>("Invalid class type!");
+
+        throw $r7;
+    }
+    public java.util.List parseNeededDependencies() throws java.io.IOException
+    {
+        com.getkeepsafe.relinker.elf.ElfParser r0;
+        java.util.ArrayList r1, r3;
+        java.nio.channels.FileChannel $r2;
+        com.getkeepsafe.relinker.elf.Elf$Header $r4;
+        java.nio.ByteBuffer $r5;
+        boolean $z0;
+        java.nio.ByteOrder $r6;
+        int $i0;
+        long l1, l3, l4, $l5;
+        byte $b2;
+        com.getkeepsafe.relinker.elf.Elf$SectionHeader $r7;
+        com.getkeepsafe.relinker.elf.Elf$ProgramHeader $r8;
+        java.util.List $r9;
+        com.getkeepsafe.relinker.elf.Elf$DynamicStructure $r10;
+        java.lang.Long $r11;
+        java.lang.IllegalStateException $r12;
+        java.util.Iterator $r13;
+        java.lang.Object $r14;
+        java.lang.String $r15;
+
+        r0 := @this: com.getkeepsafe.relinker.elf.ElfParser;
+
+        $r2 = r0.<com.getkeepsafe.relinker.elf.ElfParser: java.nio.channels.FileChannel channel>;
+
+        virtualinvoke $r2.<java.nio.channels.FileChannel: java.nio.channels.FileChannel position(long)>(0L);
+
+        r3 = new java.util.ArrayList;
+
+        specialinvoke r3.<java.util.ArrayList: void <init>()>();
+
+        $r4 = virtualinvoke r0.<com.getkeepsafe.relinker.elf.ElfParser: com.getkeepsafe.relinker.elf.Elf$Header parseHeader()>();
+
+        $r5 = staticinvoke <java.nio.ByteBuffer: java.nio.ByteBuffer allocate(int)>(8);
+
+        $z0 = $r4.<com.getkeepsafe.relinker.elf.Elf$Header: boolean bigEndian>;
+
+        if $z0 == 0 goto label05;
+
+        $r6 = <java.nio.ByteOrder: java.nio.ByteOrder BIG_ENDIAN>;
+
+     label01:
+        virtualinvoke $r5.<java.nio.ByteBuffer: java.nio.ByteBuffer order(java.nio.ByteOrder)>($r6);
+
+        $i0 = $r4.<com.getkeepsafe.relinker.elf.Elf$Header: int phnum>;
+
+        l1 = (long) $i0;
+
+        $b2 = l1 cmp 65535L;
+
+        if $b2 != 0 goto label02;
+
+        $r7 = virtualinvoke $r4.<com.getkeepsafe.relinker.elf.Elf$Header: com.getkeepsafe.relinker.elf.Elf$SectionHeader getSectionHeader(int)>(0);
+
+        l1 = $r7.<com.getkeepsafe.relinker.elf.Elf$SectionHeader: long info>;
+
+     label02:
+        l3 = 0L;
+
+        l4 = 0L;
+
+     label03:
+        $b2 = l4 cmp l1;
+
+        if $b2 >= 0 goto label04;
+
+        $r8 = virtualinvoke $r4.<com.getkeepsafe.relinker.elf.Elf$Header: com.getkeepsafe.relinker.elf.Elf$ProgramHeader getProgramHeader(long)>(l4);
+
+        $l5 = $r8.<com.getkeepsafe.relinker.elf.Elf$ProgramHeader: long type>;
+
+        $b2 = $l5 cmp 2L;
+
+        if $b2 != 0 goto label06;
+
+        l3 = $r8.<com.getkeepsafe.relinker.elf.Elf$ProgramHeader: long offset>;
+
+     label04:
+        $b2 = l3 cmp 0L;
+
+        if $b2 != 0 goto label07;
+
+        $r9 = staticinvoke <java.util.Collections: java.util.List unmodifiableList(java.util.List)>(r3);
+
+        return $r9;
+
+     label05:
+        $r6 = <java.nio.ByteOrder: java.nio.ByteOrder LITTLE_ENDIAN>;
+
+        goto label01;
+
+     label06:
+        l4 = l4 + 1L;
+
+        goto label03;
+
+     label07:
+        $i0 = 0;
+
+        r1 = new java.util.ArrayList;
+
+        specialinvoke r1.<java.util.ArrayList: void <init>()>();
+
+        l4 = 0L;
+
+     label08:
+        $r10 = virtualinvoke $r4.<com.getkeepsafe.relinker.elf.Elf$Header: com.getkeepsafe.relinker.elf.Elf$DynamicStructure getDynamicStructure(long,int)>(l3, $i0);
+
+        $l5 = $r10.<com.getkeepsafe.relinker.elf.Elf$DynamicStructure: long tag>;
+
+        $b2 = $l5 cmp 1L;
+
+        if $b2 != 0 goto label10;
+
+        $l5 = $r10.<com.getkeepsafe.relinker.elf.Elf$DynamicStructure: long val>;
+
+        $r11 = staticinvoke <java.lang.Long: java.lang.Long valueOf(long)>($l5);
+
+        interfaceinvoke r1.<java.util.List: boolean add(java.lang.Object)>($r11);
+
+     label09:
+        $i0 = $i0 + 1;
+
+        $l5 = $r10.<com.getkeepsafe.relinker.elf.Elf$DynamicStructure: long tag>;
+
+        $b2 = $l5 cmp 0L;
+
+        if $b2 != 0 goto label08;
+
+        $b2 = l4 cmp 0L;
+
+        if $b2 != 0 goto label11;
+
+        $r12 = new java.lang.IllegalStateException;
+
+        specialinvoke $r12.<java.lang.IllegalStateException: void <init>(java.lang.String)>("String table offset not found!");
+
+        throw $r12;
+
+     label10:
+        $l5 = $r10.<com.getkeepsafe.relinker.elf.Elf$DynamicStructure: long tag>;
+
+        $b2 = $l5 cmp 5L;
+
+        if $b2 != 0 goto label09;
+
+        l4 = $r10.<com.getkeepsafe.relinker.elf.Elf$DynamicStructure: long val>;
+
+        goto label09;
+
+     label11:
+        l1 = specialinvoke r0.<com.getkeepsafe.relinker.elf.ElfParser: long offsetFromVma(com.getkeepsafe.relinker.elf.Elf$Header,long,long)>($r4, l1, l4);
+
+        $r13 = interfaceinvoke r1.<java.util.List: java.util.Iterator iterator()>();
+
+     label12:
+        $z0 = interfaceinvoke $r13.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label13;
+
+        $r14 = interfaceinvoke $r13.<java.util.Iterator: java.lang.Object next()>();
+
+        $r11 = (java.lang.Long) $r14;
+
+        l3 = virtualinvoke $r11.<java.lang.Long: long longValue()>();
+
+        l3 = l3 + l1;
+
+        $r15 = virtualinvoke r0.<com.getkeepsafe.relinker.elf.ElfParser: java.lang.String readString(java.nio.ByteBuffer,long)>($r5, l3);
+
+        interfaceinvoke r3.<java.util.List: boolean add(java.lang.Object)>($r15);
+
+        goto label12;
+
+     label13:
+        return r3;
+    }
+    protected void read(java.nio.ByteBuffer, long, int) throws java.io.IOException
+    {
+        com.getkeepsafe.relinker.elf.ElfParser r0;
+        java.nio.ByteBuffer $r1;
+        long $l0, l3, $l4;
+        int $i1, $i2;
+        byte $b5;
+        java.nio.channels.FileChannel $r2;
+        java.io.EOFException $r3;
+
+        r0 := @this: com.getkeepsafe.relinker.elf.ElfParser;
+
+        $r1 := @parameter0: java.nio.ByteBuffer;
+
+        $l0 := @parameter1: long;
+
+        $i1 := @parameter2: int;
+
+        virtualinvoke $r1.<java.nio.ByteBuffer: java.nio.Buffer position(int)>(0);
+
+        virtualinvoke $r1.<java.nio.ByteBuffer: java.nio.Buffer limit(int)>($i1);
+
+        l3 = 0L;
+
+     label1:
+        $l4 = (long) $i1;
+
+        $b5 = l3 cmp $l4;
+
+        if $b5 >= 0 goto label3;
+
+        $r2 = r0.<com.getkeepsafe.relinker.elf.ElfParser: java.nio.channels.FileChannel channel>;
+
+        $l4 = $l0 + l3;
+
+        $i2 = virtualinvoke $r2.<java.nio.channels.FileChannel: int read(java.nio.ByteBuffer,long)>($r1, $l4);
+
+        if $i2 != -1 goto label2;
+
+        $r3 = new java.io.EOFException;
+
+        specialinvoke $r3.<java.io.EOFException: void <init>()>();
+
+        throw $r3;
+
+     label2:
+        $l4 = (long) $i2;
+
+        l3 = l3 + $l4;
+
+        goto label1;
+
+     label3:
+        virtualinvoke $r1.<java.nio.ByteBuffer: java.nio.Buffer position(int)>(0);
+
+        return;
+    }
+    protected short readByte(java.nio.ByteBuffer, long) throws java.io.IOException
+    {
+        com.getkeepsafe.relinker.elf.ElfParser r0;
+        java.nio.ByteBuffer $r1;
+        long $l0;
+        byte $b1;
+        int $i2;
+        short $s3;
+
+        r0 := @this: com.getkeepsafe.relinker.elf.ElfParser;
+
+        $r1 := @parameter0: java.nio.ByteBuffer;
+
+        $l0 := @parameter1: long;
+
+        virtualinvoke r0.<com.getkeepsafe.relinker.elf.ElfParser: void read(java.nio.ByteBuffer,long,int)>($r1, $l0, 1);
+
+        $b1 = virtualinvoke $r1.<java.nio.ByteBuffer: byte get()>();
+
+        $i2 = $b1 & 255;
+
+        $s3 = (short) $i2;
+
+        return $s3;
+    }
+    protected int readHalf(java.nio.ByteBuffer, long) throws java.io.IOException
+    {
+        com.getkeepsafe.relinker.elf.ElfParser r0;
+        java.nio.ByteBuffer $r1;
+        long $l0;
+        short $s1;
+        int $i2;
+
+        r0 := @this: com.getkeepsafe.relinker.elf.ElfParser;
+
+        $r1 := @parameter0: java.nio.ByteBuffer;
+
+        $l0 := @parameter1: long;
+
+        virtualinvoke r0.<com.getkeepsafe.relinker.elf.ElfParser: void read(java.nio.ByteBuffer,long,int)>($r1, $l0, 2);
+
+        $s1 = virtualinvoke $r1.<java.nio.ByteBuffer: short getShort()>();
+
+        $i2 = $s1 & 65535;
+
+        return $i2;
+    }
+    protected long readLong(java.nio.ByteBuffer, long) throws java.io.IOException
+    {
+        com.getkeepsafe.relinker.elf.ElfParser r0;
+        java.nio.ByteBuffer $r1;
+        long $l0;
+
+        r0 := @this: com.getkeepsafe.relinker.elf.ElfParser;
+
+        $r1 := @parameter0: java.nio.ByteBuffer;
+
+        $l0 := @parameter1: long;
+
+        virtualinvoke r0.<com.getkeepsafe.relinker.elf.ElfParser: void read(java.nio.ByteBuffer,long,int)>($r1, $l0, 8);
+
+        $l0 = virtualinvoke $r1.<java.nio.ByteBuffer: long getLong()>();
+
+        return $l0;
+    }
+    protected java.lang.String readString(java.nio.ByteBuffer, long) throws java.io.IOException
+    {
+        com.getkeepsafe.relinker.elf.ElfParser r0;
+        java.nio.ByteBuffer $r1;
+        java.lang.StringBuilder r2;
+        long l0;
+        short $s1;
+        char $c2;
+        java.lang.String $r3;
+
+        r0 := @this: com.getkeepsafe.relinker.elf.ElfParser;
+
+        $r1 := @parameter0: java.nio.ByteBuffer;
+
+        l0 := @parameter1: long;
+
+        r2 = new java.lang.StringBuilder;
+
+        specialinvoke r2.<java.lang.StringBuilder: void <init>()>();
+
+     label1:
+        $s1 = virtualinvoke r0.<com.getkeepsafe.relinker.elf.ElfParser: short readByte(java.nio.ByteBuffer,long)>($r1, l0);
+
+        if $s1 == 0 goto label2;
+
+        $c2 = (char) $s1;
+
+        virtualinvoke r2.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>($c2);
+
+        l0 = l0 + 1L;
+
+        goto label1;
+
+     label2:
+        $r3 = virtualinvoke r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r3;
+    }
+    protected long readWord(java.nio.ByteBuffer, long) throws java.io.IOException
+    {
+        com.getkeepsafe.relinker.elf.ElfParser r0;
+        java.nio.ByteBuffer $r1;
+        long $l0;
+        int $i1;
+
+        r0 := @this: com.getkeepsafe.relinker.elf.ElfParser;
+
+        $r1 := @parameter0: java.nio.ByteBuffer;
+
+        $l0 := @parameter1: long;
+
+        virtualinvoke r0.<com.getkeepsafe.relinker.elf.ElfParser: void read(java.nio.ByteBuffer,long,int)>($r1, $l0, 4);
+
+        $i1 = virtualinvoke $r1.<java.nio.ByteBuffer: int getInt()>();
+
+        $l0 = (long) $i1;
+
+        $l0 = $l0 & 4294967295L;
+
+        return $l0;
+    }

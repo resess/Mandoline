@@ -1,0 +1,1557 @@
+com.newsblur.fragment.ItemListFragment extends com.newsblur.fragment.NbFragment implements android.app.LoaderManager$LoaderCallbacks android.view.View$OnCreateContextMenuListener android.widget.AbsListView$OnScrollListener android.widget.AdapterView$OnItemClickListener
+public static int ITEMLIST_LOADER
+protected com.newsblur.activity.ItemsList activity
+protected com.newsblur.database.StoryItemsAdapter adapter
+private boolean cursorSeenYet
+com.newsblur.view.ProgressThrobber emptyProgressView
+private android.view.View fleuronFooter
+protected com.newsblur.view.ProgressThrobber footerProgressView
+private boolean gestureDebounce
+private int gestureLeftToRightFlag
+private int gestureRightToLeftFlag
+protected com.newsblur.view.ProgressThrobber headerProgressView
+android.widget.ListView itemList
+private java.lang.String lastAutoMarkHash
+private boolean stopLoading
+    static void <clinit>()
+    {
+        <com.newsblur.fragment.ItemListFragment: int ITEMLIST_LOADER> = 1;
+
+        return;
+    }
+    public void <init>()
+    {
+        com.newsblur.fragment.ItemListFragment r0;
+
+        r0 := @this: com.newsblur.fragment.ItemListFragment;
+
+        specialinvoke r0.<com.newsblur.fragment.NbFragment: void <init>()>();
+
+        r0.<com.newsblur.fragment.ItemListFragment: boolean cursorSeenYet> = 0;
+
+        r0.<com.newsblur.fragment.ItemListFragment: boolean stopLoading> = 0;
+
+        r0.<com.newsblur.fragment.ItemListFragment: int gestureLeftToRightFlag> = -1;
+
+        r0.<com.newsblur.fragment.ItemListFragment: int gestureRightToLeftFlag> = -1;
+
+        r0.<com.newsblur.fragment.ItemListFragment: boolean gestureDebounce> = 0;
+
+        r0.<com.newsblur.fragment.ItemListFragment: java.lang.String lastAutoMarkHash> = null;
+
+        return;
+    }
+    private void triggerRefresh(int, java.lang.Integer)
+    {
+        com.newsblur.fragment.ItemListFragment r0;
+        int $i0;
+        java.lang.Integer $r1;
+        com.newsblur.util.FeedSet $r2;
+        boolean $z0;
+
+        r0 := @this: com.newsblur.fragment.ItemListFragment;
+
+        $i0 := @parameter0: int;
+
+        $r1 := @parameter1: java.lang.Integer;
+
+        $r2 = virtualinvoke r0.<com.newsblur.fragment.ItemListFragment: com.newsblur.util.FeedSet getFeedSet()>();
+
+        $z0 = staticinvoke <com.newsblur.service.NBSyncService: boolean requestMoreForFeed(com.newsblur.util.FeedSet,int,java.lang.Integer)>($r2, $i0, $r1);
+
+        if $z0 != 0 goto label1;
+
+        if $r1 != null goto label2;
+
+     label1:
+        virtualinvoke r0.<com.newsblur.fragment.ItemListFragment: void triggerSync()>();
+
+     label2:
+        return;
+    }
+    private void updateLoadingMessage()
+    {
+        com.newsblur.fragment.ItemListFragment r0;
+        android.widget.ListView $r1;
+        java.lang.Class $r2;
+        java.lang.String $r3;
+        android.view.View $r4, $r5;
+        android.widget.TextView r6;
+        android.widget.ImageView r7;
+        com.newsblur.util.FeedSet $r8;
+        boolean $z0;
+        com.newsblur.activity.ItemsList $r9;
+        com.newsblur.util.ReadFilter $r10, $r11;
+
+        r0 := @this: com.newsblur.fragment.ItemListFragment;
+
+        $r1 = r0.<com.newsblur.fragment.ItemListFragment: android.widget.ListView itemList>;
+
+        if $r1 != null goto label1;
+
+        $r2 = virtualinvoke r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r3 = virtualinvoke $r2.<java.lang.Class: java.lang.String getName()>();
+
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String)>($r3, "ItemListFragment does not have the expected ListView.");
+
+        return;
+
+     label1:
+        $r1 = r0.<com.newsblur.fragment.ItemListFragment: android.widget.ListView itemList>;
+
+        $r4 = virtualinvoke $r1.<android.widget.ListView: android.view.View getEmptyView()>();
+
+        $r5 = virtualinvoke $r4.<android.view.View: android.view.View findViewById(int)>(2131427352);
+
+        r6 = (android.widget.TextView) $r5;
+
+        $r4 = virtualinvoke $r4.<android.view.View: android.view.View findViewById(int)>(2131427353);
+
+        r7 = (android.widget.ImageView) $r4;
+
+        $r8 = virtualinvoke r0.<com.newsblur.fragment.ItemListFragment: com.newsblur.util.FeedSet getFeedSet()>();
+
+        $z0 = virtualinvoke $r8.<com.newsblur.util.FeedSet: boolean isMuted()>();
+
+        if $z0 == 0 goto label2;
+
+        virtualinvoke r6.<android.widget.TextView: void setText(int)>(2131230765);
+
+        virtualinvoke r6.<android.widget.TextView: void setTypeface(android.graphics.Typeface,int)>(null, 0);
+
+        virtualinvoke r7.<android.widget.ImageView: void setVisibility(int)>(0);
+
+        return;
+
+     label2:
+        $r8 = virtualinvoke r0.<com.newsblur.fragment.ItemListFragment: com.newsblur.util.FeedSet getFeedSet()>();
+
+        $r9 = r0.<com.newsblur.fragment.ItemListFragment: com.newsblur.activity.ItemsList activity>;
+
+        $z0 = staticinvoke <com.newsblur.service.NBSyncService: boolean isFeedSetSyncing(com.newsblur.util.FeedSet,android.content.Context)>($r8, $r9);
+
+        if $z0 != 0 goto label3;
+
+        $z0 = r0.<com.newsblur.fragment.ItemListFragment: boolean cursorSeenYet>;
+
+        if $z0 != 0 goto label4;
+
+     label3:
+        virtualinvoke r6.<android.widget.TextView: void setText(int)>(2131230764);
+
+        virtualinvoke r6.<android.widget.TextView: void setTypeface(android.graphics.Typeface,int)>(null, 2);
+
+        virtualinvoke r7.<android.widget.ImageView: void setVisibility(int)>(4);
+
+        return;
+
+     label4:
+        $r9 = r0.<com.newsblur.fragment.ItemListFragment: com.newsblur.activity.ItemsList activity>;
+
+        $r8 = virtualinvoke r0.<com.newsblur.fragment.ItemListFragment: com.newsblur.util.FeedSet getFeedSet()>();
+
+        $r10 = staticinvoke <com.newsblur.util.PrefsUtils: com.newsblur.util.ReadFilter getReadFilter(android.content.Context,com.newsblur.util.FeedSet)>($r9, $r8);
+
+        $r11 = <com.newsblur.util.ReadFilter: com.newsblur.util.ReadFilter UNREAD>;
+
+        if $r10 != $r11 goto label6;
+
+        virtualinvoke r6.<android.widget.TextView: void setText(int)>(2131230769);
+
+     label5:
+        virtualinvoke r6.<android.widget.TextView: void setTypeface(android.graphics.Typeface,int)>(null, 0);
+
+        virtualinvoke r7.<android.widget.ImageView: void setVisibility(int)>(0);
+
+        return;
+
+     label6:
+        virtualinvoke r6.<android.widget.TextView: void setText(int)>(2131230768);
+
+        goto label5;
+    }
+    protected void flushGesture()
+    {
+        com.newsblur.fragment.ItemListFragment r0;
+        int i0, $i1;
+        com.newsblur.util.GestureAction r1;
+        android.app.Activity $r2;
+        com.newsblur.database.StoryItemsAdapter $r3;
+        com.newsblur.domain.Story $r4;
+        int[] $r5;
+
+        r0 := @this: com.newsblur.fragment.ItemListFragment;
+
+        i0 = -1;
+
+        r1 = <com.newsblur.util.GestureAction: com.newsblur.util.GestureAction GEST_ACTION_NONE>;
+
+        $i1 = r0.<com.newsblur.fragment.ItemListFragment: int gestureLeftToRightFlag>;
+
+        if $i1 <= -1 goto label1;
+
+        i0 = r0.<com.newsblur.fragment.ItemListFragment: int gestureLeftToRightFlag>;
+
+        $r2 = virtualinvoke r0.<com.newsblur.fragment.ItemListFragment: android.app.Activity getActivity()>();
+
+        r1 = staticinvoke <com.newsblur.util.PrefsUtils: com.newsblur.util.GestureAction getLeftToRightGestureAction(android.content.Context)>($r2);
+
+        r0.<com.newsblur.fragment.ItemListFragment: int gestureLeftToRightFlag> = -1;
+
+        r0.<com.newsblur.fragment.ItemListFragment: boolean gestureDebounce> = 1;
+
+     label1:
+        $i1 = r0.<com.newsblur.fragment.ItemListFragment: int gestureRightToLeftFlag>;
+
+        if $i1 <= -1 goto label2;
+
+        i0 = r0.<com.newsblur.fragment.ItemListFragment: int gestureRightToLeftFlag>;
+
+        $r2 = virtualinvoke r0.<com.newsblur.fragment.ItemListFragment: android.app.Activity getActivity()>();
+
+        r1 = staticinvoke <com.newsblur.util.PrefsUtils: com.newsblur.util.GestureAction getRightToLeftGestureAction(android.content.Context)>($r2);
+
+        r0.<com.newsblur.fragment.ItemListFragment: int gestureRightToLeftFlag> = -1;
+
+        r0.<com.newsblur.fragment.ItemListFragment: boolean gestureDebounce> = 1;
+
+     label2:
+        if i0 > -1 goto label3;
+
+        return;
+
+     label3:
+        $r3 = r0.<com.newsblur.fragment.ItemListFragment: com.newsblur.database.StoryItemsAdapter adapter>;
+
+        i0 = i0 + -1;
+
+        $r4 = virtualinvoke $r3.<com.newsblur.database.StoryItemsAdapter: com.newsblur.domain.Story getStory(int)>(i0);
+
+        if $r4 == null goto label9;
+
+        $r5 = <com.newsblur.fragment.ItemListFragment$2: int[] $SwitchMap$com$newsblur$util$GestureAction>;
+
+        i0 = virtualinvoke r1.<com.newsblur.util.GestureAction: int ordinal()>();
+
+        i0 = $r5[i0];
+
+        lookupswitch(i0)
+        {
+            case 1: goto label5;
+            case 2: goto label6;
+            case 3: goto label7;
+            case 4: goto label8;
+            default: goto label4;
+        };
+
+     label4:
+        return;
+
+     label5:
+        $r2 = virtualinvoke r0.<com.newsblur.fragment.ItemListFragment: android.app.Activity getActivity()>();
+
+        staticinvoke <com.newsblur.util.FeedUtils: void markStoryAsRead(com.newsblur.domain.Story,android.content.Context)>($r4, $r2);
+
+        return;
+
+     label6:
+        $r2 = virtualinvoke r0.<com.newsblur.fragment.ItemListFragment: android.app.Activity getActivity()>();
+
+        staticinvoke <com.newsblur.util.FeedUtils: void markStoryUnread(com.newsblur.domain.Story,android.content.Context)>($r4, $r2);
+
+        return;
+
+     label7:
+        $r2 = virtualinvoke r0.<com.newsblur.fragment.ItemListFragment: android.app.Activity getActivity()>();
+
+        staticinvoke <com.newsblur.util.FeedUtils: void setStorySaved(com.newsblur.domain.Story,boolean,android.content.Context)>($r4, 1, $r2);
+
+        return;
+
+     label8:
+        $r2 = virtualinvoke r0.<com.newsblur.fragment.ItemListFragment: android.app.Activity getActivity()>();
+
+        staticinvoke <com.newsblur.util.FeedUtils: void setStorySaved(com.newsblur.domain.Story,boolean,android.content.Context)>($r4, 0, $r2);
+
+     label9:
+        return;
+    }
+    protected void gestureLeftToRight(float, float)
+    {
+        com.newsblur.fragment.ItemListFragment r0;
+        float $f0, $f1;
+        android.widget.ListView $r1;
+        int $i0, $i1;
+
+        r0 := @this: com.newsblur.fragment.ItemListFragment;
+
+        $f0 := @parameter0: float;
+
+        $f1 := @parameter1: float;
+
+        $r1 = r0.<com.newsblur.fragment.ItemListFragment: android.widget.ListView itemList>;
+
+        $i0 = (int) $f0;
+
+        $i1 = (int) $f1;
+
+        $i0 = virtualinvoke $r1.<android.widget.ListView: int pointToPosition(int,int)>($i0, $i1);
+
+        r0.<com.newsblur.fragment.ItemListFragment: int gestureLeftToRightFlag> = $i0;
+
+        return;
+    }
+    protected void gestureRightToLeft(float, float)
+    {
+        com.newsblur.fragment.ItemListFragment r0;
+        float $f0, $f1;
+        android.widget.ListView $r1;
+        int $i0, $i1;
+
+        r0 := @this: com.newsblur.fragment.ItemListFragment;
+
+        $f0 := @parameter0: float;
+
+        $f1 := @parameter1: float;
+
+        $r1 = r0.<com.newsblur.fragment.ItemListFragment: android.widget.ListView itemList>;
+
+        $i0 = (int) $f0;
+
+        $i1 = (int) $f1;
+
+        $i0 = virtualinvoke $r1.<android.widget.ListView: int pointToPosition(int,int)>($i0, $i1);
+
+        r0.<com.newsblur.fragment.ItemListFragment: int gestureRightToLeftFlag> = $i0;
+
+        return;
+    }
+    protected com.newsblur.util.FeedSet getFeedSet()
+    {
+        com.newsblur.fragment.ItemListFragment r0;
+        com.newsblur.util.FeedSet $r1;
+        com.newsblur.activity.ItemsList $r2;
+
+        r0 := @this: com.newsblur.fragment.ItemListFragment;
+
+        $r2 = r0.<com.newsblur.fragment.ItemListFragment: com.newsblur.activity.ItemsList activity>;
+
+        $r1 = virtualinvoke $r2.<com.newsblur.activity.ItemsList: com.newsblur.util.FeedSet getFeedSet()>();
+
+        return $r1;
+    }
+    public void hasUpdated()
+    {
+        com.newsblur.fragment.ItemListFragment r0;
+        int $i0;
+        boolean $z0;
+        com.newsblur.util.FeedSet $r1;
+        android.app.LoaderManager $r2;
+
+        r0 := @this: com.newsblur.fragment.ItemListFragment;
+
+        $z0 = virtualinvoke r0.<com.newsblur.fragment.ItemListFragment: boolean isAdded()>();
+
+        if $z0 == 0 goto label1;
+
+        $r1 = virtualinvoke r0.<com.newsblur.fragment.ItemListFragment: com.newsblur.util.FeedSet getFeedSet()>();
+
+        $z0 = virtualinvoke $r1.<com.newsblur.util.FeedSet: boolean isMuted()>();
+
+        if $z0 != 0 goto label1;
+
+        $r2 = virtualinvoke r0.<com.newsblur.fragment.ItemListFragment: android.app.LoaderManager getLoaderManager()>();
+
+        $i0 = <com.newsblur.fragment.ItemListFragment: int ITEMLIST_LOADER>;
+
+        virtualinvoke $r2.<android.app.LoaderManager: android.content.Loader restartLoader(int,android.os.Bundle,android.app.LoaderManager$LoaderCallbacks)>($i0, null, r0);
+
+     label1:
+        return;
+    }
+    public boolean onContextItemSelected(android.view.MenuItem)
+    {
+        com.newsblur.fragment.ItemListFragment r0;
+        android.view.MenuItem $r1;
+        int i0;
+        android.view.ContextMenu$ContextMenuInfo $r2;
+        android.widget.AdapterView$AdapterContextMenuInfo r3;
+        com.newsblur.database.StoryItemsAdapter $r4;
+        com.newsblur.domain.Story $r5;
+        android.app.Activity $r6;
+        boolean $z0;
+        com.newsblur.util.FeedSet $r7;
+        long $l1;
+        java.lang.Long $r8;
+
+        r0 := @this: com.newsblur.fragment.ItemListFragment;
+
+        $r1 := @parameter0: android.view.MenuItem;
+
+        $r2 = interfaceinvoke $r1.<android.view.MenuItem: android.view.ContextMenu$ContextMenuInfo getMenuInfo()>();
+
+        r3 = (android.widget.AdapterView$AdapterContextMenuInfo) $r2;
+
+        i0 = r3.<android.widget.AdapterView$AdapterContextMenuInfo: int position>;
+
+        i0 = i0 + -1;
+
+        $r4 = r0.<com.newsblur.fragment.ItemListFragment: com.newsblur.database.StoryItemsAdapter adapter>;
+
+        $r5 = virtualinvoke $r4.<com.newsblur.database.StoryItemsAdapter: com.newsblur.domain.Story getStory(int)>(i0);
+
+        $r6 = virtualinvoke r0.<com.newsblur.fragment.ItemListFragment: android.app.Activity getActivity()>();
+
+        i0 = interfaceinvoke $r1.<android.view.MenuItem: int getItemId()>();
+
+        lookupswitch(i0)
+        {
+            case 2131427563: goto label6;
+            case 2131427564: goto label7;
+            case 2131427565: goto label3;
+            case 2131427566: goto label2;
+            case 2131427567: goto label5;
+            case 2131427568: goto label4;
+            case 2131427569: goto label8;
+            case 2131427570: goto label9;
+            default: goto label1;
+        };
+
+     label1:
+        $z0 = specialinvoke r0.<com.newsblur.fragment.NbFragment: boolean onContextItemSelected(android.view.MenuItem)>($r1);
+
+        return $z0;
+
+     label2:
+        staticinvoke <com.newsblur.util.FeedUtils: void markStoryAsRead(com.newsblur.domain.Story,android.content.Context)>($r5, $r6);
+
+        return 1;
+
+     label3:
+        staticinvoke <com.newsblur.util.FeedUtils: void markStoryUnread(com.newsblur.domain.Story,android.content.Context)>($r5, $r6);
+
+        return 1;
+
+     label4:
+        $r7 = virtualinvoke r0.<com.newsblur.fragment.ItemListFragment: com.newsblur.util.FeedSet getFeedSet()>();
+
+        $l1 = $r5.<com.newsblur.domain.Story: long timestamp>;
+
+        $r8 = staticinvoke <java.lang.Long: java.lang.Long valueOf(long)>($l1);
+
+        staticinvoke <com.newsblur.util.FeedUtils: void markRead(android.app.Activity,com.newsblur.util.FeedSet,java.lang.Long,java.lang.Long,int,boolean)>($r6, $r7, $r8, null, 2131099664, 0);
+
+        return 1;
+
+     label5:
+        $r7 = virtualinvoke r0.<com.newsblur.fragment.ItemListFragment: com.newsblur.util.FeedSet getFeedSet()>();
+
+        $l1 = $r5.<com.newsblur.domain.Story: long timestamp>;
+
+        $r8 = staticinvoke <java.lang.Long: java.lang.Long valueOf(long)>($l1);
+
+        staticinvoke <com.newsblur.util.FeedUtils: void markRead(android.app.Activity,com.newsblur.util.FeedSet,java.lang.Long,java.lang.Long,int,boolean)>($r6, $r7, null, $r8, 2131099663, 0);
+
+        return 1;
+
+     label6:
+        staticinvoke <com.newsblur.util.FeedUtils: void sendStoryBrief(com.newsblur.domain.Story,android.content.Context)>($r5, $r6);
+
+        return 1;
+
+     label7:
+        staticinvoke <com.newsblur.util.FeedUtils: void sendStoryFull(com.newsblur.domain.Story,android.content.Context)>($r5, $r6);
+
+        return 1;
+
+     label8:
+        staticinvoke <com.newsblur.util.FeedUtils: void setStorySaved(com.newsblur.domain.Story,boolean,android.content.Context)>($r5, 1, $r6);
+
+        return 1;
+
+     label9:
+        staticinvoke <com.newsblur.util.FeedUtils: void setStorySaved(com.newsblur.domain.Story,boolean,android.content.Context)>($r5, 0, $r6);
+
+        return 1;
+    }
+    public void onCreate(android.os.Bundle)
+    {
+        com.newsblur.fragment.ItemListFragment r0;
+        android.os.Bundle $r1;
+        android.app.Activity $r2;
+        com.newsblur.activity.ItemsList $r3;
+        com.newsblur.util.FeedSet $r4;
+        java.lang.Class $r5;
+        java.lang.String $r6;
+
+        r0 := @this: com.newsblur.fragment.ItemListFragment;
+
+        $r1 := @parameter0: android.os.Bundle;
+
+        specialinvoke r0.<com.newsblur.fragment.NbFragment: void onCreate(android.os.Bundle)>($r1);
+
+        $r2 = virtualinvoke r0.<com.newsblur.fragment.ItemListFragment: android.app.Activity getActivity()>();
+
+        $r3 = (com.newsblur.activity.ItemsList) $r2;
+
+        r0.<com.newsblur.fragment.ItemListFragment: com.newsblur.activity.ItemsList activity> = $r3;
+
+        $r4 = virtualinvoke r0.<com.newsblur.fragment.ItemListFragment: com.newsblur.util.FeedSet getFeedSet()>();
+
+        if $r4 != null goto label1;
+
+        $r5 = virtualinvoke r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r6 = virtualinvoke $r5.<java.lang.Class: java.lang.String getName()>();
+
+        staticinvoke <com.newsblur.util.Log: void w(java.lang.String,java.lang.String)>($r6, "item list started without FeedSet.");
+
+        $r3 = r0.<com.newsblur.fragment.ItemListFragment: com.newsblur.activity.ItemsList activity>;
+
+        virtualinvoke $r3.<com.newsblur.activity.ItemsList: void finish()>();
+
+        return;
+
+     label1:
+        specialinvoke r0.<com.newsblur.fragment.ItemListFragment: void triggerRefresh(int,java.lang.Integer)>(1, null);
+
+        return;
+    }
+    public void onCreateContextMenu(android.view.ContextMenu, android.view.View, android.view.ContextMenu$ContextMenuInfo)
+    {
+        com.newsblur.fragment.ItemListFragment r0;
+        android.view.ContextMenu $r1;
+        android.view.View $r2;
+        int i0;
+        android.view.ContextMenu$ContextMenuInfo r3;
+        android.app.Activity $r4;
+        android.view.MenuInflater $r5;
+        com.newsblur.activity.ItemsList $r6;
+        com.newsblur.util.FeedSet $r7;
+        com.newsblur.util.StoryOrder $r8, $r9;
+        android.widget.AdapterView$AdapterContextMenuInfo r10;
+        com.newsblur.database.StoryItemsAdapter $r11;
+        com.newsblur.domain.Story $r12;
+        boolean $z0;
+
+        r0 := @this: com.newsblur.fragment.ItemListFragment;
+
+        $r1 := @parameter0: android.view.ContextMenu;
+
+        $r2 := @parameter1: android.view.View;
+
+        r3 := @parameter2: android.view.ContextMenu$ContextMenuInfo;
+
+        i0 = r0.<com.newsblur.fragment.ItemListFragment: int gestureLeftToRightFlag>;
+
+        if i0 > -1 goto label8;
+
+        i0 = r0.<com.newsblur.fragment.ItemListFragment: int gestureRightToLeftFlag>;
+
+        if i0 <= -1 goto label1;
+
+        return;
+
+     label1:
+        $r4 = virtualinvoke r0.<com.newsblur.fragment.ItemListFragment: android.app.Activity getActivity()>();
+
+        $r5 = virtualinvoke $r4.<android.app.Activity: android.view.MenuInflater getMenuInflater()>();
+
+        $r6 = r0.<com.newsblur.fragment.ItemListFragment: com.newsblur.activity.ItemsList activity>;
+
+        $r7 = virtualinvoke r0.<com.newsblur.fragment.ItemListFragment: com.newsblur.util.FeedSet getFeedSet()>();
+
+        $r8 = staticinvoke <com.newsblur.util.PrefsUtils: com.newsblur.util.StoryOrder getStoryOrder(android.content.Context,com.newsblur.util.FeedSet)>($r6, $r7);
+
+        $r9 = <com.newsblur.util.StoryOrder: com.newsblur.util.StoryOrder NEWEST>;
+
+        if $r8 != $r9 goto label4;
+
+        virtualinvoke $r5.<android.view.MenuInflater: void inflate(int,android.view.Menu)>(2131361796, $r1);
+
+     label2:
+        r10 = (android.widget.AdapterView$AdapterContextMenuInfo) r3;
+
+        i0 = r10.<android.widget.AdapterView$AdapterContextMenuInfo: int position>;
+
+        i0 = i0 + -1;
+
+        $r11 = r0.<com.newsblur.fragment.ItemListFragment: com.newsblur.database.StoryItemsAdapter adapter>;
+
+        $r12 = virtualinvoke $r11.<com.newsblur.database.StoryItemsAdapter: com.newsblur.domain.Story getStory(int)>(i0);
+
+        $r7 = virtualinvoke r0.<com.newsblur.fragment.ItemListFragment: com.newsblur.util.FeedSet getFeedSet()>();
+
+        $z0 = virtualinvoke $r7.<com.newsblur.util.FeedSet: boolean isFilterSaved()>();
+
+        if $z0 == 0 goto label5;
+
+        interfaceinvoke $r1.<android.view.ContextMenu: void removeItem(int)>(2131427566);
+
+        interfaceinvoke $r1.<android.view.ContextMenu: void removeItem(int)>(2131427565);
+
+     label3:
+        $z0 = $r12.<com.newsblur.domain.Story: boolean starred>;
+
+        if $z0 == 0 goto label7;
+
+        interfaceinvoke $r1.<android.view.ContextMenu: void removeItem(int)>(2131427569);
+
+        return;
+
+     label4:
+        virtualinvoke $r5.<android.view.MenuInflater: void inflate(int,android.view.Menu)>(2131361797, $r1);
+
+        goto label2;
+
+     label5:
+        $z0 = $r12.<com.newsblur.domain.Story: boolean read>;
+
+        if $z0 == 0 goto label6;
+
+        interfaceinvoke $r1.<android.view.ContextMenu: void removeItem(int)>(2131427566);
+
+        goto label3;
+
+     label6:
+        interfaceinvoke $r1.<android.view.ContextMenu: void removeItem(int)>(2131427565);
+
+        goto label3;
+
+     label7:
+        interfaceinvoke $r1.<android.view.ContextMenu: void removeItem(int)>(2131427570);
+
+     label8:
+        return;
+    }
+    public android.content.Loader onCreateLoader(int, android.os.Bundle)
+    {
+        com.newsblur.fragment.ItemListFragment r0;
+        int $i0;
+        android.os.Bundle $r1;
+        com.newsblur.util.FeedSet $r2;
+        java.lang.Class $r3;
+        java.lang.String $r4;
+        android.app.Activity $r5;
+        boolean $z0;
+        com.newsblur.database.BlurDatabaseHelper $r6;
+        android.content.Loader $r7;
+        java.lang.Exception $r8;
+
+        r0 := @this: com.newsblur.fragment.ItemListFragment;
+
+        $i0 := @parameter0: int;
+
+        $r1 := @parameter1: android.os.Bundle;
+
+        $r2 = virtualinvoke r0.<com.newsblur.fragment.ItemListFragment: com.newsblur.util.FeedSet getFeedSet()>();
+
+        if $r2 != null goto label3;
+
+        $r3 = virtualinvoke r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r4 = virtualinvoke $r3.<java.lang.Class: java.lang.String getName()>();
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String)>($r4, "can\'t create fragment, no feedset ready");
+
+     label1:
+        $r5 = virtualinvoke r0.<com.newsblur.fragment.ItemListFragment: android.app.Activity getActivity()>();
+
+        virtualinvoke $r5.<android.app.Activity: void finish()>();
+
+     label2:
+        return null;
+
+     label3:
+        $z0 = virtualinvoke $r2.<com.newsblur.util.FeedSet: boolean isMuted()>();
+
+        if $z0 == 0 goto label4;
+
+        specialinvoke r0.<com.newsblur.fragment.ItemListFragment: void updateLoadingMessage()>();
+
+        return null;
+
+     label4:
+        $r6 = <com.newsblur.util.FeedUtils: com.newsblur.database.BlurDatabaseHelper dbHelper>;
+
+        $r2 = virtualinvoke r0.<com.newsblur.fragment.ItemListFragment: com.newsblur.util.FeedSet getFeedSet()>();
+
+        $r7 = virtualinvoke $r6.<com.newsblur.database.BlurDatabaseHelper: android.content.Loader getActiveStoriesLoader(com.newsblur.util.FeedSet)>($r2);
+
+        return $r7;
+
+     label5:
+        $r8 := @caughtexception;
+
+        return null;
+
+        catch java.lang.Exception from label1 to label2 with label5;
+    }
+    public android.view.View onCreateView(android.view.LayoutInflater, android.view.ViewGroup, android.os.Bundle)
+    {
+        com.newsblur.fragment.ItemListFragment r0;
+        android.view.LayoutInflater $r1;
+        android.view.ViewGroup $r2;
+        android.os.Bundle $r3;
+        android.view.View $r4, $r9, $r10;
+        com.newsblur.activity.ItemsList $r5;
+        boolean $z0, $z1;
+        com.newsblur.view.ProgressThrobber $r6;
+        int[] $r7;
+        android.app.Activity $r8;
+        int $i0;
+        android.widget.ListView $r11;
+        com.newsblur.database.StoryItemsAdapter $r12;
+
+        r0 := @this: com.newsblur.fragment.ItemListFragment;
+
+        $r1 := @parameter0: android.view.LayoutInflater;
+
+        $r2 := @parameter1: android.view.ViewGroup;
+
+        $r3 := @parameter2: android.os.Bundle;
+
+        $r4 = virtualinvoke $r1.<android.view.LayoutInflater: android.view.View inflate(int,android.view.ViewGroup)>(2130903057, null);
+
+        staticinvoke <butterknife.ButterKnife: void bind(java.lang.Object,android.view.View)>(r0, $r4);
+
+        $r5 = r0.<com.newsblur.fragment.ItemListFragment: com.newsblur.activity.ItemsList activity>;
+
+        $z0 = staticinvoke <com.newsblur.util.ViewUtils: boolean isPowerSaveMode(android.content.Context)>($r5);
+
+        $r6 = r0.<com.newsblur.fragment.ItemListFragment: com.newsblur.view.ProgressThrobber emptyProgressView>;
+
+        if $z0 != 0 goto label4;
+
+        $z1 = 1;
+
+     label1:
+        virtualinvoke $r6.<com.newsblur.view.ProgressThrobber: void setEnabled(boolean)>($z1);
+
+        $r6 = r0.<com.newsblur.fragment.ItemListFragment: com.newsblur.view.ProgressThrobber emptyProgressView>;
+
+        $r7 = newarray (int)[4];
+
+        $r8 = virtualinvoke r0.<com.newsblur.fragment.ItemListFragment: android.app.Activity getActivity()>();
+
+        $i0 = staticinvoke <com.newsblur.util.UIUtils: int getColor(android.content.Context,int)>($r8, 2131165253);
+
+        $r7[0] = $i0;
+
+        $r8 = virtualinvoke r0.<com.newsblur.fragment.ItemListFragment: android.app.Activity getActivity()>();
+
+        $i0 = staticinvoke <com.newsblur.util.UIUtils: int getColor(android.content.Context,int)>($r8, 2131165254);
+
+        $r7[1] = $i0;
+
+        $r8 = virtualinvoke r0.<com.newsblur.fragment.ItemListFragment: android.app.Activity getActivity()>();
+
+        $i0 = staticinvoke <com.newsblur.util.UIUtils: int getColor(android.content.Context,int)>($r8, 2131165255);
+
+        $r7[2] = $i0;
+
+        $r8 = virtualinvoke r0.<com.newsblur.fragment.ItemListFragment: android.app.Activity getActivity()>();
+
+        $i0 = staticinvoke <com.newsblur.util.UIUtils: int getColor(android.content.Context,int)>($r8, 2131165256);
+
+        $r7[3] = $i0;
+
+        virtualinvoke $r6.<com.newsblur.view.ProgressThrobber: void setColors(int[])>($r7);
+
+        $r9 = virtualinvoke $r1.<android.view.LayoutInflater: android.view.View inflate(int,android.view.ViewGroup)>(2130903084, null);
+
+        $r10 = virtualinvoke $r9.<android.view.View: android.view.View findViewById(int)>(2131427504);
+
+        $r6 = (com.newsblur.view.ProgressThrobber) $r10;
+
+        r0.<com.newsblur.fragment.ItemListFragment: com.newsblur.view.ProgressThrobber headerProgressView> = $r6;
+
+        $r6 = r0.<com.newsblur.fragment.ItemListFragment: com.newsblur.view.ProgressThrobber headerProgressView>;
+
+        if $z0 != 0 goto label5;
+
+        $z1 = 1;
+
+     label2:
+        virtualinvoke $r6.<com.newsblur.view.ProgressThrobber: void setEnabled(boolean)>($z1);
+
+        $r6 = r0.<com.newsblur.fragment.ItemListFragment: com.newsblur.view.ProgressThrobber headerProgressView>;
+
+        $r7 = newarray (int)[4];
+
+        $r8 = virtualinvoke r0.<com.newsblur.fragment.ItemListFragment: android.app.Activity getActivity()>();
+
+        $i0 = staticinvoke <com.newsblur.util.UIUtils: int getColor(android.content.Context,int)>($r8, 2131165253);
+
+        $r7[0] = $i0;
+
+        $r8 = virtualinvoke r0.<com.newsblur.fragment.ItemListFragment: android.app.Activity getActivity()>();
+
+        $i0 = staticinvoke <com.newsblur.util.UIUtils: int getColor(android.content.Context,int)>($r8, 2131165254);
+
+        $r7[1] = $i0;
+
+        $r8 = virtualinvoke r0.<com.newsblur.fragment.ItemListFragment: android.app.Activity getActivity()>();
+
+        $i0 = staticinvoke <com.newsblur.util.UIUtils: int getColor(android.content.Context,int)>($r8, 2131165255);
+
+        $r7[2] = $i0;
+
+        $r8 = virtualinvoke r0.<com.newsblur.fragment.ItemListFragment: android.app.Activity getActivity()>();
+
+        $i0 = staticinvoke <com.newsblur.util.UIUtils: int getColor(android.content.Context,int)>($r8, 2131165256);
+
+        $r7[3] = $i0;
+
+        virtualinvoke $r6.<com.newsblur.view.ProgressThrobber: void setColors(int[])>($r7);
+
+        $r11 = r0.<com.newsblur.fragment.ItemListFragment: android.widget.ListView itemList>;
+
+        virtualinvoke $r11.<android.widget.ListView: void addHeaderView(android.view.View,java.lang.Object,boolean)>($r9, null, 0);
+
+        $r9 = virtualinvoke $r1.<android.view.LayoutInflater: android.view.View inflate(int,android.view.ViewGroup)>(2130903084, null);
+
+        $r10 = virtualinvoke $r9.<android.view.View: android.view.View findViewById(int)>(2131427504);
+
+        $r6 = (com.newsblur.view.ProgressThrobber) $r10;
+
+        r0.<com.newsblur.fragment.ItemListFragment: com.newsblur.view.ProgressThrobber footerProgressView> = $r6;
+
+        $r6 = r0.<com.newsblur.fragment.ItemListFragment: com.newsblur.view.ProgressThrobber footerProgressView>;
+
+        if $z0 != 0 goto label6;
+
+        $z0 = 1;
+
+     label3:
+        virtualinvoke $r6.<com.newsblur.view.ProgressThrobber: void setEnabled(boolean)>($z0);
+
+        $r6 = r0.<com.newsblur.fragment.ItemListFragment: com.newsblur.view.ProgressThrobber footerProgressView>;
+
+        $r7 = newarray (int)[4];
+
+        $r8 = virtualinvoke r0.<com.newsblur.fragment.ItemListFragment: android.app.Activity getActivity()>();
+
+        $i0 = staticinvoke <com.newsblur.util.UIUtils: int getColor(android.content.Context,int)>($r8, 2131165253);
+
+        $r7[0] = $i0;
+
+        $r8 = virtualinvoke r0.<com.newsblur.fragment.ItemListFragment: android.app.Activity getActivity()>();
+
+        $i0 = staticinvoke <com.newsblur.util.UIUtils: int getColor(android.content.Context,int)>($r8, 2131165254);
+
+        $r7[1] = $i0;
+
+        $r8 = virtualinvoke r0.<com.newsblur.fragment.ItemListFragment: android.app.Activity getActivity()>();
+
+        $i0 = staticinvoke <com.newsblur.util.UIUtils: int getColor(android.content.Context,int)>($r8, 2131165255);
+
+        $r7[2] = $i0;
+
+        $r8 = virtualinvoke r0.<com.newsblur.fragment.ItemListFragment: android.app.Activity getActivity()>();
+
+        $i0 = staticinvoke <com.newsblur.util.UIUtils: int getColor(android.content.Context,int)>($r8, 2131165256);
+
+        $r7[3] = $i0;
+
+        virtualinvoke $r6.<com.newsblur.view.ProgressThrobber: void setColors(int[])>($r7);
+
+        $r11 = r0.<com.newsblur.fragment.ItemListFragment: android.widget.ListView itemList>;
+
+        virtualinvoke $r11.<android.widget.ListView: void addFooterView(android.view.View,java.lang.Object,boolean)>($r9, null, 0);
+
+        $r9 = virtualinvoke $r1.<android.view.LayoutInflater: android.view.View inflate(int,android.view.ViewGroup)>(2130903081, null);
+
+        r0.<com.newsblur.fragment.ItemListFragment: android.view.View fleuronFooter> = $r9;
+
+        $r9 = r0.<com.newsblur.fragment.ItemListFragment: android.view.View fleuronFooter>;
+
+        virtualinvoke $r9.<android.view.View: void setVisibility(int)>(8);
+
+        $r11 = r0.<com.newsblur.fragment.ItemListFragment: android.widget.ListView itemList>;
+
+        $r9 = r0.<com.newsblur.fragment.ItemListFragment: android.view.View fleuronFooter>;
+
+        virtualinvoke $r11.<android.widget.ListView: void addFooterView(android.view.View,java.lang.Object,boolean)>($r9, null, 0);
+
+        $r11 = r0.<com.newsblur.fragment.ItemListFragment: android.widget.ListView itemList>;
+
+        $r9 = virtualinvoke $r4.<android.view.View: android.view.View findViewById(int)>(2131427334);
+
+        virtualinvoke $r11.<android.widget.ListView: void setEmptyView(android.view.View)>($r9);
+
+        $r11 = r0.<com.newsblur.fragment.ItemListFragment: android.widget.ListView itemList>;
+
+        virtualinvoke r0.<com.newsblur.fragment.ItemListFragment: void setupGestureDetector(android.view.View)>($r11);
+
+        $r11 = r0.<com.newsblur.fragment.ItemListFragment: android.widget.ListView itemList>;
+
+        virtualinvoke $r11.<android.widget.ListView: void setOnScrollListener(android.widget.AbsListView$OnScrollListener)>(r0);
+
+        $r11 = r0.<com.newsblur.fragment.ItemListFragment: android.widget.ListView itemList>;
+
+        virtualinvoke $r11.<android.widget.ListView: void setOnItemClickListener(android.widget.AdapterView$OnItemClickListener)>(r0);
+
+        $r11 = r0.<com.newsblur.fragment.ItemListFragment: android.widget.ListView itemList>;
+
+        virtualinvoke $r11.<android.widget.ListView: void setOnCreateContextMenuListener(android.view.View$OnCreateContextMenuListener)>(r0);
+
+        $r12 = r0.<com.newsblur.fragment.ItemListFragment: com.newsblur.database.StoryItemsAdapter adapter>;
+
+        if $r12 == null goto label7;
+
+        $r11 = r0.<com.newsblur.fragment.ItemListFragment: android.widget.ListView itemList>;
+
+        $r12 = r0.<com.newsblur.fragment.ItemListFragment: com.newsblur.database.StoryItemsAdapter adapter>;
+
+        virtualinvoke $r11.<android.widget.ListView: void setAdapter(android.widget.ListAdapter)>($r12);
+
+        return $r4;
+
+     label4:
+        $z1 = 0;
+
+        goto label1;
+
+     label5:
+        $z1 = 0;
+
+        goto label2;
+
+     label6:
+        $z0 = 0;
+
+        goto label3;
+
+     label7:
+        return $r4;
+    }
+    public void onItemClick(android.widget.AdapterView, android.view.View, int, long)
+    {
+        com.newsblur.fragment.ItemListFragment r0;
+        android.widget.AdapterView r1;
+        android.view.View $r2;
+        int $i0, $i2;
+        long $l1;
+        boolean $z0;
+        com.newsblur.database.StoryItemsAdapter $r3;
+        com.newsblur.domain.Story $r4;
+        android.app.Activity $r5;
+        com.newsblur.util.FeedSet $r6;
+        java.lang.String $r7;
+        java.lang.Throwable $r8;
+
+        r0 := @this: com.newsblur.fragment.ItemListFragment;
+
+        r1 := @parameter0: android.widget.AdapterView;
+
+        $r2 := @parameter1: android.view.View;
+
+        $i0 := @parameter2: int;
+
+        $l1 := @parameter3: long;
+
+        entermonitor r0;
+
+     label1:
+        $z0 = r0.<com.newsblur.fragment.ItemListFragment: boolean gestureDebounce>;
+
+        if $z0 == 0 goto label3;
+
+        r0.<com.newsblur.fragment.ItemListFragment: boolean gestureDebounce> = 0;
+
+     label2:
+        exitmonitor r0;
+
+        return;
+
+     label3:
+        $i2 = r0.<com.newsblur.fragment.ItemListFragment: int gestureLeftToRightFlag>;
+
+        if $i2 > -1 goto label2;
+
+        $i2 = r0.<com.newsblur.fragment.ItemListFragment: int gestureRightToLeftFlag>;
+
+        if $i2 > -1 goto label2;
+
+        $i0 = $i0 + -1;
+
+        $r3 = r0.<com.newsblur.fragment.ItemListFragment: com.newsblur.database.StoryItemsAdapter adapter>;
+
+        $r4 = virtualinvoke $r3.<com.newsblur.database.StoryItemsAdapter: com.newsblur.domain.Story getStory(int)>($i0);
+
+        if $r4 == null goto label2;
+
+        $r5 = virtualinvoke r0.<com.newsblur.fragment.ItemListFragment: android.app.Activity getActivity()>();
+
+        $z0 = virtualinvoke $r5.<android.app.Activity: boolean isFinishing()>();
+
+        if $z0 != 0 goto label2;
+
+        $r6 = virtualinvoke r0.<com.newsblur.fragment.ItemListFragment: com.newsblur.util.FeedSet getFeedSet()>();
+
+        $r7 = $r4.<com.newsblur.domain.Story: java.lang.String storyHash>;
+
+        $r5 = virtualinvoke r0.<com.newsblur.fragment.ItemListFragment: android.app.Activity getActivity()>();
+
+        staticinvoke <com.newsblur.util.UIUtils: void startReadingActivity(com.newsblur.util.FeedSet,java.lang.String,android.content.Context)>($r6, $r7, $r5);
+
+     label4:
+        goto label2;
+
+     label5:
+        $r8 := @caughtexception;
+
+        exitmonitor r0;
+
+        throw $r8;
+
+        catch java.lang.Throwable from label1 to label2 with label5;
+        catch java.lang.Throwable from label3 to label4 with label5;
+    }
+    public void onLoadFinished(android.content.Loader, android.database.Cursor)
+    {
+        com.newsblur.fragment.ItemListFragment r0;
+        android.content.Loader r1;
+        android.database.Cursor $r2;
+        boolean $z0;
+        com.newsblur.util.FeedSet $r3;
+        java.lang.Class $r4;
+        java.lang.String $r5, $r9;
+        com.newsblur.database.StoryItemsAdapter $r6;
+        java.lang.Throwable $r7;
+        java.lang.StringBuilder $r8;
+        int $i0;
+        java.lang.Integer $r10;
+
+        r0 := @this: com.newsblur.fragment.ItemListFragment;
+
+        r1 := @parameter0: android.content.Loader;
+
+        $r2 := @parameter1: android.database.Cursor;
+
+        entermonitor r0;
+
+     label01:
+        $z0 = r0.<com.newsblur.fragment.ItemListFragment: boolean stopLoading>;
+
+     label02:
+        if $z0 == 0 goto label04;
+
+     label03:
+        exitmonitor r0;
+
+        return;
+
+     label04:
+        if $r2 == null goto label07;
+
+     label05:
+        $r3 = virtualinvoke r0.<com.newsblur.fragment.ItemListFragment: com.newsblur.util.FeedSet getFeedSet()>();
+
+        $z0 = staticinvoke <com.newsblur.service.NBSyncService: boolean isFeedSetReady(com.newsblur.util.FeedSet)>($r3);
+
+        if $z0 != 0 goto label10;
+
+        $r4 = virtualinvoke r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r5 = virtualinvoke $r4.<java.lang.Class: java.lang.String getName()>();
+
+        staticinvoke <com.newsblur.util.Log: void i(java.lang.String,java.lang.String)>($r5, "stale load");
+
+        $r6 = r0.<com.newsblur.fragment.ItemListFragment: com.newsblur.database.StoryItemsAdapter adapter>;
+
+        virtualinvoke $r6.<com.newsblur.database.StoryItemsAdapter: void setShowNone(boolean)>(1);
+
+        virtualinvoke r0.<com.newsblur.fragment.ItemListFragment: void setLoading(boolean)>(1);
+
+        specialinvoke r0.<com.newsblur.fragment.ItemListFragment: void triggerRefresh(int,java.lang.Integer)>(1, null);
+
+     label06:
+        $r6 = r0.<com.newsblur.fragment.ItemListFragment: com.newsblur.database.StoryItemsAdapter adapter>;
+
+        virtualinvoke $r6.<com.newsblur.database.StoryItemsAdapter: android.database.Cursor swapCursor(android.database.Cursor)>($r2);
+
+     label07:
+        specialinvoke r0.<com.newsblur.fragment.ItemListFragment: void updateLoadingMessage()>();
+
+     label08:
+        goto label03;
+
+     label09:
+        $r7 := @caughtexception;
+
+        exitmonitor r0;
+
+        throw $r7;
+
+     label10:
+        r0.<com.newsblur.fragment.ItemListFragment: boolean cursorSeenYet> = 1;
+
+        $r4 = virtualinvoke r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r5 = virtualinvoke $r4.<java.lang.Class: java.lang.String getName()>();
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("loaded cursor with count: ");
+
+        $i0 = interfaceinvoke $r2.<android.database.Cursor: int getCount()>();
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.newsblur.util.Log: void d(java.lang.String,java.lang.String)>($r5, $r9);
+
+        $i0 = interfaceinvoke $r2.<android.database.Cursor: int getCount()>();
+
+        if $i0 >= 1 goto label11;
+
+        $r10 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(0);
+
+        specialinvoke r0.<com.newsblur.fragment.ItemListFragment: void triggerRefresh(int,java.lang.Integer)>(1, $r10);
+
+     label11:
+        $r6 = r0.<com.newsblur.fragment.ItemListFragment: com.newsblur.database.StoryItemsAdapter adapter>;
+
+        virtualinvoke $r6.<com.newsblur.database.StoryItemsAdapter: void setShowNone(boolean)>(0);
+
+     label12:
+        goto label06;
+
+        catch java.lang.Throwable from label01 to label02 with label09;
+        catch java.lang.Throwable from label05 to label08 with label09;
+        catch java.lang.Throwable from label10 to label12 with label09;
+    }
+    public volatile void onLoadFinished(android.content.Loader, java.lang.Object)
+    {
+        com.newsblur.fragment.ItemListFragment r0;
+        android.content.Loader $r1;
+        java.lang.Object $r2;
+        android.database.Cursor $r3;
+
+        r0 := @this: com.newsblur.fragment.ItemListFragment;
+
+        $r1 := @parameter0: android.content.Loader;
+
+        $r2 := @parameter1: java.lang.Object;
+
+        $r3 = (android.database.Cursor) $r2;
+
+        virtualinvoke r0.<com.newsblur.fragment.ItemListFragment: void onLoadFinished(android.content.Loader,android.database.Cursor)>($r1, $r3);
+
+        return;
+    }
+    public void onLoaderReset(android.content.Loader)
+    {
+        com.newsblur.fragment.ItemListFragment r0;
+        android.content.Loader r1;
+        com.newsblur.database.StoryItemsAdapter $r2;
+
+        r0 := @this: com.newsblur.fragment.ItemListFragment;
+
+        r1 := @parameter0: android.content.Loader;
+
+        $r2 = r0.<com.newsblur.fragment.ItemListFragment: com.newsblur.database.StoryItemsAdapter adapter>;
+
+        if $r2 == null goto label1;
+
+        $r2 = r0.<com.newsblur.fragment.ItemListFragment: com.newsblur.database.StoryItemsAdapter adapter>;
+
+        virtualinvoke $r2.<com.newsblur.database.StoryItemsAdapter: void notifyDataSetInvalidated()>();
+
+     label1:
+        return;
+    }
+    public void onPause()
+    {
+        com.newsblur.fragment.ItemListFragment r0;
+
+        r0 := @this: com.newsblur.fragment.ItemListFragment;
+
+        r0.<com.newsblur.fragment.ItemListFragment: boolean cursorSeenYet> = 0;
+
+        specialinvoke r0.<com.newsblur.fragment.NbFragment: void onPause()>();
+
+        return;
+    }
+    public void onResume()
+    {
+        com.newsblur.fragment.ItemListFragment r0;
+        com.newsblur.database.StoryItemsAdapter $r1;
+        boolean $z0;
+        java.lang.Class $r2;
+        java.lang.String $r3;
+        android.app.Activity $r4;
+
+        r0 := @this: com.newsblur.fragment.ItemListFragment;
+
+        $r1 = r0.<com.newsblur.fragment.ItemListFragment: com.newsblur.database.StoryItemsAdapter adapter>;
+
+        if $r1 == null goto label1;
+
+        $r1 = r0.<com.newsblur.fragment.ItemListFragment: com.newsblur.database.StoryItemsAdapter adapter>;
+
+        $z0 = virtualinvoke $r1.<com.newsblur.database.StoryItemsAdapter: boolean isStale()>();
+
+        if $z0 == 0 goto label1;
+
+        $r2 = virtualinvoke r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r3 = virtualinvoke $r2.<java.lang.Class: java.lang.String getName()>();
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String)>($r3, "stale fragment loaded, falling back.");
+
+        $r4 = virtualinvoke r0.<com.newsblur.fragment.ItemListFragment: android.app.Activity getActivity()>();
+
+        virtualinvoke $r4.<android.app.Activity: void finish()>();
+
+     label1:
+        specialinvoke r0.<com.newsblur.fragment.NbFragment: void onResume()>();
+
+        return;
+    }
+    public void onScroll(android.widget.AbsListView, int, int, int)
+    {
+        com.newsblur.fragment.ItemListFragment r0;
+        android.widget.AbsListView $r1;
+        int $i0, $i1, $i2;
+        java.lang.String $r2, $r7;
+        boolean $z0;
+        java.lang.Integer $r3;
+        android.app.Activity $r4;
+        com.newsblur.database.StoryItemsAdapter $r5;
+        com.newsblur.domain.Story $r6;
+        java.lang.Throwable $r8;
+
+        r0 := @this: com.newsblur.fragment.ItemListFragment;
+
+        $r1 := @parameter0: android.widget.AbsListView;
+
+        $i0 := @parameter1: int;
+
+        $i1 := @parameter2: int;
+
+        $i2 := @parameter3: int;
+
+        entermonitor r0;
+
+     label1:
+        $z0 = r0.<com.newsblur.fragment.ItemListFragment: boolean cursorSeenYet>;
+
+     label2:
+        if $z0 != 0 goto label4;
+
+     label3:
+        exitmonitor r0;
+
+        return;
+
+     label4:
+        $i2 = $i2 + -2;
+
+        if $i2 >= 0 goto label5;
+
+        $i2 = 0;
+
+     label5:
+        $i1 = $i1 * 2;
+
+        $i1 = $i1 + $i0;
+
+        $i1 = $i1 + 1;
+
+     label6:
+        $r3 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i2);
+
+        specialinvoke r0.<com.newsblur.fragment.ItemListFragment: void triggerRefresh(int,java.lang.Integer)>($i1, $r3);
+
+        if $i2 <= 0 goto label3;
+
+        if $i0 <= 0 goto label3;
+
+        $r4 = virtualinvoke r0.<com.newsblur.fragment.ItemListFragment: android.app.Activity getActivity()>();
+
+        $z0 = staticinvoke <com.newsblur.util.PrefsUtils: boolean isMarkReadOnScroll(android.content.Context)>($r4);
+
+        if $z0 == 0 goto label3;
+
+        $i0 = $i0 + -1;
+
+        $r5 = r0.<com.newsblur.fragment.ItemListFragment: com.newsblur.database.StoryItemsAdapter adapter>;
+
+        $r6 = virtualinvoke $r5.<com.newsblur.database.StoryItemsAdapter: com.newsblur.domain.Story getStory(int)>($i0);
+
+        $r7 = $r6.<com.newsblur.domain.Story: java.lang.String storyHash>;
+
+        $r2 = r0.<com.newsblur.fragment.ItemListFragment: java.lang.String lastAutoMarkHash>;
+
+        $z0 = virtualinvoke $r7.<java.lang.String: boolean equals(java.lang.Object)>($r2);
+
+        if $z0 != 0 goto label3;
+
+        $r2 = $r6.<com.newsblur.domain.Story: java.lang.String storyHash>;
+
+        r0.<com.newsblur.fragment.ItemListFragment: java.lang.String lastAutoMarkHash> = $r2;
+
+        $r4 = virtualinvoke r0.<com.newsblur.fragment.ItemListFragment: android.app.Activity getActivity()>();
+
+        staticinvoke <com.newsblur.util.FeedUtils: void markStoryAsRead(com.newsblur.domain.Story,android.content.Context)>($r6, $r4);
+
+     label7:
+        goto label3;
+
+     label8:
+        $r8 := @caughtexception;
+
+        exitmonitor r0;
+
+        throw $r8;
+
+        catch java.lang.Throwable from label1 to label2 with label8;
+        catch java.lang.Throwable from label6 to label7 with label8;
+    }
+    public void onScrollStateChanged(android.widget.AbsListView, int)
+    {
+        com.newsblur.fragment.ItemListFragment r0;
+        android.widget.AbsListView $r1;
+        int $i0;
+
+        r0 := @this: com.newsblur.fragment.ItemListFragment;
+
+        $r1 := @parameter0: android.widget.AbsListView;
+
+        $i0 := @parameter1: int;
+
+        return;
+    }
+    public void onStart()
+    {
+        com.newsblur.fragment.ItemListFragment r0;
+        int $i0;
+        android.app.LoaderManager $r1;
+
+        r0 := @this: com.newsblur.fragment.ItemListFragment;
+
+        specialinvoke r0.<com.newsblur.fragment.NbFragment: void onStart()>();
+
+        r0.<com.newsblur.fragment.ItemListFragment: boolean stopLoading> = 0;
+
+        $r1 = virtualinvoke r0.<com.newsblur.fragment.ItemListFragment: android.app.LoaderManager getLoaderManager()>();
+
+        $i0 = <com.newsblur.fragment.ItemListFragment: int ITEMLIST_LOADER>;
+
+        virtualinvoke $r1.<android.app.LoaderManager: android.content.Loader initLoader(int,android.os.Bundle,android.app.LoaderManager$LoaderCallbacks)>($i0, null, r0);
+
+        return;
+    }
+    public void resetEmptyState()
+    {
+        com.newsblur.fragment.ItemListFragment r0;
+        com.newsblur.database.StoryItemsAdapter $r1;
+        com.newsblur.database.BlurDatabaseHelper $r2;
+
+        r0 := @this: com.newsblur.fragment.ItemListFragment;
+
+        $r1 = r0.<com.newsblur.fragment.ItemListFragment: com.newsblur.database.StoryItemsAdapter adapter>;
+
+        if $r1 == null goto label1;
+
+        $r1 = r0.<com.newsblur.fragment.ItemListFragment: com.newsblur.database.StoryItemsAdapter adapter>;
+
+        virtualinvoke $r1.<com.newsblur.database.StoryItemsAdapter: void notifyDataSetInvalidated()>();
+
+     label1:
+        r0.<com.newsblur.fragment.ItemListFragment: boolean cursorSeenYet> = 0;
+
+        $r2 = <com.newsblur.util.FeedUtils: com.newsblur.database.BlurDatabaseHelper dbHelper>;
+
+        virtualinvoke $r2.<com.newsblur.database.BlurDatabaseHelper: void clearStorySession()>();
+
+        return;
+    }
+    public void scrollToTop()
+    {
+        com.newsblur.fragment.ItemListFragment r0;
+        android.widget.ListView $r1;
+        java.lang.Class $r2;
+        java.lang.String $r3;
+
+        r0 := @this: com.newsblur.fragment.ItemListFragment;
+
+        $r1 = r0.<com.newsblur.fragment.ItemListFragment: android.widget.ListView itemList>;
+
+        if $r1 != null goto label1;
+
+        $r2 = virtualinvoke r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r3 = virtualinvoke $r2.<java.lang.Class: java.lang.String getName()>();
+
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String)>($r3, "ItemListFragment does not have the expected ListView.");
+
+        return;
+
+     label1:
+        $r1 = r0.<com.newsblur.fragment.ItemListFragment: android.widget.ListView itemList>;
+
+        virtualinvoke $r1.<android.widget.ListView: void setSelection(int)>(0);
+
+        return;
+    }
+    public void setLoading(boolean)
+    {
+        com.newsblur.fragment.ItemListFragment r0;
+        boolean $z0;
+        android.view.View $r1;
+        com.newsblur.util.FeedSet $r2;
+        com.newsblur.view.ProgressThrobber $r3;
+
+        r0 := @this: com.newsblur.fragment.ItemListFragment;
+
+        $z0 := @parameter0: boolean;
+
+        $r1 = r0.<com.newsblur.fragment.ItemListFragment: android.view.View fleuronFooter>;
+
+        if $r1 == null goto label4;
+
+        if $z0 == 0 goto label3;
+
+        $r2 = virtualinvoke r0.<com.newsblur.fragment.ItemListFragment: com.newsblur.util.FeedSet getFeedSet()>();
+
+        $z0 = staticinvoke <com.newsblur.service.NBSyncService: boolean isFeedSetStoriesFresh(com.newsblur.util.FeedSet)>($r2);
+
+        if $z0 == 0 goto label2;
+
+        $r3 = r0.<com.newsblur.fragment.ItemListFragment: com.newsblur.view.ProgressThrobber headerProgressView>;
+
+        virtualinvoke $r3.<com.newsblur.view.ProgressThrobber: void setVisibility(int)>(4);
+
+        $r3 = r0.<com.newsblur.fragment.ItemListFragment: com.newsblur.view.ProgressThrobber footerProgressView>;
+
+        virtualinvoke $r3.<com.newsblur.view.ProgressThrobber: void setVisibility(int)>(0);
+
+     label1:
+        $r3 = r0.<com.newsblur.fragment.ItemListFragment: com.newsblur.view.ProgressThrobber emptyProgressView>;
+
+        virtualinvoke $r3.<com.newsblur.view.ProgressThrobber: void setVisibility(int)>(0);
+
+        $r1 = r0.<com.newsblur.fragment.ItemListFragment: android.view.View fleuronFooter>;
+
+        virtualinvoke $r1.<android.view.View: void setVisibility(int)>(8);
+
+        return;
+
+     label2:
+        $r3 = r0.<com.newsblur.fragment.ItemListFragment: com.newsblur.view.ProgressThrobber headerProgressView>;
+
+        virtualinvoke $r3.<com.newsblur.view.ProgressThrobber: void setVisibility(int)>(0);
+
+        $r3 = r0.<com.newsblur.fragment.ItemListFragment: com.newsblur.view.ProgressThrobber footerProgressView>;
+
+        virtualinvoke $r3.<com.newsblur.view.ProgressThrobber: void setVisibility(int)>(8);
+
+        goto label1;
+
+     label3:
+        $r3 = r0.<com.newsblur.fragment.ItemListFragment: com.newsblur.view.ProgressThrobber headerProgressView>;
+
+        virtualinvoke $r3.<com.newsblur.view.ProgressThrobber: void setVisibility(int)>(4);
+
+        $r3 = r0.<com.newsblur.fragment.ItemListFragment: com.newsblur.view.ProgressThrobber footerProgressView>;
+
+        virtualinvoke $r3.<com.newsblur.view.ProgressThrobber: void setVisibility(int)>(8);
+
+        $r3 = r0.<com.newsblur.fragment.ItemListFragment: com.newsblur.view.ProgressThrobber emptyProgressView>;
+
+        virtualinvoke $r3.<com.newsblur.view.ProgressThrobber: void setVisibility(int)>(8);
+
+        $z0 = r0.<com.newsblur.fragment.ItemListFragment: boolean cursorSeenYet>;
+
+        if $z0 == 0 goto label4;
+
+        $r2 = virtualinvoke r0.<com.newsblur.fragment.ItemListFragment: com.newsblur.util.FeedSet getFeedSet()>();
+
+        $z0 = staticinvoke <com.newsblur.service.NBSyncService: boolean isFeedSetExhausted(com.newsblur.util.FeedSet)>($r2);
+
+        if $z0 == 0 goto label4;
+
+        $r1 = r0.<com.newsblur.fragment.ItemListFragment: android.view.View fleuronFooter>;
+
+        virtualinvoke $r1.<android.view.View: void setVisibility(int)>(0);
+
+     label4:
+        return;
+    }
+    public void setTextSize(java.lang.Float)
+    {
+        com.newsblur.fragment.ItemListFragment r0;
+        java.lang.Float $r1;
+        float $f0;
+        com.newsblur.database.StoryItemsAdapter $r2;
+
+        r0 := @this: com.newsblur.fragment.ItemListFragment;
+
+        $r1 := @parameter0: java.lang.Float;
+
+        $r2 = r0.<com.newsblur.fragment.ItemListFragment: com.newsblur.database.StoryItemsAdapter adapter>;
+
+        if $r2 == null goto label1;
+
+        $r2 = r0.<com.newsblur.fragment.ItemListFragment: com.newsblur.database.StoryItemsAdapter adapter>;
+
+        $f0 = virtualinvoke $r1.<java.lang.Float: float floatValue()>();
+
+        virtualinvoke $r2.<com.newsblur.database.StoryItemsAdapter: void setTextSize(float)>($f0);
+
+        $r2 = r0.<com.newsblur.fragment.ItemListFragment: com.newsblur.database.StoryItemsAdapter adapter>;
+
+        virtualinvoke $r2.<com.newsblur.database.StoryItemsAdapter: void notifyDataSetChanged()>();
+
+     label1:
+        return;
+    }
+    protected void setupGestureDetector(android.view.View)
+    {
+        com.newsblur.fragment.ItemListFragment r0;
+        android.view.View $r1;
+        android.view.GestureDetector r2;
+        com.newsblur.fragment.ItemListFragment$ItemListGestureDetector $r3;
+        android.app.Activity $r4;
+        com.newsblur.fragment.ItemListFragment$1 $r5;
+
+        r0 := @this: com.newsblur.fragment.ItemListFragment;
+
+        $r1 := @parameter0: android.view.View;
+
+        r2 = new android.view.GestureDetector;
+
+        $r4 = virtualinvoke r0.<com.newsblur.fragment.ItemListFragment: android.app.Activity getActivity()>();
+
+        $r3 = new com.newsblur.fragment.ItemListFragment$ItemListGestureDetector;
+
+        specialinvoke $r3.<com.newsblur.fragment.ItemListFragment$ItemListGestureDetector: void <init>(com.newsblur.fragment.ItemListFragment)>(r0);
+
+        specialinvoke r2.<android.view.GestureDetector: void <init>(android.content.Context,android.view.GestureDetector$OnGestureListener)>($r4, $r3);
+
+        $r5 = new com.newsblur.fragment.ItemListFragment$1;
+
+        specialinvoke $r5.<com.newsblur.fragment.ItemListFragment$1: void <init>(com.newsblur.fragment.ItemListFragment,android.view.GestureDetector)>(r0, r2);
+
+        virtualinvoke $r1.<android.view.View: void setOnTouchListener(android.view.View$OnTouchListener)>($r5);
+
+        return;
+    }
+    public void stopLoader()
+    {
+        com.newsblur.fragment.ItemListFragment r0;
+
+        r0 := @this: com.newsblur.fragment.ItemListFragment;
+
+        r0.<com.newsblur.fragment.ItemListFragment: boolean stopLoading> = 1;
+
+        return;
+    }

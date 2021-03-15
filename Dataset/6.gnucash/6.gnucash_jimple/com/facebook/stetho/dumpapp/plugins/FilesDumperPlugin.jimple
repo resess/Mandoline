@@ -1,0 +1,770 @@
+com.facebook.stetho.dumpapp.plugins.FilesDumperPlugin extends java.lang.Object implements com.facebook.stetho.dumpapp.DumperPlugin
+private static final java.lang.String NAME
+private final android.content.Context mContext
+    public void <init>(android.content.Context)
+    {
+        com.facebook.stetho.dumpapp.plugins.FilesDumperPlugin r0;
+        android.content.Context $r1;
+
+        r0 := @this: com.facebook.stetho.dumpapp.plugins.FilesDumperPlugin;
+
+        $r1 := @parameter0: android.content.Context;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<com.facebook.stetho.dumpapp.plugins.FilesDumperPlugin: android.content.Context mContext> = $r1;
+
+        return;
+    }
+    private void addFiles(java.util.zip.ZipOutputStream, byte[], java.io.File[]) throws java.io.IOException
+    {
+        com.facebook.stetho.dumpapp.plugins.FilesDumperPlugin r0;
+        java.util.zip.ZipOutputStream $r1;
+        byte[] $r2;
+        java.io.File[] $r3, $r6;
+        java.io.File r4, $r9;
+        java.io.FileInputStream r5;
+        int $i0, $i1;
+        boolean $z0;
+        java.util.zip.ZipEntry $r7;
+        android.content.Context $r8;
+        java.lang.String $r10;
+        java.lang.Throwable $r11;
+
+        r0 := @this: com.facebook.stetho.dumpapp.plugins.FilesDumperPlugin;
+
+        $r1 := @parameter0: java.util.zip.ZipOutputStream;
+
+        $r2 := @parameter1: byte[];
+
+        $r3 := @parameter2: java.io.File[];
+
+        $i0 = lengthof $r3;
+
+        $i1 = 0;
+
+     label1:
+        if $i1 >= $i0 goto label7;
+
+        r4 = $r3[$i1];
+
+        $z0 = virtualinvoke r4.<java.io.File: boolean isDirectory()>();
+
+        if $z0 == 0 goto label3;
+
+        $r6 = virtualinvoke r4.<java.io.File: java.io.File[] listFiles()>();
+
+        specialinvoke r0.<com.facebook.stetho.dumpapp.plugins.FilesDumperPlugin: void addFiles(java.util.zip.ZipOutputStream,byte[],java.io.File[])>($r1, $r2, $r6);
+
+     label2:
+        $i1 = $i1 + 1;
+
+        goto label1;
+
+     label3:
+        $r7 = new java.util.zip.ZipEntry;
+
+        $r8 = r0.<com.facebook.stetho.dumpapp.plugins.FilesDumperPlugin: android.content.Context mContext>;
+
+        $r9 = staticinvoke <com.facebook.stetho.dumpapp.plugins.FilesDumperPlugin: java.io.File getBaseDir(android.content.Context)>($r8);
+
+        $r9 = virtualinvoke $r9.<java.io.File: java.io.File getParentFile()>();
+
+        $r10 = staticinvoke <com.facebook.stetho.dumpapp.plugins.FilesDumperPlugin: java.lang.String relativizePath(java.io.File,java.io.File)>($r9, r4);
+
+        specialinvoke $r7.<java.util.zip.ZipEntry: void <init>(java.lang.String)>($r10);
+
+        virtualinvoke $r1.<java.util.zip.ZipOutputStream: void putNextEntry(java.util.zip.ZipEntry)>($r7);
+
+        r5 = new java.io.FileInputStream;
+
+        specialinvoke r5.<java.io.FileInputStream: void <init>(java.io.File)>(r4);
+
+     label4:
+        staticinvoke <com.facebook.stetho.dumpapp.plugins.FilesDumperPlugin: void copy(java.io.InputStream,java.io.OutputStream,byte[])>(r5, $r1, $r2);
+
+     label5:
+        virtualinvoke r5.<java.io.FileInputStream: void close()>();
+
+        goto label2;
+
+     label6:
+        $r11 := @caughtexception;
+
+        virtualinvoke r5.<java.io.FileInputStream: void close()>();
+
+        throw $r11;
+
+     label7:
+        return;
+
+        catch java.lang.Throwable from label4 to label5 with label6;
+    }
+    private static void copy(java.io.InputStream, java.io.OutputStream, byte[]) throws java.io.IOException
+    {
+        java.io.InputStream $r0;
+        java.io.OutputStream $r1;
+        byte[] $r2;
+        int $i0;
+
+        $r0 := @parameter0: java.io.InputStream;
+
+        $r1 := @parameter1: java.io.OutputStream;
+
+        $r2 := @parameter2: byte[];
+
+     label1:
+        $i0 = virtualinvoke $r0.<java.io.InputStream: int read(byte[])>($r2);
+
+        if $i0 < 0 goto label2;
+
+        virtualinvoke $r1.<java.io.OutputStream: void write(byte[],int,int)>($r2, 0, $i0);
+
+        goto label1;
+
+     label2:
+        return;
+    }
+    private void doDownload(java.io.PrintStream, java.util.Iterator) throws com.facebook.stetho.dumpapp.DumpUsageException
+    {
+        com.facebook.stetho.dumpapp.plugins.FilesDumperPlugin r0;
+        java.io.PrintStream $r1;
+        java.util.Iterator r2;
+        byte[] r3;
+        android.content.Context $r6;
+        java.lang.String $r7, $r9;
+        boolean $z1;
+        java.lang.Object $r8;
+        java.io.File $r10;
+        java.io.OutputStream r11;
+        int $i0;
+        java.io.File[] $r13;
+        java.lang.Object[] $r14;
+        java.lang.Throwable $r15;
+        java.io.IOException r16, r17, r18;
+        java.util.ArrayList $r19;
+        java.io.BufferedOutputStream $r20;
+        java.util.zip.ZipOutputStream $r21;
+        java.io.FileOutputStream $r22;
+        java.lang.RuntimeException $r23;
+
+        r0 := @this: com.facebook.stetho.dumpapp.plugins.FilesDumperPlugin;
+
+        $r1 := @parameter0: java.io.PrintStream;
+
+        r2 := @parameter1: java.util.Iterator;
+
+        $r7 = staticinvoke <com.facebook.stetho.dumpapp.ArgsHelper: java.lang.String nextArg(java.util.Iterator,java.lang.String)>(r2, "Must specify output file or \'-\'");
+
+        $r19 = new java.util.ArrayList;
+
+        specialinvoke $r19.<java.util.ArrayList: void <init>()>();
+
+     label01:
+        $z1 = interfaceinvoke r2.<java.util.Iterator: boolean hasNext()>();
+
+        if $z1 == 0 goto label02;
+
+        $r6 = r0.<com.facebook.stetho.dumpapp.plugins.FilesDumperPlugin: android.content.Context mContext>;
+
+        $r8 = interfaceinvoke r2.<java.util.Iterator: java.lang.Object next()>();
+
+        $r9 = (java.lang.String) $r8;
+
+        $r10 = staticinvoke <com.facebook.stetho.dumpapp.plugins.FilesDumperPlugin: java.io.File resolvePossibleAppStoragePath(android.content.Context,java.lang.String)>($r6, $r9);
+
+        virtualinvoke $r19.<java.util.ArrayList: boolean add(java.lang.Object)>($r10);
+
+        goto label01;
+
+     label02:
+        $r9 = "-";
+
+     label03:
+        $z1 = virtualinvoke $r9.<java.lang.String: boolean equals(java.lang.Object)>($r7);
+
+     label04:
+        if $z1 == 0 goto label12;
+
+        r11 = $r1;
+
+     label05:
+        $r21 = new java.util.zip.ZipOutputStream;
+
+        $r20 = new java.io.BufferedOutputStream;
+
+     label06:
+        specialinvoke $r20.<java.io.BufferedOutputStream: void <init>(java.io.OutputStream)>(r11);
+
+        specialinvoke $r21.<java.util.zip.ZipOutputStream: void <init>(java.io.OutputStream)>($r20);
+
+     label07:
+        r3 = newarray (byte)[2048];
+
+        $i0 = virtualinvoke $r19.<java.util.ArrayList: int size()>();
+
+     label08:
+        if $i0 <= 0 goto label15;
+
+     label09:
+        $i0 = virtualinvoke $r19.<java.util.ArrayList: int size()>();
+
+        $r13 = newarray (java.io.File)[$i0];
+
+        $r14 = virtualinvoke $r19.<java.util.ArrayList: java.lang.Object[] toArray(java.lang.Object[])>($r13);
+
+        $r13 = (java.io.File[]) $r14;
+
+        specialinvoke r0.<com.facebook.stetho.dumpapp.plugins.FilesDumperPlugin: void addFiles(java.util.zip.ZipOutputStream,byte[],java.io.File[])>($r21, r3, $r13);
+
+     label10:
+        virtualinvoke $r21.<java.util.zip.ZipOutputStream: void close()>();
+
+     label11:
+        return;
+
+     label12:
+        $r22 = new java.io.FileOutputStream;
+
+        r11 = $r22;
+
+     label13:
+        $r10 = staticinvoke <com.facebook.stetho.dumpapp.plugins.FilesDumperPlugin: java.io.File resolvePossibleSdcardPath(java.lang.String)>($r7);
+
+        specialinvoke $r22.<java.io.FileOutputStream: void <init>(java.io.File)>($r10);
+
+     label14:
+        goto label05;
+
+     label15:
+        $r6 = r0.<com.facebook.stetho.dumpapp.plugins.FilesDumperPlugin: android.content.Context mContext>;
+
+        $r10 = staticinvoke <com.facebook.stetho.dumpapp.plugins.FilesDumperPlugin: java.io.File getBaseDir(android.content.Context)>($r6);
+
+        $r13 = virtualinvoke $r10.<java.io.File: java.io.File[] listFiles()>();
+
+        specialinvoke r0.<com.facebook.stetho.dumpapp.plugins.FilesDumperPlugin: void addFiles(java.util.zip.ZipOutputStream,byte[],java.io.File[])>($r21, r3, $r13);
+
+     label16:
+        goto label10;
+
+     label17:
+        $r15 := @caughtexception;
+
+     label18:
+        virtualinvoke $r21.<java.util.zip.ZipOutputStream: void close()>();
+
+     label19:
+        throw $r15;
+
+     label20:
+        r16 := @caughtexception;
+
+        $r23 = new java.lang.RuntimeException;
+
+        specialinvoke $r23.<java.lang.RuntimeException: void <init>(java.lang.Throwable)>(r16);
+
+        throw $r23;
+
+     label21:
+        r17 := @caughtexception;
+
+        goto label24;
+
+     label22:
+        staticinvoke <com.facebook.stetho.common.Util: void close(java.io.Closeable,boolean)>(r11, 0);
+
+     label23:
+        throw r17;
+
+     label24:
+        goto label22;
+
+     label25:
+        r18 := @caughtexception;
+
+     label26:
+        staticinvoke <com.facebook.stetho.common.Util: void close(java.io.Closeable,boolean)>(r11, 1);
+
+     label27:
+        goto label19;
+
+        catch java.io.IOException from label03 to label04 with label20;
+        catch java.io.IOException from label06 to label07 with label20;
+        catch java.lang.Throwable from label07 to label08 with label17;
+        catch java.lang.Throwable from label09 to label10 with label17;
+        catch java.io.IOException from label10 to label11 with label21;
+        catch java.io.IOException from label13 to label14 with label20;
+        catch java.lang.Throwable from label15 to label16 with label17;
+        catch java.io.IOException from label18 to label19 with label25;
+        catch java.io.IOException from label19 to label20 with label20;
+        catch java.io.IOException from label22 to label23 with label20;
+        catch java.io.IOException from label23 to label24 with label20;
+        catch java.io.IOException from label26 to label27 with label20;
+    }
+    private void doLs(java.io.PrintStream) throws com.facebook.stetho.dumpapp.DumpUsageException
+    {
+        com.facebook.stetho.dumpapp.plugins.FilesDumperPlugin r0;
+        java.io.PrintStream $r1;
+        android.content.Context $r2;
+        java.io.File $r3;
+        boolean $z0;
+
+        r0 := @this: com.facebook.stetho.dumpapp.plugins.FilesDumperPlugin;
+
+        $r1 := @parameter0: java.io.PrintStream;
+
+        $r2 = r0.<com.facebook.stetho.dumpapp.plugins.FilesDumperPlugin: android.content.Context mContext>;
+
+        $r3 = staticinvoke <com.facebook.stetho.dumpapp.plugins.FilesDumperPlugin: java.io.File getBaseDir(android.content.Context)>($r2);
+
+        $z0 = virtualinvoke $r3.<java.io.File: boolean isDirectory()>();
+
+        if $z0 == 0 goto label1;
+
+        staticinvoke <com.facebook.stetho.dumpapp.plugins.FilesDumperPlugin: void printDirectoryText(java.io.File,java.lang.String,java.io.PrintStream)>($r3, "", $r1);
+
+     label1:
+        return;
+    }
+    private void doTree(java.io.PrintStream) throws com.facebook.stetho.dumpapp.DumpUsageException
+    {
+        com.facebook.stetho.dumpapp.plugins.FilesDumperPlugin r0;
+        java.io.PrintStream $r1;
+        java.io.File $r2;
+        android.content.Context $r3;
+
+        r0 := @this: com.facebook.stetho.dumpapp.plugins.FilesDumperPlugin;
+
+        $r1 := @parameter0: java.io.PrintStream;
+
+        $r3 = r0.<com.facebook.stetho.dumpapp.plugins.FilesDumperPlugin: android.content.Context mContext>;
+
+        $r2 = staticinvoke <com.facebook.stetho.dumpapp.plugins.FilesDumperPlugin: java.io.File getBaseDir(android.content.Context)>($r3);
+
+        staticinvoke <com.facebook.stetho.dumpapp.plugins.FilesDumperPlugin: void printDirectoryVisual(java.io.File,int,java.io.PrintStream)>($r2, 0, $r1);
+
+        return;
+    }
+    private void doUsage(java.io.PrintStream)
+    {
+        com.facebook.stetho.dumpapp.plugins.FilesDumperPlugin r0;
+        java.io.PrintStream $r1;
+        java.lang.StringBuilder $r2;
+        java.lang.String $r3;
+
+        r0 := @this: com.facebook.stetho.dumpapp.plugins.FilesDumperPlugin;
+
+        $r1 := @parameter0: java.io.PrintStream;
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Usage: dumpapp files ");
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("<command> [command-options]");
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r1.<java.io.PrintStream: void println(java.lang.String)>($r3);
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("       dumpapp files ");
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("ls");
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r1.<java.io.PrintStream: void println(java.lang.String)>($r3);
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("       dumpapp files ");
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("tree");
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r1.<java.io.PrintStream: void println(java.lang.String)>($r3);
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("       dumpapp files ");
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("download <output.zip> [<path>...]");
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r1.<java.io.PrintStream: void println(java.lang.String)>($r3);
+
+        virtualinvoke $r1.<java.io.PrintStream: void println()>();
+
+        virtualinvoke $r1.<java.io.PrintStream: void println(java.lang.String)>("dumpapp files ls: List files similar to the ls command");
+
+        virtualinvoke $r1.<java.io.PrintStream: void println()>();
+
+        virtualinvoke $r1.<java.io.PrintStream: void println(java.lang.String)>("dumpapp files tree: List files similar to the tree command");
+
+        virtualinvoke $r1.<java.io.PrintStream: void println()>();
+
+        virtualinvoke $r1.<java.io.PrintStream: void println(java.lang.String)>("dumpapp files download: Fetch internal application storage");
+
+        virtualinvoke $r1.<java.io.PrintStream: void println(java.lang.String)>("    <output.zip>: Output location or \'-\' for stdout");
+
+        virtualinvoke $r1.<java.io.PrintStream: void println(java.lang.String)>("    <path>: Fetch only those paths named (directories fetch recursively)");
+
+        return;
+    }
+    private static java.io.File getBaseDir(android.content.Context)
+    {
+        android.content.Context $r0;
+        java.io.File $r1;
+
+        $r0 := @parameter0: android.content.Context;
+
+        $r1 = virtualinvoke $r0.<android.content.Context: java.io.File getFilesDir()>();
+
+        $r1 = virtualinvoke $r1.<java.io.File: java.io.File getParentFile()>();
+
+        return $r1;
+    }
+    private static void printDirectoryText(java.io.File, java.lang.String, java.io.PrintStream)
+    {
+        java.io.File $r0;
+        java.lang.String $r1, $r5;
+        java.io.PrintStream $r2;
+        java.io.File[] $r3;
+        int i0, $i1;
+        boolean $z0;
+        java.lang.StringBuilder $r4;
+
+        $r0 := @parameter0: java.io.File;
+
+        $r1 := @parameter1: java.lang.String;
+
+        $r2 := @parameter2: java.io.PrintStream;
+
+        $r3 = virtualinvoke $r0.<java.io.File: java.io.File[] listFiles()>();
+
+        i0 = 0;
+
+     label1:
+        $i1 = lengthof $r3;
+
+        if i0 >= $i1 goto label4;
+
+        $r0 = $r3[i0];
+
+        $z0 = virtualinvoke $r0.<java.io.File: boolean isDirectory()>();
+
+        if $z0 == 0 goto label3;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r5 = virtualinvoke $r0.<java.io.File: java.lang.String getName()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("/");
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.facebook.stetho.dumpapp.plugins.FilesDumperPlugin: void printDirectoryText(java.io.File,java.lang.String,java.io.PrintStream)>($r0, $r5, $r2);
+
+     label2:
+        i0 = i0 + 1;
+
+        goto label1;
+
+     label3:
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r5 = virtualinvoke $r0.<java.io.File: java.lang.String getName()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r2.<java.io.PrintStream: void println(java.lang.String)>($r5);
+
+        goto label2;
+
+     label4:
+        return;
+    }
+    private static void printDirectoryVisual(java.io.File, int, java.io.PrintStream)
+    {
+        java.io.File $r0;
+        int $i0, i1, $i2;
+        java.io.PrintStream $r1;
+        java.io.File[] $r2;
+        java.lang.String $r3;
+        boolean $z0;
+
+        $r0 := @parameter0: java.io.File;
+
+        $i0 := @parameter1: int;
+
+        $r1 := @parameter2: java.io.PrintStream;
+
+        $r2 = virtualinvoke $r0.<java.io.File: java.io.File[] listFiles()>();
+
+        i1 = 0;
+
+     label1:
+        $i2 = lengthof $r2;
+
+        if i1 >= $i2 goto label3;
+
+        staticinvoke <com.facebook.stetho.dumpapp.plugins.FilesDumperPlugin: void printHeaderVisual(int,java.io.PrintStream)>($i0, $r1);
+
+        $r0 = $r2[i1];
+
+        virtualinvoke $r1.<java.io.PrintStream: void print(java.lang.String)>("+---");
+
+        $r3 = virtualinvoke $r0.<java.io.File: java.lang.String getName()>();
+
+        virtualinvoke $r1.<java.io.PrintStream: void print(java.lang.String)>($r3);
+
+        virtualinvoke $r1.<java.io.PrintStream: void println()>();
+
+        $z0 = virtualinvoke $r0.<java.io.File: boolean isDirectory()>();
+
+        if $z0 == 0 goto label2;
+
+        $i2 = $i0 + 1;
+
+        staticinvoke <com.facebook.stetho.dumpapp.plugins.FilesDumperPlugin: void printDirectoryVisual(java.io.File,int,java.io.PrintStream)>($r0, $i2, $r1);
+
+     label2:
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label3:
+        return;
+    }
+    private static void printHeaderVisual(int, java.io.PrintStream)
+    {
+        int $i0, i1;
+        java.io.PrintStream $r0;
+
+        $i0 := @parameter0: int;
+
+        $r0 := @parameter1: java.io.PrintStream;
+
+        i1 = 0;
+
+     label1:
+        if i1 >= $i0 goto label2;
+
+        virtualinvoke $r0.<java.io.PrintStream: void print(java.lang.String)>("|   ");
+
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label2:
+        return;
+    }
+    private static java.lang.String relativizePath(java.io.File, java.io.File)
+    {
+        java.io.File $r0, $r1;
+        java.lang.String $r2, $r3;
+        boolean $z0;
+        int $i0;
+
+        $r0 := @parameter0: java.io.File;
+
+        $r1 := @parameter1: java.io.File;
+
+        $r2 = virtualinvoke $r0.<java.io.File: java.lang.String getAbsolutePath()>();
+
+        $r3 = virtualinvoke $r1.<java.io.File: java.lang.String getAbsolutePath()>();
+
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean startsWith(java.lang.String)>($r2);
+
+        if $z0 == 0 goto label1;
+
+        $i0 = virtualinvoke $r2.<java.lang.String: int length()>();
+
+        $i0 = $i0 + 1;
+
+        $r2 = virtualinvoke $r3.<java.lang.String: java.lang.String substring(int)>($i0);
+
+        return $r2;
+
+     label1:
+        return $r3;
+    }
+    private static java.io.File resolvePossibleAppStoragePath(android.content.Context, java.lang.String)
+    {
+        android.content.Context $r0;
+        java.lang.String $r1;
+        boolean $z0;
+        java.io.File $r2, $r3;
+
+        $r0 := @parameter0: android.content.Context;
+
+        $r1 := @parameter1: java.lang.String;
+
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean startsWith(java.lang.String)>("/");
+
+        if $z0 == 0 goto label1;
+
+        $r2 = new java.io.File;
+
+        specialinvoke $r2.<java.io.File: void <init>(java.lang.String)>($r1);
+
+        return $r2;
+
+     label1:
+        $r2 = new java.io.File;
+
+        $r3 = staticinvoke <com.facebook.stetho.dumpapp.plugins.FilesDumperPlugin: java.io.File getBaseDir(android.content.Context)>($r0);
+
+        specialinvoke $r2.<java.io.File: void <init>(java.io.File,java.lang.String)>($r3, $r1);
+
+        return $r2;
+    }
+    private static java.io.File resolvePossibleSdcardPath(java.lang.String)
+    {
+        java.lang.String $r0;
+        boolean $z0;
+        java.io.File $r1, $r2;
+
+        $r0 := @parameter0: java.lang.String;
+
+        $z0 = virtualinvoke $r0.<java.lang.String: boolean startsWith(java.lang.String)>("/");
+
+        if $z0 == 0 goto label1;
+
+        $r1 = new java.io.File;
+
+        specialinvoke $r1.<java.io.File: void <init>(java.lang.String)>($r0);
+
+        return $r1;
+
+     label1:
+        $r1 = new java.io.File;
+
+        $r2 = staticinvoke <android.os.Environment: java.io.File getExternalStorageDirectory()>();
+
+        specialinvoke $r1.<java.io.File: void <init>(java.io.File,java.lang.String)>($r2, $r0);
+
+        return $r1;
+    }
+    public void dump(com.facebook.stetho.dumpapp.DumperContext) throws com.facebook.stetho.dumpapp.DumpException
+    {
+        com.facebook.stetho.dumpapp.plugins.FilesDumperPlugin r0;
+        com.facebook.stetho.dumpapp.DumperContext $r1;
+        java.util.List $r2;
+        java.util.Iterator $r3;
+        java.lang.String $r4, $r5;
+        boolean $z0;
+        java.io.PrintStream $r6;
+        com.facebook.stetho.dumpapp.DumpUsageException $r7;
+        java.lang.StringBuilder $r8;
+
+        r0 := @this: com.facebook.stetho.dumpapp.plugins.FilesDumperPlugin;
+
+        $r1 := @parameter0: com.facebook.stetho.dumpapp.DumperContext;
+
+        $r2 = virtualinvoke $r1.<com.facebook.stetho.dumpapp.DumperContext: java.util.List getArgsAsList()>();
+
+        $r3 = interfaceinvoke $r2.<java.util.List: java.util.Iterator iterator()>();
+
+        $r4 = staticinvoke <com.facebook.stetho.dumpapp.ArgsHelper: java.lang.String nextOptionalArg(java.util.Iterator,java.lang.String)>($r3, "");
+
+        $r5 = "ls";
+
+        $z0 = virtualinvoke $r5.<java.lang.String: boolean equals(java.lang.Object)>($r4);
+
+        if $z0 == 0 goto label1;
+
+        $r6 = virtualinvoke $r1.<com.facebook.stetho.dumpapp.DumperContext: java.io.PrintStream getStdout()>();
+
+        specialinvoke r0.<com.facebook.stetho.dumpapp.plugins.FilesDumperPlugin: void doLs(java.io.PrintStream)>($r6);
+
+        return;
+
+     label1:
+        $r5 = "tree";
+
+        $z0 = virtualinvoke $r5.<java.lang.String: boolean equals(java.lang.Object)>($r4);
+
+        if $z0 == 0 goto label2;
+
+        $r6 = virtualinvoke $r1.<com.facebook.stetho.dumpapp.DumperContext: java.io.PrintStream getStdout()>();
+
+        specialinvoke r0.<com.facebook.stetho.dumpapp.plugins.FilesDumperPlugin: void doTree(java.io.PrintStream)>($r6);
+
+        return;
+
+     label2:
+        $r5 = "download";
+
+        $z0 = virtualinvoke $r5.<java.lang.String: boolean equals(java.lang.Object)>($r4);
+
+        if $z0 == 0 goto label3;
+
+        $r6 = virtualinvoke $r1.<com.facebook.stetho.dumpapp.DumperContext: java.io.PrintStream getStdout()>();
+
+        specialinvoke r0.<com.facebook.stetho.dumpapp.plugins.FilesDumperPlugin: void doDownload(java.io.PrintStream,java.util.Iterator)>($r6, $r3);
+
+        return;
+
+     label3:
+        $r6 = virtualinvoke $r1.<com.facebook.stetho.dumpapp.DumperContext: java.io.PrintStream getStdout()>();
+
+        specialinvoke r0.<com.facebook.stetho.dumpapp.plugins.FilesDumperPlugin: void doUsage(java.io.PrintStream)>($r6);
+
+        $r5 = "";
+
+        $z0 = virtualinvoke $r5.<java.lang.String: boolean equals(java.lang.Object)>($r4);
+
+        if $z0 != 0 goto label4;
+
+        $r7 = new com.facebook.stetho.dumpapp.DumpUsageException;
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unknown command: ");
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r4 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r7.<com.facebook.stetho.dumpapp.DumpUsageException: void <init>(java.lang.String)>($r4);
+
+        throw $r7;
+
+     label4:
+        return;
+    }
+    public java.lang.String getName()
+    {
+        com.facebook.stetho.dumpapp.plugins.FilesDumperPlugin r0;
+
+        r0 := @this: com.facebook.stetho.dumpapp.plugins.FilesDumperPlugin;
+
+        return "files";
+    }

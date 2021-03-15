@@ -1,0 +1,229 @@
+com.fsck.k9.mail.Transport extends java.lang.Object
+protected static final int SOCKET_CONNECT_TIMEOUT
+protected static final int SOCKET_READ_TIMEOUT
+    public void <init>()
+    {
+        com.fsck.k9.mail.Transport r0;
+
+        r0 := @this: com.fsck.k9.mail.Transport;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+    public static java.lang.String createTransportUri(com.fsck.k9.mail.ServerSettings)
+    {
+        com.fsck.k9.mail.ServerSettings $r0;
+        com.fsck.k9.mail.ServerSettings$Type $r1, $r2;
+        java.lang.String $r3;
+        java.lang.IllegalArgumentException $r4;
+
+        $r0 := @parameter0: com.fsck.k9.mail.ServerSettings;
+
+        $r1 = <com.fsck.k9.mail.ServerSettings$Type: com.fsck.k9.mail.ServerSettings$Type SMTP>;
+
+        $r2 = $r0.<com.fsck.k9.mail.ServerSettings: com.fsck.k9.mail.ServerSettings$Type type>;
+
+        if $r1 != $r2 goto label1;
+
+        $r3 = staticinvoke <com.fsck.k9.mail.transport.SmtpTransport: java.lang.String createUri(com.fsck.k9.mail.ServerSettings)>($r0);
+
+        return $r3;
+
+     label1:
+        $r1 = <com.fsck.k9.mail.ServerSettings$Type: com.fsck.k9.mail.ServerSettings$Type WebDAV>;
+
+        $r2 = $r0.<com.fsck.k9.mail.ServerSettings: com.fsck.k9.mail.ServerSettings$Type type>;
+
+        if $r1 != $r2 goto label2;
+
+        $r3 = staticinvoke <com.fsck.k9.mail.transport.WebDavTransport: java.lang.String createUri(com.fsck.k9.mail.ServerSettings)>($r0);
+
+        return $r3;
+
+     label2:
+        $r4 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r4.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Not a valid transport URI");
+
+        throw $r4;
+    }
+    public static com.fsck.k9.mail.ServerSettings decodeTransportUri(java.lang.String)
+    {
+        java.lang.String $r0;
+        boolean $z0;
+        com.fsck.k9.mail.ServerSettings $r1;
+        java.lang.IllegalArgumentException $r2;
+
+        $r0 := @parameter0: java.lang.String;
+
+        $z0 = virtualinvoke $r0.<java.lang.String: boolean startsWith(java.lang.String)>("smtp");
+
+        if $z0 == 0 goto label1;
+
+        $r1 = staticinvoke <com.fsck.k9.mail.transport.SmtpTransport: com.fsck.k9.mail.ServerSettings decodeUri(java.lang.String)>($r0);
+
+        return $r1;
+
+     label1:
+        $z0 = virtualinvoke $r0.<java.lang.String: boolean startsWith(java.lang.String)>("webdav");
+
+        if $z0 == 0 goto label2;
+
+        $r1 = staticinvoke <com.fsck.k9.mail.transport.WebDavTransport: com.fsck.k9.mail.ServerSettings decodeUri(java.lang.String)>($r0);
+
+        return $r1;
+
+     label2:
+        $r2 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r2.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Not a valid transport URI");
+
+        throw $r2;
+    }
+    protected static java.lang.String decodeUtf8(java.lang.String)
+    {
+        java.lang.String $r0;
+        java.io.UnsupportedEncodingException r1;
+        java.lang.RuntimeException $r2;
+
+        $r0 := @parameter0: java.lang.String;
+
+     label1:
+        $r0 = staticinvoke <java.net.URLDecoder: java.lang.String decode(java.lang.String,java.lang.String)>($r0, "UTF-8");
+
+     label2:
+        return $r0;
+
+     label3:
+        r1 := @caughtexception;
+
+        $r2 = new java.lang.RuntimeException;
+
+        specialinvoke $r2.<java.lang.RuntimeException: void <init>(java.lang.String)>("UTF-8 not found");
+
+        throw $r2;
+
+        catch java.io.UnsupportedEncodingException from label1 to label2 with label3;
+    }
+    protected static java.lang.String encodeUtf8(java.lang.String)
+    {
+        java.lang.String $r0;
+        java.io.UnsupportedEncodingException r1;
+        java.lang.RuntimeException $r2;
+
+        $r0 := @parameter0: java.lang.String;
+
+     label1:
+        $r0 = staticinvoke <java.net.URLEncoder: java.lang.String encode(java.lang.String,java.lang.String)>($r0, "UTF-8");
+
+     label2:
+        return $r0;
+
+     label3:
+        r1 := @caughtexception;
+
+        $r2 = new java.lang.RuntimeException;
+
+        specialinvoke $r2.<java.lang.RuntimeException: void <init>(java.lang.String)>("UTF-8 not found");
+
+        throw $r2;
+
+        catch java.io.UnsupportedEncodingException from label1 to label2 with label3;
+    }
+    public static com.fsck.k9.mail.Transport getInstance(android.content.Context, com.fsck.k9.mail.store.StoreConfig) throws com.fsck.k9.mail.MessagingException
+    {
+        android.content.Context $r0;
+        com.fsck.k9.mail.store.StoreConfig $r1;
+        java.lang.String $r2;
+        boolean $z0;
+        com.fsck.k9.mail.Transport $r3;
+        java.lang.Throwable $r4;
+        java.lang.StringBuilder $r5, $r9;
+        com.fsck.k9.mail.ssl.DefaultTrustedSocketFactory $r6;
+        com.fsck.k9.mail.transport.SmtpTransport $r7;
+        com.fsck.k9.mail.transport.WebDavTransport $r8;
+        com.fsck.k9.mail.MessagingException $r10;
+
+        $r0 := @parameter0: android.content.Context;
+
+        $r1 := @parameter1: com.fsck.k9.mail.store.StoreConfig;
+
+        entermonitor class "Lcom/fsck/k9/mail/Transport;";
+
+     label1:
+        $r2 = interfaceinvoke $r1.<com.fsck.k9.mail.store.StoreConfig: java.lang.String getTransportUri()>();
+
+        $z0 = virtualinvoke $r2.<java.lang.String: boolean startsWith(java.lang.String)>("smtp");
+
+        if $z0 == 0 goto label3;
+
+        $r7 = new com.fsck.k9.mail.transport.SmtpTransport;
+
+        $r3 = $r7;
+
+        $r6 = new com.fsck.k9.mail.ssl.DefaultTrustedSocketFactory;
+
+        specialinvoke $r6.<com.fsck.k9.mail.ssl.DefaultTrustedSocketFactory: void <init>(android.content.Context)>($r0);
+
+        specialinvoke $r7.<com.fsck.k9.mail.transport.SmtpTransport: void <init>(com.fsck.k9.mail.store.StoreConfig,com.fsck.k9.mail.ssl.TrustedSocketFactory)>($r1, $r6);
+
+     label2:
+        exitmonitor class "Lcom/fsck/k9/mail/Transport;";
+
+        return $r3;
+
+     label3:
+        $z0 = virtualinvoke $r2.<java.lang.String: boolean startsWith(java.lang.String)>("webdav");
+
+        if $z0 == 0 goto label6;
+
+        $r8 = new com.fsck.k9.mail.transport.WebDavTransport;
+
+        $r3 = $r8;
+
+        specialinvoke $r8.<com.fsck.k9.mail.transport.WebDavTransport: void <init>(com.fsck.k9.mail.store.StoreConfig)>($r1);
+
+     label4:
+        goto label2;
+
+     label5:
+        $r4 := @caughtexception;
+
+        exitmonitor class "Lcom/fsck/k9/mail/Transport;";
+
+        throw $r4;
+
+     label6:
+        $r10 = new com.fsck.k9.mail.MessagingException;
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unable to locate an applicable Transport for ");
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r2 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r10.<com.fsck.k9.mail.MessagingException: void <init>(java.lang.String)>($r2);
+
+        throw $r10;
+
+     label7:
+        nop;
+
+        catch java.lang.Throwable from label1 to label2 with label5;
+        catch java.lang.Throwable from label3 to label4 with label5;
+        catch java.lang.Throwable from label6 to label7 with label5;
+    }
+public abstract void close() { 
+// no body
+} 
+public abstract void open() throws com.fsck.k9.mail.MessagingException { 
+// no body
+} 
+public abstract void sendMessage(com.fsck.k9.mail.Message) throws com.fsck.k9.mail.MessagingException { 
+// no body
+} 

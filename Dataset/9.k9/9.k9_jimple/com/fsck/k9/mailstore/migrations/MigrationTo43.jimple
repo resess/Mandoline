@@ -1,0 +1,125 @@
+com.fsck.k9.mailstore.migrations.MigrationTo43 extends java.lang.Object
+    void <init>()
+    {
+        com.fsck.k9.mailstore.migrations.MigrationTo43 r0;
+
+        r0 := @this: com.fsck.k9.mailstore.migrations.MigrationTo43;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+    public static void fixOutboxFolders(android.database.sqlite.SQLiteDatabase, com.fsck.k9.mailstore.migrations.MigrationsHelper)
+    {
+        android.database.sqlite.SQLiteDatabase $r0;
+        com.fsck.k9.mailstore.migrations.MigrationsHelper $r1;
+        android.content.ContentValues r2;
+        com.fsck.k9.mailstore.LocalFolder r3, r5;
+        java.lang.Exception r4;
+        com.fsck.k9.mailstore.LocalStore $r6;
+        com.fsck.k9.Account $r7;
+        android.content.Context $r8;
+        boolean $z0;
+        java.lang.String[] $r9;
+        java.lang.Object[] $r10;
+        java.lang.String $r11;
+        java.util.List $r12;
+        int $i0;
+
+        $r0 := @parameter0: android.database.sqlite.SQLiteDatabase;
+
+        $r1 := @parameter1: com.fsck.k9.mailstore.migrations.MigrationsHelper;
+
+     label01:
+        $r6 = interfaceinvoke $r1.<com.fsck.k9.mailstore.migrations.MigrationsHelper: com.fsck.k9.mailstore.LocalStore getLocalStore()>();
+
+        $r7 = interfaceinvoke $r1.<com.fsck.k9.mailstore.migrations.MigrationsHelper: com.fsck.k9.Account getAccount()>();
+
+        $r8 = interfaceinvoke $r1.<com.fsck.k9.mailstore.migrations.MigrationsHelper: android.content.Context getContext()>();
+
+     label02:
+        r3 = new com.fsck.k9.mailstore.LocalFolder;
+
+     label03:
+        specialinvoke r3.<com.fsck.k9.mailstore.LocalFolder: void <init>(com.fsck.k9.mailstore.LocalStore,java.lang.String)>($r6, "OUTBOX");
+
+        $z0 = virtualinvoke r3.<com.fsck.k9.mailstore.LocalFolder: boolean exists()>();
+
+     label04:
+        if $z0 == 0 goto label06;
+
+        r2 = new android.content.ContentValues;
+
+     label05:
+        specialinvoke r2.<android.content.ContentValues: void <init>()>();
+
+        virtualinvoke r2.<android.content.ContentValues: void put(java.lang.String,java.lang.String)>("name", "K9MAIL_INTERNAL_OUTBOX");
+
+        $r9 = newarray (java.lang.String)[1];
+
+        $r9[0] = "OUTBOX";
+
+        virtualinvoke $r0.<android.database.sqlite.SQLiteDatabase: int update(java.lang.String,android.content.ContentValues,java.lang.String,java.lang.String[])>("folders", r2, "name = ?", $r9);
+
+        $r10 = newarray (java.lang.Object)[1];
+
+        $r10[0] = "K9MAIL_INTERNAL_OUTBOX";
+
+        staticinvoke <timber.log.Timber: void i(java.lang.String,java.lang.Object[])>("Renamed folder OUTBOX to %s", $r10);
+
+     label06:
+        $r11 = virtualinvoke $r8.<android.content.Context: java.lang.String getString(int)>(2131166091);
+
+     label07:
+        r5 = new com.fsck.k9.mailstore.LocalFolder;
+
+     label08:
+        specialinvoke r5.<com.fsck.k9.mailstore.LocalFolder: void <init>(com.fsck.k9.mailstore.LocalStore,java.lang.String)>($r6, $r11);
+
+        $z0 = virtualinvoke r5.<com.fsck.k9.mailstore.LocalFolder: boolean exists()>();
+
+     label09:
+        if $z0 == 0 goto label16;
+
+     label10:
+        $r12 = virtualinvoke r5.<com.fsck.k9.mailstore.LocalFolder: java.util.List getMessages(com.fsck.k9.mail.MessageRetrievalListener,boolean)>(null, 0);
+
+        $i0 = interfaceinvoke $r12.<java.util.List: int size()>();
+
+     label11:
+        if $i0 <= 0 goto label13;
+
+        r3 = new com.fsck.k9.mailstore.LocalFolder;
+
+     label12:
+        $r11 = virtualinvoke $r7.<com.fsck.k9.Account: java.lang.String getDraftsFolderName()>();
+
+        specialinvoke r3.<com.fsck.k9.mailstore.LocalFolder: void <init>(com.fsck.k9.mailstore.LocalStore,java.lang.String)>($r6, $r11);
+
+        virtualinvoke r5.<com.fsck.k9.mailstore.LocalFolder: java.util.Map moveMessages(java.util.List,com.fsck.k9.mail.Folder)>($r12, r3);
+
+     label13:
+        virtualinvoke r5.<com.fsck.k9.mailstore.LocalFolder: void delete()>();
+
+        virtualinvoke r5.<com.fsck.k9.mailstore.LocalFolder: void delete(boolean)>(1);
+
+     label14:
+        return;
+
+     label15:
+        r4 := @caughtexception;
+
+        $r10 = newarray (java.lang.Object)[0];
+
+        staticinvoke <timber.log.Timber: void e(java.lang.Throwable,java.lang.String,java.lang.Object[])>(r4, "Error trying to fix the outbox folders", $r10);
+
+     label16:
+        return;
+
+        catch java.lang.Exception from label01 to label02 with label15;
+        catch java.lang.Exception from label03 to label04 with label15;
+        catch java.lang.Exception from label05 to label07 with label15;
+        catch java.lang.Exception from label08 to label09 with label15;
+        catch java.lang.Exception from label10 to label11 with label15;
+        catch java.lang.Exception from label12 to label14 with label15;
+    }

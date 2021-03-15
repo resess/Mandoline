@@ -1,0 +1,2873 @@
+com.ichi2.libanki.Media extends java.lang.Object
+private static final java.util.regex.Pattern fIllegalCharReg
+private static final java.util.regex.Pattern fImgRegExpQ
+private static final java.util.regex.Pattern fImgRegExpU
+private static final java.util.regex.Pattern fRemotePattern
+private static final java.util.regex.Pattern fSoundRegexps
+public static java.util.List mRegexps
+private com.ichi2.libanki.Collection mCol
+private com.ichi2.libanki.DB mDb
+private java.lang.String mDir
+    static void <clinit>()
+    {
+        java.util.regex.Pattern $r0;
+        java.util.regex.Pattern[] $r1;
+        java.util.List $r2;
+
+        $r0 = staticinvoke <java.util.regex.Pattern: java.util.regex.Pattern compile(java.lang.String)>("[><:\"/?*^\\\\|\\x00\\r\\n]");
+
+        <com.ichi2.libanki.Media: java.util.regex.Pattern fIllegalCharReg> = $r0;
+
+        $r0 = staticinvoke <java.util.regex.Pattern: java.util.regex.Pattern compile(java.lang.String)>("(https?|ftp)://");
+
+        <com.ichi2.libanki.Media: java.util.regex.Pattern fRemotePattern> = $r0;
+
+        $r0 = staticinvoke <java.util.regex.Pattern: java.util.regex.Pattern compile(java.lang.String)>("(?i)(\\[sound:([^]]+)\\])");
+
+        <com.ichi2.libanki.Media: java.util.regex.Pattern fSoundRegexps> = $r0;
+
+        $r0 = staticinvoke <java.util.regex.Pattern: java.util.regex.Pattern compile(java.lang.String)>("(?i)(<img[^>]* src=([\\\"\'])([^>]+?)(\\2)[^>]*>)");
+
+        <com.ichi2.libanki.Media: java.util.regex.Pattern fImgRegExpQ> = $r0;
+
+        $r0 = staticinvoke <java.util.regex.Pattern: java.util.regex.Pattern compile(java.lang.String)>("(?i)(<img[^>]* src=(?![\'\\\"])([^ >]+)[^>]*?>)");
+
+        <com.ichi2.libanki.Media: java.util.regex.Pattern fImgRegExpU> = $r0;
+
+        $r1 = newarray (java.util.regex.Pattern)[3];
+
+        $r0 = <com.ichi2.libanki.Media: java.util.regex.Pattern fSoundRegexps>;
+
+        $r1[0] = $r0;
+
+        $r0 = <com.ichi2.libanki.Media: java.util.regex.Pattern fImgRegExpQ>;
+
+        $r1[1] = $r0;
+
+        $r0 = <com.ichi2.libanki.Media: java.util.regex.Pattern fImgRegExpU>;
+
+        $r1[2] = $r0;
+
+        $r2 = staticinvoke <java.util.Arrays: java.util.List asList(java.lang.Object[])>($r1);
+
+        <com.ichi2.libanki.Media: java.util.List mRegexps> = $r2;
+
+        return;
+    }
+    public void <init>(com.ichi2.libanki.Collection, boolean)
+    {
+        com.ichi2.libanki.Media r0;
+        com.ichi2.libanki.Collection $r1;
+        boolean $z0;
+        java.io.File r2;
+        java.lang.String $r3;
+        java.lang.StringBuilder $r4;
+        java.lang.Object[] $r5;
+
+        r0 := @this: com.ichi2.libanki.Media;
+
+        $r1 := @parameter0: com.ichi2.libanki.Collection;
+
+        $z0 := @parameter1: boolean;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<com.ichi2.libanki.Media: com.ichi2.libanki.Collection mCol> = $r1;
+
+        if $z0 == 0 goto label1;
+
+        r0.<com.ichi2.libanki.Media: java.lang.String mDir> = null;
+
+        return;
+
+     label1:
+        $r3 = virtualinvoke $r1.<com.ichi2.libanki.Collection: java.lang.String getPath()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.String: java.lang.String replaceFirst(java.lang.String,java.lang.String)>("\\.anki2$", ".media");
+
+        r0.<com.ichi2.libanki.Media: java.lang.String mDir> = $r3;
+
+        r2 = new java.io.File;
+
+        $r3 = r0.<com.ichi2.libanki.Media: java.lang.String mDir>;
+
+        specialinvoke r2.<java.io.File: void <init>(java.lang.String)>($r3);
+
+        $z0 = virtualinvoke r2.<java.io.File: boolean exists()>();
+
+        if $z0 != 0 goto label2;
+
+        $z0 = virtualinvoke r2.<java.io.File: boolean mkdir()>();
+
+        if $z0 != 0 goto label2;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Cannot create media directory: ");
+
+        $r3 = r0.<com.ichi2.libanki.Media: java.lang.String mDir>;
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r3 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r5 = newarray (java.lang.Object)[0];
+
+        staticinvoke <timber.log.Timber: void e(java.lang.String,java.lang.Object[])>($r3, $r5);
+
+     label2:
+        virtualinvoke r0.<com.ichi2.libanki.Media: void connect()>();
+
+        return;
+    }
+    private android.util.Pair _changes()
+    {
+        com.ichi2.libanki.Media r0;
+        java.util.ArrayList r1, r6;
+        java.util.HashMap r2;
+        android.database.SQLException r3;
+        java.io.File r4, r5;
+        android.database.Cursor r7, $r10;
+        com.ichi2.libanki.DB $r8;
+        io.requery.android.database.sqlite.SQLiteDatabase $r9;
+        boolean $z0;
+        java.lang.String $r11, $r12, $r20;
+        long $l0, $l4;
+        java.lang.Long $r13;
+        java.lang.Object[] $r14;
+        java.lang.Boolean $r15;
+        java.lang.RuntimeException $r16;
+        java.lang.Throwable $r17;
+        java.io.File[] $r18;
+        int $i1, $i2;
+        byte $b3;
+        com.ichi2.libanki.Collection $r19;
+        java.lang.Object $r21;
+        java.util.Set $r22;
+        java.util.Iterator $r23;
+        android.util.Pair $r24;
+
+        r0 := @this: com.ichi2.libanki.Media;
+
+        r2 = new java.util.HashMap;
+
+        specialinvoke r2.<java.util.HashMap: void <init>()>();
+
+        r7 = null;
+
+     label01:
+        $r8 = r0.<com.ichi2.libanki.Media: com.ichi2.libanki.DB mDb>;
+
+     label02:
+        $r9 = virtualinvoke $r8.<com.ichi2.libanki.DB: io.requery.android.database.sqlite.SQLiteDatabase getDatabase()>();
+
+        $r10 = virtualinvoke $r9.<io.requery.android.database.sqlite.SQLiteDatabase: android.database.Cursor rawQuery(java.lang.String,java.lang.Object[])>("select fname, csum, mtime from media where csum is not null", null);
+
+     label03:
+        r7 = $r10;
+
+     label04:
+        $z0 = interfaceinvoke $r10.<android.database.Cursor: boolean moveToNext()>();
+
+     label05:
+        if $z0 == 0 goto label16;
+
+     label06:
+        $r11 = interfaceinvoke $r10.<android.database.Cursor: java.lang.String getString(int)>(0);
+
+        $r12 = interfaceinvoke $r10.<android.database.Cursor: java.lang.String getString(int)>(1);
+
+        $l0 = interfaceinvoke $r10.<android.database.Cursor: long getLong(int)>(2);
+
+        $r13 = staticinvoke <java.lang.Long: java.lang.Long valueOf(long)>($l0);
+
+     label07:
+        $r14 = newarray (java.lang.Object)[3];
+
+        $r14[0] = $r12;
+
+        $r14[1] = $r13;
+
+     label08:
+        $r15 = staticinvoke <java.lang.Boolean: java.lang.Boolean valueOf(boolean)>(0);
+
+     label09:
+        $r14[2] = $r15;
+
+     label10:
+        interfaceinvoke r2.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r11, $r14);
+
+     label11:
+        goto label04;
+
+     label12:
+        r3 := @caughtexception;
+
+     label13:
+        $r16 = new java.lang.RuntimeException;
+
+        specialinvoke $r16.<java.lang.RuntimeException: void <init>(java.lang.Throwable)>(r3);
+
+        throw $r16;
+
+     label14:
+        $r17 := @caughtexception;
+
+        if r7 == null goto label15;
+
+        interfaceinvoke r7.<android.database.Cursor: void close()>();
+
+     label15:
+        throw $r17;
+
+     label16:
+        if $r10 == null goto label17;
+
+        interfaceinvoke $r10.<android.database.Cursor: void close()>();
+
+     label17:
+        r1 = new java.util.ArrayList;
+
+        specialinvoke r1.<java.util.ArrayList: void <init>()>();
+
+        r6 = new java.util.ArrayList;
+
+        specialinvoke r6.<java.util.ArrayList: void <init>()>();
+
+        r4 = new java.io.File;
+
+        $r11 = virtualinvoke r0.<com.ichi2.libanki.Media: java.lang.String dir()>();
+
+        specialinvoke r4.<java.io.File: void <init>(java.lang.String)>($r11);
+
+        $r18 = virtualinvoke r4.<java.io.File: java.io.File[] listFiles()>();
+
+        $i1 = lengthof $r18;
+
+        $i2 = 0;
+
+     label18:
+        if $i2 >= $i1 goto label27;
+
+        r4 = $r18[$i2];
+
+        $z0 = virtualinvoke r4.<java.io.File: boolean isDirectory()>();
+
+        if $z0 == 0 goto label20;
+
+     label19:
+        $i2 = $i2 + 1;
+
+        goto label18;
+
+     label20:
+        $r11 = virtualinvoke r4.<java.io.File: java.lang.String getName()>();
+
+        $z0 = virtualinvoke $r11.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("thumbs.db");
+
+        if $z0 != 0 goto label19;
+
+        $z0 = virtualinvoke r0.<com.ichi2.libanki.Media: boolean hasIllegal(java.lang.String)>($r11);
+
+        if $z0 != 0 goto label19;
+
+        $l0 = virtualinvoke r4.<java.io.File: long length()>();
+
+        $b3 = $l0 cmp 0L;
+
+        if $b3 != 0 goto label21;
+
+        virtualinvoke r4.<java.io.File: boolean delete()>();
+
+        goto label19;
+
+     label21:
+        $b3 = $l0 cmp 104857600L;
+
+        if $b3 <= 0 goto label22;
+
+        $r19 = r0.<com.ichi2.libanki.Media: com.ichi2.libanki.Collection mCol>;
+
+        $r14 = newarray (java.lang.Object)[2];
+
+        $r14[0] = "ignoring file over 100MB";
+
+        $r14[1] = r4;
+
+        virtualinvoke $r19.<com.ichi2.libanki.Collection: void log(java.lang.Object[])>($r14);
+
+        goto label19;
+
+     label22:
+        $r12 = staticinvoke <com.ichi2.libanki.Utils: java.lang.String nfcNormalized(java.lang.String)>($r11);
+
+        $z0 = virtualinvoke $r11.<java.lang.String: boolean equals(java.lang.Object)>($r12);
+
+        if $z0 != 0 goto label23;
+
+        r5 = new java.io.File;
+
+        $r20 = virtualinvoke r0.<com.ichi2.libanki.Media: java.lang.String dir()>();
+
+        specialinvoke r5.<java.io.File: void <init>(java.lang.String,java.lang.String)>($r20, $r12);
+
+        $z0 = virtualinvoke r5.<java.io.File: boolean exists()>();
+
+        if $z0 == 0 goto label24;
+
+        virtualinvoke r4.<java.io.File: boolean delete()>();
+
+     label23:
+        $z0 = interfaceinvoke r2.<java.util.Map: boolean containsKey(java.lang.Object)>($r11);
+
+        if $z0 != 0 goto label25;
+
+        interfaceinvoke r1.<java.util.List: boolean add(java.lang.Object)>($r11);
+
+        goto label19;
+
+     label24:
+        virtualinvoke r4.<java.io.File: boolean renameTo(java.io.File)>(r5);
+
+        goto label23;
+
+     label25:
+        $r12 = virtualinvoke r4.<java.io.File: java.lang.String getAbsolutePath()>();
+
+        $l0 = specialinvoke r0.<com.ichi2.libanki.Media: long _mtime(java.lang.String)>($r12);
+
+        $r21 = interfaceinvoke r2.<java.util.Map: java.lang.Object get(java.lang.Object)>($r11);
+
+        $r14 = (java.lang.Object[]) $r21;
+
+        $r21 = $r14[1];
+
+        $r13 = (java.lang.Long) $r21;
+
+        $l4 = virtualinvoke $r13.<java.lang.Long: long longValue()>();
+
+        $b3 = $l0 cmp $l4;
+
+        if $b3 == 0 goto label26;
+
+        $r12 = virtualinvoke r4.<java.io.File: java.lang.String getAbsolutePath()>();
+
+        $r12 = specialinvoke r0.<com.ichi2.libanki.Media: java.lang.String _checksum(java.lang.String)>($r12);
+
+        $r21 = interfaceinvoke r2.<java.util.Map: java.lang.Object get(java.lang.Object)>($r11);
+
+        $r14 = (java.lang.Object[]) $r21;
+
+        $r21 = $r14[0];
+
+        $z0 = virtualinvoke $r12.<java.lang.String: boolean equals(java.lang.Object)>($r21);
+
+        if $z0 != 0 goto label26;
+
+        interfaceinvoke r1.<java.util.List: boolean add(java.lang.Object)>($r11);
+
+     label26:
+        $r21 = interfaceinvoke r2.<java.util.Map: java.lang.Object get(java.lang.Object)>($r11);
+
+        $r14 = (java.lang.Object[]) $r21;
+
+        $r15 = staticinvoke <java.lang.Boolean: java.lang.Boolean valueOf(boolean)>(1);
+
+        $r14[2] = $r15;
+
+        goto label19;
+
+     label27:
+        $r22 = interfaceinvoke r2.<java.util.Map: java.util.Set keySet()>();
+
+        $r23 = interfaceinvoke $r22.<java.util.Set: java.util.Iterator iterator()>();
+
+     label28:
+        $z0 = interfaceinvoke $r23.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label29;
+
+        $r21 = interfaceinvoke $r23.<java.util.Iterator: java.lang.Object next()>();
+
+        $r11 = (java.lang.String) $r21;
+
+        $r21 = interfaceinvoke r2.<java.util.Map: java.lang.Object get(java.lang.Object)>($r11);
+
+        $r14 = (java.lang.Object[]) $r21;
+
+        $r21 = $r14[2];
+
+        $r15 = (java.lang.Boolean) $r21;
+
+        $z0 = virtualinvoke $r15.<java.lang.Boolean: boolean booleanValue()>();
+
+        if $z0 != 0 goto label28;
+
+        interfaceinvoke r6.<java.util.List: boolean add(java.lang.Object)>($r11);
+
+        goto label28;
+
+     label29:
+        $r24 = new android.util.Pair;
+
+        specialinvoke $r24.<android.util.Pair: void <init>(java.lang.Object,java.lang.Object)>(r1, r6);
+
+        return $r24;
+
+        catch android.database.SQLException from label02 to label03 with label12;
+        catch android.database.SQLException from label04 to label05 with label12;
+        catch android.database.SQLException from label06 to label07 with label12;
+        catch android.database.SQLException from label08 to label09 with label12;
+        catch android.database.SQLException from label10 to label11 with label12;
+        catch java.lang.Throwable from label01 to label03 with label14;
+        catch java.lang.Throwable from label04 to label05 with label14;
+        catch java.lang.Throwable from label06 to label11 with label14;
+        catch java.lang.Throwable from label13 to label14 with label14;
+    }
+    private java.lang.String _checksum(java.lang.String)
+    {
+        com.ichi2.libanki.Media r0;
+        java.lang.String $r1;
+
+        r0 := @this: com.ichi2.libanki.Media;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r1 = staticinvoke <com.ichi2.libanki.Utils: java.lang.String fileChecksum(java.lang.String)>($r1);
+
+        return $r1;
+    }
+    private java.util.List _expandClozes(java.lang.String)
+    {
+        com.ichi2.libanki.Media r0;
+        java.lang.String $r1, $r7, $r12;
+        java.lang.StringBuffer r2;
+        java.util.TreeSet r3;
+        java.util.ArrayList r4;
+        java.util.regex.Pattern $r5;
+        java.util.regex.Matcher $r6;
+        boolean $z0;
+        java.util.Iterator $r8;
+        java.lang.Object $r9;
+        java.util.Locale $r10;
+        java.lang.Object[] $r11;
+
+        r0 := @this: com.ichi2.libanki.Media;
+
+        $r1 := @parameter0: java.lang.String;
+
+        r3 = new java.util.TreeSet;
+
+        specialinvoke r3.<java.util.TreeSet: void <init>()>();
+
+        $r5 = staticinvoke <java.util.regex.Pattern: java.util.regex.Pattern compile(java.lang.String)>("\\{\\{c(\\d+)::.+?\\}\\}");
+
+        $r6 = virtualinvoke $r5.<java.util.regex.Pattern: java.util.regex.Matcher matcher(java.lang.CharSequence)>($r1);
+
+     label1:
+        $z0 = virtualinvoke $r6.<java.util.regex.Matcher: boolean find()>();
+
+        if $z0 == 0 goto label2;
+
+        $r7 = virtualinvoke $r6.<java.util.regex.Matcher: java.lang.String group(int)>(1);
+
+        interfaceinvoke r3.<java.util.Set: boolean add(java.lang.Object)>($r7);
+
+        goto label1;
+
+     label2:
+        r4 = new java.util.ArrayList;
+
+        specialinvoke r4.<java.util.ArrayList: void <init>()>();
+
+        $r8 = interfaceinvoke r3.<java.util.Set: java.util.Iterator iterator()>();
+
+     label3:
+        $z0 = interfaceinvoke $r8.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label7;
+
+        $r9 = interfaceinvoke $r8.<java.util.Iterator: java.lang.Object next()>();
+
+        $r7 = (java.lang.String) $r9;
+
+        r2 = new java.lang.StringBuffer;
+
+        specialinvoke r2.<java.lang.StringBuffer: void <init>()>();
+
+        $r10 = <java.util.Locale: java.util.Locale US>;
+
+        $r11 = newarray (java.lang.Object)[1];
+
+        $r11[0] = $r7;
+
+        $r7 = staticinvoke <java.lang.String: java.lang.String format(java.util.Locale,java.lang.String,java.lang.Object[])>($r10, "(?s)\\{\\{c%s::(.*?)(::(.*?))?\\}\\}", $r11);
+
+        $r5 = staticinvoke <java.util.regex.Pattern: java.util.regex.Pattern compile(java.lang.String)>($r7);
+
+        $r6 = virtualinvoke $r5.<java.util.regex.Pattern: java.util.regex.Matcher matcher(java.lang.CharSequence)>($r1);
+
+     label4:
+        $z0 = virtualinvoke $r6.<java.util.regex.Matcher: boolean find()>();
+
+        if $z0 == 0 goto label6;
+
+        $r7 = virtualinvoke $r6.<java.util.regex.Matcher: java.lang.String group(int)>(3);
+
+        $z0 = staticinvoke <android.text.TextUtils: boolean isEmpty(java.lang.CharSequence)>($r7);
+
+        if $z0 != 0 goto label5;
+
+        virtualinvoke $r6.<java.util.regex.Matcher: java.util.regex.Matcher appendReplacement(java.lang.StringBuffer,java.lang.String)>(r2, "[$3]");
+
+        goto label4;
+
+     label5:
+        virtualinvoke $r6.<java.util.regex.Matcher: java.util.regex.Matcher appendReplacement(java.lang.StringBuffer,java.lang.String)>(r2, "[...]");
+
+        goto label4;
+
+     label6:
+        virtualinvoke $r6.<java.util.regex.Matcher: java.lang.StringBuffer appendTail(java.lang.StringBuffer)>(r2);
+
+        $r7 = virtualinvoke r2.<java.lang.StringBuffer: java.lang.String toString()>();
+
+        $r10 = <java.util.Locale: java.util.Locale US>;
+
+        $r11 = newarray (java.lang.Object)[1];
+
+        $r11[0] = ".+?";
+
+        $r12 = staticinvoke <java.lang.String: java.lang.String format(java.util.Locale,java.lang.String,java.lang.Object[])>($r10, "(?s)\\{\\{c%s::(.*?)(::(.*?))?\\}\\}", $r11);
+
+        $r7 = virtualinvoke $r7.<java.lang.String: java.lang.String replaceAll(java.lang.String,java.lang.String)>($r12, "$1");
+
+        virtualinvoke r4.<java.util.ArrayList: boolean add(java.lang.Object)>($r7);
+
+        goto label3;
+
+     label7:
+        $r10 = <java.util.Locale: java.util.Locale US>;
+
+        $r11 = newarray (java.lang.Object)[1];
+
+        $r11[0] = ".+?";
+
+        $r7 = staticinvoke <java.lang.String: java.lang.String format(java.util.Locale,java.lang.String,java.lang.Object[])>($r10, "(?s)\\{\\{c%s::(.*?)(::(.*?))?\\}\\}", $r11);
+
+        $r1 = virtualinvoke $r1.<java.lang.String: java.lang.String replaceAll(java.lang.String,java.lang.String)>($r7, "$1");
+
+        virtualinvoke r4.<java.util.ArrayList: boolean add(java.lang.Object)>($r1);
+
+        return r4;
+    }
+    private void _logChanges()
+    {
+        com.ichi2.libanki.Media r0;
+        java.util.ArrayList r1;
+        android.util.Pair $r2;
+        java.lang.Object r3;
+        java.util.List r4, r5;
+        java.util.Iterator $r6;
+        boolean $z0;
+        java.lang.String r7, $r9;
+        java.io.File $r8;
+        long $l0;
+        java.lang.Object[] $r10;
+        java.lang.Long $r11;
+        java.lang.Integer $r12;
+        com.ichi2.libanki.DB $r13;
+
+        r0 := @this: com.ichi2.libanki.Media;
+
+        $r2 = specialinvoke r0.<com.ichi2.libanki.Media: android.util.Pair _changes()>();
+
+        r3 = $r2.<android.util.Pair: java.lang.Object first>;
+
+        r4 = (java.util.List) r3;
+
+        r3 = $r2.<android.util.Pair: java.lang.Object second>;
+
+        r5 = (java.util.List) r3;
+
+        r1 = new java.util.ArrayList;
+
+        specialinvoke r1.<java.util.ArrayList: void <init>()>();
+
+        $r6 = interfaceinvoke r4.<java.util.List: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r6.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label2;
+
+        r3 = interfaceinvoke $r6.<java.util.Iterator: java.lang.Object next()>();
+
+        r7 = (java.lang.String) r3;
+
+        $r8 = new java.io.File;
+
+        $r9 = virtualinvoke r0.<com.ichi2.libanki.Media: java.lang.String dir()>();
+
+        specialinvoke $r8.<java.io.File: void <init>(java.lang.String,java.lang.String)>($r9, r7);
+
+        $r9 = virtualinvoke $r8.<java.io.File: java.lang.String getAbsolutePath()>();
+
+        $l0 = specialinvoke r0.<com.ichi2.libanki.Media: long _mtime(java.lang.String)>($r9);
+
+        $r10 = newarray (java.lang.Object)[4];
+
+        $r10[0] = r7;
+
+        r7 = specialinvoke r0.<com.ichi2.libanki.Media: java.lang.String _checksum(java.lang.String)>($r9);
+
+        $r10[1] = r7;
+
+        $r11 = staticinvoke <java.lang.Long: java.lang.Long valueOf(long)>($l0);
+
+        $r10[2] = $r11;
+
+        $r12 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(1);
+
+        $r10[3] = $r12;
+
+        virtualinvoke r1.<java.util.ArrayList: boolean add(java.lang.Object)>($r10);
+
+        goto label1;
+
+     label2:
+        $r6 = interfaceinvoke r5.<java.util.List: java.util.Iterator iterator()>();
+
+     label3:
+        $z0 = interfaceinvoke $r6.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label4;
+
+        r3 = interfaceinvoke $r6.<java.util.Iterator: java.lang.Object next()>();
+
+        r7 = (java.lang.String) r3;
+
+        $r10 = newarray (java.lang.Object)[4];
+
+        $r10[0] = r7;
+
+        $r10[1] = null;
+
+        $r12 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(0);
+
+        $r10[2] = $r12;
+
+        $r12 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(1);
+
+        $r10[3] = $r12;
+
+        virtualinvoke r1.<java.util.ArrayList: boolean add(java.lang.Object)>($r10);
+
+        goto label3;
+
+     label4:
+        $r13 = r0.<com.ichi2.libanki.Media: com.ichi2.libanki.DB mDb>;
+
+        virtualinvoke $r13.<com.ichi2.libanki.DB: void executeMany(java.lang.String,java.util.List)>("insert or replace into media values (?,?,?,?)", r1);
+
+        $r13 = r0.<com.ichi2.libanki.Media: com.ichi2.libanki.DB mDb>;
+
+        $r10 = newarray (java.lang.Object)[1];
+
+        r7 = virtualinvoke r0.<com.ichi2.libanki.Media: java.lang.String dir()>();
+
+        $l0 = specialinvoke r0.<com.ichi2.libanki.Media: long _mtime(java.lang.String)>(r7);
+
+        $r11 = staticinvoke <java.lang.Long: java.lang.Long valueOf(long)>($l0);
+
+        $r10[0] = $r11;
+
+        virtualinvoke $r13.<com.ichi2.libanki.DB: void execute(java.lang.String,java.lang.Object[])>("update meta set dirMod = ?", $r10);
+
+        $r13 = r0.<com.ichi2.libanki.Media: com.ichi2.libanki.DB mDb>;
+
+        virtualinvoke $r13.<com.ichi2.libanki.DB: void commit()>();
+
+        return;
+    }
+    private long _mtime(java.lang.String)
+    {
+        com.ichi2.libanki.Media r0;
+        java.lang.String $r1;
+        java.io.File r2;
+        long $l0;
+
+        r0 := @this: com.ichi2.libanki.Media;
+
+        $r1 := @parameter0: java.lang.String;
+
+        r2 = new java.io.File;
+
+        specialinvoke r2.<java.io.File: void <init>(java.lang.String)>($r1);
+
+        $l0 = virtualinvoke r2.<java.io.File: long lastModified()>();
+
+        $l0 = $l0 / 1000L;
+
+        return $l0;
+    }
+    private void _normalizeNoteRefs(long)
+    {
+        com.ichi2.libanki.Media r0;
+        long $l0;
+        java.lang.String r1, $r5;
+        com.ichi2.libanki.Collection $r2;
+        com.ichi2.libanki.Note $r3;
+        java.lang.String[] $r4;
+        int i1, $i2;
+        boolean $z0;
+
+        r0 := @this: com.ichi2.libanki.Media;
+
+        $l0 := @parameter0: long;
+
+        $r2 = r0.<com.ichi2.libanki.Media: com.ichi2.libanki.Collection mCol>;
+
+        $r3 = virtualinvoke $r2.<com.ichi2.libanki.Collection: com.ichi2.libanki.Note getNote(long)>($l0);
+
+        $r4 = virtualinvoke $r3.<com.ichi2.libanki.Note: java.lang.String[] getFields()>();
+
+        i1 = 0;
+
+     label1:
+        $i2 = lengthof $r4;
+
+        if i1 >= $i2 goto label3;
+
+        r1 = $r4[i1];
+
+        $r5 = staticinvoke <com.ichi2.libanki.Utils: java.lang.String nfcNormalized(java.lang.String)>(r1);
+
+        $z0 = virtualinvoke $r5.<java.lang.String: boolean equals(java.lang.Object)>(r1);
+
+        if $z0 != 0 goto label2;
+
+        virtualinvoke $r3.<com.ichi2.libanki.Note: void setField(int,java.lang.String)>(i1, $r5);
+
+     label2:
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label3:
+        virtualinvoke $r3.<com.ichi2.libanki.Note: void flush()>();
+
+        return;
+    }
+    private java.util.List check(java.io.File[])
+    {
+        com.ichi2.libanki.Media r0;
+        java.io.File[] $r1, $r21;
+        java.util.HashSet r2;
+        java.util.ArrayList r3, r5, r6, r23;
+        java.io.File r4, r22;
+        java.lang.String $r7, r18, $r19;
+        android.database.Cursor r8, $r12;
+        com.ichi2.libanki.Collection $r9;
+        com.ichi2.libanki.DB $r10;
+        io.requery.android.database.sqlite.SQLiteDatabase $r11;
+        boolean $z0, $z1;
+        long $l0, $l1;
+        java.lang.Long $r13;
+        java.util.List $r14, r15;
+        java.util.Iterator $r16;
+        java.lang.Object $r17;
+        java.lang.Throwable $r20;
+        int $i2, $i3;
+
+        r0 := @this: com.ichi2.libanki.Media;
+
+        $r1 := @parameter0: java.io.File[];
+
+        r4 = new java.io.File;
+
+        $r7 = virtualinvoke r0.<com.ichi2.libanki.Media: java.lang.String dir()>();
+
+        specialinvoke r4.<java.io.File: void <init>(java.lang.String)>($r7);
+
+        r2 = new java.util.HashSet;
+
+        specialinvoke r2.<java.util.HashSet: void <init>()>();
+
+        r8 = null;
+
+     label01:
+        $r9 = r0.<com.ichi2.libanki.Media: com.ichi2.libanki.Collection mCol>;
+
+        $r10 = virtualinvoke $r9.<com.ichi2.libanki.Collection: com.ichi2.libanki.DB getDb()>();
+
+        $r11 = virtualinvoke $r10.<com.ichi2.libanki.DB: io.requery.android.database.sqlite.SQLiteDatabase getDatabase()>();
+
+        $r12 = virtualinvoke $r11.<io.requery.android.database.sqlite.SQLiteDatabase: android.database.Cursor rawQuery(java.lang.String,java.lang.Object[])>("select id, mid, flds from notes", null);
+
+     label02:
+        r8 = $r12;
+
+     label03:
+        $z0 = interfaceinvoke $r12.<android.database.Cursor: boolean moveToNext()>();
+
+     label04:
+        if $z0 == 0 goto label18;
+
+     label05:
+        $l0 = interfaceinvoke $r12.<android.database.Cursor: long getLong(int)>(0);
+
+        $l1 = interfaceinvoke $r12.<android.database.Cursor: long getLong(int)>(1);
+
+        $r7 = interfaceinvoke $r12.<android.database.Cursor: java.lang.String getString(int)>(2);
+
+        $r13 = staticinvoke <java.lang.Long: java.lang.Long valueOf(long)>($l1);
+
+        $r14 = virtualinvoke r0.<com.ichi2.libanki.Media: java.util.List filesInStr(java.lang.Long,java.lang.String)>($r13, $r7);
+
+     label06:
+        r15 = $r14;
+
+     label07:
+        $r16 = interfaceinvoke $r14.<java.util.List: java.util.Iterator iterator()>();
+
+     label08:
+        $z0 = interfaceinvoke $r16.<java.util.Iterator: boolean hasNext()>();
+
+     label09:
+        if $z0 == 0 goto label14;
+
+     label10:
+        $r17 = interfaceinvoke $r16.<java.util.Iterator: java.lang.Object next()>();
+
+        r18 = (java.lang.String) $r17;
+
+        $r19 = staticinvoke <com.ichi2.libanki.Utils: java.lang.String nfcNormalized(java.lang.String)>(r18);
+
+        $z0 = virtualinvoke r18.<java.lang.String: boolean equals(java.lang.Object)>($r19);
+
+     label11:
+        if $z0 != 0 goto label08;
+
+     label12:
+        specialinvoke r0.<com.ichi2.libanki.Media: void _normalizeNoteRefs(long)>($l0);
+
+        $r13 = staticinvoke <java.lang.Long: java.lang.Long valueOf(long)>($l1);
+
+        $r14 = virtualinvoke r0.<com.ichi2.libanki.Media: java.util.List filesInStr(java.lang.Long,java.lang.String)>($r13, $r7);
+
+     label13:
+        r15 = $r14;
+
+     label14:
+        interfaceinvoke r2.<java.util.Set: boolean addAll(java.util.Collection)>(r15);
+
+     label15:
+        goto label03;
+
+     label16:
+        $r20 := @caughtexception;
+
+        if r8 == null goto label17;
+
+        interfaceinvoke r8.<android.database.Cursor: void close()>();
+
+     label17:
+        throw $r20;
+
+     label18:
+        if $r12 == null goto label19;
+
+        interfaceinvoke $r12.<android.database.Cursor: void close()>();
+
+     label19:
+        r6 = new java.util.ArrayList;
+
+        specialinvoke r6.<java.util.ArrayList: void <init>()>();
+
+        r3 = new java.util.ArrayList;
+
+        specialinvoke r3.<java.util.ArrayList: void <init>()>();
+
+        if $r1 != null goto label23;
+
+        $r21 = virtualinvoke r4.<java.io.File: java.io.File[] listFiles()>();
+
+     label20:
+        $z0 = 0;
+
+        $i2 = lengthof $r21;
+
+        $i3 = 0;
+
+     label21:
+        if $i3 >= $i2 goto label29;
+
+        r22 = $r21[$i3];
+
+        if $r1 != null goto label24;
+
+        $z1 = virtualinvoke r22.<java.io.File: boolean isDirectory()>();
+
+        if $z1 == 0 goto label24;
+
+     label22:
+        $i3 = $i3 + 1;
+
+        goto label21;
+
+     label23:
+        $r21 = $r1;
+
+        goto label20;
+
+     label24:
+        $r7 = virtualinvoke r22.<java.io.File: java.lang.String getName()>();
+
+        $z1 = virtualinvoke $r7.<java.lang.String: boolean startsWith(java.lang.String)>("_");
+
+        if $z1 != 0 goto label22;
+
+        r4 = new java.io.File;
+
+        $r7 = virtualinvoke r0.<com.ichi2.libanki.Media: java.lang.String dir()>();
+
+        r18 = virtualinvoke r22.<java.io.File: java.lang.String getName()>();
+
+        r18 = staticinvoke <com.ichi2.libanki.Utils: java.lang.String nfcNormalized(java.lang.String)>(r18);
+
+        specialinvoke r4.<java.io.File: void <init>(java.lang.String,java.lang.String)>($r7, r18);
+
+        if $r1 != null goto label26;
+
+        $r7 = virtualinvoke r22.<java.io.File: java.lang.String getName()>();
+
+        r18 = virtualinvoke r4.<java.io.File: java.lang.String getName()>();
+
+        $z1 = virtualinvoke $r7.<java.lang.String: boolean equals(java.lang.Object)>(r18);
+
+        if $z1 != 0 goto label26;
+
+        $z0 = virtualinvoke r4.<java.io.File: boolean exists()>();
+
+        if $z0 == 0 goto label27;
+
+        virtualinvoke r22.<java.io.File: boolean delete()>();
+
+        $z0 = 1;
+
+     label25:
+        r22 = r4;
+
+     label26:
+        $r7 = virtualinvoke r4.<java.io.File: java.lang.String getName()>();
+
+        $z1 = interfaceinvoke r2.<java.util.Set: boolean contains(java.lang.Object)>($r7);
+
+        if $z1 != 0 goto label28;
+
+        $r7 = virtualinvoke r22.<java.io.File: java.lang.String getName()>();
+
+        interfaceinvoke r6.<java.util.List: boolean add(java.lang.Object)>($r7);
+
+        goto label22;
+
+     label27:
+        virtualinvoke r22.<java.io.File: boolean renameTo(java.io.File)>(r4);
+
+        $z0 = 1;
+
+        goto label25;
+
+     label28:
+        $r7 = virtualinvoke r4.<java.io.File: java.lang.String getName()>();
+
+        interfaceinvoke r2.<java.util.Set: boolean remove(java.lang.Object)>($r7);
+
+        goto label22;
+
+     label29:
+        if $z0 == 0 goto label30;
+
+        $r14 = specialinvoke r0.<com.ichi2.libanki.Media: java.util.List check(java.io.File[])>($r1);
+
+        return $r14;
+
+     label30:
+        r5 = new java.util.ArrayList;
+
+        specialinvoke r5.<java.util.ArrayList: void <init>()>();
+
+        $r16 = interfaceinvoke r2.<java.util.Set: java.util.Iterator iterator()>();
+
+     label31:
+        $z0 = interfaceinvoke $r16.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label32;
+
+        $r17 = interfaceinvoke $r16.<java.util.Iterator: java.lang.Object next()>();
+
+        $r7 = (java.lang.String) $r17;
+
+        $z0 = virtualinvoke $r7.<java.lang.String: boolean startsWith(java.lang.String)>("_");
+
+        if $z0 != 0 goto label31;
+
+        interfaceinvoke r5.<java.util.List: boolean add(java.lang.Object)>($r7);
+
+        goto label31;
+
+     label32:
+        r23 = new java.util.ArrayList;
+
+        specialinvoke r23.<java.util.ArrayList: void <init>()>();
+
+        interfaceinvoke r23.<java.util.List: boolean add(java.lang.Object)>(r5);
+
+        interfaceinvoke r23.<java.util.List: boolean add(java.lang.Object)>(r6);
+
+        interfaceinvoke r23.<java.util.List: boolean add(java.lang.Object)>(r3);
+
+        return r23;
+
+        catch java.lang.Throwable from label01 to label02 with label16;
+        catch java.lang.Throwable from label03 to label04 with label16;
+        catch java.lang.Throwable from label05 to label06 with label16;
+        catch java.lang.Throwable from label07 to label09 with label16;
+        catch java.lang.Throwable from label10 to label11 with label16;
+        catch java.lang.Throwable from label12 to label13 with label16;
+        catch java.lang.Throwable from label14 to label15 with label16;
+    }
+    public static int indexOfFname(java.util.regex.Pattern)
+    {
+        java.util.regex.Pattern $r0, $r1;
+
+        $r0 := @parameter0: java.util.regex.Pattern;
+
+        $r1 = <com.ichi2.libanki.Media: java.util.regex.Pattern fSoundRegexps>;
+
+        if $r0 != $r1 goto label1;
+
+        return 2;
+
+     label1:
+        $r1 = <com.ichi2.libanki.Media: java.util.regex.Pattern fImgRegExpU>;
+
+        if $r0 == $r1 goto label2;
+
+        return 3;
+
+     label2:
+        return 2;
+    }
+    private java.lang.String writeData(java.io.File) throws java.io.IOException
+    {
+        com.ichi2.libanki.Media r0;
+        java.io.File $r1, r3;
+        java.lang.String r2, r5, $r6, $r8, $r9;
+        java.lang.String[] $r4;
+        java.lang.StringBuilder $r7;
+        boolean $z0;
+        java.util.regex.Pattern $r10;
+        java.util.regex.Matcher $r11;
+        int $i0;
+        java.util.Locale $r12;
+        java.lang.Object[] $r13;
+        java.lang.Integer $r14;
+
+        r0 := @this: com.ichi2.libanki.Media;
+
+        $r1 := @parameter0: java.io.File;
+
+        r2 = virtualinvoke $r1.<java.io.File: java.lang.String getName()>();
+
+        r2 = staticinvoke <com.ichi2.libanki.Utils: java.lang.String nfcNormalized(java.lang.String)>(r2);
+
+        r2 = virtualinvoke r0.<com.ichi2.libanki.Media: java.lang.String stripIllegal(java.lang.String)>(r2);
+
+        $r4 = staticinvoke <com.ichi2.libanki.Utils: java.lang.String[] splitFilename(java.lang.String)>(r2);
+
+        r5 = $r4[0];
+
+        r2 = $r4[1];
+
+        $r6 = staticinvoke <com.ichi2.libanki.Utils: java.lang.String fileChecksum(java.io.File)>($r1);
+
+     label1:
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r5);
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r2);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        r3 = new java.io.File;
+
+        $r9 = virtualinvoke r0.<com.ichi2.libanki.Media: java.lang.String dir()>();
+
+        specialinvoke r3.<java.io.File: void <init>(java.lang.String,java.lang.String)>($r9, $r8);
+
+        $z0 = virtualinvoke r3.<java.io.File: boolean exists()>();
+
+        if $z0 != 0 goto label2;
+
+        staticinvoke <com.ichi2.libanki.Utils: void copyFile(java.io.File,java.io.File)>($r1, r3);
+
+        return $r8;
+
+     label2:
+        $r9 = staticinvoke <com.ichi2.libanki.Utils: java.lang.String fileChecksum(java.io.File)>(r3);
+
+        $z0 = virtualinvoke $r9.<java.lang.String: boolean equals(java.lang.Object)>($r6);
+
+        if $z0 != 0 goto label4;
+
+        $r10 = staticinvoke <java.util.regex.Pattern: java.util.regex.Pattern compile(java.lang.String)>(" \\((\\d+)\\)$");
+
+        $r11 = virtualinvoke $r10.<java.util.regex.Pattern: java.util.regex.Matcher matcher(java.lang.CharSequence)>(r5);
+
+        $z0 = virtualinvoke $r11.<java.util.regex.Matcher: boolean find()>();
+
+        if $z0 != 0 goto label3;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r5);
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" (1)");
+
+        r5 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        goto label1;
+
+     label3:
+        r5 = virtualinvoke $r11.<java.util.regex.Matcher: java.lang.String group(int)>(1);
+
+        $i0 = staticinvoke <java.lang.Integer: int parseInt(java.lang.String)>(r5);
+
+        $r12 = <java.util.Locale: java.util.Locale US>;
+
+        $r13 = newarray (java.lang.Object)[1];
+
+        $i0 = $i0 + 1;
+
+        $r14 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        $r13[0] = $r14;
+
+        r5 = staticinvoke <java.lang.String: java.lang.String format(java.util.Locale,java.lang.String,java.lang.Object[])>($r12, " (%d)", $r13);
+
+        goto label1;
+
+     label4:
+        return $r8;
+    }
+    public java.lang.Long _changed()
+    {
+        com.ichi2.libanki.Media r0;
+        com.ichi2.libanki.DB $r1;
+        long $l0, $l1;
+        java.lang.String $r2;
+        byte $b2;
+        java.lang.Long $r3;
+
+        r0 := @this: com.ichi2.libanki.Media;
+
+        $r1 = r0.<com.ichi2.libanki.Media: com.ichi2.libanki.DB mDb>;
+
+        $l0 = virtualinvoke $r1.<com.ichi2.libanki.DB: long queryLongScalar(java.lang.String)>("select dirMod from meta");
+
+        $r2 = virtualinvoke r0.<com.ichi2.libanki.Media: java.lang.String dir()>();
+
+        $l1 = specialinvoke r0.<com.ichi2.libanki.Media: long _mtime(java.lang.String)>($r2);
+
+        $b2 = $l0 cmp 0L;
+
+        if $b2 == 0 goto label1;
+
+        $b2 = $l0 cmp $l1;
+
+        if $b2 != 0 goto label1;
+
+        return null;
+
+     label1:
+        $r3 = staticinvoke <java.lang.Long: java.lang.Long valueOf(long)>($l1);
+
+        return $r3;
+    }
+    public void _initDB()
+    {
+        com.ichi2.libanki.Media r0;
+        com.ichi2.libanki.DB $r1;
+
+        r0 := @this: com.ichi2.libanki.Media;
+
+        $r1 = r0.<com.ichi2.libanki.Media: com.ichi2.libanki.DB mDb>;
+
+        virtualinvoke $r1.<com.ichi2.libanki.DB: void executeScript(java.lang.String)>("create table media (\n fname text not null primary key,\n csum text,           -- null indicates deleted file\n mtime int not null,  -- zero if deleted\n dirty int not null\n);\ncreate index idx_media_dirty on media (dirty);\ncreate table meta (dirMod int, lastUsn int); insert into meta values (0, 0);");
+
+        return;
+    }
+    public java.lang.String addFile(java.io.File) throws java.io.IOException
+    {
+        com.ichi2.libanki.Media r0;
+        java.io.File $r1;
+        java.lang.String $r2;
+
+        r0 := @this: com.ichi2.libanki.Media;
+
+        $r1 := @parameter0: java.io.File;
+
+        $r2 = specialinvoke r0.<com.ichi2.libanki.Media: java.lang.String writeData(java.io.File)>($r1);
+
+        virtualinvoke r0.<com.ichi2.libanki.Media: void markFileAdd(java.lang.String)>($r2);
+
+        return $r2;
+    }
+    public int addFilesFromZip(java.util.zip.ZipFile) throws java.io.IOException
+    {
+        com.ichi2.libanki.Media r0;
+        java.util.zip.ZipFile $r1;
+        org.json.JSONException r2;
+        java.util.ArrayList r3, $r9;
+        org.json.JSONObject r4;
+        java.util.zip.ZipEntry $r5;
+        java.io.InputStream $r6;
+        java.lang.String $r7, $r12, $r13;
+        int i0, $i2;
+        java.util.Enumeration $r8;
+        java.util.Iterator $r10;
+        boolean $z0;
+        java.lang.Object $r11;
+        java.lang.Object[] $r14;
+        long $l1;
+        java.lang.Long $r15;
+        java.lang.Integer $r16;
+        com.ichi2.libanki.DB $r17;
+        java.lang.RuntimeException $r18;
+        java.lang.Throwable $r19;
+
+        r0 := @this: com.ichi2.libanki.Media;
+
+        $r1 := @parameter0: java.util.zip.ZipFile;
+
+     label01:
+        r3 = new java.util.ArrayList;
+
+     label02:
+        specialinvoke r3.<java.util.ArrayList: void <init>()>();
+
+     label03:
+        r4 = new org.json.JSONObject;
+
+     label04:
+        $r5 = virtualinvoke $r1.<java.util.zip.ZipFile: java.util.zip.ZipEntry getEntry(java.lang.String)>("_meta");
+
+        $r6 = virtualinvoke $r1.<java.util.zip.ZipFile: java.io.InputStream getInputStream(java.util.zip.ZipEntry)>($r5);
+
+        $r7 = staticinvoke <com.ichi2.libanki.Utils: java.lang.String convertStreamToString(java.io.InputStream)>($r6);
+
+        specialinvoke r4.<org.json.JSONObject: void <init>(java.lang.String)>($r7);
+
+     label05:
+        i0 = 0;
+
+     label06:
+        $r8 = virtualinvoke $r1.<java.util.zip.ZipFile: java.util.Enumeration entries()>();
+
+        $r9 = staticinvoke <java.util.Collections: java.util.ArrayList list(java.util.Enumeration)>($r8);
+
+        $r10 = virtualinvoke $r9.<java.util.ArrayList: java.util.Iterator iterator()>();
+
+     label07:
+        $z0 = interfaceinvoke $r10.<java.util.Iterator: boolean hasNext()>();
+
+     label08:
+        if $z0 == 0 goto label23;
+
+     label09:
+        $r11 = interfaceinvoke $r10.<java.util.Iterator: java.lang.Object next()>();
+
+     label10:
+        $r5 = (java.util.zip.ZipEntry) $r11;
+
+     label11:
+        $r7 = virtualinvoke $r5.<java.util.zip.ZipEntry: java.lang.String getName()>();
+
+        $z0 = virtualinvoke $r7.<java.lang.String: boolean equals(java.lang.Object)>("_meta");
+
+     label12:
+        if $z0 != 0 goto label07;
+
+     label13:
+        $r7 = virtualinvoke $r5.<java.util.zip.ZipEntry: java.lang.String getName()>();
+
+        $r7 = virtualinvoke r4.<org.json.JSONObject: java.lang.String getString(java.lang.String)>($r7);
+
+        $r7 = staticinvoke <com.ichi2.libanki.Utils: java.lang.String nfcNormalized(java.lang.String)>($r7);
+
+        $r12 = virtualinvoke r0.<com.ichi2.libanki.Media: java.lang.String dir()>();
+
+     label14:
+        $r13 = <java.io.File: java.lang.String separator>;
+
+     label15:
+        $r12 = virtualinvoke $r12.<java.lang.String: java.lang.String concat(java.lang.String)>($r13);
+
+        $r12 = virtualinvoke $r12.<java.lang.String: java.lang.String concat(java.lang.String)>($r7);
+
+        $r6 = virtualinvoke $r1.<java.util.zip.ZipFile: java.io.InputStream getInputStream(java.util.zip.ZipEntry)>($r5);
+
+        staticinvoke <com.ichi2.libanki.Utils: void writeToFile(java.io.InputStream,java.lang.String)>($r6, $r12);
+
+        $r13 = staticinvoke <com.ichi2.libanki.Utils: java.lang.String fileChecksum(java.lang.String)>($r12);
+
+     label16:
+        $r14 = newarray (java.lang.Object)[4];
+
+        $r14[0] = $r7;
+
+        $r14[1] = $r13;
+
+     label17:
+        $l1 = specialinvoke r0.<com.ichi2.libanki.Media: long _mtime(java.lang.String)>($r12);
+
+        $r15 = staticinvoke <java.lang.Long: java.lang.Long valueOf(long)>($l1);
+
+     label18:
+        $r14[2] = $r15;
+
+     label19:
+        $r16 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(0);
+
+     label20:
+        $r14[3] = $r16;
+
+     label21:
+        interfaceinvoke r3.<java.util.List: boolean add(java.lang.Object)>($r14);
+
+     label22:
+        i0 = i0 + 1;
+
+        goto label07;
+
+     label23:
+        $i2 = interfaceinvoke r3.<java.util.List: int size()>();
+
+     label24:
+        if $i2 <= 0 goto label27;
+
+     label25:
+        $r17 = r0.<com.ichi2.libanki.Media: com.ichi2.libanki.DB mDb>;
+
+     label26:
+        virtualinvoke $r17.<com.ichi2.libanki.DB: void executeMany(java.lang.String,java.util.List)>("insert or replace into media values (?,?,?,?)", r3);
+
+     label27:
+        virtualinvoke $r1.<java.util.zip.ZipFile: void close()>();
+
+        return i0;
+
+     label28:
+        r2 := @caughtexception;
+
+     label29:
+        $r18 = new java.lang.RuntimeException;
+
+        specialinvoke $r18.<java.lang.RuntimeException: void <init>(java.lang.Throwable)>(r2);
+
+        throw $r18;
+
+     label30:
+        $r19 := @caughtexception;
+
+        virtualinvoke $r1.<java.util.zip.ZipFile: void close()>();
+
+        throw $r19;
+
+        catch org.json.JSONException from label02 to label03 with label28;
+        catch org.json.JSONException from label04 to label05 with label28;
+        catch org.json.JSONException from label06 to label08 with label28;
+        catch org.json.JSONException from label09 to label10 with label28;
+        catch org.json.JSONException from label11 to label12 with label28;
+        catch org.json.JSONException from label13 to label14 with label28;
+        catch org.json.JSONException from label15 to label16 with label28;
+        catch org.json.JSONException from label17 to label18 with label28;
+        catch org.json.JSONException from label19 to label20 with label28;
+        catch org.json.JSONException from label21 to label22 with label28;
+        catch org.json.JSONException from label23 to label24 with label28;
+        catch org.json.JSONException from label26 to label27 with label28;
+        catch java.lang.Throwable from label01 to label05 with label30;
+        catch java.lang.Throwable from label06 to label08 with label30;
+        catch java.lang.Throwable from label09 to label12 with label30;
+        catch java.lang.Throwable from label13 to label22 with label30;
+        catch java.lang.Throwable from label23 to label24 with label30;
+        catch java.lang.Throwable from label25 to label27 with label30;
+        catch java.lang.Throwable from label29 to label30 with label30;
+    }
+    public java.util.List check()
+    {
+        com.ichi2.libanki.Media r0;
+        java.util.List $r1;
+
+        r0 := @this: com.ichi2.libanki.Media;
+
+        $r1 = specialinvoke r0.<com.ichi2.libanki.Media: java.util.List check(java.io.File[])>(null);
+
+        return $r1;
+    }
+    public void close()
+    {
+        com.ichi2.libanki.Media r0;
+        boolean $z0;
+        com.ichi2.libanki.Collection $r1;
+        com.ichi2.libanki.DB $r2;
+
+        r0 := @this: com.ichi2.libanki.Media;
+
+        $r1 = r0.<com.ichi2.libanki.Media: com.ichi2.libanki.Collection mCol>;
+
+        $z0 = virtualinvoke $r1.<com.ichi2.libanki.Collection: boolean getServer()>();
+
+        if $z0 == 0 goto label1;
+
+        return;
+
+     label1:
+        $r2 = r0.<com.ichi2.libanki.Media: com.ichi2.libanki.DB mDb>;
+
+        virtualinvoke $r2.<com.ichi2.libanki.DB: void close()>();
+
+        r0.<com.ichi2.libanki.Media: com.ichi2.libanki.DB mDb> = null;
+
+        return;
+    }
+    public void connect()
+    {
+        com.ichi2.libanki.Media r0;
+        java.io.File r1;
+        com.ichi2.libanki.Collection $r2;
+        boolean $z0;
+        java.lang.StringBuilder $r3;
+        java.lang.String $r4;
+        com.ichi2.libanki.DB $r5;
+
+        r0 := @this: com.ichi2.libanki.Media;
+
+        $r2 = r0.<com.ichi2.libanki.Media: com.ichi2.libanki.Collection mCol>;
+
+        $z0 = virtualinvoke $r2.<com.ichi2.libanki.Collection: boolean getServer()>();
+
+        if $z0 == 0 goto label1;
+
+        return;
+
+     label1:
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke r0.<com.ichi2.libanki.Media: java.lang.String dir()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".ad.db2");
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        r1 = new java.io.File;
+
+        specialinvoke r1.<java.io.File: void <init>(java.lang.String)>($r4);
+
+        $z0 = virtualinvoke r1.<java.io.File: boolean exists()>();
+
+        if $z0 != 0 goto label4;
+
+        $z0 = 1;
+
+     label2:
+        $r5 = new com.ichi2.libanki.DB;
+
+        specialinvoke $r5.<com.ichi2.libanki.DB: void <init>(java.lang.String)>($r4);
+
+        r0.<com.ichi2.libanki.Media: com.ichi2.libanki.DB mDb> = $r5;
+
+        if $z0 == 0 goto label3;
+
+        virtualinvoke r0.<com.ichi2.libanki.Media: void _initDB()>();
+
+     label3:
+        virtualinvoke r0.<com.ichi2.libanki.Media: void maybeUpgrade()>();
+
+        return;
+
+     label4:
+        $z0 = 0;
+
+        goto label2;
+    }
+    public java.lang.String dir()
+    {
+        com.ichi2.libanki.Media r0;
+        java.lang.String r1;
+
+        r0 := @this: com.ichi2.libanki.Media;
+
+        r1 = r0.<com.ichi2.libanki.Media: java.lang.String mDir>;
+
+        return r1;
+    }
+    public int dirtyCount()
+    {
+        com.ichi2.libanki.Media r0;
+        int $i0;
+        com.ichi2.libanki.DB $r1;
+
+        r0 := @this: com.ichi2.libanki.Media;
+
+        $r1 = r0.<com.ichi2.libanki.Media: com.ichi2.libanki.DB mDb>;
+
+        $i0 = virtualinvoke $r1.<com.ichi2.libanki.DB: int queryScalar(java.lang.String)>("select count() from media where dirty=1");
+
+        return $i0;
+    }
+    public java.lang.String escapeImages(java.lang.String)
+    {
+        com.ichi2.libanki.Media r0;
+        java.lang.String $r1;
+
+        r0 := @this: com.ichi2.libanki.Media;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r1 = virtualinvoke r0.<com.ichi2.libanki.Media: java.lang.String escapeImages(java.lang.String,boolean)>($r1, 0);
+
+        return $r1;
+    }
+    public java.lang.String escapeImages(java.lang.String, boolean)
+    {
+        com.ichi2.libanki.Media r0;
+        boolean $z0, $z1;
+        java.util.regex.Pattern $r1, $r8;
+        java.lang.String $r2, $r9, $r10, $r12;
+        java.util.regex.Pattern[] $r3;
+        java.util.List $r4;
+        java.util.Iterator $r5;
+        java.lang.Object $r6;
+        java.util.regex.Matcher $r7, $r11;
+        byte b0;
+
+        r0 := @this: com.ichi2.libanki.Media;
+
+        $r2 := @parameter0: java.lang.String;
+
+        $z0 := @parameter1: boolean;
+
+        $r3 = newarray (java.util.regex.Pattern)[2];
+
+        $r1 = <com.ichi2.libanki.Media: java.util.regex.Pattern fImgRegExpQ>;
+
+        $r3[0] = $r1;
+
+        $r1 = <com.ichi2.libanki.Media: java.util.regex.Pattern fImgRegExpU>;
+
+        $r3[1] = $r1;
+
+        $r4 = staticinvoke <java.util.Arrays: java.util.List asList(java.lang.Object[])>($r3);
+
+        $r5 = interfaceinvoke $r4.<java.util.List: java.util.Iterator iterator()>();
+
+     label1:
+        $z1 = interfaceinvoke $r5.<java.util.Iterator: boolean hasNext()>();
+
+        if $z1 == 0 goto label5;
+
+        $r6 = interfaceinvoke $r5.<java.util.Iterator: java.lang.Object next()>();
+
+        $r1 = (java.util.regex.Pattern) $r6;
+
+        $r7 = virtualinvoke $r1.<java.util.regex.Pattern: java.util.regex.Matcher matcher(java.lang.CharSequence)>($r2);
+
+        $r8 = <com.ichi2.libanki.Media: java.util.regex.Pattern fImgRegExpU>;
+
+        if $r1 != $r8 goto label3;
+
+        b0 = 2;
+
+     label2:
+        $z1 = virtualinvoke $r7.<java.util.regex.Matcher: boolean find()>();
+
+        if $z1 == 0 goto label1;
+
+        $r9 = virtualinvoke $r7.<java.util.regex.Matcher: java.lang.String group(int)>(0);
+
+        $r10 = virtualinvoke $r7.<java.util.regex.Matcher: java.lang.String group(int)>(b0);
+
+        $r1 = <com.ichi2.libanki.Media: java.util.regex.Pattern fRemotePattern>;
+
+        $r11 = virtualinvoke $r1.<java.util.regex.Pattern: java.util.regex.Matcher matcher(java.lang.CharSequence)>($r10);
+
+        $z1 = virtualinvoke $r11.<java.util.regex.Matcher: boolean find()>();
+
+        if $z1 != 0 goto label2;
+
+        if $z0 == 0 goto label4;
+
+        $r12 = staticinvoke <android.net.Uri: java.lang.String decode(java.lang.String)>($r10);
+
+        $r10 = virtualinvoke $r9.<java.lang.String: java.lang.String replace(java.lang.CharSequence,java.lang.CharSequence)>($r10, $r12);
+
+        $r2 = virtualinvoke $r2.<java.lang.String: java.lang.String replace(java.lang.CharSequence,java.lang.CharSequence)>($r9, $r10);
+
+        goto label2;
+
+     label3:
+        b0 = 3;
+
+        goto label2;
+
+     label4:
+        $r12 = staticinvoke <android.net.Uri: java.lang.String encode(java.lang.String)>($r10);
+
+        $r10 = virtualinvoke $r9.<java.lang.String: java.lang.String replace(java.lang.CharSequence,java.lang.CharSequence)>($r10, $r12);
+
+        $r2 = virtualinvoke $r2.<java.lang.String: java.lang.String replace(java.lang.CharSequence,java.lang.CharSequence)>($r9, $r10);
+
+        goto label2;
+
+     label5:
+        return $r2;
+    }
+    public java.util.List filesInStr(java.lang.Long, java.lang.String)
+    {
+        com.ichi2.libanki.Media r0;
+        java.lang.Long $r1;
+        java.lang.String $r2;
+        java.util.List $r3;
+
+        r0 := @this: com.ichi2.libanki.Media;
+
+        $r1 := @parameter0: java.lang.Long;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $r3 = virtualinvoke r0.<com.ichi2.libanki.Media: java.util.List filesInStr(java.lang.Long,java.lang.String,boolean)>($r1, $r2, 0);
+
+        return $r3;
+    }
+    public java.util.List filesInStr(java.lang.Long, java.lang.String, boolean)
+    {
+        com.ichi2.libanki.Media r0;
+        java.lang.Long $r1;
+        java.lang.String $r2, $r15, $r17;
+        boolean $z0, $z1;
+        org.json.JSONException r3;
+        java.util.ArrayList r4, $r19;
+        com.ichi2.libanki.Collection $r5;
+        com.ichi2.libanki.Models $r6;
+        long $l0;
+        org.json.JSONObject $r7;
+        java.util.List r8;
+        int $i1;
+        java.util.Iterator $r9, $r11;
+        java.lang.Object $r10;
+        java.util.regex.Pattern r12, $r13;
+        byte b2;
+        java.util.regex.Matcher $r14, $r18;
+        java.util.Locale $r16;
+        java.lang.RuntimeException $r20;
+
+        r0 := @this: com.ichi2.libanki.Media;
+
+        $r1 := @parameter0: java.lang.Long;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $z0 := @parameter2: boolean;
+
+        $r19 = new java.util.ArrayList;
+
+        r4 = $r19;
+
+        specialinvoke $r19.<java.util.ArrayList: void <init>()>();
+
+        $r5 = r0.<com.ichi2.libanki.Media: com.ichi2.libanki.Collection mCol>;
+
+        $r6 = virtualinvoke $r5.<com.ichi2.libanki.Collection: com.ichi2.libanki.Models getModels()>();
+
+        $l0 = virtualinvoke $r1.<java.lang.Long: long longValue()>();
+
+        $r7 = virtualinvoke $r6.<com.ichi2.libanki.Models: org.json.JSONObject get(long)>($l0);
+
+        $r19 = new java.util.ArrayList;
+
+        r8 = $r19;
+
+        specialinvoke $r19.<java.util.ArrayList: void <init>()>();
+
+     label01:
+        $i1 = virtualinvoke $r7.<org.json.JSONObject: int getInt(java.lang.String)>("type");
+
+     label02:
+        if $i1 != 1 goto label13;
+
+     label03:
+        $z1 = virtualinvoke $r2.<java.lang.String: boolean contains(java.lang.CharSequence)>("{{c");
+
+     label04:
+        if $z1 == 0 goto label13;
+
+     label05:
+        r8 = specialinvoke r0.<com.ichi2.libanki.Media: java.util.List _expandClozes(java.lang.String)>($r2);
+
+     label06:
+        $r9 = interfaceinvoke r8.<java.util.List: java.util.Iterator iterator()>();
+
+     label07:
+        $z1 = interfaceinvoke $r9.<java.util.Iterator: boolean hasNext()>();
+
+        if $z1 == 0 goto label19;
+
+        $r10 = interfaceinvoke $r9.<java.util.Iterator: java.lang.Object next()>();
+
+        $r2 = (java.lang.String) $r10;
+
+        $r5 = r0.<com.ichi2.libanki.Media: com.ichi2.libanki.Collection mCol>;
+
+        $r2 = staticinvoke <com.ichi2.libanki.LaTeX: java.lang.String mungeQA(java.lang.String,com.ichi2.libanki.Collection)>($r2, $r5);
+
+        r8 = <com.ichi2.libanki.Media: java.util.List mRegexps>;
+
+        $r11 = interfaceinvoke r8.<java.util.List: java.util.Iterator iterator()>();
+
+     label08:
+        $z1 = interfaceinvoke $r11.<java.util.Iterator: boolean hasNext()>();
+
+        if $z1 == 0 goto label07;
+
+        $r10 = interfaceinvoke $r11.<java.util.Iterator: java.lang.Object next()>();
+
+        r12 = (java.util.regex.Pattern) $r10;
+
+        $r13 = <com.ichi2.libanki.Media: java.util.regex.Pattern fSoundRegexps>;
+
+        if r12 != $r13 goto label16;
+
+        b2 = 2;
+
+     label09:
+        $r14 = virtualinvoke r12.<java.util.regex.Pattern: java.util.regex.Matcher matcher(java.lang.CharSequence)>($r2);
+
+     label10:
+        $z1 = virtualinvoke $r14.<java.util.regex.Matcher: boolean find()>();
+
+        if $z1 == 0 goto label08;
+
+        $r15 = virtualinvoke $r14.<java.util.regex.Matcher: java.lang.String group(int)>(b2);
+
+        r12 = <com.ichi2.libanki.Media: java.util.regex.Pattern fRemotePattern>;
+
+        $r16 = <java.util.Locale: java.util.Locale US>;
+
+        $r17 = virtualinvoke $r15.<java.lang.String: java.lang.String toLowerCase(java.util.Locale)>($r16);
+
+        $r18 = virtualinvoke r12.<java.util.regex.Pattern: java.util.regex.Matcher matcher(java.lang.CharSequence)>($r17);
+
+        $z1 = virtualinvoke $r18.<java.util.regex.Matcher: boolean find()>();
+
+        if $z1 != 0 goto label18;
+
+        $z1 = 1;
+
+     label11:
+        if $z1 != 0 goto label12;
+
+        if $z0 == 0 goto label10;
+
+     label12:
+        interfaceinvoke r4.<java.util.List: boolean add(java.lang.Object)>($r15);
+
+        goto label10;
+
+     label13:
+        interfaceinvoke r8.<java.util.List: boolean add(java.lang.Object)>($r2);
+
+     label14:
+        goto label06;
+
+     label15:
+        r3 := @caughtexception;
+
+        $r20 = new java.lang.RuntimeException;
+
+        specialinvoke $r20.<java.lang.RuntimeException: void <init>(java.lang.Throwable)>(r3);
+
+        throw $r20;
+
+     label16:
+        $r13 = <com.ichi2.libanki.Media: java.util.regex.Pattern fImgRegExpU>;
+
+        if r12 != $r13 goto label17;
+
+        b2 = 2;
+
+        goto label09;
+
+     label17:
+        b2 = 3;
+
+        goto label09;
+
+     label18:
+        $z1 = 0;
+
+        goto label11;
+
+     label19:
+        return r4;
+
+        catch org.json.JSONException from label01 to label02 with label15;
+        catch org.json.JSONException from label03 to label04 with label15;
+        catch org.json.JSONException from label05 to label06 with label15;
+        catch org.json.JSONException from label13 to label14 with label15;
+    }
+    public void findChanges()
+    {
+        com.ichi2.libanki.Media r0;
+
+        r0 := @this: com.ichi2.libanki.Media;
+
+        virtualinvoke r0.<com.ichi2.libanki.Media: void findChanges(boolean)>(0);
+
+        return;
+    }
+    public void findChanges(boolean)
+    {
+        com.ichi2.libanki.Media r0;
+        boolean $z0;
+        java.lang.Long $r1;
+
+        r0 := @this: com.ichi2.libanki.Media;
+
+        $z0 := @parameter0: boolean;
+
+        if $z0 != 0 goto label1;
+
+        $r1 = virtualinvoke r0.<com.ichi2.libanki.Media: java.lang.Long _changed()>();
+
+        if $r1 == null goto label2;
+
+     label1:
+        specialinvoke r0.<com.ichi2.libanki.Media: void _logChanges()>();
+
+     label2:
+        return;
+    }
+    public void forceResync()
+    {
+        com.ichi2.libanki.Media r0;
+        com.ichi2.libanki.DB $r1;
+
+        r0 := @this: com.ichi2.libanki.Media;
+
+        $r1 = r0.<com.ichi2.libanki.Media: com.ichi2.libanki.DB mDb>;
+
+        virtualinvoke $r1.<com.ichi2.libanki.DB: void execute(java.lang.String)>("delete from media");
+
+        $r1 = r0.<com.ichi2.libanki.Media: com.ichi2.libanki.DB mDb>;
+
+        virtualinvoke $r1.<com.ichi2.libanki.DB: void execute(java.lang.String)>("update meta set lastUsn=0,dirMod=0");
+
+        $r1 = r0.<com.ichi2.libanki.Media: com.ichi2.libanki.DB mDb>;
+
+        virtualinvoke $r1.<com.ichi2.libanki.DB: void execute(java.lang.String)>("vacuum");
+
+        $r1 = r0.<com.ichi2.libanki.Media: com.ichi2.libanki.DB mDb>;
+
+        virtualinvoke $r1.<com.ichi2.libanki.DB: void execute(java.lang.String)>("analyze");
+
+        $r1 = r0.<com.ichi2.libanki.Media: com.ichi2.libanki.DB mDb>;
+
+        virtualinvoke $r1.<com.ichi2.libanki.DB: void commit()>();
+
+        return;
+    }
+    public com.ichi2.libanki.DB getDb()
+    {
+        com.ichi2.libanki.Media r0;
+        com.ichi2.libanki.DB r1;
+
+        r0 := @this: com.ichi2.libanki.Media;
+
+        r1 = r0.<com.ichi2.libanki.Media: com.ichi2.libanki.DB mDb>;
+
+        return r1;
+    }
+    public boolean hasIllegal(java.lang.String)
+    {
+        com.ichi2.libanki.Media r0;
+        java.lang.String $r1;
+        java.util.regex.Pattern $r2;
+        java.util.regex.Matcher $r3;
+        boolean $z0;
+
+        r0 := @this: com.ichi2.libanki.Media;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = <com.ichi2.libanki.Media: java.util.regex.Pattern fIllegalCharReg>;
+
+        $r3 = virtualinvoke $r2.<java.util.regex.Pattern: java.util.regex.Matcher matcher(java.lang.CharSequence)>($r1);
+
+        $z0 = virtualinvoke $r3.<java.util.regex.Matcher: boolean find()>();
+
+        return $z0;
+    }
+    public boolean have(java.lang.String)
+    {
+        com.ichi2.libanki.Media r0;
+        java.lang.String $r1, $r3;
+        java.io.File $r2;
+        boolean $z0;
+
+        r0 := @this: com.ichi2.libanki.Media;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = new java.io.File;
+
+        $r3 = virtualinvoke r0.<com.ichi2.libanki.Media: java.lang.String dir()>();
+
+        specialinvoke $r2.<java.io.File: void <init>(java.lang.String,java.lang.String)>($r3, $r1);
+
+        $z0 = virtualinvoke $r2.<java.io.File: boolean exists()>();
+
+        return $z0;
+    }
+    public boolean haveDirty()
+    {
+        com.ichi2.libanki.Media r0;
+        int $i0;
+        com.ichi2.libanki.DB $r1;
+
+        r0 := @this: com.ichi2.libanki.Media;
+
+        $r1 = r0.<com.ichi2.libanki.Media: com.ichi2.libanki.DB mDb>;
+
+        $i0 = virtualinvoke $r1.<com.ichi2.libanki.DB: int queryScalar(java.lang.String)>("select 1 from media where dirty=1 limit 1");
+
+        if $i0 <= 0 goto label1;
+
+        return 1;
+
+     label1:
+        return 0;
+    }
+    public int lastUsn()
+    {
+        com.ichi2.libanki.Media r0;
+        int $i0;
+        com.ichi2.libanki.DB $r1;
+
+        r0 := @this: com.ichi2.libanki.Media;
+
+        $r1 = r0.<com.ichi2.libanki.Media: com.ichi2.libanki.DB mDb>;
+
+        $i0 = virtualinvoke $r1.<com.ichi2.libanki.DB: int queryScalar(java.lang.String)>("select lastUsn from meta");
+
+        return $i0;
+    }
+    public void markClean(java.util.List)
+    {
+        com.ichi2.libanki.Media r0;
+        java.util.List r1;
+        java.util.Iterator $r2;
+        boolean $z0;
+        java.lang.Object $r3;
+        java.lang.String r4;
+        com.ichi2.libanki.DB $r5;
+        java.lang.Object[] $r6;
+
+        r0 := @this: com.ichi2.libanki.Media;
+
+        r1 := @parameter0: java.util.List;
+
+        $r2 = interfaceinvoke r1.<java.util.List: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r2.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label2;
+
+        $r3 = interfaceinvoke $r2.<java.util.Iterator: java.lang.Object next()>();
+
+        r4 = (java.lang.String) $r3;
+
+        $r5 = r0.<com.ichi2.libanki.Media: com.ichi2.libanki.DB mDb>;
+
+        $r6 = newarray (java.lang.Object)[1];
+
+        $r6[0] = r4;
+
+        virtualinvoke $r5.<com.ichi2.libanki.DB: void execute(java.lang.String,java.lang.Object[])>("update media set dirty=0 where fname=?", $r6);
+
+        goto label1;
+
+     label2:
+        return;
+    }
+    public void markFileAdd(java.lang.String)
+    {
+        com.ichi2.libanki.Media r0;
+        java.lang.String $r1, $r4;
+        java.lang.Object[] $r2;
+        java.io.File $r3;
+        com.ichi2.libanki.DB $r5;
+        long $l0;
+        java.lang.Long $r6;
+        java.lang.Integer $r7;
+
+        r0 := @this: com.ichi2.libanki.Media;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = newarray (java.lang.Object)[1];
+
+        $r2[0] = $r1;
+
+        staticinvoke <timber.log.Timber: void d(java.lang.String,java.lang.Object[])>("Marking media file addition in media db: %s", $r2);
+
+        $r3 = new java.io.File;
+
+        $r4 = virtualinvoke r0.<com.ichi2.libanki.Media: java.lang.String dir()>();
+
+        specialinvoke $r3.<java.io.File: void <init>(java.lang.String,java.lang.String)>($r4, $r1);
+
+        $r4 = virtualinvoke $r3.<java.io.File: java.lang.String getAbsolutePath()>();
+
+        $r5 = r0.<com.ichi2.libanki.Media: com.ichi2.libanki.DB mDb>;
+
+        $r2 = newarray (java.lang.Object)[4];
+
+        $r2[0] = $r1;
+
+        $r1 = specialinvoke r0.<com.ichi2.libanki.Media: java.lang.String _checksum(java.lang.String)>($r4);
+
+        $r2[1] = $r1;
+
+        $l0 = specialinvoke r0.<com.ichi2.libanki.Media: long _mtime(java.lang.String)>($r4);
+
+        $r6 = staticinvoke <java.lang.Long: java.lang.Long valueOf(long)>($l0);
+
+        $r2[2] = $r6;
+
+        $r7 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(1);
+
+        $r2[3] = $r7;
+
+        virtualinvoke $r5.<com.ichi2.libanki.DB: void execute(java.lang.String,java.lang.Object[])>("insert or replace into media values (?,?,?,?)", $r2);
+
+        return;
+    }
+    public void maybeUpgrade()
+    {
+        com.ichi2.libanki.Media r0;
+        java.lang.Exception r1;
+        java.io.File r2, r3;
+        java.io.StringWriter r4;
+        java.lang.StringBuilder $r5;
+        java.lang.String $r6, $r10;
+        boolean $z0;
+        com.ichi2.libanki.DB $r7;
+        java.util.Locale $r8;
+        java.lang.Object[] $r9;
+        java.io.PrintWriter $r11;
+        com.ichi2.libanki.Collection $r12;
+
+        r0 := @this: com.ichi2.libanki.Media;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke r0.<com.ichi2.libanki.Media: java.lang.String dir()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".db");
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        r3 = new java.io.File;
+
+        specialinvoke r3.<java.io.File: void <init>(java.lang.String)>($r6);
+
+        $z0 = virtualinvoke r3.<java.io.File: boolean exists()>();
+
+        if $z0 == 0 goto label5;
+
+        $r7 = r0.<com.ichi2.libanki.Media: com.ichi2.libanki.DB mDb>;
+
+        $r8 = <java.util.Locale: java.util.Locale US>;
+
+        $r9 = newarray (java.lang.Object)[1];
+
+        $r9[0] = $r6;
+
+        $r10 = staticinvoke <java.lang.String: java.lang.String format(java.util.Locale,java.lang.String,java.lang.Object[])>($r8, "attach \"%s\" as old", $r9);
+
+        virtualinvoke $r7.<com.ichi2.libanki.DB: void execute(java.lang.String)>($r10);
+
+     label1:
+        $r7 = r0.<com.ichi2.libanki.Media: com.ichi2.libanki.DB mDb>;
+
+        virtualinvoke $r7.<com.ichi2.libanki.DB: void execute(java.lang.String)>("insert into media\n select m.fname, csum, mod, ifnull((select 1 from log l2 where l2.fname=m.fname), 0) as dirty\n from old.media m\n left outer join old.log l using (fname)\n union\n select fname, null, 0, 1 from old.log where type=1;");
+
+        $r7 = r0.<com.ichi2.libanki.Media: com.ichi2.libanki.DB mDb>;
+
+        virtualinvoke $r7.<com.ichi2.libanki.DB: void execute(java.lang.String)>("delete from meta");
+
+        $r7 = r0.<com.ichi2.libanki.Media: com.ichi2.libanki.DB mDb>;
+
+        virtualinvoke $r7.<com.ichi2.libanki.DB: void execute(java.lang.String)>("insert into meta select dirMod, usn from old.meta");
+
+        $r7 = r0.<com.ichi2.libanki.Media: com.ichi2.libanki.DB mDb>;
+
+        virtualinvoke $r7.<com.ichi2.libanki.DB: void commit()>();
+
+     label2:
+        $r7 = r0.<com.ichi2.libanki.Media: com.ichi2.libanki.DB mDb>;
+
+        virtualinvoke $r7.<com.ichi2.libanki.DB: void execute(java.lang.String)>("detach old");
+
+        r2 = new java.io.File;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".old");
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke r2.<java.io.File: void <init>(java.lang.String)>($r6);
+
+        $z0 = virtualinvoke r2.<java.io.File: boolean exists()>();
+
+        if $z0 == 0 goto label3;
+
+        virtualinvoke r2.<java.io.File: boolean delete()>();
+
+     label3:
+        virtualinvoke r3.<java.io.File: boolean renameTo(java.io.File)>(r2);
+
+        return;
+
+     label4:
+        r1 := @caughtexception;
+
+        r4 = new java.io.StringWriter;
+
+        specialinvoke r4.<java.io.StringWriter: void <init>()>();
+
+        $r11 = new java.io.PrintWriter;
+
+        specialinvoke $r11.<java.io.PrintWriter: void <init>(java.io.Writer)>(r4);
+
+        virtualinvoke r1.<java.lang.Exception: void printStackTrace(java.io.PrintWriter)>($r11);
+
+        $r12 = r0.<com.ichi2.libanki.Media: com.ichi2.libanki.Collection mCol>;
+
+        $r9 = newarray (java.lang.Object)[1];
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("failed to import old media db:");
+
+        $r10 = virtualinvoke r4.<java.io.StringWriter: java.lang.String toString()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r10);
+
+        $r10 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r9[0] = $r10;
+
+        virtualinvoke $r12.<com.ichi2.libanki.Collection: void log(java.lang.Object[])>($r9);
+
+        goto label2;
+
+     label5:
+        return;
+
+        catch java.lang.Exception from label1 to label2 with label4;
+    }
+    public android.util.Pair mediaChangesZip()
+    {
+        com.ichi2.libanki.Media r0;
+        java.io.BufferedInputStream r1;
+        byte[] r2;
+        java.io.File r3, r4;
+        java.util.ArrayList r5;
+        org.json.JSONArray r6, $r24;
+        java.util.zip.ZipOutputStream r7;
+        com.ichi2.libanki.Collection $r8;
+        java.lang.String $r9, $r16, $r17;
+        android.database.Cursor r10, $r15;
+        java.io.BufferedOutputStream $r11;
+        java.io.FileOutputStream $r12;
+        int i0, i1, $i2;
+        com.ichi2.libanki.DB $r13;
+        io.requery.android.database.sqlite.SQLiteDatabase $r14;
+        boolean $z0;
+        java.lang.Object[] $r18;
+        java.lang.StringBuilder $r19;
+        java.io.FileInputStream $r20;
+        java.util.zip.ZipEntry $r21;
+        java.io.FileNotFoundException r22;
+        android.util.Pair $r23;
+        long $l3, $l4;
+        java.io.IOException r25;
+        java.lang.RuntimeException $r26;
+        java.lang.Throwable $r27;
+
+        r0 := @this: com.ichi2.libanki.Media;
+
+        r3 = new java.io.File;
+
+        $r8 = r0.<com.ichi2.libanki.Media: com.ichi2.libanki.Collection mCol>;
+
+        $r9 = virtualinvoke $r8.<com.ichi2.libanki.Collection: java.lang.String getPath()>();
+
+        $r9 = virtualinvoke $r9.<java.lang.String: java.lang.String replaceFirst(java.lang.String,java.lang.String)>("collection\\.anki2$", "tmpSyncToServer.zip");
+
+        specialinvoke r3.<java.io.File: void <init>(java.lang.String)>($r9);
+
+        r10 = null;
+
+     label01:
+        r7 = new java.util.zip.ZipOutputStream;
+
+        $r11 = new java.io.BufferedOutputStream;
+
+        $r12 = new java.io.FileOutputStream;
+
+     label02:
+        specialinvoke $r12.<java.io.FileOutputStream: void <init>(java.io.File)>(r3);
+
+        specialinvoke $r11.<java.io.BufferedOutputStream: void <init>(java.io.OutputStream)>($r12);
+
+        specialinvoke r7.<java.util.zip.ZipOutputStream: void <init>(java.io.OutputStream)>($r11);
+
+        virtualinvoke r7.<java.util.zip.ZipOutputStream: void setMethod(int)>(8);
+
+     label03:
+        r5 = new java.util.ArrayList;
+
+     label04:
+        specialinvoke r5.<java.util.ArrayList: void <init>()>();
+
+     label05:
+        r6 = new org.json.JSONArray;
+
+     label06:
+        specialinvoke r6.<org.json.JSONArray: void <init>()>();
+
+     label07:
+        i0 = 0;
+
+     label08:
+        r2 = newarray (byte)[2048];
+
+        $r13 = r0.<com.ichi2.libanki.Media: com.ichi2.libanki.DB mDb>;
+
+     label09:
+        $r14 = virtualinvoke $r13.<com.ichi2.libanki.DB: io.requery.android.database.sqlite.SQLiteDatabase getDatabase()>();
+
+        $r15 = virtualinvoke $r14.<io.requery.android.database.sqlite.SQLiteDatabase: android.database.Cursor rawQuery(java.lang.String,java.lang.Object[])>("select fname, csum from media where dirty=1 limit 25", null);
+
+     label10:
+        r10 = $r15;
+
+        i1 = 0;
+
+     label11:
+        $z0 = interfaceinvoke $r15.<android.database.Cursor: boolean moveToNext()>();
+
+     label12:
+        if $z0 == 0 goto label32;
+
+     label13:
+        $r9 = interfaceinvoke $r15.<android.database.Cursor: java.lang.String getString(int)>(0);
+
+        $r16 = interfaceinvoke $r15.<android.database.Cursor: java.lang.String getString(int)>(1);
+
+        interfaceinvoke r5.<java.util.List: boolean add(java.lang.Object)>($r9);
+
+        $r17 = staticinvoke <com.ichi2.libanki.Utils: java.lang.String nfcNormalized(java.lang.String)>($r9);
+
+        $z0 = staticinvoke <android.text.TextUtils: boolean isEmpty(java.lang.CharSequence)>($r16);
+
+     label14:
+        if $z0 != 0 goto label43;
+
+     label15:
+        $r8 = r0.<com.ichi2.libanki.Media: com.ichi2.libanki.Collection mCol>;
+
+        $r18 = newarray (java.lang.Object)[1];
+
+        $r19 = new java.lang.StringBuilder;
+
+     label16:
+        specialinvoke $r19.<java.lang.StringBuilder: void <init>()>();
+
+        $r19 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("+media zip ");
+
+        $r19 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r9);
+
+        $r16 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label17:
+        $r18[0] = $r16;
+
+     label18:
+        virtualinvoke $r8.<com.ichi2.libanki.Collection: void log(java.lang.Object[])>($r18);
+
+     label19:
+        r4 = new java.io.File;
+
+     label20:
+        $r16 = virtualinvoke r0.<com.ichi2.libanki.Media: java.lang.String dir()>();
+
+        specialinvoke r4.<java.io.File: void <init>(java.lang.String,java.lang.String)>($r16, $r9);
+
+     label21:
+        r1 = new java.io.BufferedInputStream;
+
+        $r20 = new java.io.FileInputStream;
+
+     label22:
+        specialinvoke $r20.<java.io.FileInputStream: void <init>(java.io.File)>(r4);
+
+        specialinvoke r1.<java.io.BufferedInputStream: void <init>(java.io.InputStream,int)>($r20, 2048);
+
+     label23:
+        $r21 = new java.util.zip.ZipEntry;
+
+     label24:
+        $r16 = staticinvoke <java.lang.Integer: java.lang.String toString(int)>(i1);
+
+        specialinvoke $r21.<java.util.zip.ZipEntry: void <init>(java.lang.String)>($r16);
+
+        virtualinvoke r7.<java.util.zip.ZipOutputStream: void putNextEntry(java.util.zip.ZipEntry)>($r21);
+
+     label25:
+        $i2 = virtualinvoke r1.<java.io.BufferedInputStream: int read(byte[],int,int)>(r2, 0, 2048);
+
+     label26:
+        if $i2 == -1 goto label37;
+
+     label27:
+        virtualinvoke r7.<java.util.zip.ZipOutputStream: void write(byte[],int,int)>(r2, 0, $i2);
+
+     label28:
+        goto label25;
+
+     label29:
+        r22 := @caughtexception;
+
+     label30:
+        virtualinvoke r0.<com.ichi2.libanki.Media: void removeFile(java.lang.String)>($r9);
+
+     label31:
+        if i0 < 2621440 goto label54;
+
+     label32:
+        $r21 = new java.util.zip.ZipEntry;
+
+     label33:
+        specialinvoke $r21.<java.util.zip.ZipEntry: void <init>(java.lang.String)>("_meta");
+
+        virtualinvoke r7.<java.util.zip.ZipOutputStream: void putNextEntry(java.util.zip.ZipEntry)>($r21);
+
+        $r9 = staticinvoke <com.ichi2.libanki.Utils: java.lang.String jsonToString(org.json.JSONArray)>(r6);
+
+        r2 = virtualinvoke $r9.<java.lang.String: byte[] getBytes()>();
+
+        virtualinvoke r7.<java.util.zip.ZipOutputStream: void write(byte[])>(r2);
+
+        virtualinvoke r7.<java.util.zip.ZipOutputStream: void closeEntry()>();
+
+        virtualinvoke r7.<java.util.zip.ZipOutputStream: void close()>();
+
+        virtualinvoke r3.<java.io.File: void deleteOnExit()>();
+
+     label34:
+        $r23 = new android.util.Pair;
+
+     label35:
+        specialinvoke $r23.<android.util.Pair: void <init>(java.lang.Object,java.lang.Object)>(r3, r5);
+
+     label36:
+        if $r15 == null goto label55;
+
+        interfaceinvoke $r15.<android.database.Cursor: void close()>();
+
+        return $r23;
+
+     label37:
+        virtualinvoke r7.<java.util.zip.ZipOutputStream: void closeEntry()>();
+
+        virtualinvoke r1.<java.io.BufferedInputStream: void close()>();
+
+     label38:
+        $r24 = new org.json.JSONArray;
+
+     label39:
+        specialinvoke $r24.<org.json.JSONArray: void <init>()>();
+
+        $r24 = virtualinvoke $r24.<org.json.JSONArray: org.json.JSONArray put(java.lang.Object)>($r17);
+
+        $r17 = staticinvoke <java.lang.Integer: java.lang.String toString(int)>(i1);
+
+        $r24 = virtualinvoke $r24.<org.json.JSONArray: org.json.JSONArray put(java.lang.Object)>($r17);
+
+        virtualinvoke r6.<org.json.JSONArray: org.json.JSONArray put(java.lang.Object)>($r24);
+
+     label40:
+        $l3 = (long) i0;
+
+     label41:
+        $l4 = virtualinvoke r4.<java.io.File: long length()>();
+
+     label42:
+        $l3 = $l3 + $l4;
+
+        i0 = (int) $l3;
+
+        goto label31;
+
+     label43:
+        $r8 = r0.<com.ichi2.libanki.Media: com.ichi2.libanki.Collection mCol>;
+
+        $r18 = newarray (java.lang.Object)[1];
+
+        $r19 = new java.lang.StringBuilder;
+
+     label44:
+        specialinvoke $r19.<java.lang.StringBuilder: void <init>()>();
+
+        $r19 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("-media zip ");
+
+        $r19 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r9);
+
+        $r9 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label45:
+        $r18[0] = $r9;
+
+     label46:
+        virtualinvoke $r8.<com.ichi2.libanki.Collection: void log(java.lang.Object[])>($r18);
+
+     label47:
+        $r24 = new org.json.JSONArray;
+
+     label48:
+        specialinvoke $r24.<org.json.JSONArray: void <init>()>();
+
+        $r24 = virtualinvoke $r24.<org.json.JSONArray: org.json.JSONArray put(java.lang.Object)>($r17);
+
+        $r24 = virtualinvoke $r24.<org.json.JSONArray: org.json.JSONArray put(java.lang.Object)>("");
+
+        virtualinvoke r6.<org.json.JSONArray: org.json.JSONArray put(java.lang.Object)>($r24);
+
+     label49:
+        goto label31;
+
+     label50:
+        r25 := @caughtexception;
+
+     label51:
+        $r18 = newarray (java.lang.Object)[1];
+
+        $r18[0] = r25;
+
+        staticinvoke <timber.log.Timber: void e(java.lang.String,java.lang.Object[])>("Failed to create media changes zip", $r18);
+
+        $r26 = new java.lang.RuntimeException;
+
+        specialinvoke $r26.<java.lang.RuntimeException: void <init>(java.lang.Throwable)>(r25);
+
+        throw $r26;
+
+     label52:
+        $r27 := @caughtexception;
+
+        if r10 == null goto label53;
+
+        interfaceinvoke r10.<android.database.Cursor: void close()>();
+
+     label53:
+        throw $r27;
+
+     label54:
+        i1 = i1 + 1;
+
+        goto label11;
+
+     label55:
+        return $r23;
+
+        catch java.io.IOException from label02 to label03 with label50;
+        catch java.io.IOException from label04 to label05 with label50;
+        catch java.io.IOException from label06 to label07 with label50;
+        catch java.io.IOException from label09 to label10 with label50;
+        catch java.io.IOException from label11 to label12 with label50;
+        catch java.io.IOException from label13 to label14 with label50;
+        catch java.lang.Throwable from label01 to label07 with label52;
+        catch java.lang.Throwable from label08 to label10 with label52;
+        catch java.lang.Throwable from label11 to label12 with label52;
+        catch java.lang.Throwable from label13 to label14 with label52;
+        catch java.io.FileNotFoundException from label16 to label17 with label29;
+        catch java.io.FileNotFoundException from label18 to label19 with label29;
+        catch java.io.FileNotFoundException from label20 to label21 with label29;
+        catch java.io.FileNotFoundException from label22 to label23 with label29;
+        catch java.io.FileNotFoundException from label24 to label26 with label29;
+        catch java.io.FileNotFoundException from label27 to label28 with label29;
+        catch java.io.IOException from label16 to label17 with label50;
+        catch java.io.IOException from label18 to label19 with label50;
+        catch java.io.IOException from label20 to label21 with label50;
+        catch java.io.IOException from label22 to label23 with label50;
+        catch java.io.IOException from label24 to label26 with label50;
+        catch java.io.IOException from label27 to label28 with label50;
+        catch java.lang.Throwable from label15 to label26 with label52;
+        catch java.lang.Throwable from label27 to label28 with label52;
+        catch java.io.IOException from label30 to label31 with label50;
+        catch java.io.IOException from label33 to label34 with label50;
+        catch java.io.IOException from label35 to label36 with label50;
+        catch java.lang.Throwable from label30 to label31 with label52;
+        catch java.lang.Throwable from label32 to label36 with label52;
+        catch java.io.FileNotFoundException from label37 to label38 with label29;
+        catch java.io.FileNotFoundException from label39 to label40 with label29;
+        catch java.io.FileNotFoundException from label41 to label42 with label29;
+        catch java.io.IOException from label37 to label38 with label50;
+        catch java.io.IOException from label39 to label40 with label50;
+        catch java.io.IOException from label41 to label42 with label50;
+        catch java.lang.Throwable from label37 to label40 with label52;
+        catch java.lang.Throwable from label41 to label42 with label52;
+        catch java.io.IOException from label44 to label45 with label50;
+        catch java.io.IOException from label46 to label47 with label50;
+        catch java.io.IOException from label48 to label49 with label50;
+        catch java.lang.Throwable from label43 to label49 with label52;
+        catch java.lang.Throwable from label51 to label52 with label52;
+    }
+    public int mediacount()
+    {
+        com.ichi2.libanki.Media r0;
+        int $i0;
+        com.ichi2.libanki.DB $r1;
+
+        r0 := @this: com.ichi2.libanki.Media;
+
+        $r1 = r0.<com.ichi2.libanki.Media: com.ichi2.libanki.DB mDb>;
+
+        $i0 = virtualinvoke $r1.<com.ichi2.libanki.DB: int queryScalar(java.lang.String)>("select count() from media where csum is not null");
+
+        return $i0;
+    }
+    public boolean needScan()
+    {
+        com.ichi2.libanki.Media r0;
+        long $l0;
+        com.ichi2.libanki.DB $r1;
+        byte $b1;
+
+        r0 := @this: com.ichi2.libanki.Media;
+
+        $r1 = r0.<com.ichi2.libanki.Media: com.ichi2.libanki.DB mDb>;
+
+        $l0 = virtualinvoke $r1.<com.ichi2.libanki.DB: long queryLongScalar(java.lang.String)>("select dirMod from meta");
+
+        $b1 = $l0 cmp 0L;
+
+        if $b1 != 0 goto label1;
+
+        return 1;
+
+     label1:
+        return 0;
+    }
+    public void removeFile(java.lang.String)
+    {
+        com.ichi2.libanki.Media r0;
+        java.lang.String $r1, $r3;
+        java.io.File r2;
+        boolean $z0;
+        java.lang.Object[] $r4;
+        com.ichi2.libanki.DB $r5;
+        java.lang.Integer $r6;
+
+        r0 := @this: com.ichi2.libanki.Media;
+
+        $r1 := @parameter0: java.lang.String;
+
+        r2 = new java.io.File;
+
+        $r3 = virtualinvoke r0.<com.ichi2.libanki.Media: java.lang.String dir()>();
+
+        specialinvoke r2.<java.io.File: void <init>(java.lang.String,java.lang.String)>($r3, $r1);
+
+        $z0 = virtualinvoke r2.<java.io.File: boolean exists()>();
+
+        if $z0 == 0 goto label1;
+
+        virtualinvoke r2.<java.io.File: boolean delete()>();
+
+     label1:
+        $r4 = newarray (java.lang.Object)[1];
+
+        $r4[0] = $r1;
+
+        staticinvoke <timber.log.Timber: void d(java.lang.String,java.lang.Object[])>("Marking media file removal in media db: %s", $r4);
+
+        $r5 = r0.<com.ichi2.libanki.Media: com.ichi2.libanki.DB mDb>;
+
+        $r4 = newarray (java.lang.Object)[4];
+
+        $r4[0] = $r1;
+
+        $r4[1] = null;
+
+        $r6 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(0);
+
+        $r4[2] = $r6;
+
+        $r6 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(1);
+
+        $r4[3] = $r6;
+
+        virtualinvoke $r5.<com.ichi2.libanki.DB: void execute(java.lang.String,java.lang.Object[])>("insert or replace into media values (?,?,?,?)", $r4);
+
+        return;
+    }
+    public void setLastUsn(int)
+    {
+        com.ichi2.libanki.Media r0;
+        int $i0;
+        java.lang.Integer $r1;
+        com.ichi2.libanki.DB $r2;
+        java.lang.Object[] $r3;
+
+        r0 := @this: com.ichi2.libanki.Media;
+
+        $i0 := @parameter0: int;
+
+        $r2 = r0.<com.ichi2.libanki.Media: com.ichi2.libanki.DB mDb>;
+
+        $r3 = newarray (java.lang.Object)[1];
+
+        $r1 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        $r3[0] = $r1;
+
+        virtualinvoke $r2.<com.ichi2.libanki.DB: void execute(java.lang.String,java.lang.Object[])>("update meta set lastUsn = ?", $r3);
+
+        $r2 = r0.<com.ichi2.libanki.Media: com.ichi2.libanki.DB mDb>;
+
+        virtualinvoke $r2.<com.ichi2.libanki.DB: void commit()>();
+
+        return;
+    }
+    public java.lang.String strip(java.lang.String)
+    {
+        com.ichi2.libanki.Media r0;
+        java.lang.String $r1;
+        java.util.List $r2;
+        java.util.Iterator $r3;
+        boolean $z0;
+        java.lang.Object $r4;
+        java.util.regex.Pattern r5;
+        java.util.regex.Matcher $r6;
+
+        r0 := @this: com.ichi2.libanki.Media;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = <com.ichi2.libanki.Media: java.util.List mRegexps>;
+
+        $r3 = interfaceinvoke $r2.<java.util.List: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r3.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label2;
+
+        $r4 = interfaceinvoke $r3.<java.util.Iterator: java.lang.Object next()>();
+
+        r5 = (java.util.regex.Pattern) $r4;
+
+        $r6 = virtualinvoke r5.<java.util.regex.Pattern: java.util.regex.Matcher matcher(java.lang.CharSequence)>($r1);
+
+        $r1 = virtualinvoke $r6.<java.util.regex.Matcher: java.lang.String replaceAll(java.lang.String)>("");
+
+        goto label1;
+
+     label2:
+        return $r1;
+    }
+    public java.lang.String stripIllegal(java.lang.String)
+    {
+        com.ichi2.libanki.Media r0;
+        java.lang.String $r1;
+        java.util.regex.Pattern $r2;
+        java.util.regex.Matcher $r3;
+
+        r0 := @this: com.ichi2.libanki.Media;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = <com.ichi2.libanki.Media: java.util.regex.Pattern fIllegalCharReg>;
+
+        $r3 = virtualinvoke $r2.<java.util.regex.Pattern: java.util.regex.Matcher matcher(java.lang.CharSequence)>($r1);
+
+        $r1 = virtualinvoke $r3.<java.util.regex.Matcher: java.lang.String replaceAll(java.lang.String)>("");
+
+        return $r1;
+    }
+    public void syncDelete(java.lang.String)
+    {
+        com.ichi2.libanki.Media r0;
+        java.lang.String $r1, $r3;
+        java.io.File r2;
+        boolean $z0;
+        com.ichi2.libanki.DB $r4;
+        java.lang.Object[] $r5;
+
+        r0 := @this: com.ichi2.libanki.Media;
+
+        $r1 := @parameter0: java.lang.String;
+
+        r2 = new java.io.File;
+
+        $r3 = virtualinvoke r0.<com.ichi2.libanki.Media: java.lang.String dir()>();
+
+        specialinvoke r2.<java.io.File: void <init>(java.lang.String,java.lang.String)>($r3, $r1);
+
+        $z0 = virtualinvoke r2.<java.io.File: boolean exists()>();
+
+        if $z0 == 0 goto label1;
+
+        virtualinvoke r2.<java.io.File: boolean delete()>();
+
+     label1:
+        $r4 = r0.<com.ichi2.libanki.Media: com.ichi2.libanki.DB mDb>;
+
+        $r5 = newarray (java.lang.Object)[1];
+
+        $r5[0] = $r1;
+
+        virtualinvoke $r4.<com.ichi2.libanki.DB: void execute(java.lang.String,java.lang.Object[])>("delete from media where fname=?", $r5);
+
+        return;
+    }
+    public android.util.Pair syncInfo(java.lang.String)
+    {
+        com.ichi2.libanki.Media r0;
+        java.lang.String $r1;
+        android.database.Cursor r2, $r6;
+        com.ichi2.libanki.DB $r3;
+        io.requery.android.database.sqlite.SQLiteDatabase $r4;
+        java.lang.String[] $r5;
+        boolean $z0;
+        int $i0;
+        android.util.Pair $r7;
+        java.lang.Integer $r8;
+        java.lang.Throwable $r9;
+
+        r0 := @this: com.ichi2.libanki.Media;
+
+        $r1 := @parameter0: java.lang.String;
+
+        r2 = null;
+
+     label01:
+        $r3 = r0.<com.ichi2.libanki.Media: com.ichi2.libanki.DB mDb>;
+
+        $r4 = virtualinvoke $r3.<com.ichi2.libanki.DB: io.requery.android.database.sqlite.SQLiteDatabase getDatabase()>();
+
+        $r5 = newarray (java.lang.String)[1];
+
+        $r5[0] = $r1;
+
+        $r6 = virtualinvoke $r4.<io.requery.android.database.sqlite.SQLiteDatabase: android.database.Cursor rawQuery(java.lang.String,java.lang.Object[])>("select csum, dirty from media where fname=?", $r5);
+
+     label02:
+        r2 = $r6;
+
+     label03:
+        $z0 = interfaceinvoke $r6.<android.database.Cursor: boolean moveToNext()>();
+
+     label04:
+        if $z0 == 0 goto label07;
+
+     label05:
+        $r1 = interfaceinvoke $r6.<android.database.Cursor: java.lang.String getString(int)>(0);
+
+        $i0 = interfaceinvoke $r6.<android.database.Cursor: int getInt(int)>(1);
+
+        $r7 = new android.util.Pair;
+
+        $r8 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        specialinvoke $r7.<android.util.Pair: void <init>(java.lang.Object,java.lang.Object)>($r1, $r8);
+
+     label06:
+        if $r6 == null goto label11;
+
+        interfaceinvoke $r6.<android.database.Cursor: void close()>();
+
+        return $r7;
+
+     label07:
+        $r7 = new android.util.Pair;
+
+        $r8 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(0);
+
+        specialinvoke $r7.<android.util.Pair: void <init>(java.lang.Object,java.lang.Object)>(null, $r8);
+
+     label08:
+        if $r6 == null goto label11;
+
+        interfaceinvoke $r6.<android.database.Cursor: void close()>();
+
+        return $r7;
+
+     label09:
+        $r9 := @caughtexception;
+
+        if r2 == null goto label10;
+
+        interfaceinvoke r2.<android.database.Cursor: void close()>();
+
+     label10:
+        throw $r9;
+
+     label11:
+        return $r7;
+
+        catch java.lang.Throwable from label01 to label02 with label09;
+        catch java.lang.Throwable from label03 to label04 with label09;
+        catch java.lang.Throwable from label05 to label06 with label09;
+        catch java.lang.Throwable from label07 to label08 with label09;
+    }

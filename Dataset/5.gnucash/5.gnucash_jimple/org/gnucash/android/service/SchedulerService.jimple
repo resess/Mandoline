@@ -1,0 +1,295 @@
+org.gnucash.android.service.SchedulerService extends android.app.IntentService
+public static final java.lang.String LOG_TAG
+    public void <init>()
+    {
+        org.gnucash.android.service.SchedulerService r0;
+
+        r0 := @this: org.gnucash.android.service.SchedulerService;
+
+        specialinvoke r0.<android.app.IntentService: void <init>(java.lang.String)>("SchedulerService");
+
+        return;
+    }
+    private void executeScheduledEvent(org.gnucash.android.model.ScheduledAction)
+    {
+        org.gnucash.android.service.SchedulerService r0;
+        org.gnucash.android.model.ScheduledAction $r1;
+        android.content.ContentValues r2;
+        org.gnucash.android.model.Transaction r3, r12;
+        int[] $r4;
+        org.gnucash.android.model.ScheduledAction$ActionType $r5;
+        int $i0;
+        long $l1, $l3;
+        java.lang.Long $r6;
+        java.lang.Integer $r7;
+        org.gnucash.android.db.ScheduledActionDbAdapter $r8;
+        java.lang.String $r9;
+        org.gnucash.android.db.TransactionsDbAdapter $r10;
+        org.gnucash.android.model.BaseModel $r11;
+        byte $b2;
+        java.sql.Timestamp $r13;
+        org.gnucash.android.export.ExportParams $r14;
+        org.gnucash.android.export.ExportAsyncTask $r15;
+        android.content.Context $r16;
+        org.gnucash.android.export.ExportParams[] $r17;
+        android.os.AsyncTask $r18;
+        java.lang.Exception r19;
+
+        r0 := @this: org.gnucash.android.service.SchedulerService;
+
+        $r1 := @parameter0: org.gnucash.android.model.ScheduledAction;
+
+        $r4 = <org.gnucash.android.service.SchedulerService$1: int[] $SwitchMap$org$gnucash$android$model$ScheduledAction$ActionType>;
+
+        $r5 = virtualinvoke $r1.<org.gnucash.android.model.ScheduledAction: org.gnucash.android.model.ScheduledAction$ActionType getActionType()>();
+
+        $i0 = virtualinvoke $r5.<org.gnucash.android.model.ScheduledAction$ActionType: int ordinal()>();
+
+        $i0 = $r4[$i0];
+
+        lookupswitch($i0)
+        {
+            case 1: goto label02;
+            case 2: goto label05;
+            default: goto label01;
+        };
+
+     label01:
+        r2 = new android.content.ContentValues;
+
+        specialinvoke r2.<android.content.ContentValues: void <init>()>();
+
+        $l1 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        $r6 = staticinvoke <java.lang.Long: java.lang.Long valueOf(long)>($l1);
+
+        virtualinvoke r2.<android.content.ContentValues: void put(java.lang.String,java.lang.Long)>("last_run", $r6);
+
+        $i0 = virtualinvoke $r1.<org.gnucash.android.model.ScheduledAction: int getExecutionCount()>();
+
+        $i0 = $i0 + 1;
+
+        $r7 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        virtualinvoke r2.<android.content.ContentValues: void put(java.lang.String,java.lang.Integer)>("execution_count", $r7);
+
+        $r8 = staticinvoke <org.gnucash.android.db.ScheduledActionDbAdapter: org.gnucash.android.db.ScheduledActionDbAdapter getInstance()>();
+
+        $r9 = virtualinvoke $r1.<org.gnucash.android.model.ScheduledAction: java.lang.String getUID()>();
+
+        virtualinvoke $r8.<org.gnucash.android.db.ScheduledActionDbAdapter: int updateRecord(java.lang.String,android.content.ContentValues)>($r9, r2);
+
+        return;
+
+     label02:
+        $r9 = virtualinvoke $r1.<org.gnucash.android.model.ScheduledAction: java.lang.String getActionUID()>();
+
+        $r10 = staticinvoke <org.gnucash.android.db.TransactionsDbAdapter: org.gnucash.android.db.TransactionsDbAdapter getInstance()>();
+
+        $r11 = virtualinvoke $r10.<org.gnucash.android.db.TransactionsDbAdapter: org.gnucash.android.model.BaseModel getRecord(java.lang.String)>($r9);
+
+        r12 = (org.gnucash.android.model.Transaction) $r11;
+
+        r3 = new org.gnucash.android.model.Transaction;
+
+        specialinvoke r3.<org.gnucash.android.model.Transaction: void <init>(org.gnucash.android.model.Transaction,boolean)>(r12, 1);
+
+        $l1 = virtualinvoke $r1.<org.gnucash.android.model.ScheduledAction: long getLastRun()>();
+
+        $b2 = $l1 cmp 0L;
+
+        if $b2 <= 0 goto label04;
+
+        $l1 = virtualinvoke $r1.<org.gnucash.android.model.ScheduledAction: long getLastRun()>();
+
+        $l3 = virtualinvoke $r1.<org.gnucash.android.model.ScheduledAction: long getPeriod()>();
+
+        $l1 = $l1 + $l3;
+
+     label03:
+        virtualinvoke r3.<org.gnucash.android.model.Transaction: void setTime(long)>($l1);
+
+        $r13 = new java.sql.Timestamp;
+
+        specialinvoke $r13.<java.sql.Timestamp: void <init>(long)>($l1);
+
+        virtualinvoke r3.<org.gnucash.android.model.Transaction: void setCreatedTimestamp(java.sql.Timestamp)>($r13);
+
+        virtualinvoke $r10.<org.gnucash.android.db.TransactionsDbAdapter: void addRecord(org.gnucash.android.model.Transaction)>(r3);
+
+        goto label01;
+
+     label04:
+        $l1 = virtualinvoke $r1.<org.gnucash.android.model.ScheduledAction: long getStartTime()>();
+
+        $l3 = virtualinvoke $r1.<org.gnucash.android.model.ScheduledAction: long getPeriod()>();
+
+        $l1 = $l1 + $l3;
+
+        goto label03;
+
+     label05:
+        $r9 = virtualinvoke $r1.<org.gnucash.android.model.ScheduledAction: java.lang.String getTag()>();
+
+        $r14 = staticinvoke <org.gnucash.android.export.ExportParams: org.gnucash.android.export.ExportParams parseCsv(java.lang.String)>($r9);
+
+        $r15 = new org.gnucash.android.export.ExportAsyncTask;
+
+     label06:
+        $r16 = staticinvoke <org.gnucash.android.app.GnuCashApplication: android.content.Context getAppContext()>();
+
+        specialinvoke $r15.<org.gnucash.android.export.ExportAsyncTask: void <init>(android.content.Context)>($r16);
+
+     label07:
+        $r17 = newarray (org.gnucash.android.export.ExportParams)[1];
+
+        $r17[0] = $r14;
+
+     label08:
+        $r18 = virtualinvoke $r15.<org.gnucash.android.export.ExportAsyncTask: android.os.AsyncTask execute(java.lang.Object[])>($r17);
+
+        virtualinvoke $r18.<android.os.AsyncTask: java.lang.Object get()>();
+
+     label09:
+        goto label01;
+
+     label10:
+        r19 := @caughtexception;
+
+     label11:
+        staticinvoke <com.crashlytics.android.Crashlytics: void logException(java.lang.Throwable)>(r19);
+
+        $r9 = virtualinvoke r19.<java.lang.Exception: java.lang.String getMessage()>();
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String)>("SchedulerService", $r9);
+
+        return;
+
+     label12:
+        r19 := @caughtexception;
+
+        goto label11;
+
+        catch java.lang.InterruptedException from label06 to label07 with label10;
+        catch java.lang.InterruptedException from label08 to label09 with label10;
+        catch java.util.concurrent.ExecutionException from label06 to label07 with label12;
+        catch java.util.concurrent.ExecutionException from label08 to label09 with label12;
+    }
+    protected void onHandleIntent(android.content.Intent)
+    {
+        org.gnucash.android.service.SchedulerService r0;
+        android.content.Intent $r1;
+        java.lang.Object $r2;
+        android.os.PowerManager r3;
+        android.os.PowerManager$WakeLock $r4;
+        org.gnucash.android.db.ScheduledActionDbAdapter $r5;
+        java.util.List $r6;
+        java.util.Iterator $r7;
+        boolean $z0;
+        org.gnucash.android.model.ScheduledAction r8;
+        long $l0, $l1, $l2, $l3;
+        byte $b4;
+        int $i5, $i6;
+        java.lang.StringBuilder $r9;
+        java.lang.String $r10;
+
+        r0 := @this: org.gnucash.android.service.SchedulerService;
+
+        $r1 := @parameter0: android.content.Intent;
+
+        staticinvoke <android.util.Log: int i(java.lang.String,java.lang.String)>("SchedulerService", "Starting scheduled action service");
+
+        $r2 = virtualinvoke r0.<org.gnucash.android.service.SchedulerService: java.lang.Object getSystemService(java.lang.String)>("power");
+
+        r3 = (android.os.PowerManager) $r2;
+
+        $r4 = virtualinvoke r3.<android.os.PowerManager: android.os.PowerManager$WakeLock newWakeLock(int,java.lang.String)>(1, "SchedulerService");
+
+        virtualinvoke $r4.<android.os.PowerManager$WakeLock: void acquire()>();
+
+        $r5 = staticinvoke <org.gnucash.android.app.GnuCashApplication: org.gnucash.android.db.ScheduledActionDbAdapter getScheduledEventDbAdapter()>();
+
+        $r6 = virtualinvoke $r5.<org.gnucash.android.db.ScheduledActionDbAdapter: java.util.List getAllEnabledScheduledActions()>();
+
+        $r7 = interfaceinvoke $r6.<java.util.List: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r7.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label4;
+
+        $r2 = interfaceinvoke $r7.<java.util.Iterator: java.lang.Object next()>();
+
+        r8 = (org.gnucash.android.model.ScheduledAction) $r2;
+
+        $l0 = virtualinvoke r8.<org.gnucash.android.model.ScheduledAction: long getLastRun()>();
+
+        $l1 = virtualinvoke r8.<org.gnucash.android.model.ScheduledAction: long getPeriod()>();
+
+        $l2 = virtualinvoke r8.<org.gnucash.android.model.ScheduledAction: long getEndTime()>();
+
+        $l3 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        $b4 = $l2 cmp 0L;
+
+        if $b4 <= 0 goto label2;
+
+        $b4 = $l3 cmp $l2;
+
+        if $b4 < 0 goto label3;
+
+     label2:
+        $i5 = virtualinvoke r8.<org.gnucash.android.model.ScheduledAction: int getExecutionCount()>();
+
+        $i6 = virtualinvoke r8.<org.gnucash.android.model.ScheduledAction: int getTotalFrequency()>();
+
+        if $i5 < $i6 goto label3;
+
+        $b4 = $l2 cmp 0L;
+
+        if $b4 != 0 goto label1;
+
+        $i5 = virtualinvoke r8.<org.gnucash.android.model.ScheduledAction: int getTotalFrequency()>();
+
+        if $i5 != 0 goto label1;
+
+     label3:
+        $l0 = $l0 + $l1;
+
+        $b4 = $l0 cmp $l3;
+
+        if $b4 > 0 goto label1;
+
+        $l0 = virtualinvoke r8.<org.gnucash.android.model.ScheduledAction: long getStartTime()>();
+
+        $b4 = $l0 cmp $l3;
+
+        if $b4 > 0 goto label1;
+
+        $z0 = virtualinvoke r8.<org.gnucash.android.model.ScheduledAction: boolean isEnabled()>();
+
+        if $z0 == 0 goto label1;
+
+        specialinvoke r0.<org.gnucash.android.service.SchedulerService: void executeScheduledEvent(org.gnucash.android.model.ScheduledAction)>(r8);
+
+        goto label1;
+
+     label4:
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Completed service @ ");
+
+        $l3 = staticinvoke <android.os.SystemClock: long elapsedRealtime()>();
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l3);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int i(java.lang.String,java.lang.String)>("SchedulerService", $r10);
+
+        virtualinvoke $r4.<android.os.PowerManager$WakeLock: void release()>();
+
+        return;
+    }

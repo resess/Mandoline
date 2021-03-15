@@ -1,0 +1,606 @@
+com.facebook.stetho.inspector.ChromeDevtoolsServer extends java.lang.Object implements com.facebook.stetho.websocket.SimpleEndpoint
+public static final java.lang.String PATH
+private static final java.lang.String TAG
+private final com.facebook.stetho.inspector.MethodDispatcher mMethodDispatcher
+private final com.facebook.stetho.json.ObjectMapper mObjectMapper
+private final java.util.Map mPeers
+    public void <init>(java.lang.Iterable)
+    {
+        com.facebook.stetho.inspector.ChromeDevtoolsServer r0;
+        java.lang.Iterable r1;
+        com.facebook.stetho.json.ObjectMapper $r2;
+        java.util.Map $r3;
+        java.util.HashMap $r4;
+        com.facebook.stetho.inspector.MethodDispatcher $r5;
+
+        r0 := @this: com.facebook.stetho.inspector.ChromeDevtoolsServer;
+
+        r1 := @parameter0: java.lang.Iterable;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r4 = new java.util.HashMap;
+
+        specialinvoke $r4.<java.util.HashMap: void <init>()>();
+
+        $r3 = staticinvoke <java.util.Collections: java.util.Map synchronizedMap(java.util.Map)>($r4);
+
+        r0.<com.facebook.stetho.inspector.ChromeDevtoolsServer: java.util.Map mPeers> = $r3;
+
+        $r2 = new com.facebook.stetho.json.ObjectMapper;
+
+        specialinvoke $r2.<com.facebook.stetho.json.ObjectMapper: void <init>()>();
+
+        r0.<com.facebook.stetho.inspector.ChromeDevtoolsServer: com.facebook.stetho.json.ObjectMapper mObjectMapper> = $r2;
+
+        $r5 = new com.facebook.stetho.inspector.MethodDispatcher;
+
+        $r2 = r0.<com.facebook.stetho.inspector.ChromeDevtoolsServer: com.facebook.stetho.json.ObjectMapper mObjectMapper>;
+
+        specialinvoke $r5.<com.facebook.stetho.inspector.MethodDispatcher: void <init>(com.facebook.stetho.json.ObjectMapper,java.lang.Iterable)>($r2, r1);
+
+        r0.<com.facebook.stetho.inspector.ChromeDevtoolsServer: com.facebook.stetho.inspector.MethodDispatcher mMethodDispatcher> = $r5;
+
+        return;
+    }
+    private void closeSafely(com.facebook.stetho.websocket.SimpleSession, int, java.lang.String)
+    {
+        com.facebook.stetho.inspector.ChromeDevtoolsServer r0;
+        com.facebook.stetho.websocket.SimpleSession $r1;
+        int $i0;
+        java.lang.String $r2;
+
+        r0 := @this: com.facebook.stetho.inspector.ChromeDevtoolsServer;
+
+        $r1 := @parameter0: com.facebook.stetho.websocket.SimpleSession;
+
+        $i0 := @parameter1: int;
+
+        $r2 := @parameter2: java.lang.String;
+
+        interfaceinvoke $r1.<com.facebook.stetho.websocket.SimpleSession: void close(int,java.lang.String)>($i0, $r2);
+
+        return;
+    }
+    private void handleRemoteMessage(com.facebook.stetho.inspector.jsonrpc.JsonRpcPeer, java.lang.String) throws java.io.IOException, com.facebook.stetho.inspector.MessageHandlingException, org.json.JSONException
+    {
+        com.facebook.stetho.inspector.ChromeDevtoolsServer r0;
+        com.facebook.stetho.inspector.jsonrpc.JsonRpcPeer $r1;
+        java.lang.String $r2;
+        org.json.JSONObject r3;
+        boolean $z0;
+        com.facebook.stetho.inspector.MessageHandlingException $r4;
+        java.lang.StringBuilder $r5;
+
+        r0 := @this: com.facebook.stetho.inspector.ChromeDevtoolsServer;
+
+        $r1 := @parameter0: com.facebook.stetho.inspector.jsonrpc.JsonRpcPeer;
+
+        $r2 := @parameter1: java.lang.String;
+
+        r3 = new org.json.JSONObject;
+
+        specialinvoke r3.<org.json.JSONObject: void <init>(java.lang.String)>($r2);
+
+        $z0 = virtualinvoke r3.<org.json.JSONObject: boolean has(java.lang.String)>("method");
+
+        if $z0 == 0 goto label1;
+
+        specialinvoke r0.<com.facebook.stetho.inspector.ChromeDevtoolsServer: void handleRemoteRequest(com.facebook.stetho.inspector.jsonrpc.JsonRpcPeer,org.json.JSONObject)>($r1, r3);
+
+        return;
+
+     label1:
+        $z0 = virtualinvoke r3.<org.json.JSONObject: boolean has(java.lang.String)>("result");
+
+        if $z0 == 0 goto label2;
+
+        specialinvoke r0.<com.facebook.stetho.inspector.ChromeDevtoolsServer: void handleRemoteResponse(com.facebook.stetho.inspector.jsonrpc.JsonRpcPeer,org.json.JSONObject)>($r1, r3);
+
+        return;
+
+     label2:
+        $r4 = new com.facebook.stetho.inspector.MessageHandlingException;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Improper JSON-RPC message: ");
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r2 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r4.<com.facebook.stetho.inspector.MessageHandlingException: void <init>(java.lang.String)>($r2);
+
+        throw $r4;
+    }
+    private void handleRemoteRequest(com.facebook.stetho.inspector.jsonrpc.JsonRpcPeer, org.json.JSONObject) throws com.facebook.stetho.inspector.MessageHandlingException
+    {
+        com.facebook.stetho.inspector.ChromeDevtoolsServer r0;
+        com.facebook.stetho.inspector.jsonrpc.JsonRpcPeer $r1;
+        org.json.JSONObject $r2, r7, $r10;
+        com.facebook.stetho.inspector.jsonrpc.protocol.JsonRpcResponse r3;
+        com.facebook.stetho.json.ObjectMapper $r4;
+        java.lang.Object $r5;
+        com.facebook.stetho.inspector.jsonrpc.protocol.JsonRpcRequest r6;
+        com.facebook.stetho.inspector.MethodDispatcher $r8;
+        java.lang.String $r9;
+        java.lang.Long $r11;
+        long $l0;
+        com.facebook.stetho.websocket.SimpleSession $r12;
+        com.facebook.stetho.inspector.jsonrpc.JsonRpcException r13;
+        com.facebook.stetho.inspector.jsonrpc.protocol.JsonRpcError $r14;
+        java.lang.OutOfMemoryError r15;
+
+        r0 := @this: com.facebook.stetho.inspector.ChromeDevtoolsServer;
+
+        $r1 := @parameter0: com.facebook.stetho.inspector.jsonrpc.JsonRpcPeer;
+
+        $r2 := @parameter1: org.json.JSONObject;
+
+        $r4 = r0.<com.facebook.stetho.inspector.ChromeDevtoolsServer: com.facebook.stetho.json.ObjectMapper mObjectMapper>;
+
+        $r5 = virtualinvoke $r4.<com.facebook.stetho.json.ObjectMapper: java.lang.Object convertValue(java.lang.Object,java.lang.Class)>($r2, class "Lcom/facebook/stetho/inspector/jsonrpc/protocol/JsonRpcRequest;");
+
+        r6 = (com.facebook.stetho.inspector.jsonrpc.protocol.JsonRpcRequest) $r5;
+
+        $r2 = null;
+
+        r7 = null;
+
+        $r8 = r0.<com.facebook.stetho.inspector.ChromeDevtoolsServer: com.facebook.stetho.inspector.MethodDispatcher mMethodDispatcher>;
+
+        $r9 = r6.<com.facebook.stetho.inspector.jsonrpc.protocol.JsonRpcRequest: java.lang.String method>;
+
+        $r10 = r6.<com.facebook.stetho.inspector.jsonrpc.protocol.JsonRpcRequest: org.json.JSONObject params>;
+
+     label1:
+        $r10 = virtualinvoke $r8.<com.facebook.stetho.inspector.MethodDispatcher: org.json.JSONObject dispatch(com.facebook.stetho.inspector.jsonrpc.JsonRpcPeer,java.lang.String,org.json.JSONObject)>($r1, $r9, $r10);
+
+     label2:
+        $r2 = $r10;
+
+     label3:
+        $r11 = r6.<com.facebook.stetho.inspector.jsonrpc.protocol.JsonRpcRequest: java.lang.Long id>;
+
+        if $r11 == null goto label8;
+
+        r3 = new com.facebook.stetho.inspector.jsonrpc.protocol.JsonRpcResponse;
+
+        specialinvoke r3.<com.facebook.stetho.inspector.jsonrpc.protocol.JsonRpcResponse: void <init>()>();
+
+        $r11 = r6.<com.facebook.stetho.inspector.jsonrpc.protocol.JsonRpcRequest: java.lang.Long id>;
+
+        $l0 = virtualinvoke $r11.<java.lang.Long: long longValue()>();
+
+        r3.<com.facebook.stetho.inspector.jsonrpc.protocol.JsonRpcResponse: long id> = $l0;
+
+        r3.<com.facebook.stetho.inspector.jsonrpc.protocol.JsonRpcResponse: org.json.JSONObject result> = $r2;
+
+        r3.<com.facebook.stetho.inspector.jsonrpc.protocol.JsonRpcResponse: org.json.JSONObject error> = r7;
+
+        $r4 = r0.<com.facebook.stetho.inspector.ChromeDevtoolsServer: com.facebook.stetho.json.ObjectMapper mObjectMapper>;
+
+        $r5 = virtualinvoke $r4.<com.facebook.stetho.json.ObjectMapper: java.lang.Object convertValue(java.lang.Object,java.lang.Class)>(r3, class "Lorg/json/JSONObject;");
+
+        $r2 = (org.json.JSONObject) $r5;
+
+     label4:
+        $r9 = virtualinvoke $r2.<org.json.JSONObject: java.lang.String toString()>();
+
+     label5:
+        $r12 = virtualinvoke $r1.<com.facebook.stetho.inspector.jsonrpc.JsonRpcPeer: com.facebook.stetho.websocket.SimpleSession getWebSocket()>();
+
+        interfaceinvoke $r12.<com.facebook.stetho.websocket.SimpleSession: void sendText(java.lang.String)>($r9);
+
+        return;
+
+     label6:
+        r13 := @caughtexception;
+
+        staticinvoke <com.facebook.stetho.inspector.ChromeDevtoolsServer: void logDispatchException(com.facebook.stetho.inspector.jsonrpc.JsonRpcException)>(r13);
+
+        $r4 = r0.<com.facebook.stetho.inspector.ChromeDevtoolsServer: com.facebook.stetho.json.ObjectMapper mObjectMapper>;
+
+        $r14 = virtualinvoke r13.<com.facebook.stetho.inspector.jsonrpc.JsonRpcException: com.facebook.stetho.inspector.jsonrpc.protocol.JsonRpcError getErrorMessage()>();
+
+        $r5 = virtualinvoke $r4.<com.facebook.stetho.json.ObjectMapper: java.lang.Object convertValue(java.lang.Object,java.lang.Class)>($r14, class "Lorg/json/JSONObject;");
+
+        r7 = (org.json.JSONObject) $r5;
+
+        goto label3;
+
+     label7:
+        r15 := @caughtexception;
+
+        r3.<com.facebook.stetho.inspector.jsonrpc.protocol.JsonRpcResponse: org.json.JSONObject result> = null;
+
+        $r4 = r0.<com.facebook.stetho.inspector.ChromeDevtoolsServer: com.facebook.stetho.json.ObjectMapper mObjectMapper>;
+
+        $r9 = virtualinvoke r15.<java.lang.OutOfMemoryError: java.lang.String getMessage()>();
+
+        $r5 = virtualinvoke $r4.<com.facebook.stetho.json.ObjectMapper: java.lang.Object convertValue(java.lang.Object,java.lang.Class)>($r9, class "Lorg/json/JSONObject;");
+
+        $r2 = (org.json.JSONObject) $r5;
+
+        r3.<com.facebook.stetho.inspector.jsonrpc.protocol.JsonRpcResponse: org.json.JSONObject error> = $r2;
+
+        $r4 = r0.<com.facebook.stetho.inspector.ChromeDevtoolsServer: com.facebook.stetho.json.ObjectMapper mObjectMapper>;
+
+        $r5 = virtualinvoke $r4.<com.facebook.stetho.json.ObjectMapper: java.lang.Object convertValue(java.lang.Object,java.lang.Class)>(r3, class "Lorg/json/JSONObject;");
+
+        $r2 = (org.json.JSONObject) $r5;
+
+        $r9 = virtualinvoke $r2.<org.json.JSONObject: java.lang.String toString()>();
+
+        goto label5;
+
+     label8:
+        return;
+
+        catch com.facebook.stetho.inspector.jsonrpc.JsonRpcException from label1 to label2 with label6;
+        catch java.lang.OutOfMemoryError from label4 to label5 with label7;
+    }
+    private void handleRemoteResponse(com.facebook.stetho.inspector.jsonrpc.JsonRpcPeer, org.json.JSONObject) throws com.facebook.stetho.inspector.MismatchedResponseException
+    {
+        com.facebook.stetho.inspector.ChromeDevtoolsServer r0;
+        com.facebook.stetho.inspector.jsonrpc.JsonRpcPeer $r1;
+        org.json.JSONObject $r2;
+        long $l0;
+        com.facebook.stetho.json.ObjectMapper $r3;
+        java.lang.Object $r4;
+        com.facebook.stetho.inspector.jsonrpc.protocol.JsonRpcResponse r5;
+        com.facebook.stetho.inspector.jsonrpc.PendingRequest $r6;
+        com.facebook.stetho.inspector.MismatchedResponseException $r7;
+        com.facebook.stetho.inspector.jsonrpc.PendingRequestCallback $r8;
+
+        r0 := @this: com.facebook.stetho.inspector.ChromeDevtoolsServer;
+
+        $r1 := @parameter0: com.facebook.stetho.inspector.jsonrpc.JsonRpcPeer;
+
+        $r2 := @parameter1: org.json.JSONObject;
+
+        $r3 = r0.<com.facebook.stetho.inspector.ChromeDevtoolsServer: com.facebook.stetho.json.ObjectMapper mObjectMapper>;
+
+        $r4 = virtualinvoke $r3.<com.facebook.stetho.json.ObjectMapper: java.lang.Object convertValue(java.lang.Object,java.lang.Class)>($r2, class "Lcom/facebook/stetho/inspector/jsonrpc/protocol/JsonRpcResponse;");
+
+        r5 = (com.facebook.stetho.inspector.jsonrpc.protocol.JsonRpcResponse) $r4;
+
+        $l0 = r5.<com.facebook.stetho.inspector.jsonrpc.protocol.JsonRpcResponse: long id>;
+
+        $r6 = virtualinvoke $r1.<com.facebook.stetho.inspector.jsonrpc.JsonRpcPeer: com.facebook.stetho.inspector.jsonrpc.PendingRequest getAndRemovePendingRequest(long)>($l0);
+
+        if $r6 != null goto label1;
+
+        $r7 = new com.facebook.stetho.inspector.MismatchedResponseException;
+
+        $l0 = r5.<com.facebook.stetho.inspector.jsonrpc.protocol.JsonRpcResponse: long id>;
+
+        specialinvoke $r7.<com.facebook.stetho.inspector.MismatchedResponseException: void <init>(long)>($l0);
+
+        throw $r7;
+
+     label1:
+        $r8 = $r6.<com.facebook.stetho.inspector.jsonrpc.PendingRequest: com.facebook.stetho.inspector.jsonrpc.PendingRequestCallback callback>;
+
+        if $r8 == null goto label2;
+
+        $r8 = $r6.<com.facebook.stetho.inspector.jsonrpc.PendingRequest: com.facebook.stetho.inspector.jsonrpc.PendingRequestCallback callback>;
+
+        interfaceinvoke $r8.<com.facebook.stetho.inspector.jsonrpc.PendingRequestCallback: void onResponse(com.facebook.stetho.inspector.jsonrpc.JsonRpcPeer,com.facebook.stetho.inspector.jsonrpc.protocol.JsonRpcResponse)>($r1, r5);
+
+     label2:
+        return;
+    }
+    private static void logDispatchException(com.facebook.stetho.inspector.jsonrpc.JsonRpcException)
+    {
+        com.facebook.stetho.inspector.jsonrpc.JsonRpcException $r0;
+        com.facebook.stetho.inspector.jsonrpc.protocol.JsonRpcError $r1;
+        int[] $r2;
+        com.facebook.stetho.inspector.jsonrpc.protocol.JsonRpcError$ErrorCode $r3;
+        int $i0;
+        java.lang.StringBuilder $r4;
+        java.lang.String $r5;
+
+        $r0 := @parameter0: com.facebook.stetho.inspector.jsonrpc.JsonRpcException;
+
+        $r1 = virtualinvoke $r0.<com.facebook.stetho.inspector.jsonrpc.JsonRpcException: com.facebook.stetho.inspector.jsonrpc.protocol.JsonRpcError getErrorMessage()>();
+
+        $r2 = <com.facebook.stetho.inspector.ChromeDevtoolsServer$1: int[] $SwitchMap$com$facebook$stetho$inspector$jsonrpc$protocol$JsonRpcError$ErrorCode>;
+
+        $r3 = $r1.<com.facebook.stetho.inspector.jsonrpc.protocol.JsonRpcError: com.facebook.stetho.inspector.jsonrpc.protocol.JsonRpcError$ErrorCode code>;
+
+        $i0 = virtualinvoke $r3.<com.facebook.stetho.inspector.jsonrpc.protocol.JsonRpcError$ErrorCode: int ordinal()>();
+
+        $i0 = $r2[$i0];
+
+        lookupswitch($i0)
+        {
+            case 1: goto label2;
+            default: goto label1;
+        };
+
+     label1:
+        staticinvoke <com.facebook.stetho.common.LogRedirector: void w(java.lang.String,java.lang.String,java.lang.Throwable)>("ChromeDevtoolsServer", "Error processing remote message", $r0);
+
+        return;
+
+     label2:
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Method not implemented: ");
+
+        $r5 = $r1.<com.facebook.stetho.inspector.jsonrpc.protocol.JsonRpcError: java.lang.String message>;
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.facebook.stetho.common.LogRedirector: void d(java.lang.String,java.lang.String)>("ChromeDevtoolsServer", $r5);
+
+        return;
+    }
+    public void onClose(com.facebook.stetho.websocket.SimpleSession, int, java.lang.String)
+    {
+        com.facebook.stetho.inspector.ChromeDevtoolsServer r0;
+        com.facebook.stetho.websocket.SimpleSession $r1;
+        int $i0;
+        java.lang.String $r2;
+        java.lang.StringBuilder $r3;
+        java.util.Map $r4;
+        java.lang.Object $r5;
+        com.facebook.stetho.inspector.jsonrpc.JsonRpcPeer r6;
+
+        r0 := @this: com.facebook.stetho.inspector.ChromeDevtoolsServer;
+
+        $r1 := @parameter0: com.facebook.stetho.websocket.SimpleSession;
+
+        $i0 := @parameter1: int;
+
+        $r2 := @parameter2: java.lang.String;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("onClose: reason=");
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ");
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r2 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.facebook.stetho.common.LogRedirector: void d(java.lang.String,java.lang.String)>("ChromeDevtoolsServer", $r2);
+
+        $r4 = r0.<com.facebook.stetho.inspector.ChromeDevtoolsServer: java.util.Map mPeers>;
+
+        $r5 = interfaceinvoke $r4.<java.util.Map: java.lang.Object remove(java.lang.Object)>($r1);
+
+        r6 = (com.facebook.stetho.inspector.jsonrpc.JsonRpcPeer) $r5;
+
+        if r6 == null goto label1;
+
+        virtualinvoke r6.<com.facebook.stetho.inspector.jsonrpc.JsonRpcPeer: void invokeDisconnectReceivers()>();
+
+     label1:
+        return;
+    }
+    public void onError(com.facebook.stetho.websocket.SimpleSession, java.lang.Throwable)
+    {
+        com.facebook.stetho.inspector.ChromeDevtoolsServer r0;
+        com.facebook.stetho.websocket.SimpleSession $r1;
+        java.lang.Throwable $r2;
+        java.lang.StringBuilder $r3;
+        java.lang.String $r4;
+
+        r0 := @this: com.facebook.stetho.inspector.ChromeDevtoolsServer;
+
+        $r1 := @parameter0: com.facebook.stetho.websocket.SimpleSession;
+
+        $r2 := @parameter1: java.lang.Throwable;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("onError: ex=");
+
+        $r4 = virtualinvoke $r2.<java.lang.Throwable: java.lang.String toString()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.facebook.stetho.common.LogRedirector: void e(java.lang.String,java.lang.String)>("ChromeDevtoolsServer", $r4);
+
+        return;
+    }
+    public void onMessage(com.facebook.stetho.websocket.SimpleSession, java.lang.String)
+    {
+        com.facebook.stetho.inspector.ChromeDevtoolsServer r0;
+        com.facebook.stetho.websocket.SimpleSession $r1;
+        java.lang.String $r2, $r4;
+        boolean $z0;
+        java.lang.StringBuilder $r3;
+        java.util.Map $r5;
+        java.lang.Object $r6;
+        com.facebook.stetho.inspector.jsonrpc.JsonRpcPeer r7;
+        java.io.IOException r8;
+        java.lang.Class $r9;
+        com.facebook.stetho.inspector.MessageHandlingException r10;
+        org.json.JSONException r11;
+
+        r0 := @this: com.facebook.stetho.inspector.ChromeDevtoolsServer;
+
+        $r1 := @parameter0: com.facebook.stetho.websocket.SimpleSession;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $z0 = staticinvoke <com.facebook.stetho.common.LogRedirector: boolean isLoggable(java.lang.String,int)>("ChromeDevtoolsServer", 2);
+
+        if $z0 == 0 goto label1;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("onMessage: message=");
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.facebook.stetho.common.LogRedirector: void v(java.lang.String,java.lang.String)>("ChromeDevtoolsServer", $r4);
+
+     label1:
+        $r5 = r0.<com.facebook.stetho.inspector.ChromeDevtoolsServer: java.util.Map mPeers>;
+
+     label2:
+        $r6 = interfaceinvoke $r5.<java.util.Map: java.lang.Object get(java.lang.Object)>($r1);
+
+     label3:
+        r7 = (com.facebook.stetho.inspector.jsonrpc.JsonRpcPeer) $r6;
+
+     label4:
+        staticinvoke <com.facebook.stetho.common.Util: java.lang.Object throwIfNull(java.lang.Object)>(r7);
+
+        specialinvoke r0.<com.facebook.stetho.inspector.ChromeDevtoolsServer: void handleRemoteMessage(com.facebook.stetho.inspector.jsonrpc.JsonRpcPeer,java.lang.String)>(r7, $r2);
+
+     label5:
+        return;
+
+     label6:
+        r8 := @caughtexception;
+
+        $z0 = staticinvoke <com.facebook.stetho.common.LogRedirector: boolean isLoggable(java.lang.String,int)>("ChromeDevtoolsServer", 2);
+
+        if $z0 == 0 goto label7;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unexpected I/O exception processing message: ");
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r8);
+
+        $r2 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.facebook.stetho.common.LogRedirector: void v(java.lang.String,java.lang.String)>("ChromeDevtoolsServer", $r2);
+
+     label7:
+        $r9 = virtualinvoke r8.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r2 = virtualinvoke $r9.<java.lang.Class: java.lang.String getSimpleName()>();
+
+        specialinvoke r0.<com.facebook.stetho.inspector.ChromeDevtoolsServer: void closeSafely(com.facebook.stetho.websocket.SimpleSession,int,java.lang.String)>($r1, 1011, $r2);
+
+        return;
+
+     label8:
+        r10 := @caughtexception;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Message could not be processed by implementation: ");
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r10);
+
+        $r2 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.facebook.stetho.common.LogRedirector: void i(java.lang.String,java.lang.String)>("ChromeDevtoolsServer", $r2);
+
+        $r9 = virtualinvoke r10.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r2 = virtualinvoke $r9.<java.lang.Class: java.lang.String getSimpleName()>();
+
+        specialinvoke r0.<com.facebook.stetho.inspector.ChromeDevtoolsServer: void closeSafely(com.facebook.stetho.websocket.SimpleSession,int,java.lang.String)>($r1, 1011, $r2);
+
+        return;
+
+     label9:
+        r11 := @caughtexception;
+
+        staticinvoke <com.facebook.stetho.common.LogRedirector: void v(java.lang.String,java.lang.String,java.lang.Throwable)>("ChromeDevtoolsServer", "Unexpected JSON exception processing message", r11);
+
+        $r9 = virtualinvoke r11.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r2 = virtualinvoke $r9.<java.lang.Class: java.lang.String getSimpleName()>();
+
+        specialinvoke r0.<com.facebook.stetho.inspector.ChromeDevtoolsServer: void closeSafely(com.facebook.stetho.websocket.SimpleSession,int,java.lang.String)>($r1, 1011, $r2);
+
+        return;
+
+        catch java.io.IOException from label2 to label3 with label6;
+        catch java.io.IOException from label4 to label5 with label6;
+        catch com.facebook.stetho.inspector.MessageHandlingException from label2 to label3 with label8;
+        catch com.facebook.stetho.inspector.MessageHandlingException from label4 to label5 with label8;
+        catch org.json.JSONException from label2 to label3 with label9;
+        catch org.json.JSONException from label4 to label5 with label9;
+    }
+    public void onMessage(com.facebook.stetho.websocket.SimpleSession, byte[], int)
+    {
+        com.facebook.stetho.inspector.ChromeDevtoolsServer r0;
+        com.facebook.stetho.websocket.SimpleSession $r1;
+        byte[] $r2;
+        int $i0;
+        java.lang.StringBuilder $r3;
+        java.lang.String $r4;
+
+        r0 := @this: com.facebook.stetho.inspector.ChromeDevtoolsServer;
+
+        $r1 := @parameter0: com.facebook.stetho.websocket.SimpleSession;
+
+        $r2 := @parameter1: byte[];
+
+        $i0 := @parameter2: int;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Ignoring binary message of length ");
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.facebook.stetho.common.LogRedirector: void d(java.lang.String,java.lang.String)>("ChromeDevtoolsServer", $r4);
+
+        return;
+    }
+    public void onOpen(com.facebook.stetho.websocket.SimpleSession)
+    {
+        com.facebook.stetho.inspector.ChromeDevtoolsServer r0;
+        com.facebook.stetho.websocket.SimpleSession $r1;
+        com.facebook.stetho.json.ObjectMapper $r2;
+        java.util.Map $r3;
+        com.facebook.stetho.inspector.jsonrpc.JsonRpcPeer $r4;
+
+        r0 := @this: com.facebook.stetho.inspector.ChromeDevtoolsServer;
+
+        $r1 := @parameter0: com.facebook.stetho.websocket.SimpleSession;
+
+        staticinvoke <com.facebook.stetho.common.LogRedirector: void d(java.lang.String,java.lang.String)>("ChromeDevtoolsServer", "onOpen");
+
+        $r3 = r0.<com.facebook.stetho.inspector.ChromeDevtoolsServer: java.util.Map mPeers>;
+
+        $r4 = new com.facebook.stetho.inspector.jsonrpc.JsonRpcPeer;
+
+        $r2 = r0.<com.facebook.stetho.inspector.ChromeDevtoolsServer: com.facebook.stetho.json.ObjectMapper mObjectMapper>;
+
+        specialinvoke $r4.<com.facebook.stetho.inspector.jsonrpc.JsonRpcPeer: void <init>(com.facebook.stetho.json.ObjectMapper,com.facebook.stetho.websocket.SimpleSession)>($r2, $r1);
+
+        interfaceinvoke $r3.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r1, $r4);
+
+        return;
+    }

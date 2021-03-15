@@ -1,0 +1,807 @@
+com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity extends android.app.Activity implements android.content.DialogInterface$OnCancelListener
+private static final java.lang.String BUNDLE_KEY_SHUT_OFF
+public static java.lang.String EXTRA_PRONUNCIATION_FILE_PATH
+public static java.lang.String EXTRA_SOURCE
+private com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity mActivity
+private com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity$DownloadFileTask mDownloadMp3Task
+private com.ichi2.anki.multimediacard.language.LanguageListerBeolingus mLanguageLister
+private java.lang.String mMp3Address
+private com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity$BackgroundPost mPostPronunciation
+private com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity$BackgroundPost mPostTranslation
+private java.lang.String mPronunciationAddress
+private java.lang.String mPronunciationPage
+private android.widget.Button mSaveButton
+java.lang.String mSource
+private android.widget.Spinner mSpinnerFrom
+private boolean mStopped
+private java.lang.String mTranslation
+private java.lang.String mTranslationAddress
+private android.app.ProgressDialog progressDialog
+    static void <clinit>()
+    {
+        <com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: java.lang.String EXTRA_SOURCE> = "com.ichi2.anki.LoadPronounciationActivity.extra.source";
+
+        <com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: java.lang.String EXTRA_PRONUNCIATION_FILE_PATH> = "com.ichi2.anki.LoadPronounciationActivity.extra.pronun.file.path";
+
+        return;
+    }
+    public void <init>()
+    {
+        com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity r0;
+
+        r0 := @this: com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity;
+
+        specialinvoke r0.<android.app.Activity: void <init>()>();
+
+        r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: android.app.ProgressDialog progressDialog> = null;
+
+        r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity$BackgroundPost mPostTranslation> = null;
+
+        r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity$BackgroundPost mPostPronunciation> = null;
+
+        r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity$DownloadFileTask mDownloadMp3Task> = null;
+
+        return;
+    }
+    static com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity access$100(com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity)
+    {
+        com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity $r0;
+
+        $r0 := @parameter0: com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity;
+
+        $r0 = $r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity mActivity>;
+
+        return $r0;
+    }
+    private java.lang.String computeAddressOfTranslationPage()
+    {
+        com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity r0;
+        java.io.UnsupportedEncodingException r1;
+        java.lang.String r2, $r5, $r7;
+        android.widget.Spinner $r3;
+        java.lang.Object $r4;
+        com.ichi2.anki.multimediacard.language.LanguageListerBeolingus $r6;
+
+        r0 := @this: com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity;
+
+        r2 = "http://dict.tu-chemnitz.de/dings.cgi?lang=en&service=SERVICE&opterrors=0&optpro=0&query=Welt";
+
+        $r3 = r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: android.widget.Spinner mSpinnerFrom>;
+
+        $r4 = virtualinvoke $r3.<android.widget.Spinner: java.lang.Object getSelectedItem()>();
+
+        $r5 = virtualinvoke $r4.<java.lang.Object: java.lang.String toString()>();
+
+        $r6 = r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: com.ichi2.anki.multimediacard.language.LanguageListerBeolingus mLanguageLister>;
+
+        $r5 = virtualinvoke $r6.<com.ichi2.anki.multimediacard.language.LanguageListerBeolingus: java.lang.String getCodeFor(java.lang.String)>($r5);
+
+        $r7 = r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: java.lang.String mSource>;
+
+     label1:
+        $r7 = staticinvoke <java.net.URLEncoder: java.lang.String encode(java.lang.String,java.lang.String)>($r7, "utf-8");
+
+     label2:
+        r2 = virtualinvoke r2.<java.lang.String: java.lang.String replaceAll(java.lang.String,java.lang.String)>("SERVICE", $r5);
+
+        r2 = virtualinvoke r2.<java.lang.String: java.lang.String replaceAll(java.lang.String,java.lang.String)>("Welt", $r7);
+
+        return r2;
+
+     label3:
+        r1 := @caughtexception;
+
+        $r7 = r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: java.lang.String mSource>;
+
+        $r7 = virtualinvoke $r7.<java.lang.String: java.lang.String replace(java.lang.CharSequence,java.lang.CharSequence)>(" ", "%20");
+
+        goto label2;
+
+        catch java.io.UnsupportedEncodingException from label1 to label2 with label3;
+    }
+    private void dismissCarefullyProgressDialog()
+    {
+        com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity r0;
+        boolean $z0;
+        android.app.ProgressDialog $r1;
+        java.lang.Exception $r2;
+
+        r0 := @this: com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity;
+
+     label1:
+        $r1 = r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: android.app.ProgressDialog progressDialog>;
+
+     label2:
+        if $r1 == null goto label8;
+
+     label3:
+        $r1 = r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: android.app.ProgressDialog progressDialog>;
+
+        $z0 = virtualinvoke $r1.<android.app.ProgressDialog: boolean isShowing()>();
+
+     label4:
+        if $z0 == 0 goto label8;
+
+     label5:
+        $r1 = r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: android.app.ProgressDialog progressDialog>;
+
+        virtualinvoke $r1.<android.app.ProgressDialog: void dismiss()>();
+
+     label6:
+        return;
+
+     label7:
+        $r2 := @caughtexception;
+
+     label8:
+        return;
+
+        catch java.lang.Exception from label1 to label2 with label7;
+        catch java.lang.Exception from label3 to label4 with label7;
+        catch java.lang.Exception from label5 to label6 with label7;
+    }
+    private void failNoPronunciation()
+    {
+        com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity r0;
+        java.lang.String $r1;
+
+        r0 := @this: com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity;
+
+        $r1 = specialinvoke r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: java.lang.String gtxt(int)>(2131231153);
+
+        specialinvoke r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: void stop(java.lang.String)>($r1);
+
+        r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: java.lang.String mPronunciationAddress> = "no";
+
+        r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: java.lang.String mMp3Address> = "no";
+
+        return;
+    }
+    private void finishCancel()
+    {
+        com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity r0;
+        android.content.Intent r1;
+
+        r0 := @this: com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity;
+
+        r1 = new android.content.Intent;
+
+        specialinvoke r1.<android.content.Intent: void <init>()>();
+
+        virtualinvoke r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: void setResult(int,android.content.Intent)>(0, r1);
+
+        virtualinvoke r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: void finish()>();
+
+        return;
+    }
+    private java.lang.String gtxt(int)
+    {
+        com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity r0;
+        int $i0;
+        java.lang.CharSequence $r1;
+        java.lang.String $r2;
+
+        r0 := @this: com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity;
+
+        $i0 := @parameter0: int;
+
+        $r1 = virtualinvoke r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: java.lang.CharSequence getText(int)>($i0);
+
+        $r2 = interfaceinvoke $r1.<java.lang.CharSequence: java.lang.String toString()>();
+
+        return $r2;
+    }
+    private void showProgressDialog(java.lang.String)
+    {
+        com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity r0;
+        java.lang.String $r1, $r2;
+        android.app.ProgressDialog $r3;
+
+        r0 := @this: com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity;
+
+        $r1 := @parameter0: java.lang.String;
+
+        specialinvoke r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: void dismissCarefullyProgressDialog()>();
+
+        $r2 = specialinvoke r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: java.lang.String gtxt(int)>(2131231167);
+
+        $r3 = staticinvoke <android.app.ProgressDialog: android.app.ProgressDialog show(android.content.Context,java.lang.CharSequence,java.lang.CharSequence,boolean,boolean)>(r0, $r2, $r1, 1, 0);
+
+        r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: android.app.ProgressDialog progressDialog> = $r3;
+
+        $r3 = r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: android.app.ProgressDialog progressDialog>;
+
+        virtualinvoke $r3.<android.app.ProgressDialog: void setCancelable(boolean)>(1);
+
+        $r3 = r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: android.app.ProgressDialog progressDialog>;
+
+        virtualinvoke $r3.<android.app.ProgressDialog: void setOnCancelListener(android.content.DialogInterface$OnCancelListener)>(r0);
+
+        return;
+    }
+    private void showToast(java.lang.CharSequence)
+    {
+        com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity r0;
+        java.lang.CharSequence $r1;
+        android.widget.Toast $r2;
+
+        r0 := @this: com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity;
+
+        $r1 := @parameter0: java.lang.CharSequence;
+
+        $r2 = staticinvoke <android.widget.Toast: android.widget.Toast makeText(android.content.Context,java.lang.CharSequence,int)>(r0, $r1, 0);
+
+        virtualinvoke $r2.<android.widget.Toast: void show()>();
+
+        return;
+    }
+    private void showToastLong(java.lang.CharSequence)
+    {
+        com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity r0;
+        java.lang.CharSequence $r1;
+        android.widget.Toast $r2;
+
+        r0 := @this: com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity;
+
+        $r1 := @parameter0: java.lang.CharSequence;
+
+        $r2 = staticinvoke <android.widget.Toast: android.widget.Toast makeText(android.content.Context,java.lang.CharSequence,int)>(r0, $r1, 1);
+
+        virtualinvoke $r2.<android.widget.Toast: void show()>();
+
+        return;
+    }
+    private void stop(java.lang.String)
+    {
+        com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity r0;
+        java.lang.String $r1;
+        android.app.ProgressDialog $r2;
+
+        r0 := @this: com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: android.app.ProgressDialog progressDialog>;
+
+        virtualinvoke $r2.<android.app.ProgressDialog: void dismiss()>();
+
+        specialinvoke r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: void showToast(java.lang.CharSequence)>($r1);
+
+        return;
+    }
+    private void stopAllTasks()
+    {
+        com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity r0;
+        com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity$BackgroundPost r1;
+        com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity$DownloadFileTask r2;
+
+        r0 := @this: com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity;
+
+        r1 = r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity$BackgroundPost mPostTranslation>;
+
+        staticinvoke <com.ichi2.anki.runtimetools.TaskOperations: void stopTaskGracefully(android.os.AsyncTask)>(r1);
+
+        r1 = r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity$BackgroundPost mPostPronunciation>;
+
+        staticinvoke <com.ichi2.anki.runtimetools.TaskOperations: void stopTaskGracefully(android.os.AsyncTask)>(r1);
+
+        r2 = r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity$DownloadFileTask mDownloadMp3Task>;
+
+        staticinvoke <com.ichi2.anki.runtimetools.TaskOperations: void stopTaskGracefully(android.os.AsyncTask)>(r2);
+
+        return;
+    }
+    public void onCancel(android.content.DialogInterface)
+    {
+        com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity r0;
+        android.content.DialogInterface $r1;
+        android.content.Intent r2;
+
+        r0 := @this: com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity;
+
+        $r1 := @parameter0: android.content.DialogInterface;
+
+        r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: boolean mStopped> = 1;
+
+        specialinvoke r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: void dismissCarefullyProgressDialog()>();
+
+        specialinvoke r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: void stopAllTasks()>();
+
+        r2 = new android.content.Intent;
+
+        specialinvoke r2.<android.content.Intent: void <init>()>();
+
+        virtualinvoke r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: void setResult(int,android.content.Intent)>(0, r2);
+
+        virtualinvoke r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: void finish()>();
+
+        return;
+    }
+    protected void onCreate(android.os.Bundle)
+    {
+        com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity r0;
+        android.os.Bundle $r1;
+        android.widget.ArrayAdapter r2;
+        android.widget.Button r3;
+        boolean $z0;
+        android.content.Intent $r4;
+        java.lang.String $r5;
+        android.view.View $r6;
+        android.widget.LinearLayout r7;
+        com.ichi2.anki.multimediacard.language.LanguageListerBeolingus $r8;
+        android.widget.Spinner $r9;
+        java.util.ArrayList $r10;
+        com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity$1 $r11;
+        com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity$2 $r12;
+
+        r0 := @this: com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity;
+
+        $r1 := @parameter0: android.os.Bundle;
+
+        specialinvoke r0.<android.app.Activity: void onCreate(android.os.Bundle)>($r1);
+
+        if $r1 == null goto label1;
+
+        $z0 = virtualinvoke $r1.<android.os.Bundle: boolean getBoolean(java.lang.String,boolean)>("key.multimedia.shut.off", 0);
+
+        if $z0 == 0 goto label1;
+
+        specialinvoke r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: void finishCancel()>();
+
+        return;
+
+     label1:
+        virtualinvoke r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: void setContentView(int)>(2130903068);
+
+        $r4 = virtualinvoke r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: android.content.Intent getIntent()>();
+
+        $r1 = virtualinvoke $r4.<android.content.Intent: android.os.Bundle getExtras()>();
+
+        $r5 = <com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: java.lang.String EXTRA_SOURCE>;
+
+        $r5 = virtualinvoke $r1.<android.os.Bundle: java.lang.String getString(java.lang.String)>($r5);
+
+        r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: java.lang.String mSource> = $r5;
+
+        $r6 = virtualinvoke r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: android.view.View findViewById(int)>(2131755132);
+
+        r7 = (android.widget.LinearLayout) $r6;
+
+        $r8 = new com.ichi2.anki.multimediacard.language.LanguageListerBeolingus;
+
+        specialinvoke $r8.<com.ichi2.anki.multimediacard.language.LanguageListerBeolingus: void <init>(android.content.Context)>(r0);
+
+        r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: com.ichi2.anki.multimediacard.language.LanguageListerBeolingus mLanguageLister> = $r8;
+
+        $r9 = new android.widget.Spinner;
+
+        specialinvoke $r9.<android.widget.Spinner: void <init>(android.content.Context)>(r0);
+
+        r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: android.widget.Spinner mSpinnerFrom> = $r9;
+
+        r2 = new android.widget.ArrayAdapter;
+
+        $r8 = r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: com.ichi2.anki.multimediacard.language.LanguageListerBeolingus mLanguageLister>;
+
+        $r10 = virtualinvoke $r8.<com.ichi2.anki.multimediacard.language.LanguageListerBeolingus: java.util.ArrayList getLanguages()>();
+
+        specialinvoke r2.<android.widget.ArrayAdapter: void <init>(android.content.Context,int,java.util.List)>(r0, 17367048, $r10);
+
+        virtualinvoke r2.<android.widget.ArrayAdapter: void setDropDownViewResource(int)>(17367049);
+
+        $r9 = r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: android.widget.Spinner mSpinnerFrom>;
+
+        virtualinvoke $r9.<android.widget.Spinner: void setAdapter(android.widget.SpinnerAdapter)>(r2);
+
+        $r9 = r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: android.widget.Spinner mSpinnerFrom>;
+
+        virtualinvoke r7.<android.widget.LinearLayout: void addView(android.view.View)>($r9);
+
+        r3 = new android.widget.Button;
+
+        specialinvoke r3.<android.widget.Button: void <init>(android.content.Context)>(r0);
+
+        $r5 = specialinvoke r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: java.lang.String gtxt(int)>(2131231168);
+
+        virtualinvoke r3.<android.widget.Button: void setText(java.lang.CharSequence)>($r5);
+
+        virtualinvoke r7.<android.widget.LinearLayout: void addView(android.view.View)>(r3);
+
+        $r11 = new com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity$1;
+
+        specialinvoke $r11.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity$1: void <init>(com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity)>(r0);
+
+        virtualinvoke r3.<android.widget.Button: void setOnClickListener(android.view.View$OnClickListener)>($r11);
+
+        r3 = new android.widget.Button;
+
+        specialinvoke r3.<android.widget.Button: void <init>(android.content.Context)>(r0);
+
+        r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: android.widget.Button mSaveButton> = r3;
+
+        r3 = r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: android.widget.Button mSaveButton>;
+
+        virtualinvoke r3.<android.widget.Button: void setText(java.lang.CharSequence)>("Save");
+
+        r3 = r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: android.widget.Button mSaveButton>;
+
+        $r12 = new com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity$2;
+
+        specialinvoke $r12.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity$2: void <init>(com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity)>(r0);
+
+        virtualinvoke r3.<android.widget.Button: void setOnClickListener(android.view.View$OnClickListener)>($r12);
+
+        r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity mActivity> = r0;
+
+        r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: boolean mStopped> = 0;
+
+        return;
+    }
+    public boolean onCreateOptionsMenu(android.view.Menu)
+    {
+        com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity r0;
+        android.view.Menu $r1;
+        android.view.MenuInflater $r2;
+
+        r0 := @this: com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity;
+
+        $r1 := @parameter0: android.view.Menu;
+
+        $r2 = virtualinvoke r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: android.view.MenuInflater getMenuInflater()>();
+
+        virtualinvoke $r2.<android.view.MenuInflater: void inflate(int,android.view.Menu)>(2131820545, $r1);
+
+        return 1;
+    }
+    protected void onLoadPronunciation(android.view.View)
+    {
+        com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity r0;
+        android.view.View $r1;
+        java.lang.Exception r2;
+        boolean $z0;
+        java.lang.String $r3;
+        com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity$BackgroundPost $r4;
+        java.lang.Void[] $r5;
+        android.app.ProgressDialog $r6;
+
+        r0 := @this: com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity;
+
+        $r1 := @parameter0: android.view.View;
+
+        $z0 = staticinvoke <com.ichi2.async.Connection: boolean isOnline()>();
+
+        if $z0 != 0 goto label1;
+
+        $r3 = specialinvoke r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: java.lang.String gtxt(int)>(2131231193);
+
+        specialinvoke r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: void showToast(java.lang.CharSequence)>($r3);
+
+        return;
+
+     label1:
+        $r3 = specialinvoke r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: java.lang.String gtxt(int)>(2131231171);
+
+        specialinvoke r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: void showProgressDialog(java.lang.String)>($r3);
+
+        $r3 = specialinvoke r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: java.lang.String computeAddressOfTranslationPage()>();
+
+        r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: java.lang.String mTranslationAddress> = $r3;
+
+        $r4 = new com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity$BackgroundPost;
+
+     label2:
+        specialinvoke $r4.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity$BackgroundPost: void <init>(com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity,com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity$1)>(r0, null);
+
+        r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity$BackgroundPost mPostTranslation> = $r4;
+
+        $r4 = r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity$BackgroundPost mPostTranslation>;
+
+        $r3 = r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: java.lang.String mTranslationAddress>;
+
+        virtualinvoke $r4.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity$BackgroundPost: void setAddress(java.lang.String)>($r3);
+
+        $r4 = r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity$BackgroundPost mPostTranslation>;
+
+        $r5 = newarray (java.lang.Void)[0];
+
+        virtualinvoke $r4.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity$BackgroundPost: android.os.AsyncTask execute(java.lang.Object[])>($r5);
+
+     label3:
+        return;
+
+     label4:
+        r2 := @caughtexception;
+
+        $r6 = r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: android.app.ProgressDialog progressDialog>;
+
+        virtualinvoke $r6.<android.app.ProgressDialog: void dismiss()>();
+
+        $r3 = specialinvoke r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: java.lang.String gtxt(int)>(2131231172);
+
+        specialinvoke r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: void showToast(java.lang.CharSequence)>($r3);
+
+        return;
+
+        catch java.lang.Exception from label2 to label3 with label4;
+    }
+    protected void onPause()
+    {
+        com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity r0;
+
+        r0 := @this: com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity;
+
+        specialinvoke r0.<android.app.Activity: void onPause()>();
+
+        specialinvoke r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: void dismissCarefullyProgressDialog()>();
+
+        specialinvoke r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: void stopAllTasks()>();
+
+        return;
+    }
+    protected void onSaveInstanceState(android.os.Bundle)
+    {
+        com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity r0;
+        android.os.Bundle $r1;
+
+        r0 := @this: com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity;
+
+        $r1 := @parameter0: android.os.Bundle;
+
+        specialinvoke r0.<android.app.Activity: void onSaveInstanceState(android.os.Bundle)>($r1);
+
+        virtualinvoke $r1.<android.os.Bundle: void putBoolean(java.lang.String,boolean)>("key.multimedia.shut.off", 1);
+
+        return;
+    }
+    protected void processPostFinished(com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity$BackgroundPost, java.lang.String)
+    {
+        com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity r0;
+        com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity$BackgroundPost $r1;
+        java.lang.String $r2, $r3, $r4;
+        boolean $z0;
+        java.util.Locale $r5;
+        java.lang.Void[] $r6;
+        java.lang.Exception r7, r10;
+        android.app.ProgressDialog $r8;
+        com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity$DownloadFileTask $r9;
+
+        r0 := @this: com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity;
+
+        $r1 := @parameter0: com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity$BackgroundPost;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $z0 = r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: boolean mStopped>;
+
+        if $z0 == 0 goto label01;
+
+        return;
+
+     label01:
+        $r3 = virtualinvoke $r1.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity$BackgroundPost: java.lang.String getAddress()>();
+
+        $r4 = r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: java.lang.String mTranslationAddress>;
+
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean contentEquals(java.lang.CharSequence)>($r4);
+
+        if $z0 == 0 goto label08;
+
+        r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: java.lang.String mTranslation> = $r2;
+
+        $r2 = r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: java.lang.String mTranslation>;
+
+        $z0 = virtualinvoke $r2.<java.lang.String: boolean startsWith(java.lang.String)>("FAILED");
+
+        if $z0 == 0 goto label02;
+
+        specialinvoke r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: void failNoPronunciation()>();
+
+        return;
+
+     label02:
+        $r2 = r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: java.lang.String mTranslation>;
+
+        $r3 = r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: java.lang.String mSource>;
+
+        $r2 = staticinvoke <com.ichi2.anki.multimediacard.beolingus.parsing.BeolingusParser: java.lang.String getPronounciationAddressFromTranslation(java.lang.String,java.lang.String)>($r2, $r3);
+
+        r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: java.lang.String mPronunciationAddress> = $r2;
+
+        $r2 = r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: java.lang.String mPronunciationAddress>;
+
+        $z0 = virtualinvoke $r2.<java.lang.String: boolean contentEquals(java.lang.CharSequence)>("no");
+
+        if $z0 == 0 goto label03;
+
+        specialinvoke r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: void failNoPronunciation()>();
+
+        $r2 = r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: java.lang.String mSource>;
+
+        $r5 = staticinvoke <java.util.Locale: java.util.Locale getDefault()>();
+
+        $r2 = virtualinvoke $r2.<java.lang.String: java.lang.String toLowerCase(java.util.Locale)>($r5);
+
+        $r3 = r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: java.lang.String mSource>;
+
+        $z0 = virtualinvoke $r2.<java.lang.String: boolean contentEquals(java.lang.CharSequence)>($r3);
+
+        if $z0 != 0 goto label14;
+
+        $r2 = specialinvoke r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: java.lang.String gtxt(int)>(2131231192);
+
+        specialinvoke r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: void showToastLong(java.lang.CharSequence)>($r2);
+
+        return;
+
+     label03:
+        $r2 = specialinvoke r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: java.lang.String gtxt(int)>(2131231169);
+
+        specialinvoke r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: void showProgressDialog(java.lang.String)>($r2);
+
+     label04:
+        $r1 = new com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity$BackgroundPost;
+
+     label05:
+        specialinvoke $r1.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity$BackgroundPost: void <init>(com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity,com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity$1)>(r0, null);
+
+        r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity$BackgroundPost mPostPronunciation> = $r1;
+
+        $r1 = r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity$BackgroundPost mPostPronunciation>;
+
+        $r2 = r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: java.lang.String mPronunciationAddress>;
+
+        virtualinvoke $r1.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity$BackgroundPost: void setAddress(java.lang.String)>($r2);
+
+        $r1 = r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity$BackgroundPost mPostPronunciation>;
+
+        $r6 = newarray (java.lang.Void)[0];
+
+        virtualinvoke $r1.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity$BackgroundPost: android.os.AsyncTask execute(java.lang.Object[])>($r6);
+
+     label06:
+        return;
+
+     label07:
+        r7 := @caughtexception;
+
+        $r8 = r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: android.app.ProgressDialog progressDialog>;
+
+        virtualinvoke $r8.<android.app.ProgressDialog: void dismiss()>();
+
+        $r2 = specialinvoke r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: java.lang.String gtxt(int)>(2131231172);
+
+        specialinvoke r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: void showToast(java.lang.CharSequence)>($r2);
+
+        return;
+
+     label08:
+        $r3 = virtualinvoke $r1.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity$BackgroundPost: java.lang.String getAddress()>();
+
+        $r4 = r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: java.lang.String mPronunciationAddress>;
+
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean contentEquals(java.lang.CharSequence)>($r4);
+
+        if $z0 == 0 goto label14;
+
+        r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: java.lang.String mPronunciationPage> = $r2;
+
+        $r2 = r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: java.lang.String mPronunciationPage>;
+
+        $r2 = staticinvoke <com.ichi2.anki.multimediacard.beolingus.parsing.BeolingusParser: java.lang.String getMp3AddressFromPronounciation(java.lang.String)>($r2);
+
+        r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: java.lang.String mMp3Address> = $r2;
+
+        $r2 = r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: java.lang.String mMp3Address>;
+
+        $z0 = virtualinvoke $r2.<java.lang.String: boolean contentEquals(java.lang.CharSequence)>("no");
+
+        if $z0 == 0 goto label09;
+
+        specialinvoke r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: void failNoPronunciation()>();
+
+        return;
+
+     label09:
+        $r2 = specialinvoke r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: java.lang.String gtxt(int)>(2131231159);
+
+        specialinvoke r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: void showProgressDialog(java.lang.String)>($r2);
+
+     label10:
+        $r9 = new com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity$DownloadFileTask;
+
+     label11:
+        specialinvoke $r9.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity$DownloadFileTask: void <init>(com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity,com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity$1)>(r0, null);
+
+        r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity$DownloadFileTask mDownloadMp3Task> = $r9;
+
+        $r9 = r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity$DownloadFileTask mDownloadMp3Task>;
+
+        $r2 = r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: java.lang.String mMp3Address>;
+
+        virtualinvoke $r9.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity$DownloadFileTask: void setAddress(java.lang.String)>($r2);
+
+        $r9 = r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity$DownloadFileTask mDownloadMp3Task>;
+
+        $r6 = newarray (java.lang.Void)[0];
+
+        virtualinvoke $r9.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity$DownloadFileTask: android.os.AsyncTask execute(java.lang.Object[])>($r6);
+
+     label12:
+        return;
+
+     label13:
+        r10 := @caughtexception;
+
+        $r8 = r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: android.app.ProgressDialog progressDialog>;
+
+        virtualinvoke $r8.<android.app.ProgressDialog: void dismiss()>();
+
+        $r2 = specialinvoke r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: java.lang.String gtxt(int)>(2131231172);
+
+        specialinvoke r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: void showToast(java.lang.CharSequence)>($r2);
+
+     label14:
+        return;
+
+        catch java.lang.Exception from label03 to label04 with label07;
+        catch java.lang.Exception from label05 to label06 with label07;
+        catch java.lang.Exception from label09 to label10 with label13;
+        catch java.lang.Exception from label11 to label12 with label13;
+    }
+    public void receiveMp3File(java.lang.String)
+    {
+        com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity r0;
+        java.lang.String $r1, $r4;
+        android.content.Intent r2;
+        boolean $z0;
+        android.app.ProgressDialog $r3;
+
+        r0 := @this: com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $z0 = r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: boolean mStopped>;
+
+        if $z0 == 0 goto label1;
+
+        return;
+
+     label1:
+        if $r1 != null goto label2;
+
+        specialinvoke r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: void failNoPronunciation()>();
+
+        return;
+
+     label2:
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean startsWith(java.lang.String)>("FAIL");
+
+        if $z0 == 0 goto label3;
+
+        specialinvoke r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: void failNoPronunciation()>();
+
+        return;
+
+     label3:
+        $r3 = r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: android.app.ProgressDialog progressDialog>;
+
+        virtualinvoke $r3.<android.app.ProgressDialog: void dismiss()>();
+
+        $r4 = specialinvoke r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: java.lang.String gtxt(int)>(2131231158);
+
+        specialinvoke r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: void showToast(java.lang.CharSequence)>($r4);
+
+        r2 = new android.content.Intent;
+
+        specialinvoke r2.<android.content.Intent: void <init>()>();
+
+        $r4 = <com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: java.lang.String EXTRA_PRONUNCIATION_FILE_PATH>;
+
+        virtualinvoke r2.<android.content.Intent: android.content.Intent putExtra(java.lang.String,java.lang.String)>($r4, $r1);
+
+        virtualinvoke r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: void setResult(int,android.content.Intent)>(-1, r2);
+
+        virtualinvoke r0.<com.ichi2.anki.multimediacard.activity.LoadPronounciationActivity: void finish()>();
+
+        return;
+    }

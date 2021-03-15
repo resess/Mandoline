@@ -1,0 +1,608 @@
+com.dropbox.sync.android.DbxSyncService extends android.app.Service
+static final java.lang.String EXTRA_START_COUNT_INCREMENT
+private static final java.lang.String TAG
+private int mBindCount
+private final com.dropbox.sync.android.DbxSyncService$LocalBinder mBinder
+private int mLatestStartId
+private final com.dropbox.sync.android.CoreLogger mLog
+private final com.dropbox.sync.android.DbxSyncService$NetworkReceiver mNetworkReceiver
+private int mStartCount
+private boolean mStarted
+    static void <clinit>()
+    {
+        java.lang.String $r0;
+        java.lang.Class $r1;
+
+        $r1 = class "Lcom/dropbox/sync/android/DbxSyncService;";
+
+        $r0 = virtualinvoke $r1.<java.lang.Class: java.lang.String getName()>();
+
+        <com.dropbox.sync.android.DbxSyncService: java.lang.String TAG> = $r0;
+
+        return;
+    }
+    public void <init>()
+    {
+        com.dropbox.sync.android.DbxSyncService r0;
+        com.dropbox.sync.android.CoreLogger $r1;
+        com.dropbox.sync.android.DbxSyncService$LocalBinder $r2;
+        com.dropbox.sync.android.DbxSyncService$NetworkReceiver $r3;
+
+        r0 := @this: com.dropbox.sync.android.DbxSyncService;
+
+        specialinvoke r0.<android.app.Service: void <init>()>();
+
+        $r1 = staticinvoke <com.dropbox.sync.android.CoreLogger: com.dropbox.sync.android.CoreLogger getGlobal()>();
+
+        r0.<com.dropbox.sync.android.DbxSyncService: com.dropbox.sync.android.CoreLogger mLog> = $r1;
+
+        $r2 = new com.dropbox.sync.android.DbxSyncService$LocalBinder;
+
+        specialinvoke $r2.<com.dropbox.sync.android.DbxSyncService$LocalBinder: void <init>(com.dropbox.sync.android.DbxSyncService)>(r0);
+
+        r0.<com.dropbox.sync.android.DbxSyncService: com.dropbox.sync.android.DbxSyncService$LocalBinder mBinder> = $r2;
+
+        $r3 = new com.dropbox.sync.android.DbxSyncService$NetworkReceiver;
+
+        specialinvoke $r3.<com.dropbox.sync.android.DbxSyncService$NetworkReceiver: void <init>(com.dropbox.sync.android.DbxSyncService,com.dropbox.sync.android.DbxSyncService$1)>(r0, null);
+
+        r0.<com.dropbox.sync.android.DbxSyncService: com.dropbox.sync.android.DbxSyncService$NetworkReceiver mNetworkReceiver> = $r3;
+
+        r0.<com.dropbox.sync.android.DbxSyncService: int mBindCount> = 0;
+
+        r0.<com.dropbox.sync.android.DbxSyncService: int mStartCount> = 0;
+
+        r0.<com.dropbox.sync.android.DbxSyncService: boolean mStarted> = 0;
+
+        r0.<com.dropbox.sync.android.DbxSyncService: int mLatestStartId> = -1;
+
+        return;
+    }
+    static java.lang.String access$200()
+    {
+        java.lang.String r0;
+
+        r0 = <com.dropbox.sync.android.DbxSyncService: java.lang.String TAG>;
+
+        return r0;
+    }
+    static android.content.Intent access$300(android.content.Context)
+    {
+        android.content.Context $r0;
+        android.content.Intent $r1;
+
+        $r0 := @parameter0: android.content.Context;
+
+        $r1 = staticinvoke <com.dropbox.sync.android.DbxSyncService: android.content.Intent makeIntent(android.content.Context)>($r0);
+
+        return $r1;
+    }
+    static android.content.Intent access$400(android.content.Context, int)
+    {
+        android.content.Context $r0;
+        int $i0;
+        android.content.Intent $r1;
+
+        $r0 := @parameter0: android.content.Context;
+
+        $i0 := @parameter1: int;
+
+        $r1 = staticinvoke <com.dropbox.sync.android.DbxSyncService: android.content.Intent makeIntent(android.content.Context,int)>($r0, $i0);
+
+        return $r1;
+    }
+    private int handleStartCommand(android.content.Intent, int, int)
+    {
+        com.dropbox.sync.android.DbxSyncService r0;
+        android.content.Intent $r1;
+        int $i0, $i1, $i2;
+        com.dropbox.sync.android.CoreLogger $r2;
+        java.lang.String $r3, $r5;
+        java.lang.StringBuilder $r4;
+        com.dropbox.sync.android.DbxRuntimeException$Internal $r6;
+        java.lang.RuntimeException $r7;
+
+        r0 := @this: com.dropbox.sync.android.DbxSyncService;
+
+        $r1 := @parameter0: android.content.Intent;
+
+        $i0 := @parameter1: int;
+
+        $i1 := @parameter2: int;
+
+        r0.<com.dropbox.sync.android.DbxSyncService: int mLatestStartId> = $i1;
+
+        if $r1 == null goto label1;
+
+        $i0 = $i0 & 3;
+
+        if $i0 != 0 goto label1;
+
+        r0.<com.dropbox.sync.android.DbxSyncService: boolean mStarted> = 1;
+
+        $i0 = virtualinvoke $r1.<android.content.Intent: int getIntExtra(java.lang.String,int)>("start-count", 0);
+
+        $i2 = r0.<com.dropbox.sync.android.DbxSyncService: int mStartCount>;
+
+        $i2 = $i2 + $i0;
+
+        r0.<com.dropbox.sync.android.DbxSyncService: int mStartCount> = $i2;
+
+        $r2 = r0.<com.dropbox.sync.android.DbxSyncService: com.dropbox.sync.android.CoreLogger mLog>;
+
+        $r3 = <com.dropbox.sync.android.DbxSyncService: java.lang.String TAG>;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("DbxSyncService.handleStartCommand(");
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i1);
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", ");
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("): \tbc=");
+
+        $i1 = r0.<com.dropbox.sync.android.DbxSyncService: int mBindCount>;
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i1);
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" \tsc=");
+
+        $i1 = r0.<com.dropbox.sync.android.DbxSyncService: int mStartCount>;
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i1);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r2.<com.dropbox.sync.android.CoreLogger: void v(java.lang.String,java.lang.String)>($r3, $r5);
+
+        $i1 = r0.<com.dropbox.sync.android.DbxSyncService: int mStartCount>;
+
+        if $i1 >= 0 goto label1;
+
+        $r2 = r0.<com.dropbox.sync.android.DbxSyncService: com.dropbox.sync.android.CoreLogger mLog>;
+
+        $r3 = <com.dropbox.sync.android.DbxSyncService: java.lang.String TAG>;
+
+        $r6 = new com.dropbox.sync.android.DbxRuntimeException$Internal;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Invalid start count ");
+
+        $i1 = r0.<com.dropbox.sync.android.DbxSyncService: int mStartCount>;
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i1);
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" after handleStartCommand(");
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(").");
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r6.<com.dropbox.sync.android.DbxRuntimeException$Internal: void <init>(java.lang.String)>($r5);
+
+        $r7 = virtualinvoke $r2.<com.dropbox.sync.android.CoreLogger: java.lang.RuntimeException logAndThrow(java.lang.String,java.lang.RuntimeException)>($r3, $r6);
+
+        throw $r7;
+
+     label1:
+        specialinvoke r0.<com.dropbox.sync.android.DbxSyncService: void stopIfUnused()>();
+
+        return 2;
+    }
+    private static android.content.Intent makeIntent(android.content.Context)
+    {
+        android.content.Context $r0;
+        android.content.Intent $r1;
+
+        $r0 := @parameter0: android.content.Context;
+
+        $r1 = new android.content.Intent;
+
+        specialinvoke $r1.<android.content.Intent: void <init>(android.content.Context,java.lang.Class)>($r0, class "Lcom/dropbox/sync/android/DbxSyncService;");
+
+        return $r1;
+    }
+    private static android.content.Intent makeIntent(android.content.Context, int)
+    {
+        android.content.Context $r0;
+        int $i0;
+        android.content.Intent $r1;
+
+        $r0 := @parameter0: android.content.Context;
+
+        $i0 := @parameter1: int;
+
+        $r1 = staticinvoke <com.dropbox.sync.android.DbxSyncService: android.content.Intent makeIntent(android.content.Context)>($r0);
+
+        virtualinvoke $r1.<android.content.Intent: android.content.Intent putExtra(java.lang.String,int)>("start-count", $i0);
+
+        return $r1;
+    }
+    private void stopIfUnused()
+    {
+        com.dropbox.sync.android.DbxSyncService r0;
+        java.lang.String $r1, $r4;
+        boolean $z0;
+        int $i0;
+        com.dropbox.sync.android.CoreLogger $r2;
+        java.lang.StringBuilder $r3;
+
+        r0 := @this: com.dropbox.sync.android.DbxSyncService;
+
+        $z0 = r0.<com.dropbox.sync.android.DbxSyncService: boolean mStarted>;
+
+        if $z0 == 0 goto label3;
+
+        $i0 = r0.<com.dropbox.sync.android.DbxSyncService: int mBindCount>;
+
+        if $i0 != 0 goto label3;
+
+        $i0 = r0.<com.dropbox.sync.android.DbxSyncService: int mStartCount>;
+
+        if $i0 != 0 goto label3;
+
+        $i0 = r0.<com.dropbox.sync.android.DbxSyncService: int mLatestStartId>;
+
+        $z0 = virtualinvoke r0.<com.dropbox.sync.android.DbxSyncService: boolean stopSelfResult(int)>($i0);
+
+        $r2 = r0.<com.dropbox.sync.android.DbxSyncService: com.dropbox.sync.android.CoreLogger mLog>;
+
+        $r1 = <com.dropbox.sync.android.DbxSyncService: java.lang.String TAG>;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("DbxSyncService.stopSelfResult(");
+
+        $i0 = r0.<com.dropbox.sync.android.DbxSyncService: int mLatestStartId>;
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(") -> ");
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>($z0);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r2.<com.dropbox.sync.android.CoreLogger: void v(java.lang.String,java.lang.String)>($r1, $r4);
+
+        if $z0 != 0 goto label2;
+
+        $z0 = 1;
+
+     label1:
+        r0.<com.dropbox.sync.android.DbxSyncService: boolean mStarted> = $z0;
+
+        return;
+
+     label2:
+        $z0 = 0;
+
+        goto label1;
+
+     label3:
+        return;
+    }
+    public android.os.IBinder onBind(android.content.Intent)
+    {
+        com.dropbox.sync.android.DbxSyncService r0;
+        android.content.Intent $r1;
+        java.lang.String $r2, $r5;
+        int $i0;
+        com.dropbox.sync.android.CoreLogger $r3;
+        java.lang.StringBuilder $r4;
+        com.dropbox.sync.android.DbxSyncService$LocalBinder r6;
+
+        r0 := @this: com.dropbox.sync.android.DbxSyncService;
+
+        $r1 := @parameter0: android.content.Intent;
+
+        $i0 = r0.<com.dropbox.sync.android.DbxSyncService: int mBindCount>;
+
+        $i0 = $i0 + 1;
+
+        r0.<com.dropbox.sync.android.DbxSyncService: int mBindCount> = $i0;
+
+        $r3 = r0.<com.dropbox.sync.android.DbxSyncService: com.dropbox.sync.android.CoreLogger mLog>;
+
+        $r2 = <com.dropbox.sync.android.DbxSyncService: java.lang.String TAG>;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("DbxSyncService.onBind: \t\t\t\t\tbc=");
+
+        $i0 = r0.<com.dropbox.sync.android.DbxSyncService: int mBindCount>;
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" \tsc=");
+
+        $i0 = r0.<com.dropbox.sync.android.DbxSyncService: int mStartCount>;
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r3.<com.dropbox.sync.android.CoreLogger: void v(java.lang.String,java.lang.String)>($r2, $r5);
+
+        r6 = r0.<com.dropbox.sync.android.DbxSyncService: com.dropbox.sync.android.DbxSyncService$LocalBinder mBinder>;
+
+        return r6;
+    }
+    public void onCreate()
+    {
+        com.dropbox.sync.android.DbxSyncService r0;
+        java.lang.String $r1;
+        com.dropbox.sync.android.CoreNetworkStatus $r2;
+        com.dropbox.sync.android.CoreLogger $r3;
+        com.dropbox.sync.android.DbxSyncService$NetworkReceiver $r4;
+
+        r0 := @this: com.dropbox.sync.android.DbxSyncService;
+
+        specialinvoke r0.<android.app.Service: void onCreate()>();
+
+        $r3 = r0.<com.dropbox.sync.android.DbxSyncService: com.dropbox.sync.android.CoreLogger mLog>;
+
+        $r1 = <com.dropbox.sync.android.DbxSyncService: java.lang.String TAG>;
+
+        virtualinvoke $r3.<com.dropbox.sync.android.CoreLogger: void i(java.lang.String,java.lang.String)>($r1, "DbxSyncService starting.");
+
+        $r4 = r0.<com.dropbox.sync.android.DbxSyncService: com.dropbox.sync.android.DbxSyncService$NetworkReceiver mNetworkReceiver>;
+
+        virtualinvoke $r4.<com.dropbox.sync.android.DbxSyncService$NetworkReceiver: void register()>();
+
+        $r2 = staticinvoke <com.dropbox.sync.android.CoreNetworkStatus: com.dropbox.sync.android.CoreNetworkStatus getInstance()>();
+
+        virtualinvoke $r2.<com.dropbox.sync.android.CoreNetworkStatus: void updateNetworkStatus(android.content.Context)>(r0);
+
+        return;
+    }
+    public void onDestroy()
+    {
+        com.dropbox.sync.android.DbxSyncService r0;
+        java.lang.String $r1;
+        com.dropbox.sync.android.CoreLogger $r2;
+        com.dropbox.sync.android.DbxSyncService$NetworkReceiver $r3;
+
+        r0 := @this: com.dropbox.sync.android.DbxSyncService;
+
+        $r2 = r0.<com.dropbox.sync.android.DbxSyncService: com.dropbox.sync.android.CoreLogger mLog>;
+
+        $r1 = <com.dropbox.sync.android.DbxSyncService: java.lang.String TAG>;
+
+        virtualinvoke $r2.<com.dropbox.sync.android.CoreLogger: void i(java.lang.String,java.lang.String)>($r1, "DbxSyncService stopping.");
+
+        $r3 = r0.<com.dropbox.sync.android.DbxSyncService: com.dropbox.sync.android.DbxSyncService$NetworkReceiver mNetworkReceiver>;
+
+        virtualinvoke $r3.<com.dropbox.sync.android.DbxSyncService$NetworkReceiver: void unregister()>();
+
+        specialinvoke r0.<android.app.Service: void onDestroy()>();
+
+        return;
+    }
+    public void onRebind(android.content.Intent)
+    {
+        com.dropbox.sync.android.DbxSyncService r0;
+        android.content.Intent $r1;
+        java.lang.String $r2, $r5;
+        int $i0;
+        com.dropbox.sync.android.CoreLogger $r3;
+        java.lang.StringBuilder $r4;
+
+        r0 := @this: com.dropbox.sync.android.DbxSyncService;
+
+        $r1 := @parameter0: android.content.Intent;
+
+        $i0 = r0.<com.dropbox.sync.android.DbxSyncService: int mBindCount>;
+
+        $i0 = $i0 + 1;
+
+        r0.<com.dropbox.sync.android.DbxSyncService: int mBindCount> = $i0;
+
+        $r3 = r0.<com.dropbox.sync.android.DbxSyncService: com.dropbox.sync.android.CoreLogger mLog>;
+
+        $r2 = <com.dropbox.sync.android.DbxSyncService: java.lang.String TAG>;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("DbxSyncService.onRebind: \t\t\t\tbc=");
+
+        $i0 = r0.<com.dropbox.sync.android.DbxSyncService: int mBindCount>;
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" \tsc=");
+
+        $i0 = r0.<com.dropbox.sync.android.DbxSyncService: int mStartCount>;
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r3.<com.dropbox.sync.android.CoreLogger: void v(java.lang.String,java.lang.String)>($r2, $r5);
+
+        return;
+    }
+    public void onStart(android.content.Intent, int)
+    {
+        com.dropbox.sync.android.DbxSyncService r0;
+        android.content.Intent $r1;
+        int $i0;
+        java.lang.String $r2, $r5;
+        com.dropbox.sync.android.CoreLogger $r3;
+        java.lang.StringBuilder $r4;
+
+        r0 := @this: com.dropbox.sync.android.DbxSyncService;
+
+        $r1 := @parameter0: android.content.Intent;
+
+        $i0 := @parameter1: int;
+
+        $r3 = r0.<com.dropbox.sync.android.DbxSyncService: com.dropbox.sync.android.CoreLogger mLog>;
+
+        $r2 = <com.dropbox.sync.android.DbxSyncService: java.lang.String TAG>;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("DbxSyncService.onStartCommand(");
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", no-flags, ");
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(")");
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r3.<com.dropbox.sync.android.CoreLogger: void v(java.lang.String,java.lang.String)>($r2, $r5);
+
+        specialinvoke r0.<com.dropbox.sync.android.DbxSyncService: int handleStartCommand(android.content.Intent,int,int)>($r1, 0, $i0);
+
+        return;
+    }
+    public int onStartCommand(android.content.Intent, int, int)
+    {
+        com.dropbox.sync.android.DbxSyncService r0;
+        android.content.Intent $r1;
+        int $i0, $i1;
+        java.lang.String $r2, $r5;
+        com.dropbox.sync.android.CoreLogger $r3;
+        java.lang.StringBuilder $r4;
+
+        r0 := @this: com.dropbox.sync.android.DbxSyncService;
+
+        $r1 := @parameter0: android.content.Intent;
+
+        $i0 := @parameter1: int;
+
+        $i1 := @parameter2: int;
+
+        $r3 = r0.<com.dropbox.sync.android.DbxSyncService: com.dropbox.sync.android.CoreLogger mLog>;
+
+        $r2 = <com.dropbox.sync.android.DbxSyncService: java.lang.String TAG>;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("DbxSyncService.onStartCommand(");
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i1);
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", ");
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", ");
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i1);
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(")");
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r3.<com.dropbox.sync.android.CoreLogger: void v(java.lang.String,java.lang.String)>($r2, $r5);
+
+        $i0 = specialinvoke r0.<com.dropbox.sync.android.DbxSyncService: int handleStartCommand(android.content.Intent,int,int)>($r1, $i0, $i1);
+
+        return $i0;
+    }
+    public boolean onUnbind(android.content.Intent)
+    {
+        com.dropbox.sync.android.DbxSyncService r0;
+        android.content.Intent $r1;
+        int $i0;
+        com.dropbox.sync.android.CoreLogger $r2;
+        java.lang.String $r3, $r5;
+        java.lang.StringBuilder $r4;
+        com.dropbox.sync.android.DbxRuntimeException$Internal $r6;
+        java.lang.RuntimeException $r7;
+
+        r0 := @this: com.dropbox.sync.android.DbxSyncService;
+
+        $r1 := @parameter0: android.content.Intent;
+
+        $i0 = r0.<com.dropbox.sync.android.DbxSyncService: int mBindCount>;
+
+        $i0 = $i0 + -1;
+
+        r0.<com.dropbox.sync.android.DbxSyncService: int mBindCount> = $i0;
+
+        $r2 = r0.<com.dropbox.sync.android.DbxSyncService: com.dropbox.sync.android.CoreLogger mLog>;
+
+        $r3 = <com.dropbox.sync.android.DbxSyncService: java.lang.String TAG>;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("DbxSyncService.onUnbind: \t\t\t\tbc=");
+
+        $i0 = r0.<com.dropbox.sync.android.DbxSyncService: int mBindCount>;
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" \tsc=");
+
+        $i0 = r0.<com.dropbox.sync.android.DbxSyncService: int mStartCount>;
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r2.<com.dropbox.sync.android.CoreLogger: void v(java.lang.String,java.lang.String)>($r3, $r5);
+
+        $i0 = r0.<com.dropbox.sync.android.DbxSyncService: int mBindCount>;
+
+        if $i0 >= 0 goto label1;
+
+        $r2 = r0.<com.dropbox.sync.android.DbxSyncService: com.dropbox.sync.android.CoreLogger mLog>;
+
+        $r3 = <com.dropbox.sync.android.DbxSyncService: java.lang.String TAG>;
+
+        $r6 = new com.dropbox.sync.android.DbxRuntimeException$Internal;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Invalid bind count ");
+
+        $i0 = r0.<com.dropbox.sync.android.DbxSyncService: int mBindCount>;
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" after onUnbind().");
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r6.<com.dropbox.sync.android.DbxRuntimeException$Internal: void <init>(java.lang.String)>($r5);
+
+        $r7 = virtualinvoke $r2.<com.dropbox.sync.android.CoreLogger: java.lang.RuntimeException logAndThrow(java.lang.String,java.lang.RuntimeException)>($r3, $r6);
+
+        throw $r7;
+
+     label1:
+        specialinvoke r0.<com.dropbox.sync.android.DbxSyncService: void stopIfUnused()>();
+
+        return 1;
+    }

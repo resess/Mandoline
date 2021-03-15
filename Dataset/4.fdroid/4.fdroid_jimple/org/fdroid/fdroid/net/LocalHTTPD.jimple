@@ -1,0 +1,1327 @@
+org.fdroid.fdroid.net.LocalHTTPD extends fi.iki.elonen.NanoHTTPD
+private static final java.lang.String TAG
+private final android.content.Context context
+private final java.io.File webRoot
+    public void <init>(android.content.Context, java.lang.String, int, java.io.File, boolean)
+    {
+        org.fdroid.fdroid.net.LocalHTTPD r0;
+        android.content.Context $r1;
+        java.lang.String $r2;
+        int $i0;
+        java.io.File $r3;
+        boolean $z0;
+
+        r0 := @this: org.fdroid.fdroid.net.LocalHTTPD;
+
+        $r1 := @parameter0: android.content.Context;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $i0 := @parameter2: int;
+
+        $r3 := @parameter3: java.io.File;
+
+        $z0 := @parameter4: boolean;
+
+        specialinvoke r0.<fi.iki.elonen.NanoHTTPD: void <init>(java.lang.String,int)>($r2, $i0);
+
+        r0.<org.fdroid.fdroid.net.LocalHTTPD: java.io.File webRoot> = $r3;
+
+        $r1 = virtualinvoke $r1.<android.content.Context: android.content.Context getApplicationContext()>();
+
+        r0.<org.fdroid.fdroid.net.LocalHTTPD: android.content.Context context> = $r1;
+
+        if $z0 == 0 goto label1;
+
+        specialinvoke r0.<org.fdroid.fdroid.net.LocalHTTPD: void enableHTTPS()>();
+
+     label1:
+        return;
+    }
+    private fi.iki.elonen.NanoHTTPD$Response createResponse(fi.iki.elonen.NanoHTTPD$Response$Status, java.lang.String, java.io.InputStream)
+    {
+        org.fdroid.fdroid.net.LocalHTTPD r0;
+        fi.iki.elonen.NanoHTTPD$Response$Status $r1;
+        java.lang.String $r2;
+        java.io.InputStream $r3;
+        fi.iki.elonen.NanoHTTPD$Response r4;
+
+        r0 := @this: org.fdroid.fdroid.net.LocalHTTPD;
+
+        $r1 := @parameter0: fi.iki.elonen.NanoHTTPD$Response$Status;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $r3 := @parameter2: java.io.InputStream;
+
+        r4 = new fi.iki.elonen.NanoHTTPD$Response;
+
+        specialinvoke r4.<fi.iki.elonen.NanoHTTPD$Response: void <init>(fi.iki.elonen.NanoHTTPD$Response$IStatus,java.lang.String,java.io.InputStream)>($r1, $r2, $r3);
+
+        virtualinvoke r4.<fi.iki.elonen.NanoHTTPD$Response: void addHeader(java.lang.String,java.lang.String)>("Accept-Ranges", "bytes");
+
+        return r4;
+    }
+    private fi.iki.elonen.NanoHTTPD$Response createResponse(fi.iki.elonen.NanoHTTPD$Response$Status, java.lang.String, java.lang.String)
+    {
+        org.fdroid.fdroid.net.LocalHTTPD r0;
+        fi.iki.elonen.NanoHTTPD$Response$Status $r1;
+        java.lang.String $r2, $r3;
+        fi.iki.elonen.NanoHTTPD$Response r4;
+
+        r0 := @this: org.fdroid.fdroid.net.LocalHTTPD;
+
+        $r1 := @parameter0: fi.iki.elonen.NanoHTTPD$Response$Status;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $r3 := @parameter2: java.lang.String;
+
+        r4 = new fi.iki.elonen.NanoHTTPD$Response;
+
+        specialinvoke r4.<fi.iki.elonen.NanoHTTPD$Response: void <init>(fi.iki.elonen.NanoHTTPD$Response$IStatus,java.lang.String,java.lang.String)>($r1, $r2, $r3);
+
+        virtualinvoke r4.<fi.iki.elonen.NanoHTTPD$Response: void addHeader(java.lang.String,java.lang.String)>("Accept-Ranges", "bytes");
+
+        return r4;
+    }
+    private void enableHTTPS()
+    {
+        org.fdroid.fdroid.net.LocalHTTPD r0;
+        android.content.Context $r1;
+        org.fdroid.fdroid.localrepo.LocalRepoKeyStore $r2;
+        java.security.KeyStore $r3;
+        javax.net.ssl.KeyManager[] $r4;
+        javax.net.ssl.SSLServerSocketFactory $r5;
+        java.lang.Object r6;
+        java.lang.Throwable $r7;
+
+        r0 := @this: org.fdroid.fdroid.net.LocalHTTPD;
+
+        $r1 = r0.<org.fdroid.fdroid.net.LocalHTTPD: android.content.Context context>;
+
+     label1:
+        $r2 = staticinvoke <org.fdroid.fdroid.localrepo.LocalRepoKeyStore: org.fdroid.fdroid.localrepo.LocalRepoKeyStore get(android.content.Context)>($r1);
+
+        $r3 = virtualinvoke $r2.<org.fdroid.fdroid.localrepo.LocalRepoKeyStore: java.security.KeyStore getKeyStore()>();
+
+        $r4 = virtualinvoke $r2.<org.fdroid.fdroid.localrepo.LocalRepoKeyStore: javax.net.ssl.KeyManager[] getKeyManagers()>();
+
+        $r5 = staticinvoke <fi.iki.elonen.NanoHTTPD: javax.net.ssl.SSLServerSocketFactory makeSSLSocketFactory(java.security.KeyStore,javax.net.ssl.KeyManager[])>($r3, $r4);
+
+        virtualinvoke r0.<org.fdroid.fdroid.net.LocalHTTPD: void makeSecure(javax.net.ssl.SSLServerSocketFactory)>($r5);
+
+     label2:
+        return;
+
+     label3:
+        r6 := @caughtexception;
+
+     label4:
+        $r7 = (java.lang.Throwable) r6;
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String,java.lang.Throwable)>("LocalHTTPD", "Could not enable HTTPS", $r7);
+
+        return;
+
+     label5:
+        r6 := @caughtexception;
+
+        goto label4;
+
+        catch org.fdroid.fdroid.localrepo.LocalRepoKeyStore$InitException from label1 to label2 with label3;
+        catch java.io.IOException from label1 to label2 with label5;
+    }
+    private java.lang.String encodeUriBetweenSlashes(java.lang.String)
+    {
+        org.fdroid.fdroid.net.LocalHTTPD r0;
+        java.lang.String $r1, r3;
+        java.util.StringTokenizer r2;
+        boolean $z0;
+        int $i0, $i1;
+        java.lang.StringBuilder $r4;
+        java.io.UnsupportedEncodingException $r5;
+
+        r0 := @this: org.fdroid.fdroid.net.LocalHTTPD;
+
+        $r1 := @parameter0: java.lang.String;
+
+        r3 = "";
+
+        r2 = new java.util.StringTokenizer;
+
+        specialinvoke r2.<java.util.StringTokenizer: void <init>(java.lang.String,java.lang.String,boolean)>($r1, "/ ", 1);
+
+     label01:
+        $z0 = virtualinvoke r2.<java.util.StringTokenizer: boolean hasMoreTokens()>();
+
+        if $z0 == 0 goto label10;
+
+        $r1 = virtualinvoke r2.<java.util.StringTokenizer: java.lang.String nextToken()>();
+
+        $i0 = -1;
+
+        $i1 = virtualinvoke $r1.<java.lang.String: int hashCode()>();
+
+        lookupswitch($i1)
+        {
+            case 32: goto label07;
+            case 47: goto label06;
+            default: goto label02;
+        };
+
+     label02:
+        lookupswitch($i0)
+        {
+            case 0: goto label08;
+            case 1: goto label09;
+            default: goto label03;
+        };
+
+     label03:
+        $r4 = new java.lang.StringBuilder;
+
+     label04:
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r3);
+
+        $r1 = staticinvoke <java.net.URLEncoder: java.lang.String encode(java.lang.String,java.lang.String)>($r1, "UTF-8");
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r1 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label05:
+        r3 = $r1;
+
+        goto label01;
+
+     label06:
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean equals(java.lang.Object)>("/");
+
+        if $z0 == 0 goto label02;
+
+        $i0 = 0;
+
+        goto label02;
+
+     label07:
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean equals(java.lang.Object)>(" ");
+
+        if $z0 == 0 goto label02;
+
+        $i0 = 1;
+
+        goto label02;
+
+     label08:
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r3);
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("/");
+
+        r3 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        goto label01;
+
+     label09:
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r3);
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("%20");
+
+        r3 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        goto label01;
+
+     label10:
+        return r3;
+
+     label11:
+        $r5 := @caughtexception;
+
+        goto label01;
+
+        catch java.io.UnsupportedEncodingException from label04 to label05 with label11;
+    }
+    private java.lang.String findIndexFileInDirectory(java.io.File)
+    {
+        org.fdroid.fdroid.net.LocalHTTPD r0;
+        java.io.File $r1, r2;
+        boolean $z0;
+
+        r0 := @this: org.fdroid.fdroid.net.LocalHTTPD;
+
+        $r1 := @parameter0: java.io.File;
+
+        r2 = new java.io.File;
+
+        specialinvoke r2.<java.io.File: void <init>(java.io.File,java.lang.String)>($r1, "index.html");
+
+        $z0 = virtualinvoke r2.<java.io.File: boolean exists()>();
+
+        if $z0 == 0 goto label1;
+
+        return "index.html";
+
+     label1:
+        return null;
+    }
+    public static java.lang.String getMimeTypeForFile(java.lang.String)
+    {
+        java.lang.String $r0;
+        android.webkit.MimeTypeMap $r1;
+
+        $r0 := @parameter0: java.lang.String;
+
+        $r0 = staticinvoke <android.webkit.MimeTypeMap: java.lang.String getFileExtensionFromUrl(java.lang.String)>($r0);
+
+        if $r0 == null goto label1;
+
+        $r1 = staticinvoke <android.webkit.MimeTypeMap: android.webkit.MimeTypeMap getSingleton()>();
+
+        $r0 = virtualinvoke $r1.<android.webkit.MimeTypeMap: java.lang.String getMimeTypeFromExtension(java.lang.String)>($r0);
+
+        return $r0;
+
+     label1:
+        return null;
+    }
+    private fi.iki.elonen.NanoHTTPD$Response handleGet(fi.iki.elonen.NanoHTTPD$IHTTPSession)
+    {
+        org.fdroid.fdroid.net.LocalHTTPD r0;
+        fi.iki.elonen.NanoHTTPD$IHTTPSession $r1;
+        java.util.Map $r2;
+        java.lang.String $r3;
+        java.io.File $r4;
+        boolean $z0;
+        fi.iki.elonen.NanoHTTPD$Response$Status $r5;
+        java.lang.StringBuilder $r6;
+        fi.iki.elonen.NanoHTTPD$Response $r7;
+
+        r0 := @this: org.fdroid.fdroid.net.LocalHTTPD;
+
+        $r1 := @parameter0: fi.iki.elonen.NanoHTTPD$IHTTPSession;
+
+        $r2 = interfaceinvoke $r1.<fi.iki.elonen.NanoHTTPD$IHTTPSession: java.util.Map getHeaders()>();
+
+        interfaceinvoke $r1.<fi.iki.elonen.NanoHTTPD$IHTTPSession: java.util.Map getParms()>();
+
+        $r3 = interfaceinvoke $r1.<fi.iki.elonen.NanoHTTPD$IHTTPSession: java.lang.String getUri()>();
+
+        $r4 = r0.<org.fdroid.fdroid.net.LocalHTTPD: java.io.File webRoot>;
+
+        $z0 = virtualinvoke $r4.<java.io.File: boolean isDirectory()>();
+
+        if $z0 != 0 goto label1;
+
+        $r5 = <fi.iki.elonen.NanoHTTPD$Response$Status: fi.iki.elonen.NanoHTTPD$Response$Status INTERNAL_ERROR>;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("INTERNAL ERRROR: given path is not a directory (");
+
+        $r4 = r0.<org.fdroid.fdroid.net.LocalHTTPD: java.io.File webRoot>;
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r4);
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(").");
+
+        $r3 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r7 = specialinvoke r0.<org.fdroid.fdroid.net.LocalHTTPD: fi.iki.elonen.NanoHTTPD$Response createResponse(fi.iki.elonen.NanoHTTPD$Response$Status,java.lang.String,java.lang.String)>($r5, "text/plain", $r3);
+
+        return $r7;
+
+     label1:
+        $r2 = staticinvoke <java.util.Collections: java.util.Map unmodifiableMap(java.util.Map)>($r2);
+
+        $r7 = specialinvoke r0.<org.fdroid.fdroid.net.LocalHTTPD: fi.iki.elonen.NanoHTTPD$Response respond(java.util.Map,java.lang.String)>($r2, $r3);
+
+        return $r7;
+    }
+    private fi.iki.elonen.NanoHTTPD$Response handlePost(fi.iki.elonen.NanoHTTPD$IHTTPSession)
+    {
+        org.fdroid.fdroid.net.LocalHTTPD r0;
+        fi.iki.elonen.NanoHTTPD$IHTTPSession $r1;
+        java.lang.String $r2;
+        android.net.Uri $r3;
+        int $i0, $i1;
+        fi.iki.elonen.NanoHTTPD$Response $r4;
+        boolean $z0;
+        java.util.Map $r5;
+        fi.iki.elonen.NanoHTTPD$Response$Status $r6;
+        java.lang.Object $r7;
+
+        r0 := @this: org.fdroid.fdroid.net.LocalHTTPD;
+
+        $r1 := @parameter0: fi.iki.elonen.NanoHTTPD$IHTTPSession;
+
+        $r2 = interfaceinvoke $r1.<fi.iki.elonen.NanoHTTPD$IHTTPSession: java.lang.String getUri()>();
+
+        $r3 = staticinvoke <android.net.Uri: android.net.Uri parse(java.lang.String)>($r2);
+
+        $r2 = virtualinvoke $r3.<android.net.Uri: java.lang.String getPath()>();
+
+        $i0 = -1;
+
+        $i1 = virtualinvoke $r2.<java.lang.String: int hashCode()>();
+
+        lookupswitch($i1)
+        {
+            case 352039872: goto label3;
+            default: goto label1;
+        };
+
+     label1:
+        lookupswitch($i0)
+        {
+            case 0: goto label4;
+            default: goto label2;
+        };
+
+     label2:
+        $r4 = new fi.iki.elonen.NanoHTTPD$Response;
+
+        specialinvoke $r4.<fi.iki.elonen.NanoHTTPD$Response: void <init>(java.lang.String)>("");
+
+        return $r4;
+
+     label3:
+        $z0 = virtualinvoke $r2.<java.lang.String: boolean equals(java.lang.Object)>("/request-swap");
+
+        if $z0 == 0 goto label1;
+
+        $i0 = 0;
+
+        goto label1;
+
+     label4:
+        $r5 = interfaceinvoke $r1.<fi.iki.elonen.NanoHTTPD$IHTTPSession: java.util.Map getParms()>();
+
+        $z0 = interfaceinvoke $r5.<java.util.Map: boolean containsKey(java.lang.Object)>("repo");
+
+        if $z0 != 0 goto label5;
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String)>("LocalHTTPD", "Malformed /request-swap request to local repo HTTP server. Should have posted a \'repo\' parameter.");
+
+        $r4 = new fi.iki.elonen.NanoHTTPD$Response;
+
+        $r6 = <fi.iki.elonen.NanoHTTPD$Response$Status: fi.iki.elonen.NanoHTTPD$Response$Status BAD_REQUEST>;
+
+        specialinvoke $r4.<fi.iki.elonen.NanoHTTPD$Response: void <init>(fi.iki.elonen.NanoHTTPD$Response$IStatus,java.lang.String,java.lang.String)>($r6, "text/plain", "Requires \'repo\' parameter to be posted.");
+
+        return $r4;
+
+     label5:
+        $r5 = interfaceinvoke $r1.<fi.iki.elonen.NanoHTTPD$IHTTPSession: java.util.Map getParms()>();
+
+        $r7 = interfaceinvoke $r5.<java.util.Map: java.lang.Object get(java.lang.Object)>("repo");
+
+        $r2 = (java.lang.String) $r7;
+
+        specialinvoke r0.<org.fdroid.fdroid.net.LocalHTTPD: void requestSwap(java.lang.String)>($r2);
+
+        $r4 = new fi.iki.elonen.NanoHTTPD$Response;
+
+        $r6 = <fi.iki.elonen.NanoHTTPD$Response$Status: fi.iki.elonen.NanoHTTPD$Response$Status OK>;
+
+        specialinvoke $r4.<fi.iki.elonen.NanoHTTPD$Response: void <init>(fi.iki.elonen.NanoHTTPD$Response$IStatus,java.lang.String,java.lang.String)>($r6, "text/plain", "Swap request received.");
+
+        return $r4;
+    }
+    private java.lang.String listDirectory(java.lang.String, java.io.File)
+    {
+        org.fdroid.fdroid.net.LocalHTTPD r0;
+        java.lang.String $r1, $r5, $r7;
+        java.io.File $r2, r3;
+        java.lang.StringBuilder r4, $r6, $r15;
+        int $i0, $i1;
+        org.fdroid.fdroid.net.LocalHTTPD$2 $r8;
+        java.lang.String[] $r9;
+        java.util.List $r10, $r12;
+        org.fdroid.fdroid.net.LocalHTTPD$3 $r11;
+        java.util.Iterator $r13;
+        boolean $z0;
+        java.lang.Object $r14;
+        long $l2, $l4;
+        byte $b3;
+
+        r0 := @this: org.fdroid.fdroid.net.LocalHTTPD;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.io.File;
+
+        r4 = new java.lang.StringBuilder;
+
+        specialinvoke r4.<java.lang.StringBuilder: void <init>()>();
+
+        r4 = virtualinvoke r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Directory ");
+
+        r4 = virtualinvoke r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r5 = virtualinvoke r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        r4 = new java.lang.StringBuilder;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("<html><head><title>");
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("</title><style><!--\n");
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("span.dirname { font-weight: bold; }\n");
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("span.filesize { font-size: 75%; }\n");
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("// -->\n");
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("</style>");
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("</head><body><h1>");
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("</h1>");
+
+        $r5 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke r4.<java.lang.StringBuilder: void <init>(java.lang.String)>($r5);
+
+        $r5 = null;
+
+        $i0 = virtualinvoke $r1.<java.lang.String: int length()>();
+
+        if $i0 <= 1 goto label01;
+
+        $i0 = virtualinvoke $r1.<java.lang.String: int length()>();
+
+        $i0 = $i0 + -1;
+
+        $r7 = virtualinvoke $r1.<java.lang.String: java.lang.String substring(int,int)>(0, $i0);
+
+        $i0 = virtualinvoke $r7.<java.lang.String: int lastIndexOf(int)>(47);
+
+        if $i0 < 0 goto label01;
+
+        $i1 = virtualinvoke $r7.<java.lang.String: int length()>();
+
+        if $i0 >= $i1 goto label01;
+
+        $i0 = $i0 + 1;
+
+        $r5 = virtualinvoke $r1.<java.lang.String: java.lang.String substring(int,int)>(0, $i0);
+
+     label01:
+        $r8 = new org.fdroid.fdroid.net.LocalHTTPD$2;
+
+        specialinvoke $r8.<org.fdroid.fdroid.net.LocalHTTPD$2: void <init>(org.fdroid.fdroid.net.LocalHTTPD)>(r0);
+
+        $r9 = virtualinvoke $r2.<java.io.File: java.lang.String[] list(java.io.FilenameFilter)>($r8);
+
+        $r10 = staticinvoke <java.util.Arrays: java.util.List asList(java.lang.Object[])>($r9);
+
+        staticinvoke <java.util.Collections: void sort(java.util.List)>($r10);
+
+        $r11 = new org.fdroid.fdroid.net.LocalHTTPD$3;
+
+        specialinvoke $r11.<org.fdroid.fdroid.net.LocalHTTPD$3: void <init>(org.fdroid.fdroid.net.LocalHTTPD)>(r0);
+
+        $r9 = virtualinvoke $r2.<java.io.File: java.lang.String[] list(java.io.FilenameFilter)>($r11);
+
+        $r12 = staticinvoke <java.util.Arrays: java.util.List asList(java.lang.Object[])>($r9);
+
+        staticinvoke <java.util.Collections: void sort(java.util.List)>($r12);
+
+        if $r5 != null goto label02;
+
+        $i0 = interfaceinvoke $r12.<java.util.List: int size()>();
+
+        $i1 = interfaceinvoke $r10.<java.util.List: int size()>();
+
+        $i0 = $i0 + $i1;
+
+        if $i0 <= 0 goto label14;
+
+     label02:
+        virtualinvoke r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("<ul>");
+
+        if $r5 != null goto label03;
+
+        $i0 = interfaceinvoke $r12.<java.util.List: int size()>();
+
+        if $i0 <= 0 goto label07;
+
+     label03:
+        virtualinvoke r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("<section class=\"directories\">");
+
+        if $r5 == null goto label04;
+
+        $r6 = virtualinvoke r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("<li><a rel=\"directory\" href=\"");
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\"><span class=\"dirname\">..</span></a></b></li>");
+
+     label04:
+        $r13 = interfaceinvoke $r12.<java.util.List: java.util.Iterator iterator()>();
+
+     label05:
+        $z0 = interfaceinvoke $r13.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label06;
+
+        $r14 = interfaceinvoke $r13.<java.util.Iterator: java.lang.Object next()>();
+
+        $r5 = (java.lang.String) $r14;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("/");
+
+        $r5 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r6 = virtualinvoke r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("<li><a rel=\"directory\" href=\"");
+
+        $r15 = new java.lang.StringBuilder;
+
+        specialinvoke $r15.<java.lang.StringBuilder: void <init>()>();
+
+        $r15 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r15 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r7 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r7 = specialinvoke r0.<org.fdroid.fdroid.net.LocalHTTPD: java.lang.String encodeUriBetweenSlashes(java.lang.String)>($r7);
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r7);
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\"><span class=\"dirname\">");
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("</span></a></b></li>");
+
+        goto label05;
+
+     label06:
+        virtualinvoke r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("</section>");
+
+     label07:
+        $i0 = interfaceinvoke $r10.<java.util.List: int size()>();
+
+        if $i0 <= 0 goto label13;
+
+        virtualinvoke r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("<section class=\"files\">");
+
+        $r13 = interfaceinvoke $r10.<java.util.List: java.util.Iterator iterator()>();
+
+     label08:
+        $z0 = interfaceinvoke $r13.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label12;
+
+        $r14 = interfaceinvoke $r13.<java.util.Iterator: java.lang.Object next()>();
+
+        $r5 = (java.lang.String) $r14;
+
+        $r6 = virtualinvoke r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("<li><a href=\"");
+
+        $r15 = new java.lang.StringBuilder;
+
+        specialinvoke $r15.<java.lang.StringBuilder: void <init>()>();
+
+        $r15 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r15 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r7 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r7 = specialinvoke r0.<org.fdroid.fdroid.net.LocalHTTPD: java.lang.String encodeUriBetweenSlashes(java.lang.String)>($r7);
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r7);
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\"><span class=\"filename\">");
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("</span></a>");
+
+        r3 = new java.io.File;
+
+        specialinvoke r3.<java.io.File: void <init>(java.io.File,java.lang.String)>($r2, $r5);
+
+        $l2 = virtualinvoke r3.<java.io.File: long length()>();
+
+        virtualinvoke r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("&nbsp;<span class=\"filesize\">(");
+
+        $b3 = $l2 cmp 1024L;
+
+        if $b3 >= 0 goto label10;
+
+        $r6 = virtualinvoke r4.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l2);
+
+        virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" bytes");
+
+     label09:
+        virtualinvoke r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(")</span></li>");
+
+        goto label08;
+
+     label10:
+        $b3 = $l2 cmp 1048576L;
+
+        if $b3 >= 0 goto label11;
+
+        $l4 = $l2 / 1024L;
+
+        $r6 = virtualinvoke r4.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l4);
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(46);
+
+        $l2 = $l2 % 1024L;
+
+        $l2 = $l2 / 10L;
+
+        $l2 = $l2 % 100L;
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l2);
+
+        virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" KB");
+
+        goto label09;
+
+     label11:
+        $l4 = $l2 / 1048576L;
+
+        $r6 = virtualinvoke r4.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l4);
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(46);
+
+        $l2 = $l2 % 1048576L;
+
+        $l2 = $l2 / 10L;
+
+        $l2 = $l2 % 100L;
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l2);
+
+        virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" MB");
+
+        goto label09;
+
+     label12:
+        virtualinvoke r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("</section>");
+
+     label13:
+        virtualinvoke r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("</ul>");
+
+     label14:
+        virtualinvoke r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("</body></html>");
+
+        $r1 = virtualinvoke r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r1;
+    }
+    private void requestSwap(java.lang.String)
+    {
+        org.fdroid.fdroid.net.LocalHTTPD r0;
+        java.lang.String $r1, $r4;
+        android.content.Intent r2;
+        java.lang.StringBuilder $r3;
+        android.net.Uri $r5;
+        android.content.Context $r6;
+
+        r0 := @this: org.fdroid.fdroid.net.LocalHTTPD;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Received request to swap with ");
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <org.fdroid.fdroid.Utils: void debugLog(java.lang.String,java.lang.String)>("LocalHTTPD", $r4);
+
+        staticinvoke <org.fdroid.fdroid.Utils: void debugLog(java.lang.String,java.lang.String)>("LocalHTTPD", "Showing confirm screen to check whether that is okay with the user.");
+
+        $r5 = staticinvoke <android.net.Uri: android.net.Uri parse(java.lang.String)>($r1);
+
+        r2 = new android.content.Intent;
+
+        $r6 = r0.<org.fdroid.fdroid.net.LocalHTTPD: android.content.Context context>;
+
+        specialinvoke r2.<android.content.Intent: void <init>(android.content.Context,java.lang.Class)>($r6, class "Lorg/fdroid/fdroid/views/swap/SwapWorkflowActivity;");
+
+        virtualinvoke r2.<android.content.Intent: android.content.Intent setData(android.net.Uri)>($r5);
+
+        virtualinvoke r2.<android.content.Intent: android.content.Intent putExtra(java.lang.String,boolean)>("EXTRA_CONFIRM", 1);
+
+        virtualinvoke r2.<android.content.Intent: android.content.Intent putExtra(java.lang.String,boolean)>("preventFurtherSwap", 1);
+
+        virtualinvoke r2.<android.content.Intent: android.content.Intent addFlags(int)>(268435456);
+
+        $r6 = r0.<org.fdroid.fdroid.net.LocalHTTPD: android.content.Context context>;
+
+        virtualinvoke $r6.<android.content.Context: void startActivity(android.content.Intent)>(r2);
+
+        return;
+    }
+    private fi.iki.elonen.NanoHTTPD$Response respond(java.util.Map, java.lang.String)
+    {
+        org.fdroid.fdroid.net.LocalHTTPD r0;
+        java.util.Map r1;
+        java.io.File r2, $r7;
+        java.lang.String $r3, $r4;
+        char $c0;
+        int $i1;
+        boolean $z0;
+        fi.iki.elonen.NanoHTTPD$Response$Status $r5;
+        fi.iki.elonen.NanoHTTPD$Response $r6, r9;
+        java.lang.StringBuilder $r8;
+
+        r0 := @this: org.fdroid.fdroid.net.LocalHTTPD;
+
+        r1 := @parameter0: java.util.Map;
+
+        $r3 := @parameter1: java.lang.String;
+
+        $r3 = virtualinvoke $r3.<java.lang.String: java.lang.String trim()>();
+
+        $c0 = <java.io.File: char separatorChar>;
+
+        $r4 = virtualinvoke $r3.<java.lang.String: java.lang.String replace(char,char)>($c0, 47);
+
+        $r3 = $r4;
+
+        $i1 = virtualinvoke $r4.<java.lang.String: int indexOf(int)>(63);
+
+        if $i1 < 0 goto label1;
+
+        $i1 = virtualinvoke $r4.<java.lang.String: int indexOf(int)>(63);
+
+        $r3 = virtualinvoke $r4.<java.lang.String: java.lang.String substring(int,int)>(0, $i1);
+
+     label1:
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean contains(java.lang.CharSequence)>("../");
+
+        if $z0 == 0 goto label2;
+
+        $r5 = <fi.iki.elonen.NanoHTTPD$Response$Status: fi.iki.elonen.NanoHTTPD$Response$Status FORBIDDEN>;
+
+        $r6 = specialinvoke r0.<org.fdroid.fdroid.net.LocalHTTPD: fi.iki.elonen.NanoHTTPD$Response createResponse(fi.iki.elonen.NanoHTTPD$Response$Status,java.lang.String,java.lang.String)>($r5, "text/plain", "FORBIDDEN: Won\'t serve ../ for security reasons.");
+
+        return $r6;
+
+     label2:
+        r2 = new java.io.File;
+
+        $r7 = r0.<org.fdroid.fdroid.net.LocalHTTPD: java.io.File webRoot>;
+
+        specialinvoke r2.<java.io.File: void <init>(java.io.File,java.lang.String)>($r7, $r3);
+
+        $z0 = virtualinvoke r2.<java.io.File: boolean exists()>();
+
+        if $z0 != 0 goto label3;
+
+        $r5 = <fi.iki.elonen.NanoHTTPD$Response$Status: fi.iki.elonen.NanoHTTPD$Response$Status NOT_FOUND>;
+
+        $r6 = specialinvoke r0.<org.fdroid.fdroid.net.LocalHTTPD: fi.iki.elonen.NanoHTTPD$Response createResponse(fi.iki.elonen.NanoHTTPD$Response$Status,java.lang.String,java.lang.String)>($r5, "text/plain", "Error 404, file not found.");
+
+        return $r6;
+
+     label3:
+        $z0 = virtualinvoke r2.<java.io.File: boolean isDirectory()>();
+
+        if $z0 == 0 goto label4;
+
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean endsWith(java.lang.String)>("/");
+
+        if $z0 != 0 goto label4;
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("/");
+
+        $r3 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r5 = <fi.iki.elonen.NanoHTTPD$Response$Status: fi.iki.elonen.NanoHTTPD$Response$Status REDIRECT>;
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("<html><body>Redirected: <a href=\"");
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\">");
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("</a></body></html>");
+
+        $r4 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r6 = specialinvoke r0.<org.fdroid.fdroid.net.LocalHTTPD: fi.iki.elonen.NanoHTTPD$Response createResponse(fi.iki.elonen.NanoHTTPD$Response$Status,java.lang.String,java.lang.String)>($r5, "text/html", $r4);
+
+        virtualinvoke $r6.<fi.iki.elonen.NanoHTTPD$Response: void addHeader(java.lang.String,java.lang.String)>("Location", $r3);
+
+        return $r6;
+
+     label4:
+        $z0 = virtualinvoke r2.<java.io.File: boolean isDirectory()>();
+
+        if $z0 == 0 goto label7;
+
+        $r4 = specialinvoke r0.<org.fdroid.fdroid.net.LocalHTTPD: java.lang.String findIndexFileInDirectory(java.io.File)>(r2);
+
+        if $r4 != null goto label6;
+
+        $z0 = virtualinvoke r2.<java.io.File: boolean canRead()>();
+
+        if $z0 == 0 goto label5;
+
+        $r5 = <fi.iki.elonen.NanoHTTPD$Response$Status: fi.iki.elonen.NanoHTTPD$Response$Status OK>;
+
+        $r3 = specialinvoke r0.<org.fdroid.fdroid.net.LocalHTTPD: java.lang.String listDirectory(java.lang.String,java.io.File)>($r3, r2);
+
+        $r6 = specialinvoke r0.<org.fdroid.fdroid.net.LocalHTTPD: fi.iki.elonen.NanoHTTPD$Response createResponse(fi.iki.elonen.NanoHTTPD$Response$Status,java.lang.String,java.lang.String)>($r5, "text/html", $r3);
+
+        return $r6;
+
+     label5:
+        $r5 = <fi.iki.elonen.NanoHTTPD$Response$Status: fi.iki.elonen.NanoHTTPD$Response$Status FORBIDDEN>;
+
+        $r6 = specialinvoke r0.<org.fdroid.fdroid.net.LocalHTTPD: fi.iki.elonen.NanoHTTPD$Response createResponse(fi.iki.elonen.NanoHTTPD$Response$Status,java.lang.String,java.lang.String)>($r5, "text/plain", "FORBIDDEN: No directory listing.");
+
+        return $r6;
+
+     label6:
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r3 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r6 = specialinvoke r0.<org.fdroid.fdroid.net.LocalHTTPD: fi.iki.elonen.NanoHTTPD$Response respond(java.util.Map,java.lang.String)>(r1, $r3);
+
+        return $r6;
+
+     label7:
+        $r4 = staticinvoke <org.fdroid.fdroid.net.LocalHTTPD: java.lang.String getMimeTypeForFile(java.lang.String)>($r3);
+
+        $r6 = virtualinvoke r0.<org.fdroid.fdroid.net.LocalHTTPD: fi.iki.elonen.NanoHTTPD$Response serveFile(java.lang.String,java.util.Map,java.io.File,java.lang.String)>($r3, r1, r2, $r4);
+
+        r9 = $r6;
+
+        if $r6 == null goto label9;
+
+     label8:
+        return r9;
+
+     label9:
+        $r5 = <fi.iki.elonen.NanoHTTPD$Response$Status: fi.iki.elonen.NanoHTTPD$Response$Status NOT_FOUND>;
+
+        r9 = specialinvoke r0.<org.fdroid.fdroid.net.LocalHTTPD: fi.iki.elonen.NanoHTTPD$Response createResponse(fi.iki.elonen.NanoHTTPD$Response$Status,java.lang.String,java.lang.String)>($r5, "text/plain", "Error 404, file not found.");
+
+        goto label8;
+    }
+    public fi.iki.elonen.NanoHTTPD$Response serve(fi.iki.elonen.NanoHTTPD$IHTTPSession)
+    {
+        org.fdroid.fdroid.net.LocalHTTPD r0;
+        fi.iki.elonen.NanoHTTPD$IHTTPSession $r1;
+        java.io.IOException r2;
+        fi.iki.elonen.NanoHTTPD$ResponseException r3;
+        fi.iki.elonen.NanoHTTPD$Method $r4, $r5;
+        java.util.HashMap $r6;
+        fi.iki.elonen.NanoHTTPD$Response $r7;
+        fi.iki.elonen.NanoHTTPD$Response$Status $r8;
+        java.lang.String $r9;
+
+        r0 := @this: org.fdroid.fdroid.net.LocalHTTPD;
+
+        $r1 := @parameter0: fi.iki.elonen.NanoHTTPD$IHTTPSession;
+
+        $r4 = interfaceinvoke $r1.<fi.iki.elonen.NanoHTTPD$IHTTPSession: fi.iki.elonen.NanoHTTPD$Method getMethod()>();
+
+        $r5 = <fi.iki.elonen.NanoHTTPD$Method: fi.iki.elonen.NanoHTTPD$Method POST>;
+
+        if $r4 != $r5 goto label5;
+
+        $r6 = new java.util.HashMap;
+
+     label1:
+        specialinvoke $r6.<java.util.HashMap: void <init>()>();
+
+        interfaceinvoke $r1.<fi.iki.elonen.NanoHTTPD$IHTTPSession: void parseBody(java.util.Map)>($r6);
+
+     label2:
+        $r7 = specialinvoke r0.<org.fdroid.fdroid.net.LocalHTTPD: fi.iki.elonen.NanoHTTPD$Response handlePost(fi.iki.elonen.NanoHTTPD$IHTTPSession)>($r1);
+
+        return $r7;
+
+     label3:
+        r2 := @caughtexception;
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String,java.lang.Throwable)>("LocalHTTPD", "An error occured while parsing the POST body", r2);
+
+        $r7 = new fi.iki.elonen.NanoHTTPD$Response;
+
+        $r8 = <fi.iki.elonen.NanoHTTPD$Response$Status: fi.iki.elonen.NanoHTTPD$Response$Status INTERNAL_ERROR>;
+
+        specialinvoke $r7.<fi.iki.elonen.NanoHTTPD$Response: void <init>(fi.iki.elonen.NanoHTTPD$Response$IStatus,java.lang.String,java.lang.String)>($r8, "text/plain", "Internal server error, check logcat on server for details.");
+
+        return $r7;
+
+     label4:
+        r3 := @caughtexception;
+
+        $r7 = new fi.iki.elonen.NanoHTTPD$Response;
+
+        $r8 = virtualinvoke r3.<fi.iki.elonen.NanoHTTPD$ResponseException: fi.iki.elonen.NanoHTTPD$Response$Status getStatus()>();
+
+        $r9 = virtualinvoke r3.<fi.iki.elonen.NanoHTTPD$ResponseException: java.lang.String getMessage()>();
+
+        specialinvoke $r7.<fi.iki.elonen.NanoHTTPD$Response: void <init>(fi.iki.elonen.NanoHTTPD$Response$IStatus,java.lang.String,java.lang.String)>($r8, "text/plain", $r9);
+
+        return $r7;
+
+     label5:
+        $r7 = specialinvoke r0.<org.fdroid.fdroid.net.LocalHTTPD: fi.iki.elonen.NanoHTTPD$Response handleGet(fi.iki.elonen.NanoHTTPD$IHTTPSession)>($r1);
+
+        return $r7;
+
+        catch java.io.IOException from label1 to label2 with label3;
+        catch fi.iki.elonen.NanoHTTPD$ResponseException from label1 to label2 with label4;
+    }
+    fi.iki.elonen.NanoHTTPD$Response serveFile(java.lang.String, java.util.Map, java.io.File, java.lang.String)
+    {
+        org.fdroid.fdroid.net.LocalHTTPD r0;
+        java.lang.String $r1, $r4, r9, $r10, $r11;
+        java.util.Map r2;
+        java.io.File $r3;
+        org.fdroid.fdroid.net.LocalHTTPD$1 r5;
+        java.io.IOException r6;
+        java.lang.StringBuilder $r7;
+        long $l0, l2, $l3, $l5;
+        int $i1;
+        java.lang.Object $r8;
+        boolean $z0;
+        byte $b4;
+        fi.iki.elonen.NanoHTTPD$Response$Status $r12;
+        fi.iki.elonen.NanoHTTPD$Response $r13;
+        java.io.FileInputStream $r14;
+        java.lang.NumberFormatException $r15;
+
+        r0 := @this: org.fdroid.fdroid.net.LocalHTTPD;
+
+        $r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.util.Map;
+
+        $r3 := @parameter2: java.io.File;
+
+        $r4 := @parameter3: java.lang.String;
+
+        $r7 = new java.lang.StringBuilder;
+
+     label01:
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r1 = virtualinvoke $r3.<java.io.File: java.lang.String getAbsolutePath()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $l0 = virtualinvoke $r3.<java.io.File: long lastModified()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l0);
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("");
+
+        $l0 = virtualinvoke $r3.<java.io.File: long length()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l0);
+
+        $r1 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $i1 = virtualinvoke $r1.<java.lang.String: int hashCode()>();
+
+        $r1 = staticinvoke <java.lang.Integer: java.lang.String toHexString(int)>($i1);
+
+     label02:
+        $l0 = 0L;
+
+        l2 = -1L;
+
+     label03:
+        $r8 = interfaceinvoke r2.<java.util.Map: java.lang.Object get(java.lang.Object)>("range");
+
+     label04:
+        r9 = (java.lang.String) $r8;
+
+        if r9 == null goto label15;
+
+     label05:
+        $z0 = virtualinvoke r9.<java.lang.String: boolean startsWith(java.lang.String)>("bytes=");
+
+     label06:
+        if $z0 == 0 goto label15;
+
+        $r10 = "bytes=";
+
+     label07:
+        $i1 = virtualinvoke $r10.<java.lang.String: int length()>();
+
+        $r10 = virtualinvoke r9.<java.lang.String: java.lang.String substring(int)>($i1);
+
+     label08:
+        r9 = $r10;
+
+     label09:
+        $i1 = virtualinvoke $r10.<java.lang.String: int indexOf(int)>(45);
+
+     label10:
+        if $i1 <= 0 goto label15;
+
+     label11:
+        $r11 = virtualinvoke $r10.<java.lang.String: java.lang.String substring(int,int)>(0, $i1);
+
+        $l3 = staticinvoke <java.lang.Long: long parseLong(java.lang.String)>($r11);
+
+     label12:
+        $l0 = $l3;
+
+        $i1 = $i1 + 1;
+
+     label13:
+        $r10 = virtualinvoke $r10.<java.lang.String: java.lang.String substring(int)>($i1);
+
+        $l3 = staticinvoke <java.lang.Long: long parseLong(java.lang.String)>($r10);
+
+     label14:
+        l2 = $l3;
+
+     label15:
+        $l3 = virtualinvoke $r3.<java.io.File: long length()>();
+
+     label16:
+        if r9 == null goto label33;
+
+        $b4 = $l0 cmp 0L;
+
+        if $b4 < 0 goto label33;
+
+        $b4 = $l0 cmp $l3;
+
+        if $b4 < 0 goto label21;
+
+        $r12 = <fi.iki.elonen.NanoHTTPD$Response$Status: fi.iki.elonen.NanoHTTPD$Response$Status RANGE_NOT_SATISFIABLE>;
+
+     label17:
+        $r13 = specialinvoke r0.<org.fdroid.fdroid.net.LocalHTTPD: fi.iki.elonen.NanoHTTPD$Response createResponse(fi.iki.elonen.NanoHTTPD$Response$Status,java.lang.String,java.lang.String)>($r12, "text/plain", "");
+
+     label18:
+        $r7 = new java.lang.StringBuilder;
+
+     label19:
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("bytes 0-0/");
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l3);
+
+        $r4 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r13.<fi.iki.elonen.NanoHTTPD$Response: void addHeader(java.lang.String,java.lang.String)>("Content-Range", $r4);
+
+        virtualinvoke $r13.<fi.iki.elonen.NanoHTTPD$Response: void addHeader(java.lang.String,java.lang.String)>("ETag", $r1);
+
+     label20:
+        return $r13;
+
+     label21:
+        $b4 = l2 cmp 0L;
+
+        if $b4 >= 0 goto label22;
+
+        l2 = $l3 - 1L;
+
+     label22:
+        $l5 = l2 - $l0;
+
+        $l5 = $l5 + 1L;
+
+        $b4 = $l5 cmp 0L;
+
+        if $b4 >= 0 goto label23;
+
+        $l5 = 0L;
+
+     label23:
+        r5 = new org.fdroid.fdroid.net.LocalHTTPD$1;
+
+     label24:
+        specialinvoke r5.<org.fdroid.fdroid.net.LocalHTTPD$1: void <init>(org.fdroid.fdroid.net.LocalHTTPD,java.io.File,long)>(r0, $r3, $l5);
+
+        virtualinvoke r5.<java.io.FileInputStream: long skip(long)>($l0);
+
+     label25:
+        $r12 = <fi.iki.elonen.NanoHTTPD$Response$Status: fi.iki.elonen.NanoHTTPD$Response$Status PARTIAL_CONTENT>;
+
+     label26:
+        $r13 = specialinvoke r0.<org.fdroid.fdroid.net.LocalHTTPD: fi.iki.elonen.NanoHTTPD$Response createResponse(fi.iki.elonen.NanoHTTPD$Response$Status,java.lang.String,java.io.InputStream)>($r12, $r4, r5);
+
+     label27:
+        $r7 = new java.lang.StringBuilder;
+
+     label28:
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("");
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l5);
+
+        $r4 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r13.<fi.iki.elonen.NanoHTTPD$Response: void addHeader(java.lang.String,java.lang.String)>("Content-Length", $r4);
+
+     label29:
+        $r7 = new java.lang.StringBuilder;
+
+     label30:
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("bytes ");
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l0);
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("-");
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>(l2);
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("/");
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l3);
+
+        $r4 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r13.<fi.iki.elonen.NanoHTTPD$Response: void addHeader(java.lang.String,java.lang.String)>("Content-Range", $r4);
+
+        virtualinvoke $r13.<fi.iki.elonen.NanoHTTPD$Response: void addHeader(java.lang.String,java.lang.String)>("ETag", $r1);
+
+     label31:
+        return $r13;
+
+     label32:
+        r6 := @caughtexception;
+
+        $r12 = <fi.iki.elonen.NanoHTTPD$Response$Status: fi.iki.elonen.NanoHTTPD$Response$Status FORBIDDEN>;
+
+        $r13 = specialinvoke r0.<org.fdroid.fdroid.net.LocalHTTPD: fi.iki.elonen.NanoHTTPD$Response createResponse(fi.iki.elonen.NanoHTTPD$Response$Status,java.lang.String,java.lang.String)>($r12, "text/plain", "FORBIDDEN: Reading file failed.");
+
+        return $r13;
+
+     label33:
+        $r8 = interfaceinvoke r2.<java.util.Map: java.lang.Object get(java.lang.Object)>("if-none-match");
+
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean equals(java.lang.Object)>($r8);
+
+     label34:
+        if $z0 == 0 goto label37;
+
+        $r12 = <fi.iki.elonen.NanoHTTPD$Response$Status: fi.iki.elonen.NanoHTTPD$Response$Status NOT_MODIFIED>;
+
+     label35:
+        $r13 = specialinvoke r0.<org.fdroid.fdroid.net.LocalHTTPD: fi.iki.elonen.NanoHTTPD$Response createResponse(fi.iki.elonen.NanoHTTPD$Response$Status,java.lang.String,java.lang.String)>($r12, $r4, "");
+
+     label36:
+        return $r13;
+
+     label37:
+        $r12 = <fi.iki.elonen.NanoHTTPD$Response$Status: fi.iki.elonen.NanoHTTPD$Response$Status OK>;
+
+        $r14 = new java.io.FileInputStream;
+
+     label38:
+        specialinvoke $r14.<java.io.FileInputStream: void <init>(java.io.File)>($r3);
+
+        $r13 = specialinvoke r0.<org.fdroid.fdroid.net.LocalHTTPD: fi.iki.elonen.NanoHTTPD$Response createResponse(fi.iki.elonen.NanoHTTPD$Response$Status,java.lang.String,java.io.InputStream)>($r12, $r4, $r14);
+
+     label39:
+        $r7 = new java.lang.StringBuilder;
+
+     label40:
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("");
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l3);
+
+        $r4 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r13.<fi.iki.elonen.NanoHTTPD$Response: void addHeader(java.lang.String,java.lang.String)>("Content-Length", $r4);
+
+        virtualinvoke $r13.<fi.iki.elonen.NanoHTTPD$Response: void addHeader(java.lang.String,java.lang.String)>("ETag", $r1);
+
+     label41:
+        return $r13;
+
+     label42:
+        $r15 := @caughtexception;
+
+        goto label15;
+
+        catch java.io.IOException from label01 to label02 with label32;
+        catch java.io.IOException from label03 to label04 with label32;
+        catch java.io.IOException from label05 to label06 with label32;
+        catch java.io.IOException from label07 to label08 with label32;
+        catch java.io.IOException from label09 to label10 with label32;
+        catch java.lang.NumberFormatException from label11 to label12 with label42;
+        catch java.lang.NumberFormatException from label13 to label14 with label42;
+        catch java.io.IOException from label11 to label12 with label32;
+        catch java.io.IOException from label13 to label14 with label32;
+        catch java.io.IOException from label15 to label16 with label32;
+        catch java.io.IOException from label17 to label18 with label32;
+        catch java.io.IOException from label19 to label20 with label32;
+        catch java.io.IOException from label24 to label25 with label32;
+        catch java.io.IOException from label26 to label27 with label32;
+        catch java.io.IOException from label28 to label29 with label32;
+        catch java.io.IOException from label30 to label31 with label32;
+        catch java.io.IOException from label33 to label34 with label32;
+        catch java.io.IOException from label35 to label36 with label32;
+        catch java.io.IOException from label38 to label39 with label32;
+        catch java.io.IOException from label40 to label41 with label32;
+    }

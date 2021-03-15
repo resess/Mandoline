@@ -1,0 +1,1351 @@
+org.gnucash.android.ui.settings.SettingsActivity extends org.gnucash.android.ui.settings.AppCompatPreferenceActivity implements android.preference.Preference$OnPreferenceChangeListener android.preference.Preference$OnPreferenceClickListener
+public static final int DOUBLE_TAP_DELAY
+public static final java.lang.String DROPBOX_APP_KEY
+public static final java.lang.String DROPBOX_APP_SECRET
+public static final java.lang.String LOG_TAG
+public static final int REQUEST_LINK_TO_DBX
+public static final int REQUEST_RESOLVE_CONNECTION
+public static com.google.android.gms.common.api.GoogleApiClient mGoogleApiClient
+private com.dropbox.sync.android.DbxAccountManager mDbxAccountManager
+private int mDeleteAccountsClickCount
+private int mDeleteTransactionsClickCount
+    public void <init>()
+    {
+        org.gnucash.android.ui.settings.SettingsActivity r0;
+
+        r0 := @this: org.gnucash.android.ui.settings.SettingsActivity;
+
+        specialinvoke r0.<org.gnucash.android.ui.settings.AppCompatPreferenceActivity: void <init>()>();
+
+        return;
+    }
+    static int access$102(org.gnucash.android.ui.settings.SettingsActivity, int)
+    {
+        org.gnucash.android.ui.settings.SettingsActivity $r0;
+        int $i0;
+
+        $r0 := @parameter0: org.gnucash.android.ui.settings.SettingsActivity;
+
+        $i0 := @parameter1: int;
+
+        $r0.<org.gnucash.android.ui.settings.SettingsActivity: int mDeleteAccountsClickCount> = $i0;
+
+        return $i0;
+    }
+    static int access$202(org.gnucash.android.ui.settings.SettingsActivity, int)
+    {
+        org.gnucash.android.ui.settings.SettingsActivity $r0;
+        int $i0;
+
+        $r0 := @parameter0: org.gnucash.android.ui.settings.SettingsActivity;
+
+        $i0 := @parameter1: int;
+
+        $r0.<org.gnucash.android.ui.settings.SettingsActivity: int mDeleteTransactionsClickCount> = $i0;
+
+        return $i0;
+    }
+    public static com.google.android.gms.common.api.GoogleApiClient getGoogleApiClient(android.content.Context)
+    {
+        android.content.Context $r0;
+        com.google.android.gms.common.api.GoogleApiClient$Builder $r1;
+        com.google.android.gms.common.api.Api $r2;
+        com.google.android.gms.common.api.Scope $r3;
+        org.gnucash.android.ui.settings.SettingsActivity$2 $r4;
+        org.gnucash.android.ui.settings.SettingsActivity$1 $r5;
+        com.google.android.gms.common.api.GoogleApiClient $r6;
+
+        $r0 := @parameter0: android.content.Context;
+
+        $r1 = new com.google.android.gms.common.api.GoogleApiClient$Builder;
+
+        specialinvoke $r1.<com.google.android.gms.common.api.GoogleApiClient$Builder: void <init>(android.content.Context)>($r0);
+
+        $r2 = <com.google.android.gms.drive.Drive: com.google.android.gms.common.api.Api API>;
+
+        $r1 = virtualinvoke $r1.<com.google.android.gms.common.api.GoogleApiClient$Builder: com.google.android.gms.common.api.GoogleApiClient$Builder addApi(com.google.android.gms.common.api.Api)>($r2);
+
+        $r3 = <com.google.android.gms.drive.Drive: com.google.android.gms.common.api.Scope SCOPE_APPFOLDER>;
+
+        $r1 = virtualinvoke $r1.<com.google.android.gms.common.api.GoogleApiClient$Builder: com.google.android.gms.common.api.GoogleApiClient$Builder addScope(com.google.android.gms.common.api.Scope)>($r3);
+
+        $r3 = <com.google.android.gms.drive.Drive: com.google.android.gms.common.api.Scope SCOPE_FILE>;
+
+        $r1 = virtualinvoke $r1.<com.google.android.gms.common.api.GoogleApiClient$Builder: com.google.android.gms.common.api.GoogleApiClient$Builder addScope(com.google.android.gms.common.api.Scope)>($r3);
+
+        $r4 = new org.gnucash.android.ui.settings.SettingsActivity$2;
+
+        specialinvoke $r4.<org.gnucash.android.ui.settings.SettingsActivity$2: void <init>(android.content.Context)>($r0);
+
+        $r1 = virtualinvoke $r1.<com.google.android.gms.common.api.GoogleApiClient$Builder: com.google.android.gms.common.api.GoogleApiClient$Builder addConnectionCallbacks(com.google.android.gms.common.api.GoogleApiClient$ConnectionCallbacks)>($r4);
+
+        $r5 = new org.gnucash.android.ui.settings.SettingsActivity$1;
+
+        specialinvoke $r5.<org.gnucash.android.ui.settings.SettingsActivity$1: void <init>(android.content.Context)>($r0);
+
+        $r1 = virtualinvoke $r1.<com.google.android.gms.common.api.GoogleApiClient$Builder: com.google.android.gms.common.api.GoogleApiClient$Builder addOnConnectionFailedListener(com.google.android.gms.common.api.GoogleApiClient$OnConnectionFailedListener)>($r5);
+
+        $r6 = virtualinvoke $r1.<com.google.android.gms.common.api.GoogleApiClient$Builder: com.google.android.gms.common.api.GoogleApiClient build()>();
+
+        return $r6;
+    }
+    private void setDefaultCurrencyListener()
+    {
+        org.gnucash.android.ui.settings.SettingsActivity r0;
+        java.util.ArrayList r1, r2;
+        java.lang.CharSequence[] r3, r4;
+        org.gnucash.android.db.CommoditiesDbAdapter $r5;
+        long $l0;
+        int $i1;
+        android.database.Cursor $r6;
+        boolean $z0;
+        java.lang.String $r7, $r8;
+        java.lang.StringBuilder $r9;
+        android.preference.Preference $r10;
+        android.preference.ListPreference $r11;
+        java.lang.Object[] $r12;
+
+        r0 := @this: org.gnucash.android.ui.settings.SettingsActivity;
+
+        $r5 = staticinvoke <org.gnucash.android.db.CommoditiesDbAdapter: org.gnucash.android.db.CommoditiesDbAdapter getInstance()>();
+
+        r1 = new java.util.ArrayList;
+
+        $l0 = virtualinvoke $r5.<org.gnucash.android.db.CommoditiesDbAdapter: long getRecordsCount()>();
+
+        $i1 = (int) $l0;
+
+        specialinvoke r1.<java.util.ArrayList: void <init>(int)>($i1);
+
+        r2 = new java.util.ArrayList;
+
+        $l0 = virtualinvoke $r5.<org.gnucash.android.db.CommoditiesDbAdapter: long getRecordsCount()>();
+
+        $i1 = (int) $l0;
+
+        specialinvoke r2.<java.util.ArrayList: void <init>(int)>($i1);
+
+        $r6 = virtualinvoke $r5.<org.gnucash.android.db.CommoditiesDbAdapter: android.database.Cursor fetchAllRecords(java.lang.String)>("mnemonic ASC");
+
+     label1:
+        $z0 = interfaceinvoke $r6.<android.database.Cursor: boolean moveToNext()>();
+
+        if $z0 == 0 goto label2;
+
+        $i1 = interfaceinvoke $r6.<android.database.Cursor: int getColumnIndexOrThrow(java.lang.String)>("mnemonic");
+
+        $r7 = interfaceinvoke $r6.<android.database.Cursor: java.lang.String getString(int)>($i1);
+
+        $i1 = interfaceinvoke $r6.<android.database.Cursor: int getColumnIndexOrThrow(java.lang.String)>("fullname");
+
+        $r8 = interfaceinvoke $r6.<android.database.Cursor: java.lang.String getString(int)>($i1);
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r7);
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" - ");
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r8);
+
+        $r8 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        interfaceinvoke r1.<java.util.List: boolean add(java.lang.Object)>($r8);
+
+        interfaceinvoke r2.<java.util.List: boolean add(java.lang.Object)>($r7);
+
+        goto label1;
+
+     label2:
+        interfaceinvoke $r6.<android.database.Cursor: void close()>();
+
+        $i1 = interfaceinvoke r1.<java.util.List: int size()>();
+
+        r3 = newarray (java.lang.CharSequence)[$i1];
+
+        $i1 = interfaceinvoke r2.<java.util.List: int size()>();
+
+        r4 = newarray (java.lang.CharSequence)[$i1];
+
+        $r7 = virtualinvoke r0.<org.gnucash.android.ui.settings.SettingsActivity: java.lang.String getString(int)>(2131296785);
+
+        $r10 = virtualinvoke r0.<org.gnucash.android.ui.settings.SettingsActivity: android.preference.Preference findPreference(java.lang.CharSequence)>($r7);
+
+        $r7 = staticinvoke <org.gnucash.android.app.GnuCashApplication: java.lang.String getDefaultCurrencyCode()>();
+
+        virtualinvoke $r10.<android.preference.Preference: void setSummary(java.lang.CharSequence)>($r7);
+
+        virtualinvoke $r10.<android.preference.Preference: void setOnPreferenceChangeListener(android.preference.Preference$OnPreferenceChangeListener)>(r0);
+
+        $r11 = (android.preference.ListPreference) $r10;
+
+        $r12 = interfaceinvoke r1.<java.util.List: java.lang.Object[] toArray(java.lang.Object[])>(r3);
+
+        r3 = (java.lang.CharSequence[]) $r12;
+
+        virtualinvoke $r11.<android.preference.ListPreference: void setEntries(java.lang.CharSequence[])>(r3);
+
+        $r11 = (android.preference.ListPreference) $r10;
+
+        $r12 = interfaceinvoke r2.<java.util.List: java.lang.Object[] toArray(java.lang.Object[])>(r4);
+
+        r4 = (java.lang.CharSequence[]) $r12;
+
+        virtualinvoke $r11.<android.preference.ListPreference: void setEntryValues(java.lang.CharSequence[])>(r4);
+
+        return;
+    }
+    private void toggleDropboxSync()
+    {
+        org.gnucash.android.ui.settings.SettingsActivity r0;
+        boolean $z0;
+        com.dropbox.sync.android.DbxAccountManager $r1;
+
+        r0 := @this: org.gnucash.android.ui.settings.SettingsActivity;
+
+        $r1 = r0.<org.gnucash.android.ui.settings.SettingsActivity: com.dropbox.sync.android.DbxAccountManager mDbxAccountManager>;
+
+        $z0 = virtualinvoke $r1.<com.dropbox.sync.android.DbxAccountManager: boolean hasLinkedAccount()>();
+
+        if $z0 == 0 goto label1;
+
+        $r1 = r0.<org.gnucash.android.ui.settings.SettingsActivity: com.dropbox.sync.android.DbxAccountManager mDbxAccountManager>;
+
+        virtualinvoke $r1.<com.dropbox.sync.android.DbxAccountManager: void unlink()>();
+
+        return;
+
+     label1:
+        $r1 = r0.<org.gnucash.android.ui.settings.SettingsActivity: com.dropbox.sync.android.DbxAccountManager mDbxAccountManager>;
+
+        virtualinvoke $r1.<com.dropbox.sync.android.DbxAccountManager: void startLink(android.app.Activity,int)>(r0, 17);
+
+        return;
+    }
+    private void toggleGoogleDriveSync()
+    {
+        org.gnucash.android.ui.settings.SettingsActivity r0;
+        android.content.SharedPreferences $r1;
+        java.lang.String $r2;
+        android.content.SharedPreferences$Editor $r3;
+        com.google.android.gms.common.api.GoogleApiClient $r4;
+
+        r0 := @this: org.gnucash.android.ui.settings.SettingsActivity;
+
+        $r1 = staticinvoke <android.preference.PreferenceManager: android.content.SharedPreferences getDefaultSharedPreferences(android.content.Context)>(r0);
+
+        $r2 = virtualinvoke r0.<org.gnucash.android.ui.settings.SettingsActivity: java.lang.String getString(int)>(2131296797);
+
+        $r2 = interfaceinvoke $r1.<android.content.SharedPreferences: java.lang.String getString(java.lang.String,java.lang.String)>($r2, null);
+
+        if $r2 == null goto label1;
+
+        $r3 = interfaceinvoke $r1.<android.content.SharedPreferences: android.content.SharedPreferences$Editor edit()>();
+
+        $r2 = virtualinvoke r0.<org.gnucash.android.ui.settings.SettingsActivity: java.lang.String getString(int)>(2131296797);
+
+        $r3 = interfaceinvoke $r3.<android.content.SharedPreferences$Editor: android.content.SharedPreferences$Editor remove(java.lang.String)>($r2);
+
+        interfaceinvoke $r3.<android.content.SharedPreferences$Editor: boolean commit()>();
+
+        $r4 = <org.gnucash.android.ui.settings.SettingsActivity: com.google.android.gms.common.api.GoogleApiClient mGoogleApiClient>;
+
+        interfaceinvoke $r4.<com.google.android.gms.common.api.GoogleApiClient: void disconnect()>();
+
+        return;
+
+     label1:
+        $r4 = <org.gnucash.android.ui.settings.SettingsActivity: com.google.android.gms.common.api.GoogleApiClient mGoogleApiClient>;
+
+        interfaceinvoke $r4.<com.google.android.gms.common.api.GoogleApiClient: void connect()>();
+
+        return;
+    }
+    protected boolean isValidFragment(java.lang.String)
+    {
+        org.gnucash.android.ui.settings.SettingsActivity r0;
+        java.lang.String $r1, $r3;
+        java.lang.Class $r2;
+        boolean $z0;
+
+        r0 := @this: org.gnucash.android.ui.settings.SettingsActivity;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = class "Lorg/gnucash/android/ui/settings/BackupPreferenceFragment;";
+
+        $r3 = virtualinvoke $r2.<java.lang.Class: java.lang.String getName()>();
+
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>($r1);
+
+        if $z0 != 0 goto label1;
+
+        $r2 = class "Lorg/gnucash/android/ui/settings/AccountPreferencesFragment;";
+
+        $r3 = virtualinvoke $r2.<java.lang.Class: java.lang.String getName()>();
+
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>($r1);
+
+        if $z0 != 0 goto label1;
+
+        $r2 = class "Lorg/gnucash/android/ui/settings/GeneralPreferenceFragment;";
+
+        $r3 = virtualinvoke $r2.<java.lang.Class: java.lang.String getName()>();
+
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>($r1);
+
+        if $z0 != 0 goto label1;
+
+        $r2 = class "Lorg/gnucash/android/ui/settings/TransactionsPreferenceFragment;";
+
+        $r3 = virtualinvoke $r2.<java.lang.Class: java.lang.String getName()>();
+
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>($r1);
+
+        if $z0 != 0 goto label1;
+
+        $r2 = class "Lorg/gnucash/android/ui/settings/AboutPreferenceFragment;";
+
+        $r3 = virtualinvoke $r2.<java.lang.Class: java.lang.String getName()>();
+
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>($r1);
+
+        if $z0 == 0 goto label2;
+
+     label1:
+        return 1;
+
+     label2:
+        return 0;
+    }
+    public void onActivityResult(int, int, android.content.Intent)
+    {
+        org.gnucash.android.ui.settings.SettingsActivity r0;
+        int $i0, $i1;
+        android.content.Intent $r1;
+        boolean z0;
+        android.content.Context $r2;
+        android.content.SharedPreferences $r3;
+        android.content.SharedPreferences$Editor $r4;
+        java.lang.String $r5;
+        android.widget.Toast $r6;
+        android.preference.Preference $r7;
+        android.preference.CheckBoxPreference $r8;
+        com.google.android.gms.common.api.GoogleApiClient $r9;
+
+        r0 := @this: org.gnucash.android.ui.settings.SettingsActivity;
+
+        $i0 := @parameter0: int;
+
+        $i1 := @parameter1: int;
+
+        $r1 := @parameter2: android.content.Intent;
+
+        z0 = 1;
+
+        lookupswitch($i0)
+        {
+            case 1: goto label02;
+            case 2: goto label03;
+            case 3: goto label05;
+            case 4: goto label08;
+            case 17: goto label09;
+            case 18: goto label10;
+            default: goto label01;
+        };
+
+     label01:
+        return;
+
+     label02:
+        if $i1 != -1 goto label11;
+
+        if $r1 == null goto label11;
+
+        staticinvoke <org.gnucash.android.ui.account.AccountsActivity: void importXmlFileFromIntent(android.app.Activity,android.content.Intent,org.gnucash.android.ui.util.TaskDelegate)>(r0, $r1, null);
+
+        return;
+
+     label03:
+        if $i1 != -1 goto label04;
+
+        if $r1 == null goto label04;
+
+        $r2 = virtualinvoke r0.<org.gnucash.android.ui.settings.SettingsActivity: android.content.Context getApplicationContext()>();
+
+        $r3 = staticinvoke <android.preference.PreferenceManager: android.content.SharedPreferences getDefaultSharedPreferences(android.content.Context)>($r2);
+
+        $r4 = interfaceinvoke $r3.<android.content.SharedPreferences: android.content.SharedPreferences$Editor edit()>();
+
+        $r5 = virtualinvoke $r1.<android.content.Intent: java.lang.String getStringExtra(java.lang.String)>("passcode");
+
+        $r4 = interfaceinvoke $r4.<android.content.SharedPreferences$Editor: android.content.SharedPreferences$Editor putString(java.lang.String,java.lang.String)>("passcode", $r5);
+
+        interfaceinvoke $r4.<android.content.SharedPreferences$Editor: boolean commit()>();
+
+        $r2 = virtualinvoke r0.<org.gnucash.android.ui.settings.SettingsActivity: android.content.Context getApplicationContext()>();
+
+        $r3 = staticinvoke <android.preference.PreferenceManager: android.content.SharedPreferences getDefaultSharedPreferences(android.content.Context)>($r2);
+
+        $r4 = interfaceinvoke $r3.<android.content.SharedPreferences: android.content.SharedPreferences$Editor edit()>();
+
+        $r4 = interfaceinvoke $r4.<android.content.SharedPreferences$Editor: android.content.SharedPreferences$Editor putBoolean(java.lang.String,boolean)>("enabled_passcode", 1);
+
+        interfaceinvoke $r4.<android.content.SharedPreferences$Editor: boolean commit()>();
+
+        $r6 = staticinvoke <android.widget.Toast: android.widget.Toast makeText(android.content.Context,int,int)>(r0, 2131296539, 0);
+
+        virtualinvoke $r6.<android.widget.Toast: void show()>();
+
+        $r5 = virtualinvoke r0.<org.gnucash.android.ui.settings.SettingsActivity: java.lang.String getString(int)>(2131296794);
+
+        $r7 = virtualinvoke r0.<org.gnucash.android.ui.settings.SettingsActivity: android.preference.Preference findPreference(java.lang.CharSequence)>($r5);
+
+        $r5 = virtualinvoke r0.<org.gnucash.android.ui.settings.SettingsActivity: java.lang.String getString(int)>(2131296487);
+
+        virtualinvoke $r7.<android.preference.Preference: void setTitle(java.lang.CharSequence)>($r5);
+
+     label04:
+        if $i1 != 0 goto label11;
+
+        $r2 = virtualinvoke r0.<org.gnucash.android.ui.settings.SettingsActivity: android.content.Context getApplicationContext()>();
+
+        $r3 = staticinvoke <android.preference.PreferenceManager: android.content.SharedPreferences getDefaultSharedPreferences(android.content.Context)>($r2);
+
+        $r4 = interfaceinvoke $r3.<android.content.SharedPreferences: android.content.SharedPreferences$Editor edit()>();
+
+        $r4 = interfaceinvoke $r4.<android.content.SharedPreferences$Editor: android.content.SharedPreferences$Editor putBoolean(java.lang.String,boolean)>("enabled_passcode", 0);
+
+        interfaceinvoke $r4.<android.content.SharedPreferences$Editor: boolean commit()>();
+
+        $r5 = virtualinvoke r0.<org.gnucash.android.ui.settings.SettingsActivity: java.lang.String getString(int)>(2131296794);
+
+        $r7 = virtualinvoke r0.<org.gnucash.android.ui.settings.SettingsActivity: android.preference.Preference findPreference(java.lang.CharSequence)>($r5);
+
+        $r8 = (android.preference.CheckBoxPreference) $r7;
+
+        virtualinvoke $r8.<android.preference.CheckBoxPreference: void setChecked(boolean)>(0);
+
+        $r5 = virtualinvoke r0.<org.gnucash.android.ui.settings.SettingsActivity: java.lang.String getString(int)>(2131296794);
+
+        $r7 = virtualinvoke r0.<org.gnucash.android.ui.settings.SettingsActivity: android.preference.Preference findPreference(java.lang.CharSequence)>($r5);
+
+        $r5 = virtualinvoke r0.<org.gnucash.android.ui.settings.SettingsActivity: java.lang.String getString(int)>(2131296486);
+
+        virtualinvoke $r7.<android.preference.Preference: void setTitle(java.lang.CharSequence)>($r5);
+
+        return;
+
+     label05:
+        if $i1 == -1 goto label07;
+
+     label06:
+        $r2 = virtualinvoke r0.<org.gnucash.android.ui.settings.SettingsActivity: android.content.Context getApplicationContext()>();
+
+        $r3 = staticinvoke <android.preference.PreferenceManager: android.content.SharedPreferences getDefaultSharedPreferences(android.content.Context)>($r2);
+
+        $r4 = interfaceinvoke $r3.<android.content.SharedPreferences: android.content.SharedPreferences$Editor edit()>();
+
+        $r4 = interfaceinvoke $r4.<android.content.SharedPreferences$Editor: android.content.SharedPreferences$Editor putBoolean(java.lang.String,boolean)>("enabled_passcode", z0);
+
+        interfaceinvoke $r4.<android.content.SharedPreferences$Editor: boolean commit()>();
+
+        $r5 = virtualinvoke r0.<org.gnucash.android.ui.settings.SettingsActivity: java.lang.String getString(int)>(2131296794);
+
+        $r7 = virtualinvoke r0.<org.gnucash.android.ui.settings.SettingsActivity: android.preference.Preference findPreference(java.lang.CharSequence)>($r5);
+
+        $r8 = (android.preference.CheckBoxPreference) $r7;
+
+        virtualinvoke $r8.<android.preference.CheckBoxPreference: void setChecked(boolean)>(z0);
+
+        return;
+
+     label07:
+        z0 = 0;
+
+        goto label06;
+
+     label08:
+        if $i1 != -1 goto label11;
+
+        if $r1 == null goto label11;
+
+        $r2 = virtualinvoke r0.<org.gnucash.android.ui.settings.SettingsActivity: android.content.Context getApplicationContext()>();
+
+        $r3 = staticinvoke <android.preference.PreferenceManager: android.content.SharedPreferences getDefaultSharedPreferences(android.content.Context)>($r2);
+
+        $r4 = interfaceinvoke $r3.<android.content.SharedPreferences: android.content.SharedPreferences$Editor edit()>();
+
+        $r5 = virtualinvoke $r1.<android.content.Intent: java.lang.String getStringExtra(java.lang.String)>("passcode");
+
+        $r4 = interfaceinvoke $r4.<android.content.SharedPreferences$Editor: android.content.SharedPreferences$Editor putString(java.lang.String,java.lang.String)>("passcode", $r5);
+
+        interfaceinvoke $r4.<android.content.SharedPreferences$Editor: boolean commit()>();
+
+        $r2 = virtualinvoke r0.<org.gnucash.android.ui.settings.SettingsActivity: android.content.Context getApplicationContext()>();
+
+        $r3 = staticinvoke <android.preference.PreferenceManager: android.content.SharedPreferences getDefaultSharedPreferences(android.content.Context)>($r2);
+
+        $r4 = interfaceinvoke $r3.<android.content.SharedPreferences: android.content.SharedPreferences$Editor edit()>();
+
+        $r4 = interfaceinvoke $r4.<android.content.SharedPreferences$Editor: android.content.SharedPreferences$Editor putBoolean(java.lang.String,boolean)>("enabled_passcode", 1);
+
+        interfaceinvoke $r4.<android.content.SharedPreferences$Editor: boolean commit()>();
+
+        $r6 = staticinvoke <android.widget.Toast: android.widget.Toast makeText(android.content.Context,int,int)>(r0, 2131296539, 0);
+
+        virtualinvoke $r6.<android.widget.Toast: void show()>();
+
+        $r5 = virtualinvoke r0.<org.gnucash.android.ui.settings.SettingsActivity: java.lang.String getString(int)>(2131296794);
+
+        $r7 = virtualinvoke r0.<org.gnucash.android.ui.settings.SettingsActivity: android.preference.Preference findPreference(java.lang.CharSequence)>($r5);
+
+        $r5 = virtualinvoke r0.<org.gnucash.android.ui.settings.SettingsActivity: java.lang.String getString(int)>(2131296487);
+
+        virtualinvoke $r7.<android.preference.Preference: void setTitle(java.lang.CharSequence)>($r5);
+
+        return;
+
+     label09:
+        $r5 = virtualinvoke r0.<org.gnucash.android.ui.settings.SettingsActivity: java.lang.String getString(int)>(2131296792);
+
+        $r7 = virtualinvoke r0.<org.gnucash.android.ui.settings.SettingsActivity: android.preference.Preference findPreference(java.lang.CharSequence)>($r5);
+
+        if $r7 == null goto label11;
+
+        virtualinvoke r0.<org.gnucash.android.ui.settings.SettingsActivity: void toggleDropboxPreference(android.preference.Preference)>($r7);
+
+        return;
+
+     label10:
+        if $i1 != -1 goto label11;
+
+        $r9 = <org.gnucash.android.ui.settings.SettingsActivity: com.google.android.gms.common.api.GoogleApiClient mGoogleApiClient>;
+
+        interfaceinvoke $r9.<com.google.android.gms.common.api.GoogleApiClient: void connect()>();
+
+        $r5 = virtualinvoke r0.<org.gnucash.android.ui.settings.SettingsActivity: java.lang.String getString(int)>(2131296792);
+
+        $r7 = virtualinvoke r0.<org.gnucash.android.ui.settings.SettingsActivity: android.preference.Preference findPreference(java.lang.CharSequence)>($r5);
+
+        if $r7 == null goto label11;
+
+        virtualinvoke r0.<org.gnucash.android.ui.settings.SettingsActivity: void toggleDropboxPreference(android.preference.Preference)>($r7);
+
+     label11:
+        return;
+    }
+    public void onBuildHeaders(java.util.List)
+    {
+        org.gnucash.android.ui.settings.SettingsActivity r0;
+        java.util.List r1;
+
+        r0 := @this: org.gnucash.android.ui.settings.SettingsActivity;
+
+        r1 := @parameter0: java.util.List;
+
+        virtualinvoke r0.<org.gnucash.android.ui.settings.SettingsActivity: void loadHeadersFromResource(int,java.util.List)>(2131034118, r1);
+
+        return;
+    }
+    protected void onCreate(android.os.Bundle)
+    {
+        org.gnucash.android.ui.settings.SettingsActivity r0;
+        android.os.Bundle $r1;
+        java.lang.Object[] $r2;
+        java.lang.String $r3, $r4;
+        android.content.Context $r5;
+        com.dropbox.sync.android.DbxAccountManager $r6;
+        com.google.android.gms.common.api.GoogleApiClient $r7;
+        android.support.v7.app.ActionBar $r8;
+        int $i0;
+        android.preference.Preference $r9;
+        android.preference.CheckBoxPreference $r10;
+        boolean $z0;
+
+        r0 := @this: org.gnucash.android.ui.settings.SettingsActivity;
+
+        $r1 := @parameter0: android.os.Bundle;
+
+        specialinvoke r0.<org.gnucash.android.ui.settings.AppCompatPreferenceActivity: void onCreate(android.os.Bundle)>($r1);
+
+        $r2 = newarray (java.lang.Object)[1];
+
+        $r2[0] = "dhjh8ke9wf05948";
+
+        $r3 = virtualinvoke r0.<org.gnucash.android.ui.settings.SettingsActivity: java.lang.String getString(int,java.lang.Object[])>(2131296775, $r2);
+
+        $r2 = newarray (java.lang.Object)[1];
+
+        $r2[0] = "h2t9fphj3nr4wkw";
+
+        $r4 = virtualinvoke r0.<org.gnucash.android.ui.settings.SettingsActivity: java.lang.String getString(int,java.lang.Object[])>(2131296776, $r2);
+
+        $r5 = virtualinvoke r0.<org.gnucash.android.ui.settings.SettingsActivity: android.content.Context getApplicationContext()>();
+
+        $r6 = staticinvoke <com.dropbox.sync.android.DbxAccountManager: com.dropbox.sync.android.DbxAccountManager getInstance(android.content.Context,java.lang.String,java.lang.String)>($r5, $r3, $r4);
+
+        r0.<org.gnucash.android.ui.settings.SettingsActivity: com.dropbox.sync.android.DbxAccountManager mDbxAccountManager> = $r6;
+
+        $r7 = staticinvoke <org.gnucash.android.ui.settings.SettingsActivity: com.google.android.gms.common.api.GoogleApiClient getGoogleApiClient(android.content.Context)>(r0);
+
+        <org.gnucash.android.ui.settings.SettingsActivity: com.google.android.gms.common.api.GoogleApiClient mGoogleApiClient> = $r7;
+
+        $r8 = virtualinvoke r0.<org.gnucash.android.ui.settings.SettingsActivity: android.support.v7.app.ActionBar getSupportActionBar()>();
+
+        virtualinvoke $r8.<android.support.v7.app.ActionBar: void setTitle(int)>(2131296504);
+
+        virtualinvoke $r8.<android.support.v7.app.ActionBar: void setHomeButtonEnabled(boolean)>(1);
+
+        virtualinvoke $r8.<android.support.v7.app.ActionBar: void setDisplayHomeAsUpEnabled(boolean)>(1);
+
+        $i0 = <android.os.Build$VERSION: int SDK_INT>;
+
+        if $i0 >= 11 goto label3;
+
+        virtualinvoke r0.<org.gnucash.android.ui.settings.SettingsActivity: void addPreferencesFromResource(int)>(2131034116);
+
+        virtualinvoke r0.<org.gnucash.android.ui.settings.SettingsActivity: void addPreferencesFromResource(int)>(2131034114);
+
+        virtualinvoke r0.<org.gnucash.android.ui.settings.SettingsActivity: void addPreferencesFromResource(int)>(2131034117);
+
+        virtualinvoke r0.<org.gnucash.android.ui.settings.SettingsActivity: void addPreferencesFromResource(int)>(2131034115);
+
+        virtualinvoke r0.<org.gnucash.android.ui.settings.SettingsActivity: void addPreferencesFromResource(int)>(2131034113);
+
+        specialinvoke r0.<org.gnucash.android.ui.settings.SettingsActivity: void setDefaultCurrencyListener()>();
+
+        $r3 = virtualinvoke r0.<org.gnucash.android.ui.settings.SettingsActivity: java.lang.String getString(int)>(2131296799);
+
+        $r9 = virtualinvoke r0.<org.gnucash.android.ui.settings.SettingsActivity: android.preference.Preference findPreference(java.lang.CharSequence)>($r3);
+
+        virtualinvoke $r9.<android.preference.Preference: void setOnPreferenceClickListener(android.preference.Preference$OnPreferenceClickListener)>(r0);
+
+        $r3 = virtualinvoke r0.<org.gnucash.android.ui.settings.SettingsActivity: java.lang.String getString(int)>(2131296805);
+
+        $r9 = virtualinvoke r0.<org.gnucash.android.ui.settings.SettingsActivity: android.preference.Preference findPreference(java.lang.CharSequence)>($r3);
+
+        virtualinvoke $r9.<android.preference.Preference: void setOnPreferenceClickListener(android.preference.Preference$OnPreferenceClickListener)>(r0);
+
+        $r3 = virtualinvoke r0.<org.gnucash.android.ui.settings.SettingsActivity: java.lang.String getString(int)>(2131296808);
+
+        $r9 = virtualinvoke r0.<org.gnucash.android.ui.settings.SettingsActivity: android.preference.Preference findPreference(java.lang.CharSequence)>($r3);
+
+        virtualinvoke $r9.<android.preference.Preference: void setOnPreferenceChangeListener(android.preference.Preference$OnPreferenceChangeListener)>(r0);
+
+        $r3 = virtualinvoke r0.<org.gnucash.android.ui.settings.SettingsActivity: java.lang.String getString(int)>(2131296790);
+
+        $r9 = virtualinvoke r0.<org.gnucash.android.ui.settings.SettingsActivity: android.preference.Preference findPreference(java.lang.CharSequence)>($r3);
+
+        virtualinvoke $r9.<android.preference.Preference: void setOnPreferenceClickListener(android.preference.Preference$OnPreferenceClickListener)>(r0);
+
+        $r3 = virtualinvoke r0.<org.gnucash.android.ui.settings.SettingsActivity: java.lang.String getString(int)>(2131296789);
+
+        $r9 = virtualinvoke r0.<org.gnucash.android.ui.settings.SettingsActivity: android.preference.Preference findPreference(java.lang.CharSequence)>($r3);
+
+        virtualinvoke $r9.<android.preference.Preference: void setOnPreferenceClickListener(android.preference.Preference$OnPreferenceClickListener)>(r0);
+
+        $r3 = virtualinvoke r0.<org.gnucash.android.ui.settings.SettingsActivity: java.lang.String getString(int)>(2131296780);
+
+        $r9 = virtualinvoke r0.<org.gnucash.android.ui.settings.SettingsActivity: android.preference.Preference findPreference(java.lang.CharSequence)>($r3);
+
+        virtualinvoke $r9.<android.preference.Preference: void setOnPreferenceClickListener(android.preference.Preference$OnPreferenceClickListener)>(r0);
+
+        $r3 = virtualinvoke r0.<org.gnucash.android.ui.settings.SettingsActivity: java.lang.String getString(int)>(2131296782);
+
+        $r9 = virtualinvoke r0.<org.gnucash.android.ui.settings.SettingsActivity: android.preference.Preference findPreference(java.lang.CharSequence)>($r3);
+
+        virtualinvoke $r9.<android.preference.Preference: void setOnPreferenceClickListener(android.preference.Preference$OnPreferenceClickListener)>(r0);
+
+        $r3 = virtualinvoke r0.<org.gnucash.android.ui.settings.SettingsActivity: java.lang.String getString(int)>(2131296792);
+
+        $r9 = virtualinvoke r0.<org.gnucash.android.ui.settings.SettingsActivity: android.preference.Preference findPreference(java.lang.CharSequence)>($r3);
+
+        virtualinvoke r0.<org.gnucash.android.ui.settings.SettingsActivity: void toggleDropboxPreference(android.preference.Preference)>($r9);
+
+        virtualinvoke $r9.<android.preference.Preference: void setOnPreferenceClickListener(android.preference.Preference$OnPreferenceClickListener)>(r0);
+
+        $r3 = virtualinvoke r0.<org.gnucash.android.ui.settings.SettingsActivity: java.lang.String getString(int)>(2131296798);
+
+        $r9 = virtualinvoke r0.<org.gnucash.android.ui.settings.SettingsActivity: android.preference.Preference findPreference(java.lang.CharSequence)>($r3);
+
+        virtualinvoke $r9.<android.preference.Preference: void setOnPreferenceClickListener(android.preference.Preference$OnPreferenceClickListener)>(r0);
+
+        virtualinvoke r0.<org.gnucash.android.ui.settings.SettingsActivity: void toggleGoogleDrivePreference(android.preference.Preference)>($r9);
+
+        $r3 = virtualinvoke r0.<org.gnucash.android.ui.settings.SettingsActivity: java.lang.String getString(int)>(2131296783);
+
+        $r9 = virtualinvoke r0.<org.gnucash.android.ui.settings.SettingsActivity: android.preference.Preference findPreference(java.lang.CharSequence)>($r3);
+
+        virtualinvoke $r9.<android.preference.Preference: void setOnPreferenceClickListener(android.preference.Preference$OnPreferenceClickListener)>(r0);
+
+        $r3 = virtualinvoke r0.<org.gnucash.android.ui.settings.SettingsActivity: java.lang.String getString(int)>(2131296794);
+
+        $r9 = virtualinvoke r0.<org.gnucash.android.ui.settings.SettingsActivity: android.preference.Preference findPreference(java.lang.CharSequence)>($r3);
+
+        virtualinvoke $r9.<android.preference.Preference: void setOnPreferenceChangeListener(android.preference.Preference$OnPreferenceChangeListener)>(r0);
+
+        $r10 = (android.preference.CheckBoxPreference) $r9;
+
+        $z0 = virtualinvoke $r10.<android.preference.CheckBoxPreference: boolean isChecked()>();
+
+        if $z0 == 0 goto label2;
+
+        $r3 = virtualinvoke r0.<org.gnucash.android.ui.settings.SettingsActivity: java.lang.String getString(int)>(2131296487);
+
+     label1:
+        virtualinvoke $r9.<android.preference.Preference: void setTitle(java.lang.CharSequence)>($r3);
+
+        $r3 = virtualinvoke r0.<org.gnucash.android.ui.settings.SettingsActivity: java.lang.String getString(int)>(2131296782);
+
+        $r9 = virtualinvoke r0.<org.gnucash.android.ui.settings.SettingsActivity: android.preference.Preference findPreference(java.lang.CharSequence)>($r3);
+
+        virtualinvoke $r9.<android.preference.Preference: void setOnPreferenceClickListener(android.preference.Preference$OnPreferenceClickListener)>(r0);
+
+        return;
+
+     label2:
+        $r3 = virtualinvoke r0.<org.gnucash.android.ui.settings.SettingsActivity: java.lang.String getString(int)>(2131296486);
+
+        goto label1;
+
+     label3:
+        return;
+    }
+    public boolean onOptionsItemSelected(android.view.MenuItem)
+    {
+        org.gnucash.android.ui.settings.SettingsActivity r0;
+        android.view.MenuItem $r1;
+        int $i0;
+        android.app.FragmentManager $r2;
+
+        r0 := @this: org.gnucash.android.ui.settings.SettingsActivity;
+
+        $r1 := @parameter0: android.view.MenuItem;
+
+        $i0 = interfaceinvoke $r1.<android.view.MenuItem: int getItemId()>();
+
+        lookupswitch($i0)
+        {
+            case 16908332: goto label2;
+            default: goto label1;
+        };
+
+     label1:
+        return 0;
+
+     label2:
+        $i0 = <android.os.Build$VERSION: int SDK_INT>;
+
+        if $i0 < 11 goto label5;
+
+        $r2 = virtualinvoke r0.<org.gnucash.android.ui.settings.SettingsActivity: android.app.FragmentManager getFragmentManager()>();
+
+        $i0 = virtualinvoke $r2.<android.app.FragmentManager: int getBackStackEntryCount()>();
+
+        if $i0 <= 0 goto label4;
+
+        virtualinvoke $r2.<android.app.FragmentManager: void popBackStack()>();
+
+     label3:
+        return 1;
+
+     label4:
+        virtualinvoke r0.<org.gnucash.android.ui.settings.SettingsActivity: void finish()>();
+
+        goto label3;
+
+     label5:
+        virtualinvoke r0.<org.gnucash.android.ui.settings.SettingsActivity: void finish()>();
+
+        goto label3;
+    }
+    protected void onPause()
+    {
+        org.gnucash.android.ui.settings.SettingsActivity r0;
+        long $l0;
+
+        r0 := @this: org.gnucash.android.ui.settings.SettingsActivity;
+
+        specialinvoke r0.<org.gnucash.android.ui.settings.AppCompatPreferenceActivity: void onPause()>();
+
+        $l0 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        <org.gnucash.android.app.GnuCashApplication: long PASSCODE_SESSION_INIT_TIME> = $l0;
+
+        return;
+    }
+    public boolean onPreferenceChange(android.preference.Preference, java.lang.Object)
+    {
+        org.gnucash.android.ui.settings.SettingsActivity r0;
+        android.preference.Preference $r1;
+        android.content.Intent r2;
+        java.lang.Object r3;
+        java.lang.String $r4, $r5;
+        boolean $z0;
+        org.gnucash.android.db.CommoditiesDbAdapter $r6;
+        org.gnucash.android.model.Commodity $r7;
+        java.lang.Boolean r8;
+
+        r0 := @this: org.gnucash.android.ui.settings.SettingsActivity;
+
+        $r1 := @parameter0: android.preference.Preference;
+
+        r3 := @parameter1: java.lang.Object;
+
+        $r4 = virtualinvoke $r1.<android.preference.Preference: java.lang.String getKey()>();
+
+        $r5 = virtualinvoke r0.<org.gnucash.android.ui.settings.SettingsActivity: java.lang.String getString(int)>(2131296785);
+
+        $z0 = virtualinvoke $r4.<java.lang.String: boolean equals(java.lang.Object)>($r5);
+
+        if $z0 == 0 goto label2;
+
+        $r4 = virtualinvoke r3.<java.lang.Object: java.lang.String toString()>();
+
+        staticinvoke <org.gnucash.android.app.GnuCashApplication: void setDefaultCurrencyCode(java.lang.String)>($r4);
+
+        $r6 = staticinvoke <org.gnucash.android.db.CommoditiesDbAdapter: org.gnucash.android.db.CommoditiesDbAdapter getInstance()>();
+
+        $r4 = virtualinvoke r3.<java.lang.Object: java.lang.String toString()>();
+
+        $r7 = virtualinvoke $r6.<org.gnucash.android.db.CommoditiesDbAdapter: org.gnucash.android.model.Commodity getCommodity(java.lang.String)>($r4);
+
+        $r4 = virtualinvoke $r7.<org.gnucash.android.model.Commodity: java.lang.String getFullname()>();
+
+        virtualinvoke $r1.<android.preference.Preference: void setSummary(java.lang.CharSequence)>($r4);
+
+     label1:
+        return 1;
+
+     label2:
+        $r4 = virtualinvoke $r1.<android.preference.Preference: java.lang.String getKey()>();
+
+        $r5 = virtualinvoke r0.<org.gnucash.android.ui.settings.SettingsActivity: java.lang.String getString(int)>(2131296794);
+
+        $z0 = virtualinvoke $r4.<java.lang.String: boolean equals(java.lang.Object)>($r5);
+
+        if $z0 == 0 goto label4;
+
+        r8 = (java.lang.Boolean) r3;
+
+        $z0 = virtualinvoke r8.<java.lang.Boolean: boolean booleanValue()>();
+
+        if $z0 == 0 goto label3;
+
+        r2 = new android.content.Intent;
+
+        specialinvoke r2.<android.content.Intent: void <init>(android.content.Context,java.lang.Class)>(r0, class "Lorg/gnucash/android/ui/passcode/PasscodePreferenceActivity;");
+
+        virtualinvoke r0.<org.gnucash.android.ui.settings.SettingsActivity: void startActivityForResult(android.content.Intent,int)>(r2, 2);
+
+        goto label1;
+
+     label3:
+        r2 = new android.content.Intent;
+
+        specialinvoke r2.<android.content.Intent: void <init>(android.content.Context,java.lang.Class)>(r0, class "Lorg/gnucash/android/ui/passcode/PasscodeLockScreenActivity;");
+
+        virtualinvoke r2.<android.content.Intent: android.content.Intent putExtra(java.lang.String,java.lang.String)>("disable_passcode", "disable_passcode");
+
+        virtualinvoke r0.<org.gnucash.android.ui.settings.SettingsActivity: void startActivityForResult(android.content.Intent,int)>(r2, 3);
+
+        goto label1;
+
+     label4:
+        $r4 = virtualinvoke $r1.<android.preference.Preference: java.lang.String getKey()>();
+
+        $r5 = virtualinvoke r0.<org.gnucash.android.ui.settings.SettingsActivity: java.lang.String getString(int)>(2131296808);
+
+        $z0 = virtualinvoke $r4.<java.lang.String: boolean equals(java.lang.Object)>($r5);
+
+        if $z0 == 0 goto label1;
+
+        r8 = (java.lang.Boolean) r3;
+
+        $z0 = virtualinvoke r8.<java.lang.Boolean: boolean booleanValue()>();
+
+        virtualinvoke r0.<org.gnucash.android.ui.settings.SettingsActivity: void setImbalanceAccountsHidden(boolean)>($z0);
+
+        goto label1;
+    }
+    public boolean onPreferenceClick(android.preference.Preference)
+    {
+        org.gnucash.android.ui.settings.SettingsActivity r0;
+        android.preference.Preference $r1;
+        java.lang.String $r2, $r3;
+        boolean $z0;
+        int i0;
+        android.widget.Toast $r4;
+        org.gnucash.android.db.AccountsDbAdapter $r5;
+        java.util.List r6;
+        org.gnucash.android.db.TransactionsDbAdapter $r7;
+        java.util.Timer $r8;
+        org.gnucash.android.ui.settings.SettingsActivity$ResetCounter $r9;
+        java.util.ArrayList $r10;
+        android.content.Intent $r11;
+
+        r0 := @this: org.gnucash.android.ui.settings.SettingsActivity;
+
+        $r1 := @parameter0: android.preference.Preference;
+
+        $r2 = virtualinvoke $r1.<android.preference.Preference: java.lang.String getKey()>();
+
+        $r3 = virtualinvoke r0.<org.gnucash.android.ui.settings.SettingsActivity: java.lang.String getString(int)>(2131296799);
+
+        $z0 = virtualinvoke $r2.<java.lang.String: boolean equals(java.lang.Object)>($r3);
+
+        if $z0 == 0 goto label01;
+
+        staticinvoke <org.gnucash.android.ui.account.AccountsActivity: void startXmlFileChooser(android.app.Activity)>(r0);
+
+        return 1;
+
+     label01:
+        $r3 = virtualinvoke r0.<org.gnucash.android.ui.settings.SettingsActivity: java.lang.String getString(int)>(2131296805);
+
+        $z0 = virtualinvoke $r2.<java.lang.String: boolean equals(java.lang.Object)>($r3);
+
+        if $z0 == 0 goto label02;
+
+        virtualinvoke r0.<org.gnucash.android.ui.settings.SettingsActivity: void restoreBackup()>();
+
+     label02:
+        $r3 = virtualinvoke r0.<org.gnucash.android.ui.settings.SettingsActivity: java.lang.String getString(int)>(2131296780);
+
+        $z0 = virtualinvoke $r2.<java.lang.String: boolean equals(java.lang.Object)>($r3);
+
+        if $z0 == 0 goto label03;
+
+        staticinvoke <org.gnucash.android.ui.account.AccountsActivity: android.app.AlertDialog showWhatsNewDialog(android.content.Context)>(r0);
+
+        return 1;
+
+     label03:
+        $r3 = virtualinvoke r0.<org.gnucash.android.ui.settings.SettingsActivity: java.lang.String getString(int)>(2131296792);
+
+        $z0 = virtualinvoke $r2.<java.lang.String: boolean equals(java.lang.Object)>($r3);
+
+        if $z0 == 0 goto label04;
+
+        specialinvoke r0.<org.gnucash.android.ui.settings.SettingsActivity: void toggleDropboxSync()>();
+
+        virtualinvoke r0.<org.gnucash.android.ui.settings.SettingsActivity: void toggleDropboxPreference(android.preference.Preference)>($r1);
+
+     label04:
+        $r3 = virtualinvoke r0.<org.gnucash.android.ui.settings.SettingsActivity: java.lang.String getString(int)>(2131296798);
+
+        $z0 = virtualinvoke $r2.<java.lang.String: boolean equals(java.lang.Object)>($r3);
+
+        if $z0 == 0 goto label05;
+
+        specialinvoke r0.<org.gnucash.android.ui.settings.SettingsActivity: void toggleGoogleDriveSync()>();
+
+        virtualinvoke r0.<org.gnucash.android.ui.settings.SettingsActivity: void toggleGoogleDrivePreference(android.preference.Preference)>($r1);
+
+     label05:
+        $r3 = virtualinvoke r0.<org.gnucash.android.ui.settings.SettingsActivity: java.lang.String getString(int)>(2131296783);
+
+        $z0 = virtualinvoke $r2.<java.lang.String: boolean equals(java.lang.Object)>($r3);
+
+        if $z0 == 0 goto label07;
+
+        $z0 = staticinvoke <org.gnucash.android.export.xml.GncXmlExporter: boolean createBackup()>();
+
+        if $z0 == 0 goto label09;
+
+        i0 = 2131296521;
+
+     label06:
+        $r4 = staticinvoke <android.widget.Toast: android.widget.Toast makeText(android.content.Context,int,int)>(r0, i0, 0);
+
+        virtualinvoke $r4.<android.widget.Toast: void show()>();
+
+     label07:
+        $r3 = virtualinvoke r0.<org.gnucash.android.ui.settings.SettingsActivity: java.lang.String getString(int)>(2131296789);
+
+        $z0 = virtualinvoke $r2.<java.lang.String: boolean equals(java.lang.Object)>($r3);
+
+        if $z0 == 0 goto label11;
+
+        i0 = r0.<org.gnucash.android.ui.settings.SettingsActivity: int mDeleteAccountsClickCount>;
+
+        i0 = i0 + 1;
+
+        r0.<org.gnucash.android.ui.settings.SettingsActivity: int mDeleteAccountsClickCount> = i0;
+
+        i0 = r0.<org.gnucash.android.ui.settings.SettingsActivity: int mDeleteAccountsClickCount>;
+
+        if i0 >= 2 goto label10;
+
+        $r4 = staticinvoke <android.widget.Toast: android.widget.Toast makeText(android.content.Context,int,int)>(r0, 2131296543, 0);
+
+        virtualinvoke $r4.<android.widget.Toast: void show()>();
+
+     label08:
+        $r8 = new java.util.Timer;
+
+        specialinvoke $r8.<java.util.Timer: void <init>()>();
+
+        $r9 = new org.gnucash.android.ui.settings.SettingsActivity$ResetCounter;
+
+        specialinvoke $r9.<org.gnucash.android.ui.settings.SettingsActivity$ResetCounter: void <init>(org.gnucash.android.ui.settings.SettingsActivity,org.gnucash.android.ui.settings.SettingsActivity$1)>(r0, null);
+
+        virtualinvoke $r8.<java.util.Timer: void schedule(java.util.TimerTask,long)>($r9, 2000L);
+
+        return 1;
+
+     label09:
+        i0 = 2131296519;
+
+        goto label06;
+
+     label10:
+        staticinvoke <org.gnucash.android.export.xml.GncXmlExporter: boolean createBackup()>();
+
+        $r5 = staticinvoke <org.gnucash.android.db.AccountsDbAdapter: org.gnucash.android.db.AccountsDbAdapter getInstance()>();
+
+        virtualinvoke $r5.<org.gnucash.android.db.AccountsDbAdapter: int deleteAllRecords()>();
+
+        $r4 = staticinvoke <android.widget.Toast: android.widget.Toast makeText(android.content.Context,int,int)>(r0, 2131296517, 1);
+
+        virtualinvoke $r4.<android.widget.Toast: void show()>();
+
+        goto label08;
+
+     label11:
+        $r3 = virtualinvoke r0.<org.gnucash.android.ui.settings.SettingsActivity: java.lang.String getString(int)>(2131296790);
+
+        $z0 = virtualinvoke $r2.<java.lang.String: boolean equals(java.lang.Object)>($r3);
+
+        if $z0 == 0 goto label16;
+
+        i0 = r0.<org.gnucash.android.ui.settings.SettingsActivity: int mDeleteTransactionsClickCount>;
+
+        i0 = i0 + 1;
+
+        r0.<org.gnucash.android.ui.settings.SettingsActivity: int mDeleteTransactionsClickCount> = i0;
+
+        i0 = r0.<org.gnucash.android.ui.settings.SettingsActivity: int mDeleteTransactionsClickCount>;
+
+        if i0 >= 2 goto label13;
+
+        $r4 = staticinvoke <android.widget.Toast: android.widget.Toast makeText(android.content.Context,int,int)>(r0, 2131296543, 0);
+
+        virtualinvoke $r4.<android.widget.Toast: void show()>();
+
+     label12:
+        $r8 = new java.util.Timer;
+
+        specialinvoke $r8.<java.util.Timer: void <init>()>();
+
+        $r9 = new org.gnucash.android.ui.settings.SettingsActivity$ResetCounter;
+
+        specialinvoke $r9.<org.gnucash.android.ui.settings.SettingsActivity$ResetCounter: void <init>(org.gnucash.android.ui.settings.SettingsActivity,org.gnucash.android.ui.settings.SettingsActivity$1)>(r0, null);
+
+        virtualinvoke $r8.<java.util.Timer: void schedule(java.util.TimerTask,long)>($r9, 2000L);
+
+        return 1;
+
+     label13:
+        staticinvoke <org.gnucash.android.export.xml.GncXmlExporter: boolean createBackup()>();
+
+        $r10 = new java.util.ArrayList;
+
+        r6 = $r10;
+
+        specialinvoke $r10.<java.util.ArrayList: void <init>()>();
+
+        $z0 = staticinvoke <org.gnucash.android.app.GnuCashApplication: boolean shouldSaveOpeningBalances(boolean)>(0);
+
+        if $z0 == 0 goto label14;
+
+        $r5 = staticinvoke <org.gnucash.android.db.AccountsDbAdapter: org.gnucash.android.db.AccountsDbAdapter getInstance()>();
+
+        r6 = virtualinvoke $r5.<org.gnucash.android.db.AccountsDbAdapter: java.util.List getAllOpeningBalanceTransactions()>();
+
+     label14:
+        $r7 = staticinvoke <org.gnucash.android.db.TransactionsDbAdapter: org.gnucash.android.db.TransactionsDbAdapter getInstance()>();
+
+        virtualinvoke $r7.<org.gnucash.android.db.TransactionsDbAdapter: int deleteAllRecords()>();
+
+        if $z0 == 0 goto label15;
+
+        virtualinvoke $r7.<org.gnucash.android.db.TransactionsDbAdapter: long bulkAddRecords(java.util.List)>(r6);
+
+     label15:
+        $r4 = staticinvoke <android.widget.Toast: android.widget.Toast makeText(android.content.Context,int,int)>(r0, 2131296518, 1);
+
+        virtualinvoke $r4.<android.widget.Toast: void show()>();
+
+        goto label12;
+
+     label16:
+        $r3 = virtualinvoke r0.<org.gnucash.android.ui.settings.SettingsActivity: java.lang.String getString(int)>(2131296782);
+
+        $z0 = virtualinvoke $r2.<java.lang.String: boolean equals(java.lang.Object)>($r3);
+
+        if $z0 == 0 goto label17;
+
+        $r11 = new android.content.Intent;
+
+        specialinvoke $r11.<android.content.Intent: void <init>(android.content.Context,java.lang.Class)>(r0, class "Lorg/gnucash/android/ui/passcode/PasscodePreferenceActivity;");
+
+        virtualinvoke r0.<org.gnucash.android.ui.settings.SettingsActivity: void startActivityForResult(android.content.Intent,int)>($r11, 4);
+
+        return 1;
+
+     label17:
+        return 0;
+    }
+    protected void onResume()
+    {
+        org.gnucash.android.ui.settings.SettingsActivity r0;
+
+        r0 := @this: org.gnucash.android.ui.settings.SettingsActivity;
+
+        specialinvoke r0.<org.gnucash.android.ui.settings.AppCompatPreferenceActivity: void onResume()>();
+
+        r0.<org.gnucash.android.ui.settings.SettingsActivity: int mDeleteAccountsClickCount> = 0;
+
+        r0.<org.gnucash.android.ui.settings.SettingsActivity: int mDeleteTransactionsClickCount> = 0;
+
+        return;
+    }
+    public void restoreBackup()
+    {
+        org.gnucash.android.ui.settings.SettingsActivity r0;
+        android.widget.ArrayAdapter r1;
+        java.io.File r2;
+        int i0, i1;
+        android.app.AlertDialog$Builder r3;
+        java.lang.String $r4;
+        java.io.File[] $r5;
+        android.widget.Toast $r6;
+        java.util.List $r7;
+        java.lang.Object[] $r8;
+        java.text.DateFormat $r9;
+        long $l2;
+        byte $b3;
+        java.util.Date $r10;
+        org.gnucash.android.ui.settings.SettingsActivity$3 $r11;
+        org.gnucash.android.ui.settings.SettingsActivity$4 $r12;
+        android.app.AlertDialog $r13;
+
+        r0 := @this: org.gnucash.android.ui.settings.SettingsActivity;
+
+        staticinvoke <android.util.Log: int i(java.lang.String,java.lang.String)>("Settings", "Opening GnuCash XML backups for restore");
+
+        r2 = new java.io.File;
+
+        $r4 = <org.gnucash.android.export.Exporter: java.lang.String BACKUP_FOLDER_PATH>;
+
+        specialinvoke r2.<java.io.File: void <init>(java.lang.String)>($r4);
+
+        $r5 = virtualinvoke r2.<java.io.File: java.io.File[] listFiles()>();
+
+        if $r5 != null goto label1;
+
+        $r6 = staticinvoke <android.widget.Toast: android.widget.Toast makeText(android.content.Context,int,int)>(r0, 2131296520, 1);
+
+        virtualinvoke $r6.<android.widget.Toast: void show()>();
+
+        r2 = new java.io.File;
+
+        $r4 = <org.gnucash.android.export.Exporter: java.lang.String BACKUP_FOLDER_PATH>;
+
+        specialinvoke r2.<java.io.File: void <init>(java.lang.String)>($r4);
+
+        virtualinvoke r2.<java.io.File: boolean mkdirs()>();
+
+        return;
+
+     label1:
+        staticinvoke <java.util.Arrays: void sort(java.lang.Object[])>($r5);
+
+        $r7 = staticinvoke <java.util.Arrays: java.util.List asList(java.lang.Object[])>($r5);
+
+        staticinvoke <java.util.Collections: void reverse(java.util.List)>($r7);
+
+        $r8 = interfaceinvoke $r7.<java.util.List: java.lang.Object[] toArray()>();
+
+        $r5 = (java.io.File[]) $r8;
+
+        r1 = new android.widget.ArrayAdapter;
+
+        specialinvoke r1.<android.widget.ArrayAdapter: void <init>(android.content.Context,int)>(r0, 17367058);
+
+        $r9 = staticinvoke <java.text.SimpleDateFormat: java.text.DateFormat getDateTimeInstance()>();
+
+        i0 = lengthof $r5;
+
+        i1 = 0;
+
+     label2:
+        if i1 >= i0 goto label5;
+
+        r2 = $r5[i1];
+
+        $r4 = virtualinvoke r2.<java.io.File: java.lang.String getName()>();
+
+        $l2 = staticinvoke <org.gnucash.android.export.Exporter: long getExportTime(java.lang.String)>($r4);
+
+        $b3 = $l2 cmp 0L;
+
+        if $b3 <= 0 goto label4;
+
+        $r10 = new java.util.Date;
+
+        specialinvoke $r10.<java.util.Date: void <init>(long)>($l2);
+
+        $r4 = virtualinvoke $r9.<java.text.DateFormat: java.lang.String format(java.util.Date)>($r10);
+
+        virtualinvoke r1.<android.widget.ArrayAdapter: void add(java.lang.Object)>($r4);
+
+     label3:
+        i1 = i1 + 1;
+
+        goto label2;
+
+     label4:
+        $r4 = virtualinvoke r2.<java.io.File: java.lang.String getName()>();
+
+        virtualinvoke r1.<android.widget.ArrayAdapter: void add(java.lang.Object)>($r4);
+
+        goto label3;
+
+     label5:
+        r3 = new android.app.AlertDialog$Builder;
+
+        specialinvoke r3.<android.app.AlertDialog$Builder: void <init>(android.content.Context)>(r0);
+
+        virtualinvoke r3.<android.app.AlertDialog$Builder: android.app.AlertDialog$Builder setTitle(int)>(2131296500);
+
+        $r11 = new org.gnucash.android.ui.settings.SettingsActivity$3;
+
+        specialinvoke $r11.<org.gnucash.android.ui.settings.SettingsActivity$3: void <init>(org.gnucash.android.ui.settings.SettingsActivity)>(r0);
+
+        virtualinvoke r3.<android.app.AlertDialog$Builder: android.app.AlertDialog$Builder setNegativeButton(int,android.content.DialogInterface$OnClickListener)>(2131296259, $r11);
+
+        $r12 = new org.gnucash.android.ui.settings.SettingsActivity$4;
+
+        specialinvoke $r12.<org.gnucash.android.ui.settings.SettingsActivity$4: void <init>(org.gnucash.android.ui.settings.SettingsActivity,java.io.File[])>(r0, $r5);
+
+        virtualinvoke r3.<android.app.AlertDialog$Builder: android.app.AlertDialog$Builder setAdapter(android.widget.ListAdapter,android.content.DialogInterface$OnClickListener)>(r1, $r12);
+
+        $r13 = virtualinvoke r3.<android.app.AlertDialog$Builder: android.app.AlertDialog create()>();
+
+        virtualinvoke $r13.<android.app.AlertDialog: void show()>();
+
+        return;
+    }
+    public void setImbalanceAccountsHidden(boolean)
+    {
+        org.gnucash.android.ui.settings.SettingsActivity r0;
+        boolean $z0;
+        java.lang.String r1, $r7;
+        org.gnucash.android.db.AccountsDbAdapter $r2;
+        java.util.List $r3;
+        java.util.Iterator $r4;
+        java.lang.Object $r5;
+        java.util.Currency r6;
+
+        r0 := @this: org.gnucash.android.ui.settings.SettingsActivity;
+
+        $z0 := @parameter0: boolean;
+
+        if $z0 == 0 goto label3;
+
+        r1 = "0";
+
+     label1:
+        $r2 = staticinvoke <org.gnucash.android.db.AccountsDbAdapter: org.gnucash.android.db.AccountsDbAdapter getInstance()>();
+
+        $r3 = virtualinvoke $r2.<org.gnucash.android.db.AccountsDbAdapter: java.util.List getCurrenciesInUse()>();
+
+        $r4 = interfaceinvoke $r3.<java.util.List: java.util.Iterator iterator()>();
+
+     label2:
+        $z0 = interfaceinvoke $r4.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label4;
+
+        $r5 = interfaceinvoke $r4.<java.util.Iterator: java.lang.Object next()>();
+
+        r6 = (java.util.Currency) $r5;
+
+        $r7 = virtualinvoke $r2.<org.gnucash.android.db.AccountsDbAdapter: java.lang.String getImbalanceAccountUID(java.util.Currency)>(r6);
+
+        if $r7 == null goto label2;
+
+        virtualinvoke $r2.<org.gnucash.android.db.AccountsDbAdapter: int updateRecord(java.lang.String,java.lang.String,java.lang.String)>($r7, "is_hidden", r1);
+
+        goto label2;
+
+     label3:
+        r1 = "1";
+
+        goto label1;
+
+     label4:
+        return;
+    }
+    public void toggleDropboxPreference(android.preference.Preference)
+    {
+        org.gnucash.android.ui.settings.SettingsActivity r0;
+        boolean $z0;
+        android.preference.Preference $r1;
+        android.preference.CheckBoxPreference $r2;
+        com.dropbox.sync.android.DbxAccountManager $r3;
+
+        r0 := @this: org.gnucash.android.ui.settings.SettingsActivity;
+
+        $r1 := @parameter0: android.preference.Preference;
+
+        $r2 = (android.preference.CheckBoxPreference) $r1;
+
+        $r3 = r0.<org.gnucash.android.ui.settings.SettingsActivity: com.dropbox.sync.android.DbxAccountManager mDbxAccountManager>;
+
+        $z0 = virtualinvoke $r3.<com.dropbox.sync.android.DbxAccountManager: boolean hasLinkedAccount()>();
+
+        virtualinvoke $r2.<android.preference.CheckBoxPreference: void setChecked(boolean)>($z0);
+
+        return;
+    }
+    public void toggleGoogleDrivePreference(android.preference.Preference)
+    {
+        org.gnucash.android.ui.settings.SettingsActivity r0;
+        android.preference.Preference $r1;
+        android.content.SharedPreferences $r2;
+        java.lang.String $r3;
+        android.preference.CheckBoxPreference $r4;
+        boolean $z0;
+
+        r0 := @this: org.gnucash.android.ui.settings.SettingsActivity;
+
+        $r1 := @parameter0: android.preference.Preference;
+
+        $r2 = staticinvoke <android.preference.PreferenceManager: android.content.SharedPreferences getDefaultSharedPreferences(android.content.Context)>(r0);
+
+        $r3 = virtualinvoke r0.<org.gnucash.android.ui.settings.SettingsActivity: java.lang.String getString(int)>(2131296797);
+
+        $r3 = interfaceinvoke $r2.<android.content.SharedPreferences: java.lang.String getString(java.lang.String,java.lang.String)>($r3, null);
+
+        $r4 = (android.preference.CheckBoxPreference) $r1;
+
+        if $r3 == null goto label2;
+
+        $z0 = 1;
+
+     label1:
+        virtualinvoke $r4.<android.preference.CheckBoxPreference: void setChecked(boolean)>($z0);
+
+        return;
+
+     label2:
+        $z0 = 0;
+
+        goto label1;
+    }

@@ -1,0 +1,449 @@
+com.fsck.k9.mail.store.imap.ImapFolderPusher extends com.fsck.k9.mail.store.imap.ImapFolder
+private static final int IDLE_FAILURE_COUNT_LIMIT
+private static final int IDLE_READ_TIMEOUT_INCREMENT
+private static final int MAX_DELAY_TIME
+private static final int NORMAL_DELAY_TIME
+private final com.fsck.k9.mail.store.imap.ImapFolderPusher$IdleStopper idleStopper
+private volatile boolean idling
+private java.lang.Thread listeningThread
+private final com.fsck.k9.mail.PushReceiver pushReceiver
+private volatile boolean stop
+private final java.util.List storedUntaggedResponses
+private final java.lang.Object threadLock
+private final com.fsck.k9.mail.power.TracingPowerManager$TracingWakeLock wakeLock
+    public void <init>(com.fsck.k9.mail.store.imap.ImapStore, java.lang.String, com.fsck.k9.mail.PushReceiver)
+    {
+        com.fsck.k9.mail.store.imap.ImapFolderPusher r0;
+        com.fsck.k9.mail.store.imap.ImapStore $r1;
+        java.lang.String $r2;
+        com.fsck.k9.mail.PushReceiver $r3;
+        java.lang.Object $r4;
+        com.fsck.k9.mail.store.imap.ImapFolderPusher$IdleStopper $r5;
+        java.util.ArrayList $r6;
+        android.content.Context $r7;
+        com.fsck.k9.mail.power.TracingPowerManager $r8;
+        java.lang.StringBuilder $r9;
+        com.fsck.k9.mail.store.StoreConfig $r10;
+        com.fsck.k9.mail.power.TracingPowerManager$TracingWakeLock $r11;
+
+        r0 := @this: com.fsck.k9.mail.store.imap.ImapFolderPusher;
+
+        $r1 := @parameter0: com.fsck.k9.mail.store.imap.ImapStore;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $r3 := @parameter2: com.fsck.k9.mail.PushReceiver;
+
+        specialinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: void <init>(com.fsck.k9.mail.store.imap.ImapStore,java.lang.String)>($r1, $r2);
+
+        $r4 = new java.lang.Object;
+
+        specialinvoke $r4.<java.lang.Object: void <init>()>();
+
+        r0.<com.fsck.k9.mail.store.imap.ImapFolderPusher: java.lang.Object threadLock> = $r4;
+
+        $r5 = new com.fsck.k9.mail.store.imap.ImapFolderPusher$IdleStopper;
+
+        specialinvoke $r5.<com.fsck.k9.mail.store.imap.ImapFolderPusher$IdleStopper: void <init>(com.fsck.k9.mail.store.imap.ImapFolderPusher$1)>(null);
+
+        r0.<com.fsck.k9.mail.store.imap.ImapFolderPusher: com.fsck.k9.mail.store.imap.ImapFolderPusher$IdleStopper idleStopper> = $r5;
+
+        $r6 = new java.util.ArrayList;
+
+        specialinvoke $r6.<java.util.ArrayList: void <init>()>();
+
+        r0.<com.fsck.k9.mail.store.imap.ImapFolderPusher: java.util.List storedUntaggedResponses> = $r6;
+
+        r0.<com.fsck.k9.mail.store.imap.ImapFolderPusher: boolean stop> = 0;
+
+        r0.<com.fsck.k9.mail.store.imap.ImapFolderPusher: boolean idling> = 0;
+
+        r0.<com.fsck.k9.mail.store.imap.ImapFolderPusher: com.fsck.k9.mail.PushReceiver pushReceiver> = $r3;
+
+        $r7 = interfaceinvoke $r3.<com.fsck.k9.mail.PushReceiver: android.content.Context getContext()>();
+
+        $r8 = staticinvoke <com.fsck.k9.mail.power.TracingPowerManager: com.fsck.k9.mail.power.TracingPowerManager getPowerManager(android.content.Context)>($r7);
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("ImapFolderPusher ");
+
+        $r10 = virtualinvoke $r1.<com.fsck.k9.mail.store.imap.ImapStore: com.fsck.k9.mail.store.StoreConfig getStoreConfig()>();
+
+        $r2 = virtualinvoke $r10.<java.lang.Object: java.lang.String toString()>();
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(":");
+
+        $r2 = virtualinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolderPusher: java.lang.String getName()>();
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r2 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r11 = virtualinvoke $r8.<com.fsck.k9.mail.power.TracingPowerManager: com.fsck.k9.mail.power.TracingPowerManager$TracingWakeLock newWakeLock(int,java.lang.String)>(1, $r2);
+
+        r0.<com.fsck.k9.mail.store.imap.ImapFolderPusher: com.fsck.k9.mail.power.TracingPowerManager$TracingWakeLock wakeLock> = $r11;
+
+        $r11 = r0.<com.fsck.k9.mail.store.imap.ImapFolderPusher: com.fsck.k9.mail.power.TracingPowerManager$TracingWakeLock wakeLock>;
+
+        virtualinvoke $r11.<com.fsck.k9.mail.power.TracingPowerManager$TracingWakeLock: void setReferenceCounted(boolean)>(0);
+
+        return;
+    }
+    static com.fsck.k9.mail.power.TracingPowerManager$TracingWakeLock access$200(com.fsck.k9.mail.store.imap.ImapFolderPusher)
+    {
+        com.fsck.k9.mail.store.imap.ImapFolderPusher $r0;
+        com.fsck.k9.mail.power.TracingPowerManager$TracingWakeLock r1;
+
+        $r0 := @parameter0: com.fsck.k9.mail.store.imap.ImapFolderPusher;
+
+        r1 = $r0.<com.fsck.k9.mail.store.imap.ImapFolderPusher: com.fsck.k9.mail.power.TracingPowerManager$TracingWakeLock wakeLock>;
+
+        return r1;
+    }
+    static boolean access$300(com.fsck.k9.mail.store.imap.ImapFolderPusher)
+    {
+        com.fsck.k9.mail.store.imap.ImapFolderPusher $r0;
+        boolean z0;
+
+        $r0 := @parameter0: com.fsck.k9.mail.store.imap.ImapFolderPusher;
+
+        z0 = $r0.<com.fsck.k9.mail.store.imap.ImapFolderPusher: boolean stop>;
+
+        return z0;
+    }
+    static boolean access$302(com.fsck.k9.mail.store.imap.ImapFolderPusher, boolean)
+    {
+        com.fsck.k9.mail.store.imap.ImapFolderPusher $r0;
+        boolean $z0;
+
+        $r0 := @parameter0: com.fsck.k9.mail.store.imap.ImapFolderPusher;
+
+        $z0 := @parameter1: boolean;
+
+        $r0.<com.fsck.k9.mail.store.imap.ImapFolderPusher: boolean stop> = $z0;
+
+        return $z0;
+    }
+    static com.fsck.k9.mail.PushReceiver access$400(com.fsck.k9.mail.store.imap.ImapFolderPusher)
+    {
+        com.fsck.k9.mail.store.imap.ImapFolderPusher $r0;
+        com.fsck.k9.mail.PushReceiver r1;
+
+        $r0 := @parameter0: com.fsck.k9.mail.store.imap.ImapFolderPusher;
+
+        r1 = $r0.<com.fsck.k9.mail.store.imap.ImapFolderPusher: com.fsck.k9.mail.PushReceiver pushReceiver>;
+
+        return r1;
+    }
+    static boolean access$502(com.fsck.k9.mail.store.imap.ImapFolderPusher, boolean)
+    {
+        com.fsck.k9.mail.store.imap.ImapFolderPusher $r0;
+        boolean $z0;
+
+        $r0 := @parameter0: com.fsck.k9.mail.store.imap.ImapFolderPusher;
+
+        $z0 := @parameter1: boolean;
+
+        $r0.<com.fsck.k9.mail.store.imap.ImapFolderPusher: boolean idling> = $z0;
+
+        return $z0;
+    }
+    static com.fsck.k9.mail.store.imap.ImapFolderPusher$IdleStopper access$600(com.fsck.k9.mail.store.imap.ImapFolderPusher)
+    {
+        com.fsck.k9.mail.store.imap.ImapFolderPusher $r0;
+        com.fsck.k9.mail.store.imap.ImapFolderPusher$IdleStopper r1;
+
+        $r0 := @parameter0: com.fsck.k9.mail.store.imap.ImapFolderPusher;
+
+        r1 = $r0.<com.fsck.k9.mail.store.imap.ImapFolderPusher: com.fsck.k9.mail.store.imap.ImapFolderPusher$IdleStopper idleStopper>;
+
+        return r1;
+    }
+    static java.util.List access$700(com.fsck.k9.mail.store.imap.ImapFolderPusher)
+    {
+        com.fsck.k9.mail.store.imap.ImapFolderPusher $r0;
+        java.util.List r1;
+
+        $r0 := @parameter0: com.fsck.k9.mail.store.imap.ImapFolderPusher;
+
+        r1 = $r0.<com.fsck.k9.mail.store.imap.ImapFolderPusher: java.util.List storedUntaggedResponses>;
+
+        return r1;
+    }
+    static void access$800(com.fsck.k9.mail.store.imap.ImapFolderPusher, com.fsck.k9.mail.store.imap.ImapResponse)
+    {
+        com.fsck.k9.mail.store.imap.ImapFolderPusher $r0;
+        com.fsck.k9.mail.store.imap.ImapResponse $r1;
+
+        $r0 := @parameter0: com.fsck.k9.mail.store.imap.ImapFolderPusher;
+
+        $r1 := @parameter1: com.fsck.k9.mail.store.imap.ImapResponse;
+
+        specialinvoke $r0.<com.fsck.k9.mail.store.imap.ImapFolderPusher: void superHandleUntaggedResponse(com.fsck.k9.mail.store.imap.ImapResponse)>($r1);
+
+        return;
+    }
+    private void superHandleUntaggedResponse(com.fsck.k9.mail.store.imap.ImapResponse)
+    {
+        com.fsck.k9.mail.store.imap.ImapFolderPusher r0;
+        com.fsck.k9.mail.store.imap.ImapResponse $r1;
+
+        r0 := @this: com.fsck.k9.mail.store.imap.ImapFolderPusher;
+
+        $r1 := @parameter0: com.fsck.k9.mail.store.imap.ImapResponse;
+
+        specialinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolder: void handleUntaggedResponse(com.fsck.k9.mail.store.imap.ImapResponse)>($r1);
+
+        return;
+    }
+    protected void handleUntaggedResponse(com.fsck.k9.mail.store.imap.ImapResponse)
+    {
+        com.fsck.k9.mail.store.imap.ImapFolderPusher r0;
+        com.fsck.k9.mail.store.imap.ImapResponse $r1;
+        java.lang.String $r2;
+        int $i0;
+        java.lang.Object $r3;
+        boolean $z0;
+        java.lang.Object[] $r4;
+        java.util.List $r5, $r6;
+        java.lang.Throwable $r7;
+
+        r0 := @this: com.fsck.k9.mail.store.imap.ImapFolderPusher;
+
+        $r1 := @parameter0: com.fsck.k9.mail.store.imap.ImapResponse;
+
+        $r2 = virtualinvoke $r1.<com.fsck.k9.mail.store.imap.ImapResponse: java.lang.String getTag()>();
+
+        if $r2 != null goto label8;
+
+        $i0 = virtualinvoke $r1.<com.fsck.k9.mail.store.imap.ImapResponse: int size()>();
+
+        if $i0 <= 1 goto label8;
+
+        $r3 = virtualinvoke $r1.<com.fsck.k9.mail.store.imap.ImapResponse: java.lang.Object get(int)>(1);
+
+        $z0 = staticinvoke <com.fsck.k9.mail.store.imap.ImapResponseParser: boolean equalsIgnoreCase(java.lang.Object,java.lang.String)>($r3, "FETCH");
+
+        if $z0 != 0 goto label1;
+
+        $z0 = staticinvoke <com.fsck.k9.mail.store.imap.ImapResponseParser: boolean equalsIgnoreCase(java.lang.Object,java.lang.String)>($r3, "EXPUNGE");
+
+        if $z0 != 0 goto label1;
+
+        $z0 = staticinvoke <com.fsck.k9.mail.store.imap.ImapResponseParser: boolean equalsIgnoreCase(java.lang.Object,java.lang.String)>($r3, "EXISTS");
+
+        if $z0 == 0 goto label4;
+
+     label1:
+        $z0 = staticinvoke <com.fsck.k9.mail.K9MailLib: boolean isDebug()>();
+
+        if $z0 == 0 goto label2;
+
+        $r4 = newarray (java.lang.Object)[1];
+
+        $r4[0] = $r1;
+
+        staticinvoke <timber.log.Timber: void d(java.lang.String,java.lang.Object[])>("Storing response %s for later processing", $r4);
+
+     label2:
+        $r5 = r0.<com.fsck.k9.mail.store.imap.ImapFolderPusher: java.util.List storedUntaggedResponses>;
+
+        entermonitor $r5;
+
+     label3:
+        $r6 = r0.<com.fsck.k9.mail.store.imap.ImapFolderPusher: java.util.List storedUntaggedResponses>;
+
+        interfaceinvoke $r6.<java.util.List: boolean add(java.lang.Object)>($r1);
+
+        exitmonitor $r5;
+
+     label4:
+        virtualinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolderPusher: void handlePossibleUidNext(com.fsck.k9.mail.store.imap.ImapResponse)>($r1);
+
+        return;
+
+     label5:
+        $r7 := @caughtexception;
+
+     label6:
+        exitmonitor $r5;
+
+     label7:
+        throw $r7;
+
+     label8:
+        return;
+
+        catch java.lang.Throwable from label3 to label4 with label5;
+        catch java.lang.Throwable from label6 to label7 with label5;
+    }
+    public void refresh() throws java.io.IOException, com.fsck.k9.mail.MessagingException
+    {
+        com.fsck.k9.mail.store.imap.ImapFolderPusher r0;
+        boolean $z0;
+        com.fsck.k9.mail.power.TracingPowerManager$TracingWakeLock $r1;
+        com.fsck.k9.mail.store.imap.ImapFolderPusher$IdleStopper $r2;
+
+        r0 := @this: com.fsck.k9.mail.store.imap.ImapFolderPusher;
+
+        $z0 = r0.<com.fsck.k9.mail.store.imap.ImapFolderPusher: boolean idling>;
+
+        if $z0 == 0 goto label1;
+
+        $r1 = r0.<com.fsck.k9.mail.store.imap.ImapFolderPusher: com.fsck.k9.mail.power.TracingPowerManager$TracingWakeLock wakeLock>;
+
+        virtualinvoke $r1.<com.fsck.k9.mail.power.TracingPowerManager$TracingWakeLock: void acquire(long)>(60000L);
+
+        $r2 = r0.<com.fsck.k9.mail.store.imap.ImapFolderPusher: com.fsck.k9.mail.store.imap.ImapFolderPusher$IdleStopper idleStopper>;
+
+        virtualinvoke $r2.<com.fsck.k9.mail.store.imap.ImapFolderPusher$IdleStopper: void stopIdle()>();
+
+     label1:
+        return;
+    }
+    public void start()
+    {
+        com.fsck.k9.mail.store.imap.ImapFolderPusher r0;
+        java.lang.Object $r1;
+        java.lang.Thread $r2;
+        java.lang.IllegalStateException $r3;
+        java.lang.Throwable $r4;
+        com.fsck.k9.mail.store.imap.ImapFolderPusher$PushRunnable $r5;
+
+        r0 := @this: com.fsck.k9.mail.store.imap.ImapFolderPusher;
+
+        $r1 = r0.<com.fsck.k9.mail.store.imap.ImapFolderPusher: java.lang.Object threadLock>;
+
+        entermonitor $r1;
+
+     label1:
+        $r2 = r0.<com.fsck.k9.mail.store.imap.ImapFolderPusher: java.lang.Thread listeningThread>;
+
+        if $r2 == null goto label4;
+
+        $r3 = new java.lang.IllegalStateException;
+
+        specialinvoke $r3.<java.lang.IllegalStateException: void <init>(java.lang.String)>("start() called twice");
+
+        throw $r3;
+
+     label2:
+        $r4 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label3:
+        throw $r4;
+
+     label4:
+        $r2 = new java.lang.Thread;
+
+        $r5 = new com.fsck.k9.mail.store.imap.ImapFolderPusher$PushRunnable;
+
+        specialinvoke $r5.<com.fsck.k9.mail.store.imap.ImapFolderPusher$PushRunnable: void <init>(com.fsck.k9.mail.store.imap.ImapFolderPusher,com.fsck.k9.mail.store.imap.ImapFolderPusher$1)>(r0, null);
+
+        specialinvoke $r2.<java.lang.Thread: void <init>(java.lang.Runnable)>($r5);
+
+        r0.<com.fsck.k9.mail.store.imap.ImapFolderPusher: java.lang.Thread listeningThread> = $r2;
+
+        $r2 = r0.<com.fsck.k9.mail.store.imap.ImapFolderPusher: java.lang.Thread listeningThread>;
+
+        virtualinvoke $r2.<java.lang.Thread: void start()>();
+
+        exitmonitor $r1;
+
+     label5:
+        return;
+
+        catch java.lang.Throwable from label1 to label3 with label2;
+        catch java.lang.Throwable from label4 to label5 with label2;
+    }
+    public void stop()
+    {
+        com.fsck.k9.mail.store.imap.ImapFolderPusher r0;
+        com.fsck.k9.mail.store.imap.ImapConnection r1;
+        java.lang.Object $r2;
+        java.lang.Thread $r3;
+        java.lang.IllegalStateException $r4;
+        java.lang.Throwable $r5;
+        boolean $z0;
+        java.lang.Object[] $r6;
+        java.lang.String $r7;
+
+        r0 := @this: com.fsck.k9.mail.store.imap.ImapFolderPusher;
+
+        $r2 = r0.<com.fsck.k9.mail.store.imap.ImapFolderPusher: java.lang.Object threadLock>;
+
+        entermonitor $r2;
+
+     label1:
+        $r3 = r0.<com.fsck.k9.mail.store.imap.ImapFolderPusher: java.lang.Thread listeningThread>;
+
+        if $r3 != null goto label4;
+
+        $r4 = new java.lang.IllegalStateException;
+
+        specialinvoke $r4.<java.lang.IllegalStateException: void <init>(java.lang.String)>("stop() called twice");
+
+        throw $r4;
+
+     label2:
+        $r5 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label3:
+        throw $r5;
+
+     label4:
+        r0.<com.fsck.k9.mail.store.imap.ImapFolderPusher: boolean stop> = 1;
+
+        $r3 = r0.<com.fsck.k9.mail.store.imap.ImapFolderPusher: java.lang.Thread listeningThread>;
+
+        virtualinvoke $r3.<java.lang.Thread: void interrupt()>();
+
+        r0.<com.fsck.k9.mail.store.imap.ImapFolderPusher: java.lang.Thread listeningThread> = null;
+
+        exitmonitor $r2;
+
+     label5:
+        r1 = r0.<com.fsck.k9.mail.store.imap.ImapFolderPusher: com.fsck.k9.mail.store.imap.ImapConnection connection>;
+
+        if r1 == null goto label7;
+
+        $z0 = staticinvoke <com.fsck.k9.mail.K9MailLib: boolean isDebug()>();
+
+        if $z0 == 0 goto label6;
+
+        $r6 = newarray (java.lang.Object)[1];
+
+        $r7 = virtualinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolderPusher: java.lang.String getLogId()>();
+
+        $r6[0] = $r7;
+
+        staticinvoke <timber.log.Timber: void v(java.lang.String,java.lang.Object[])>("Closing connection to stop pushing for %s", $r6);
+
+     label6:
+        virtualinvoke r1.<com.fsck.k9.mail.store.imap.ImapConnection: void close()>();
+
+        return;
+
+     label7:
+        $r6 = newarray (java.lang.Object)[1];
+
+        $r7 = virtualinvoke r0.<com.fsck.k9.mail.store.imap.ImapFolderPusher: java.lang.String getLogId()>();
+
+        $r6[0] = $r7;
+
+        staticinvoke <timber.log.Timber: void w(java.lang.String,java.lang.Object[])>("Attempt to interrupt null connection to stop pushing on folderPusher for %s", $r6);
+
+        return;
+
+        catch java.lang.Throwable from label1 to label3 with label2;
+        catch java.lang.Throwable from label4 to label5 with label2;
+    }

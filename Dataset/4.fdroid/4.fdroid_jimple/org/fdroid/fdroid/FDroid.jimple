@@ -1,0 +1,974 @@
+org.fdroid.fdroid.FDroid extends android.support.v7.app.AppCompatActivity implements android.support.v7.widget.SearchView$OnQueryTextListener
+public static final java.lang.String ACTION_ADD_REPO
+private static final java.lang.String ADD_REPO_INTENT_HANDLED
+public static final java.lang.String EXTRA_TAB_UPDATE
+private static final int REQUEST_ENABLE_BLUETOOTH
+private static final int REQUEST_PREFS
+private static final int REQUEST_SWAP
+private static final java.lang.String TAG
+private org.fdroid.fdroid.views.AppListFragmentPagerAdapter adapter
+private org.fdroid.fdroid.FDroidApp fdroidApp
+private java.lang.String pendingSearchQuery
+private android.view.MenuItem searchMenuItem
+private org.fdroid.fdroid.compat.TabManager tabManager
+private android.support.v4.view.ViewPager viewPager
+    public void <init>()
+    {
+        org.fdroid.fdroid.FDroid r0;
+
+        r0 := @this: org.fdroid.fdroid.FDroid;
+
+        specialinvoke r0.<android.support.v7.app.AppCompatActivity: void <init>()>();
+
+        return;
+    }
+    static org.fdroid.fdroid.compat.TabManager access$000(org.fdroid.fdroid.FDroid)
+    {
+        org.fdroid.fdroid.FDroid $r0;
+        org.fdroid.fdroid.compat.TabManager $r1;
+
+        $r0 := @parameter0: org.fdroid.fdroid.FDroid;
+
+        $r1 = specialinvoke $r0.<org.fdroid.fdroid.FDroid: org.fdroid.fdroid.compat.TabManager getTabManager()>();
+
+        return $r1;
+    }
+    static void access$100(org.fdroid.fdroid.FDroid)
+    {
+        org.fdroid.fdroid.FDroid $r0;
+
+        $r0 := @parameter0: org.fdroid.fdroid.FDroid;
+
+        specialinvoke $r0.<org.fdroid.fdroid.FDroid: void refreshUpdateTabLabel()>();
+
+        return;
+    }
+    private void checkForAddRepoIntent(android.content.Intent)
+    {
+        org.fdroid.fdroid.FDroid r0;
+        android.content.Intent $r1, r2;
+        org.fdroid.fdroid.data.NewRepoConfig r3;
+        boolean $z0;
+        android.net.Uri $r4;
+        java.lang.String $r5;
+        android.widget.Toast $r6;
+
+        r0 := @this: org.fdroid.fdroid.FDroid;
+
+        $r1 := @parameter0: android.content.Intent;
+
+        $z0 = virtualinvoke $r1.<android.content.Intent: boolean hasExtra(java.lang.String)>("addRepoIntentHandled");
+
+        if $z0 != 0 goto label3;
+
+        virtualinvoke $r1.<android.content.Intent: android.content.Intent putExtra(java.lang.String,boolean)>("addRepoIntentHandled", 1);
+
+        r3 = new org.fdroid.fdroid.data.NewRepoConfig;
+
+        specialinvoke r3.<org.fdroid.fdroid.data.NewRepoConfig: void <init>(android.content.Context,android.content.Intent)>(r0, $r1);
+
+        $z0 = virtualinvoke r3.<org.fdroid.fdroid.data.NewRepoConfig: boolean isValidRepo()>();
+
+        if $z0 == 0 goto label2;
+
+        $z0 = virtualinvoke r3.<org.fdroid.fdroid.data.NewRepoConfig: boolean isFromSwap()>();
+
+        if $z0 == 0 goto label1;
+
+        r2 = new android.content.Intent;
+
+        specialinvoke r2.<android.content.Intent: void <init>(android.content.Context,java.lang.Class)>(r0, class "Lorg/fdroid/fdroid/views/swap/SwapWorkflowActivity;");
+
+        virtualinvoke r2.<android.content.Intent: android.content.Intent putExtra(java.lang.String,boolean)>("EXTRA_CONFIRM", 1);
+
+        $r4 = virtualinvoke $r1.<android.content.Intent: android.net.Uri getData()>();
+
+        virtualinvoke r2.<android.content.Intent: android.content.Intent setData(android.net.Uri)>($r4);
+
+        virtualinvoke r0.<org.fdroid.fdroid.FDroid: void startActivityForResult(android.content.Intent,int)>(r2, 3);
+
+        return;
+
+     label1:
+        r2 = new android.content.Intent;
+
+        $r4 = virtualinvoke $r1.<android.content.Intent: android.net.Uri getData()>();
+
+        specialinvoke r2.<android.content.Intent: void <init>(java.lang.String,android.net.Uri,android.content.Context,java.lang.Class)>("org.fdroid.fdroid.FDroid.ACTION_ADD_REPO", $r4, r0, class "Lorg/fdroid/fdroid/views/ManageReposActivity;");
+
+        virtualinvoke r0.<org.fdroid.fdroid.FDroid: void startActivity(android.content.Intent)>(r2);
+
+        return;
+
+     label2:
+        $r5 = virtualinvoke r3.<org.fdroid.fdroid.data.NewRepoConfig: java.lang.String getErrorMessage()>();
+
+        if $r5 == null goto label3;
+
+        $r5 = virtualinvoke r3.<org.fdroid.fdroid.data.NewRepoConfig: java.lang.String getErrorMessage()>();
+
+        $r6 = staticinvoke <android.widget.Toast: android.widget.Toast makeText(android.content.Context,java.lang.CharSequence,int)>(r0, $r5, 1);
+
+        virtualinvoke $r6.<android.widget.Toast: void show()>();
+
+     label3:
+        return;
+    }
+    private void createViews()
+    {
+        org.fdroid.fdroid.FDroid r0;
+        android.view.View $r1;
+        android.support.v4.view.ViewPager $r2;
+        org.fdroid.fdroid.views.AppListFragmentPagerAdapter $r3;
+        org.fdroid.fdroid.FDroid$2 $r4;
+
+        r0 := @this: org.fdroid.fdroid.FDroid;
+
+        $r1 = virtualinvoke r0.<org.fdroid.fdroid.FDroid: android.view.View findViewById(int)>(2131624077);
+
+        $r2 = (android.support.v4.view.ViewPager) $r1;
+
+        r0.<org.fdroid.fdroid.FDroid: android.support.v4.view.ViewPager viewPager> = $r2;
+
+        $r3 = new org.fdroid.fdroid.views.AppListFragmentPagerAdapter;
+
+        specialinvoke $r3.<org.fdroid.fdroid.views.AppListFragmentPagerAdapter: void <init>(org.fdroid.fdroid.FDroid)>(r0);
+
+        r0.<org.fdroid.fdroid.FDroid: org.fdroid.fdroid.views.AppListFragmentPagerAdapter adapter> = $r3;
+
+        $r2 = r0.<org.fdroid.fdroid.FDroid: android.support.v4.view.ViewPager viewPager>;
+
+        $r3 = r0.<org.fdroid.fdroid.FDroid: org.fdroid.fdroid.views.AppListFragmentPagerAdapter adapter>;
+
+        virtualinvoke $r2.<android.support.v4.view.ViewPager: void setAdapter(android.support.v4.view.PagerAdapter)>($r3);
+
+        $r2 = r0.<org.fdroid.fdroid.FDroid: android.support.v4.view.ViewPager viewPager>;
+
+        $r4 = new org.fdroid.fdroid.FDroid$2;
+
+        specialinvoke $r4.<org.fdroid.fdroid.FDroid$2: void <init>(org.fdroid.fdroid.FDroid)>(r0);
+
+        virtualinvoke $r2.<android.support.v4.view.ViewPager: void setOnPageChangeListener(android.support.v4.view.ViewPager$OnPageChangeListener)>($r4);
+
+        return;
+    }
+    private org.fdroid.fdroid.compat.TabManager getTabManager()
+    {
+        org.fdroid.fdroid.FDroid r0;
+        android.support.v4.view.ViewPager $r1;
+        org.fdroid.fdroid.compat.TabManager $r2;
+
+        r0 := @this: org.fdroid.fdroid.FDroid;
+
+        $r2 = r0.<org.fdroid.fdroid.FDroid: org.fdroid.fdroid.compat.TabManager tabManager>;
+
+        if $r2 != null goto label1;
+
+        $r2 = new org.fdroid.fdroid.compat.TabManager;
+
+        $r1 = r0.<org.fdroid.fdroid.FDroid: android.support.v4.view.ViewPager viewPager>;
+
+        specialinvoke $r2.<org.fdroid.fdroid.compat.TabManager: void <init>(org.fdroid.fdroid.FDroid,android.support.v4.view.ViewPager)>(r0, $r1);
+
+        r0.<org.fdroid.fdroid.FDroid: org.fdroid.fdroid.compat.TabManager tabManager> = $r2;
+
+     label1:
+        $r2 = r0.<org.fdroid.fdroid.FDroid: org.fdroid.fdroid.compat.TabManager tabManager>;
+
+        return $r2;
+    }
+    private void handleSearchOrAppViewIntent(android.content.Intent)
+    {
+        org.fdroid.fdroid.FDroid r0;
+        android.content.Intent $r1;
+        java.lang.String $r2, $r3, $r5, $r6;
+        boolean $z0;
+        android.net.Uri $r4;
+        int $i0, $i1;
+        java.lang.String[] $r7;
+        java.lang.StringBuilder $r8;
+
+        r0 := @this: org.fdroid.fdroid.FDroid;
+
+        $r1 := @parameter0: android.content.Intent;
+
+        $r2 = "android.intent.action.SEARCH";
+
+        $r3 = virtualinvoke $r1.<android.content.Intent: java.lang.String getAction()>();
+
+        $z0 = virtualinvoke $r2.<java.lang.String: boolean equals(java.lang.Object)>($r3);
+
+        if $z0 == 0 goto label01;
+
+        $r2 = virtualinvoke $r1.<android.content.Intent: java.lang.String getStringExtra(java.lang.String)>("query");
+
+        specialinvoke r0.<org.fdroid.fdroid.FDroid: void performSearch(java.lang.String)>($r2);
+
+        return;
+
+     label01:
+        $r4 = virtualinvoke $r1.<android.content.Intent: android.net.Uri getData()>();
+
+        if $r4 == null goto label23;
+
+        $r5 = virtualinvoke $r4.<android.net.Uri: java.lang.String getScheme()>();
+
+        $r6 = virtualinvoke $r4.<android.net.Uri: java.lang.String getPath()>();
+
+        $r2 = null;
+
+        $r3 = null;
+
+        $z0 = virtualinvoke $r4.<android.net.Uri: boolean isHierarchical()>();
+
+        if $z0 == 0 goto label20;
+
+        $r5 = virtualinvoke $r4.<android.net.Uri: java.lang.String getHost()>();
+
+        if $r5 == null goto label23;
+
+        $i0 = -1;
+
+        $i1 = virtualinvoke $r5.<java.lang.String: int hashCode()>();
+
+        lookupswitch($i1)
+        {
+            case -906336856: goto label08;
+            case 3000946: goto label10;
+            case 28462918: goto label09;
+            case 110087831: goto label11;
+            case 430031819: goto label06;
+            case 943491918: goto label12;
+            case 1557721666: goto label07;
+            default: goto label02;
+        };
+
+     label02:
+        lookupswitch($i0)
+        {
+            case 0: goto label13;
+            case 1: goto label15;
+            case 2: goto label16;
+            case 3: goto label17;
+            case 4: goto label19;
+            case 5: goto label19;
+            case 6: goto label19;
+            default: goto label03;
+        };
+
+     label03:
+        $z0 = staticinvoke <android.text.TextUtils: boolean isEmpty(java.lang.CharSequence)>($r3);
+
+        if $z0 != 0 goto label05;
+
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean startsWith(java.lang.String)>("pname:");
+
+        if $z0 == 0 goto label04;
+
+        $r7 = virtualinvoke $r3.<java.lang.String: java.lang.String[] split(java.lang.String)>(":");
+
+        $r2 = $r7[1];
+
+     label04:
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean contains(java.lang.CharSequence)>(":");
+
+        if $z0 == 0 goto label05;
+
+        $r7 = virtualinvoke $r3.<java.lang.String: java.lang.String[] split(java.lang.String)>(":");
+
+        $r3 = $r7[1];
+
+     label05:
+        $z0 = staticinvoke <android.text.TextUtils: boolean isEmpty(java.lang.CharSequence)>($r2);
+
+        if $z0 != 0 goto label22;
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("FDroid launched via app link for \'");
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\'");
+
+        $r3 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <org.fdroid.fdroid.Utils: void debugLog(java.lang.String,java.lang.String)>("FDroid", $r3);
+
+        $r1 = new android.content.Intent;
+
+        specialinvoke $r1.<android.content.Intent: void <init>(android.content.Context,java.lang.Class)>(r0, class "Lorg/fdroid/fdroid/AppDetails;");
+
+        virtualinvoke $r1.<android.content.Intent: android.content.Intent putExtra(java.lang.String,java.lang.String)>("appid", $r2);
+
+        virtualinvoke r0.<org.fdroid.fdroid.FDroid: void startActivity(android.content.Intent)>($r1);
+
+        virtualinvoke r0.<org.fdroid.fdroid.FDroid: void finish()>();
+
+        return;
+
+     label06:
+        $z0 = virtualinvoke $r5.<java.lang.String: boolean equals(java.lang.Object)>("f-droid.org");
+
+        if $z0 == 0 goto label02;
+
+        $i0 = 0;
+
+        goto label02;
+
+     label07:
+        $z0 = virtualinvoke $r5.<java.lang.String: boolean equals(java.lang.Object)>("details");
+
+        if $z0 == 0 goto label02;
+
+        $i0 = 1;
+
+        goto label02;
+
+     label08:
+        $z0 = virtualinvoke $r5.<java.lang.String: boolean equals(java.lang.Object)>("search");
+
+        if $z0 == 0 goto label02;
+
+        $i0 = 2;
+
+        goto label02;
+
+     label09:
+        $z0 = virtualinvoke $r5.<java.lang.String: boolean equals(java.lang.Object)>("play.google.com");
+
+        if $z0 == 0 goto label02;
+
+        $i0 = 3;
+
+        goto label02;
+
+     label10:
+        $z0 = virtualinvoke $r5.<java.lang.String: boolean equals(java.lang.Object)>("apps");
+
+        if $z0 == 0 goto label02;
+
+        $i0 = 4;
+
+        goto label02;
+
+     label11:
+        $z0 = virtualinvoke $r5.<java.lang.String: boolean equals(java.lang.Object)>("amazon.com");
+
+        if $z0 == 0 goto label02;
+
+        $i0 = 5;
+
+        goto label02;
+
+     label12:
+        $z0 = virtualinvoke $r5.<java.lang.String: boolean equals(java.lang.Object)>("www.amazon.com");
+
+        if $z0 == 0 goto label02;
+
+        $i0 = 6;
+
+        goto label02;
+
+     label13:
+        $z0 = virtualinvoke $r6.<java.lang.String: boolean startsWith(java.lang.String)>("/repository/browse");
+
+        if $z0 == 0 goto label14;
+
+        $r3 = staticinvoke <org.fdroid.fdroid.compat.UriCompat: java.lang.String getQueryParameter(android.net.Uri,java.lang.String)>($r4, "fdfilter");
+
+        $r2 = staticinvoke <org.fdroid.fdroid.compat.UriCompat: java.lang.String getQueryParameter(android.net.Uri,java.lang.String)>($r4, "fdid");
+
+        goto label03;
+
+     label14:
+        $z0 = virtualinvoke $r6.<java.lang.String: boolean startsWith(java.lang.String)>("/app");
+
+        if $z0 == 0 goto label03;
+
+        $r5 = virtualinvoke $r4.<android.net.Uri: java.lang.String getLastPathSegment()>();
+
+        $r2 = $r5;
+
+        $r6 = "app";
+
+        $z0 = virtualinvoke $r6.<java.lang.String: boolean equals(java.lang.Object)>($r5);
+
+        if $z0 == 0 goto label03;
+
+        $r2 = null;
+
+        goto label03;
+
+     label15:
+        $r2 = staticinvoke <org.fdroid.fdroid.compat.UriCompat: java.lang.String getQueryParameter(android.net.Uri,java.lang.String)>($r4, "id");
+
+        goto label03;
+
+     label16:
+        $r3 = staticinvoke <org.fdroid.fdroid.compat.UriCompat: java.lang.String getQueryParameter(android.net.Uri,java.lang.String)>($r4, "q");
+
+        goto label03;
+
+     label17:
+        $z0 = virtualinvoke $r6.<java.lang.String: boolean startsWith(java.lang.String)>("/store/apps/details");
+
+        if $z0 == 0 goto label18;
+
+        $r2 = staticinvoke <org.fdroid.fdroid.compat.UriCompat: java.lang.String getQueryParameter(android.net.Uri,java.lang.String)>($r4, "id");
+
+        goto label03;
+
+     label18:
+        $z0 = virtualinvoke $r6.<java.lang.String: boolean startsWith(java.lang.String)>("/store/search");
+
+        if $z0 == 0 goto label03;
+
+        $r3 = staticinvoke <org.fdroid.fdroid.compat.UriCompat: java.lang.String getQueryParameter(android.net.Uri,java.lang.String)>($r4, "q");
+
+        goto label03;
+
+     label19:
+        $r2 = staticinvoke <org.fdroid.fdroid.compat.UriCompat: java.lang.String getQueryParameter(android.net.Uri,java.lang.String)>($r4, "p");
+
+        $r3 = staticinvoke <org.fdroid.fdroid.compat.UriCompat: java.lang.String getQueryParameter(android.net.Uri,java.lang.String)>($r4, "s");
+
+        goto label03;
+
+     label20:
+        $r6 = "fdroid.app";
+
+        $z0 = virtualinvoke $r6.<java.lang.String: boolean equals(java.lang.Object)>($r5);
+
+        if $z0 == 0 goto label21;
+
+        $r2 = virtualinvoke $r4.<android.net.Uri: java.lang.String getSchemeSpecificPart()>();
+
+        goto label03;
+
+     label21:
+        $r6 = "fdroid.search";
+
+        $z0 = virtualinvoke $r6.<java.lang.String: boolean equals(java.lang.Object)>($r5);
+
+        if $z0 == 0 goto label03;
+
+        $r3 = virtualinvoke $r4.<android.net.Uri: java.lang.String getSchemeSpecificPart()>();
+
+        goto label03;
+
+     label22:
+        $z0 = staticinvoke <android.text.TextUtils: boolean isEmpty(java.lang.CharSequence)>($r3);
+
+        if $z0 != 0 goto label23;
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("FDroid launched via search link for \'");
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\'");
+
+        $r2 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <org.fdroid.fdroid.Utils: void debugLog(java.lang.String,java.lang.String)>("FDroid", $r2);
+
+        specialinvoke r0.<org.fdroid.fdroid.FDroid: void performSearch(java.lang.String)>($r3);
+
+     label23:
+        return;
+    }
+    private void performSearch(java.lang.String)
+    {
+        org.fdroid.fdroid.FDroid r0;
+        java.lang.String $r1;
+        android.view.View $r2;
+        android.view.MenuItem $r3;
+        android.support.v7.widget.SearchView r4;
+
+        r0 := @this: org.fdroid.fdroid.FDroid;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r3 = r0.<org.fdroid.fdroid.FDroid: android.view.MenuItem searchMenuItem>;
+
+        if $r3 != null goto label1;
+
+        r0.<org.fdroid.fdroid.FDroid: java.lang.String pendingSearchQuery> = $r1;
+
+        return;
+
+     label1:
+        $r3 = r0.<org.fdroid.fdroid.FDroid: android.view.MenuItem searchMenuItem>;
+
+        $r2 = staticinvoke <android.support.v4.view.MenuItemCompat: android.view.View getActionView(android.view.MenuItem)>($r3);
+
+        r4 = (android.support.v7.widget.SearchView) $r2;
+
+        $r3 = r0.<org.fdroid.fdroid.FDroid: android.view.MenuItem searchMenuItem>;
+
+        staticinvoke <android.support.v4.view.MenuItemCompat: boolean expandActionView(android.view.MenuItem)>($r3);
+
+        virtualinvoke r4.<android.support.v7.widget.SearchView: void setQuery(java.lang.CharSequence,boolean)>($r1, 1);
+
+        return;
+    }
+    private void refreshUpdateTabLabel()
+    {
+        org.fdroid.fdroid.FDroid r0;
+        org.fdroid.fdroid.compat.TabManager $r1;
+
+        r0 := @this: org.fdroid.fdroid.FDroid;
+
+        $r1 = specialinvoke r0.<org.fdroid.fdroid.FDroid: org.fdroid.fdroid.compat.TabManager getTabManager()>();
+
+        virtualinvoke $r1.<org.fdroid.fdroid.compat.TabManager: void refreshTabLabel(int)>(2);
+
+        $r1 = specialinvoke r0.<org.fdroid.fdroid.FDroid: org.fdroid.fdroid.compat.TabManager getTabManager()>();
+
+        virtualinvoke $r1.<org.fdroid.fdroid.compat.TabManager: void refreshTabLabel(int)>(1);
+
+        return;
+    }
+    protected void onActivityResult(int, int, android.content.Intent)
+    {
+        org.fdroid.fdroid.FDroid r0;
+        int $i0, $i1;
+        android.content.Intent $r1;
+        android.content.Context $r2;
+        android.app.Application $r3;
+        org.fdroid.fdroid.FDroidApp $r4;
+
+        r0 := @this: org.fdroid.fdroid.FDroid;
+
+        $i0 := @parameter0: int;
+
+        $i1 := @parameter1: int;
+
+        $r1 := @parameter2: android.content.Intent;
+
+        lookupswitch($i0)
+        {
+            case 1: goto label2;
+            case 2: goto label3;
+            default: goto label1;
+        };
+
+     label1:
+        return;
+
+     label2:
+        $r2 = virtualinvoke r0.<org.fdroid.fdroid.FDroid: android.content.Context getBaseContext()>();
+
+        staticinvoke <org.fdroid.fdroid.UpdateService: void schedule(android.content.Context)>($r2);
+
+        $i0 = $i1 & 4;
+
+        if $i0 == 0 goto label4;
+
+        $r3 = virtualinvoke r0.<org.fdroid.fdroid.FDroid: android.app.Application getApplication()>();
+
+        $r4 = (org.fdroid.fdroid.FDroidApp) $r3;
+
+        virtualinvoke $r4.<org.fdroid.fdroid.FDroidApp: void reloadTheme()>();
+
+        $r1 = virtualinvoke r0.<org.fdroid.fdroid.FDroid: android.content.Intent getIntent()>();
+
+        virtualinvoke r0.<org.fdroid.fdroid.FDroid: void overridePendingTransition(int,int)>(0, 0);
+
+        virtualinvoke $r1.<android.content.Intent: android.content.Intent addFlags(int)>(65536);
+
+        virtualinvoke r0.<org.fdroid.fdroid.FDroid: void finish()>();
+
+        virtualinvoke r0.<org.fdroid.fdroid.FDroid: void overridePendingTransition(int,int)>(0, 0);
+
+        virtualinvoke r0.<org.fdroid.fdroid.FDroid: void startActivity(android.content.Intent)>($r1);
+
+        return;
+
+     label3:
+        $r4 = r0.<org.fdroid.fdroid.FDroid: org.fdroid.fdroid.FDroidApp fdroidApp>;
+
+        virtualinvoke $r4.<org.fdroid.fdroid.FDroidApp: void sendViaBluetooth(android.app.Activity,int,java.lang.String)>(r0, $i1, "org.fdroid.fdroid");
+
+     label4:
+        return;
+    }
+    public void onConfigurationChanged(android.content.res.Configuration)
+    {
+        org.fdroid.fdroid.FDroid r0;
+        android.content.res.Configuration $r1;
+        org.fdroid.fdroid.compat.TabManager $r2;
+
+        r0 := @this: org.fdroid.fdroid.FDroid;
+
+        $r1 := @parameter0: android.content.res.Configuration;
+
+        specialinvoke r0.<android.support.v7.app.AppCompatActivity: void onConfigurationChanged(android.content.res.Configuration)>($r1);
+
+        $r2 = specialinvoke r0.<org.fdroid.fdroid.FDroid: org.fdroid.fdroid.compat.TabManager getTabManager()>();
+
+        virtualinvoke $r2.<org.fdroid.fdroid.compat.TabManager: void onConfigurationChanged(android.content.res.Configuration)>($r1);
+
+        return;
+    }
+    protected void onCreate(android.os.Bundle)
+    {
+        org.fdroid.fdroid.FDroid r0;
+        android.os.Bundle $r1;
+        org.fdroid.fdroid.FDroid$AppObserver $r2;
+        android.app.Application $r3;
+        org.fdroid.fdroid.FDroidApp $r4;
+        org.fdroid.fdroid.compat.TabManager $r5;
+        android.content.Intent $r6;
+        boolean $z0;
+        android.net.Uri $r7;
+        android.content.ContentResolver $r8;
+
+        r0 := @this: org.fdroid.fdroid.FDroid;
+
+        $r1 := @parameter0: android.os.Bundle;
+
+        $r3 = virtualinvoke r0.<org.fdroid.fdroid.FDroid: android.app.Application getApplication()>();
+
+        $r4 = (org.fdroid.fdroid.FDroidApp) $r3;
+
+        r0.<org.fdroid.fdroid.FDroid: org.fdroid.fdroid.FDroidApp fdroidApp> = $r4;
+
+        $r4 = r0.<org.fdroid.fdroid.FDroid: org.fdroid.fdroid.FDroidApp fdroidApp>;
+
+        virtualinvoke $r4.<org.fdroid.fdroid.FDroidApp: void applyTheme(android.app.Activity)>(r0);
+
+        specialinvoke r0.<android.support.v7.app.AppCompatActivity: void onCreate(android.os.Bundle)>($r1);
+
+        virtualinvoke r0.<org.fdroid.fdroid.FDroid: void setContentView(int)>(2130903078);
+
+        specialinvoke r0.<org.fdroid.fdroid.FDroid: void createViews()>();
+
+        $r5 = specialinvoke r0.<org.fdroid.fdroid.FDroid: org.fdroid.fdroid.compat.TabManager getTabManager()>();
+
+        virtualinvoke $r5.<org.fdroid.fdroid.compat.TabManager: void createTabs()>();
+
+        virtualinvoke r0.<org.fdroid.fdroid.FDroid: void setDefaultKeyMode(int)>(3);
+
+        $r6 = virtualinvoke r0.<org.fdroid.fdroid.FDroid: android.content.Intent getIntent()>();
+
+        specialinvoke r0.<org.fdroid.fdroid.FDroid: void handleSearchOrAppViewIntent(android.content.Intent)>($r6);
+
+        $z0 = virtualinvoke $r6.<android.content.Intent: boolean hasExtra(java.lang.String)>("extraTab");
+
+        if $z0 == 0 goto label1;
+
+        $z0 = virtualinvoke $r6.<android.content.Intent: boolean getBooleanExtra(java.lang.String,boolean)>("extraTab", 0);
+
+        if $z0 == 0 goto label1;
+
+        $r5 = specialinvoke r0.<org.fdroid.fdroid.FDroid: org.fdroid.fdroid.compat.TabManager getTabManager()>();
+
+        virtualinvoke $r5.<org.fdroid.fdroid.compat.TabManager: void selectTab(int)>(2);
+
+     label1:
+        $r7 = staticinvoke <org.fdroid.fdroid.data.AppProvider: android.net.Uri getContentUri()>();
+
+        $r8 = virtualinvoke r0.<org.fdroid.fdroid.FDroid: android.content.ContentResolver getContentResolver()>();
+
+        $r2 = new org.fdroid.fdroid.FDroid$AppObserver;
+
+        specialinvoke $r2.<org.fdroid.fdroid.FDroid$AppObserver: void <init>(org.fdroid.fdroid.FDroid)>(r0);
+
+        virtualinvoke $r8.<android.content.ContentResolver: void registerContentObserver(android.net.Uri,boolean,android.database.ContentObserver)>($r7, 1, $r2);
+
+        staticinvoke <org.fdroid.fdroid.privileged.install.InstallExtensionDialogActivity: void firstTime(android.content.Context)>(r0);
+
+        return;
+    }
+    public boolean onCreateOptionsMenu(android.view.Menu)
+    {
+        org.fdroid.fdroid.FDroid r0;
+        android.view.Menu $r1;
+        android.view.MenuInflater $r2;
+        org.fdroid.fdroid.FDroidApp $r3;
+        android.bluetooth.BluetoothAdapter $r4;
+        android.view.MenuItem $r5;
+        java.lang.Object $r6;
+        android.app.SearchManager r7;
+        android.view.View $r8;
+        android.support.v7.widget.SearchView r9;
+        android.content.ComponentName $r10;
+        android.app.SearchableInfo $r11;
+        java.lang.String $r12;
+        boolean $z0;
+
+        r0 := @this: org.fdroid.fdroid.FDroid;
+
+        $r1 := @parameter0: android.view.Menu;
+
+        $r2 = virtualinvoke r0.<org.fdroid.fdroid.FDroid: android.view.MenuInflater getMenuInflater()>();
+
+        virtualinvoke $r2.<android.view.MenuInflater: void inflate(int,android.view.Menu)>(2131689472, $r1);
+
+        $r3 = r0.<org.fdroid.fdroid.FDroid: org.fdroid.fdroid.FDroidApp fdroidApp>;
+
+        $r4 = $r3.<org.fdroid.fdroid.FDroidApp: android.bluetooth.BluetoothAdapter bluetoothAdapter>;
+
+        if $r4 != null goto label1;
+
+        $r5 = interfaceinvoke $r1.<android.view.Menu: android.view.MenuItem findItem(int)>(2131624179);
+
+        interfaceinvoke $r5.<android.view.MenuItem: android.view.MenuItem setVisible(boolean)>(0);
+
+     label1:
+        $r6 = virtualinvoke r0.<org.fdroid.fdroid.FDroid: java.lang.Object getSystemService(java.lang.String)>("search");
+
+        r7 = (android.app.SearchManager) $r6;
+
+        $r5 = interfaceinvoke $r1.<android.view.Menu: android.view.MenuItem findItem(int)>(2131624175);
+
+        r0.<org.fdroid.fdroid.FDroid: android.view.MenuItem searchMenuItem> = $r5;
+
+        $r5 = r0.<org.fdroid.fdroid.FDroid: android.view.MenuItem searchMenuItem>;
+
+        $r8 = staticinvoke <android.support.v4.view.MenuItemCompat: android.view.View getActionView(android.view.MenuItem)>($r5);
+
+        r9 = (android.support.v7.widget.SearchView) $r8;
+
+        $r10 = virtualinvoke r0.<org.fdroid.fdroid.FDroid: android.content.ComponentName getComponentName()>();
+
+        $r11 = virtualinvoke r7.<android.app.SearchManager: android.app.SearchableInfo getSearchableInfo(android.content.ComponentName)>($r10);
+
+        virtualinvoke r9.<android.support.v7.widget.SearchView: void setSearchableInfo(android.app.SearchableInfo)>($r11);
+
+        virtualinvoke r9.<android.support.v7.widget.SearchView: void setMaxWidth(int)>(1000000);
+
+        virtualinvoke r9.<android.support.v7.widget.SearchView: void setOnQueryTextListener(android.support.v7.widget.SearchView$OnQueryTextListener)>(r0);
+
+        $r12 = r0.<org.fdroid.fdroid.FDroid: java.lang.String pendingSearchQuery>;
+
+        if $r12 == null goto label2;
+
+        $r12 = r0.<org.fdroid.fdroid.FDroid: java.lang.String pendingSearchQuery>;
+
+        specialinvoke r0.<org.fdroid.fdroid.FDroid: void performSearch(java.lang.String)>($r12);
+
+        r0.<org.fdroid.fdroid.FDroid: java.lang.String pendingSearchQuery> = null;
+
+     label2:
+        $z0 = specialinvoke r0.<android.support.v7.app.AppCompatActivity: boolean onCreateOptionsMenu(android.view.Menu)>($r1);
+
+        return $z0;
+    }
+    protected void onNewIntent(android.content.Intent)
+    {
+        org.fdroid.fdroid.FDroid r0;
+        android.content.Intent $r1;
+
+        r0 := @this: org.fdroid.fdroid.FDroid;
+
+        $r1 := @parameter0: android.content.Intent;
+
+        specialinvoke r0.<android.support.v7.app.AppCompatActivity: void onNewIntent(android.content.Intent)>($r1);
+
+        specialinvoke r0.<org.fdroid.fdroid.FDroid: void handleSearchOrAppViewIntent(android.content.Intent)>($r1);
+
+        specialinvoke r0.<org.fdroid.fdroid.FDroid: void checkForAddRepoIntent(android.content.Intent)>($r1);
+
+        return;
+    }
+    public boolean onOptionsItemSelected(android.view.MenuItem)
+    {
+        org.fdroid.fdroid.FDroid r0;
+        android.view.MenuItem $r1;
+        android.content.Intent r2;
+        int $i0;
+        boolean $z0;
+        android.content.Context $r3;
+        android.view.LayoutInflater $r4;
+        android.view.View $r5, $r7;
+        java.lang.String $r6;
+        android.widget.TextView $r8;
+        android.support.v7.app.AlertDialog$Builder $r9;
+        android.support.v7.app.AlertDialog $r10;
+        org.fdroid.fdroid.FDroid$1 $r11;
+
+        r0 := @this: org.fdroid.fdroid.FDroid;
+
+        $r1 := @parameter0: android.view.MenuItem;
+
+        $i0 = interfaceinvoke $r1.<android.view.MenuItem: int getItemId()>();
+
+        lookupswitch($i0)
+        {
+            case 2131624176: goto label2;
+            case 2131624177: goto label5;
+            case 2131624178: goto label3;
+            case 2131624179: goto label6;
+            case 2131624180: goto label4;
+            case 2131624181: goto label7;
+            default: goto label1;
+        };
+
+     label1:
+        $z0 = specialinvoke r0.<android.support.v7.app.AppCompatActivity: boolean onOptionsItemSelected(android.view.MenuItem)>($r1);
+
+        return $z0;
+
+     label2:
+        staticinvoke <org.fdroid.fdroid.UpdateService: void updateNow(android.content.Context)>(r0);
+
+        return 1;
+
+     label3:
+        r2 = new android.content.Intent;
+
+        specialinvoke r2.<android.content.Intent: void <init>(android.content.Context,java.lang.Class)>(r0, class "Lorg/fdroid/fdroid/views/ManageReposActivity;");
+
+        virtualinvoke r0.<org.fdroid.fdroid.FDroid: void startActivity(android.content.Intent)>(r2);
+
+        return 1;
+
+     label4:
+        r2 = new android.content.Intent;
+
+        $r3 = virtualinvoke r0.<org.fdroid.fdroid.FDroid: android.content.Context getBaseContext()>();
+
+        specialinvoke r2.<android.content.Intent: void <init>(android.content.Context,java.lang.Class)>($r3, class "Lorg/fdroid/fdroid/PreferencesActivity;");
+
+        virtualinvoke r0.<org.fdroid.fdroid.FDroid: void startActivityForResult(android.content.Intent,int)>(r2, 1);
+
+        return 1;
+
+     label5:
+        r2 = new android.content.Intent;
+
+        specialinvoke r2.<android.content.Intent: void <init>(android.content.Context,java.lang.Class)>(r0, class "Lorg/fdroid/fdroid/views/swap/SwapWorkflowActivity;");
+
+        virtualinvoke r0.<org.fdroid.fdroid.FDroid: void startActivity(android.content.Intent)>(r2);
+
+        return 1;
+
+     label6:
+        r2 = new android.content.Intent;
+
+        specialinvoke r2.<android.content.Intent: void <init>(java.lang.String)>("android.bluetooth.adapter.action.REQUEST_DISCOVERABLE");
+
+        virtualinvoke r2.<android.content.Intent: android.content.Intent putExtra(java.lang.String,int)>("android.bluetooth.adapter.extra.DISCOVERABLE_DURATION", 121);
+
+        virtualinvoke r0.<org.fdroid.fdroid.FDroid: void startActivityForResult(android.content.Intent,int)>(r2, 2);
+
+        return 1;
+
+     label7:
+        $r4 = staticinvoke <android.view.LayoutInflater: android.view.LayoutInflater 'from'(android.content.Context)>(r0);
+
+        $r5 = virtualinvoke $r4.<android.view.LayoutInflater: android.view.View inflate(int,android.view.ViewGroup)>(2130903065, null);
+
+        $r6 = staticinvoke <org.fdroid.fdroid.Utils: java.lang.String getVersionName(android.content.Context)>(r0);
+
+        if $r6 == null goto label8;
+
+        $r7 = virtualinvoke $r5.<android.view.View: android.view.View findViewById(int)>(2131624017);
+
+        $r8 = (android.widget.TextView) $r7;
+
+        virtualinvoke $r8.<android.widget.TextView: void setText(java.lang.CharSequence)>($r6);
+
+     label8:
+        $r9 = new android.support.v7.app.AlertDialog$Builder;
+
+        specialinvoke $r9.<android.support.v7.app.AlertDialog$Builder: void <init>(android.content.Context)>(r0);
+
+        $r9 = virtualinvoke $r9.<android.support.v7.app.AlertDialog$Builder: android.support.v7.app.AlertDialog$Builder setView(android.view.View)>($r5);
+
+        $r10 = virtualinvoke $r9.<android.support.v7.app.AlertDialog$Builder: android.support.v7.app.AlertDialog create()>();
+
+        virtualinvoke $r10.<android.support.v7.app.AlertDialog: void setTitle(int)>(2131165265);
+
+        $r6 = virtualinvoke r0.<org.fdroid.fdroid.FDroid: java.lang.String getString(int)>(2131165239);
+
+        $r11 = new org.fdroid.fdroid.FDroid$1;
+
+        specialinvoke $r11.<org.fdroid.fdroid.FDroid$1: void <init>(org.fdroid.fdroid.FDroid)>(r0);
+
+        virtualinvoke $r10.<android.support.v7.app.AlertDialog: void setButton(int,java.lang.CharSequence,android.content.DialogInterface$OnClickListener)>(-2, $r6, $r11);
+
+        virtualinvoke $r10.<android.support.v7.app.AlertDialog: void show()>();
+
+        return 1;
+    }
+    public boolean onQueryTextChange(java.lang.String)
+    {
+        org.fdroid.fdroid.FDroid r0;
+        java.lang.String $r1;
+        org.fdroid.fdroid.views.AppListFragmentPagerAdapter $r2;
+
+        r0 := @this: org.fdroid.fdroid.FDroid;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = r0.<org.fdroid.fdroid.FDroid: org.fdroid.fdroid.views.AppListFragmentPagerAdapter adapter>;
+
+        virtualinvoke $r2.<org.fdroid.fdroid.views.AppListFragmentPagerAdapter: void updateSearchQuery(java.lang.String)>($r1);
+
+        return 1;
+    }
+    public boolean onQueryTextSubmit(java.lang.String)
+    {
+        org.fdroid.fdroid.FDroid r0;
+        java.lang.String $r1;
+
+        r0 := @this: org.fdroid.fdroid.FDroid;
+
+        $r1 := @parameter0: java.lang.String;
+
+        return 1;
+    }
+    protected void onResume()
+    {
+        org.fdroid.fdroid.FDroid r0;
+        android.app.Application $r1;
+        java.lang.String $r2;
+        android.content.Intent $r3;
+
+        r0 := @this: org.fdroid.fdroid.FDroid;
+
+        specialinvoke r0.<android.support.v7.app.AppCompatActivity: void onResume()>();
+
+        $r1 = virtualinvoke r0.<org.fdroid.fdroid.FDroid: android.app.Application getApplication()>();
+
+        $r2 = virtualinvoke $r1.<android.app.Application: java.lang.String getPackageName()>();
+
+        staticinvoke <org.fdroid.fdroid.NfcHelper: void setAndroidBeam(android.app.Activity,java.lang.String)>(r0, $r2);
+
+        $r3 = virtualinvoke r0.<org.fdroid.fdroid.FDroid: android.content.Intent getIntent()>();
+
+        specialinvoke r0.<org.fdroid.fdroid.FDroid: void checkForAddRepoIntent(android.content.Intent)>($r3);
+
+        return;
+    }
+    public void removeNotification(int)
+    {
+        org.fdroid.fdroid.FDroid r0;
+        int $i0;
+        android.content.Context $r1;
+        java.lang.Object $r2;
+        android.app.NotificationManager r3;
+
+        r0 := @this: org.fdroid.fdroid.FDroid;
+
+        $i0 := @parameter0: int;
+
+        $r1 = virtualinvoke r0.<org.fdroid.fdroid.FDroid: android.content.Context getBaseContext()>();
+
+        $r2 = virtualinvoke $r1.<android.content.Context: java.lang.Object getSystemService(java.lang.String)>("notification");
+
+        r3 = (android.app.NotificationManager) $r2;
+
+        virtualinvoke r3.<android.app.NotificationManager: void cancel(int)>($i0);
+
+        return;
+    }

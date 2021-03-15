@@ -1,0 +1,1581 @@
+org.spongycastle.crypto.engines.Salsa20Engine extends java.lang.Object implements org.spongycastle.crypto.SkippingStreamCipher
+public static final int DEFAULT_ROUNDS
+private static final int STATE_SIZE
+protected static final byte[] sigma
+protected static final byte[] tau
+private int cW0
+private int cW1
+private int cW2
+protected int[] engineState
+private int index
+private boolean initialised
+private byte[] keyStream
+protected int rounds
+protected int[] x
+    static void <clinit>()
+    {
+        byte[] $r0;
+
+        $r0 = staticinvoke <org.spongycastle.util.Strings: byte[] toByteArray(java.lang.String)>("expand 32-byte k");
+
+        <org.spongycastle.crypto.engines.Salsa20Engine: byte[] sigma> = $r0;
+
+        $r0 = staticinvoke <org.spongycastle.util.Strings: byte[] toByteArray(java.lang.String)>("expand 16-byte k");
+
+        <org.spongycastle.crypto.engines.Salsa20Engine: byte[] tau> = $r0;
+
+        return;
+    }
+    public void <init>()
+    {
+        org.spongycastle.crypto.engines.Salsa20Engine r0;
+
+        r0 := @this: org.spongycastle.crypto.engines.Salsa20Engine;
+
+        specialinvoke r0.<org.spongycastle.crypto.engines.Salsa20Engine: void <init>(int)>(20);
+
+        return;
+    }
+    public void <init>(int)
+    {
+        org.spongycastle.crypto.engines.Salsa20Engine r0;
+        int $i0, $i1;
+        int[] $r1;
+        byte[] $r2;
+        java.lang.IllegalArgumentException $r3;
+
+        r0 := @this: org.spongycastle.crypto.engines.Salsa20Engine;
+
+        $i0 := @parameter0: int;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<org.spongycastle.crypto.engines.Salsa20Engine: int index> = 0;
+
+        $r1 = newarray (int)[16];
+
+        r0.<org.spongycastle.crypto.engines.Salsa20Engine: int[] engineState> = $r1;
+
+        $r1 = newarray (int)[16];
+
+        r0.<org.spongycastle.crypto.engines.Salsa20Engine: int[] x> = $r1;
+
+        $r2 = newarray (byte)[64];
+
+        r0.<org.spongycastle.crypto.engines.Salsa20Engine: byte[] keyStream> = $r2;
+
+        r0.<org.spongycastle.crypto.engines.Salsa20Engine: boolean initialised> = 0;
+
+        if $i0 <= 0 goto label1;
+
+        $i1 = $i0 & 1;
+
+        if $i1 == 0 goto label2;
+
+     label1:
+        $r3 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r3.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("\'rounds\' must be a positive, even number");
+
+        throw $r3;
+
+     label2:
+        r0.<org.spongycastle.crypto.engines.Salsa20Engine: int rounds> = $i0;
+
+        return;
+    }
+    private boolean limitExceeded()
+    {
+        org.spongycastle.crypto.engines.Salsa20Engine r0;
+        int $i0;
+
+        r0 := @this: org.spongycastle.crypto.engines.Salsa20Engine;
+
+        $i0 = r0.<org.spongycastle.crypto.engines.Salsa20Engine: int cW0>;
+
+        $i0 = $i0 + 1;
+
+        r0.<org.spongycastle.crypto.engines.Salsa20Engine: int cW0> = $i0;
+
+        if $i0 != 0 goto label1;
+
+        $i0 = r0.<org.spongycastle.crypto.engines.Salsa20Engine: int cW1>;
+
+        $i0 = $i0 + 1;
+
+        r0.<org.spongycastle.crypto.engines.Salsa20Engine: int cW1> = $i0;
+
+        if $i0 != 0 goto label1;
+
+        $i0 = r0.<org.spongycastle.crypto.engines.Salsa20Engine: int cW2>;
+
+        $i0 = $i0 + 1;
+
+        r0.<org.spongycastle.crypto.engines.Salsa20Engine: int cW2> = $i0;
+
+        $i0 = $i0 & 32;
+
+        if $i0 == 0 goto label1;
+
+        return 1;
+
+     label1:
+        return 0;
+    }
+    private boolean limitExceeded(int)
+    {
+        org.spongycastle.crypto.engines.Salsa20Engine r0;
+        int $i0, $i1;
+
+        r0 := @this: org.spongycastle.crypto.engines.Salsa20Engine;
+
+        $i0 := @parameter0: int;
+
+        $i1 = r0.<org.spongycastle.crypto.engines.Salsa20Engine: int cW0>;
+
+        $i1 = $i1 + $i0;
+
+        r0.<org.spongycastle.crypto.engines.Salsa20Engine: int cW0> = $i1;
+
+        $i1 = r0.<org.spongycastle.crypto.engines.Salsa20Engine: int cW0>;
+
+        if $i1 >= $i0 goto label1;
+
+        $i0 = r0.<org.spongycastle.crypto.engines.Salsa20Engine: int cW0>;
+
+        if $i0 < 0 goto label1;
+
+        $i0 = r0.<org.spongycastle.crypto.engines.Salsa20Engine: int cW1>;
+
+        $i0 = $i0 + 1;
+
+        r0.<org.spongycastle.crypto.engines.Salsa20Engine: int cW1> = $i0;
+
+        if $i0 != 0 goto label1;
+
+        $i0 = r0.<org.spongycastle.crypto.engines.Salsa20Engine: int cW2>;
+
+        $i0 = $i0 + 1;
+
+        r0.<org.spongycastle.crypto.engines.Salsa20Engine: int cW2> = $i0;
+
+        $i0 = $i0 & 32;
+
+        if $i0 == 0 goto label1;
+
+        return 1;
+
+     label1:
+        return 0;
+    }
+    private void resetLimitCounter()
+    {
+        org.spongycastle.crypto.engines.Salsa20Engine r0;
+
+        r0 := @this: org.spongycastle.crypto.engines.Salsa20Engine;
+
+        r0.<org.spongycastle.crypto.engines.Salsa20Engine: int cW0> = 0;
+
+        r0.<org.spongycastle.crypto.engines.Salsa20Engine: int cW1> = 0;
+
+        r0.<org.spongycastle.crypto.engines.Salsa20Engine: int cW2> = 0;
+
+        return;
+    }
+    protected static int rotl(int, int)
+    {
+        int $i0, $i1, $i2;
+
+        $i0 := @parameter0: int;
+
+        $i1 := @parameter1: int;
+
+        $i2 = $i0 << $i1;
+
+        $i1 = neg $i1;
+
+        $i0 = $i0 >>> $i1;
+
+        $i0 = $i2 | $i0;
+
+        return $i0;
+    }
+    public static void salsaCore(int, int[], int[])
+    {
+        int $i0, $i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15, i16, $i17;
+        int[] $r0, $r1;
+        java.lang.IllegalArgumentException $r2;
+
+        $i0 := @parameter0: int;
+
+        $r0 := @parameter1: int[];
+
+        $r1 := @parameter2: int[];
+
+        $i1 = lengthof $r0;
+
+        if $i1 == 16 goto label1;
+
+        $r2 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r2.<java.lang.IllegalArgumentException: void <init>()>();
+
+        throw $r2;
+
+     label1:
+        $i1 = lengthof $r1;
+
+        if $i1 == 16 goto label2;
+
+        $r2 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r2.<java.lang.IllegalArgumentException: void <init>()>();
+
+        throw $r2;
+
+     label2:
+        $i1 = $i0 % 2;
+
+        if $i1 == 0 goto label3;
+
+        $r2 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r2.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Number of rounds must be even");
+
+        throw $r2;
+
+     label3:
+        i2 = $r0[0];
+
+        i3 = $r0[1];
+
+        i4 = $r0[2];
+
+        i5 = $r0[3];
+
+        i6 = $r0[4];
+
+        i7 = $r0[5];
+
+        i8 = $r0[6];
+
+        i9 = $r0[7];
+
+        i10 = $r0[8];
+
+        i11 = $r0[9];
+
+        i12 = $r0[10];
+
+        $i1 = $r0[11];
+
+        i13 = $r0[12];
+
+        i14 = $r0[13];
+
+        i15 = $r0[14];
+
+        i16 = $r0[15];
+
+     label4:
+        if $i0 <= 0 goto label5;
+
+        $i17 = i2 + i13;
+
+        $i17 = staticinvoke <org.spongycastle.crypto.engines.Salsa20Engine: int rotl(int,int)>($i17, 7);
+
+        i6 = i6 ^ $i17;
+
+        $i17 = i6 + i2;
+
+        $i17 = staticinvoke <org.spongycastle.crypto.engines.Salsa20Engine: int rotl(int,int)>($i17, 9);
+
+        i10 = i10 ^ $i17;
+
+        $i17 = i10 + i6;
+
+        $i17 = staticinvoke <org.spongycastle.crypto.engines.Salsa20Engine: int rotl(int,int)>($i17, 13);
+
+        i13 = i13 ^ $i17;
+
+        $i17 = i13 + i10;
+
+        $i17 = staticinvoke <org.spongycastle.crypto.engines.Salsa20Engine: int rotl(int,int)>($i17, 18);
+
+        i2 = i2 ^ $i17;
+
+        $i17 = i7 + i3;
+
+        $i17 = staticinvoke <org.spongycastle.crypto.engines.Salsa20Engine: int rotl(int,int)>($i17, 7);
+
+        i11 = i11 ^ $i17;
+
+        $i17 = i11 + i7;
+
+        $i17 = staticinvoke <org.spongycastle.crypto.engines.Salsa20Engine: int rotl(int,int)>($i17, 9);
+
+        i14 = i14 ^ $i17;
+
+        $i17 = i14 + i11;
+
+        $i17 = staticinvoke <org.spongycastle.crypto.engines.Salsa20Engine: int rotl(int,int)>($i17, 13);
+
+        i3 = i3 ^ $i17;
+
+        $i17 = i3 + i14;
+
+        $i17 = staticinvoke <org.spongycastle.crypto.engines.Salsa20Engine: int rotl(int,int)>($i17, 18);
+
+        i7 = i7 ^ $i17;
+
+        $i17 = i12 + i8;
+
+        $i17 = staticinvoke <org.spongycastle.crypto.engines.Salsa20Engine: int rotl(int,int)>($i17, 7);
+
+        i15 = i15 ^ $i17;
+
+        $i17 = i15 + i12;
+
+        $i17 = staticinvoke <org.spongycastle.crypto.engines.Salsa20Engine: int rotl(int,int)>($i17, 9);
+
+        i4 = i4 ^ $i17;
+
+        $i17 = i4 + i15;
+
+        $i17 = staticinvoke <org.spongycastle.crypto.engines.Salsa20Engine: int rotl(int,int)>($i17, 13);
+
+        i8 = i8 ^ $i17;
+
+        $i17 = i8 + i4;
+
+        $i17 = staticinvoke <org.spongycastle.crypto.engines.Salsa20Engine: int rotl(int,int)>($i17, 18);
+
+        i12 = i12 ^ $i17;
+
+        $i17 = i16 + $i1;
+
+        $i17 = staticinvoke <org.spongycastle.crypto.engines.Salsa20Engine: int rotl(int,int)>($i17, 7);
+
+        i5 = i5 ^ $i17;
+
+        $i17 = i5 + i16;
+
+        $i17 = staticinvoke <org.spongycastle.crypto.engines.Salsa20Engine: int rotl(int,int)>($i17, 9);
+
+        i9 = i9 ^ $i17;
+
+        $i17 = i9 + i5;
+
+        $i17 = staticinvoke <org.spongycastle.crypto.engines.Salsa20Engine: int rotl(int,int)>($i17, 13);
+
+        $i1 = $i1 ^ $i17;
+
+        $i17 = $i1 + i9;
+
+        $i17 = staticinvoke <org.spongycastle.crypto.engines.Salsa20Engine: int rotl(int,int)>($i17, 18);
+
+        i16 = i16 ^ $i17;
+
+        $i17 = i2 + i5;
+
+        $i17 = staticinvoke <org.spongycastle.crypto.engines.Salsa20Engine: int rotl(int,int)>($i17, 7);
+
+        i3 = i3 ^ $i17;
+
+        $i17 = i3 + i2;
+
+        $i17 = staticinvoke <org.spongycastle.crypto.engines.Salsa20Engine: int rotl(int,int)>($i17, 9);
+
+        i4 = i4 ^ $i17;
+
+        $i17 = i4 + i3;
+
+        $i17 = staticinvoke <org.spongycastle.crypto.engines.Salsa20Engine: int rotl(int,int)>($i17, 13);
+
+        i5 = i5 ^ $i17;
+
+        $i17 = i5 + i4;
+
+        $i17 = staticinvoke <org.spongycastle.crypto.engines.Salsa20Engine: int rotl(int,int)>($i17, 18);
+
+        i2 = i2 ^ $i17;
+
+        $i17 = i7 + i6;
+
+        $i17 = staticinvoke <org.spongycastle.crypto.engines.Salsa20Engine: int rotl(int,int)>($i17, 7);
+
+        i8 = i8 ^ $i17;
+
+        $i17 = i8 + i7;
+
+        $i17 = staticinvoke <org.spongycastle.crypto.engines.Salsa20Engine: int rotl(int,int)>($i17, 9);
+
+        i9 = i9 ^ $i17;
+
+        $i17 = i9 + i8;
+
+        $i17 = staticinvoke <org.spongycastle.crypto.engines.Salsa20Engine: int rotl(int,int)>($i17, 13);
+
+        i6 = i6 ^ $i17;
+
+        $i17 = i6 + i9;
+
+        $i17 = staticinvoke <org.spongycastle.crypto.engines.Salsa20Engine: int rotl(int,int)>($i17, 18);
+
+        i7 = i7 ^ $i17;
+
+        $i17 = i12 + i11;
+
+        $i17 = staticinvoke <org.spongycastle.crypto.engines.Salsa20Engine: int rotl(int,int)>($i17, 7);
+
+        $i1 = $i1 ^ $i17;
+
+        $i17 = $i1 + i12;
+
+        $i17 = staticinvoke <org.spongycastle.crypto.engines.Salsa20Engine: int rotl(int,int)>($i17, 9);
+
+        i10 = i10 ^ $i17;
+
+        $i17 = i10 + $i1;
+
+        $i17 = staticinvoke <org.spongycastle.crypto.engines.Salsa20Engine: int rotl(int,int)>($i17, 13);
+
+        i11 = i11 ^ $i17;
+
+        $i17 = i11 + i10;
+
+        $i17 = staticinvoke <org.spongycastle.crypto.engines.Salsa20Engine: int rotl(int,int)>($i17, 18);
+
+        i12 = i12 ^ $i17;
+
+        $i17 = i16 + i15;
+
+        $i17 = staticinvoke <org.spongycastle.crypto.engines.Salsa20Engine: int rotl(int,int)>($i17, 7);
+
+        i13 = i13 ^ $i17;
+
+        $i17 = i13 + i16;
+
+        $i17 = staticinvoke <org.spongycastle.crypto.engines.Salsa20Engine: int rotl(int,int)>($i17, 9);
+
+        i14 = i14 ^ $i17;
+
+        $i17 = i14 + i13;
+
+        $i17 = staticinvoke <org.spongycastle.crypto.engines.Salsa20Engine: int rotl(int,int)>($i17, 13);
+
+        i15 = i15 ^ $i17;
+
+        $i17 = i15 + i14;
+
+        $i17 = staticinvoke <org.spongycastle.crypto.engines.Salsa20Engine: int rotl(int,int)>($i17, 18);
+
+        i16 = i16 ^ $i17;
+
+        $i0 = $i0 + -2;
+
+        goto label4;
+
+     label5:
+        $i0 = $r0[0];
+
+        $i0 = $i0 + i2;
+
+        $r1[0] = $i0;
+
+        $i0 = $r0[1];
+
+        $i0 = $i0 + i3;
+
+        $r1[1] = $i0;
+
+        $i0 = $r0[2];
+
+        $i0 = $i0 + i4;
+
+        $r1[2] = $i0;
+
+        $i0 = $r0[3];
+
+        $i0 = $i0 + i5;
+
+        $r1[3] = $i0;
+
+        $i0 = $r0[4];
+
+        $i0 = $i0 + i6;
+
+        $r1[4] = $i0;
+
+        $i0 = $r0[5];
+
+        $i0 = $i0 + i7;
+
+        $r1[5] = $i0;
+
+        $i0 = $r0[6];
+
+        $i0 = $i0 + i8;
+
+        $r1[6] = $i0;
+
+        $i0 = $r0[7];
+
+        $i0 = $i0 + i9;
+
+        $r1[7] = $i0;
+
+        $i0 = $r0[8];
+
+        $i0 = $i0 + i10;
+
+        $r1[8] = $i0;
+
+        $i0 = $r0[9];
+
+        $i0 = $i0 + i11;
+
+        $r1[9] = $i0;
+
+        $i0 = $r0[10];
+
+        $i0 = $i0 + i12;
+
+        $r1[10] = $i0;
+
+        $i0 = $r0[11];
+
+        $i0 = $i0 + $i1;
+
+        $r1[11] = $i0;
+
+        $i0 = $r0[12];
+
+        $i0 = $i0 + i13;
+
+        $r1[12] = $i0;
+
+        $i0 = $r0[13];
+
+        $i0 = $i0 + i14;
+
+        $r1[13] = $i0;
+
+        $i0 = $r0[14];
+
+        $i0 = $i0 + i15;
+
+        $r1[14] = $i0;
+
+        $i0 = $r0[15];
+
+        $i0 = $i0 + i16;
+
+        $r1[15] = $i0;
+
+        return;
+    }
+    protected void advanceCounter()
+    {
+        org.spongycastle.crypto.engines.Salsa20Engine r0;
+        int[] $r1;
+        int $i0;
+
+        r0 := @this: org.spongycastle.crypto.engines.Salsa20Engine;
+
+        $r1 = r0.<org.spongycastle.crypto.engines.Salsa20Engine: int[] engineState>;
+
+        $i0 = $r1[8];
+
+        $i0 = $i0 + 1;
+
+        $r1[8] = $i0;
+
+        if $i0 != 0 goto label1;
+
+        $r1 = r0.<org.spongycastle.crypto.engines.Salsa20Engine: int[] engineState>;
+
+        $i0 = $r1[9];
+
+        $i0 = $i0 + 1;
+
+        $r1[9] = $i0;
+
+     label1:
+        return;
+    }
+    protected void advanceCounter(long)
+    {
+        org.spongycastle.crypto.engines.Salsa20Engine r0;
+        long $l0, $l3;
+        int i1, i2, $i4;
+        int[] $r1;
+
+        r0 := @this: org.spongycastle.crypto.engines.Salsa20Engine;
+
+        $l0 := @parameter0: long;
+
+        $l3 = $l0 >>> 32;
+
+        i1 = (int) $l3;
+
+        i2 = (int) $l0;
+
+        if i1 <= 0 goto label1;
+
+        $r1 = r0.<org.spongycastle.crypto.engines.Salsa20Engine: int[] engineState>;
+
+        $i4 = $r1[9];
+
+        i1 = $i4 + i1;
+
+        $r1[9] = i1;
+
+     label1:
+        $r1 = r0.<org.spongycastle.crypto.engines.Salsa20Engine: int[] engineState>;
+
+        i1 = $r1[8];
+
+        $r1 = r0.<org.spongycastle.crypto.engines.Salsa20Engine: int[] engineState>;
+
+        $i4 = $r1[8];
+
+        i2 = $i4 + i2;
+
+        $r1[8] = i2;
+
+        if i1 == 0 goto label2;
+
+        $r1 = r0.<org.spongycastle.crypto.engines.Salsa20Engine: int[] engineState>;
+
+        i2 = $r1[8];
+
+        if i2 >= i1 goto label2;
+
+        $r1 = r0.<org.spongycastle.crypto.engines.Salsa20Engine: int[] engineState>;
+
+        i2 = $r1[9];
+
+        i2 = i2 + 1;
+
+        $r1[9] = i2;
+
+     label2:
+        return;
+    }
+    protected void generateKeyStream(byte[])
+    {
+        org.spongycastle.crypto.engines.Salsa20Engine r0;
+        byte[] $r1;
+        int[] $r2, $r3;
+        int $i0;
+
+        r0 := @this: org.spongycastle.crypto.engines.Salsa20Engine;
+
+        $r1 := @parameter0: byte[];
+
+        $i0 = r0.<org.spongycastle.crypto.engines.Salsa20Engine: int rounds>;
+
+        $r3 = r0.<org.spongycastle.crypto.engines.Salsa20Engine: int[] engineState>;
+
+        $r2 = r0.<org.spongycastle.crypto.engines.Salsa20Engine: int[] x>;
+
+        staticinvoke <org.spongycastle.crypto.engines.Salsa20Engine: void salsaCore(int,int[],int[])>($i0, $r3, $r2);
+
+        $r2 = r0.<org.spongycastle.crypto.engines.Salsa20Engine: int[] x>;
+
+        staticinvoke <org.spongycastle.util.Pack: void intToLittleEndian(int[],byte[],int)>($r2, $r1, 0);
+
+        return;
+    }
+    public java.lang.String getAlgorithmName()
+    {
+        org.spongycastle.crypto.engines.Salsa20Engine r0;
+        int $i0;
+        java.lang.StringBuilder $r1;
+        java.lang.String $r2;
+
+        r0 := @this: org.spongycastle.crypto.engines.Salsa20Engine;
+
+        $i0 = r0.<org.spongycastle.crypto.engines.Salsa20Engine: int rounds>;
+
+        if $i0 == 20 goto label1;
+
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r1 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Salsa20");
+
+        $r1 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("/");
+
+        $i0 = r0.<org.spongycastle.crypto.engines.Salsa20Engine: int rounds>;
+
+        $r1 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r2 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r2;
+
+     label1:
+        return "Salsa20";
+    }
+    protected long getCounter()
+    {
+        org.spongycastle.crypto.engines.Salsa20Engine r0;
+        int[] $r1;
+        int $i0;
+        long $l1, $l2;
+
+        r0 := @this: org.spongycastle.crypto.engines.Salsa20Engine;
+
+        $r1 = r0.<org.spongycastle.crypto.engines.Salsa20Engine: int[] engineState>;
+
+        $i0 = $r1[9];
+
+        $l1 = (long) $i0;
+
+        $l1 = $l1 << 32;
+
+        $r1 = r0.<org.spongycastle.crypto.engines.Salsa20Engine: int[] engineState>;
+
+        $i0 = $r1[8];
+
+        $l2 = (long) $i0;
+
+        $l2 = $l2 & 4294967295L;
+
+        $l1 = $l1 | $l2;
+
+        return $l1;
+    }
+    protected int getNonceSize()
+    {
+        org.spongycastle.crypto.engines.Salsa20Engine r0;
+
+        r0 := @this: org.spongycastle.crypto.engines.Salsa20Engine;
+
+        return 8;
+    }
+    public long getPosition()
+    {
+        org.spongycastle.crypto.engines.Salsa20Engine r0;
+        long $l0, $l2;
+        int $i1;
+
+        r0 := @this: org.spongycastle.crypto.engines.Salsa20Engine;
+
+        $l0 = virtualinvoke r0.<org.spongycastle.crypto.engines.Salsa20Engine: long getCounter()>();
+
+        $l0 = $l0 * 64L;
+
+        $i1 = r0.<org.spongycastle.crypto.engines.Salsa20Engine: int index>;
+
+        $l2 = (long) $i1;
+
+        $l0 = $l0 + $l2;
+
+        return $l0;
+    }
+    public void init(boolean, org.spongycastle.crypto.CipherParameters)
+    {
+        org.spongycastle.crypto.engines.Salsa20Engine r0;
+        boolean $z0;
+        org.spongycastle.crypto.CipherParameters $r1;
+        java.lang.IllegalArgumentException $r2;
+        java.lang.StringBuilder $r3;
+        java.lang.String $r4;
+        org.spongycastle.crypto.params.ParametersWithIV r5;
+        byte[] $r6, $r9;
+        int $i0, $i1;
+        java.lang.IllegalStateException $r7;
+        org.spongycastle.crypto.params.KeyParameter r8;
+
+        r0 := @this: org.spongycastle.crypto.engines.Salsa20Engine;
+
+        $z0 := @parameter0: boolean;
+
+        $r1 := @parameter1: org.spongycastle.crypto.CipherParameters;
+
+        $z0 = $r1 instanceof org.spongycastle.crypto.params.ParametersWithIV;
+
+        if $z0 != 0 goto label1;
+
+        $r2 = new java.lang.IllegalArgumentException;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke r0.<org.spongycastle.crypto.engines.Salsa20Engine: java.lang.String getAlgorithmName()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" Init parameters must include an IV");
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r2.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r4);
+
+        throw $r2;
+
+     label1:
+        r5 = (org.spongycastle.crypto.params.ParametersWithIV) $r1;
+
+        $r6 = virtualinvoke r5.<org.spongycastle.crypto.params.ParametersWithIV: byte[] getIV()>();
+
+        if $r6 == null goto label2;
+
+        $i0 = lengthof $r6;
+
+        $i1 = virtualinvoke r0.<org.spongycastle.crypto.engines.Salsa20Engine: int getNonceSize()>();
+
+        if $i0 == $i1 goto label3;
+
+     label2:
+        $r2 = new java.lang.IllegalArgumentException;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke r0.<org.spongycastle.crypto.engines.Salsa20Engine: java.lang.String getAlgorithmName()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" requires exactly ");
+
+        $i0 = virtualinvoke r0.<org.spongycastle.crypto.engines.Salsa20Engine: int getNonceSize()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" bytes of IV");
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r2.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r4);
+
+        throw $r2;
+
+     label3:
+        $r1 = virtualinvoke r5.<org.spongycastle.crypto.params.ParametersWithIV: org.spongycastle.crypto.CipherParameters getParameters()>();
+
+        if $r1 != null goto label6;
+
+        $z0 = r0.<org.spongycastle.crypto.engines.Salsa20Engine: boolean initialised>;
+
+        if $z0 != 0 goto label4;
+
+        $r7 = new java.lang.IllegalStateException;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke r0.<org.spongycastle.crypto.engines.Salsa20Engine: java.lang.String getAlgorithmName()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" KeyParameter can not be null for first initialisation");
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r7.<java.lang.IllegalStateException: void <init>(java.lang.String)>($r4);
+
+        throw $r7;
+
+     label4:
+        virtualinvoke r0.<org.spongycastle.crypto.engines.Salsa20Engine: void setKey(byte[],byte[])>(null, $r6);
+
+     label5:
+        virtualinvoke r0.<org.spongycastle.crypto.engines.Salsa20Engine: void reset()>();
+
+        r0.<org.spongycastle.crypto.engines.Salsa20Engine: boolean initialised> = 1;
+
+        return;
+
+     label6:
+        $z0 = $r1 instanceof org.spongycastle.crypto.params.KeyParameter;
+
+        if $z0 == 0 goto label7;
+
+        r8 = (org.spongycastle.crypto.params.KeyParameter) $r1;
+
+        $r9 = virtualinvoke r8.<org.spongycastle.crypto.params.KeyParameter: byte[] getKey()>();
+
+        virtualinvoke r0.<org.spongycastle.crypto.engines.Salsa20Engine: void setKey(byte[],byte[])>($r9, $r6);
+
+        goto label5;
+
+     label7:
+        $r2 = new java.lang.IllegalArgumentException;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke r0.<org.spongycastle.crypto.engines.Salsa20Engine: java.lang.String getAlgorithmName()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" Init parameters must contain a KeyParameter (or null for re-init)");
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r2.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r4);
+
+        throw $r2;
+    }
+    public int processBytes(byte[], int, int, byte[], int)
+    {
+        org.spongycastle.crypto.engines.Salsa20Engine r0;
+        byte[] $r1, $r2, $r9;
+        int $i0, $i1, $i2, $i3, $i4, $i5;
+        boolean $z0;
+        java.lang.IllegalStateException $r3;
+        java.lang.StringBuilder $r4;
+        java.lang.String $r5;
+        org.spongycastle.crypto.DataLengthException $r6;
+        org.spongycastle.crypto.OutputLengthException $r7;
+        org.spongycastle.crypto.MaxBytesExceededException $r8;
+        byte $b6, $b7;
+
+        r0 := @this: org.spongycastle.crypto.engines.Salsa20Engine;
+
+        $r1 := @parameter0: byte[];
+
+        $i0 := @parameter1: int;
+
+        $i1 := @parameter2: int;
+
+        $r2 := @parameter3: byte[];
+
+        $i2 := @parameter4: int;
+
+        $z0 = r0.<org.spongycastle.crypto.engines.Salsa20Engine: boolean initialised>;
+
+        if $z0 != 0 goto label1;
+
+        $r3 = new java.lang.IllegalStateException;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke r0.<org.spongycastle.crypto.engines.Salsa20Engine: java.lang.String getAlgorithmName()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" not initialised");
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r3.<java.lang.IllegalStateException: void <init>(java.lang.String)>($r5);
+
+        throw $r3;
+
+     label1:
+        $i3 = $i0 + $i1;
+
+        $i4 = lengthof $r1;
+
+        if $i3 <= $i4 goto label2;
+
+        $r6 = new org.spongycastle.crypto.DataLengthException;
+
+        specialinvoke $r6.<org.spongycastle.crypto.DataLengthException: void <init>(java.lang.String)>("input buffer too short");
+
+        throw $r6;
+
+     label2:
+        $i3 = $i2 + $i1;
+
+        $i4 = lengthof $r2;
+
+        if $i3 <= $i4 goto label3;
+
+        $r7 = new org.spongycastle.crypto.OutputLengthException;
+
+        specialinvoke $r7.<org.spongycastle.crypto.OutputLengthException: void <init>(java.lang.String)>("output buffer too short");
+
+        throw $r7;
+
+     label3:
+        $z0 = specialinvoke r0.<org.spongycastle.crypto.engines.Salsa20Engine: boolean limitExceeded(int)>($i1);
+
+        if $z0 == 0 goto label4;
+
+        $r8 = new org.spongycastle.crypto.MaxBytesExceededException;
+
+        specialinvoke $r8.<org.spongycastle.crypto.MaxBytesExceededException: void <init>(java.lang.String)>("2^70 byte limit per IV would be exceeded; Change IV");
+
+        throw $r8;
+
+     label4:
+        $i3 = 0;
+
+     label5:
+        if $i3 >= $i1 goto label7;
+
+        $i4 = $i3 + $i2;
+
+        $r9 = r0.<org.spongycastle.crypto.engines.Salsa20Engine: byte[] keyStream>;
+
+        $i5 = r0.<org.spongycastle.crypto.engines.Salsa20Engine: int index>;
+
+        $b6 = $r9[$i5];
+
+        $i5 = $i3 + $i0;
+
+        $b7 = $r1[$i5];
+
+        $i5 = $b6 ^ $b7;
+
+        $b6 = (byte) $i5;
+
+        $r2[$i4] = $b6;
+
+        $i4 = r0.<org.spongycastle.crypto.engines.Salsa20Engine: int index>;
+
+        $i4 = $i4 + 1;
+
+        $i4 = $i4 & 63;
+
+        r0.<org.spongycastle.crypto.engines.Salsa20Engine: int index> = $i4;
+
+        $i4 = r0.<org.spongycastle.crypto.engines.Salsa20Engine: int index>;
+
+        if $i4 != 0 goto label6;
+
+        virtualinvoke r0.<org.spongycastle.crypto.engines.Salsa20Engine: void advanceCounter()>();
+
+        $r9 = r0.<org.spongycastle.crypto.engines.Salsa20Engine: byte[] keyStream>;
+
+        virtualinvoke r0.<org.spongycastle.crypto.engines.Salsa20Engine: void generateKeyStream(byte[])>($r9);
+
+     label6:
+        $i3 = $i3 + 1;
+
+        goto label5;
+
+     label7:
+        return $i1;
+    }
+    public void reset()
+    {
+        org.spongycastle.crypto.engines.Salsa20Engine r0;
+        byte[] $r1;
+
+        r0 := @this: org.spongycastle.crypto.engines.Salsa20Engine;
+
+        r0.<org.spongycastle.crypto.engines.Salsa20Engine: int index> = 0;
+
+        specialinvoke r0.<org.spongycastle.crypto.engines.Salsa20Engine: void resetLimitCounter()>();
+
+        virtualinvoke r0.<org.spongycastle.crypto.engines.Salsa20Engine: void resetCounter()>();
+
+        $r1 = r0.<org.spongycastle.crypto.engines.Salsa20Engine: byte[] keyStream>;
+
+        virtualinvoke r0.<org.spongycastle.crypto.engines.Salsa20Engine: void generateKeyStream(byte[])>($r1);
+
+        return;
+    }
+    protected void resetCounter()
+    {
+        org.spongycastle.crypto.engines.Salsa20Engine r0;
+        int[] $r1, $r2;
+
+        r0 := @this: org.spongycastle.crypto.engines.Salsa20Engine;
+
+        $r1 = r0.<org.spongycastle.crypto.engines.Salsa20Engine: int[] engineState>;
+
+        $r2 = r0.<org.spongycastle.crypto.engines.Salsa20Engine: int[] engineState>;
+
+        $r2[9] = 0;
+
+        $r1[8] = 0;
+
+        return;
+    }
+    protected void retreatCounter()
+    {
+        org.spongycastle.crypto.engines.Salsa20Engine r0;
+        int[] $r1;
+        int $i0;
+        java.lang.IllegalStateException $r2;
+
+        r0 := @this: org.spongycastle.crypto.engines.Salsa20Engine;
+
+        $r1 = r0.<org.spongycastle.crypto.engines.Salsa20Engine: int[] engineState>;
+
+        $i0 = $r1[8];
+
+        if $i0 != 0 goto label1;
+
+        $r1 = r0.<org.spongycastle.crypto.engines.Salsa20Engine: int[] engineState>;
+
+        $i0 = $r1[9];
+
+        if $i0 != 0 goto label1;
+
+        $r2 = new java.lang.IllegalStateException;
+
+        specialinvoke $r2.<java.lang.IllegalStateException: void <init>(java.lang.String)>("attempt to reduce counter past zero.");
+
+        throw $r2;
+
+     label1:
+        $r1 = r0.<org.spongycastle.crypto.engines.Salsa20Engine: int[] engineState>;
+
+        $i0 = $r1[8];
+
+        $i0 = $i0 + -1;
+
+        $r1[8] = $i0;
+
+        if $i0 != -1 goto label2;
+
+        $r1 = r0.<org.spongycastle.crypto.engines.Salsa20Engine: int[] engineState>;
+
+        $i0 = $r1[9];
+
+        $i0 = $i0 + -1;
+
+        $r1[9] = $i0;
+
+     label2:
+        return;
+    }
+    protected void retreatCounter(long)
+    {
+        org.spongycastle.crypto.engines.Salsa20Engine r0;
+        long $l0, $l3;
+        int i1, i2, $i4;
+        int[] $r1;
+        byte $b5;
+        java.lang.IllegalStateException $r2;
+
+        r0 := @this: org.spongycastle.crypto.engines.Salsa20Engine;
+
+        $l0 := @parameter0: long;
+
+        $l3 = $l0 >>> 32;
+
+        i1 = (int) $l3;
+
+        i2 = (int) $l0;
+
+        if i1 == 0 goto label1;
+
+        $r1 = r0.<org.spongycastle.crypto.engines.Salsa20Engine: int[] engineState>;
+
+        $i4 = $r1[9];
+
+        $l0 = (long) $i4;
+
+        $l0 = $l0 & 4294967295L;
+
+        $l3 = (long) i1;
+
+        $l3 = $l3 & 4294967295L;
+
+        $b5 = $l0 cmp $l3;
+
+        if $b5 < 0 goto label2;
+
+        $r1 = r0.<org.spongycastle.crypto.engines.Salsa20Engine: int[] engineState>;
+
+        $i4 = $r1[9];
+
+        i1 = $i4 - i1;
+
+        $r1[9] = i1;
+
+     label1:
+        $r1 = r0.<org.spongycastle.crypto.engines.Salsa20Engine: int[] engineState>;
+
+        i1 = $r1[8];
+
+        $l0 = (long) i1;
+
+        $l0 = $l0 & 4294967295L;
+
+        $l3 = (long) i2;
+
+        $l3 = $l3 & 4294967295L;
+
+        $b5 = $l0 cmp $l3;
+
+        if $b5 < 0 goto label3;
+
+        $r1 = r0.<org.spongycastle.crypto.engines.Salsa20Engine: int[] engineState>;
+
+        i1 = $r1[8];
+
+        i2 = i1 - i2;
+
+        $r1[8] = i2;
+
+        return;
+
+     label2:
+        $r2 = new java.lang.IllegalStateException;
+
+        specialinvoke $r2.<java.lang.IllegalStateException: void <init>(java.lang.String)>("attempt to reduce counter past zero.");
+
+        throw $r2;
+
+     label3:
+        $r1 = r0.<org.spongycastle.crypto.engines.Salsa20Engine: int[] engineState>;
+
+        i1 = $r1[9];
+
+        if i1 == 0 goto label4;
+
+        $r1 = r0.<org.spongycastle.crypto.engines.Salsa20Engine: int[] engineState>;
+
+        i1 = $r1[9];
+
+        i1 = i1 + -1;
+
+        $r1[9] = i1;
+
+        $r1 = r0.<org.spongycastle.crypto.engines.Salsa20Engine: int[] engineState>;
+
+        i1 = $r1[8];
+
+        i2 = i1 - i2;
+
+        $r1[8] = i2;
+
+        return;
+
+     label4:
+        $r2 = new java.lang.IllegalStateException;
+
+        specialinvoke $r2.<java.lang.IllegalStateException: void <init>(java.lang.String)>("attempt to reduce counter past zero.");
+
+        throw $r2;
+    }
+    public byte returnByte(byte)
+    {
+        org.spongycastle.crypto.engines.Salsa20Engine r0;
+        byte $b0, $b2;
+        boolean $z0;
+        org.spongycastle.crypto.MaxBytesExceededException $r1;
+        byte[] $r2;
+        int $i1;
+
+        r0 := @this: org.spongycastle.crypto.engines.Salsa20Engine;
+
+        $b0 := @parameter0: byte;
+
+        $z0 = specialinvoke r0.<org.spongycastle.crypto.engines.Salsa20Engine: boolean limitExceeded()>();
+
+        if $z0 == 0 goto label1;
+
+        $r1 = new org.spongycastle.crypto.MaxBytesExceededException;
+
+        specialinvoke $r1.<org.spongycastle.crypto.MaxBytesExceededException: void <init>(java.lang.String)>("2^70 byte limit per IV; Change IV");
+
+        throw $r1;
+
+     label1:
+        $r2 = r0.<org.spongycastle.crypto.engines.Salsa20Engine: byte[] keyStream>;
+
+        $i1 = r0.<org.spongycastle.crypto.engines.Salsa20Engine: int index>;
+
+        $b2 = $r2[$i1];
+
+        $i1 = $b2 ^ $b0;
+
+        $b0 = (byte) $i1;
+
+        $i1 = r0.<org.spongycastle.crypto.engines.Salsa20Engine: int index>;
+
+        $i1 = $i1 + 1;
+
+        $i1 = $i1 & 63;
+
+        r0.<org.spongycastle.crypto.engines.Salsa20Engine: int index> = $i1;
+
+        $i1 = r0.<org.spongycastle.crypto.engines.Salsa20Engine: int index>;
+
+        if $i1 != 0 goto label2;
+
+        virtualinvoke r0.<org.spongycastle.crypto.engines.Salsa20Engine: void advanceCounter()>();
+
+        $r2 = r0.<org.spongycastle.crypto.engines.Salsa20Engine: byte[] keyStream>;
+
+        virtualinvoke r0.<org.spongycastle.crypto.engines.Salsa20Engine: void generateKeyStream(byte[])>($r2);
+
+     label2:
+        return $b0;
+    }
+    public long seekTo(long)
+    {
+        org.spongycastle.crypto.engines.Salsa20Engine r0;
+        long $l0;
+
+        r0 := @this: org.spongycastle.crypto.engines.Salsa20Engine;
+
+        $l0 := @parameter0: long;
+
+        virtualinvoke r0.<org.spongycastle.crypto.engines.Salsa20Engine: void reset()>();
+
+        $l0 = virtualinvoke r0.<org.spongycastle.crypto.engines.Salsa20Engine: long skip(long)>($l0);
+
+        return $l0;
+    }
+    protected void setKey(byte[], byte[])
+    {
+        org.spongycastle.crypto.engines.Salsa20Engine r0;
+        byte[] $r1, $r2, r7;
+        int $i0, $i1;
+        java.lang.IllegalArgumentException $r3;
+        java.lang.StringBuilder $r4;
+        java.lang.String $r5;
+        int[] $r6;
+
+        r0 := @this: org.spongycastle.crypto.engines.Salsa20Engine;
+
+        $r1 := @parameter0: byte[];
+
+        $r2 := @parameter1: byte[];
+
+        if $r1 == null goto label3;
+
+        $i0 = lengthof $r1;
+
+        if $i0 == 16 goto label1;
+
+        $i0 = lengthof $r1;
+
+        if $i0 == 32 goto label1;
+
+        $r3 = new java.lang.IllegalArgumentException;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke r0.<org.spongycastle.crypto.engines.Salsa20Engine: java.lang.String getAlgorithmName()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" requires 128 bit or 256 bit key");
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r3.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r5);
+
+        throw $r3;
+
+     label1:
+        $r6 = r0.<org.spongycastle.crypto.engines.Salsa20Engine: int[] engineState>;
+
+        $i0 = staticinvoke <org.spongycastle.util.Pack: int littleEndianToInt(byte[],int)>($r1, 0);
+
+        $r6[1] = $i0;
+
+        $r6 = r0.<org.spongycastle.crypto.engines.Salsa20Engine: int[] engineState>;
+
+        $i0 = staticinvoke <org.spongycastle.util.Pack: int littleEndianToInt(byte[],int)>($r1, 4);
+
+        $r6[2] = $i0;
+
+        $r6 = r0.<org.spongycastle.crypto.engines.Salsa20Engine: int[] engineState>;
+
+        $i0 = staticinvoke <org.spongycastle.util.Pack: int littleEndianToInt(byte[],int)>($r1, 8);
+
+        $r6[3] = $i0;
+
+        $r6 = r0.<org.spongycastle.crypto.engines.Salsa20Engine: int[] engineState>;
+
+        $i0 = staticinvoke <org.spongycastle.util.Pack: int littleEndianToInt(byte[],int)>($r1, 12);
+
+        $r6[4] = $i0;
+
+        $i0 = lengthof $r1;
+
+        if $i0 != 32 goto label4;
+
+        r7 = <org.spongycastle.crypto.engines.Salsa20Engine: byte[] sigma>;
+
+        $i0 = 16;
+
+     label2:
+        $r6 = r0.<org.spongycastle.crypto.engines.Salsa20Engine: int[] engineState>;
+
+        $i1 = staticinvoke <org.spongycastle.util.Pack: int littleEndianToInt(byte[],int)>($r1, $i0);
+
+        $r6[11] = $i1;
+
+        $r6 = r0.<org.spongycastle.crypto.engines.Salsa20Engine: int[] engineState>;
+
+        $i1 = $i0 + 4;
+
+        $i1 = staticinvoke <org.spongycastle.util.Pack: int littleEndianToInt(byte[],int)>($r1, $i1);
+
+        $r6[12] = $i1;
+
+        $r6 = r0.<org.spongycastle.crypto.engines.Salsa20Engine: int[] engineState>;
+
+        $i1 = $i0 + 8;
+
+        $i1 = staticinvoke <org.spongycastle.util.Pack: int littleEndianToInt(byte[],int)>($r1, $i1);
+
+        $r6[13] = $i1;
+
+        $r6 = r0.<org.spongycastle.crypto.engines.Salsa20Engine: int[] engineState>;
+
+        $i0 = $i0 + 12;
+
+        $i0 = staticinvoke <org.spongycastle.util.Pack: int littleEndianToInt(byte[],int)>($r1, $i0);
+
+        $r6[14] = $i0;
+
+        $r6 = r0.<org.spongycastle.crypto.engines.Salsa20Engine: int[] engineState>;
+
+        $i0 = staticinvoke <org.spongycastle.util.Pack: int littleEndianToInt(byte[],int)>(r7, 0);
+
+        $r6[0] = $i0;
+
+        $r6 = r0.<org.spongycastle.crypto.engines.Salsa20Engine: int[] engineState>;
+
+        $i0 = staticinvoke <org.spongycastle.util.Pack: int littleEndianToInt(byte[],int)>(r7, 4);
+
+        $r6[5] = $i0;
+
+        $r6 = r0.<org.spongycastle.crypto.engines.Salsa20Engine: int[] engineState>;
+
+        $i0 = staticinvoke <org.spongycastle.util.Pack: int littleEndianToInt(byte[],int)>(r7, 8);
+
+        $r6[10] = $i0;
+
+        $r6 = r0.<org.spongycastle.crypto.engines.Salsa20Engine: int[] engineState>;
+
+        $i0 = staticinvoke <org.spongycastle.util.Pack: int littleEndianToInt(byte[],int)>(r7, 12);
+
+        $r6[15] = $i0;
+
+     label3:
+        $r6 = r0.<org.spongycastle.crypto.engines.Salsa20Engine: int[] engineState>;
+
+        $i0 = staticinvoke <org.spongycastle.util.Pack: int littleEndianToInt(byte[],int)>($r2, 0);
+
+        $r6[6] = $i0;
+
+        $r6 = r0.<org.spongycastle.crypto.engines.Salsa20Engine: int[] engineState>;
+
+        $i0 = staticinvoke <org.spongycastle.util.Pack: int littleEndianToInt(byte[],int)>($r2, 4);
+
+        $r6[7] = $i0;
+
+        return;
+
+     label4:
+        r7 = <org.spongycastle.crypto.engines.Salsa20Engine: byte[] tau>;
+
+        $i0 = 0;
+
+        goto label2;
+    }
+    public long skip(long)
+    {
+        org.spongycastle.crypto.engines.Salsa20Engine r0;
+        long $l0, l3, l6;
+        int i1, $i4, $i5;
+        byte $b2;
+        byte[] $r1;
+
+        r0 := @this: org.spongycastle.crypto.engines.Salsa20Engine;
+
+        $l0 := @parameter0: long;
+
+        $b2 = $l0 cmp 0L;
+
+        if $b2 < 0 goto label3;
+
+        l3 = $l0;
+
+        $b2 = $l0 cmp 64L;
+
+        if $b2 < 0 goto label1;
+
+        l3 = $l0 / 64L;
+
+        virtualinvoke r0.<org.spongycastle.crypto.engines.Salsa20Engine: void advanceCounter(long)>(l3);
+
+        l3 = l3 * 64L;
+
+        l3 = $l0 - l3;
+
+     label1:
+        i1 = r0.<org.spongycastle.crypto.engines.Salsa20Engine: int index>;
+
+        $i4 = r0.<org.spongycastle.crypto.engines.Salsa20Engine: int index>;
+
+        $i5 = (int) l3;
+
+        $i4 = $i4 + $i5;
+
+        $i4 = $i4 & 63;
+
+        r0.<org.spongycastle.crypto.engines.Salsa20Engine: int index> = $i4;
+
+        $i4 = r0.<org.spongycastle.crypto.engines.Salsa20Engine: int index>;
+
+        if $i4 >= i1 goto label2;
+
+        virtualinvoke r0.<org.spongycastle.crypto.engines.Salsa20Engine: void advanceCounter()>();
+
+     label2:
+        $r1 = r0.<org.spongycastle.crypto.engines.Salsa20Engine: byte[] keyStream>;
+
+        virtualinvoke r0.<org.spongycastle.crypto.engines.Salsa20Engine: void generateKeyStream(byte[])>($r1);
+
+        return $l0;
+
+     label3:
+        l3 = neg $l0;
+
+        $b2 = l3 cmp 64L;
+
+        if $b2 < 0 goto label4;
+
+        l6 = l3 / 64L;
+
+        virtualinvoke r0.<org.spongycastle.crypto.engines.Salsa20Engine: void retreatCounter(long)>(l6);
+
+        l6 = l6 * 64L;
+
+        l3 = l3 - l6;
+
+     label4:
+        l6 = 0L;
+
+     label5:
+        $b2 = l6 cmp l3;
+
+        if $b2 >= 0 goto label2;
+
+        i1 = r0.<org.spongycastle.crypto.engines.Salsa20Engine: int index>;
+
+        if i1 != 0 goto label6;
+
+        virtualinvoke r0.<org.spongycastle.crypto.engines.Salsa20Engine: void retreatCounter()>();
+
+     label6:
+        i1 = r0.<org.spongycastle.crypto.engines.Salsa20Engine: int index>;
+
+        i1 = i1 + -1;
+
+        i1 = i1 & 63;
+
+        r0.<org.spongycastle.crypto.engines.Salsa20Engine: int index> = i1;
+
+        l6 = l6 + 1L;
+
+        goto label5;
+    }

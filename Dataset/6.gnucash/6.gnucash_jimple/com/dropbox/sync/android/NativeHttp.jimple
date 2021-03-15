@@ -1,0 +1,1952 @@
+com.dropbox.sync.android.NativeHttp extends java.lang.Object
+private static final boolean DEBUG_LOG_HTTP
+private static final java.lang.String TAG
+private static final java.lang.String sContentLengthHeaderKey
+private static final java.lang.String sXDropboxRequestId
+private static final java.lang.String sXServerResponseTime
+private final byte[] mBuffer
+private final com.dropbox.sync.android.NativeEnv mEnv
+private boolean mIsShutDown
+private final com.dropbox.sync.android.CoreLogger mLog
+private final com.dropbox.sync.android.CoreHttpRequestor mRequestor
+    static void <clinit>()
+    {
+        java.lang.String $r0;
+        java.lang.Class $r1;
+
+        $r1 = class "Lcom/dropbox/sync/android/NativeHttp;";
+
+        $r0 = virtualinvoke $r1.<java.lang.Class: java.lang.String getName()>();
+
+        <com.dropbox.sync.android.NativeHttp: java.lang.String TAG> = $r0;
+
+        staticinvoke <com.dropbox.sync.android.NativeLib: void ensureLoaded()>();
+
+        staticinvoke <com.dropbox.sync.android.NativeHttp: void nativeClassInit()>();
+
+        return;
+    }
+    void <init>()
+    {
+        com.dropbox.sync.android.NativeHttp r0;
+
+        r0 := @this: com.dropbox.sync.android.NativeHttp;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<com.dropbox.sync.android.NativeHttp: boolean mIsShutDown> = 0;
+
+        r0.<com.dropbox.sync.android.NativeHttp: com.dropbox.sync.android.CoreLogger mLog> = null;
+
+        r0.<com.dropbox.sync.android.NativeHttp: com.dropbox.sync.android.NativeEnv mEnv> = null;
+
+        r0.<com.dropbox.sync.android.NativeHttp: com.dropbox.sync.android.CoreHttpRequestor mRequestor> = null;
+
+        r0.<com.dropbox.sync.android.NativeHttp: byte[] mBuffer> = null;
+
+        return;
+    }
+    void <init>(com.dropbox.sync.android.NativeEnv)
+    {
+        com.dropbox.sync.android.NativeHttp r0;
+        com.dropbox.sync.android.NativeEnv $r1;
+        com.dropbox.sync.android.CoreLogger $r2;
+        com.dropbox.sync.android.CoreStandardHttpRequestor $r3;
+        byte[] $r4;
+
+        r0 := @this: com.dropbox.sync.android.NativeHttp;
+
+        $r1 := @parameter0: com.dropbox.sync.android.NativeEnv;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<com.dropbox.sync.android.NativeHttp: boolean mIsShutDown> = 0;
+
+        $r2 = new com.dropbox.sync.android.CoreLogger;
+
+        specialinvoke $r2.<com.dropbox.sync.android.CoreLogger: void <init>()>();
+
+        r0.<com.dropbox.sync.android.NativeHttp: com.dropbox.sync.android.CoreLogger mLog> = $r2;
+
+        r0.<com.dropbox.sync.android.NativeHttp: com.dropbox.sync.android.NativeEnv mEnv> = $r1;
+
+        $r3 = new com.dropbox.sync.android.CoreStandardHttpRequestor;
+
+        specialinvoke $r3.<com.dropbox.sync.android.CoreStandardHttpRequestor: void <init>()>();
+
+        r0.<com.dropbox.sync.android.NativeHttp: com.dropbox.sync.android.CoreHttpRequestor mRequestor> = $r3;
+
+        $r4 = newarray (byte)[65536];
+
+        r0.<com.dropbox.sync.android.NativeHttp: byte[] mBuffer> = $r4;
+
+        return;
+    }
+    static void access$000(long, long, long)
+    {
+        long $l0, $l1, $l2;
+
+        $l0 := @parameter0: long;
+
+        $l1 := @parameter1: long;
+
+        $l2 := @parameter2: long;
+
+        staticinvoke <com.dropbox.sync.android.NativeHttp: void nativeUpdateFileProgress(long,long,long)>($l0, $l1, $l2);
+
+        return;
+    }
+    private com.dropbox.sync.android.NativeHttp$NativeHttpResponse doGet(java.lang.String, java.lang.String[], java.lang.String[], int) throws java.io.IOException
+    {
+        com.dropbox.sync.android.NativeHttp r0;
+        java.lang.String $r1, $r6;
+        java.lang.String[] $r2, $r3;
+        int $i0;
+        java.io.ByteArrayOutputStream r4;
+        com.dropbox.sync.android.CoreLogger $r5;
+        com.dropbox.sync.android.analytics.HttpRequestEvents$Completed $r7, $r11, $r17;
+        com.dropbox.sync.android.analytics.HttpRequestEvents$HttpMethod $r8;
+        android.net.Uri $r9;
+        android.net.Uri$Builder $r10;
+        java.util.ArrayList $r12;
+        com.dropbox.sync.android.CoreHttpRequestor $r13;
+        com.dropbox.sync.android.CoreHttpRequestor$SingleRequest $r14;
+        java.io.InputStream r15;
+        com.dropbox.sync.android.CoreHttpRequestor$Response $r16;
+        long $l1;
+        double $d0;
+        byte[] $r18;
+        java.lang.StringBuilder $r19;
+        com.dropbox.sync.android.NativeHttp$NativeHttpResponse $r20;
+        java.io.Closeable[] $r21;
+        java.lang.Throwable $r22;
+
+        r0 := @this: com.dropbox.sync.android.NativeHttp;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.lang.String[];
+
+        $r3 := @parameter2: java.lang.String[];
+
+        $i0 := @parameter3: int;
+
+        $r5 = r0.<com.dropbox.sync.android.NativeHttp: com.dropbox.sync.android.CoreLogger mLog>;
+
+        $r6 = <com.dropbox.sync.android.NativeHttp: java.lang.String TAG>;
+
+        virtualinvoke $r5.<com.dropbox.sync.android.CoreLogger: void d(java.lang.String,java.lang.String)>($r6, "Sending HTTP GET");
+
+        $r7 = new com.dropbox.sync.android.analytics.HttpRequestEvents$Completed;
+
+        specialinvoke $r7.<com.dropbox.sync.android.analytics.HttpRequestEvents$Completed: void <init>(com.dropbox.sync.android.DbxAccount)>(null);
+
+        $r7 = virtualinvoke $r7.<com.dropbox.sync.android.analytics.HttpRequestEvents$Completed: com.dropbox.sync.android.analytics.HttpRequestEvents$Completed startTimerForDuration()>();
+
+        $r8 = <com.dropbox.sync.android.analytics.HttpRequestEvents$HttpMethod: com.dropbox.sync.android.analytics.HttpRequestEvents$HttpMethod http_method_get>;
+
+        $r7 = virtualinvoke $r7.<com.dropbox.sync.android.analytics.HttpRequestEvents$Completed: com.dropbox.sync.android.analytics.HttpRequestEvents$Completed setMethod(com.dropbox.sync.android.analytics.HttpRequestEvents$HttpMethod)>($r8);
+
+        $r7 = virtualinvoke $r7.<com.dropbox.sync.android.analytics.HttpRequestEvents$Completed: com.dropbox.sync.android.analytics.HttpRequestEvents$Completed setIsStreamingReq(boolean)>(0);
+
+        $r9 = staticinvoke <android.net.Uri: android.net.Uri parse(java.lang.String)>($r1);
+
+        $r10 = virtualinvoke $r9.<android.net.Uri: android.net.Uri$Builder buildUpon()>();
+
+        $r10 = virtualinvoke $r10.<android.net.Uri$Builder: android.net.Uri$Builder query(java.lang.String)>("");
+
+        $r9 = virtualinvoke $r10.<android.net.Uri$Builder: android.net.Uri build()>();
+
+        $r6 = virtualinvoke $r9.<android.net.Uri: java.lang.String toString()>();
+
+        $r11 = virtualinvoke $r7.<com.dropbox.sync.android.analytics.HttpRequestEvents$Completed: com.dropbox.sync.android.analytics.HttpRequestEvents$Completed setEndpoint(java.lang.String)>($r6);
+
+        $r7 = $r11;
+
+        $r12 = specialinvoke r0.<com.dropbox.sync.android.NativeHttp: java.util.ArrayList makeHeaders(java.lang.String[],java.lang.String[])>($r2, $r3);
+
+        r4 = new java.io.ByteArrayOutputStream;
+
+        specialinvoke r4.<java.io.ByteArrayOutputStream: void <init>()>();
+
+        $r13 = r0.<com.dropbox.sync.android.NativeHttp: com.dropbox.sync.android.CoreHttpRequestor mRequestor>;
+
+        $r14 = virtualinvoke $r13.<com.dropbox.sync.android.CoreHttpRequestor: com.dropbox.sync.android.CoreHttpRequestor$SingleRequest startSingleRequest()>();
+
+        r15 = null;
+
+     label01:
+        $r16 = virtualinvoke $r14.<com.dropbox.sync.android.CoreHttpRequestor$SingleRequest: com.dropbox.sync.android.CoreHttpRequestor$Response doGet(java.lang.String,java.lang.Iterable,int)>($r1, $r12, $i0);
+
+        $i0 = $r16.<com.dropbox.sync.android.CoreHttpRequestor$Response: int statusCode>;
+
+        $r17 = virtualinvoke $r11.<com.dropbox.sync.android.analytics.HttpRequestEvents$Completed: com.dropbox.sync.android.analytics.HttpRequestEvents$Completed setHttpResponseCode(int)>($i0);
+
+        $r1 = staticinvoke <com.dropbox.sync.android.NativeHttp: java.lang.String getServerResponseTime(com.dropbox.sync.android.CoreHttpRequestor$Response)>($r16);
+
+        $r17 = virtualinvoke $r17.<com.dropbox.sync.android.analytics.HttpRequestEvents$Completed: com.dropbox.sync.android.analytics.HttpRequestEvents$Completed setXServerResponseTime(java.lang.String)>($r1);
+
+        $r1 = staticinvoke <com.dropbox.sync.android.NativeHttp: java.lang.String getsDropboxRequestId(com.dropbox.sync.android.CoreHttpRequestor$Response)>($r16);
+
+        $r17 = virtualinvoke $r17.<com.dropbox.sync.android.analytics.HttpRequestEvents$Completed: com.dropbox.sync.android.analytics.HttpRequestEvents$Completed setXDropboxRequestId(java.lang.String)>($r1);
+
+        $l1 = staticinvoke <com.dropbox.sync.android.NativeHttp: long getContentLength(com.dropbox.sync.android.CoreHttpRequestor$Response)>($r16);
+
+     label02:
+        $d0 = (double) $l1;
+
+     label03:
+        virtualinvoke $r17.<com.dropbox.sync.android.analytics.HttpRequestEvents$Completed: com.dropbox.sync.android.analytics.HttpRequestEvents$Completed setContentLength(double)>($d0);
+
+        r15 = $r16.<com.dropbox.sync.android.CoreHttpRequestor$Response: java.io.InputStream body>;
+
+        $r18 = r0.<com.dropbox.sync.android.NativeHttp: byte[] mBuffer>;
+
+        staticinvoke <com.dropbox.sync.android.CoreIOUtil: void copyStreamToStream(java.io.InputStream,java.io.OutputStream,byte[],com.dropbox.sync.android.CoreIOUtil$ProgressListener)>(r15, r4, $r18, null);
+
+        $r18 = virtualinvoke r4.<java.io.ByteArrayOutputStream: byte[] toByteArray()>();
+
+        $r5 = r0.<com.dropbox.sync.android.NativeHttp: com.dropbox.sync.android.CoreLogger mLog>;
+
+        $r1 = <com.dropbox.sync.android.NativeHttp: java.lang.String TAG>;
+
+        $r19 = new java.lang.StringBuilder;
+
+        specialinvoke $r19.<java.lang.StringBuilder: void <init>()>();
+
+        $r19 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("HTTP GET status ");
+
+        $i0 = $r16.<com.dropbox.sync.android.CoreHttpRequestor$Response: int statusCode>;
+
+        $r19 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r6 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r5.<com.dropbox.sync.android.CoreLogger: void d(java.lang.String,java.lang.String)>($r1, $r6);
+
+        $r11 = virtualinvoke $r11.<com.dropbox.sync.android.analytics.HttpRequestEvents$Completed: com.dropbox.sync.android.analytics.HttpRequestEvents$Completed stopTimerForDuration()>();
+
+        $i0 = lengthof $r18;
+
+     label04:
+        $d0 = (double) $i0;
+
+     label05:
+        $r11 = virtualinvoke $r11.<com.dropbox.sync.android.analytics.HttpRequestEvents$Completed: com.dropbox.sync.android.analytics.HttpRequestEvents$Completed setReadResponseBytes(double)>($d0);
+
+        virtualinvoke $r11.<com.dropbox.sync.android.analytics.HttpRequestEvents$Completed: void log()>();
+
+     label06:
+        $r7 = null;
+
+     label07:
+        $r20 = new com.dropbox.sync.android.NativeHttp$NativeHttpResponse;
+
+        $i0 = $r16.<com.dropbox.sync.android.CoreHttpRequestor$Response: int statusCode>;
+
+        specialinvoke $r20.<com.dropbox.sync.android.NativeHttp$NativeHttpResponse: void <init>(int,byte[])>($i0, $r18);
+
+     label08:
+        goto label09;
+
+     label09:
+        $r21 = newarray (java.io.Closeable)[3];
+
+        $r21[0] = r4;
+
+        $r21[1] = r15;
+
+        $r21[2] = $r14;
+
+        staticinvoke <com.dropbox.sync.android.CoreIOUtil: void closeAll(java.io.Closeable[])>($r21);
+
+        return $r20;
+
+     label10:
+        $r22 := @caughtexception;
+
+        if $r7 == null goto label11;
+
+        $r7 = virtualinvoke $r7.<com.dropbox.sync.android.analytics.HttpRequestEvents$Completed: com.dropbox.sync.android.analytics.HttpRequestEvents$Completed stopTimerForDuration()>();
+
+        virtualinvoke $r7.<com.dropbox.sync.android.analytics.HttpRequestEvents$Completed: void log()>();
+
+     label11:
+        $r21 = newarray (java.io.Closeable)[3];
+
+        $r21[0] = r4;
+
+        $r21[1] = r15;
+
+        $r21[2] = $r14;
+
+        staticinvoke <com.dropbox.sync.android.CoreIOUtil: void closeAll(java.io.Closeable[])>($r21);
+
+        throw $r22;
+
+        catch java.lang.Throwable from label01 to label02 with label10;
+        catch java.lang.Throwable from label03 to label04 with label10;
+        catch java.lang.Throwable from label05 to label06 with label10;
+        catch java.lang.Throwable from label07 to label08 with label10;
+    }
+    private com.dropbox.sync.android.NativeHttp$NativeHttpResponse doGetToFile(java.lang.String, java.lang.String[], java.lang.String[], java.lang.String, long) throws java.io.IOException
+    {
+        com.dropbox.sync.android.NativeHttp r0;
+        java.lang.String $r1, $r4, $r7;
+        java.lang.String[] $r2, $r3;
+        long $l0, $l2;
+        java.io.ByteArrayOutputStream r5, r12;
+        com.dropbox.sync.android.CoreLogger $r6;
+        java.util.ArrayList $r8;
+        com.dropbox.sync.android.CoreHttpRequestor $r9;
+        com.dropbox.sync.android.CoreHttpRequestor$SingleRequest $r10;
+        java.io.InputStream r11;
+        com.dropbox.sync.android.CoreHttpRequestor$Response $r13;
+        int $i1;
+        java.io.File $r14;
+        byte[] $r15;
+        com.dropbox.sync.android.NativeHttp$1 $r16;
+        java.lang.StringBuilder $r17;
+        com.dropbox.sync.android.NativeHttp$NativeHttpResponse $r18;
+        java.io.Closeable[] $r19;
+        java.lang.Throwable $r20;
+
+        r0 := @this: com.dropbox.sync.android.NativeHttp;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.lang.String[];
+
+        $r3 := @parameter2: java.lang.String[];
+
+        $r4 := @parameter3: java.lang.String;
+
+        $l0 := @parameter4: long;
+
+        $r6 = r0.<com.dropbox.sync.android.NativeHttp: com.dropbox.sync.android.CoreLogger mLog>;
+
+        $r7 = <com.dropbox.sync.android.NativeHttp: java.lang.String TAG>;
+
+        virtualinvoke $r6.<com.dropbox.sync.android.CoreLogger: void d(java.lang.String,java.lang.String)>($r7, "Sending HTTP GET");
+
+        $r8 = specialinvoke r0.<com.dropbox.sync.android.NativeHttp: java.util.ArrayList makeHeaders(java.lang.String[],java.lang.String[])>($r2, $r3);
+
+        $r9 = r0.<com.dropbox.sync.android.NativeHttp: com.dropbox.sync.android.CoreHttpRequestor mRequestor>;
+
+        $r10 = virtualinvoke $r9.<com.dropbox.sync.android.CoreHttpRequestor: com.dropbox.sync.android.CoreHttpRequestor$SingleRequest startSingleRequest()>();
+
+        r11 = null;
+
+        r12 = null;
+
+     label01:
+        $r13 = virtualinvoke $r10.<com.dropbox.sync.android.CoreHttpRequestor$SingleRequest: com.dropbox.sync.android.CoreHttpRequestor$Response doGet(java.lang.String,java.lang.Iterable,int)>($r1, $r8, -1);
+
+        r11 = $r13.<com.dropbox.sync.android.CoreHttpRequestor$Response: java.io.InputStream body>;
+
+        $i1 = $r13.<com.dropbox.sync.android.CoreHttpRequestor$Response: int statusCode>;
+
+     label02:
+        if 200 != $i1 goto label08;
+
+     label03:
+        $l2 = staticinvoke <com.dropbox.sync.android.NativeHttp: long getContentLength(com.dropbox.sync.android.CoreHttpRequestor$Response)>($r13);
+
+        $r14 = new java.io.File;
+
+        specialinvoke $r14.<java.io.File: void <init>(java.lang.String)>($r4);
+
+        $r15 = r0.<com.dropbox.sync.android.NativeHttp: byte[] mBuffer>;
+
+        $r16 = new com.dropbox.sync.android.NativeHttp$1;
+
+        specialinvoke $r16.<com.dropbox.sync.android.NativeHttp$1: void <init>(com.dropbox.sync.android.NativeHttp,long,long)>(r0, $l0, $l2);
+
+        staticinvoke <com.dropbox.sync.android.CoreIOUtil: void copyStreamToFile(java.io.InputStream,java.io.File,byte[],com.dropbox.sync.android.CoreIOUtil$ProgressListener)>(r11, $r14, $r15, $r16);
+
+     label04:
+        $r15 = null;
+
+     label05:
+        $r6 = r0.<com.dropbox.sync.android.NativeHttp: com.dropbox.sync.android.CoreLogger mLog>;
+
+        $r1 = <com.dropbox.sync.android.NativeHttp: java.lang.String TAG>;
+
+        $r17 = new java.lang.StringBuilder;
+
+        specialinvoke $r17.<java.lang.StringBuilder: void <init>()>();
+
+        $r17 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("HTTP GET status ");
+
+        $i1 = $r13.<com.dropbox.sync.android.CoreHttpRequestor$Response: int statusCode>;
+
+        $r17 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i1);
+
+        $r4 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r6.<com.dropbox.sync.android.CoreLogger: void d(java.lang.String,java.lang.String)>($r1, $r4);
+
+     label06:
+        $r18 = new com.dropbox.sync.android.NativeHttp$NativeHttpResponse;
+
+        $i1 = $r13.<com.dropbox.sync.android.CoreHttpRequestor$Response: int statusCode>;
+
+        specialinvoke $r18.<com.dropbox.sync.android.NativeHttp$NativeHttpResponse: void <init>(int,byte[])>($i1, $r15);
+
+     label07:
+        $r19 = newarray (java.io.Closeable)[3];
+
+        $r19[0] = r12;
+
+        $r19[1] = r11;
+
+        $r19[2] = $r10;
+
+        staticinvoke <com.dropbox.sync.android.CoreIOUtil: void closeAll(java.io.Closeable[])>($r19);
+
+        return $r18;
+
+     label08:
+        r5 = new java.io.ByteArrayOutputStream;
+
+        specialinvoke r5.<java.io.ByteArrayOutputStream: void <init>()>();
+
+     label09:
+        r12 = r5;
+
+     label10:
+        $r15 = r0.<com.dropbox.sync.android.NativeHttp: byte[] mBuffer>;
+
+        staticinvoke <com.dropbox.sync.android.CoreIOUtil: void copyStreamToStream(java.io.InputStream,java.io.OutputStream,byte[],com.dropbox.sync.android.CoreIOUtil$ProgressListener)>(r11, r5, $r15, null);
+
+        $r15 = virtualinvoke r5.<java.io.ByteArrayOutputStream: byte[] toByteArray()>();
+
+     label11:
+        $r6 = r0.<com.dropbox.sync.android.NativeHttp: com.dropbox.sync.android.CoreLogger mLog>;
+
+        $r1 = <com.dropbox.sync.android.NativeHttp: java.lang.String TAG>;
+
+        $r17 = new java.lang.StringBuilder;
+
+        specialinvoke $r17.<java.lang.StringBuilder: void <init>()>();
+
+        $r17 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("HTTP GET status ");
+
+        $i1 = $r13.<com.dropbox.sync.android.CoreHttpRequestor$Response: int statusCode>;
+
+        $r17 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i1);
+
+        $r4 = virtualinvoke $r17.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r6.<com.dropbox.sync.android.CoreLogger: void d(java.lang.String,java.lang.String)>($r1, $r4);
+
+     label12:
+        goto label06;
+
+     label13:
+        $r20 := @caughtexception;
+
+        $r19 = newarray (java.io.Closeable)[3];
+
+        $r19[0] = r12;
+
+        $r19[1] = r11;
+
+        $r19[2] = $r10;
+
+        staticinvoke <com.dropbox.sync.android.CoreIOUtil: void closeAll(java.io.Closeable[])>($r19);
+
+        throw $r20;
+
+        catch java.lang.Throwable from label01 to label02 with label13;
+        catch java.lang.Throwable from label03 to label04 with label13;
+        catch java.lang.Throwable from label05 to label07 with label13;
+        catch java.lang.Throwable from label08 to label09 with label13;
+        catch java.lang.Throwable from label10 to label11 with label13;
+        catch java.lang.Throwable from label11 to label12 with label13;
+    }
+    private com.dropbox.sync.android.NativeHttp$NativeHttpResponse doPost(java.lang.String, java.lang.String[], java.lang.String[], byte[], int) throws java.io.IOException
+    {
+        com.dropbox.sync.android.NativeHttp r0;
+        java.lang.String $r1, $r7;
+        java.lang.String[] $r2, $r3;
+        byte[] $r4;
+        int $i0, $i1;
+        java.io.ByteArrayOutputStream r5, r18;
+        com.dropbox.sync.android.CoreLogger $r6;
+        com.dropbox.sync.android.analytics.HttpRequestEvents$Completed $r8, $r12, $r23;
+        com.dropbox.sync.android.analytics.HttpRequestEvents$HttpMethod $r9;
+        android.net.Uri $r10;
+        android.net.Uri$Builder $r11;
+        double $d0;
+        java.util.ArrayList $r13;
+        com.dropbox.sync.android.CoreHttpRequestor$Header $r14;
+        com.dropbox.sync.android.CoreHttpRequestor $r15;
+        com.dropbox.sync.android.CoreHttpRequestor$SingleRequest $r16;
+        com.dropbox.sync.android.CoreHttpRequestor$Uploader r17, $r20;
+        java.io.InputStream r19;
+        java.io.OutputStream $r21;
+        com.dropbox.sync.android.CoreHttpRequestor$Response $r22;
+        long $l2;
+        java.lang.StringBuilder $r24;
+        com.dropbox.sync.android.NativeHttp$NativeHttpResponse $r25;
+        java.io.Closeable[] $r26;
+        java.lang.Throwable $r27;
+
+        r0 := @this: com.dropbox.sync.android.NativeHttp;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.lang.String[];
+
+        $r3 := @parameter2: java.lang.String[];
+
+        $r4 := @parameter3: byte[];
+
+        $i0 := @parameter4: int;
+
+        $r6 = r0.<com.dropbox.sync.android.NativeHttp: com.dropbox.sync.android.CoreLogger mLog>;
+
+        $r7 = <com.dropbox.sync.android.NativeHttp: java.lang.String TAG>;
+
+        virtualinvoke $r6.<com.dropbox.sync.android.CoreLogger: void d(java.lang.String,java.lang.String)>($r7, "Sending HTTP POST");
+
+        $r8 = new com.dropbox.sync.android.analytics.HttpRequestEvents$Completed;
+
+        specialinvoke $r8.<com.dropbox.sync.android.analytics.HttpRequestEvents$Completed: void <init>(com.dropbox.sync.android.DbxAccount)>(null);
+
+        $r8 = virtualinvoke $r8.<com.dropbox.sync.android.analytics.HttpRequestEvents$Completed: com.dropbox.sync.android.analytics.HttpRequestEvents$Completed startTimerForDuration()>();
+
+        $r9 = <com.dropbox.sync.android.analytics.HttpRequestEvents$HttpMethod: com.dropbox.sync.android.analytics.HttpRequestEvents$HttpMethod http_method_post>;
+
+        $r8 = virtualinvoke $r8.<com.dropbox.sync.android.analytics.HttpRequestEvents$Completed: com.dropbox.sync.android.analytics.HttpRequestEvents$Completed setMethod(com.dropbox.sync.android.analytics.HttpRequestEvents$HttpMethod)>($r9);
+
+        $r8 = virtualinvoke $r8.<com.dropbox.sync.android.analytics.HttpRequestEvents$Completed: com.dropbox.sync.android.analytics.HttpRequestEvents$Completed setIsStreamingReq(boolean)>(0);
+
+        $r10 = staticinvoke <android.net.Uri: android.net.Uri parse(java.lang.String)>($r1);
+
+        $r11 = virtualinvoke $r10.<android.net.Uri: android.net.Uri$Builder buildUpon()>();
+
+        $r11 = virtualinvoke $r11.<android.net.Uri$Builder: android.net.Uri$Builder query(java.lang.String)>("");
+
+        $r10 = virtualinvoke $r11.<android.net.Uri$Builder: android.net.Uri build()>();
+
+        $r7 = virtualinvoke $r10.<android.net.Uri: java.lang.String toString()>();
+
+        $r8 = virtualinvoke $r8.<com.dropbox.sync.android.analytics.HttpRequestEvents$Completed: com.dropbox.sync.android.analytics.HttpRequestEvents$Completed setEndpoint(java.lang.String)>($r7);
+
+        $i1 = lengthof $r4;
+
+        $d0 = (double) $i1;
+
+        $r12 = virtualinvoke $r8.<com.dropbox.sync.android.analytics.HttpRequestEvents$Completed: com.dropbox.sync.android.analytics.HttpRequestEvents$Completed setPostLength(double)>($d0);
+
+        $r8 = $r12;
+
+        $r13 = specialinvoke r0.<com.dropbox.sync.android.NativeHttp: java.util.ArrayList makeHeaders(java.lang.String[],java.lang.String[])>($r2, $r3);
+
+        $r14 = new com.dropbox.sync.android.CoreHttpRequestor$Header;
+
+        specialinvoke $r14.<com.dropbox.sync.android.CoreHttpRequestor$Header: void <init>(java.lang.String,java.lang.String)>("Content-Type", "application/x-www-form-urlencoded; charset=utf-8");
+
+        virtualinvoke $r13.<java.util.ArrayList: boolean add(java.lang.Object)>($r14);
+
+        $r15 = r0.<com.dropbox.sync.android.NativeHttp: com.dropbox.sync.android.CoreHttpRequestor mRequestor>;
+
+        $r16 = virtualinvoke $r15.<com.dropbox.sync.android.CoreHttpRequestor: com.dropbox.sync.android.CoreHttpRequestor$SingleRequest startSingleRequest()>();
+
+        r17 = null;
+
+        r18 = null;
+
+        r19 = null;
+
+     label01:
+        virtualinvoke $r12.<com.dropbox.sync.android.analytics.HttpRequestEvents$Completed: com.dropbox.sync.android.analytics.HttpRequestEvents$Completed startTimerForDurationRequest()>();
+
+        $i1 = lengthof $r4;
+
+        $r20 = virtualinvoke $r16.<com.dropbox.sync.android.CoreHttpRequestor$SingleRequest: com.dropbox.sync.android.CoreHttpRequestor$Uploader startPost(java.lang.String,java.lang.Iterable,int,int)>($r1, $r13, $i1, $i0);
+
+     label02:
+        r17 = $r20;
+
+     label03:
+        r5 = new java.io.ByteArrayOutputStream;
+
+        specialinvoke r5.<java.io.ByteArrayOutputStream: void <init>()>();
+
+     label04:
+        $r21 = $r20.<com.dropbox.sync.android.CoreHttpRequestor$Uploader: java.io.OutputStream body>;
+
+        virtualinvoke $r21.<java.io.OutputStream: void write(byte[])>($r4);
+
+        virtualinvoke $r12.<com.dropbox.sync.android.analytics.HttpRequestEvents$Completed: com.dropbox.sync.android.analytics.HttpRequestEvents$Completed stopTimerForDurationRequest()>();
+
+        virtualinvoke $r12.<com.dropbox.sync.android.analytics.HttpRequestEvents$Completed: com.dropbox.sync.android.analytics.HttpRequestEvents$Completed startTimerForDurationResponse()>();
+
+        $r22 = virtualinvoke $r20.<com.dropbox.sync.android.CoreHttpRequestor$Uploader: com.dropbox.sync.android.CoreHttpRequestor$Response finish()>();
+
+        $i0 = $r22.<com.dropbox.sync.android.CoreHttpRequestor$Response: int statusCode>;
+
+        $r23 = virtualinvoke $r12.<com.dropbox.sync.android.analytics.HttpRequestEvents$Completed: com.dropbox.sync.android.analytics.HttpRequestEvents$Completed setHttpResponseCode(int)>($i0);
+
+        $r1 = staticinvoke <com.dropbox.sync.android.NativeHttp: java.lang.String getServerResponseTime(com.dropbox.sync.android.CoreHttpRequestor$Response)>($r22);
+
+        $r23 = virtualinvoke $r23.<com.dropbox.sync.android.analytics.HttpRequestEvents$Completed: com.dropbox.sync.android.analytics.HttpRequestEvents$Completed setXServerResponseTime(java.lang.String)>($r1);
+
+        $r1 = staticinvoke <com.dropbox.sync.android.NativeHttp: java.lang.String getsDropboxRequestId(com.dropbox.sync.android.CoreHttpRequestor$Response)>($r22);
+
+        $r23 = virtualinvoke $r23.<com.dropbox.sync.android.analytics.HttpRequestEvents$Completed: com.dropbox.sync.android.analytics.HttpRequestEvents$Completed setXDropboxRequestId(java.lang.String)>($r1);
+
+        $l2 = staticinvoke <com.dropbox.sync.android.NativeHttp: long getContentLength(com.dropbox.sync.android.CoreHttpRequestor$Response)>($r22);
+
+     label05:
+        $d0 = (double) $l2;
+
+     label06:
+        virtualinvoke $r23.<com.dropbox.sync.android.analytics.HttpRequestEvents$Completed: com.dropbox.sync.android.analytics.HttpRequestEvents$Completed setContentLength(double)>($d0);
+
+        r19 = $r22.<com.dropbox.sync.android.CoreHttpRequestor$Response: java.io.InputStream body>;
+
+        $r4 = r0.<com.dropbox.sync.android.NativeHttp: byte[] mBuffer>;
+
+        staticinvoke <com.dropbox.sync.android.CoreIOUtil: void copyStreamToStream(java.io.InputStream,java.io.OutputStream,byte[],com.dropbox.sync.android.CoreIOUtil$ProgressListener)>(r19, r5, $r4, null);
+
+        virtualinvoke $r12.<com.dropbox.sync.android.analytics.HttpRequestEvents$Completed: com.dropbox.sync.android.analytics.HttpRequestEvents$Completed stopTimerForDurationResponse()>();
+
+        $r4 = virtualinvoke r5.<java.io.ByteArrayOutputStream: byte[] toByteArray()>();
+
+        $r6 = r0.<com.dropbox.sync.android.NativeHttp: com.dropbox.sync.android.CoreLogger mLog>;
+
+        $r1 = <com.dropbox.sync.android.NativeHttp: java.lang.String TAG>;
+
+        $r24 = new java.lang.StringBuilder;
+
+        specialinvoke $r24.<java.lang.StringBuilder: void <init>()>();
+
+        $r24 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("HTTP POST status ");
+
+        $i0 = $r22.<com.dropbox.sync.android.CoreHttpRequestor$Response: int statusCode>;
+
+        $r24 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r7 = virtualinvoke $r24.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r6.<com.dropbox.sync.android.CoreLogger: void d(java.lang.String,java.lang.String)>($r1, $r7);
+
+        $r12 = virtualinvoke $r12.<com.dropbox.sync.android.analytics.HttpRequestEvents$Completed: com.dropbox.sync.android.analytics.HttpRequestEvents$Completed stopTimerForDuration()>();
+
+        $i0 = lengthof $r4;
+
+     label07:
+        $d0 = (double) $i0;
+
+     label08:
+        $r12 = virtualinvoke $r12.<com.dropbox.sync.android.analytics.HttpRequestEvents$Completed: com.dropbox.sync.android.analytics.HttpRequestEvents$Completed setReadResponseBytes(double)>($d0);
+
+        virtualinvoke $r12.<com.dropbox.sync.android.analytics.HttpRequestEvents$Completed: void log()>();
+
+     label09:
+        $r8 = null;
+
+     label10:
+        $r25 = new com.dropbox.sync.android.NativeHttp$NativeHttpResponse;
+
+        $i0 = $r22.<com.dropbox.sync.android.CoreHttpRequestor$Response: int statusCode>;
+
+        specialinvoke $r25.<com.dropbox.sync.android.NativeHttp$NativeHttpResponse: void <init>(int,byte[])>($i0, $r4);
+
+     label11:
+        goto label12;
+
+     label12:
+        $r26 = newarray (java.io.Closeable)[4];
+
+        $r26[0] = $r20;
+
+        $r26[1] = r5;
+
+        $r26[2] = r19;
+
+        $r26[3] = $r16;
+
+        staticinvoke <com.dropbox.sync.android.CoreIOUtil: void closeAll(java.io.Closeable[])>($r26);
+
+        return $r25;
+
+     label13:
+        $r27 := @caughtexception;
+
+     label14:
+        if $r8 == null goto label15;
+
+        $r8 = virtualinvoke $r8.<com.dropbox.sync.android.analytics.HttpRequestEvents$Completed: com.dropbox.sync.android.analytics.HttpRequestEvents$Completed stopTimerForDuration()>();
+
+        virtualinvoke $r8.<com.dropbox.sync.android.analytics.HttpRequestEvents$Completed: void log()>();
+
+     label15:
+        $r26 = newarray (java.io.Closeable)[4];
+
+        $r26[0] = r17;
+
+        $r26[1] = r18;
+
+        $r26[2] = r19;
+
+        $r26[3] = $r16;
+
+        staticinvoke <com.dropbox.sync.android.CoreIOUtil: void closeAll(java.io.Closeable[])>($r26);
+
+        throw $r27;
+
+     label16:
+        $r27 := @caughtexception;
+
+        r18 = r5;
+
+        goto label14;
+
+        catch java.lang.Throwable from label01 to label02 with label13;
+        catch java.lang.Throwable from label03 to label04 with label13;
+        catch java.lang.Throwable from label04 to label05 with label16;
+        catch java.lang.Throwable from label06 to label07 with label16;
+        catch java.lang.Throwable from label08 to label09 with label16;
+        catch java.lang.Throwable from label10 to label11 with label16;
+    }
+    private com.dropbox.sync.android.NativeHttp$NativeHttpStreamingResponse doPostStreaming(java.lang.String, java.lang.String[], java.lang.String[], byte[], int) throws java.io.IOException
+    {
+        com.dropbox.sync.android.NativeHttp r0;
+        java.lang.String $r1, $r7;
+        java.lang.String[] $r2, $r3;
+        byte[] $r4;
+        int $i0, $i1;
+        com.dropbox.sync.android.NativeHttp$NativeHttpStreamingResponse r5;
+        com.dropbox.sync.android.CoreLogger $r6;
+        com.dropbox.sync.android.analytics.HttpRequestEvents$Completed $r8, $r22;
+        com.dropbox.sync.android.analytics.HttpRequestEvents$HttpMethod $r9;
+        android.net.Uri $r10;
+        android.net.Uri$Builder $r11;
+        double $d0;
+        java.util.ArrayList $r12;
+        com.dropbox.sync.android.CoreHttpRequestor$Header $r13;
+        com.dropbox.sync.android.CoreHttpRequestor $r14;
+        com.dropbox.sync.android.CoreHttpRequestor$SingleRequest $r15;
+        com.dropbox.sync.android.CoreHttpRequestor$Uploader r16, $r18;
+        java.io.InputStream r17;
+        java.io.OutputStream $r19;
+        com.dropbox.sync.android.CoreHttpRequestor$Response $r20;
+        java.lang.StringBuilder $r21;
+        long $l2;
+        java.io.Closeable[] $r23;
+        java.lang.Throwable $r24;
+
+        r0 := @this: com.dropbox.sync.android.NativeHttp;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.lang.String[];
+
+        $r3 := @parameter2: java.lang.String[];
+
+        $r4 := @parameter3: byte[];
+
+        $i0 := @parameter4: int;
+
+        $r6 = r0.<com.dropbox.sync.android.NativeHttp: com.dropbox.sync.android.CoreLogger mLog>;
+
+        $r7 = <com.dropbox.sync.android.NativeHttp: java.lang.String TAG>;
+
+        virtualinvoke $r6.<com.dropbox.sync.android.CoreLogger: void d(java.lang.String,java.lang.String)>($r7, "Sending HTTP POST");
+
+        $r8 = new com.dropbox.sync.android.analytics.HttpRequestEvents$Completed;
+
+        specialinvoke $r8.<com.dropbox.sync.android.analytics.HttpRequestEvents$Completed: void <init>(com.dropbox.sync.android.DbxAccount)>(null);
+
+        $r9 = <com.dropbox.sync.android.analytics.HttpRequestEvents$HttpMethod: com.dropbox.sync.android.analytics.HttpRequestEvents$HttpMethod http_method_post>;
+
+        $r8 = virtualinvoke $r8.<com.dropbox.sync.android.analytics.HttpRequestEvents$Completed: com.dropbox.sync.android.analytics.HttpRequestEvents$Completed setMethod(com.dropbox.sync.android.analytics.HttpRequestEvents$HttpMethod)>($r9);
+
+        $r8 = virtualinvoke $r8.<com.dropbox.sync.android.analytics.HttpRequestEvents$Completed: com.dropbox.sync.android.analytics.HttpRequestEvents$Completed setIsStreamingReq(boolean)>(1);
+
+        $r10 = staticinvoke <android.net.Uri: android.net.Uri parse(java.lang.String)>($r1);
+
+        $r11 = virtualinvoke $r10.<android.net.Uri: android.net.Uri$Builder buildUpon()>();
+
+        $r11 = virtualinvoke $r11.<android.net.Uri$Builder: android.net.Uri$Builder query(java.lang.String)>("");
+
+        $r10 = virtualinvoke $r11.<android.net.Uri$Builder: android.net.Uri build()>();
+
+        $r7 = virtualinvoke $r10.<android.net.Uri: java.lang.String toString()>();
+
+        $r8 = virtualinvoke $r8.<com.dropbox.sync.android.analytics.HttpRequestEvents$Completed: com.dropbox.sync.android.analytics.HttpRequestEvents$Completed setEndpoint(java.lang.String)>($r7);
+
+        $i1 = lengthof $r4;
+
+        $d0 = (double) $i1;
+
+        $r8 = virtualinvoke $r8.<com.dropbox.sync.android.analytics.HttpRequestEvents$Completed: com.dropbox.sync.android.analytics.HttpRequestEvents$Completed setPostLength(double)>($d0);
+
+        $r8 = virtualinvoke $r8.<com.dropbox.sync.android.analytics.HttpRequestEvents$Completed: com.dropbox.sync.android.analytics.HttpRequestEvents$Completed startTimerForDuration()>();
+
+        $r12 = specialinvoke r0.<com.dropbox.sync.android.NativeHttp: java.util.ArrayList makeHeaders(java.lang.String[],java.lang.String[])>($r2, $r3);
+
+        $r13 = new com.dropbox.sync.android.CoreHttpRequestor$Header;
+
+        specialinvoke $r13.<com.dropbox.sync.android.CoreHttpRequestor$Header: void <init>(java.lang.String,java.lang.String)>("Content-Type", "application/x-www-form-urlencoded; charset=utf-8");
+
+        virtualinvoke $r12.<java.util.ArrayList: boolean add(java.lang.Object)>($r13);
+
+        $r14 = r0.<com.dropbox.sync.android.NativeHttp: com.dropbox.sync.android.CoreHttpRequestor mRequestor>;
+
+        $r15 = virtualinvoke $r14.<com.dropbox.sync.android.CoreHttpRequestor: com.dropbox.sync.android.CoreHttpRequestor$SingleRequest startSingleRequest()>();
+
+        r16 = null;
+
+        r17 = null;
+
+     label1:
+        virtualinvoke $r8.<com.dropbox.sync.android.analytics.HttpRequestEvents$Completed: com.dropbox.sync.android.analytics.HttpRequestEvents$Completed startTimerForDurationRequest()>();
+
+        $i1 = lengthof $r4;
+
+        $r18 = virtualinvoke $r15.<com.dropbox.sync.android.CoreHttpRequestor$SingleRequest: com.dropbox.sync.android.CoreHttpRequestor$Uploader startPost(java.lang.String,java.lang.Iterable,int,int)>($r1, $r12, $i1, $i0);
+
+     label2:
+        r16 = $r18;
+
+     label3:
+        $r19 = $r18.<com.dropbox.sync.android.CoreHttpRequestor$Uploader: java.io.OutputStream body>;
+
+        virtualinvoke $r19.<java.io.OutputStream: void write(byte[])>($r4);
+
+        virtualinvoke $r8.<com.dropbox.sync.android.analytics.HttpRequestEvents$Completed: com.dropbox.sync.android.analytics.HttpRequestEvents$Completed stopTimerForDurationRequest()>();
+
+        virtualinvoke $r8.<com.dropbox.sync.android.analytics.HttpRequestEvents$Completed: com.dropbox.sync.android.analytics.HttpRequestEvents$Completed startTimerForDurationResponse()>();
+
+        $r20 = virtualinvoke $r18.<com.dropbox.sync.android.CoreHttpRequestor$Uploader: com.dropbox.sync.android.CoreHttpRequestor$Response finish()>();
+
+        r17 = $r20.<com.dropbox.sync.android.CoreHttpRequestor$Response: java.io.InputStream body>;
+
+        $r6 = r0.<com.dropbox.sync.android.NativeHttp: com.dropbox.sync.android.CoreLogger mLog>;
+
+        $r1 = <com.dropbox.sync.android.NativeHttp: java.lang.String TAG>;
+
+        $r21 = new java.lang.StringBuilder;
+
+        specialinvoke $r21.<java.lang.StringBuilder: void <init>()>();
+
+        $r21 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("HTTP POST status ");
+
+        $i0 = $r20.<com.dropbox.sync.android.CoreHttpRequestor$Response: int statusCode>;
+
+        $r21 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r7 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r6.<com.dropbox.sync.android.CoreLogger: void d(java.lang.String,java.lang.String)>($r1, $r7);
+
+        $i0 = $r20.<com.dropbox.sync.android.CoreHttpRequestor$Response: int statusCode>;
+
+        $r22 = virtualinvoke $r8.<com.dropbox.sync.android.analytics.HttpRequestEvents$Completed: com.dropbox.sync.android.analytics.HttpRequestEvents$Completed setHttpResponseCode(int)>($i0);
+
+        $r1 = staticinvoke <com.dropbox.sync.android.NativeHttp: java.lang.String getServerResponseTime(com.dropbox.sync.android.CoreHttpRequestor$Response)>($r20);
+
+        $r22 = virtualinvoke $r22.<com.dropbox.sync.android.analytics.HttpRequestEvents$Completed: com.dropbox.sync.android.analytics.HttpRequestEvents$Completed setXServerResponseTime(java.lang.String)>($r1);
+
+        $r1 = staticinvoke <com.dropbox.sync.android.NativeHttp: java.lang.String getsDropboxRequestId(com.dropbox.sync.android.CoreHttpRequestor$Response)>($r20);
+
+        $r22 = virtualinvoke $r22.<com.dropbox.sync.android.analytics.HttpRequestEvents$Completed: com.dropbox.sync.android.analytics.HttpRequestEvents$Completed setXDropboxRequestId(java.lang.String)>($r1);
+
+        $l2 = staticinvoke <com.dropbox.sync.android.NativeHttp: long getContentLength(com.dropbox.sync.android.CoreHttpRequestor$Response)>($r20);
+
+     label4:
+        $d0 = (double) $l2;
+
+     label5:
+        virtualinvoke $r22.<com.dropbox.sync.android.analytics.HttpRequestEvents$Completed: com.dropbox.sync.android.analytics.HttpRequestEvents$Completed setContentLength(double)>($d0);
+
+        r5 = new com.dropbox.sync.android.NativeHttp$NativeHttpStreamingResponse;
+
+        $i0 = $r20.<com.dropbox.sync.android.CoreHttpRequestor$Response: int statusCode>;
+
+        specialinvoke r5.<com.dropbox.sync.android.NativeHttp$NativeHttpStreamingResponse: void <init>(int,java.io.InputStream,com.dropbox.sync.android.CoreHttpRequestor$Uploader,com.dropbox.sync.android.CoreHttpRequestor$SingleRequest,com.dropbox.sync.android.analytics.HttpRequestEvents$Completed)>($i0, r17, $r18, $r15, $r8);
+
+     label6:
+        goto label8;
+
+     label7:
+        $r24 := @caughtexception;
+
+        $r8 = virtualinvoke $r8.<com.dropbox.sync.android.analytics.HttpRequestEvents$Completed: com.dropbox.sync.android.analytics.HttpRequestEvents$Completed stopTimerForDuration()>();
+
+        virtualinvoke $r8.<com.dropbox.sync.android.analytics.HttpRequestEvents$Completed: void log()>();
+
+        $r23 = newarray (java.io.Closeable)[3];
+
+        $r23[0] = r16;
+
+        $r23[1] = r17;
+
+        $r23[2] = $r15;
+
+        staticinvoke <com.dropbox.sync.android.CoreIOUtil: void closeAll(java.io.Closeable[])>($r23);
+
+        throw $r24;
+
+     label8:
+        return r5;
+
+        catch java.lang.Throwable from label1 to label2 with label7;
+        catch java.lang.Throwable from label3 to label4 with label7;
+        catch java.lang.Throwable from label5 to label6 with label7;
+    }
+    private com.dropbox.sync.android.NativeHttp$NativeHttpResponse doPutFile(java.lang.String, java.lang.String[], java.lang.String[], java.lang.String, long, long, long) throws java.io.IOException
+    {
+        com.dropbox.sync.android.NativeHttp r0;
+        java.lang.String $r1, $r4, $r9;
+        java.lang.String[] $r2, $r3;
+        long $l0, $l1, $l2;
+        java.io.OutputStream $r5;
+        byte[] $r6;
+        java.io.ByteArrayOutputStream r7;
+        com.dropbox.sync.android.CoreLogger $r8;
+        java.util.ArrayList $r10;
+        com.dropbox.sync.android.CoreHttpRequestor$Header $r11;
+        com.dropbox.sync.android.CoreHttpRequestor $r12;
+        com.dropbox.sync.android.CoreHttpRequestor$SingleRequest $r13;
+        com.dropbox.sync.android.CoreHttpRequestor$Uploader $r14;
+        java.io.File $r15;
+        com.dropbox.sync.android.NativeHttp$2 $r16;
+        com.dropbox.sync.android.CoreHttpRequestor$Response $r17;
+        java.io.InputStream $r18;
+        java.lang.StringBuilder $r19;
+        int $i3;
+        com.dropbox.sync.android.NativeHttp$NativeHttpResponse $r20;
+        java.io.Closeable[] $r21;
+        java.lang.Throwable $r22, $r23, $r24;
+
+        r0 := @this: com.dropbox.sync.android.NativeHttp;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.lang.String[];
+
+        $r3 := @parameter2: java.lang.String[];
+
+        $r4 := @parameter3: java.lang.String;
+
+        $l0 := @parameter4: long;
+
+        $l1 := @parameter5: long;
+
+        $l2 := @parameter6: long;
+
+        $r8 = r0.<com.dropbox.sync.android.NativeHttp: com.dropbox.sync.android.CoreLogger mLog>;
+
+        $r9 = <com.dropbox.sync.android.NativeHttp: java.lang.String TAG>;
+
+        virtualinvoke $r8.<com.dropbox.sync.android.CoreLogger: void d(java.lang.String,java.lang.String)>($r9, "Sending HTTP PUT");
+
+        $r10 = specialinvoke r0.<com.dropbox.sync.android.NativeHttp: java.util.ArrayList makeHeaders(java.lang.String[],java.lang.String[])>($r2, $r3);
+
+        $r11 = new com.dropbox.sync.android.CoreHttpRequestor$Header;
+
+        specialinvoke $r11.<com.dropbox.sync.android.CoreHttpRequestor$Header: void <init>(java.lang.String,java.lang.String)>("Content-Type", "application/octet-stream");
+
+        virtualinvoke $r10.<java.util.ArrayList: boolean add(java.lang.Object)>($r11);
+
+        $r12 = r0.<com.dropbox.sync.android.NativeHttp: com.dropbox.sync.android.CoreHttpRequestor mRequestor>;
+
+        $r13 = virtualinvoke $r12.<com.dropbox.sync.android.CoreHttpRequestor: com.dropbox.sync.android.CoreHttpRequestor$SingleRequest startSingleRequest()>();
+
+     label01:
+        $r14 = virtualinvoke $r13.<com.dropbox.sync.android.CoreHttpRequestor$SingleRequest: com.dropbox.sync.android.CoreHttpRequestor$Uploader startPut(java.lang.String,java.lang.Iterable,int,int)>($r1, $r10, -1, -1);
+
+     label02:
+        $r15 = new java.io.File;
+
+        specialinvoke $r15.<java.io.File: void <init>(java.lang.String)>($r4);
+
+        $r5 = $r14.<com.dropbox.sync.android.CoreHttpRequestor$Uploader: java.io.OutputStream body>;
+
+        $r6 = r0.<com.dropbox.sync.android.NativeHttp: byte[] mBuffer>;
+
+        $r16 = new com.dropbox.sync.android.NativeHttp$2;
+
+        specialinvoke $r16.<com.dropbox.sync.android.NativeHttp$2: void <init>(com.dropbox.sync.android.NativeHttp,long,long)>(r0, $l2, $l1);
+
+        staticinvoke <com.dropbox.sync.android.CoreIOUtil: void copyFileToStream(java.io.File,java.io.OutputStream,byte[],long,long,com.dropbox.sync.android.CoreIOUtil$ProgressListener)>($r15, $r5, $r6, $l0, $l1, $r16);
+
+        $r17 = virtualinvoke $r14.<com.dropbox.sync.android.CoreHttpRequestor$Uploader: com.dropbox.sync.android.CoreHttpRequestor$Response finish()>();
+
+        $r18 = $r17.<com.dropbox.sync.android.CoreHttpRequestor$Response: java.io.InputStream body>;
+
+     label03:
+        virtualinvoke $r14.<com.dropbox.sync.android.CoreHttpRequestor$Uploader: void close()>();
+
+        r7 = new java.io.ByteArrayOutputStream;
+
+        specialinvoke r7.<java.io.ByteArrayOutputStream: void <init>()>();
+
+     label04:
+        $r6 = r0.<com.dropbox.sync.android.NativeHttp: byte[] mBuffer>;
+
+        staticinvoke <com.dropbox.sync.android.CoreIOUtil: void copyStreamToStream(java.io.InputStream,java.io.OutputStream,byte[],com.dropbox.sync.android.CoreIOUtil$ProgressListener)>($r18, r7, $r6, null);
+
+        $r6 = virtualinvoke r7.<java.io.ByteArrayOutputStream: byte[] toByteArray()>();
+
+        $r8 = r0.<com.dropbox.sync.android.NativeHttp: com.dropbox.sync.android.CoreLogger mLog>;
+
+        $r1 = <com.dropbox.sync.android.NativeHttp: java.lang.String TAG>;
+
+        $r19 = new java.lang.StringBuilder;
+
+        specialinvoke $r19.<java.lang.StringBuilder: void <init>()>();
+
+        $r19 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("HTTP PUT status ");
+
+        $i3 = $r17.<com.dropbox.sync.android.CoreHttpRequestor$Response: int statusCode>;
+
+        $r19 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i3);
+
+        $r4 = virtualinvoke $r19.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r8.<com.dropbox.sync.android.CoreLogger: void d(java.lang.String,java.lang.String)>($r1, $r4);
+
+        $r20 = new com.dropbox.sync.android.NativeHttp$NativeHttpResponse;
+
+        $i3 = $r17.<com.dropbox.sync.android.CoreHttpRequestor$Response: int statusCode>;
+
+        specialinvoke $r20.<com.dropbox.sync.android.NativeHttp$NativeHttpResponse: void <init>(int,byte[])>($i3, $r6);
+
+     label05:
+        $r21 = newarray (java.io.Closeable)[2];
+
+        $r21[0] = r7;
+
+        $r21[1] = $r18;
+
+        staticinvoke <com.dropbox.sync.android.CoreIOUtil: void closeAll(java.io.Closeable[])>($r21);
+
+     label06:
+        virtualinvoke $r13.<com.dropbox.sync.android.CoreHttpRequestor$SingleRequest: void close()>();
+
+        return $r20;
+
+     label07:
+        $r22 := @caughtexception;
+
+     label08:
+        virtualinvoke $r14.<com.dropbox.sync.android.CoreHttpRequestor$Uploader: void close()>();
+
+        throw $r22;
+
+     label09:
+        $r23 := @caughtexception;
+
+        virtualinvoke $r13.<com.dropbox.sync.android.CoreHttpRequestor$SingleRequest: void close()>();
+
+        throw $r23;
+
+     label10:
+        $r24 := @caughtexception;
+
+     label11:
+        $r21 = newarray (java.io.Closeable)[2];
+
+        $r21[0] = r7;
+
+        $r21[1] = $r18;
+
+        staticinvoke <com.dropbox.sync.android.CoreIOUtil: void closeAll(java.io.Closeable[])>($r21);
+
+        throw $r24;
+
+     label12:
+        nop;
+
+        catch java.lang.Throwable from label01 to label02 with label09;
+        catch java.lang.Throwable from label02 to label03 with label07;
+        catch java.lang.Throwable from label03 to label04 with label09;
+        catch java.lang.Throwable from label04 to label05 with label10;
+        catch java.lang.Throwable from label05 to label06 with label09;
+        catch java.lang.Throwable from label08 to label09 with label09;
+        catch java.lang.Throwable from label11 to label12 with label09;
+    }
+    private static long getContentLength(com.dropbox.sync.android.CoreHttpRequestor$Response)
+    {
+        com.dropbox.sync.android.CoreHttpRequestor$Response $r0;
+        java.util.Map $r1;
+        boolean $z0;
+        java.lang.Object $r2;
+        java.util.List $r3;
+        java.lang.String $r4;
+        long $l0;
+
+        $r0 := @parameter0: com.dropbox.sync.android.CoreHttpRequestor$Response;
+
+        $r1 = $r0.<com.dropbox.sync.android.CoreHttpRequestor$Response: java.util.Map headers>;
+
+        $z0 = interfaceinvoke $r1.<java.util.Map: boolean containsKey(java.lang.Object)>("Content-Length");
+
+        if $z0 == 0 goto label1;
+
+        $r1 = $r0.<com.dropbox.sync.android.CoreHttpRequestor$Response: java.util.Map headers>;
+
+        $r2 = interfaceinvoke $r1.<java.util.Map: java.lang.Object get(java.lang.Object)>("Content-Length");
+
+        $r3 = (java.util.List) $r2;
+
+        $r2 = interfaceinvoke $r3.<java.util.List: java.lang.Object get(int)>(0);
+
+        $r4 = (java.lang.String) $r2;
+
+        $l0 = staticinvoke <java.lang.Long: long parseLong(java.lang.String)>($r4);
+
+        return $l0;
+
+     label1:
+        return -1L;
+    }
+    private com.dropbox.sync.android.NativeHttp$HttpErrorInfo getNativeErrorInfo(java.lang.String, java.lang.Throwable)
+    {
+        com.dropbox.sync.android.NativeHttp r0;
+        java.lang.String $r1, $r4;
+        java.lang.Throwable $r2;
+        boolean $z0;
+        com.dropbox.sync.android.CoreLogger $r3;
+        java.lang.StringBuilder $r5;
+        java.lang.Class $r6;
+        com.dropbox.sync.android.NativeHttp$HttpErrorInfo $r7;
+        com.dropbox.sync.android.DbxError $r8;
+        java.io.IOException r9;
+        byte b0;
+        com.dropbox.sync.android.CoreIOUtil$WrappedException r10;
+
+        r0 := @this: com.dropbox.sync.android.NativeHttp;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.lang.Throwable;
+
+        $z0 = specialinvoke r0.<com.dropbox.sync.android.NativeHttp: boolean isShutDown()>();
+
+        if $z0 == 0 goto label01;
+
+        $r3 = r0.<com.dropbox.sync.android.NativeHttp: com.dropbox.sync.android.CoreLogger mLog>;
+
+        $r4 = <com.dropbox.sync.android.NativeHttp: java.lang.String TAG>;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" request canceled: ");
+
+        $r6 = virtualinvoke $r2.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r1 = virtualinvoke $r6.<java.lang.Class: java.lang.String getName()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(": ");
+
+        $r1 = virtualinvoke $r2.<java.lang.Throwable: java.lang.String getMessage()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r1 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r3.<com.dropbox.sync.android.CoreLogger: void i(java.lang.String,java.lang.String)>($r4, $r1);
+
+        $r7 = new com.dropbox.sync.android.NativeHttp$HttpErrorInfo;
+
+        $r8 = <com.dropbox.sync.android.DbxError: com.dropbox.sync.android.DbxError SHUTDOWN>;
+
+        specialinvoke $r7.<com.dropbox.sync.android.NativeHttp$HttpErrorInfo: void <init>(com.dropbox.sync.android.DbxError,int)>($r8, 1);
+
+        return $r7;
+
+     label01:
+        $r3 = r0.<com.dropbox.sync.android.NativeHttp: com.dropbox.sync.android.CoreLogger mLog>;
+
+        $r4 = <com.dropbox.sync.android.NativeHttp: java.lang.String TAG>;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" failed: ");
+
+        $r6 = virtualinvoke $r2.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r1 = virtualinvoke $r6.<java.lang.Class: java.lang.String getName()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(": ");
+
+        $r1 = virtualinvoke $r2.<java.lang.Throwable: java.lang.String getMessage()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r1 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r3.<com.dropbox.sync.android.CoreLogger: void w(java.lang.String,java.lang.String)>($r4, $r1);
+
+        $z0 = $r2 instanceof java.lang.RuntimeException;
+
+        if $z0 != 0 goto label02;
+
+        $z0 = $r2 instanceof java.lang.Error;
+
+        if $z0 == 0 goto label03;
+
+     label02:
+        $r3 = r0.<com.dropbox.sync.android.NativeHttp: com.dropbox.sync.android.CoreLogger mLog>;
+
+        $r1 = <com.dropbox.sync.android.NativeHttp: java.lang.String TAG>;
+
+        staticinvoke <com.dropbox.sync.android.CoreAssert: void uncaughtExceptionInCallback(java.lang.Throwable,com.dropbox.sync.android.CoreLogger,java.lang.String)>($r2, $r3, $r1);
+
+     label03:
+        $z0 = $r2 instanceof java.io.IOException;
+
+        if $z0 != 0 goto label04;
+
+        $r7 = new com.dropbox.sync.android.NativeHttp$HttpErrorInfo;
+
+        $r8 = <com.dropbox.sync.android.DbxError: com.dropbox.sync.android.DbxError INTERNAL>;
+
+        specialinvoke $r7.<com.dropbox.sync.android.NativeHttp$HttpErrorInfo: void <init>(com.dropbox.sync.android.DbxError,int)>($r8, 3);
+
+        return $r7;
+
+     label04:
+        r9 = (java.io.IOException) $r2;
+
+        $r8 = <com.dropbox.sync.android.DbxError: com.dropbox.sync.android.DbxError NETWORK>;
+
+        b0 = 2;
+
+        $z0 = r9 instanceof com.dropbox.sync.android.CoreIOUtil$FileReadException;
+
+        if $z0 != 0 goto label05;
+
+        $z0 = r9 instanceof com.dropbox.sync.android.CoreIOUtil$FileWriteException;
+
+        if $z0 == 0 goto label06;
+
+     label05:
+        $r8 = <com.dropbox.sync.android.DbxError: com.dropbox.sync.android.DbxError SYSTEM>;
+
+        b0 = 2;
+
+        r10 = (com.dropbox.sync.android.CoreIOUtil$WrappedException) r9;
+
+        r9 = virtualinvoke r10.<com.dropbox.sync.android.CoreIOUtil$WrappedException: java.io.IOException getUnderlying()>();
+
+     label06:
+        $z0 = r9 instanceof com.dropbox.sync.android.CoreIOUtil$ReadException;
+
+        if $z0 != 0 goto label07;
+
+        $z0 = r9 instanceof com.dropbox.sync.android.CoreIOUtil$WriteException;
+
+        if $z0 == 0 goto label08;
+
+     label07:
+        $r8 = <com.dropbox.sync.android.DbxError: com.dropbox.sync.android.DbxError NETWORK>;
+
+        b0 = 1;
+
+        r10 = (com.dropbox.sync.android.CoreIOUtil$WrappedException) r9;
+
+        r9 = virtualinvoke r10.<com.dropbox.sync.android.CoreIOUtil$WrappedException: java.io.IOException getUnderlying()>();
+
+     label08:
+        $z0 = r9 instanceof java.net.SocketTimeoutException;
+
+        if $z0 == 0 goto label10;
+
+        $r8 = <com.dropbox.sync.android.DbxError: com.dropbox.sync.android.DbxError TIMEOUT>;
+
+        b0 = 1;
+
+     label09:
+        $r7 = new com.dropbox.sync.android.NativeHttp$HttpErrorInfo;
+
+        specialinvoke $r7.<com.dropbox.sync.android.NativeHttp$HttpErrorInfo: void <init>(com.dropbox.sync.android.DbxError,int)>($r8, b0);
+
+        return $r7;
+
+     label10:
+        $z0 = r9 instanceof java.net.ConnectException;
+
+        if $z0 == 0 goto label11;
+
+        $r8 = <com.dropbox.sync.android.DbxError: com.dropbox.sync.android.DbxError CONNECTION>;
+
+        b0 = 1;
+
+        goto label09;
+
+     label11:
+        $z0 = r9 instanceof javax.net.ssl.SSLException;
+
+        if $z0 == 0 goto label09;
+
+        $r8 = <com.dropbox.sync.android.DbxError: com.dropbox.sync.android.DbxError SSL>;
+
+        b0 = 2;
+
+        goto label09;
+    }
+    private static java.lang.String getServerResponseTime(com.dropbox.sync.android.CoreHttpRequestor$Response)
+    {
+        com.dropbox.sync.android.CoreHttpRequestor$Response $r0;
+        java.util.Map $r1;
+        boolean $z0;
+        java.lang.Object $r2;
+        java.util.List $r3;
+        java.lang.String $r4;
+
+        $r0 := @parameter0: com.dropbox.sync.android.CoreHttpRequestor$Response;
+
+        $r1 = $r0.<com.dropbox.sync.android.CoreHttpRequestor$Response: java.util.Map headers>;
+
+        $z0 = interfaceinvoke $r1.<java.util.Map: boolean containsKey(java.lang.Object)>("X-Server-Response-Time");
+
+        if $z0 == 0 goto label1;
+
+        $r1 = $r0.<com.dropbox.sync.android.CoreHttpRequestor$Response: java.util.Map headers>;
+
+        $r2 = interfaceinvoke $r1.<java.util.Map: java.lang.Object get(java.lang.Object)>("X-Server-Response-Time");
+
+        $r3 = (java.util.List) $r2;
+
+        $r2 = interfaceinvoke $r3.<java.util.List: java.lang.Object get(int)>(0);
+
+        $r4 = (java.lang.String) $r2;
+
+        return $r4;
+
+     label1:
+        return null;
+    }
+    private static java.lang.String getsDropboxRequestId(com.dropbox.sync.android.CoreHttpRequestor$Response)
+    {
+        com.dropbox.sync.android.CoreHttpRequestor$Response $r0;
+        java.util.Map $r1;
+        boolean $z0;
+        java.lang.Object $r2;
+        java.util.List $r3;
+        java.lang.String $r4;
+
+        $r0 := @parameter0: com.dropbox.sync.android.CoreHttpRequestor$Response;
+
+        $r1 = $r0.<com.dropbox.sync.android.CoreHttpRequestor$Response: java.util.Map headers>;
+
+        $z0 = interfaceinvoke $r1.<java.util.Map: boolean containsKey(java.lang.Object)>("X-Dropbox-Request-ID");
+
+        if $z0 == 0 goto label1;
+
+        $r1 = $r0.<com.dropbox.sync.android.CoreHttpRequestor$Response: java.util.Map headers>;
+
+        $r2 = interfaceinvoke $r1.<java.util.Map: java.lang.Object get(java.lang.Object)>("X-Dropbox-Request-ID");
+
+        $r3 = (java.util.List) $r2;
+
+        $r2 = interfaceinvoke $r3.<java.util.List: java.lang.Object get(int)>(0);
+
+        $r4 = (java.lang.String) $r2;
+
+        return $r4;
+
+     label1:
+        return null;
+    }
+    private void handleHttpError(java.lang.String, com.dropbox.sync.android.analytics.HttpRequestEvents$HttpMethod, java.lang.Throwable)
+    {
+        com.dropbox.sync.android.NativeHttp r0;
+        java.lang.String $r1;
+        com.dropbox.sync.android.analytics.HttpRequestEvents$HttpMethod $r2;
+        java.lang.Throwable $r3, r4;
+        com.dropbox.sync.android.analytics.HttpRequestEvents$Error $r5;
+        android.net.Uri $r6;
+        android.net.Uri$Builder $r7;
+        java.lang.Class $r8;
+        com.dropbox.sync.android.NativeHttp$HttpErrorInfo $r9;
+        com.dropbox.sync.android.DbxError $r10, $r11;
+        int $i0, $i1;
+        java.lang.StringBuilder $r12, $r14;
+        com.dropbox.sync.android.CoreLogger $r13;
+
+        r0 := @this: com.dropbox.sync.android.NativeHttp;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: com.dropbox.sync.android.analytics.HttpRequestEvents$HttpMethod;
+
+        $r3 := @parameter2: java.lang.Throwable;
+
+        $r5 = new com.dropbox.sync.android.analytics.HttpRequestEvents$Error;
+
+        specialinvoke $r5.<com.dropbox.sync.android.analytics.HttpRequestEvents$Error: void <init>(com.dropbox.sync.android.DbxAccount)>(null);
+
+        $r5 = virtualinvoke $r5.<com.dropbox.sync.android.analytics.HttpRequestEvents$Error: com.dropbox.sync.android.analytics.HttpRequestEvents$Error setMethod(com.dropbox.sync.android.analytics.HttpRequestEvents$HttpMethod)>($r2);
+
+        $r6 = staticinvoke <android.net.Uri: android.net.Uri parse(java.lang.String)>($r1);
+
+        $r7 = virtualinvoke $r6.<android.net.Uri: android.net.Uri$Builder buildUpon()>();
+
+        $r7 = virtualinvoke $r7.<android.net.Uri$Builder: android.net.Uri$Builder query(java.lang.String)>("");
+
+        $r6 = virtualinvoke $r7.<android.net.Uri$Builder: android.net.Uri build()>();
+
+        $r1 = virtualinvoke $r6.<android.net.Uri: java.lang.String toString()>();
+
+        $r5 = virtualinvoke $r5.<com.dropbox.sync.android.analytics.HttpRequestEvents$Error: com.dropbox.sync.android.analytics.HttpRequestEvents$Error setEndpoint(java.lang.String)>($r1);
+
+        $r8 = virtualinvoke $r3.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r1 = virtualinvoke $r8.<java.lang.Class: java.lang.String getName()>();
+
+        $r5 = virtualinvoke $r5.<com.dropbox.sync.android.analytics.HttpRequestEvents$Error: com.dropbox.sync.android.analytics.HttpRequestEvents$Error setExceptionTypeName(java.lang.String)>($r1);
+
+        $r1 = virtualinvoke $r3.<java.lang.Throwable: java.lang.String getMessage()>();
+
+        $r5 = virtualinvoke $r5.<com.dropbox.sync.android.analytics.HttpRequestEvents$Error: com.dropbox.sync.android.analytics.HttpRequestEvents$Error setExceptionMessage(java.lang.String)>($r1);
+
+        r4 = virtualinvoke $r3.<java.lang.Throwable: java.lang.Throwable getCause()>();
+
+        if r4 == null goto label01;
+
+        r4 = virtualinvoke $r3.<java.lang.Throwable: java.lang.Throwable getCause()>();
+
+        $r8 = virtualinvoke r4.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r1 = virtualinvoke $r8.<java.lang.Class: java.lang.String getName()>();
+
+        virtualinvoke $r5.<com.dropbox.sync.android.analytics.HttpRequestEvents$Error: com.dropbox.sync.android.analytics.HttpRequestEvents$Error setCauseTypeName(java.lang.String)>($r1);
+
+        r4 = virtualinvoke $r3.<java.lang.Throwable: java.lang.Throwable getCause()>();
+
+        $r1 = virtualinvoke r4.<java.lang.Throwable: java.lang.String getMessage()>();
+
+        virtualinvoke $r5.<com.dropbox.sync.android.analytics.HttpRequestEvents$Error: com.dropbox.sync.android.analytics.HttpRequestEvents$Error setCauseMessage(java.lang.String)>($r1);
+
+     label01:
+        virtualinvoke $r5.<com.dropbox.sync.android.analytics.HttpRequestEvents$Error: void log()>();
+
+     label02:
+        $r1 = specialinvoke r0.<com.dropbox.sync.android.NativeHttp: java.lang.String prettyMethodNameForLogging(com.dropbox.sync.android.analytics.HttpRequestEvents$HttpMethod)>($r2);
+
+        $r9 = specialinvoke r0.<com.dropbox.sync.android.NativeHttp: com.dropbox.sync.android.NativeHttp$HttpErrorInfo getNativeErrorInfo(java.lang.String,java.lang.Throwable)>($r1, $r3);
+
+        $r10 = $r9.<com.dropbox.sync.android.NativeHttp$HttpErrorInfo: com.dropbox.sync.android.DbxError dbxError>;
+
+        $r11 = <com.dropbox.sync.android.DbxError: com.dropbox.sync.android.DbxError SHUTDOWN>;
+
+     label03:
+        if $r10 != $r11 goto label06;
+
+     label04:
+        $r10 = $r9.<com.dropbox.sync.android.NativeHttp$HttpErrorInfo: com.dropbox.sync.android.DbxError dbxError>;
+
+        $i0 = virtualinvoke $r10.<com.dropbox.sync.android.DbxError: int getNativeCode()>();
+
+        $i1 = $r9.<com.dropbox.sync.android.NativeHttp$HttpErrorInfo: int logLevel>;
+
+        staticinvoke <com.dropbox.sync.android.CoreLogger: boolean setErrorStatus(int,int,java.lang.String)>($i0, $i1, "HTTP request canceled.");
+
+     label05:
+        return;
+
+     label06:
+        $r10 = $r9.<com.dropbox.sync.android.NativeHttp$HttpErrorInfo: com.dropbox.sync.android.DbxError dbxError>;
+
+        $i0 = virtualinvoke $r10.<com.dropbox.sync.android.DbxError: int getNativeCode()>();
+
+        $i1 = $r9.<com.dropbox.sync.android.NativeHttp$HttpErrorInfo: int logLevel>;
+
+        $r12 = new java.lang.StringBuilder;
+
+        specialinvoke $r12.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r3.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r1 = virtualinvoke $r8.<java.lang.Class: java.lang.String getName()>();
+
+        $r12 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r1 = virtualinvoke $r3.<java.lang.Throwable: java.lang.String getMessage()>();
+
+     label07:
+        if $r1 != null goto label11;
+
+        $r1 = "";
+
+     label08:
+        $r12 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r1 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.dropbox.sync.android.CoreLogger: boolean setErrorStatus(int,int,java.lang.String)>($i0, $i1, $r1);
+
+     label09:
+        return;
+
+     label10:
+        r4 := @caughtexception;
+
+        $r13 = r0.<com.dropbox.sync.android.NativeHttp: com.dropbox.sync.android.CoreLogger mLog>;
+
+        $r1 = <com.dropbox.sync.android.NativeHttp: java.lang.String TAG>;
+
+        virtualinvoke $r13.<com.dropbox.sync.android.CoreLogger: void e(java.lang.String,java.lang.String,java.lang.Throwable)>($r1, "Failed to set error code: ", r4);
+
+        return;
+
+     label11:
+        $r14 = new java.lang.StringBuilder;
+
+        specialinvoke $r14.<java.lang.StringBuilder: void <init>()>();
+
+        $r14 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(": ");
+
+        $r1 = virtualinvoke $r3.<java.lang.Throwable: java.lang.String getMessage()>();
+
+        $r14 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r1 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label12:
+        goto label08;
+
+        catch java.lang.Throwable from label02 to label03 with label10;
+        catch java.lang.Throwable from label04 to label05 with label10;
+        catch java.lang.Throwable from label06 to label07 with label10;
+        catch java.lang.Throwable from label08 to label09 with label10;
+        catch java.lang.Throwable from label11 to label12 with label10;
+    }
+    private com.dropbox.sync.android.NativeHttp$NativeHttpResponse httpGetToFile(java.lang.String, java.lang.String[], java.lang.String[], java.lang.String, long)
+    {
+        com.dropbox.sync.android.NativeHttp r0;
+        java.lang.String $r1, $r4;
+        java.lang.String[] $r2, $r3;
+        long $l0;
+        java.lang.Throwable r5;
+        com.dropbox.sync.android.NativeHttp$NativeHttpResponse $r6;
+        com.dropbox.sync.android.analytics.HttpRequestEvents$HttpMethod $r7;
+
+        r0 := @this: com.dropbox.sync.android.NativeHttp;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.lang.String[];
+
+        $r3 := @parameter2: java.lang.String[];
+
+        $r4 := @parameter3: java.lang.String;
+
+        $l0 := @parameter4: long;
+
+     label1:
+        $r6 = specialinvoke r0.<com.dropbox.sync.android.NativeHttp: com.dropbox.sync.android.NativeHttp$NativeHttpResponse doGetToFile(java.lang.String,java.lang.String[],java.lang.String[],java.lang.String,long)>($r1, $r2, $r3, $r4, $l0);
+
+     label2:
+        return $r6;
+
+     label3:
+        r5 := @caughtexception;
+
+        $r7 = <com.dropbox.sync.android.analytics.HttpRequestEvents$HttpMethod: com.dropbox.sync.android.analytics.HttpRequestEvents$HttpMethod http_method_get_to_file>;
+
+        specialinvoke r0.<com.dropbox.sync.android.NativeHttp: void handleHttpError(java.lang.String,com.dropbox.sync.android.analytics.HttpRequestEvents$HttpMethod,java.lang.Throwable)>($r1, $r7, r5);
+
+        return null;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+    private com.dropbox.sync.android.NativeHttp$NativeHttpResponse httpPutFile(java.lang.String, java.lang.String[], java.lang.String[], java.lang.String, long, long, long)
+    {
+        com.dropbox.sync.android.NativeHttp r0;
+        java.lang.String $r1, $r4;
+        java.lang.String[] $r2, $r3;
+        long $l0, $l1, $l2;
+        java.lang.Throwable r5;
+        com.dropbox.sync.android.NativeHttp$NativeHttpResponse $r6;
+        com.dropbox.sync.android.analytics.HttpRequestEvents$HttpMethod $r7;
+
+        r0 := @this: com.dropbox.sync.android.NativeHttp;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.lang.String[];
+
+        $r3 := @parameter2: java.lang.String[];
+
+        $r4 := @parameter3: java.lang.String;
+
+        $l0 := @parameter4: long;
+
+        $l1 := @parameter5: long;
+
+        $l2 := @parameter6: long;
+
+     label1:
+        $r6 = specialinvoke r0.<com.dropbox.sync.android.NativeHttp: com.dropbox.sync.android.NativeHttp$NativeHttpResponse doPutFile(java.lang.String,java.lang.String[],java.lang.String[],java.lang.String,long,long,long)>($r1, $r2, $r3, $r4, $l0, $l1, $l2);
+
+     label2:
+        return $r6;
+
+     label3:
+        r5 := @caughtexception;
+
+        $r7 = <com.dropbox.sync.android.analytics.HttpRequestEvents$HttpMethod: com.dropbox.sync.android.analytics.HttpRequestEvents$HttpMethod http_method_put_file>;
+
+        specialinvoke r0.<com.dropbox.sync.android.NativeHttp: void handleHttpError(java.lang.String,com.dropbox.sync.android.analytics.HttpRequestEvents$HttpMethod,java.lang.Throwable)>($r1, $r7, r5);
+
+        return null;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+    private com.dropbox.sync.android.NativeHttp$NativeHttpResponse httpRequest(java.lang.String, java.lang.String[], java.lang.String[], byte[], int)
+    {
+        com.dropbox.sync.android.NativeHttp r0;
+        java.lang.String $r1;
+        java.lang.String[] $r2, $r3;
+        byte[] $r4;
+        int $i0;
+        java.lang.Throwable r5;
+        com.dropbox.sync.android.NativeHttp$NativeHttpResponse $r6;
+        com.dropbox.sync.android.analytics.HttpRequestEvents$HttpMethod $r7;
+
+        r0 := @this: com.dropbox.sync.android.NativeHttp;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.lang.String[];
+
+        $r3 := @parameter2: java.lang.String[];
+
+        $r4 := @parameter3: byte[];
+
+        $i0 := @parameter4: int;
+
+        if $r4 == null goto label3;
+
+     label1:
+        $r6 = specialinvoke r0.<com.dropbox.sync.android.NativeHttp: com.dropbox.sync.android.NativeHttp$NativeHttpResponse doPost(java.lang.String,java.lang.String[],java.lang.String[],byte[],int)>($r1, $r2, $r3, $r4, $i0);
+
+     label2:
+        return $r6;
+
+     label3:
+        $r6 = specialinvoke r0.<com.dropbox.sync.android.NativeHttp: com.dropbox.sync.android.NativeHttp$NativeHttpResponse doGet(java.lang.String,java.lang.String[],java.lang.String[],int)>($r1, $r2, $r3, $i0);
+
+     label4:
+        return $r6;
+
+     label5:
+        r5 := @caughtexception;
+
+        if $r4 != null goto label7;
+
+        $r7 = <com.dropbox.sync.android.analytics.HttpRequestEvents$HttpMethod: com.dropbox.sync.android.analytics.HttpRequestEvents$HttpMethod http_method_get>;
+
+     label6:
+        specialinvoke r0.<com.dropbox.sync.android.NativeHttp: void handleHttpError(java.lang.String,com.dropbox.sync.android.analytics.HttpRequestEvents$HttpMethod,java.lang.Throwable)>($r1, $r7, r5);
+
+        return null;
+
+     label7:
+        $r7 = <com.dropbox.sync.android.analytics.HttpRequestEvents$HttpMethod: com.dropbox.sync.android.analytics.HttpRequestEvents$HttpMethod http_method_post>;
+
+        goto label6;
+
+        catch java.lang.Throwable from label1 to label2 with label5;
+        catch java.lang.Throwable from label3 to label4 with label5;
+    }
+    private void httpShutDown()
+    {
+        com.dropbox.sync.android.NativeHttp r0;
+        java.lang.Throwable r1;
+        java.lang.String $r2;
+        com.dropbox.sync.android.CoreHttpRequestor $r3;
+        com.dropbox.sync.android.CoreLogger $r4;
+
+        r0 := @this: com.dropbox.sync.android.NativeHttp;
+
+     label1:
+        specialinvoke r0.<com.dropbox.sync.android.NativeHttp: void setShutDown(boolean)>(1);
+
+        $r3 = r0.<com.dropbox.sync.android.NativeHttp: com.dropbox.sync.android.CoreHttpRequestor mRequestor>;
+
+        virtualinvoke $r3.<com.dropbox.sync.android.CoreHttpRequestor: void shutDown()>();
+
+     label2:
+        return;
+
+     label3:
+        r1 := @caughtexception;
+
+        $r4 = r0.<com.dropbox.sync.android.NativeHttp: com.dropbox.sync.android.CoreLogger mLog>;
+
+        $r2 = <com.dropbox.sync.android.NativeHttp: java.lang.String TAG>;
+
+        staticinvoke <com.dropbox.sync.android.CoreAssert: void uncaughtExceptionInCallback(java.lang.Throwable,com.dropbox.sync.android.CoreLogger,java.lang.String)>(r1, $r4, $r2);
+
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+    private com.dropbox.sync.android.NativeHttp$NativeHttpStreamingResponse httpStreamingRequest(java.lang.String, java.lang.String[], java.lang.String[], byte[], int)
+    {
+        com.dropbox.sync.android.NativeHttp r0;
+        java.lang.String $r1;
+        java.lang.String[] $r2, $r3;
+        byte[] $r4;
+        int $i0;
+        java.lang.Throwable r5;
+        com.dropbox.sync.android.DbxRuntimeException$Internal $r6;
+        com.dropbox.sync.android.NativeHttp$NativeHttpStreamingResponse $r7;
+        com.dropbox.sync.android.analytics.HttpRequestEvents$HttpMethod $r8;
+
+        r0 := @this: com.dropbox.sync.android.NativeHttp;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.lang.String[];
+
+        $r3 := @parameter2: java.lang.String[];
+
+        $r4 := @parameter3: byte[];
+
+        $i0 := @parameter4: int;
+
+        if $r4 == null goto label3;
+
+     label1:
+        $r7 = specialinvoke r0.<com.dropbox.sync.android.NativeHttp: com.dropbox.sync.android.NativeHttp$NativeHttpStreamingResponse doPostStreaming(java.lang.String,java.lang.String[],java.lang.String[],byte[],int)>($r1, $r2, $r3, $r4, $i0);
+
+     label2:
+        return $r7;
+
+     label3:
+        $r8 = <com.dropbox.sync.android.analytics.HttpRequestEvents$HttpMethod: com.dropbox.sync.android.analytics.HttpRequestEvents$HttpMethod http_method_get>;
+
+        $r6 = new com.dropbox.sync.android.DbxRuntimeException$Internal;
+
+        specialinvoke $r6.<com.dropbox.sync.android.DbxRuntimeException$Internal: void <init>(java.lang.String)>("doGetStreaming not yet implemented");
+
+        specialinvoke r0.<com.dropbox.sync.android.NativeHttp: void handleHttpError(java.lang.String,com.dropbox.sync.android.analytics.HttpRequestEvents$HttpMethod,java.lang.Throwable)>($r1, $r8, $r6);
+
+     label4:
+        return null;
+
+     label5:
+        r5 := @caughtexception;
+
+        if $r4 != null goto label7;
+
+        $r8 = <com.dropbox.sync.android.analytics.HttpRequestEvents$HttpMethod: com.dropbox.sync.android.analytics.HttpRequestEvents$HttpMethod http_method_get>;
+
+     label6:
+        specialinvoke r0.<com.dropbox.sync.android.NativeHttp: void handleHttpError(java.lang.String,com.dropbox.sync.android.analytics.HttpRequestEvents$HttpMethod,java.lang.Throwable)>($r1, $r8, r5);
+
+        return null;
+
+     label7:
+        $r8 = <com.dropbox.sync.android.analytics.HttpRequestEvents$HttpMethod: com.dropbox.sync.android.analytics.HttpRequestEvents$HttpMethod http_method_post>;
+
+        goto label6;
+
+        catch java.lang.Throwable from label1 to label2 with label5;
+        catch java.lang.Throwable from label3 to label4 with label5;
+    }
+    private boolean isShutDown()
+    {
+        com.dropbox.sync.android.NativeHttp r0;
+        java.lang.Throwable $r1;
+        boolean z0;
+
+        r0 := @this: com.dropbox.sync.android.NativeHttp;
+
+        entermonitor r0;
+
+     label1:
+        z0 = r0.<com.dropbox.sync.android.NativeHttp: boolean mIsShutDown>;
+
+     label2:
+        exitmonitor r0;
+
+        return z0;
+
+     label3:
+        $r1 := @caughtexception;
+
+        exitmonitor r0;
+
+        throw $r1;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+    private java.util.ArrayList makeHeaders(java.lang.String[], java.lang.String[])
+    {
+        com.dropbox.sync.android.NativeHttp r0;
+        java.lang.String[] $r1, $r2;
+        java.util.ArrayList r3;
+        java.lang.String $r4, $r5;
+        com.dropbox.sync.android.CoreHttpRequestor$Header $r6;
+        int $i0, $i1;
+
+        r0 := @this: com.dropbox.sync.android.NativeHttp;
+
+        $r1 := @parameter0: java.lang.String[];
+
+        $r2 := @parameter1: java.lang.String[];
+
+        r3 = new java.util.ArrayList;
+
+        $i0 = lengthof $r1;
+
+        $i0 = $i0 + 1;
+
+        specialinvoke r3.<java.util.ArrayList: void <init>(int)>($i0);
+
+        $r6 = specialinvoke r0.<com.dropbox.sync.android.NativeHttp: com.dropbox.sync.android.CoreHttpRequestor$Header makeUserAgentHeader()>();
+
+        virtualinvoke r3.<java.util.ArrayList: boolean add(java.lang.Object)>($r6);
+
+        $i0 = 0;
+
+     label1:
+        $i1 = lengthof $r1;
+
+        if $i0 >= $i1 goto label2;
+
+        $r6 = new com.dropbox.sync.android.CoreHttpRequestor$Header;
+
+        $r4 = $r1[$i0];
+
+        $r5 = $r2[$i0];
+
+        specialinvoke $r6.<com.dropbox.sync.android.CoreHttpRequestor$Header: void <init>(java.lang.String,java.lang.String)>($r4, $r5);
+
+        virtualinvoke r3.<java.util.ArrayList: boolean add(java.lang.Object)>($r6);
+
+        $i0 = $i0 + 1;
+
+        goto label1;
+
+     label2:
+        return r3;
+    }
+    private com.dropbox.sync.android.CoreHttpRequestor$Header makeUserAgentHeader()
+    {
+        com.dropbox.sync.android.NativeHttp r0;
+        com.dropbox.sync.android.CoreHttpRequestor$Header $r1;
+        com.dropbox.sync.android.NativeEnv$Config $r2;
+        com.dropbox.sync.android.NativeEnv $r3;
+        java.lang.String $r4;
+
+        r0 := @this: com.dropbox.sync.android.NativeHttp;
+
+        $r1 = new com.dropbox.sync.android.CoreHttpRequestor$Header;
+
+        $r3 = r0.<com.dropbox.sync.android.NativeHttp: com.dropbox.sync.android.NativeEnv mEnv>;
+
+        $r2 = virtualinvoke $r3.<com.dropbox.sync.android.NativeEnv: com.dropbox.sync.android.NativeEnv$Config getConfig()>();
+
+        $r4 = $r2.<com.dropbox.sync.android.NativeEnv$Config: java.lang.String userAgent>;
+
+        specialinvoke $r1.<com.dropbox.sync.android.CoreHttpRequestor$Header: void <init>(java.lang.String,java.lang.String)>("User-Agent", $r4);
+
+        return $r1;
+    }
+private static native void nativeClassInit() { 
+// no body
+} 
+private static native void nativeUpdateFileProgress(long, long, long) { 
+// no body
+} 
+    private java.lang.String prettyMethodNameForLogging(com.dropbox.sync.android.analytics.HttpRequestEvents$HttpMethod)
+    {
+        com.dropbox.sync.android.NativeHttp r0;
+        com.dropbox.sync.android.analytics.HttpRequestEvents$HttpMethod $r1;
+        int[] $r2;
+        int $i0;
+        java.lang.String $r3;
+
+        r0 := @this: com.dropbox.sync.android.NativeHttp;
+
+        $r1 := @parameter0: com.dropbox.sync.android.analytics.HttpRequestEvents$HttpMethod;
+
+        $r2 = <com.dropbox.sync.android.NativeHttp$3: int[] $SwitchMap$com$dropbox$sync$android$analytics$HttpRequestEvents$HttpMethod>;
+
+        $i0 = virtualinvoke $r1.<com.dropbox.sync.android.analytics.HttpRequestEvents$HttpMethod: int ordinal()>();
+
+        $i0 = $r2[$i0];
+
+        lookupswitch($i0)
+        {
+            case 1: goto label2;
+            case 2: goto label3;
+            case 3: goto label4;
+            case 4: goto label5;
+            default: goto label1;
+        };
+
+     label1:
+        $r3 = virtualinvoke $r1.<com.dropbox.sync.android.analytics.HttpRequestEvents$HttpMethod: java.lang.String name()>();
+
+        return $r3;
+
+     label2:
+        return "GET";
+
+     label3:
+        return "POST";
+
+     label4:
+        return "PUT-file";
+
+     label5:
+        return "GET-to-file";
+    }
+    private void setShutDown(boolean)
+    {
+        com.dropbox.sync.android.NativeHttp r0;
+        boolean $z0;
+        java.lang.Throwable $r1;
+
+        r0 := @this: com.dropbox.sync.android.NativeHttp;
+
+        $z0 := @parameter0: boolean;
+
+        entermonitor r0;
+
+     label1:
+        r0.<com.dropbox.sync.android.NativeHttp: boolean mIsShutDown> = $z0;
+
+     label2:
+        exitmonitor r0;
+
+        return;
+
+     label3:
+        $r1 := @caughtexception;
+
+        exitmonitor r0;
+
+        throw $r1;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }

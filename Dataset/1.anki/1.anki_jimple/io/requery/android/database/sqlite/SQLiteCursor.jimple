@@ -1,0 +1,548 @@
+io.requery.android.database.sqlite.SQLiteCursor extends io.requery.android.database.AbstractWindowedCursor
+static final int NO_COUNT
+static final java.lang.String TAG
+private final io.requery.android.database.sqlite.CloseGuard mCloseGuard
+private android.util.SparseIntArray mColumnNameMap
+private final java.lang.String[] mColumns
+private int mCount
+private int mCursorWindowCapacity
+private final io.requery.android.database.sqlite.SQLiteCursorDriver mDriver
+private final io.requery.android.database.sqlite.SQLiteQuery mQuery
+    public void <init>(io.requery.android.database.sqlite.SQLiteCursorDriver, java.lang.String, io.requery.android.database.sqlite.SQLiteQuery)
+    {
+        io.requery.android.database.sqlite.SQLiteCursor r0;
+        io.requery.android.database.sqlite.SQLiteCursorDriver $r1;
+        java.lang.String $r2;
+        io.requery.android.database.sqlite.SQLiteQuery $r3;
+        java.lang.IllegalArgumentException $r4;
+        io.requery.android.database.sqlite.CloseGuard $r5;
+        java.lang.String[] $r6;
+
+        r0 := @this: io.requery.android.database.sqlite.SQLiteCursor;
+
+        $r1 := @parameter0: io.requery.android.database.sqlite.SQLiteCursorDriver;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $r3 := @parameter2: io.requery.android.database.sqlite.SQLiteQuery;
+
+        specialinvoke r0.<io.requery.android.database.AbstractWindowedCursor: void <init>()>();
+
+        r0.<io.requery.android.database.sqlite.SQLiteCursor: int mCount> = -1;
+
+        if $r3 != null goto label1;
+
+        $r4 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r4.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("query object cannot be null");
+
+        throw $r4;
+
+     label1:
+        r0.<io.requery.android.database.sqlite.SQLiteCursor: io.requery.android.database.sqlite.SQLiteCursorDriver mDriver> = $r1;
+
+        r0.<io.requery.android.database.sqlite.SQLiteCursor: android.util.SparseIntArray mColumnNameMap> = null;
+
+        r0.<io.requery.android.database.sqlite.SQLiteCursor: io.requery.android.database.sqlite.SQLiteQuery mQuery> = $r3;
+
+        $r5 = staticinvoke <io.requery.android.database.sqlite.CloseGuard: io.requery.android.database.sqlite.CloseGuard get()>();
+
+        r0.<io.requery.android.database.sqlite.SQLiteCursor: io.requery.android.database.sqlite.CloseGuard mCloseGuard> = $r5;
+
+        $r6 = virtualinvoke $r3.<io.requery.android.database.sqlite.SQLiteQuery: java.lang.String[] getColumnNames()>();
+
+        r0.<io.requery.android.database.sqlite.SQLiteCursor: java.lang.String[] mColumns> = $r6;
+
+        return;
+    }
+    public static int cursorPickFillWindowStartPosition(int, int)
+    {
+        int $i0, $i1;
+
+        $i0 := @parameter0: int;
+
+        $i1 := @parameter1: int;
+
+        $i1 = $i1 / 3;
+
+        $i0 = $i0 - $i1;
+
+        $i0 = staticinvoke <java.lang.Math: int max(int,int)>($i0, 0);
+
+        return $i0;
+    }
+    private void fillWindow(int)
+    {
+        io.requery.android.database.sqlite.SQLiteCursor r0;
+        int $i0, $i1;
+        java.lang.RuntimeException r1;
+        io.requery.android.database.sqlite.SQLiteDatabase $r2;
+        java.lang.String $r3;
+        io.requery.android.database.sqlite.SQLiteQuery $r4;
+        io.requery.android.database.CursorWindow $r5;
+        boolean $z0;
+        java.lang.StringBuilder $r6;
+
+        r0 := @this: io.requery.android.database.sqlite.SQLiteCursor;
+
+        $i0 := @parameter0: int;
+
+        $r2 = virtualinvoke r0.<io.requery.android.database.sqlite.SQLiteCursor: io.requery.android.database.sqlite.SQLiteDatabase getDatabase()>();
+
+        $r3 = virtualinvoke $r2.<io.requery.android.database.sqlite.SQLiteDatabase: java.lang.String getPath()>();
+
+        virtualinvoke r0.<io.requery.android.database.sqlite.SQLiteCursor: void clearOrCreateWindow(java.lang.String)>($r3);
+
+     label01:
+        $i1 = r0.<io.requery.android.database.sqlite.SQLiteCursor: int mCount>;
+
+     label02:
+        if $i1 != -1 goto label07;
+
+     label03:
+        $i1 = staticinvoke <io.requery.android.database.sqlite.SQLiteCursor: int cursorPickFillWindowStartPosition(int,int)>($i0, 0);
+
+        $r4 = r0.<io.requery.android.database.sqlite.SQLiteCursor: io.requery.android.database.sqlite.SQLiteQuery mQuery>;
+
+        $r5 = r0.<io.requery.android.database.sqlite.SQLiteCursor: io.requery.android.database.CursorWindow mWindow>;
+
+        $i0 = virtualinvoke $r4.<io.requery.android.database.sqlite.SQLiteQuery: int fillWindow(io.requery.android.database.CursorWindow,int,int,boolean)>($r5, $i1, $i0, 1);
+
+        r0.<io.requery.android.database.sqlite.SQLiteCursor: int mCount> = $i0;
+
+        $r5 = r0.<io.requery.android.database.sqlite.SQLiteCursor: io.requery.android.database.CursorWindow mWindow>;
+
+        $i0 = virtualinvoke $r5.<io.requery.android.database.CursorWindow: int getNumRows()>();
+
+        r0.<io.requery.android.database.sqlite.SQLiteCursor: int mCursorWindowCapacity> = $i0;
+
+        $z0 = staticinvoke <android.util.Log: boolean isLoggable(java.lang.String,int)>("SQLiteCursor", 3);
+
+     label04:
+        if $z0 == 0 goto label10;
+
+        $r6 = new java.lang.StringBuilder;
+
+     label05:
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("received count(*) from native_fill_window: ");
+
+        $i0 = r0.<io.requery.android.database.sqlite.SQLiteCursor: int mCount>;
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r3 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("SQLiteCursor", $r3);
+
+     label06:
+        return;
+
+     label07:
+        $i1 = r0.<io.requery.android.database.sqlite.SQLiteCursor: int mCursorWindowCapacity>;
+
+        $i1 = staticinvoke <io.requery.android.database.sqlite.SQLiteCursor: int cursorPickFillWindowStartPosition(int,int)>($i0, $i1);
+
+        $r4 = r0.<io.requery.android.database.sqlite.SQLiteCursor: io.requery.android.database.sqlite.SQLiteQuery mQuery>;
+
+        $r5 = r0.<io.requery.android.database.sqlite.SQLiteCursor: io.requery.android.database.CursorWindow mWindow>;
+
+        virtualinvoke $r4.<io.requery.android.database.sqlite.SQLiteQuery: int fillWindow(io.requery.android.database.CursorWindow,int,int,boolean)>($r5, $i1, $i0, 0);
+
+     label08:
+        return;
+
+     label09:
+        r1 := @caughtexception;
+
+        virtualinvoke r0.<io.requery.android.database.sqlite.SQLiteCursor: void setWindow(io.requery.android.database.CursorWindow)>(null);
+
+        throw r1;
+
+     label10:
+        return;
+
+        catch java.lang.RuntimeException from label01 to label02 with label09;
+        catch java.lang.RuntimeException from label03 to label04 with label09;
+        catch java.lang.RuntimeException from label05 to label06 with label09;
+        catch java.lang.RuntimeException from label07 to label08 with label09;
+    }
+    public void close()
+    {
+        io.requery.android.database.sqlite.SQLiteCursor r0;
+        io.requery.android.database.sqlite.SQLiteQuery $r1;
+        io.requery.android.database.sqlite.SQLiteCursorDriver $r2;
+        java.lang.Throwable $r3;
+
+        r0 := @this: io.requery.android.database.sqlite.SQLiteCursor;
+
+        specialinvoke r0.<io.requery.android.database.AbstractWindowedCursor: void close()>();
+
+        entermonitor r0;
+
+     label1:
+        $r1 = r0.<io.requery.android.database.sqlite.SQLiteCursor: io.requery.android.database.sqlite.SQLiteQuery mQuery>;
+
+        virtualinvoke $r1.<io.requery.android.database.sqlite.SQLiteQuery: void close()>();
+
+        $r2 = r0.<io.requery.android.database.sqlite.SQLiteCursor: io.requery.android.database.sqlite.SQLiteCursorDriver mDriver>;
+
+        interfaceinvoke $r2.<io.requery.android.database.sqlite.SQLiteCursorDriver: void cursorClosed()>();
+
+        exitmonitor r0;
+
+     label2:
+        return;
+
+     label3:
+        $r3 := @caughtexception;
+
+        exitmonitor r0;
+
+     label4:
+        throw $r3;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+    public void deactivate()
+    {
+        io.requery.android.database.sqlite.SQLiteCursor r0;
+        io.requery.android.database.sqlite.SQLiteCursorDriver $r1;
+
+        r0 := @this: io.requery.android.database.sqlite.SQLiteCursor;
+
+        specialinvoke r0.<io.requery.android.database.AbstractWindowedCursor: void deactivate()>();
+
+        $r1 = r0.<io.requery.android.database.sqlite.SQLiteCursor: io.requery.android.database.sqlite.SQLiteCursorDriver mDriver>;
+
+        interfaceinvoke $r1.<io.requery.android.database.sqlite.SQLiteCursorDriver: void cursorDeactivated()>();
+
+        return;
+    }
+    protected void finalize()
+    {
+        io.requery.android.database.sqlite.SQLiteCursor r0;
+        io.requery.android.database.CursorWindow $r1;
+        io.requery.android.database.sqlite.CloseGuard $r2;
+        java.lang.Throwable $r3;
+
+        r0 := @this: io.requery.android.database.sqlite.SQLiteCursor;
+
+     label1:
+        $r1 = r0.<io.requery.android.database.sqlite.SQLiteCursor: io.requery.android.database.CursorWindow mWindow>;
+
+     label2:
+        if $r1 == null goto label4;
+
+     label3:
+        $r2 = r0.<io.requery.android.database.sqlite.SQLiteCursor: io.requery.android.database.sqlite.CloseGuard mCloseGuard>;
+
+        virtualinvoke $r2.<io.requery.android.database.sqlite.CloseGuard: void warnIfOpen()>();
+
+        virtualinvoke r0.<io.requery.android.database.sqlite.SQLiteCursor: void close()>();
+
+     label4:
+        specialinvoke r0.<io.requery.android.database.AbstractWindowedCursor: void finalize()>();
+
+        return;
+
+     label5:
+        $r3 := @caughtexception;
+
+        specialinvoke r0.<io.requery.android.database.AbstractWindowedCursor: void finalize()>();
+
+        throw $r3;
+
+        catch java.lang.Throwable from label1 to label2 with label5;
+        catch java.lang.Throwable from label3 to label4 with label5;
+    }
+    public int getColumnIndex(java.lang.String)
+    {
+        io.requery.android.database.sqlite.SQLiteCursor r0;
+        int i0, i1, $i2;
+        java.lang.String[] r1;
+        java.lang.Exception r2;
+        android.util.SparseIntArray r3;
+        java.lang.String $r4, $r5;
+        java.lang.StringBuilder $r6;
+
+        r0 := @this: io.requery.android.database.sqlite.SQLiteCursor;
+
+        $r4 := @parameter0: java.lang.String;
+
+        r3 = r0.<io.requery.android.database.sqlite.SQLiteCursor: android.util.SparseIntArray mColumnNameMap>;
+
+        if r3 != null goto label3;
+
+        r1 = r0.<io.requery.android.database.sqlite.SQLiteCursor: java.lang.String[] mColumns>;
+
+        i0 = lengthof r1;
+
+        r3 = new android.util.SparseIntArray;
+
+        specialinvoke r3.<android.util.SparseIntArray: void <init>(int)>(i0);
+
+        i1 = 0;
+
+     label1:
+        if i1 >= i0 goto label2;
+
+        $r5 = r1[i1];
+
+        $i2 = virtualinvoke $r5.<java.lang.String: int hashCode()>();
+
+        virtualinvoke r3.<android.util.SparseIntArray: void put(int,int)>($i2, i1);
+
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label2:
+        r0.<io.requery.android.database.sqlite.SQLiteCursor: android.util.SparseIntArray mColumnNameMap> = r3;
+
+     label3:
+        i0 = virtualinvoke $r4.<java.lang.String: int lastIndexOf(int)>(46);
+
+        if i0 == -1 goto label4;
+
+        r2 = new java.lang.Exception;
+
+        specialinvoke r2.<java.lang.Exception: void <init>()>();
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("requesting column name with table name -- ");
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r5 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String,java.lang.Throwable)>("SQLiteCursor", $r5, r2);
+
+        i0 = i0 + 1;
+
+        $r4 = virtualinvoke $r4.<java.lang.String: java.lang.String substring(int)>(i0);
+
+     label4:
+        r3 = r0.<io.requery.android.database.sqlite.SQLiteCursor: android.util.SparseIntArray mColumnNameMap>;
+
+        i0 = virtualinvoke $r4.<java.lang.String: int hashCode()>();
+
+        i0 = virtualinvoke r3.<android.util.SparseIntArray: int get(int,int)>(i0, -1);
+
+        return i0;
+    }
+    public java.lang.String[] getColumnNames()
+    {
+        io.requery.android.database.sqlite.SQLiteCursor r0;
+        java.lang.String[] r1;
+
+        r0 := @this: io.requery.android.database.sqlite.SQLiteCursor;
+
+        r1 = r0.<io.requery.android.database.sqlite.SQLiteCursor: java.lang.String[] mColumns>;
+
+        return r1;
+    }
+    public int getCount()
+    {
+        io.requery.android.database.sqlite.SQLiteCursor r0;
+        int $i0;
+
+        r0 := @this: io.requery.android.database.sqlite.SQLiteCursor;
+
+        $i0 = r0.<io.requery.android.database.sqlite.SQLiteCursor: int mCount>;
+
+        if $i0 != -1 goto label1;
+
+        specialinvoke r0.<io.requery.android.database.sqlite.SQLiteCursor: void fillWindow(int)>(0);
+
+     label1:
+        $i0 = r0.<io.requery.android.database.sqlite.SQLiteCursor: int mCount>;
+
+        return $i0;
+    }
+    public io.requery.android.database.sqlite.SQLiteDatabase getDatabase()
+    {
+        io.requery.android.database.sqlite.SQLiteCursor r0;
+        io.requery.android.database.sqlite.SQLiteDatabase $r1;
+        io.requery.android.database.sqlite.SQLiteQuery $r2;
+
+        r0 := @this: io.requery.android.database.sqlite.SQLiteCursor;
+
+        $r2 = r0.<io.requery.android.database.sqlite.SQLiteCursor: io.requery.android.database.sqlite.SQLiteQuery mQuery>;
+
+        $r1 = virtualinvoke $r2.<io.requery.android.database.sqlite.SQLiteQuery: io.requery.android.database.sqlite.SQLiteDatabase getDatabase()>();
+
+        return $r1;
+    }
+    public boolean onMove(int, int)
+    {
+        io.requery.android.database.sqlite.SQLiteCursor r0;
+        int $i0, $i1, $i2;
+        io.requery.android.database.CursorWindow $r1;
+
+        r0 := @this: io.requery.android.database.sqlite.SQLiteCursor;
+
+        $i0 := @parameter0: int;
+
+        $i1 := @parameter1: int;
+
+        $r1 = r0.<io.requery.android.database.sqlite.SQLiteCursor: io.requery.android.database.CursorWindow mWindow>;
+
+        if $r1 == null goto label1;
+
+        $r1 = r0.<io.requery.android.database.sqlite.SQLiteCursor: io.requery.android.database.CursorWindow mWindow>;
+
+        $i0 = virtualinvoke $r1.<io.requery.android.database.CursorWindow: int getStartPosition()>();
+
+        if $i1 < $i0 goto label1;
+
+        $r1 = r0.<io.requery.android.database.sqlite.SQLiteCursor: io.requery.android.database.CursorWindow mWindow>;
+
+        $i0 = virtualinvoke $r1.<io.requery.android.database.CursorWindow: int getStartPosition()>();
+
+        $r1 = r0.<io.requery.android.database.sqlite.SQLiteCursor: io.requery.android.database.CursorWindow mWindow>;
+
+        $i2 = virtualinvoke $r1.<io.requery.android.database.CursorWindow: int getNumRows()>();
+
+        $i0 = $i0 + $i2;
+
+        if $i1 < $i0 goto label2;
+
+     label1:
+        specialinvoke r0.<io.requery.android.database.sqlite.SQLiteCursor: void fillWindow(int)>($i1);
+
+     label2:
+        return 1;
+    }
+    public boolean requery()
+    {
+        io.requery.android.database.sqlite.SQLiteCursor r0;
+        java.lang.IllegalStateException r1;
+        boolean $z0;
+        io.requery.android.database.sqlite.SQLiteQuery $r2;
+        io.requery.android.database.sqlite.SQLiteDatabase $r3;
+        java.lang.Throwable $r4;
+        io.requery.android.database.CursorWindow $r5;
+        io.requery.android.database.sqlite.SQLiteCursorDriver $r6;
+        java.lang.StringBuilder $r7;
+        java.lang.String $r8;
+
+        r0 := @this: io.requery.android.database.sqlite.SQLiteCursor;
+
+        $z0 = virtualinvoke r0.<io.requery.android.database.sqlite.SQLiteCursor: boolean isClosed()>();
+
+        if $z0 == 0 goto label01;
+
+        return 0;
+
+     label01:
+        entermonitor r0;
+
+     label02:
+        $r2 = r0.<io.requery.android.database.sqlite.SQLiteCursor: io.requery.android.database.sqlite.SQLiteQuery mQuery>;
+
+        $r3 = virtualinvoke $r2.<io.requery.android.database.sqlite.SQLiteQuery: io.requery.android.database.sqlite.SQLiteDatabase getDatabase()>();
+
+        $z0 = virtualinvoke $r3.<io.requery.android.database.sqlite.SQLiteDatabase: boolean isOpen()>();
+
+        if $z0 != 0 goto label06;
+
+        exitmonitor r0;
+
+     label03:
+        return 0;
+
+     label04:
+        $r4 := @caughtexception;
+
+        exitmonitor r0;
+
+     label05:
+        throw $r4;
+
+     label06:
+        $r5 = r0.<io.requery.android.database.sqlite.SQLiteCursor: io.requery.android.database.CursorWindow mWindow>;
+
+        if $r5 == null goto label07;
+
+        $r5 = r0.<io.requery.android.database.sqlite.SQLiteCursor: io.requery.android.database.CursorWindow mWindow>;
+
+        virtualinvoke $r5.<io.requery.android.database.CursorWindow: void clear()>();
+
+     label07:
+        r0.<io.requery.android.database.sqlite.SQLiteCursor: int mPos> = -1;
+
+        r0.<io.requery.android.database.sqlite.SQLiteCursor: int mCount> = -1;
+
+        $r6 = r0.<io.requery.android.database.sqlite.SQLiteCursor: io.requery.android.database.sqlite.SQLiteCursorDriver mDriver>;
+
+        interfaceinvoke $r6.<io.requery.android.database.sqlite.SQLiteCursorDriver: void cursorRequeried(android.database.Cursor)>(r0);
+
+        exitmonitor r0;
+
+     label08:
+        $z0 = specialinvoke r0.<io.requery.android.database.AbstractWindowedCursor: boolean requery()>();
+
+     label09:
+        return $z0;
+
+     label10:
+        r1 := @caughtexception;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("requery() failed ");
+
+        $r8 = virtualinvoke r1.<java.lang.IllegalStateException: java.lang.String getMessage()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r8);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String,java.lang.Throwable)>("SQLiteCursor", $r8, r1);
+
+        return 0;
+
+        catch java.lang.Throwable from label02 to label03 with label04;
+        catch java.lang.Throwable from label04 to label05 with label04;
+        catch java.lang.Throwable from label06 to label08 with label04;
+        catch java.lang.IllegalStateException from label08 to label09 with label10;
+    }
+    public void setSelectionArguments(java.lang.String[])
+    {
+        io.requery.android.database.sqlite.SQLiteCursor r0;
+        java.lang.String[] $r1;
+        io.requery.android.database.sqlite.SQLiteCursorDriver $r2;
+
+        r0 := @this: io.requery.android.database.sqlite.SQLiteCursor;
+
+        $r1 := @parameter0: java.lang.String[];
+
+        $r2 = r0.<io.requery.android.database.sqlite.SQLiteCursor: io.requery.android.database.sqlite.SQLiteCursorDriver mDriver>;
+
+        interfaceinvoke $r2.<io.requery.android.database.sqlite.SQLiteCursorDriver: void setBindArguments(java.lang.String[])>($r1);
+
+        return;
+    }
+    public void setWindow(io.requery.android.database.CursorWindow)
+    {
+        io.requery.android.database.sqlite.SQLiteCursor r0;
+        io.requery.android.database.CursorWindow $r1;
+
+        r0 := @this: io.requery.android.database.sqlite.SQLiteCursor;
+
+        $r1 := @parameter0: io.requery.android.database.CursorWindow;
+
+        specialinvoke r0.<io.requery.android.database.AbstractWindowedCursor: void setWindow(io.requery.android.database.CursorWindow)>($r1);
+
+        r0.<io.requery.android.database.sqlite.SQLiteCursor: int mCount> = -1;
+
+        return;
+    }

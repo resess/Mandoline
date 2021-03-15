@@ -1,0 +1,391 @@
+com.fsck.k9.PRNGFixes extends java.lang.Object
+private static final byte[] BUILD_FINGERPRINT_AND_DEVICE_SERIAL
+private static final int VERSION_CODE_JELLY_BEAN
+private static final int VERSION_CODE_JELLY_BEAN_MR2
+    static void <clinit>()
+    {
+        byte[] $r0;
+
+        $r0 = staticinvoke <com.fsck.k9.PRNGFixes: byte[] getBuildFingerprintAndDeviceSerial()>();
+
+        <com.fsck.k9.PRNGFixes: byte[] BUILD_FINGERPRINT_AND_DEVICE_SERIAL> = $r0;
+
+        return;
+    }
+    private void <init>()
+    {
+        com.fsck.k9.PRNGFixes r0;
+
+        r0 := @this: com.fsck.k9.PRNGFixes;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+    public static void apply()
+    {
+        staticinvoke <com.fsck.k9.PRNGFixes: void applyOpenSSLFix()>();
+
+        staticinvoke <com.fsck.k9.PRNGFixes: void installLinuxPRNGSecureRandom()>();
+
+        return;
+    }
+    private static void applyOpenSSLFix() throws java.lang.SecurityException
+    {
+        java.lang.Exception r0;
+        int $i0;
+        java.lang.Class $r1, $r6;
+        java.lang.Class[] $r2;
+        java.lang.reflect.Method $r3;
+        java.lang.Object[] $r4;
+        byte[] $r5;
+        java.lang.Integer $r7;
+        java.lang.Object $r8;
+        java.io.IOException $r9;
+        java.lang.StringBuilder $r10;
+        java.lang.String $r11;
+        java.lang.SecurityException $r12;
+
+        $i0 = <android.os.Build$VERSION: int SDK_INT>;
+
+        if $i0 < 16 goto label7;
+
+        $i0 = <android.os.Build$VERSION: int SDK_INT>;
+
+        if $i0 <= 18 goto label1;
+
+        return;
+
+     label1:
+        $r1 = staticinvoke <java.lang.Class: java.lang.Class forName(java.lang.String)>("org.apache.harmony.xnet.provider.jsse.NativeCrypto");
+
+        $r2 = newarray (java.lang.Class)[1];
+
+        $r2[0] = class "[B";
+
+        $r3 = virtualinvoke $r1.<java.lang.Class: java.lang.reflect.Method getMethod(java.lang.String,java.lang.Class[])>("RAND_seed", $r2);
+
+        $r4 = newarray (java.lang.Object)[1];
+
+        $r5 = staticinvoke <com.fsck.k9.PRNGFixes: byte[] generateSeed()>();
+
+        $r4[0] = $r5;
+
+        virtualinvoke $r3.<java.lang.reflect.Method: java.lang.Object invoke(java.lang.Object,java.lang.Object[])>(null, $r4);
+
+        $r1 = staticinvoke <java.lang.Class: java.lang.Class forName(java.lang.String)>("org.apache.harmony.xnet.provider.jsse.NativeCrypto");
+
+        $r2 = newarray (java.lang.Class)[2];
+
+        $r2[0] = class "Ljava/lang/String;";
+
+     label2:
+        $r6 = <java.lang.Long: java.lang.Class TYPE>;
+
+     label3:
+        $r2[1] = $r6;
+
+        $r3 = virtualinvoke $r1.<java.lang.Class: java.lang.reflect.Method getMethod(java.lang.String,java.lang.Class[])>("RAND_load_file", $r2);
+
+        $r4 = newarray (java.lang.Object)[2];
+
+        $r4[0] = "/dev/urandom";
+
+        $r7 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(1024);
+
+        $r4[1] = $r7;
+
+        $r8 = virtualinvoke $r3.<java.lang.reflect.Method: java.lang.Object invoke(java.lang.Object,java.lang.Object[])>(null, $r4);
+
+        $r7 = (java.lang.Integer) $r8;
+
+        $i0 = virtualinvoke $r7.<java.lang.Integer: int intValue()>();
+
+     label4:
+        if $i0 == 1024 goto label7;
+
+        $r9 = new java.io.IOException;
+
+        $r10 = new java.lang.StringBuilder;
+
+     label5:
+        specialinvoke $r10.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unexpected number of bytes read from Linux PRNG: ");
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r9.<java.io.IOException: void <init>(java.lang.String)>($r11);
+
+        throw $r9;
+
+     label6:
+        r0 := @caughtexception;
+
+        $r12 = new java.lang.SecurityException;
+
+        specialinvoke $r12.<java.lang.SecurityException: void <init>(java.lang.String,java.lang.Throwable)>("Failed to seed OpenSSL PRNG", r0);
+
+        throw $r12;
+
+     label7:
+        return;
+
+        catch java.lang.Exception from label1 to label2 with label6;
+        catch java.lang.Exception from label3 to label4 with label6;
+        catch java.lang.Exception from label5 to label6 with label6;
+    }
+    private static byte[] generateSeed()
+    {
+        java.io.IOException r0;
+        java.io.ByteArrayOutputStream r1;
+        java.io.DataOutputStream r2;
+        long $l0;
+        int $i1;
+        byte[] $r3;
+        java.lang.SecurityException $r4;
+
+        r1 = new java.io.ByteArrayOutputStream;
+
+     label1:
+        specialinvoke r1.<java.io.ByteArrayOutputStream: void <init>()>();
+
+     label2:
+        r2 = new java.io.DataOutputStream;
+
+     label3:
+        specialinvoke r2.<java.io.DataOutputStream: void <init>(java.io.OutputStream)>(r1);
+
+        $l0 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        virtualinvoke r2.<java.io.DataOutputStream: void writeLong(long)>($l0);
+
+        $l0 = staticinvoke <java.lang.System: long nanoTime()>();
+
+        virtualinvoke r2.<java.io.DataOutputStream: void writeLong(long)>($l0);
+
+        $i1 = staticinvoke <android.os.Process: int myPid()>();
+
+        virtualinvoke r2.<java.io.DataOutputStream: void writeInt(int)>($i1);
+
+        $i1 = staticinvoke <android.os.Process: int myUid()>();
+
+        virtualinvoke r2.<java.io.DataOutputStream: void writeInt(int)>($i1);
+
+     label4:
+        $r3 = <com.fsck.k9.PRNGFixes: byte[] BUILD_FINGERPRINT_AND_DEVICE_SERIAL>;
+
+     label5:
+        virtualinvoke r2.<java.io.DataOutputStream: void write(byte[])>($r3);
+
+        virtualinvoke r2.<java.io.DataOutputStream: void close()>();
+
+        $r3 = virtualinvoke r1.<java.io.ByteArrayOutputStream: byte[] toByteArray()>();
+
+     label6:
+        return $r3;
+
+     label7:
+        r0 := @caughtexception;
+
+        $r4 = new java.lang.SecurityException;
+
+        specialinvoke $r4.<java.lang.SecurityException: void <init>(java.lang.String,java.lang.Throwable)>("Failed to generate seed", r0);
+
+        throw $r4;
+
+        catch java.io.IOException from label1 to label2 with label7;
+        catch java.io.IOException from label3 to label4 with label7;
+        catch java.io.IOException from label5 to label6 with label7;
+    }
+    private static byte[] getBuildFingerprintAndDeviceSerial()
+    {
+        java.lang.String r0;
+        java.lang.StringBuilder r1;
+        java.nio.charset.Charset $r2;
+        byte[] $r3;
+
+        r1 = new java.lang.StringBuilder;
+
+        specialinvoke r1.<java.lang.StringBuilder: void <init>()>();
+
+        r0 = <android.os.Build: java.lang.String FINGERPRINT>;
+
+        if r0 == null goto label1;
+
+        virtualinvoke r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r0);
+
+     label1:
+        r0 = staticinvoke <com.fsck.k9.PRNGFixes: java.lang.String getDeviceSerialNumber()>();
+
+        if r0 == null goto label2;
+
+        virtualinvoke r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r0);
+
+     label2:
+        r0 = virtualinvoke r1.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r2 = staticinvoke <java.nio.charset.Charset: java.nio.charset.Charset forName(java.lang.String)>("UTF-8");
+
+        $r3 = virtualinvoke r0.<java.lang.String: byte[] getBytes(java.nio.charset.Charset)>($r2);
+
+        return $r3;
+    }
+    private static java.lang.String getDeviceSerialNumber()
+    {
+        java.lang.Exception r0;
+        java.lang.Class $r1;
+        java.lang.reflect.Field $r2;
+        java.lang.Object $r3;
+        java.lang.String $r4;
+
+        $r1 = class "Landroid/os/Build;";
+
+     label1:
+        $r2 = virtualinvoke $r1.<java.lang.Class: java.lang.reflect.Field getField(java.lang.String)>("SERIAL");
+
+        $r3 = virtualinvoke $r2.<java.lang.reflect.Field: java.lang.Object get(java.lang.Object)>(null);
+
+        $r4 = (java.lang.String) $r3;
+
+     label2:
+        return $r4;
+
+     label3:
+        r0 := @caughtexception;
+
+        return null;
+
+        catch java.lang.Exception from label1 to label2 with label3;
+    }
+    private static void installLinuxPRNGSecureRandom() throws java.lang.SecurityException
+    {
+        java.security.NoSuchAlgorithmException r0;
+        java.security.SecureRandom r1;
+        int $i0;
+        java.security.Provider[] $r2;
+        java.lang.Class $r3, $r5;
+        java.security.Provider $r4;
+        boolean $z0;
+        com.fsck.k9.PRNGFixes$LinuxPRNGSecureRandomProvider $r6;
+        java.lang.SecurityException $r7;
+        java.lang.StringBuilder $r8;
+        java.lang.String $r9;
+
+        $i0 = <android.os.Build$VERSION: int SDK_INT>;
+
+        if $i0 <= 18 goto label1;
+
+        return;
+
+     label1:
+        $r2 = staticinvoke <java.security.Security: java.security.Provider[] getProviders(java.lang.String)>("SecureRandom.SHA1PRNG");
+
+        if $r2 == null goto label2;
+
+        $i0 = lengthof $r2;
+
+        if $i0 < 1 goto label2;
+
+        $r3 = class "Lcom/fsck/k9/PRNGFixes$LinuxPRNGSecureRandomProvider;";
+
+        $r4 = $r2[0];
+
+        $r5 = virtualinvoke $r4.<java.lang.Object: java.lang.Class getClass()>();
+
+        $z0 = virtualinvoke $r3.<java.lang.Object: boolean equals(java.lang.Object)>($r5);
+
+        if $z0 != 0 goto label3;
+
+     label2:
+        $r6 = new com.fsck.k9.PRNGFixes$LinuxPRNGSecureRandomProvider;
+
+        specialinvoke $r6.<com.fsck.k9.PRNGFixes$LinuxPRNGSecureRandomProvider: void <init>()>();
+
+        staticinvoke <java.security.Security: int insertProviderAt(java.security.Provider,int)>($r6, 1);
+
+     label3:
+        r1 = new java.security.SecureRandom;
+
+        specialinvoke r1.<java.security.SecureRandom: void <init>()>();
+
+        $r3 = class "Lcom/fsck/k9/PRNGFixes$LinuxPRNGSecureRandomProvider;";
+
+        $r4 = virtualinvoke r1.<java.security.SecureRandom: java.security.Provider getProvider()>();
+
+        $r5 = virtualinvoke $r4.<java.lang.Object: java.lang.Class getClass()>();
+
+        $z0 = virtualinvoke $r3.<java.lang.Object: boolean equals(java.lang.Object)>($r5);
+
+        if $z0 != 0 goto label4;
+
+        $r7 = new java.lang.SecurityException;
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("new SecureRandom() backed by wrong Provider: ");
+
+        $r4 = virtualinvoke r1.<java.security.SecureRandom: java.security.Provider getProvider()>();
+
+        $r3 = virtualinvoke $r4.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r3);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r7.<java.lang.SecurityException: void <init>(java.lang.String)>($r9);
+
+        throw $r7;
+
+     label4:
+        r1 = staticinvoke <java.security.SecureRandom: java.security.SecureRandom getInstance(java.lang.String)>("SHA1PRNG");
+
+     label5:
+        $r3 = class "Lcom/fsck/k9/PRNGFixes$LinuxPRNGSecureRandomProvider;";
+
+        $r4 = virtualinvoke r1.<java.security.SecureRandom: java.security.Provider getProvider()>();
+
+        $r5 = virtualinvoke $r4.<java.lang.Object: java.lang.Class getClass()>();
+
+        $z0 = virtualinvoke $r3.<java.lang.Object: boolean equals(java.lang.Object)>($r5);
+
+        if $z0 != 0 goto label7;
+
+        $r7 = new java.lang.SecurityException;
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("SecureRandom.getInstance(\"SHA1PRNG\") backed by wrong Provider: ");
+
+        $r4 = virtualinvoke r1.<java.security.SecureRandom: java.security.Provider getProvider()>();
+
+        $r3 = virtualinvoke $r4.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r3);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r7.<java.lang.SecurityException: void <init>(java.lang.String)>($r9);
+
+        throw $r7;
+
+     label6:
+        r0 := @caughtexception;
+
+        $r7 = new java.lang.SecurityException;
+
+        specialinvoke $r7.<java.lang.SecurityException: void <init>(java.lang.String,java.lang.Throwable)>("SHA1PRNG not available", r0);
+
+        throw $r7;
+
+     label7:
+        return;
+
+        catch java.security.NoSuchAlgorithmException from label4 to label5 with label6;
+    }

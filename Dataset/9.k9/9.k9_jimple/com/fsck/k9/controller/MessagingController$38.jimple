@@ -1,0 +1,127 @@
+com.fsck.k9.controller.MessagingController$38 extends java.lang.Object implements java.lang.Runnable
+final com.fsck.k9.controller.MessagingController this$0
+final com.fsck.k9.Account val$account
+final com.fsck.k9.controller.MessagingListener val$ml
+    void <init>(com.fsck.k9.controller.MessagingController, com.fsck.k9.Account, com.fsck.k9.controller.MessagingListener)
+    {
+        com.fsck.k9.controller.MessagingController$38 r0;
+        com.fsck.k9.controller.MessagingController $r1;
+        com.fsck.k9.Account $r2;
+        com.fsck.k9.controller.MessagingListener $r3;
+
+        r0 := @this: com.fsck.k9.controller.MessagingController$38;
+
+        $r1 := @parameter0: com.fsck.k9.controller.MessagingController;
+
+        $r2 := @parameter1: com.fsck.k9.Account;
+
+        $r3 := @parameter2: com.fsck.k9.controller.MessagingListener;
+
+        r0.<com.fsck.k9.controller.MessagingController$38: com.fsck.k9.controller.MessagingController this$0> = $r1;
+
+        r0.<com.fsck.k9.controller.MessagingController$38: com.fsck.k9.Account val$account> = $r2;
+
+        r0.<com.fsck.k9.controller.MessagingController$38: com.fsck.k9.controller.MessagingListener val$ml> = $r3;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+    public void run()
+    {
+        com.fsck.k9.controller.MessagingController$38 r0;
+        com.fsck.k9.Account $r1;
+        com.fsck.k9.mailstore.LocalStore $r2;
+        long $l0, $l1;
+        com.fsck.k9.controller.MessagingController $r3;
+        com.fsck.k9.controller.MessagingListener $r4;
+        java.util.Set $r5;
+        java.util.Iterator $r6;
+        boolean $z0;
+        java.lang.Object $r7;
+        com.fsck.k9.mailstore.UnavailableStorageException r8;
+        java.lang.Object[] $r9;
+        com.fsck.k9.controller.UnavailableAccountException $r10;
+        java.lang.Exception r11;
+        java.lang.String $r12;
+
+        r0 := @this: com.fsck.k9.controller.MessagingController$38;
+
+     label01:
+        $r1 = r0.<com.fsck.k9.controller.MessagingController$38: com.fsck.k9.Account val$account>;
+
+     label02:
+        $r2 = virtualinvoke $r1.<com.fsck.k9.Account: com.fsck.k9.mailstore.LocalStore getLocalStore()>();
+
+        $l0 = virtualinvoke $r2.<com.fsck.k9.mailstore.LocalStore: long getSize()>();
+
+        virtualinvoke $r2.<com.fsck.k9.mailstore.LocalStore: void compact()>();
+
+        $l1 = virtualinvoke $r2.<com.fsck.k9.mailstore.LocalStore: long getSize()>();
+
+     label03:
+        $r3 = r0.<com.fsck.k9.controller.MessagingController$38: com.fsck.k9.controller.MessagingController this$0>;
+
+        $r4 = r0.<com.fsck.k9.controller.MessagingController$38: com.fsck.k9.controller.MessagingListener val$ml>;
+
+     label04:
+        $r5 = virtualinvoke $r3.<com.fsck.k9.controller.MessagingController: java.util.Set getListeners(com.fsck.k9.controller.MessagingListener)>($r4);
+
+        $r6 = interfaceinvoke $r5.<java.util.Set: java.util.Iterator iterator()>();
+
+     label05:
+        $z0 = interfaceinvoke $r6.<java.util.Iterator: boolean hasNext()>();
+
+     label06:
+        if $z0 == 0 goto label13;
+
+     label07:
+        $r7 = interfaceinvoke $r6.<java.util.Iterator: java.lang.Object next()>();
+
+     label08:
+        $r4 = (com.fsck.k9.controller.MessagingListener) $r7;
+
+        $r1 = r0.<com.fsck.k9.controller.MessagingController$38: com.fsck.k9.Account val$account>;
+
+     label09:
+        interfaceinvoke $r4.<com.fsck.k9.controller.MessagingListener: void accountSizeChanged(com.fsck.k9.Account,long,long)>($r1, $l0, $l1);
+
+     label10:
+        goto label05;
+
+     label11:
+        r8 := @caughtexception;
+
+        $r9 = newarray (java.lang.Object)[0];
+
+        staticinvoke <timber.log.Timber: void i(java.lang.String,java.lang.Object[])>("Failed to compact account because storage is not available - trying again later.", $r9);
+
+        $r10 = new com.fsck.k9.controller.UnavailableAccountException;
+
+        specialinvoke $r10.<com.fsck.k9.controller.UnavailableAccountException: void <init>(java.lang.Throwable)>(r8);
+
+        throw $r10;
+
+     label12:
+        r11 := @caughtexception;
+
+        $r9 = newarray (java.lang.Object)[1];
+
+        $r1 = r0.<com.fsck.k9.controller.MessagingController$38: com.fsck.k9.Account val$account>;
+
+        $r12 = virtualinvoke $r1.<com.fsck.k9.Account: java.lang.String getDescription()>();
+
+        $r9[0] = $r12;
+
+        staticinvoke <timber.log.Timber: void e(java.lang.Throwable,java.lang.String,java.lang.Object[])>(r11, "Failed to compact account %s", $r9);
+
+     label13:
+        return;
+
+        catch com.fsck.k9.mailstore.UnavailableStorageException from label02 to label03 with label11;
+        catch com.fsck.k9.mailstore.UnavailableStorageException from label04 to label06 with label11;
+        catch com.fsck.k9.mailstore.UnavailableStorageException from label07 to label08 with label11;
+        catch com.fsck.k9.mailstore.UnavailableStorageException from label09 to label10 with label11;
+        catch java.lang.Exception from label01 to label06 with label12;
+        catch java.lang.Exception from label07 to label10 with label12;
+    }

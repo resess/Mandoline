@@ -1,0 +1,294 @@
+org.apache.commons.io.FileCleaningTracker extends java.lang.Object
+final java.util.List deleteFailures
+volatile boolean exitWhenFinished
+java.lang.ref.ReferenceQueue q
+java.lang.Thread reaper
+final java.util.Collection trackers
+    public void <init>()
+    {
+        org.apache.commons.io.FileCleaningTracker r0;
+        java.lang.ref.ReferenceQueue $r1;
+        java.util.HashSet $r2;
+        java.util.Set $r3;
+        java.util.ArrayList $r4;
+        java.util.List $r5;
+
+        r0 := @this: org.apache.commons.io.FileCleaningTracker;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r1 = new java.lang.ref.ReferenceQueue;
+
+        specialinvoke $r1.<java.lang.ref.ReferenceQueue: void <init>()>();
+
+        r0.<org.apache.commons.io.FileCleaningTracker: java.lang.ref.ReferenceQueue q> = $r1;
+
+        $r2 = new java.util.HashSet;
+
+        specialinvoke $r2.<java.util.HashSet: void <init>()>();
+
+        $r3 = staticinvoke <java.util.Collections: java.util.Set synchronizedSet(java.util.Set)>($r2);
+
+        r0.<org.apache.commons.io.FileCleaningTracker: java.util.Collection trackers> = $r3;
+
+        $r4 = new java.util.ArrayList;
+
+        specialinvoke $r4.<java.util.ArrayList: void <init>()>();
+
+        $r5 = staticinvoke <java.util.Collections: java.util.List synchronizedList(java.util.List)>($r4);
+
+        r0.<org.apache.commons.io.FileCleaningTracker: java.util.List deleteFailures> = $r5;
+
+        r0.<org.apache.commons.io.FileCleaningTracker: boolean exitWhenFinished> = 0;
+
+        return;
+    }
+    private void addTracker(java.lang.String, java.lang.Object, org.apache.commons.io.FileDeleteStrategy)
+    {
+        org.apache.commons.io.FileCleaningTracker r0;
+        java.lang.String $r1;
+        java.lang.Object $r2;
+        org.apache.commons.io.FileDeleteStrategy $r3;
+        java.lang.ref.ReferenceQueue $r4;
+        boolean $z0;
+        java.lang.IllegalStateException $r5;
+        java.lang.Throwable $r6;
+        java.lang.Thread $r7;
+        org.apache.commons.io.FileCleaningTracker$Reaper $r8;
+        java.util.Collection $r9;
+        org.apache.commons.io.FileCleaningTracker$Tracker $r10;
+
+        r0 := @this: org.apache.commons.io.FileCleaningTracker;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.lang.Object;
+
+        $r3 := @parameter2: org.apache.commons.io.FileDeleteStrategy;
+
+        entermonitor r0;
+
+     label1:
+        $z0 = r0.<org.apache.commons.io.FileCleaningTracker: boolean exitWhenFinished>;
+
+        if $z0 == 0 goto label3;
+
+        $r5 = new java.lang.IllegalStateException;
+
+        specialinvoke $r5.<java.lang.IllegalStateException: void <init>(java.lang.String)>("No new trackers can be added once exitWhenFinished() is called");
+
+        throw $r5;
+
+     label2:
+        $r6 := @caughtexception;
+
+        exitmonitor r0;
+
+        throw $r6;
+
+     label3:
+        $r7 = r0.<org.apache.commons.io.FileCleaningTracker: java.lang.Thread reaper>;
+
+        if $r7 != null goto label4;
+
+        $r8 = new org.apache.commons.io.FileCleaningTracker$Reaper;
+
+        specialinvoke $r8.<org.apache.commons.io.FileCleaningTracker$Reaper: void <init>(org.apache.commons.io.FileCleaningTracker)>(r0);
+
+        r0.<org.apache.commons.io.FileCleaningTracker: java.lang.Thread reaper> = $r8;
+
+        $r7 = r0.<org.apache.commons.io.FileCleaningTracker: java.lang.Thread reaper>;
+
+        virtualinvoke $r7.<java.lang.Thread: void start()>();
+
+     label4:
+        $r9 = r0.<org.apache.commons.io.FileCleaningTracker: java.util.Collection trackers>;
+
+        $r10 = new org.apache.commons.io.FileCleaningTracker$Tracker;
+
+        $r4 = r0.<org.apache.commons.io.FileCleaningTracker: java.lang.ref.ReferenceQueue q>;
+
+        specialinvoke $r10.<org.apache.commons.io.FileCleaningTracker$Tracker: void <init>(java.lang.String,org.apache.commons.io.FileDeleteStrategy,java.lang.Object,java.lang.ref.ReferenceQueue)>($r1, $r3, $r2, $r4);
+
+        interfaceinvoke $r9.<java.util.Collection: boolean add(java.lang.Object)>($r10);
+
+     label5:
+        exitmonitor r0;
+
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label2;
+        catch java.lang.Throwable from label3 to label5 with label2;
+    }
+    public void exitWhenFinished()
+    {
+        org.apache.commons.io.FileCleaningTracker r0;
+        java.lang.Thread $r1, $r2;
+        java.lang.Throwable $r3, $r4;
+
+        r0 := @this: org.apache.commons.io.FileCleaningTracker;
+
+        entermonitor r0;
+
+     label1:
+        r0.<org.apache.commons.io.FileCleaningTracker: boolean exitWhenFinished> = 1;
+
+        $r1 = r0.<org.apache.commons.io.FileCleaningTracker: java.lang.Thread reaper>;
+
+        if $r1 == null goto label3;
+
+        $r1 = r0.<org.apache.commons.io.FileCleaningTracker: java.lang.Thread reaper>;
+
+        entermonitor $r1;
+
+     label2:
+        $r2 = r0.<org.apache.commons.io.FileCleaningTracker: java.lang.Thread reaper>;
+
+        virtualinvoke $r2.<java.lang.Thread: void interrupt()>();
+
+        exitmonitor $r1;
+
+     label3:
+        exitmonitor r0;
+
+        return;
+
+     label4:
+        $r3 := @caughtexception;
+
+     label5:
+        exitmonitor $r1;
+
+     label6:
+        throw $r3;
+
+     label7:
+        $r4 := @caughtexception;
+
+        exitmonitor r0;
+
+        throw $r4;
+
+        catch java.lang.Throwable from label1 to label2 with label7;
+        catch java.lang.Throwable from label2 to label3 with label4;
+        catch java.lang.Throwable from label5 to label6 with label4;
+        catch java.lang.Throwable from label6 to label7 with label7;
+    }
+    public java.util.List getDeleteFailures()
+    {
+        org.apache.commons.io.FileCleaningTracker r0;
+        java.util.List r1;
+
+        r0 := @this: org.apache.commons.io.FileCleaningTracker;
+
+        r1 = r0.<org.apache.commons.io.FileCleaningTracker: java.util.List deleteFailures>;
+
+        return r1;
+    }
+    public int getTrackCount()
+    {
+        org.apache.commons.io.FileCleaningTracker r0;
+        int $i0;
+        java.util.Collection $r1;
+
+        r0 := @this: org.apache.commons.io.FileCleaningTracker;
+
+        $r1 = r0.<org.apache.commons.io.FileCleaningTracker: java.util.Collection trackers>;
+
+        $i0 = interfaceinvoke $r1.<java.util.Collection: int size()>();
+
+        return $i0;
+    }
+    public void track(java.io.File, java.lang.Object)
+    {
+        org.apache.commons.io.FileCleaningTracker r0;
+        java.io.File $r1;
+        java.lang.Object $r2;
+
+        r0 := @this: org.apache.commons.io.FileCleaningTracker;
+
+        $r1 := @parameter0: java.io.File;
+
+        $r2 := @parameter1: java.lang.Object;
+
+        virtualinvoke r0.<org.apache.commons.io.FileCleaningTracker: void track(java.io.File,java.lang.Object,org.apache.commons.io.FileDeleteStrategy)>($r1, $r2, null);
+
+        return;
+    }
+    public void track(java.io.File, java.lang.Object, org.apache.commons.io.FileDeleteStrategy)
+    {
+        org.apache.commons.io.FileCleaningTracker r0;
+        java.io.File $r1;
+        java.lang.Object $r2;
+        org.apache.commons.io.FileDeleteStrategy $r3;
+        java.lang.String $r4;
+        java.lang.NullPointerException $r5;
+
+        r0 := @this: org.apache.commons.io.FileCleaningTracker;
+
+        $r1 := @parameter0: java.io.File;
+
+        $r2 := @parameter1: java.lang.Object;
+
+        $r3 := @parameter2: org.apache.commons.io.FileDeleteStrategy;
+
+        if $r1 != null goto label1;
+
+        $r5 = new java.lang.NullPointerException;
+
+        specialinvoke $r5.<java.lang.NullPointerException: void <init>(java.lang.String)>("The file must not be null");
+
+        throw $r5;
+
+     label1:
+        $r4 = virtualinvoke $r1.<java.io.File: java.lang.String getPath()>();
+
+        specialinvoke r0.<org.apache.commons.io.FileCleaningTracker: void addTracker(java.lang.String,java.lang.Object,org.apache.commons.io.FileDeleteStrategy)>($r4, $r2, $r3);
+
+        return;
+    }
+    public void track(java.lang.String, java.lang.Object)
+    {
+        org.apache.commons.io.FileCleaningTracker r0;
+        java.lang.String $r1;
+        java.lang.Object $r2;
+
+        r0 := @this: org.apache.commons.io.FileCleaningTracker;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.lang.Object;
+
+        virtualinvoke r0.<org.apache.commons.io.FileCleaningTracker: void track(java.lang.String,java.lang.Object,org.apache.commons.io.FileDeleteStrategy)>($r1, $r2, null);
+
+        return;
+    }
+    public void track(java.lang.String, java.lang.Object, org.apache.commons.io.FileDeleteStrategy)
+    {
+        org.apache.commons.io.FileCleaningTracker r0;
+        java.lang.String $r1;
+        java.lang.Object $r2;
+        org.apache.commons.io.FileDeleteStrategy $r3;
+        java.lang.NullPointerException $r4;
+
+        r0 := @this: org.apache.commons.io.FileCleaningTracker;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.lang.Object;
+
+        $r3 := @parameter2: org.apache.commons.io.FileDeleteStrategy;
+
+        if $r1 != null goto label1;
+
+        $r4 = new java.lang.NullPointerException;
+
+        specialinvoke $r4.<java.lang.NullPointerException: void <init>(java.lang.String)>("The path must not be null");
+
+        throw $r4;
+
+     label1:
+        specialinvoke r0.<org.apache.commons.io.FileCleaningTracker: void addTracker(java.lang.String,java.lang.Object,org.apache.commons.io.FileDeleteStrategy)>($r1, $r2, $r3);
+
+        return;
+    }

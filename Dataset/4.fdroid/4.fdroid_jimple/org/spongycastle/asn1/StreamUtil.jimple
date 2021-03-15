@@ -1,0 +1,221 @@
+org.spongycastle.asn1.StreamUtil extends java.lang.Object
+private static final long MAX_MEMORY
+    static void <clinit>()
+    {
+        java.lang.Runtime $r0;
+        long $l0;
+
+        $r0 = staticinvoke <java.lang.Runtime: java.lang.Runtime getRuntime()>();
+
+        $l0 = virtualinvoke $r0.<java.lang.Runtime: long maxMemory()>();
+
+        <org.spongycastle.asn1.StreamUtil: long MAX_MEMORY> = $l0;
+
+        return;
+    }
+    void <init>()
+    {
+        org.spongycastle.asn1.StreamUtil r0;
+
+        r0 := @this: org.spongycastle.asn1.StreamUtil;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+    static int calculateBodyLength(int)
+    {
+        int $i0, i1, i2;
+
+        $i0 := @parameter0: int;
+
+        i1 = 1;
+
+        if $i0 <= 127 goto label4;
+
+        i2 = 1;
+
+     label1:
+        $i0 = $i0 >>> 8;
+
+        if $i0 == 0 goto label2;
+
+        i2 = i2 + 1;
+
+        goto label1;
+
+     label2:
+        $i0 = i2 + -1;
+
+        $i0 = $i0 * 8;
+
+     label3:
+        if $i0 < 0 goto label5;
+
+        i1 = i1 + 1;
+
+        $i0 = $i0 + -8;
+
+        goto label3;
+
+     label4:
+        return 1;
+
+     label5:
+        return i1;
+    }
+    static int calculateTagLength(int) throws java.io.IOException
+    {
+        byte[] r0;
+        int $i0, i1, $i2;
+        byte $b3;
+
+        $i0 := @parameter0: int;
+
+        if $i0 < 31 goto label3;
+
+        if $i0 >= 128 goto label1;
+
+        $i0 = 1 + 1;
+
+        return $i0;
+
+     label1:
+        r0 = newarray (byte)[5];
+
+        i1 = lengthof r0;
+
+        i1 = i1 + -1;
+
+        $i2 = $i0 & 127;
+
+        $b3 = (byte) $i2;
+
+        r0[i1] = $b3;
+
+     label2:
+        $i0 = $i0 >> 7;
+
+        i1 = i1 + -1;
+
+        $i2 = $i0 & 127;
+
+        $i2 = $i2 | 128;
+
+        $b3 = (byte) $i2;
+
+        r0[i1] = $b3;
+
+        if $i0 > 127 goto label2;
+
+        $i0 = lengthof r0;
+
+        $i0 = $i0 - i1;
+
+        $i0 = 1 + $i0;
+
+        return $i0;
+
+     label3:
+        return 1;
+    }
+    static int findLimit(java.io.InputStream)
+    {
+        long $l0;
+        java.io.InputStream r0;
+        boolean $z0;
+        org.spongycastle.asn1.LimitedInputStream r1;
+        int $i1;
+        org.spongycastle.asn1.ASN1InputStream r2;
+        java.io.ByteArrayInputStream r3;
+        java.io.FileInputStream r4;
+        java.nio.channels.FileChannel $r5;
+        byte $b2;
+        java.io.IOException $r6;
+
+        r0 := @parameter0: java.io.InputStream;
+
+        $z0 = r0 instanceof org.spongycastle.asn1.LimitedInputStream;
+
+        if $z0 == 0 goto label01;
+
+        r1 = (org.spongycastle.asn1.LimitedInputStream) r0;
+
+        $i1 = virtualinvoke r1.<org.spongycastle.asn1.LimitedInputStream: int getRemaining()>();
+
+        return $i1;
+
+     label01:
+        $z0 = r0 instanceof org.spongycastle.asn1.ASN1InputStream;
+
+        if $z0 == 0 goto label02;
+
+        r2 = (org.spongycastle.asn1.ASN1InputStream) r0;
+
+        $i1 = virtualinvoke r2.<org.spongycastle.asn1.ASN1InputStream: int getLimit()>();
+
+        return $i1;
+
+     label02:
+        $z0 = r0 instanceof java.io.ByteArrayInputStream;
+
+        if $z0 == 0 goto label03;
+
+        r3 = (java.io.ByteArrayInputStream) r0;
+
+        $i1 = virtualinvoke r3.<java.io.ByteArrayInputStream: int available()>();
+
+        return $i1;
+
+     label03:
+        $z0 = r0 instanceof java.io.FileInputStream;
+
+        if $z0 == 0 goto label10;
+
+        r4 = (java.io.FileInputStream) r0;
+
+     label04:
+        $r5 = virtualinvoke r4.<java.io.FileInputStream: java.nio.channels.FileChannel getChannel()>();
+
+     label05:
+        if $r5 == null goto label08;
+
+     label06:
+        $l0 = virtualinvoke $r5.<java.nio.channels.FileChannel: long size()>();
+
+     label07:
+        $b2 = $l0 cmp 2147483647L;
+
+        if $b2 >= 0 goto label10;
+
+        $i1 = (int) $l0;
+
+        return $i1;
+
+     label08:
+        $l0 = 2147483647L;
+
+        goto label07;
+
+     label09:
+        $r6 := @caughtexception;
+
+     label10:
+        $l0 = <org.spongycastle.asn1.StreamUtil: long MAX_MEMORY>;
+
+        $b2 = $l0 cmp 2147483647L;
+
+        if $b2 <= 0 goto label11;
+
+        return 2147483647;
+
+     label11:
+        $l0 = <org.spongycastle.asn1.StreamUtil: long MAX_MEMORY>;
+
+        $i1 = (int) $l0;
+
+        return $i1;
+
+        catch java.io.IOException from label04 to label05 with label09;
+        catch java.io.IOException from label06 to label07 with label09;
+    }

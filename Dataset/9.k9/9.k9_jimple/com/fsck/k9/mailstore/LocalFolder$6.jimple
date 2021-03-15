@@ -1,0 +1,143 @@
+com.fsck.k9.mailstore.LocalFolder$6 extends java.lang.Object implements com.fsck.k9.mailstore.LockableDatabase$DbCallback
+final com.fsck.k9.mailstore.LocalFolder this$0
+final com.fsck.k9.mailstore.MessageRemovalListener val$listener
+    void <init>(com.fsck.k9.mailstore.LocalFolder, com.fsck.k9.mailstore.MessageRemovalListener)
+    {
+        com.fsck.k9.mailstore.LocalFolder$6 r0;
+        com.fsck.k9.mailstore.LocalFolder $r1;
+        com.fsck.k9.mailstore.MessageRemovalListener $r2;
+
+        r0 := @this: com.fsck.k9.mailstore.LocalFolder$6;
+
+        $r1 := @parameter0: com.fsck.k9.mailstore.LocalFolder;
+
+        $r2 := @parameter1: com.fsck.k9.mailstore.MessageRemovalListener;
+
+        r0.<com.fsck.k9.mailstore.LocalFolder$6: com.fsck.k9.mailstore.LocalFolder this$0> = $r1;
+
+        r0.<com.fsck.k9.mailstore.LocalFolder$6: com.fsck.k9.mailstore.MessageRemovalListener val$listener> = $r2;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+    public volatile java.lang.Object doDbWork(android.database.sqlite.SQLiteDatabase) throws com.fsck.k9.mailstore.LockableDatabase$WrappedException, com.fsck.k9.mail.MessagingException
+    {
+        com.fsck.k9.mailstore.LocalFolder$6 r0;
+        android.database.sqlite.SQLiteDatabase $r1;
+        java.lang.Void $r2;
+
+        r0 := @this: com.fsck.k9.mailstore.LocalFolder$6;
+
+        $r1 := @parameter0: android.database.sqlite.SQLiteDatabase;
+
+        $r2 = virtualinvoke r0.<com.fsck.k9.mailstore.LocalFolder$6: java.lang.Void doDbWork(android.database.sqlite.SQLiteDatabase)>($r1);
+
+        return $r2;
+    }
+    public java.lang.Void doDbWork(android.database.sqlite.SQLiteDatabase)
+    {
+        com.fsck.k9.mailstore.LocalFolder$6 r0;
+        android.database.sqlite.SQLiteDatabase $r1;
+        java.lang.Exception r2;
+        java.lang.String[] $r3;
+        com.fsck.k9.mailstore.LocalFolder $r4;
+        long $l0;
+        java.lang.String $r5;
+        int $i1;
+        android.database.Cursor $r6;
+        boolean $z0;
+        com.fsck.k9.mailstore.LocalMessage $r7;
+        com.fsck.k9.mailstore.MessageRemovalListener $r8;
+        java.lang.Object[] $r9;
+        java.lang.Throwable $r10;
+
+        r0 := @this: com.fsck.k9.mailstore.LocalFolder$6;
+
+        $r1 := @parameter0: android.database.sqlite.SQLiteDatabase;
+
+        $r3 = newarray (java.lang.String)[2];
+
+        $r4 = r0.<com.fsck.k9.mailstore.LocalFolder$6: com.fsck.k9.mailstore.LocalFolder this$0>;
+
+        $l0 = virtualinvoke $r4.<com.fsck.k9.mailstore.LocalFolder: long getDatabaseId()>();
+
+        $r5 = staticinvoke <java.lang.Long: java.lang.String toString(long)>($l0);
+
+        $r3[0] = $r5;
+
+        $r4 = r0.<com.fsck.k9.mailstore.LocalFolder$6: com.fsck.k9.mailstore.LocalFolder this$0>;
+
+        $i1 = staticinvoke <com.fsck.k9.mailstore.LocalFolder: int access$1000(com.fsck.k9.mailstore.LocalFolder)>($r4);
+
+        $r5 = staticinvoke <java.lang.Integer: java.lang.String toString(int)>($i1);
+
+        $r3[1] = $r5;
+
+        $r6 = virtualinvoke $r1.<android.database.sqlite.SQLiteDatabase: android.database.Cursor rawQuery(java.lang.String,java.lang.String[])>("SELECT uid FROM messages WHERE empty = 0 AND deleted = 0 AND folder_id = ? ORDER BY date DESC  LIMIT -1 OFFSET ?", $r3);
+
+     label01:
+        $z0 = interfaceinvoke $r6.<android.database.Cursor: boolean moveToNext()>();
+
+     label02:
+        if $z0 == 0 goto label12;
+
+     label03:
+        $r5 = interfaceinvoke $r6.<android.database.Cursor: java.lang.String getString(int)>(0);
+
+        $r4 = r0.<com.fsck.k9.mailstore.LocalFolder$6: com.fsck.k9.mailstore.LocalFolder this$0>;
+
+        $r7 = virtualinvoke $r4.<com.fsck.k9.mailstore.LocalFolder: com.fsck.k9.mailstore.LocalMessage getMessage(java.lang.String)>($r5);
+
+        $r8 = r0.<com.fsck.k9.mailstore.LocalFolder$6: com.fsck.k9.mailstore.MessageRemovalListener val$listener>;
+
+     label04:
+        if $r8 == null goto label06;
+
+     label05:
+        $r8 = r0.<com.fsck.k9.mailstore.LocalFolder$6: com.fsck.k9.mailstore.MessageRemovalListener val$listener>;
+
+        interfaceinvoke $r8.<com.fsck.k9.mailstore.MessageRemovalListener: void messageRemoved(com.fsck.k9.mail.Message)>($r7);
+
+     label06:
+        $r4 = r0.<com.fsck.k9.mailstore.LocalFolder$6: com.fsck.k9.mailstore.LocalFolder this$0>;
+
+        virtualinvoke $r4.<com.fsck.k9.mailstore.LocalFolder: void destroyMessage(com.fsck.k9.mailstore.LocalMessage)>($r7);
+
+     label07:
+        goto label01;
+
+     label08:
+        r2 := @caughtexception;
+
+     label09:
+        $r9 = newarray (java.lang.Object)[0];
+
+        staticinvoke <timber.log.Timber: void d(java.lang.Throwable,java.lang.String,java.lang.Object[])>(r2, "Got an exception", $r9);
+
+     label10:
+        staticinvoke <com.fsck.k9.helper.Utility: void closeQuietly(android.database.Cursor)>($r6);
+
+     label11:
+        return null;
+
+     label12:
+        staticinvoke <com.fsck.k9.helper.Utility: void closeQuietly(android.database.Cursor)>($r6);
+
+        goto label11;
+
+     label13:
+        $r10 := @caughtexception;
+
+        staticinvoke <com.fsck.k9.helper.Utility: void closeQuietly(android.database.Cursor)>($r6);
+
+        throw $r10;
+
+        catch java.lang.Exception from label01 to label02 with label08;
+        catch java.lang.Exception from label03 to label04 with label08;
+        catch java.lang.Exception from label05 to label07 with label08;
+        catch java.lang.Throwable from label01 to label02 with label13;
+        catch java.lang.Throwable from label03 to label04 with label13;
+        catch java.lang.Throwable from label05 to label07 with label13;
+        catch java.lang.Throwable from label09 to label10 with label13;
+    }

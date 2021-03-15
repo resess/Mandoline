@@ -1,0 +1,1216 @@
+okhttp3.internal.http2.Http2Reader extends java.lang.Object implements java.io.Closeable
+static final java.util.logging.Logger logger
+private final boolean client
+private final okhttp3.internal.http2.Http2Reader$ContinuationSource continuation
+final okhttp3.internal.http2.Hpack$Reader hpackReader
+private final okio.BufferedSource source
+    static void <clinit>()
+    {
+        java.lang.Class $r0;
+        java.lang.String $r1;
+        java.util.logging.Logger $r2;
+
+        $r0 = class "Lokhttp3/internal/http2/Http2;";
+
+        $r1 = virtualinvoke $r0.<java.lang.Class: java.lang.String getName()>();
+
+        $r2 = staticinvoke <java.util.logging.Logger: java.util.logging.Logger getLogger(java.lang.String)>($r1);
+
+        <okhttp3.internal.http2.Http2Reader: java.util.logging.Logger logger> = $r2;
+
+        return;
+    }
+    void <init>(okio.BufferedSource, boolean)
+    {
+        okhttp3.internal.http2.Http2Reader r0;
+        okio.BufferedSource $r1;
+        boolean $z0;
+        okhttp3.internal.http2.Http2Reader$ContinuationSource $r2;
+        okhttp3.internal.http2.Hpack$Reader $r3;
+
+        r0 := @this: okhttp3.internal.http2.Http2Reader;
+
+        $r1 := @parameter0: okio.BufferedSource;
+
+        $z0 := @parameter1: boolean;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<okhttp3.internal.http2.Http2Reader: okio.BufferedSource source> = $r1;
+
+        r0.<okhttp3.internal.http2.Http2Reader: boolean client> = $z0;
+
+        $r2 = new okhttp3.internal.http2.Http2Reader$ContinuationSource;
+
+        $r1 = r0.<okhttp3.internal.http2.Http2Reader: okio.BufferedSource source>;
+
+        specialinvoke $r2.<okhttp3.internal.http2.Http2Reader$ContinuationSource: void <init>(okio.BufferedSource)>($r1);
+
+        r0.<okhttp3.internal.http2.Http2Reader: okhttp3.internal.http2.Http2Reader$ContinuationSource continuation> = $r2;
+
+        $r3 = new okhttp3.internal.http2.Hpack$Reader;
+
+        $r2 = r0.<okhttp3.internal.http2.Http2Reader: okhttp3.internal.http2.Http2Reader$ContinuationSource continuation>;
+
+        specialinvoke $r3.<okhttp3.internal.http2.Hpack$Reader: void <init>(int,okio.Source)>(4096, $r2);
+
+        r0.<okhttp3.internal.http2.Http2Reader: okhttp3.internal.http2.Hpack$Reader hpackReader> = $r3;
+
+        return;
+    }
+    static int lengthWithoutPadding(int, byte, short) throws java.io.IOException
+    {
+        byte $b0;
+        short $s1;
+        int $i2, $i3;
+        java.lang.Object[] $r0;
+        java.lang.Short $r1;
+        java.lang.Integer $r2;
+        java.io.IOException $r3;
+
+        $i2 := @parameter0: int;
+
+        $b0 := @parameter1: byte;
+
+        $s1 := @parameter2: short;
+
+        $i3 = $b0 & 8;
+
+        if $i3 == 0 goto label1;
+
+        $i2 = $i2 + -1;
+
+     label1:
+        if $s1 <= $i2 goto label2;
+
+        $r0 = newarray (java.lang.Object)[2];
+
+        $r1 = staticinvoke <java.lang.Short: java.lang.Short valueOf(short)>($s1);
+
+        $r0[0] = $r1;
+
+        $r2 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i2);
+
+        $r0[1] = $r2;
+
+        $r3 = staticinvoke <okhttp3.internal.http2.Http2: java.io.IOException ioException(java.lang.String,java.lang.Object[])>("PROTOCOL_ERROR padding %s > remaining length %s", $r0);
+
+        throw $r3;
+
+     label2:
+        $i2 = $i2 - $s1;
+
+        $s1 = (short) $i2;
+
+        return $s1;
+    }
+    private void readData(okhttp3.internal.http2.Http2Reader$Handler, int, byte, int) throws java.io.IOException
+    {
+        okhttp3.internal.http2.Http2Reader r0;
+        okhttp3.internal.http2.Http2Reader$Handler $r1;
+        byte $b0, $b5;
+        int $i1, $i2, $i4;
+        boolean z0, z1;
+        short s3;
+        java.lang.Object[] $r2;
+        java.io.IOException $r3;
+        okio.BufferedSource $r4;
+        long $l6;
+
+        r0 := @this: okhttp3.internal.http2.Http2Reader;
+
+        $r1 := @parameter0: okhttp3.internal.http2.Http2Reader$Handler;
+
+        $i2 := @parameter1: int;
+
+        $b0 := @parameter2: byte;
+
+        $i1 := @parameter3: int;
+
+        z0 = 1;
+
+        s3 = 0;
+
+        if $i1 != 0 goto label1;
+
+        $r2 = newarray (java.lang.Object)[0];
+
+        $r3 = staticinvoke <okhttp3.internal.http2.Http2: java.io.IOException ioException(java.lang.String,java.lang.Object[])>("PROTOCOL_ERROR: TYPE_DATA streamId == 0", $r2);
+
+        throw $r3;
+
+     label1:
+        $i4 = $b0 & 1;
+
+        if $i4 == 0 goto label4;
+
+        z1 = 1;
+
+     label2:
+        $i4 = $b0 & 32;
+
+        if $i4 == 0 goto label5;
+
+     label3:
+        if z0 == 0 goto label6;
+
+        $r2 = newarray (java.lang.Object)[0];
+
+        $r3 = staticinvoke <okhttp3.internal.http2.Http2: java.io.IOException ioException(java.lang.String,java.lang.Object[])>("PROTOCOL_ERROR: FLAG_COMPRESSED without SETTINGS_COMPRESS_DATA", $r2);
+
+        throw $r3;
+
+     label4:
+        z1 = 0;
+
+        goto label2;
+
+     label5:
+        z0 = 0;
+
+        goto label3;
+
+     label6:
+        $i4 = $b0 & 8;
+
+        if $i4 == 0 goto label7;
+
+        $r4 = r0.<okhttp3.internal.http2.Http2Reader: okio.BufferedSource source>;
+
+        $b5 = interfaceinvoke $r4.<okio.BufferedSource: byte readByte()>();
+
+        $i4 = $b5 & 255;
+
+        s3 = (short) $i4;
+
+     label7:
+        $i2 = staticinvoke <okhttp3.internal.http2.Http2Reader: int lengthWithoutPadding(int,byte,short)>($i2, $b0, s3);
+
+        $r4 = r0.<okhttp3.internal.http2.Http2Reader: okio.BufferedSource source>;
+
+        interfaceinvoke $r1.<okhttp3.internal.http2.Http2Reader$Handler: void data(boolean,int,okio.BufferedSource,int)>(z1, $i1, $r4, $i2);
+
+        $r4 = r0.<okhttp3.internal.http2.Http2Reader: okio.BufferedSource source>;
+
+        $l6 = (long) s3;
+
+        interfaceinvoke $r4.<okio.BufferedSource: void skip(long)>($l6);
+
+        return;
+    }
+    private void readGoAway(okhttp3.internal.http2.Http2Reader$Handler, int, byte, int) throws java.io.IOException
+    {
+        okhttp3.internal.http2.Http2Reader r0;
+        okhttp3.internal.http2.Http2Reader$Handler $r1;
+        int $i0, $i2, $i3;
+        byte $b1;
+        java.lang.Object[] $r2;
+        java.lang.Integer $r3;
+        java.io.IOException $r4;
+        okio.BufferedSource $r5;
+        okhttp3.internal.http2.ErrorCode $r6;
+        okio.ByteString r7;
+        long $l4;
+
+        r0 := @this: okhttp3.internal.http2.Http2Reader;
+
+        $r1 := @parameter0: okhttp3.internal.http2.Http2Reader$Handler;
+
+        $i0 := @parameter1: int;
+
+        $b1 := @parameter2: byte;
+
+        $i2 := @parameter3: int;
+
+        if $i0 >= 8 goto label1;
+
+        $r2 = newarray (java.lang.Object)[1];
+
+        $r3 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        $r2[0] = $r3;
+
+        $r4 = staticinvoke <okhttp3.internal.http2.Http2: java.io.IOException ioException(java.lang.String,java.lang.Object[])>("TYPE_GOAWAY length < 8: %s", $r2);
+
+        throw $r4;
+
+     label1:
+        if $i2 == 0 goto label2;
+
+        $r2 = newarray (java.lang.Object)[0];
+
+        $r4 = staticinvoke <okhttp3.internal.http2.Http2: java.io.IOException ioException(java.lang.String,java.lang.Object[])>("TYPE_GOAWAY streamId != 0", $r2);
+
+        throw $r4;
+
+     label2:
+        $r5 = r0.<okhttp3.internal.http2.Http2Reader: okio.BufferedSource source>;
+
+        $i2 = interfaceinvoke $r5.<okio.BufferedSource: int readInt()>();
+
+        $r5 = r0.<okhttp3.internal.http2.Http2Reader: okio.BufferedSource source>;
+
+        $i3 = interfaceinvoke $r5.<okio.BufferedSource: int readInt()>();
+
+        $i0 = $i0 + -8;
+
+        $r6 = staticinvoke <okhttp3.internal.http2.ErrorCode: okhttp3.internal.http2.ErrorCode fromHttp2(int)>($i3);
+
+        if $r6 != null goto label3;
+
+        $r2 = newarray (java.lang.Object)[1];
+
+        $r3 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i3);
+
+        $r2[0] = $r3;
+
+        $r4 = staticinvoke <okhttp3.internal.http2.Http2: java.io.IOException ioException(java.lang.String,java.lang.Object[])>("TYPE_GOAWAY unexpected error code: %d", $r2);
+
+        throw $r4;
+
+     label3:
+        r7 = <okio.ByteString: okio.ByteString EMPTY>;
+
+        if $i0 <= 0 goto label4;
+
+        $r5 = r0.<okhttp3.internal.http2.Http2Reader: okio.BufferedSource source>;
+
+        $l4 = (long) $i0;
+
+        r7 = interfaceinvoke $r5.<okio.BufferedSource: okio.ByteString readByteString(long)>($l4);
+
+     label4:
+        interfaceinvoke $r1.<okhttp3.internal.http2.Http2Reader$Handler: void goAway(int,okhttp3.internal.http2.ErrorCode,okio.ByteString)>($i2, $r6, r7);
+
+        return;
+    }
+    private java.util.List readHeaderBlock(int, short, byte, int) throws java.io.IOException
+    {
+        okhttp3.internal.http2.Http2Reader r0;
+        int $i0, $i3;
+        short $s1;
+        byte $b2;
+        okhttp3.internal.http2.Http2Reader$ContinuationSource $r1, $r3;
+        java.util.List $r2;
+        okhttp3.internal.http2.Hpack$Reader $r4;
+
+        r0 := @this: okhttp3.internal.http2.Http2Reader;
+
+        $i0 := @parameter0: int;
+
+        $s1 := @parameter1: short;
+
+        $b2 := @parameter2: byte;
+
+        $i3 := @parameter3: int;
+
+        $r3 = r0.<okhttp3.internal.http2.Http2Reader: okhttp3.internal.http2.Http2Reader$ContinuationSource continuation>;
+
+        $r1 = r0.<okhttp3.internal.http2.Http2Reader: okhttp3.internal.http2.Http2Reader$ContinuationSource continuation>;
+
+        $r1.<okhttp3.internal.http2.Http2Reader$ContinuationSource: int left> = $i0;
+
+        $r3.<okhttp3.internal.http2.Http2Reader$ContinuationSource: int length> = $i0;
+
+        $r1 = r0.<okhttp3.internal.http2.Http2Reader: okhttp3.internal.http2.Http2Reader$ContinuationSource continuation>;
+
+        $r1.<okhttp3.internal.http2.Http2Reader$ContinuationSource: short padding> = $s1;
+
+        $r1 = r0.<okhttp3.internal.http2.Http2Reader: okhttp3.internal.http2.Http2Reader$ContinuationSource continuation>;
+
+        $r1.<okhttp3.internal.http2.Http2Reader$ContinuationSource: byte flags> = $b2;
+
+        $r1 = r0.<okhttp3.internal.http2.Http2Reader: okhttp3.internal.http2.Http2Reader$ContinuationSource continuation>;
+
+        $r1.<okhttp3.internal.http2.Http2Reader$ContinuationSource: int streamId> = $i3;
+
+        $r4 = r0.<okhttp3.internal.http2.Http2Reader: okhttp3.internal.http2.Hpack$Reader hpackReader>;
+
+        virtualinvoke $r4.<okhttp3.internal.http2.Hpack$Reader: void readHeaders()>();
+
+        $r4 = r0.<okhttp3.internal.http2.Http2Reader: okhttp3.internal.http2.Hpack$Reader hpackReader>;
+
+        $r2 = virtualinvoke $r4.<okhttp3.internal.http2.Hpack$Reader: java.util.List getAndResetHeaderList()>();
+
+        return $r2;
+    }
+    private void readHeaders(okhttp3.internal.http2.Http2Reader$Handler, int, byte, int) throws java.io.IOException
+    {
+        okhttp3.internal.http2.Http2Reader r0;
+        okhttp3.internal.http2.Http2Reader$Handler $r1;
+        byte $b0, $b5;
+        int $i1, $i2, $i4;
+        java.lang.Object[] $r2;
+        short s3;
+        java.io.IOException $r3;
+        boolean z0;
+        okio.BufferedSource $r4;
+        java.util.List $r5;
+
+        r0 := @this: okhttp3.internal.http2.Http2Reader;
+
+        $r1 := @parameter0: okhttp3.internal.http2.Http2Reader$Handler;
+
+        $i2 := @parameter1: int;
+
+        $b0 := @parameter2: byte;
+
+        $i1 := @parameter3: int;
+
+        s3 = 0;
+
+        if $i1 != 0 goto label1;
+
+        $r2 = newarray (java.lang.Object)[0];
+
+        $r3 = staticinvoke <okhttp3.internal.http2.Http2: java.io.IOException ioException(java.lang.String,java.lang.Object[])>("PROTOCOL_ERROR: TYPE_HEADERS streamId == 0", $r2);
+
+        throw $r3;
+
+     label1:
+        $i4 = $b0 & 1;
+
+        if $i4 == 0 goto label5;
+
+        z0 = 1;
+
+     label2:
+        $i4 = $b0 & 8;
+
+        if $i4 == 0 goto label3;
+
+        $r4 = r0.<okhttp3.internal.http2.Http2Reader: okio.BufferedSource source>;
+
+        $b5 = interfaceinvoke $r4.<okio.BufferedSource: byte readByte()>();
+
+        $i4 = $b5 & 255;
+
+        s3 = (short) $i4;
+
+     label3:
+        $i4 = $b0 & 32;
+
+        if $i4 == 0 goto label4;
+
+        specialinvoke r0.<okhttp3.internal.http2.Http2Reader: void readPriority(okhttp3.internal.http2.Http2Reader$Handler,int)>($r1, $i1);
+
+        $i2 = $i2 + -5;
+
+     label4:
+        $i2 = staticinvoke <okhttp3.internal.http2.Http2Reader: int lengthWithoutPadding(int,byte,short)>($i2, $b0, s3);
+
+        $r5 = specialinvoke r0.<okhttp3.internal.http2.Http2Reader: java.util.List readHeaderBlock(int,short,byte,int)>($i2, s3, $b0, $i1);
+
+        interfaceinvoke $r1.<okhttp3.internal.http2.Http2Reader$Handler: void headers(boolean,int,int,java.util.List)>(z0, $i1, -1, $r5);
+
+        return;
+
+     label5:
+        z0 = 0;
+
+        goto label2;
+    }
+    static int readMedium(okio.BufferedSource) throws java.io.IOException
+    {
+        okio.BufferedSource $r0;
+        byte $b0;
+        int $i1, $i2;
+
+        $r0 := @parameter0: okio.BufferedSource;
+
+        $b0 = interfaceinvoke $r0.<okio.BufferedSource: byte readByte()>();
+
+        $i1 = $b0 & 255;
+
+        $i1 = $i1 << 16;
+
+        $b0 = interfaceinvoke $r0.<okio.BufferedSource: byte readByte()>();
+
+        $i2 = $b0 & 255;
+
+        $i2 = $i2 << 8;
+
+        $i1 = $i1 | $i2;
+
+        $b0 = interfaceinvoke $r0.<okio.BufferedSource: byte readByte()>();
+
+        $i2 = $b0 & 255;
+
+        $i1 = $i1 | $i2;
+
+        return $i1;
+    }
+    private void readPing(okhttp3.internal.http2.Http2Reader$Handler, int, byte, int) throws java.io.IOException
+    {
+        okhttp3.internal.http2.Http2Reader r0;
+        okhttp3.internal.http2.Http2Reader$Handler $r1;
+        int $i0, $i2, $i3;
+        byte $b1;
+        java.lang.Object[] $r2;
+        boolean z0;
+        java.lang.Integer $r3;
+        java.io.IOException $r4;
+        okio.BufferedSource $r5;
+
+        r0 := @this: okhttp3.internal.http2.Http2Reader;
+
+        $r1 := @parameter0: okhttp3.internal.http2.Http2Reader$Handler;
+
+        $i0 := @parameter1: int;
+
+        $b1 := @parameter2: byte;
+
+        $i2 := @parameter3: int;
+
+        z0 = 1;
+
+        if $i0 == 8 goto label1;
+
+        $r2 = newarray (java.lang.Object)[1];
+
+        $r3 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        $r2[0] = $r3;
+
+        $r4 = staticinvoke <okhttp3.internal.http2.Http2: java.io.IOException ioException(java.lang.String,java.lang.Object[])>("TYPE_PING length != 8: %s", $r2);
+
+        throw $r4;
+
+     label1:
+        if $i2 == 0 goto label2;
+
+        $r2 = newarray (java.lang.Object)[0];
+
+        $r4 = staticinvoke <okhttp3.internal.http2.Http2: java.io.IOException ioException(java.lang.String,java.lang.Object[])>("TYPE_PING streamId != 0", $r2);
+
+        throw $r4;
+
+     label2:
+        $r5 = r0.<okhttp3.internal.http2.Http2Reader: okio.BufferedSource source>;
+
+        $i0 = interfaceinvoke $r5.<okio.BufferedSource: int readInt()>();
+
+        $r5 = r0.<okhttp3.internal.http2.Http2Reader: okio.BufferedSource source>;
+
+        $i2 = interfaceinvoke $r5.<okio.BufferedSource: int readInt()>();
+
+        $i3 = $b1 & 1;
+
+        if $i3 == 0 goto label4;
+
+     label3:
+        interfaceinvoke $r1.<okhttp3.internal.http2.Http2Reader$Handler: void ping(boolean,int,int)>(z0, $i0, $i2);
+
+        return;
+
+     label4:
+        z0 = 0;
+
+        goto label3;
+    }
+    private void readPriority(okhttp3.internal.http2.Http2Reader$Handler, int) throws java.io.IOException
+    {
+        okhttp3.internal.http2.Http2Reader r0;
+        okhttp3.internal.http2.Http2Reader$Handler $r1;
+        int $i0, i1, i2;
+        okio.BufferedSource $r2;
+        boolean z0;
+        byte $b3;
+
+        r0 := @this: okhttp3.internal.http2.Http2Reader;
+
+        $r1 := @parameter0: okhttp3.internal.http2.Http2Reader$Handler;
+
+        $i0 := @parameter1: int;
+
+        $r2 = r0.<okhttp3.internal.http2.Http2Reader: okio.BufferedSource source>;
+
+        i1 = interfaceinvoke $r2.<okio.BufferedSource: int readInt()>();
+
+        i2 = -2147483648 & i1;
+
+        if i2 == 0 goto label2;
+
+        z0 = 1;
+
+     label1:
+        i1 = i1 & 2147483647;
+
+        $r2 = r0.<okhttp3.internal.http2.Http2Reader: okio.BufferedSource source>;
+
+        $b3 = interfaceinvoke $r2.<okio.BufferedSource: byte readByte()>();
+
+        i2 = $b3 & 255;
+
+        i2 = i2 + 1;
+
+        interfaceinvoke $r1.<okhttp3.internal.http2.Http2Reader$Handler: void priority(int,int,int,boolean)>($i0, i1, i2, z0);
+
+        return;
+
+     label2:
+        z0 = 0;
+
+        goto label1;
+    }
+    private void readPriority(okhttp3.internal.http2.Http2Reader$Handler, int, byte, int) throws java.io.IOException
+    {
+        okhttp3.internal.http2.Http2Reader r0;
+        okhttp3.internal.http2.Http2Reader$Handler $r1;
+        int $i0, $i2;
+        byte $b1;
+        java.lang.Object[] $r2;
+        java.lang.Integer $r3;
+        java.io.IOException $r4;
+
+        r0 := @this: okhttp3.internal.http2.Http2Reader;
+
+        $r1 := @parameter0: okhttp3.internal.http2.Http2Reader$Handler;
+
+        $i0 := @parameter1: int;
+
+        $b1 := @parameter2: byte;
+
+        $i2 := @parameter3: int;
+
+        if $i0 == 5 goto label1;
+
+        $r2 = newarray (java.lang.Object)[1];
+
+        $r3 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        $r2[0] = $r3;
+
+        $r4 = staticinvoke <okhttp3.internal.http2.Http2: java.io.IOException ioException(java.lang.String,java.lang.Object[])>("TYPE_PRIORITY length: %d != 5", $r2);
+
+        throw $r4;
+
+     label1:
+        if $i2 != 0 goto label2;
+
+        $r2 = newarray (java.lang.Object)[0];
+
+        $r4 = staticinvoke <okhttp3.internal.http2.Http2: java.io.IOException ioException(java.lang.String,java.lang.Object[])>("TYPE_PRIORITY streamId == 0", $r2);
+
+        throw $r4;
+
+     label2:
+        specialinvoke r0.<okhttp3.internal.http2.Http2Reader: void readPriority(okhttp3.internal.http2.Http2Reader$Handler,int)>($r1, $i2);
+
+        return;
+    }
+    private void readPushPromise(okhttp3.internal.http2.Http2Reader$Handler, int, byte, int) throws java.io.IOException
+    {
+        okhttp3.internal.http2.Http2Reader r0;
+        okhttp3.internal.http2.Http2Reader$Handler $r1;
+        byte $b0, $b5;
+        int $i1, i2, $i3;
+        short s4;
+        java.lang.Object[] $r2;
+        java.io.IOException $r3;
+        okio.BufferedSource $r4;
+        java.util.List $r5;
+
+        r0 := @this: okhttp3.internal.http2.Http2Reader;
+
+        $r1 := @parameter0: okhttp3.internal.http2.Http2Reader$Handler;
+
+        $i3 := @parameter1: int;
+
+        $b0 := @parameter2: byte;
+
+        $i1 := @parameter3: int;
+
+        s4 = 0;
+
+        if $i1 != 0 goto label1;
+
+        $r2 = newarray (java.lang.Object)[0];
+
+        $r3 = staticinvoke <okhttp3.internal.http2.Http2: java.io.IOException ioException(java.lang.String,java.lang.Object[])>("PROTOCOL_ERROR: TYPE_PUSH_PROMISE streamId == 0", $r2);
+
+        throw $r3;
+
+     label1:
+        i2 = $b0 & 8;
+
+        if i2 == 0 goto label2;
+
+        $r4 = r0.<okhttp3.internal.http2.Http2Reader: okio.BufferedSource source>;
+
+        $b5 = interfaceinvoke $r4.<okio.BufferedSource: byte readByte()>();
+
+        i2 = $b5 & 255;
+
+        s4 = (short) i2;
+
+     label2:
+        $r4 = r0.<okhttp3.internal.http2.Http2Reader: okio.BufferedSource source>;
+
+        i2 = interfaceinvoke $r4.<okio.BufferedSource: int readInt()>();
+
+        i2 = i2 & 2147483647;
+
+        $i3 = $i3 + -4;
+
+        $i3 = staticinvoke <okhttp3.internal.http2.Http2Reader: int lengthWithoutPadding(int,byte,short)>($i3, $b0, s4);
+
+        $r5 = specialinvoke r0.<okhttp3.internal.http2.Http2Reader: java.util.List readHeaderBlock(int,short,byte,int)>($i3, s4, $b0, $i1);
+
+        interfaceinvoke $r1.<okhttp3.internal.http2.Http2Reader$Handler: void pushPromise(int,int,java.util.List)>($i1, i2, $r5);
+
+        return;
+    }
+    private void readRstStream(okhttp3.internal.http2.Http2Reader$Handler, int, byte, int) throws java.io.IOException
+    {
+        okhttp3.internal.http2.Http2Reader r0;
+        okhttp3.internal.http2.Http2Reader$Handler $r1;
+        int $i0, $i2;
+        byte $b1;
+        java.lang.Object[] $r2;
+        java.lang.Integer $r3;
+        java.io.IOException $r4;
+        okio.BufferedSource $r5;
+        okhttp3.internal.http2.ErrorCode $r6;
+
+        r0 := @this: okhttp3.internal.http2.Http2Reader;
+
+        $r1 := @parameter0: okhttp3.internal.http2.Http2Reader$Handler;
+
+        $i0 := @parameter1: int;
+
+        $b1 := @parameter2: byte;
+
+        $i2 := @parameter3: int;
+
+        if $i0 == 4 goto label1;
+
+        $r2 = newarray (java.lang.Object)[1];
+
+        $r3 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        $r2[0] = $r3;
+
+        $r4 = staticinvoke <okhttp3.internal.http2.Http2: java.io.IOException ioException(java.lang.String,java.lang.Object[])>("TYPE_RST_STREAM length: %d != 4", $r2);
+
+        throw $r4;
+
+     label1:
+        if $i2 != 0 goto label2;
+
+        $r2 = newarray (java.lang.Object)[0];
+
+        $r4 = staticinvoke <okhttp3.internal.http2.Http2: java.io.IOException ioException(java.lang.String,java.lang.Object[])>("TYPE_RST_STREAM streamId == 0", $r2);
+
+        throw $r4;
+
+     label2:
+        $r5 = r0.<okhttp3.internal.http2.Http2Reader: okio.BufferedSource source>;
+
+        $i0 = interfaceinvoke $r5.<okio.BufferedSource: int readInt()>();
+
+        $r6 = staticinvoke <okhttp3.internal.http2.ErrorCode: okhttp3.internal.http2.ErrorCode fromHttp2(int)>($i0);
+
+        if $r6 != null goto label3;
+
+        $r2 = newarray (java.lang.Object)[1];
+
+        $r3 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        $r2[0] = $r3;
+
+        $r4 = staticinvoke <okhttp3.internal.http2.Http2: java.io.IOException ioException(java.lang.String,java.lang.Object[])>("TYPE_RST_STREAM unexpected error code: %d", $r2);
+
+        throw $r4;
+
+     label3:
+        interfaceinvoke $r1.<okhttp3.internal.http2.Http2Reader$Handler: void rstStream(int,okhttp3.internal.http2.ErrorCode)>($i2, $r6);
+
+        return;
+    }
+    private void readSettings(okhttp3.internal.http2.Http2Reader$Handler, int, byte, int) throws java.io.IOException
+    {
+        okhttp3.internal.http2.Http2Reader r0;
+        okhttp3.internal.http2.Http2Reader$Handler $r1;
+        int $i0, $i2, $i5;
+        byte $b1;
+        okhttp3.internal.http2.Settings r2;
+        java.lang.Object[] $r3;
+        java.io.IOException $r4;
+        java.lang.Integer $r5;
+        okio.BufferedSource $r6;
+        short $s3, s4;
+
+        r0 := @this: okhttp3.internal.http2.Http2Reader;
+
+        $r1 := @parameter0: okhttp3.internal.http2.Http2Reader$Handler;
+
+        $i0 := @parameter1: int;
+
+        $b1 := @parameter2: byte;
+
+        $i2 := @parameter3: int;
+
+        if $i2 == 0 goto label01;
+
+        $r3 = newarray (java.lang.Object)[0];
+
+        $r4 = staticinvoke <okhttp3.internal.http2.Http2: java.io.IOException ioException(java.lang.String,java.lang.Object[])>("TYPE_SETTINGS streamId != 0", $r3);
+
+        throw $r4;
+
+     label01:
+        $i2 = $b1 & 1;
+
+        if $i2 == 0 goto label03;
+
+        if $i0 == 0 goto label02;
+
+        $r3 = newarray (java.lang.Object)[0];
+
+        $r4 = staticinvoke <okhttp3.internal.http2.Http2: java.io.IOException ioException(java.lang.String,java.lang.Object[])>("FRAME_SIZE_ERROR ack frame should be empty!", $r3);
+
+        throw $r4;
+
+     label02:
+        interfaceinvoke $r1.<okhttp3.internal.http2.Http2Reader$Handler: void ackSettings()>();
+
+        return;
+
+     label03:
+        $i2 = $i0 % 6;
+
+        if $i2 == 0 goto label04;
+
+        $r3 = newarray (java.lang.Object)[1];
+
+        $r5 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        $r3[0] = $r5;
+
+        $r4 = staticinvoke <okhttp3.internal.http2.Http2: java.io.IOException ioException(java.lang.String,java.lang.Object[])>("TYPE_SETTINGS length %% 6 != 0: %s", $r3);
+
+        throw $r4;
+
+     label04:
+        r2 = new okhttp3.internal.http2.Settings;
+
+        specialinvoke r2.<okhttp3.internal.http2.Settings: void <init>()>();
+
+        $i2 = 0;
+
+     label05:
+        if $i2 >= $i0 goto label12;
+
+        $r6 = r0.<okhttp3.internal.http2.Http2Reader: okio.BufferedSource source>;
+
+        $s3 = interfaceinvoke $r6.<okio.BufferedSource: short readShort()>();
+
+        s4 = $s3;
+
+        $r6 = r0.<okhttp3.internal.http2.Http2Reader: okio.BufferedSource source>;
+
+        $i5 = interfaceinvoke $r6.<okio.BufferedSource: int readInt()>();
+
+        lookupswitch($s3)
+        {
+            case 1: goto label06;
+            case 2: goto label07;
+            case 3: goto label08;
+            case 4: goto label09;
+            case 5: goto label10;
+            case 6: goto label06;
+            default: goto label06;
+        };
+
+     label06:
+        virtualinvoke r2.<okhttp3.internal.http2.Settings: okhttp3.internal.http2.Settings set(int,int)>(s4, $i5);
+
+        $i2 = $i2 + 6;
+
+        goto label05;
+
+     label07:
+        if $i5 == 0 goto label06;
+
+        if $i5 == 1 goto label06;
+
+        $r3 = newarray (java.lang.Object)[0];
+
+        $r4 = staticinvoke <okhttp3.internal.http2.Http2: java.io.IOException ioException(java.lang.String,java.lang.Object[])>("PROTOCOL_ERROR SETTINGS_ENABLE_PUSH != 0 or 1", $r3);
+
+        throw $r4;
+
+     label08:
+        s4 = 4;
+
+        goto label06;
+
+     label09:
+        s4 = 7;
+
+        if $i5 >= 0 goto label06;
+
+        $r3 = newarray (java.lang.Object)[0];
+
+        $r4 = staticinvoke <okhttp3.internal.http2.Http2: java.io.IOException ioException(java.lang.String,java.lang.Object[])>("PROTOCOL_ERROR SETTINGS_INITIAL_WINDOW_SIZE > 2^31 - 1", $r3);
+
+        throw $r4;
+
+     label10:
+        if $i5 < 16384 goto label11;
+
+        if $i5 <= 16777215 goto label06;
+
+     label11:
+        $r3 = newarray (java.lang.Object)[1];
+
+        $r5 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i5);
+
+        $r3[0] = $r5;
+
+        $r4 = staticinvoke <okhttp3.internal.http2.Http2: java.io.IOException ioException(java.lang.String,java.lang.Object[])>("PROTOCOL_ERROR SETTINGS_MAX_FRAME_SIZE: %s", $r3);
+
+        throw $r4;
+
+     label12:
+        interfaceinvoke $r1.<okhttp3.internal.http2.Http2Reader$Handler: void settings(boolean,okhttp3.internal.http2.Settings)>(0, r2);
+
+        return;
+    }
+    private void readWindowUpdate(okhttp3.internal.http2.Http2Reader$Handler, int, byte, int) throws java.io.IOException
+    {
+        okhttp3.internal.http2.Http2Reader r0;
+        okhttp3.internal.http2.Http2Reader$Handler $r1;
+        int $i0, $i2;
+        byte $b1;
+        long l3;
+        java.lang.Object[] $r2;
+        java.lang.Integer $r3;
+        java.io.IOException $r4;
+        okio.BufferedSource $r5;
+        java.lang.Long $r6;
+
+        r0 := @this: okhttp3.internal.http2.Http2Reader;
+
+        $r1 := @parameter0: okhttp3.internal.http2.Http2Reader$Handler;
+
+        $i0 := @parameter1: int;
+
+        $b1 := @parameter2: byte;
+
+        $i2 := @parameter3: int;
+
+        if $i0 == 4 goto label1;
+
+        $r2 = newarray (java.lang.Object)[1];
+
+        $r3 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        $r2[0] = $r3;
+
+        $r4 = staticinvoke <okhttp3.internal.http2.Http2: java.io.IOException ioException(java.lang.String,java.lang.Object[])>("TYPE_WINDOW_UPDATE length !=4: %s", $r2);
+
+        throw $r4;
+
+     label1:
+        $r5 = r0.<okhttp3.internal.http2.Http2Reader: okio.BufferedSource source>;
+
+        $i0 = interfaceinvoke $r5.<okio.BufferedSource: int readInt()>();
+
+        l3 = (long) $i0;
+
+        l3 = l3 & 2147483647L;
+
+        $b1 = l3 cmp 0L;
+
+        if $b1 != 0 goto label2;
+
+        $r2 = newarray (java.lang.Object)[1];
+
+        $r6 = staticinvoke <java.lang.Long: java.lang.Long valueOf(long)>(l3);
+
+        $r2[0] = $r6;
+
+        $r4 = staticinvoke <okhttp3.internal.http2.Http2: java.io.IOException ioException(java.lang.String,java.lang.Object[])>("windowSizeIncrement was 0", $r2);
+
+        throw $r4;
+
+     label2:
+        interfaceinvoke $r1.<okhttp3.internal.http2.Http2Reader$Handler: void windowUpdate(int,long)>($i2, l3);
+
+        return;
+    }
+    public void close() throws java.io.IOException
+    {
+        okhttp3.internal.http2.Http2Reader r0;
+        okio.BufferedSource $r1;
+
+        r0 := @this: okhttp3.internal.http2.Http2Reader;
+
+        $r1 = r0.<okhttp3.internal.http2.Http2Reader: okio.BufferedSource source>;
+
+        interfaceinvoke $r1.<okio.BufferedSource: void close()>();
+
+        return;
+    }
+    public boolean nextFrame(boolean, okhttp3.internal.http2.Http2Reader$Handler) throws java.io.IOException
+    {
+        okhttp3.internal.http2.Http2Reader r0;
+        boolean $z0;
+        okhttp3.internal.http2.Http2Reader$Handler $r1;
+        java.io.IOException r2;
+        byte b0, b2;
+        int i1, $i3;
+        okio.BufferedSource $r3;
+        java.lang.Object[] $r4;
+        java.lang.Integer $r5;
+        java.lang.Byte $r6;
+        java.util.logging.Logger $r7;
+        java.util.logging.Level $r8;
+        java.lang.String $r9;
+        long $l4;
+
+        r0 := @this: okhttp3.internal.http2.Http2Reader;
+
+        $z0 := @parameter0: boolean;
+
+        $r1 := @parameter1: okhttp3.internal.http2.Http2Reader$Handler;
+
+        $r3 = r0.<okhttp3.internal.http2.Http2Reader: okio.BufferedSource source>;
+
+     label01:
+        interfaceinvoke $r3.<okio.BufferedSource: void require(long)>(9L);
+
+     label02:
+        $r3 = r0.<okhttp3.internal.http2.Http2Reader: okio.BufferedSource source>;
+
+        $i3 = staticinvoke <okhttp3.internal.http2.Http2Reader: int readMedium(okio.BufferedSource)>($r3);
+
+        if $i3 < 0 goto label03;
+
+        if $i3 <= 16384 goto label05;
+
+     label03:
+        $r4 = newarray (java.lang.Object)[1];
+
+        $r5 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i3);
+
+        $r4[0] = $r5;
+
+        r2 = staticinvoke <okhttp3.internal.http2.Http2: java.io.IOException ioException(java.lang.String,java.lang.Object[])>("FRAME_SIZE_ERROR: %s", $r4);
+
+        throw r2;
+
+     label04:
+        r2 := @caughtexception;
+
+        return 0;
+
+     label05:
+        $r3 = r0.<okhttp3.internal.http2.Http2Reader: okio.BufferedSource source>;
+
+        b2 = interfaceinvoke $r3.<okio.BufferedSource: byte readByte()>();
+
+        i1 = b2 & 255;
+
+        b2 = (byte) i1;
+
+        if $z0 == 0 goto label06;
+
+        if b2 == 4 goto label06;
+
+        $r4 = newarray (java.lang.Object)[1];
+
+        $r6 = staticinvoke <java.lang.Byte: java.lang.Byte valueOf(byte)>(b2);
+
+        $r4[0] = $r6;
+
+        r2 = staticinvoke <okhttp3.internal.http2.Http2: java.io.IOException ioException(java.lang.String,java.lang.Object[])>("Expected a SETTINGS frame but was %s", $r4);
+
+        throw r2;
+
+     label06:
+        $r3 = r0.<okhttp3.internal.http2.Http2Reader: okio.BufferedSource source>;
+
+        b0 = interfaceinvoke $r3.<okio.BufferedSource: byte readByte()>();
+
+        i1 = b0 & 255;
+
+        b0 = (byte) i1;
+
+        $r3 = r0.<okhttp3.internal.http2.Http2Reader: okio.BufferedSource source>;
+
+        i1 = interfaceinvoke $r3.<okio.BufferedSource: int readInt()>();
+
+        i1 = i1 & 2147483647;
+
+        $r7 = <okhttp3.internal.http2.Http2Reader: java.util.logging.Logger logger>;
+
+        $r8 = <java.util.logging.Level: java.util.logging.Level FINE>;
+
+        $z0 = virtualinvoke $r7.<java.util.logging.Logger: boolean isLoggable(java.util.logging.Level)>($r8);
+
+        if $z0 == 0 goto label07;
+
+        $r7 = <okhttp3.internal.http2.Http2Reader: java.util.logging.Logger logger>;
+
+        $r9 = staticinvoke <okhttp3.internal.http2.Http2: java.lang.String frameLog(boolean,int,int,byte,byte)>(1, i1, $i3, b2, b0);
+
+        virtualinvoke $r7.<java.util.logging.Logger: void fine(java.lang.String)>($r9);
+
+     label07:
+        lookupswitch(b2)
+        {
+            case 0: goto label09;
+            case 1: goto label10;
+            case 2: goto label11;
+            case 3: goto label12;
+            case 4: goto label13;
+            case 5: goto label14;
+            case 6: goto label15;
+            case 7: goto label16;
+            case 8: goto label17;
+            default: goto label08;
+        };
+
+     label08:
+        $r3 = r0.<okhttp3.internal.http2.Http2Reader: okio.BufferedSource source>;
+
+        $l4 = (long) $i3;
+
+        interfaceinvoke $r3.<okio.BufferedSource: void skip(long)>($l4);
+
+        return 1;
+
+     label09:
+        specialinvoke r0.<okhttp3.internal.http2.Http2Reader: void readData(okhttp3.internal.http2.Http2Reader$Handler,int,byte,int)>($r1, $i3, b0, i1);
+
+        return 1;
+
+     label10:
+        specialinvoke r0.<okhttp3.internal.http2.Http2Reader: void readHeaders(okhttp3.internal.http2.Http2Reader$Handler,int,byte,int)>($r1, $i3, b0, i1);
+
+        return 1;
+
+     label11:
+        specialinvoke r0.<okhttp3.internal.http2.Http2Reader: void readPriority(okhttp3.internal.http2.Http2Reader$Handler,int,byte,int)>($r1, $i3, b0, i1);
+
+        return 1;
+
+     label12:
+        specialinvoke r0.<okhttp3.internal.http2.Http2Reader: void readRstStream(okhttp3.internal.http2.Http2Reader$Handler,int,byte,int)>($r1, $i3, b0, i1);
+
+        return 1;
+
+     label13:
+        specialinvoke r0.<okhttp3.internal.http2.Http2Reader: void readSettings(okhttp3.internal.http2.Http2Reader$Handler,int,byte,int)>($r1, $i3, b0, i1);
+
+        return 1;
+
+     label14:
+        specialinvoke r0.<okhttp3.internal.http2.Http2Reader: void readPushPromise(okhttp3.internal.http2.Http2Reader$Handler,int,byte,int)>($r1, $i3, b0, i1);
+
+        return 1;
+
+     label15:
+        specialinvoke r0.<okhttp3.internal.http2.Http2Reader: void readPing(okhttp3.internal.http2.Http2Reader$Handler,int,byte,int)>($r1, $i3, b0, i1);
+
+        return 1;
+
+     label16:
+        specialinvoke r0.<okhttp3.internal.http2.Http2Reader: void readGoAway(okhttp3.internal.http2.Http2Reader$Handler,int,byte,int)>($r1, $i3, b0, i1);
+
+        return 1;
+
+     label17:
+        specialinvoke r0.<okhttp3.internal.http2.Http2Reader: void readWindowUpdate(okhttp3.internal.http2.Http2Reader$Handler,int,byte,int)>($r1, $i3, b0, i1);
+
+        return 1;
+
+        catch java.io.IOException from label01 to label02 with label04;
+    }
+    public void readConnectionPreface(okhttp3.internal.http2.Http2Reader$Handler) throws java.io.IOException
+    {
+        okhttp3.internal.http2.Http2Reader r0;
+        okhttp3.internal.http2.Http2Reader$Handler $r1;
+        boolean $z0;
+        java.lang.Object[] $r2;
+        java.io.IOException $r3;
+        okio.BufferedSource $r4;
+        okio.ByteString $r5, $r9;
+        int $i0;
+        long $l1;
+        java.util.logging.Logger $r6;
+        java.util.logging.Level $r7;
+        java.lang.String $r8;
+
+        r0 := @this: okhttp3.internal.http2.Http2Reader;
+
+        $r1 := @parameter0: okhttp3.internal.http2.Http2Reader$Handler;
+
+        $z0 = r0.<okhttp3.internal.http2.Http2Reader: boolean client>;
+
+        if $z0 == 0 goto label1;
+
+        $z0 = virtualinvoke r0.<okhttp3.internal.http2.Http2Reader: boolean nextFrame(boolean,okhttp3.internal.http2.Http2Reader$Handler)>(1, $r1);
+
+        if $z0 != 0 goto label3;
+
+        $r2 = newarray (java.lang.Object)[0];
+
+        $r3 = staticinvoke <okhttp3.internal.http2.Http2: java.io.IOException ioException(java.lang.String,java.lang.Object[])>("Required SETTINGS preface not received", $r2);
+
+        throw $r3;
+
+     label1:
+        $r4 = r0.<okhttp3.internal.http2.Http2Reader: okio.BufferedSource source>;
+
+        $r5 = <okhttp3.internal.http2.Http2: okio.ByteString CONNECTION_PREFACE>;
+
+        $i0 = virtualinvoke $r5.<okio.ByteString: int size()>();
+
+        $l1 = (long) $i0;
+
+        $r5 = interfaceinvoke $r4.<okio.BufferedSource: okio.ByteString readByteString(long)>($l1);
+
+        $r6 = <okhttp3.internal.http2.Http2Reader: java.util.logging.Logger logger>;
+
+        $r7 = <java.util.logging.Level: java.util.logging.Level FINE>;
+
+        $z0 = virtualinvoke $r6.<java.util.logging.Logger: boolean isLoggable(java.util.logging.Level)>($r7);
+
+        if $z0 == 0 goto label2;
+
+        $r6 = <okhttp3.internal.http2.Http2Reader: java.util.logging.Logger logger>;
+
+        $r2 = newarray (java.lang.Object)[1];
+
+        $r8 = virtualinvoke $r5.<okio.ByteString: java.lang.String hex()>();
+
+        $r2[0] = $r8;
+
+        $r8 = staticinvoke <okhttp3.internal.Util: java.lang.String format(java.lang.String,java.lang.Object[])>("<< CONNECTION %s", $r2);
+
+        virtualinvoke $r6.<java.util.logging.Logger: void fine(java.lang.String)>($r8);
+
+     label2:
+        $r9 = <okhttp3.internal.http2.Http2: okio.ByteString CONNECTION_PREFACE>;
+
+        $z0 = virtualinvoke $r9.<okio.ByteString: boolean equals(java.lang.Object)>($r5);
+
+        if $z0 != 0 goto label3;
+
+        $r2 = newarray (java.lang.Object)[1];
+
+        $r8 = virtualinvoke $r5.<okio.ByteString: java.lang.String utf8()>();
+
+        $r2[0] = $r8;
+
+        $r3 = staticinvoke <okhttp3.internal.http2.Http2: java.io.IOException ioException(java.lang.String,java.lang.Object[])>("Expected a connection header but was %s", $r2);
+
+        throw $r3;
+
+     label3:
+        return;
+    }

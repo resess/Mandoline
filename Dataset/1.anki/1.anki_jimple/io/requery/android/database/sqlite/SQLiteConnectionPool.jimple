@@ -1,0 +1,2663 @@
+io.requery.android.database.sqlite.SQLiteConnectionPool extends java.lang.Object implements java.io.Closeable
+static final boolean $assertionsDisabled
+public static final int CONNECTION_FLAG_INTERACTIVE
+public static final int CONNECTION_FLAG_PRIMARY_CONNECTION_AFFINITY
+public static final int CONNECTION_FLAG_READ_ONLY
+private static final long CONNECTION_POOL_BUSY_MILLIS
+private static final java.lang.String TAG
+private final java.util.WeakHashMap mAcquiredConnections
+private final java.util.ArrayList mAvailableNonPrimaryConnections
+private io.requery.android.database.sqlite.SQLiteConnection mAvailablePrimaryConnection
+private final io.requery.android.database.sqlite.CloseGuard mCloseGuard
+private final io.requery.android.database.sqlite.SQLiteDatabaseConfiguration mConfiguration
+private final java.util.concurrent.atomic.AtomicBoolean mConnectionLeaked
+private io.requery.android.database.sqlite.SQLiteConnectionPool$ConnectionWaiter mConnectionWaiterPool
+private io.requery.android.database.sqlite.SQLiteConnectionPool$ConnectionWaiter mConnectionWaiterQueue
+private boolean mIsOpen
+private final java.lang.Object mLock
+private int mMaxConnectionPoolSize
+private int mNextConnectionId
+    static void <clinit>()
+    {
+        boolean $z0;
+        java.lang.Class $r0;
+
+        $r0 = class "Lio/requery/android/database/sqlite/SQLiteConnectionPool;";
+
+        $z0 = virtualinvoke $r0.<java.lang.Class: boolean desiredAssertionStatus()>();
+
+        if $z0 != 0 goto label2;
+
+        $z0 = 1;
+
+     label1:
+        <io.requery.android.database.sqlite.SQLiteConnectionPool: boolean $assertionsDisabled> = $z0;
+
+        return;
+
+     label2:
+        $z0 = 0;
+
+        goto label1;
+    }
+    private void <init>(io.requery.android.database.sqlite.SQLiteDatabaseConfiguration)
+    {
+        io.requery.android.database.sqlite.SQLiteConnectionPool r0;
+        io.requery.android.database.sqlite.SQLiteDatabaseConfiguration $r1, $r7;
+        io.requery.android.database.sqlite.CloseGuard $r2;
+        java.lang.Object $r3;
+        java.util.concurrent.atomic.AtomicBoolean $r4;
+        java.util.ArrayList $r5;
+        java.util.WeakHashMap $r6;
+
+        r0 := @this: io.requery.android.database.sqlite.SQLiteConnectionPool;
+
+        $r1 := @parameter0: io.requery.android.database.sqlite.SQLiteDatabaseConfiguration;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r2 = staticinvoke <io.requery.android.database.sqlite.CloseGuard: io.requery.android.database.sqlite.CloseGuard get()>();
+
+        r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: io.requery.android.database.sqlite.CloseGuard mCloseGuard> = $r2;
+
+        $r3 = new java.lang.Object;
+
+        specialinvoke $r3.<java.lang.Object: void <init>()>();
+
+        r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: java.lang.Object mLock> = $r3;
+
+        $r4 = new java.util.concurrent.atomic.AtomicBoolean;
+
+        specialinvoke $r4.<java.util.concurrent.atomic.AtomicBoolean: void <init>()>();
+
+        r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: java.util.concurrent.atomic.AtomicBoolean mConnectionLeaked> = $r4;
+
+        $r5 = new java.util.ArrayList;
+
+        specialinvoke $r5.<java.util.ArrayList: void <init>()>();
+
+        r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: java.util.ArrayList mAvailableNonPrimaryConnections> = $r5;
+
+        $r6 = new java.util.WeakHashMap;
+
+        specialinvoke $r6.<java.util.WeakHashMap: void <init>()>();
+
+        r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: java.util.WeakHashMap mAcquiredConnections> = $r6;
+
+        $r7 = new io.requery.android.database.sqlite.SQLiteDatabaseConfiguration;
+
+        specialinvoke $r7.<io.requery.android.database.sqlite.SQLiteDatabaseConfiguration: void <init>(io.requery.android.database.sqlite.SQLiteDatabaseConfiguration)>($r1);
+
+        r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: io.requery.android.database.sqlite.SQLiteDatabaseConfiguration mConfiguration> = $r7;
+
+        specialinvoke r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: void setMaxConnectionPoolSizeLocked()>();
+
+        return;
+    }
+    static java.lang.Object access$000(io.requery.android.database.sqlite.SQLiteConnectionPool)
+    {
+        io.requery.android.database.sqlite.SQLiteConnectionPool $r0;
+        java.lang.Object r1;
+
+        $r0 := @parameter0: io.requery.android.database.sqlite.SQLiteConnectionPool;
+
+        r1 = $r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: java.lang.Object mLock>;
+
+        return r1;
+    }
+    static void access$100(io.requery.android.database.sqlite.SQLiteConnectionPool, io.requery.android.database.sqlite.SQLiteConnectionPool$ConnectionWaiter)
+    {
+        io.requery.android.database.sqlite.SQLiteConnectionPool $r0;
+        io.requery.android.database.sqlite.SQLiteConnectionPool$ConnectionWaiter $r1;
+
+        $r0 := @parameter0: io.requery.android.database.sqlite.SQLiteConnectionPool;
+
+        $r1 := @parameter1: io.requery.android.database.sqlite.SQLiteConnectionPool$ConnectionWaiter;
+
+        specialinvoke $r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: void cancelConnectionWaiterLocked(io.requery.android.database.sqlite.SQLiteConnectionPool$ConnectionWaiter)>($r1);
+
+        return;
+    }
+    private void cancelConnectionWaiterLocked(io.requery.android.database.sqlite.SQLiteConnectionPool$ConnectionWaiter)
+    {
+        io.requery.android.database.sqlite.SQLiteConnectionPool r0;
+        io.requery.android.database.sqlite.SQLiteConnectionPool$ConnectionWaiter $r1, r4, r5;
+        io.requery.android.database.sqlite.SQLiteConnection $r2;
+        java.lang.RuntimeException $r3;
+        boolean $z0;
+        java.lang.AssertionError $r6;
+        android.support.v4.os.OperationCanceledException $r7;
+        java.lang.Thread $r8;
+
+        r0 := @this: io.requery.android.database.sqlite.SQLiteConnectionPool;
+
+        $r1 := @parameter0: io.requery.android.database.sqlite.SQLiteConnectionPool$ConnectionWaiter;
+
+        $r2 = $r1.<io.requery.android.database.sqlite.SQLiteConnectionPool$ConnectionWaiter: io.requery.android.database.sqlite.SQLiteConnection mAssignedConnection>;
+
+        if $r2 != null goto label7;
+
+        $r3 = $r1.<io.requery.android.database.sqlite.SQLiteConnectionPool$ConnectionWaiter: java.lang.RuntimeException mException>;
+
+        if $r3 == null goto label1;
+
+        return;
+
+     label1:
+        r4 = null;
+
+        r5 = r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: io.requery.android.database.sqlite.SQLiteConnectionPool$ConnectionWaiter mConnectionWaiterQueue>;
+
+     label2:
+        if r5 == $r1 goto label4;
+
+        $z0 = <io.requery.android.database.sqlite.SQLiteConnectionPool: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label3;
+
+        if r5 != null goto label3;
+
+        $r6 = new java.lang.AssertionError;
+
+        specialinvoke $r6.<java.lang.AssertionError: void <init>()>();
+
+        throw $r6;
+
+     label3:
+        r4 = r5;
+
+        r5 = r5.<io.requery.android.database.sqlite.SQLiteConnectionPool$ConnectionWaiter: io.requery.android.database.sqlite.SQLiteConnectionPool$ConnectionWaiter mNext>;
+
+        goto label2;
+
+     label4:
+        if r4 == null goto label6;
+
+        r5 = $r1.<io.requery.android.database.sqlite.SQLiteConnectionPool$ConnectionWaiter: io.requery.android.database.sqlite.SQLiteConnectionPool$ConnectionWaiter mNext>;
+
+        r4.<io.requery.android.database.sqlite.SQLiteConnectionPool$ConnectionWaiter: io.requery.android.database.sqlite.SQLiteConnectionPool$ConnectionWaiter mNext> = r5;
+
+     label5:
+        $r7 = new android.support.v4.os.OperationCanceledException;
+
+        specialinvoke $r7.<android.support.v4.os.OperationCanceledException: void <init>()>();
+
+        $r1.<io.requery.android.database.sqlite.SQLiteConnectionPool$ConnectionWaiter: java.lang.RuntimeException mException> = $r7;
+
+        $r8 = $r1.<io.requery.android.database.sqlite.SQLiteConnectionPool$ConnectionWaiter: java.lang.Thread mThread>;
+
+        staticinvoke <java.util.concurrent.locks.LockSupport: void unpark(java.lang.Thread)>($r8);
+
+        specialinvoke r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: void wakeConnectionWaitersLocked()>();
+
+        return;
+
+     label6:
+        r4 = $r1.<io.requery.android.database.sqlite.SQLiteConnectionPool$ConnectionWaiter: io.requery.android.database.sqlite.SQLiteConnectionPool$ConnectionWaiter mNext>;
+
+        r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: io.requery.android.database.sqlite.SQLiteConnectionPool$ConnectionWaiter mConnectionWaiterQueue> = r4;
+
+        goto label5;
+
+     label7:
+        return;
+    }
+    private void closeAvailableConnectionsAndLogExceptionsLocked()
+    {
+        io.requery.android.database.sqlite.SQLiteConnectionPool r0;
+        io.requery.android.database.sqlite.SQLiteConnection $r1;
+
+        r0 := @this: io.requery.android.database.sqlite.SQLiteConnectionPool;
+
+        specialinvoke r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: void closeAvailableNonPrimaryConnectionsAndLogExceptionsLocked()>();
+
+        $r1 = r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: io.requery.android.database.sqlite.SQLiteConnection mAvailablePrimaryConnection>;
+
+        if $r1 == null goto label1;
+
+        $r1 = r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: io.requery.android.database.sqlite.SQLiteConnection mAvailablePrimaryConnection>;
+
+        specialinvoke r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: void closeConnectionAndLogExceptionsLocked(io.requery.android.database.sqlite.SQLiteConnection)>($r1);
+
+        r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: io.requery.android.database.sqlite.SQLiteConnection mAvailablePrimaryConnection> = null;
+
+     label1:
+        return;
+    }
+    private void closeAvailableNonPrimaryConnectionsAndLogExceptionsLocked()
+    {
+        io.requery.android.database.sqlite.SQLiteConnectionPool r0;
+        java.util.ArrayList $r1;
+        java.util.Iterator $r2;
+        boolean $z0;
+        java.lang.Object $r3;
+        io.requery.android.database.sqlite.SQLiteConnection r4;
+
+        r0 := @this: io.requery.android.database.sqlite.SQLiteConnectionPool;
+
+        $r1 = r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: java.util.ArrayList mAvailableNonPrimaryConnections>;
+
+        $r2 = virtualinvoke $r1.<java.util.ArrayList: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r2.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label2;
+
+        $r3 = interfaceinvoke $r2.<java.util.Iterator: java.lang.Object next()>();
+
+        r4 = (io.requery.android.database.sqlite.SQLiteConnection) $r3;
+
+        specialinvoke r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: void closeConnectionAndLogExceptionsLocked(io.requery.android.database.sqlite.SQLiteConnection)>(r4);
+
+        goto label1;
+
+     label2:
+        $r1 = r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: java.util.ArrayList mAvailableNonPrimaryConnections>;
+
+        virtualinvoke $r1.<java.util.ArrayList: void clear()>();
+
+        return;
+    }
+    private void closeConnectionAndLogExceptionsLocked(io.requery.android.database.sqlite.SQLiteConnection)
+    {
+        io.requery.android.database.sqlite.SQLiteConnectionPool r0;
+        io.requery.android.database.sqlite.SQLiteConnection $r1;
+        java.lang.RuntimeException r2;
+        java.lang.StringBuilder $r3;
+        java.lang.String $r4;
+
+        r0 := @this: io.requery.android.database.sqlite.SQLiteConnectionPool;
+
+        $r1 := @parameter0: io.requery.android.database.sqlite.SQLiteConnection;
+
+     label1:
+        virtualinvoke $r1.<io.requery.android.database.sqlite.SQLiteConnection: void close()>();
+
+     label2:
+        return;
+
+     label3:
+        r2 := @caughtexception;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Failed to close connection, its fate is now in the hands of the merciful GC: ");
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r1);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String,java.lang.Throwable)>("SQLiteConnectionPool", $r4, r2);
+
+        return;
+
+        catch java.lang.RuntimeException from label1 to label2 with label3;
+    }
+    private void closeExcessConnectionsAndLogExceptionsLocked()
+    {
+        io.requery.android.database.sqlite.SQLiteConnectionPool r0;
+        int i0, i1, $i2;
+        java.util.ArrayList $r1;
+        java.lang.Object $r2;
+        io.requery.android.database.sqlite.SQLiteConnection r3;
+
+        r0 := @this: io.requery.android.database.sqlite.SQLiteConnectionPool;
+
+        $r1 = r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: java.util.ArrayList mAvailableNonPrimaryConnections>;
+
+        i1 = virtualinvoke $r1.<java.util.ArrayList: int size()>();
+
+     label1:
+        i0 = i1 + -1;
+
+        $i2 = r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: int mMaxConnectionPoolSize>;
+
+        $i2 = $i2 + -1;
+
+        if i1 <= $i2 goto label2;
+
+        $r1 = r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: java.util.ArrayList mAvailableNonPrimaryConnections>;
+
+        $r2 = virtualinvoke $r1.<java.util.ArrayList: java.lang.Object remove(int)>(i0);
+
+        r3 = (io.requery.android.database.sqlite.SQLiteConnection) $r2;
+
+        specialinvoke r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: void closeConnectionAndLogExceptionsLocked(io.requery.android.database.sqlite.SQLiteConnection)>(r3);
+
+        i1 = i0;
+
+        goto label1;
+
+     label2:
+        return;
+    }
+    private void discardAcquiredConnectionsLocked()
+    {
+        io.requery.android.database.sqlite.SQLiteConnectionPool r0;
+        io.requery.android.database.sqlite.SQLiteConnectionPool$AcquiredConnectionStatus $r1;
+
+        r0 := @this: io.requery.android.database.sqlite.SQLiteConnectionPool;
+
+        $r1 = <io.requery.android.database.sqlite.SQLiteConnectionPool$AcquiredConnectionStatus: io.requery.android.database.sqlite.SQLiteConnectionPool$AcquiredConnectionStatus DISCARD>;
+
+        specialinvoke r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: void markAcquiredConnectionsLocked(io.requery.android.database.sqlite.SQLiteConnectionPool$AcquiredConnectionStatus)>($r1);
+
+        return;
+    }
+    private void dispose(boolean)
+    {
+        io.requery.android.database.sqlite.SQLiteConnectionPool r0;
+        boolean $z0;
+        java.lang.Object $r1;
+        io.requery.android.database.sqlite.CloseGuard $r2;
+        java.util.WeakHashMap $r3;
+        int $i0;
+        java.lang.StringBuilder $r4;
+        io.requery.android.database.sqlite.SQLiteDatabaseConfiguration $r5;
+        java.lang.String $r6;
+        java.lang.Throwable $r7;
+
+        r0 := @this: io.requery.android.database.sqlite.SQLiteConnectionPool;
+
+        $z0 := @parameter0: boolean;
+
+        $r2 = r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: io.requery.android.database.sqlite.CloseGuard mCloseGuard>;
+
+        if $r2 == null goto label2;
+
+        if $z0 == 0 goto label1;
+
+        $r2 = r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: io.requery.android.database.sqlite.CloseGuard mCloseGuard>;
+
+        virtualinvoke $r2.<io.requery.android.database.sqlite.CloseGuard: void warnIfOpen()>();
+
+     label1:
+        $r2 = r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: io.requery.android.database.sqlite.CloseGuard mCloseGuard>;
+
+        virtualinvoke $r2.<io.requery.android.database.sqlite.CloseGuard: void close()>();
+
+     label2:
+        if $z0 != 0 goto label8;
+
+        $r1 = r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: java.lang.Object mLock>;
+
+        entermonitor $r1;
+
+     label3:
+        specialinvoke r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: void throwIfClosedLocked()>();
+
+        r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: boolean mIsOpen> = 0;
+
+        specialinvoke r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: void closeAvailableConnectionsAndLogExceptionsLocked()>();
+
+        $r3 = r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: java.util.WeakHashMap mAcquiredConnections>;
+
+        $i0 = virtualinvoke $r3.<java.util.WeakHashMap: int size()>();
+
+        if $i0 == 0 goto label4;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("The connection pool for ");
+
+        $r5 = r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: io.requery.android.database.sqlite.SQLiteDatabaseConfiguration mConfiguration>;
+
+        $r6 = $r5.<io.requery.android.database.sqlite.SQLiteDatabaseConfiguration: java.lang.String label>;
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" has been closed but there are still ");
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" connections in use.  They will be closed as they are released back to the pool.");
+
+        $r6 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int i(java.lang.String,java.lang.String)>("SQLiteConnectionPool", $r6);
+
+     label4:
+        specialinvoke r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: void wakeConnectionWaitersLocked()>();
+
+        exitmonitor $r1;
+
+     label5:
+        return;
+
+     label6:
+        $r7 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label7:
+        throw $r7;
+
+     label8:
+        return;
+
+        catch java.lang.Throwable from label3 to label5 with label6;
+        catch java.lang.Throwable from label6 to label7 with label6;
+    }
+    private void finishAcquireConnectionLocked(io.requery.android.database.sqlite.SQLiteConnection, int)
+    {
+        io.requery.android.database.sqlite.SQLiteConnectionPool r0;
+        io.requery.android.database.sqlite.SQLiteConnection $r1;
+        int $i0, $i1;
+        java.lang.RuntimeException r2;
+        boolean z0;
+        java.util.WeakHashMap $r3;
+        io.requery.android.database.sqlite.SQLiteConnectionPool$AcquiredConnectionStatus $r4;
+        java.lang.StringBuilder $r5;
+        java.lang.String $r6;
+
+        r0 := @this: io.requery.android.database.sqlite.SQLiteConnectionPool;
+
+        $r1 := @parameter0: io.requery.android.database.sqlite.SQLiteConnection;
+
+        $i0 := @parameter1: int;
+
+        $i1 = $i0 & 1;
+
+        if $i1 == 0 goto label5;
+
+        z0 = 1;
+
+     label1:
+        virtualinvoke $r1.<io.requery.android.database.sqlite.SQLiteConnection: void setOnlyAllowReadOnlyOperations(boolean)>(z0);
+
+        $r3 = r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: java.util.WeakHashMap mAcquiredConnections>;
+
+     label2:
+        $r4 = <io.requery.android.database.sqlite.SQLiteConnectionPool$AcquiredConnectionStatus: io.requery.android.database.sqlite.SQLiteConnectionPool$AcquiredConnectionStatus NORMAL>;
+
+     label3:
+        virtualinvoke $r3.<java.util.WeakHashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>($r1, $r4);
+
+     label4:
+        return;
+
+     label5:
+        z0 = 0;
+
+        goto label1;
+
+     label6:
+        r2 := @caughtexception;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Failed to prepare acquired connection for session, closing it: ");
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r1);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", connectionFlags=");
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String)>("SQLiteConnectionPool", $r6);
+
+        specialinvoke r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: void closeConnectionAndLogExceptionsLocked(io.requery.android.database.sqlite.SQLiteConnection)>($r1);
+
+        throw r2;
+
+        catch java.lang.RuntimeException from label1 to label2 with label6;
+        catch java.lang.RuntimeException from label3 to label4 with label6;
+    }
+    private static int getPriority(int)
+    {
+        int $i0;
+
+        $i0 := @parameter0: int;
+
+        $i0 = $i0 & 4;
+
+        if $i0 == 0 goto label1;
+
+        return 1;
+
+     label1:
+        return 0;
+    }
+    private boolean isSessionBlockingImportantConnectionWaitersLocked(boolean, int)
+    {
+        io.requery.android.database.sqlite.SQLiteConnectionPool r0;
+        boolean $z0, $z1;
+        int $i0, $i1;
+        io.requery.android.database.sqlite.SQLiteConnectionPool$ConnectionWaiter r1;
+
+        r0 := @this: io.requery.android.database.sqlite.SQLiteConnectionPool;
+
+        $z0 := @parameter0: boolean;
+
+        $i0 := @parameter1: int;
+
+        r1 = r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: io.requery.android.database.sqlite.SQLiteConnectionPool$ConnectionWaiter mConnectionWaiterQueue>;
+
+        if r1 == null goto label2;
+
+        $i0 = staticinvoke <io.requery.android.database.sqlite.SQLiteConnectionPool: int getPriority(int)>($i0);
+
+     label1:
+        $i1 = r1.<io.requery.android.database.sqlite.SQLiteConnectionPool$ConnectionWaiter: int mPriority>;
+
+        if $i0 <= $i1 goto label3;
+
+     label2:
+        return 0;
+
+     label3:
+        if $z0 != 0 goto label4;
+
+        $z1 = r1.<io.requery.android.database.sqlite.SQLiteConnectionPool$ConnectionWaiter: boolean mWantPrimaryConnection>;
+
+        if $z1 != 0 goto label5;
+
+     label4:
+        return 1;
+
+     label5:
+        r1 = r1.<io.requery.android.database.sqlite.SQLiteConnectionPool$ConnectionWaiter: io.requery.android.database.sqlite.SQLiteConnectionPool$ConnectionWaiter mNext>;
+
+        if r1 != null goto label1;
+
+        goto label2;
+    }
+    private void logConnectionPoolBusyLocked(long, int)
+    {
+        io.requery.android.database.sqlite.SQLiteConnectionPool r0;
+        long $l0, $l2;
+        int $i1, i3, $i4, i5;
+        java.lang.StringBuilder r1, $r4;
+        java.util.ArrayList r2, $r12;
+        java.lang.Thread $r3;
+        io.requery.android.database.sqlite.SQLiteDatabaseConfiguration $r5;
+        java.lang.String $r6;
+        float $f0;
+        java.util.WeakHashMap $r7;
+        boolean $z0;
+        java.util.Set $r8;
+        java.util.Iterator $r9;
+        java.lang.Object $r10;
+        io.requery.android.database.sqlite.SQLiteConnection r11;
+
+        r0 := @this: io.requery.android.database.sqlite.SQLiteConnectionPool;
+
+        $l0 := @parameter0: long;
+
+        $i1 := @parameter1: int;
+
+        $r3 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        r1 = new java.lang.StringBuilder;
+
+        specialinvoke r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("The connection pool for database \'");
+
+        $r5 = r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: io.requery.android.database.sqlite.SQLiteDatabaseConfiguration mConfiguration>;
+
+        $r6 = $r5.<io.requery.android.database.sqlite.SQLiteDatabaseConfiguration: java.lang.String label>;
+
+        virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        virtualinvoke r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\' has been unable to grant a connection to thread ");
+
+        $l2 = virtualinvoke $r3.<java.lang.Thread: long getId()>();
+
+        $r4 = virtualinvoke r1.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l2);
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" (");
+
+        $r6 = virtualinvoke $r3.<java.lang.Thread: java.lang.String getName()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(") ");
+
+        $r4 = virtualinvoke r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("with flags 0x");
+
+        $r6 = staticinvoke <java.lang.Integer: java.lang.String toHexString(int)>($i1);
+
+        virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r4 = virtualinvoke r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" for ");
+
+        $f0 = (float) $l0;
+
+        $f0 = $f0 * 0.001F;
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(float)>($f0);
+
+        virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" seconds.\n");
+
+        r2 = new java.util.ArrayList;
+
+        specialinvoke r2.<java.util.ArrayList: void <init>()>();
+
+        $i1 = 0;
+
+        i3 = 0;
+
+        $r7 = r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: java.util.WeakHashMap mAcquiredConnections>;
+
+        $z0 = virtualinvoke $r7.<java.util.WeakHashMap: boolean isEmpty()>();
+
+        if $z0 != 0 goto label3;
+
+        $r7 = r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: java.util.WeakHashMap mAcquiredConnections>;
+
+        $r8 = virtualinvoke $r7.<java.util.WeakHashMap: java.util.Set keySet()>();
+
+        $r9 = interfaceinvoke $r8.<java.util.Set: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r9.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label3;
+
+        $r10 = interfaceinvoke $r9.<java.util.Iterator: java.lang.Object next()>();
+
+        r11 = (io.requery.android.database.sqlite.SQLiteConnection) $r10;
+
+        $r6 = virtualinvoke r11.<io.requery.android.database.sqlite.SQLiteConnection: java.lang.String describeCurrentOperationUnsafe()>();
+
+        if $r6 == null goto label2;
+
+        virtualinvoke r2.<java.util.ArrayList: boolean add(java.lang.Object)>($r6);
+
+        $i1 = $i1 + 1;
+
+        goto label1;
+
+     label2:
+        i3 = i3 + 1;
+
+        goto label1;
+
+     label3:
+        $r12 = r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: java.util.ArrayList mAvailableNonPrimaryConnections>;
+
+        $i4 = virtualinvoke $r12.<java.util.ArrayList: int size()>();
+
+        i5 = $i4;
+
+        r11 = r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: io.requery.android.database.sqlite.SQLiteConnection mAvailablePrimaryConnection>;
+
+        if r11 == null goto label4;
+
+        i5 = $i4 + 1;
+
+     label4:
+        $r4 = virtualinvoke r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Connections: ");
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i1);
+
+        virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" active, ");
+
+        $r4 = virtualinvoke r1.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i3);
+
+        virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" idle, ");
+
+        $r4 = virtualinvoke r1.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i5);
+
+        virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" available.\n");
+
+        $z0 = virtualinvoke r2.<java.util.ArrayList: boolean isEmpty()>();
+
+        if $z0 != 0 goto label6;
+
+        virtualinvoke r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\nRequests in progress:\n");
+
+        $r9 = virtualinvoke r2.<java.util.ArrayList: java.util.Iterator iterator()>();
+
+     label5:
+        $z0 = interfaceinvoke $r9.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label6;
+
+        $r10 = interfaceinvoke $r9.<java.util.Iterator: java.lang.Object next()>();
+
+        $r6 = (java.lang.String) $r10;
+
+        $r4 = virtualinvoke r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  ");
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\n");
+
+        goto label5;
+
+     label6:
+        $r6 = virtualinvoke r1.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String)>("SQLiteConnectionPool", $r6);
+
+        return;
+    }
+    private void markAcquiredConnectionsLocked(io.requery.android.database.sqlite.SQLiteConnectionPool$AcquiredConnectionStatus)
+    {
+        io.requery.android.database.sqlite.SQLiteConnectionPool r0;
+        io.requery.android.database.sqlite.SQLiteConnectionPool$AcquiredConnectionStatus $r1, r8, $r9;
+        java.util.ArrayList r2;
+        java.util.WeakHashMap $r3;
+        boolean $z0;
+        int $i0;
+        java.util.Set $r4;
+        java.util.Iterator $r5;
+        java.lang.Object $r6;
+        java.util.Map$Entry r7;
+        io.requery.android.database.sqlite.SQLiteConnection r10;
+
+        r0 := @this: io.requery.android.database.sqlite.SQLiteConnectionPool;
+
+        $r1 := @parameter0: io.requery.android.database.sqlite.SQLiteConnectionPool$AcquiredConnectionStatus;
+
+        $r3 = r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: java.util.WeakHashMap mAcquiredConnections>;
+
+        $z0 = virtualinvoke $r3.<java.util.WeakHashMap: boolean isEmpty()>();
+
+        if $z0 != 0 goto label4;
+
+        r2 = new java.util.ArrayList;
+
+        $r3 = r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: java.util.WeakHashMap mAcquiredConnections>;
+
+        $i0 = virtualinvoke $r3.<java.util.WeakHashMap: int size()>();
+
+        specialinvoke r2.<java.util.ArrayList: void <init>(int)>($i0);
+
+        $r3 = r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: java.util.WeakHashMap mAcquiredConnections>;
+
+        $r4 = virtualinvoke $r3.<java.util.WeakHashMap: java.util.Set entrySet()>();
+
+        $r5 = interfaceinvoke $r4.<java.util.Set: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r5.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label2;
+
+        $r6 = interfaceinvoke $r5.<java.util.Iterator: java.lang.Object next()>();
+
+        r7 = (java.util.Map$Entry) $r6;
+
+        $r6 = interfaceinvoke r7.<java.util.Map$Entry: java.lang.Object getValue()>();
+
+        r8 = (io.requery.android.database.sqlite.SQLiteConnectionPool$AcquiredConnectionStatus) $r6;
+
+        if $r1 == r8 goto label1;
+
+        $r9 = <io.requery.android.database.sqlite.SQLiteConnectionPool$AcquiredConnectionStatus: io.requery.android.database.sqlite.SQLiteConnectionPool$AcquiredConnectionStatus DISCARD>;
+
+        if r8 == $r9 goto label1;
+
+        $r6 = interfaceinvoke r7.<java.util.Map$Entry: java.lang.Object getKey()>();
+
+        virtualinvoke r2.<java.util.ArrayList: boolean add(java.lang.Object)>($r6);
+
+        goto label1;
+
+     label2:
+        $r5 = virtualinvoke r2.<java.util.ArrayList: java.util.Iterator iterator()>();
+
+     label3:
+        $z0 = interfaceinvoke $r5.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label4;
+
+        $r6 = interfaceinvoke $r5.<java.util.Iterator: java.lang.Object next()>();
+
+        r10 = (io.requery.android.database.sqlite.SQLiteConnection) $r6;
+
+        $r3 = r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: java.util.WeakHashMap mAcquiredConnections>;
+
+        virtualinvoke $r3.<java.util.WeakHashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>(r10, $r1);
+
+        goto label3;
+
+     label4:
+        return;
+    }
+    private io.requery.android.database.sqlite.SQLiteConnectionPool$ConnectionWaiter obtainConnectionWaiterLocked(java.lang.Thread, long, int, boolean, java.lang.String, int)
+    {
+        io.requery.android.database.sqlite.SQLiteConnectionPool r0;
+        java.lang.Thread $r1;
+        long $l0;
+        int $i1, $i2;
+        boolean $z0;
+        java.lang.String $r2;
+        io.requery.android.database.sqlite.SQLiteConnectionPool$ConnectionWaiter $r3, r4;
+
+        r0 := @this: io.requery.android.database.sqlite.SQLiteConnectionPool;
+
+        $r1 := @parameter0: java.lang.Thread;
+
+        $l0 := @parameter1: long;
+
+        $i1 := @parameter2: int;
+
+        $z0 := @parameter3: boolean;
+
+        $r2 := @parameter4: java.lang.String;
+
+        $i2 := @parameter5: int;
+
+        r4 = r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: io.requery.android.database.sqlite.SQLiteConnectionPool$ConnectionWaiter mConnectionWaiterPool>;
+
+        if r4 == null goto label2;
+
+        $r3 = r4.<io.requery.android.database.sqlite.SQLiteConnectionPool$ConnectionWaiter: io.requery.android.database.sqlite.SQLiteConnectionPool$ConnectionWaiter mNext>;
+
+        r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: io.requery.android.database.sqlite.SQLiteConnectionPool$ConnectionWaiter mConnectionWaiterPool> = $r3;
+
+        r4.<io.requery.android.database.sqlite.SQLiteConnectionPool$ConnectionWaiter: io.requery.android.database.sqlite.SQLiteConnectionPool$ConnectionWaiter mNext> = null;
+
+     label1:
+        r4.<io.requery.android.database.sqlite.SQLiteConnectionPool$ConnectionWaiter: java.lang.Thread mThread> = $r1;
+
+        r4.<io.requery.android.database.sqlite.SQLiteConnectionPool$ConnectionWaiter: long mStartTime> = $l0;
+
+        r4.<io.requery.android.database.sqlite.SQLiteConnectionPool$ConnectionWaiter: int mPriority> = $i1;
+
+        r4.<io.requery.android.database.sqlite.SQLiteConnectionPool$ConnectionWaiter: boolean mWantPrimaryConnection> = $z0;
+
+        r4.<io.requery.android.database.sqlite.SQLiteConnectionPool$ConnectionWaiter: java.lang.String mSql> = $r2;
+
+        r4.<io.requery.android.database.sqlite.SQLiteConnectionPool$ConnectionWaiter: int mConnectionFlags> = $i2;
+
+        return r4;
+
+     label2:
+        r4 = new io.requery.android.database.sqlite.SQLiteConnectionPool$ConnectionWaiter;
+
+        specialinvoke r4.<io.requery.android.database.sqlite.SQLiteConnectionPool$ConnectionWaiter: void <init>(io.requery.android.database.sqlite.SQLiteConnectionPool$1)>(null);
+
+        goto label1;
+    }
+    public static io.requery.android.database.sqlite.SQLiteConnectionPool open(io.requery.android.database.sqlite.SQLiteDatabaseConfiguration)
+    {
+        io.requery.android.database.sqlite.SQLiteDatabaseConfiguration $r0;
+        io.requery.android.database.sqlite.SQLiteConnectionPool r1;
+        java.lang.IllegalArgumentException $r2;
+
+        $r0 := @parameter0: io.requery.android.database.sqlite.SQLiteDatabaseConfiguration;
+
+        if $r0 != null goto label1;
+
+        $r2 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r2.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("configuration must not be null.");
+
+        throw $r2;
+
+     label1:
+        r1 = new io.requery.android.database.sqlite.SQLiteConnectionPool;
+
+        specialinvoke r1.<io.requery.android.database.sqlite.SQLiteConnectionPool: void <init>(io.requery.android.database.sqlite.SQLiteDatabaseConfiguration)>($r0);
+
+        specialinvoke r1.<io.requery.android.database.sqlite.SQLiteConnectionPool: void open()>();
+
+        return r1;
+    }
+    private void open()
+    {
+        io.requery.android.database.sqlite.SQLiteConnectionPool r0;
+        io.requery.android.database.sqlite.SQLiteConnection $r1;
+        io.requery.android.database.sqlite.SQLiteDatabaseConfiguration $r2;
+        io.requery.android.database.sqlite.CloseGuard $r3;
+
+        r0 := @this: io.requery.android.database.sqlite.SQLiteConnectionPool;
+
+        $r2 = r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: io.requery.android.database.sqlite.SQLiteDatabaseConfiguration mConfiguration>;
+
+        $r1 = specialinvoke r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: io.requery.android.database.sqlite.SQLiteConnection openConnectionLocked(io.requery.android.database.sqlite.SQLiteDatabaseConfiguration,boolean)>($r2, 1);
+
+        r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: io.requery.android.database.sqlite.SQLiteConnection mAvailablePrimaryConnection> = $r1;
+
+        r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: boolean mIsOpen> = 1;
+
+        $r3 = r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: io.requery.android.database.sqlite.CloseGuard mCloseGuard>;
+
+        virtualinvoke $r3.<io.requery.android.database.sqlite.CloseGuard: void open(java.lang.String)>("close");
+
+        return;
+    }
+    private io.requery.android.database.sqlite.SQLiteConnection openConnectionLocked(io.requery.android.database.sqlite.SQLiteDatabaseConfiguration, boolean)
+    {
+        io.requery.android.database.sqlite.SQLiteConnectionPool r0;
+        io.requery.android.database.sqlite.SQLiteDatabaseConfiguration $r1;
+        boolean $z0;
+        int i0, $i1;
+        io.requery.android.database.sqlite.SQLiteConnection $r2;
+
+        r0 := @this: io.requery.android.database.sqlite.SQLiteConnectionPool;
+
+        $r1 := @parameter0: io.requery.android.database.sqlite.SQLiteDatabaseConfiguration;
+
+        $z0 := @parameter1: boolean;
+
+        i0 = r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: int mNextConnectionId>;
+
+        $i1 = i0 + 1;
+
+        r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: int mNextConnectionId> = $i1;
+
+        $r2 = staticinvoke <io.requery.android.database.sqlite.SQLiteConnection: io.requery.android.database.sqlite.SQLiteConnection open(io.requery.android.database.sqlite.SQLiteConnectionPool,io.requery.android.database.sqlite.SQLiteDatabaseConfiguration,int,boolean)>(r0, $r1, i0, $z0);
+
+        return $r2;
+    }
+    private void reconfigureAllConnectionsLocked()
+    {
+        io.requery.android.database.sqlite.SQLiteConnectionPool r0;
+        io.requery.android.database.sqlite.SQLiteConnection $r1;
+        io.requery.android.database.sqlite.SQLiteDatabaseConfiguration $r2;
+        java.util.ArrayList $r3;
+        int $i0, i1, i2;
+        java.lang.Object $r4;
+        java.lang.RuntimeException r5, r8;
+        java.lang.StringBuilder $r6;
+        java.lang.String $r7;
+        io.requery.android.database.sqlite.SQLiteConnectionPool$AcquiredConnectionStatus $r9;
+
+        r0 := @this: io.requery.android.database.sqlite.SQLiteConnectionPool;
+
+        $r1 = r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: io.requery.android.database.sqlite.SQLiteConnection mAvailablePrimaryConnection>;
+
+        if $r1 == null goto label2;
+
+     label1:
+        $r1 = r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: io.requery.android.database.sqlite.SQLiteConnection mAvailablePrimaryConnection>;
+
+        $r2 = r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: io.requery.android.database.sqlite.SQLiteDatabaseConfiguration mConfiguration>;
+
+        virtualinvoke $r1.<io.requery.android.database.sqlite.SQLiteConnection: void reconfigure(io.requery.android.database.sqlite.SQLiteDatabaseConfiguration)>($r2);
+
+     label2:
+        $r3 = r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: java.util.ArrayList mAvailableNonPrimaryConnections>;
+
+        $i0 = virtualinvoke $r3.<java.util.ArrayList: int size()>();
+
+        i1 = 0;
+
+     label3:
+        if i1 >= $i0 goto label9;
+
+        $r3 = r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: java.util.ArrayList mAvailableNonPrimaryConnections>;
+
+        $r4 = virtualinvoke $r3.<java.util.ArrayList: java.lang.Object get(int)>(i1);
+
+        $r1 = (io.requery.android.database.sqlite.SQLiteConnection) $r4;
+
+     label4:
+        $r2 = r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: io.requery.android.database.sqlite.SQLiteDatabaseConfiguration mConfiguration>;
+
+        virtualinvoke $r1.<io.requery.android.database.sqlite.SQLiteConnection: void reconfigure(io.requery.android.database.sqlite.SQLiteDatabaseConfiguration)>($r2);
+
+     label5:
+        i2 = i1;
+
+     label6:
+        i1 = i2 + 1;
+
+        goto label3;
+
+     label7:
+        r5 := @caughtexception;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Failed to reconfigure available primary connection, closing it: ");
+
+        $r1 = r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: io.requery.android.database.sqlite.SQLiteConnection mAvailablePrimaryConnection>;
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r1);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String,java.lang.Throwable)>("SQLiteConnectionPool", $r7, r5);
+
+        $r1 = r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: io.requery.android.database.sqlite.SQLiteConnection mAvailablePrimaryConnection>;
+
+        specialinvoke r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: void closeConnectionAndLogExceptionsLocked(io.requery.android.database.sqlite.SQLiteConnection)>($r1);
+
+        r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: io.requery.android.database.sqlite.SQLiteConnection mAvailablePrimaryConnection> = null;
+
+        goto label2;
+
+     label8:
+        r8 := @caughtexception;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Failed to reconfigure available non-primary connection, closing it: ");
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r1);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String,java.lang.Throwable)>("SQLiteConnectionPool", $r7, r8);
+
+        specialinvoke r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: void closeConnectionAndLogExceptionsLocked(io.requery.android.database.sqlite.SQLiteConnection)>($r1);
+
+        $r3 = r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: java.util.ArrayList mAvailableNonPrimaryConnections>;
+
+        i2 = i1 + -1;
+
+        virtualinvoke $r3.<java.util.ArrayList: java.lang.Object remove(int)>(i1);
+
+        $i0 = $i0 + -1;
+
+        goto label6;
+
+     label9:
+        $r9 = <io.requery.android.database.sqlite.SQLiteConnectionPool$AcquiredConnectionStatus: io.requery.android.database.sqlite.SQLiteConnectionPool$AcquiredConnectionStatus RECONFIGURE>;
+
+        specialinvoke r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: void markAcquiredConnectionsLocked(io.requery.android.database.sqlite.SQLiteConnectionPool$AcquiredConnectionStatus)>($r9);
+
+        return;
+
+        catch java.lang.RuntimeException from label1 to label2 with label7;
+        catch java.lang.RuntimeException from label4 to label5 with label8;
+    }
+    private boolean recycleConnectionLocked(io.requery.android.database.sqlite.SQLiteConnection, io.requery.android.database.sqlite.SQLiteConnectionPool$AcquiredConnectionStatus)
+    {
+        io.requery.android.database.sqlite.SQLiteConnectionPool r0;
+        io.requery.android.database.sqlite.SQLiteConnection $r1;
+        java.lang.RuntimeException r2;
+        io.requery.android.database.sqlite.SQLiteConnectionPool$AcquiredConnectionStatus $r3, $r4;
+        io.requery.android.database.sqlite.SQLiteDatabaseConfiguration $r5;
+        java.lang.StringBuilder $r6;
+        java.lang.String $r7;
+
+        r0 := @this: io.requery.android.database.sqlite.SQLiteConnectionPool;
+
+        $r1 := @parameter0: io.requery.android.database.sqlite.SQLiteConnection;
+
+        $r3 := @parameter1: io.requery.android.database.sqlite.SQLiteConnectionPool$AcquiredConnectionStatus;
+
+        $r4 = <io.requery.android.database.sqlite.SQLiteConnectionPool$AcquiredConnectionStatus: io.requery.android.database.sqlite.SQLiteConnectionPool$AcquiredConnectionStatus RECONFIGURE>;
+
+        if $r3 != $r4 goto label2;
+
+     label1:
+        $r5 = r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: io.requery.android.database.sqlite.SQLiteDatabaseConfiguration mConfiguration>;
+
+        virtualinvoke $r1.<io.requery.android.database.sqlite.SQLiteConnection: void reconfigure(io.requery.android.database.sqlite.SQLiteDatabaseConfiguration)>($r5);
+
+     label2:
+        $r4 = <io.requery.android.database.sqlite.SQLiteConnectionPool$AcquiredConnectionStatus: io.requery.android.database.sqlite.SQLiteConnectionPool$AcquiredConnectionStatus DISCARD>;
+
+        if $r3 != $r4 goto label4;
+
+        specialinvoke r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: void closeConnectionAndLogExceptionsLocked(io.requery.android.database.sqlite.SQLiteConnection)>($r1);
+
+        return 0;
+
+     label3:
+        r2 := @caughtexception;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Failed to reconfigure released connection, closing it: ");
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r1);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String,java.lang.Throwable)>("SQLiteConnectionPool", $r7, r2);
+
+        $r3 = <io.requery.android.database.sqlite.SQLiteConnectionPool$AcquiredConnectionStatus: io.requery.android.database.sqlite.SQLiteConnectionPool$AcquiredConnectionStatus DISCARD>;
+
+        goto label2;
+
+     label4:
+        return 1;
+
+        catch java.lang.RuntimeException from label1 to label2 with label3;
+    }
+    private void recycleConnectionWaiterLocked(io.requery.android.database.sqlite.SQLiteConnectionPool$ConnectionWaiter)
+    {
+        io.requery.android.database.sqlite.SQLiteConnectionPool r0;
+        io.requery.android.database.sqlite.SQLiteConnectionPool$ConnectionWaiter $r1, $r2;
+        int $i0;
+
+        r0 := @this: io.requery.android.database.sqlite.SQLiteConnectionPool;
+
+        $r1 := @parameter0: io.requery.android.database.sqlite.SQLiteConnectionPool$ConnectionWaiter;
+
+        $r2 = r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: io.requery.android.database.sqlite.SQLiteConnectionPool$ConnectionWaiter mConnectionWaiterPool>;
+
+        $r1.<io.requery.android.database.sqlite.SQLiteConnectionPool$ConnectionWaiter: io.requery.android.database.sqlite.SQLiteConnectionPool$ConnectionWaiter mNext> = $r2;
+
+        $r1.<io.requery.android.database.sqlite.SQLiteConnectionPool$ConnectionWaiter: java.lang.Thread mThread> = null;
+
+        $r1.<io.requery.android.database.sqlite.SQLiteConnectionPool$ConnectionWaiter: java.lang.String mSql> = null;
+
+        $r1.<io.requery.android.database.sqlite.SQLiteConnectionPool$ConnectionWaiter: io.requery.android.database.sqlite.SQLiteConnection mAssignedConnection> = null;
+
+        $r1.<io.requery.android.database.sqlite.SQLiteConnectionPool$ConnectionWaiter: java.lang.RuntimeException mException> = null;
+
+        $i0 = $r1.<io.requery.android.database.sqlite.SQLiteConnectionPool$ConnectionWaiter: int mNonce>;
+
+        $i0 = $i0 + 1;
+
+        $r1.<io.requery.android.database.sqlite.SQLiteConnectionPool$ConnectionWaiter: int mNonce> = $i0;
+
+        r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: io.requery.android.database.sqlite.SQLiteConnectionPool$ConnectionWaiter mConnectionWaiterPool> = $r1;
+
+        return;
+    }
+    private void setMaxConnectionPoolSizeLocked()
+    {
+        io.requery.android.database.sqlite.SQLiteConnectionPool r0;
+        boolean $z0;
+        io.requery.android.database.sqlite.SQLiteDatabaseConfiguration $r1;
+        int $i0;
+
+        r0 := @this: io.requery.android.database.sqlite.SQLiteConnectionPool;
+
+        $z0 = staticinvoke <io.requery.android.database.sqlite.SQLiteDatabase: boolean hasCodec()>();
+
+        if $z0 != 0 goto label1;
+
+        $r1 = r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: io.requery.android.database.sqlite.SQLiteDatabaseConfiguration mConfiguration>;
+
+        $i0 = $r1.<io.requery.android.database.sqlite.SQLiteDatabaseConfiguration: int openFlags>;
+
+        $i0 = $i0 & 536870912;
+
+        if $i0 == 0 goto label1;
+
+        $i0 = staticinvoke <io.requery.android.database.sqlite.SQLiteGlobal: int getWALConnectionPoolSize()>();
+
+        r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: int mMaxConnectionPoolSize> = $i0;
+
+        return;
+
+     label1:
+        r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: int mMaxConnectionPoolSize> = 1;
+
+        return;
+    }
+    private void throwIfClosedLocked()
+    {
+        io.requery.android.database.sqlite.SQLiteConnectionPool r0;
+        boolean $z0;
+        java.lang.IllegalStateException $r1;
+
+        r0 := @this: io.requery.android.database.sqlite.SQLiteConnectionPool;
+
+        $z0 = r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: boolean mIsOpen>;
+
+        if $z0 != 0 goto label1;
+
+        $r1 = new java.lang.IllegalStateException;
+
+        specialinvoke $r1.<java.lang.IllegalStateException: void <init>(java.lang.String)>("Cannot perform this operation because the connection pool has been closed.");
+
+        throw $r1;
+
+     label1:
+        return;
+    }
+    private io.requery.android.database.sqlite.SQLiteConnection tryAcquireNonPrimaryConnectionLocked(java.lang.String, int)
+    {
+        io.requery.android.database.sqlite.SQLiteConnectionPool r0;
+        java.lang.String $r1;
+        int $i0, $i1, i2;
+        java.util.ArrayList $r2;
+        java.lang.Object $r3;
+        io.requery.android.database.sqlite.SQLiteConnection r4;
+        boolean $z0;
+        java.util.WeakHashMap $r5;
+        io.requery.android.database.sqlite.SQLiteDatabaseConfiguration $r6;
+
+        r0 := @this: io.requery.android.database.sqlite.SQLiteConnectionPool;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $i0 := @parameter1: int;
+
+        $r2 = r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: java.util.ArrayList mAvailableNonPrimaryConnections>;
+
+        $i1 = virtualinvoke $r2.<java.util.ArrayList: int size()>();
+
+        if $i1 <= 1 goto label3;
+
+        if $r1 == null goto label3;
+
+        i2 = 0;
+
+     label1:
+        if i2 >= $i1 goto label3;
+
+        $r2 = r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: java.util.ArrayList mAvailableNonPrimaryConnections>;
+
+        $r3 = virtualinvoke $r2.<java.util.ArrayList: java.lang.Object get(int)>(i2);
+
+        r4 = (io.requery.android.database.sqlite.SQLiteConnection) $r3;
+
+        $z0 = virtualinvoke r4.<io.requery.android.database.sqlite.SQLiteConnection: boolean isPreparedStatementInCache(java.lang.String)>($r1);
+
+        if $z0 == 0 goto label2;
+
+        $r2 = r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: java.util.ArrayList mAvailableNonPrimaryConnections>;
+
+        virtualinvoke $r2.<java.util.ArrayList: java.lang.Object remove(int)>(i2);
+
+        specialinvoke r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: void finishAcquireConnectionLocked(io.requery.android.database.sqlite.SQLiteConnection,int)>(r4, $i0);
+
+        return r4;
+
+     label2:
+        i2 = i2 + 1;
+
+        goto label1;
+
+     label3:
+        if $i1 <= 0 goto label4;
+
+        $r2 = r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: java.util.ArrayList mAvailableNonPrimaryConnections>;
+
+        $i1 = $i1 + -1;
+
+        $r3 = virtualinvoke $r2.<java.util.ArrayList: java.lang.Object remove(int)>($i1);
+
+        r4 = (io.requery.android.database.sqlite.SQLiteConnection) $r3;
+
+        specialinvoke r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: void finishAcquireConnectionLocked(io.requery.android.database.sqlite.SQLiteConnection,int)>(r4, $i0);
+
+        return r4;
+
+     label4:
+        $r5 = r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: java.util.WeakHashMap mAcquiredConnections>;
+
+        i2 = virtualinvoke $r5.<java.util.WeakHashMap: int size()>();
+
+        $i1 = i2;
+
+        r4 = r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: io.requery.android.database.sqlite.SQLiteConnection mAvailablePrimaryConnection>;
+
+        if r4 == null goto label5;
+
+        $i1 = i2 + 1;
+
+     label5:
+        i2 = r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: int mMaxConnectionPoolSize>;
+
+        if $i1 < i2 goto label6;
+
+        return null;
+
+     label6:
+        $r6 = r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: io.requery.android.database.sqlite.SQLiteDatabaseConfiguration mConfiguration>;
+
+        r4 = specialinvoke r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: io.requery.android.database.sqlite.SQLiteConnection openConnectionLocked(io.requery.android.database.sqlite.SQLiteDatabaseConfiguration,boolean)>($r6, 0);
+
+        specialinvoke r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: void finishAcquireConnectionLocked(io.requery.android.database.sqlite.SQLiteConnection,int)>(r4, $i0);
+
+        return r4;
+    }
+    private io.requery.android.database.sqlite.SQLiteConnection tryAcquirePrimaryConnectionLocked(int)
+    {
+        io.requery.android.database.sqlite.SQLiteConnectionPool r0;
+        int $i0;
+        io.requery.android.database.sqlite.SQLiteConnection r1;
+        java.util.WeakHashMap $r2;
+        java.util.Set $r3;
+        java.util.Iterator $r4;
+        boolean $z0;
+        java.lang.Object $r5;
+        io.requery.android.database.sqlite.SQLiteDatabaseConfiguration $r6;
+
+        r0 := @this: io.requery.android.database.sqlite.SQLiteConnectionPool;
+
+        $i0 := @parameter0: int;
+
+        r1 = r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: io.requery.android.database.sqlite.SQLiteConnection mAvailablePrimaryConnection>;
+
+        if r1 == null goto label1;
+
+        r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: io.requery.android.database.sqlite.SQLiteConnection mAvailablePrimaryConnection> = null;
+
+        specialinvoke r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: void finishAcquireConnectionLocked(io.requery.android.database.sqlite.SQLiteConnection,int)>(r1, $i0);
+
+        return r1;
+
+     label1:
+        $r2 = r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: java.util.WeakHashMap mAcquiredConnections>;
+
+        $r3 = virtualinvoke $r2.<java.util.WeakHashMap: java.util.Set keySet()>();
+
+        $r4 = interfaceinvoke $r3.<java.util.Set: java.util.Iterator iterator()>();
+
+     label2:
+        $z0 = interfaceinvoke $r4.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label3;
+
+        $r5 = interfaceinvoke $r4.<java.util.Iterator: java.lang.Object next()>();
+
+        r1 = (io.requery.android.database.sqlite.SQLiteConnection) $r5;
+
+        $z0 = virtualinvoke r1.<io.requery.android.database.sqlite.SQLiteConnection: boolean isPrimaryConnection()>();
+
+        if $z0 == 0 goto label2;
+
+        return null;
+
+     label3:
+        $r6 = r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: io.requery.android.database.sqlite.SQLiteDatabaseConfiguration mConfiguration>;
+
+        r1 = specialinvoke r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: io.requery.android.database.sqlite.SQLiteConnection openConnectionLocked(io.requery.android.database.sqlite.SQLiteDatabaseConfiguration,boolean)>($r6, 1);
+
+        specialinvoke r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: void finishAcquireConnectionLocked(io.requery.android.database.sqlite.SQLiteConnection,int)>(r1, $i0);
+
+        return r1;
+    }
+    private io.requery.android.database.sqlite.SQLiteConnection waitForConnection(java.lang.String, int, android.support.v4.os.CancellationSignal)
+    {
+        io.requery.android.database.sqlite.SQLiteConnectionPool r0;
+        java.lang.String $r1;
+        int $i0, $i1, $i3;
+        android.support.v4.os.CancellationSignal $r2;
+        java.lang.RuntimeException r3;
+        boolean z0;
+        java.lang.Object $r4;
+        io.requery.android.database.sqlite.SQLiteConnection r5;
+        long $l2, l4, l5;
+        java.lang.Thread $r6;
+        io.requery.android.database.sqlite.SQLiteConnectionPool$ConnectionWaiter $r7, r8, $r9;
+        io.requery.android.database.sqlite.SQLiteConnectionPool$1 $r10;
+        java.util.concurrent.atomic.AtomicBoolean $r11;
+        java.lang.Throwable $r12, $r13, $r14, $r15;
+        byte $b6;
+
+        r0 := @this: io.requery.android.database.sqlite.SQLiteConnectionPool;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $i0 := @parameter1: int;
+
+        $r2 := @parameter2: android.support.v4.os.CancellationSignal;
+
+        $i1 = $i0 & 2;
+
+        if $i1 == 0 goto label07;
+
+        z0 = 1;
+
+     label01:
+        $r4 = r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: java.lang.Object mLock>;
+
+        entermonitor $r4;
+
+     label02:
+        specialinvoke r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: void throwIfClosedLocked()>();
+
+        if $r2 == null goto label03;
+
+        virtualinvoke $r2.<android.support.v4.os.CancellationSignal: void throwIfCanceled()>();
+
+     label03:
+        r5 = null;
+
+        if z0 != 0 goto label04;
+
+        r5 = specialinvoke r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: io.requery.android.database.sqlite.SQLiteConnection tryAcquireNonPrimaryConnectionLocked(java.lang.String,int)>($r1, $i0);
+
+     label04:
+        if r5 != null goto label05;
+
+        r5 = specialinvoke r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: io.requery.android.database.sqlite.SQLiteConnection tryAcquirePrimaryConnectionLocked(int)>($i0);
+
+     label05:
+        if r5 == null goto label08;
+
+        exitmonitor $r4;
+
+     label06:
+        return r5;
+
+     label07:
+        z0 = 0;
+
+        goto label01;
+
+     label08:
+        $i1 = staticinvoke <io.requery.android.database.sqlite.SQLiteConnectionPool: int getPriority(int)>($i0);
+
+        $l2 = staticinvoke <android.os.SystemClock: long uptimeMillis()>();
+
+        $r6 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        $r7 = specialinvoke r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: io.requery.android.database.sqlite.SQLiteConnectionPool$ConnectionWaiter obtainConnectionWaiterLocked(java.lang.Thread,long,int,boolean,java.lang.String,int)>($r6, $l2, $i1, z0, $r1, $i0);
+
+        r8 = null;
+
+        $r9 = r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: io.requery.android.database.sqlite.SQLiteConnectionPool$ConnectionWaiter mConnectionWaiterQueue>;
+
+     label09:
+        if $r9 == null goto label10;
+
+        $i3 = $r9.<io.requery.android.database.sqlite.SQLiteConnectionPool$ConnectionWaiter: int mPriority>;
+
+        if $i1 <= $i3 goto label25;
+
+        $r7.<io.requery.android.database.sqlite.SQLiteConnectionPool$ConnectionWaiter: io.requery.android.database.sqlite.SQLiteConnectionPool$ConnectionWaiter mNext> = $r9;
+
+     label10:
+        if r8 == null goto label27;
+
+        r8.<io.requery.android.database.sqlite.SQLiteConnectionPool$ConnectionWaiter: io.requery.android.database.sqlite.SQLiteConnectionPool$ConnectionWaiter mNext> = $r7;
+
+     label11:
+        $i1 = $r7.<io.requery.android.database.sqlite.SQLiteConnectionPool$ConnectionWaiter: int mNonce>;
+
+        exitmonitor $r4;
+
+     label12:
+        if $r2 == null goto label13;
+
+        $r10 = new io.requery.android.database.sqlite.SQLiteConnectionPool$1;
+
+        specialinvoke $r10.<io.requery.android.database.sqlite.SQLiteConnectionPool$1: void <init>(io.requery.android.database.sqlite.SQLiteConnectionPool,io.requery.android.database.sqlite.SQLiteConnectionPool$ConnectionWaiter,int)>(r0, $r7, $i1);
+
+        virtualinvoke $r2.<android.support.v4.os.CancellationSignal: void setOnCancelListener(android.support.v4.os.CancellationSignal$OnCancelListener)>($r10);
+
+     label13:
+        l4 = 30000L;
+
+     label14:
+        $l2 = $r7.<io.requery.android.database.sqlite.SQLiteConnectionPool$ConnectionWaiter: long mStartTime>;
+
+     label15:
+        l5 = $l2 + 30000L;
+
+     label16:
+        $r11 = r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: java.util.concurrent.atomic.AtomicBoolean mConnectionLeaked>;
+
+        z0 = virtualinvoke $r11.<java.util.concurrent.atomic.AtomicBoolean: boolean compareAndSet(boolean,boolean)>(1, 0);
+
+     label17:
+        if z0 == 0 goto label20;
+
+     label18:
+        $r4 = r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: java.lang.Object mLock>;
+
+        entermonitor $r4;
+
+     label19:
+        specialinvoke r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: void wakeConnectionWaitersLocked()>();
+
+        exitmonitor $r4;
+
+     label20:
+        $l2 = 1000000L * l4;
+
+     label21:
+        staticinvoke <java.util.concurrent.locks.LockSupport: void parkNanos(java.lang.Object,long)>(r0, $l2);
+
+        staticinvoke <java.lang.Thread: boolean interrupted()>();
+
+        $r4 = r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: java.lang.Object mLock>;
+
+        entermonitor $r4;
+
+     label22:
+        specialinvoke r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: void throwIfClosedLocked()>();
+
+        r5 = $r7.<io.requery.android.database.sqlite.SQLiteConnectionPool$ConnectionWaiter: io.requery.android.database.sqlite.SQLiteConnection mAssignedConnection>;
+
+        r3 = $r7.<io.requery.android.database.sqlite.SQLiteConnectionPool$ConnectionWaiter: java.lang.RuntimeException mException>;
+
+        if r5 != null goto label23;
+
+        if r3 == null goto label38;
+
+     label23:
+        specialinvoke r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: void recycleConnectionWaiterLocked(io.requery.android.database.sqlite.SQLiteConnectionPool$ConnectionWaiter)>($r7);
+
+        if r5 == null goto label35;
+
+        exitmonitor $r4;
+
+     label24:
+        if $r2 == null goto label43;
+
+        virtualinvoke $r2.<android.support.v4.os.CancellationSignal: void setOnCancelListener(android.support.v4.os.CancellationSignal$OnCancelListener)>(null);
+
+        return r5;
+
+     label25:
+        r8 = $r9;
+
+     label26:
+        $r9 = $r9.<io.requery.android.database.sqlite.SQLiteConnectionPool$ConnectionWaiter: io.requery.android.database.sqlite.SQLiteConnectionPool$ConnectionWaiter mNext>;
+
+        goto label09;
+
+     label27:
+        r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: io.requery.android.database.sqlite.SQLiteConnectionPool$ConnectionWaiter mConnectionWaiterQueue> = $r7;
+
+        goto label11;
+
+     label28:
+        $r12 := @caughtexception;
+
+        exitmonitor $r4;
+
+     label29:
+        throw $r12;
+
+     label30:
+        $r13 := @caughtexception;
+
+     label31:
+        exitmonitor $r4;
+
+     label32:
+        throw $r13;
+
+     label33:
+        $r14 := @caughtexception;
+
+        if $r2 == null goto label34;
+
+        virtualinvoke $r2.<android.support.v4.os.CancellationSignal: void setOnCancelListener(android.support.v4.os.CancellationSignal$OnCancelListener)>(null);
+
+     label34:
+        throw $r14;
+
+     label35:
+        throw r3;
+
+     label36:
+        $r15 := @caughtexception;
+
+        exitmonitor $r4;
+
+     label37:
+        throw $r15;
+
+     label38:
+        $l2 = staticinvoke <android.os.SystemClock: long uptimeMillis()>();
+
+        $b6 = $l2 cmp l5;
+
+        if $b6 >= 0 goto label41;
+
+        l4 = $l2 - l5;
+
+     label39:
+        exitmonitor $r4;
+
+     label40:
+        goto label16;
+
+     label41:
+        l4 = $r7.<io.requery.android.database.sqlite.SQLiteConnectionPool$ConnectionWaiter: long mStartTime>;
+
+        l4 = $l2 - l4;
+
+        specialinvoke r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: void logConnectionPoolBusyLocked(long,int)>(l4, $i0);
+
+     label42:
+        l4 = 30000L;
+
+        l5 = $l2 + 30000L;
+
+        goto label39;
+
+     label43:
+        return r5;
+
+        catch java.lang.Throwable from label02 to label06 with label28;
+        catch java.lang.Throwable from label08 to label12 with label28;
+        catch java.lang.Throwable from label14 to label15 with label33;
+        catch java.lang.Throwable from label16 to label17 with label33;
+        catch java.lang.Throwable from label18 to label19 with label33;
+        catch java.lang.Throwable from label19 to label20 with label30;
+        catch java.lang.Throwable from label21 to label22 with label33;
+        catch java.lang.Throwable from label22 to label24 with label36;
+        catch java.lang.Throwable from label26 to label29 with label28;
+        catch java.lang.Throwable from label31 to label32 with label30;
+        catch java.lang.Throwable from label32 to label33 with label33;
+        catch java.lang.Throwable from label35 to label37 with label36;
+        catch java.lang.Throwable from label37 to label38 with label33;
+        catch java.lang.Throwable from label38 to label40 with label36;
+        catch java.lang.Throwable from label41 to label42 with label36;
+    }
+    private void wakeConnectionWaitersLocked()
+    {
+        io.requery.android.database.sqlite.SQLiteConnectionPool r0;
+        java.lang.RuntimeException r1;
+        io.requery.android.database.sqlite.SQLiteConnectionPool$ConnectionWaiter r2, r3, r4;
+        int $i0;
+        boolean z0, z1, z2, $z3;
+        java.lang.Thread $r5;
+        io.requery.android.database.sqlite.SQLiteConnection r6, $r8;
+        java.lang.String $r7;
+
+        r0 := @this: io.requery.android.database.sqlite.SQLiteConnectionPool;
+
+        r3 = null;
+
+        r4 = r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: io.requery.android.database.sqlite.SQLiteConnectionPool$ConnectionWaiter mConnectionWaiterQueue>;
+
+        z0 = 0;
+
+        z1 = 0;
+
+     label01:
+        if r4 == null goto label20;
+
+        z2 = 0;
+
+        $z3 = r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: boolean mIsOpen>;
+
+        if $z3 != 0 goto label05;
+
+        z2 = 1;
+
+     label02:
+        r2 = r4.<io.requery.android.database.sqlite.SQLiteConnectionPool$ConnectionWaiter: io.requery.android.database.sqlite.SQLiteConnectionPool$ConnectionWaiter mNext>;
+
+        if z2 == 0 goto label19;
+
+        if r3 == null goto label18;
+
+        r3.<io.requery.android.database.sqlite.SQLiteConnectionPool$ConnectionWaiter: io.requery.android.database.sqlite.SQLiteConnectionPool$ConnectionWaiter mNext> = r2;
+
+     label03:
+        r4.<io.requery.android.database.sqlite.SQLiteConnectionPool$ConnectionWaiter: io.requery.android.database.sqlite.SQLiteConnectionPool$ConnectionWaiter mNext> = null;
+
+        $r5 = r4.<io.requery.android.database.sqlite.SQLiteConnectionPool$ConnectionWaiter: java.lang.Thread mThread>;
+
+        staticinvoke <java.util.concurrent.locks.LockSupport: void unpark(java.lang.Thread)>($r5);
+
+     label04:
+        r4 = r2;
+
+        goto label01;
+
+     label05:
+        r6 = null;
+
+     label06:
+        $z3 = r4.<io.requery.android.database.sqlite.SQLiteConnectionPool$ConnectionWaiter: boolean mWantPrimaryConnection>;
+
+     label07:
+        if $z3 != 0 goto label10;
+
+        if z1 != 0 goto label10;
+
+     label08:
+        $r7 = r4.<io.requery.android.database.sqlite.SQLiteConnectionPool$ConnectionWaiter: java.lang.String mSql>;
+
+        $i0 = r4.<io.requery.android.database.sqlite.SQLiteConnectionPool$ConnectionWaiter: int mConnectionFlags>;
+
+        $r8 = specialinvoke r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: io.requery.android.database.sqlite.SQLiteConnection tryAcquireNonPrimaryConnectionLocked(java.lang.String,int)>($r7, $i0);
+
+     label09:
+        r6 = $r8;
+
+        if $r8 != null goto label10;
+
+        z1 = 1;
+
+     label10:
+        if r6 != null goto label13;
+
+        if z0 != 0 goto label13;
+
+     label11:
+        $i0 = r4.<io.requery.android.database.sqlite.SQLiteConnectionPool$ConnectionWaiter: int mConnectionFlags>;
+
+        $r8 = specialinvoke r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: io.requery.android.database.sqlite.SQLiteConnection tryAcquirePrimaryConnectionLocked(int)>($i0);
+
+     label12:
+        r6 = $r8;
+
+        if $r8 != null goto label13;
+
+        z0 = 1;
+
+     label13:
+        if r6 == null goto label16;
+
+     label14:
+        r4.<io.requery.android.database.sqlite.SQLiteConnectionPool$ConnectionWaiter: io.requery.android.database.sqlite.SQLiteConnection mAssignedConnection> = r6;
+
+     label15:
+        z2 = 1;
+
+        goto label02;
+
+     label16:
+        if z1 == 0 goto label02;
+
+        if z0 == 0 goto label02;
+
+        return;
+
+     label17:
+        r1 := @caughtexception;
+
+        r4.<io.requery.android.database.sqlite.SQLiteConnectionPool$ConnectionWaiter: java.lang.RuntimeException mException> = r1;
+
+        z2 = 1;
+
+        goto label02;
+
+     label18:
+        r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: io.requery.android.database.sqlite.SQLiteConnectionPool$ConnectionWaiter mConnectionWaiterQueue> = r2;
+
+        goto label03;
+
+     label19:
+        r3 = r4;
+
+        goto label04;
+
+     label20:
+        return;
+
+        catch java.lang.RuntimeException from label06 to label07 with label17;
+        catch java.lang.RuntimeException from label08 to label09 with label17;
+        catch java.lang.RuntimeException from label11 to label12 with label17;
+        catch java.lang.RuntimeException from label14 to label15 with label17;
+    }
+    public io.requery.android.database.sqlite.SQLiteConnection acquireConnection(java.lang.String, int, android.support.v4.os.CancellationSignal)
+    {
+        io.requery.android.database.sqlite.SQLiteConnectionPool r0;
+        java.lang.String $r1;
+        int $i0;
+        android.support.v4.os.CancellationSignal $r2;
+        io.requery.android.database.sqlite.SQLiteConnection $r3;
+
+        r0 := @this: io.requery.android.database.sqlite.SQLiteConnectionPool;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $i0 := @parameter1: int;
+
+        $r2 := @parameter2: android.support.v4.os.CancellationSignal;
+
+        $r3 = specialinvoke r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: io.requery.android.database.sqlite.SQLiteConnection waitForConnection(java.lang.String,int,android.support.v4.os.CancellationSignal)>($r1, $i0, $r2);
+
+        return $r3;
+    }
+    public void close()
+    {
+        io.requery.android.database.sqlite.SQLiteConnectionPool r0;
+
+        r0 := @this: io.requery.android.database.sqlite.SQLiteConnectionPool;
+
+        specialinvoke r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: void dispose(boolean)>(0);
+
+        return;
+    }
+    public void collectDbStats(java.util.ArrayList)
+    {
+        io.requery.android.database.sqlite.SQLiteConnectionPool r0;
+        java.util.ArrayList r1, $r4;
+        java.lang.Object $r2, $r6;
+        io.requery.android.database.sqlite.SQLiteConnection $r3;
+        java.util.Iterator $r5;
+        boolean $z0;
+        java.lang.Throwable $r7;
+        java.util.WeakHashMap $r8;
+        java.util.Set $r9;
+
+        r0 := @this: io.requery.android.database.sqlite.SQLiteConnectionPool;
+
+        r1 := @parameter0: java.util.ArrayList;
+
+        $r2 = r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: java.lang.Object mLock>;
+
+        entermonitor $r2;
+
+     label1:
+        $r3 = r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: io.requery.android.database.sqlite.SQLiteConnection mAvailablePrimaryConnection>;
+
+        if $r3 == null goto label2;
+
+        $r3 = r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: io.requery.android.database.sqlite.SQLiteConnection mAvailablePrimaryConnection>;
+
+        virtualinvoke $r3.<io.requery.android.database.sqlite.SQLiteConnection: void collectDbStats(java.util.ArrayList)>(r1);
+
+     label2:
+        $r4 = r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: java.util.ArrayList mAvailableNonPrimaryConnections>;
+
+        $r5 = virtualinvoke $r4.<java.util.ArrayList: java.util.Iterator iterator()>();
+
+     label3:
+        $z0 = interfaceinvoke $r5.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label6;
+
+        $r6 = interfaceinvoke $r5.<java.util.Iterator: java.lang.Object next()>();
+
+        $r3 = (io.requery.android.database.sqlite.SQLiteConnection) $r6;
+
+        virtualinvoke $r3.<io.requery.android.database.sqlite.SQLiteConnection: void collectDbStats(java.util.ArrayList)>(r1);
+
+        goto label3;
+
+     label4:
+        $r7 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label5:
+        throw $r7;
+
+     label6:
+        $r8 = r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: java.util.WeakHashMap mAcquiredConnections>;
+
+        $r9 = virtualinvoke $r8.<java.util.WeakHashMap: java.util.Set keySet()>();
+
+        $r5 = interfaceinvoke $r9.<java.util.Set: java.util.Iterator iterator()>();
+
+     label7:
+        $z0 = interfaceinvoke $r5.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label8;
+
+        $r6 = interfaceinvoke $r5.<java.util.Iterator: java.lang.Object next()>();
+
+        $r3 = (io.requery.android.database.sqlite.SQLiteConnection) $r6;
+
+        virtualinvoke $r3.<io.requery.android.database.sqlite.SQLiteConnection: void collectDbStatsUnsafe(java.util.ArrayList)>(r1);
+
+        goto label7;
+
+     label8:
+        exitmonitor $r2;
+
+     label9:
+        return;
+
+        catch java.lang.Throwable from label1 to label5 with label4;
+        catch java.lang.Throwable from label6 to label9 with label4;
+    }
+    public void dump(android.util.Printer, boolean)
+    {
+        io.requery.android.database.sqlite.SQLiteConnectionPool r0;
+        android.util.Printer $r1;
+        boolean $z0, $z1;
+        java.lang.Object $r2, $r9;
+        java.lang.StringBuilder $r3;
+        io.requery.android.database.sqlite.SQLiteDatabaseConfiguration $r4;
+        java.lang.String $r5;
+        int $i0, $i3;
+        io.requery.android.database.sqlite.SQLiteConnection $r6;
+        java.util.ArrayList $r7;
+        java.util.Iterator $r8;
+        java.lang.Throwable $r10;
+        java.util.WeakHashMap $r11;
+        java.util.Set $r12;
+        java.util.Map$Entry r13;
+        io.requery.android.database.sqlite.SQLiteConnectionPool$ConnectionWaiter $r14;
+        long $l1, $l2;
+        float $f0;
+        java.lang.Thread $r15;
+
+        r0 := @this: io.requery.android.database.sqlite.SQLiteConnectionPool;
+
+        $r1 := @parameter0: android.util.Printer;
+
+        $z0 := @parameter1: boolean;
+
+        $r2 = r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: java.lang.Object mLock>;
+
+        entermonitor $r2;
+
+     label01:
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Connection pool for ");
+
+        $r4 = r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: io.requery.android.database.sqlite.SQLiteDatabaseConfiguration mConfiguration>;
+
+        $r5 = $r4.<io.requery.android.database.sqlite.SQLiteDatabaseConfiguration: java.lang.String path>;
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(":");
+
+        $r5 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        interfaceinvoke $r1.<android.util.Printer: void println(java.lang.String)>($r5);
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  Open: ");
+
+        $z1 = r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: boolean mIsOpen>;
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(boolean)>($z1);
+
+        $r5 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        interfaceinvoke $r1.<android.util.Printer: void println(java.lang.String)>($r5);
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  Max connections: ");
+
+        $i0 = r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: int mMaxConnectionPoolSize>;
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r5 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        interfaceinvoke $r1.<android.util.Printer: void println(java.lang.String)>($r5);
+
+        interfaceinvoke $r1.<android.util.Printer: void println(java.lang.String)>("  Available primary connection:");
+
+        $r6 = r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: io.requery.android.database.sqlite.SQLiteConnection mAvailablePrimaryConnection>;
+
+        if $r6 == null goto label06;
+
+        $r6 = r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: io.requery.android.database.sqlite.SQLiteConnection mAvailablePrimaryConnection>;
+
+        virtualinvoke $r6.<io.requery.android.database.sqlite.SQLiteConnection: void dump(android.util.Printer,boolean)>($r1, $z0);
+
+     label02:
+        interfaceinvoke $r1.<android.util.Printer: void println(java.lang.String)>("  Available non-primary connections:");
+
+        $r7 = r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: java.util.ArrayList mAvailableNonPrimaryConnections>;
+
+        $z1 = virtualinvoke $r7.<java.util.ArrayList: boolean isEmpty()>();
+
+        if $z1 != 0 goto label07;
+
+        $r7 = r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: java.util.ArrayList mAvailableNonPrimaryConnections>;
+
+        $r8 = virtualinvoke $r7.<java.util.ArrayList: java.util.Iterator iterator()>();
+
+     label03:
+        $z1 = interfaceinvoke $r8.<java.util.Iterator: boolean hasNext()>();
+
+        if $z1 == 0 goto label08;
+
+        $r9 = interfaceinvoke $r8.<java.util.Iterator: java.lang.Object next()>();
+
+        $r6 = (io.requery.android.database.sqlite.SQLiteConnection) $r9;
+
+        virtualinvoke $r6.<io.requery.android.database.sqlite.SQLiteConnection: void dump(android.util.Printer,boolean)>($r1, $z0);
+
+        goto label03;
+
+     label04:
+        $r10 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label05:
+        throw $r10;
+
+     label06:
+        interfaceinvoke $r1.<android.util.Printer: void println(java.lang.String)>("<none>");
+
+        goto label02;
+
+     label07:
+        interfaceinvoke $r1.<android.util.Printer: void println(java.lang.String)>("<none>");
+
+     label08:
+        interfaceinvoke $r1.<android.util.Printer: void println(java.lang.String)>("  Acquired connections:");
+
+        $r11 = r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: java.util.WeakHashMap mAcquiredConnections>;
+
+        $z1 = virtualinvoke $r11.<java.util.WeakHashMap: boolean isEmpty()>();
+
+        if $z1 != 0 goto label10;
+
+        $r11 = r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: java.util.WeakHashMap mAcquiredConnections>;
+
+        $r12 = virtualinvoke $r11.<java.util.WeakHashMap: java.util.Set entrySet()>();
+
+        $r8 = interfaceinvoke $r12.<java.util.Set: java.util.Iterator iterator()>();
+
+     label09:
+        $z1 = interfaceinvoke $r8.<java.util.Iterator: boolean hasNext()>();
+
+        if $z1 == 0 goto label11;
+
+        $r9 = interfaceinvoke $r8.<java.util.Iterator: java.lang.Object next()>();
+
+        r13 = (java.util.Map$Entry) $r9;
+
+        $r9 = interfaceinvoke r13.<java.util.Map$Entry: java.lang.Object getKey()>();
+
+        $r6 = (io.requery.android.database.sqlite.SQLiteConnection) $r9;
+
+        virtualinvoke $r6.<io.requery.android.database.sqlite.SQLiteConnection: void dumpUnsafe(android.util.Printer,boolean)>($r1, $z0);
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("  Status: ");
+
+        $r9 = interfaceinvoke r13.<java.util.Map$Entry: java.lang.Object getValue()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r9);
+
+        $r5 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        interfaceinvoke $r1.<android.util.Printer: void println(java.lang.String)>($r5);
+
+        goto label09;
+
+     label10:
+        interfaceinvoke $r1.<android.util.Printer: void println(java.lang.String)>("<none>");
+
+     label11:
+        interfaceinvoke $r1.<android.util.Printer: void println(java.lang.String)>("  Connection waiters:");
+
+        $r14 = r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: io.requery.android.database.sqlite.SQLiteConnectionPool$ConnectionWaiter mConnectionWaiterQueue>;
+
+        if $r14 == null goto label13;
+
+        $i0 = 0;
+
+        $l1 = staticinvoke <android.os.SystemClock: long uptimeMillis()>();
+
+        $r14 = r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: io.requery.android.database.sqlite.SQLiteConnectionPool$ConnectionWaiter mConnectionWaiterQueue>;
+
+     label12:
+        if $r14 == null goto label14;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(": waited for ");
+
+        $l2 = $r14.<io.requery.android.database.sqlite.SQLiteConnectionPool$ConnectionWaiter: long mStartTime>;
+
+        $l2 = $l1 - $l2;
+
+        $f0 = (float) $l2;
+
+        $f0 = $f0 * 0.001F;
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(float)>($f0);
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ms - thread=");
+
+        $r15 = $r14.<io.requery.android.database.sqlite.SQLiteConnectionPool$ConnectionWaiter: java.lang.Thread mThread>;
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r15);
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", priority=");
+
+        $i3 = $r14.<io.requery.android.database.sqlite.SQLiteConnectionPool$ConnectionWaiter: int mPriority>;
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i3);
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", sql=\'");
+
+        $r5 = $r14.<io.requery.android.database.sqlite.SQLiteConnectionPool$ConnectionWaiter: java.lang.String mSql>;
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\'");
+
+        $r5 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        interfaceinvoke $r1.<android.util.Printer: void println(java.lang.String)>($r5);
+
+        $r14 = $r14.<io.requery.android.database.sqlite.SQLiteConnectionPool$ConnectionWaiter: io.requery.android.database.sqlite.SQLiteConnectionPool$ConnectionWaiter mNext>;
+
+        $i0 = $i0 + 1;
+
+        goto label12;
+
+     label13:
+        interfaceinvoke $r1.<android.util.Printer: void println(java.lang.String)>("<none>");
+
+     label14:
+        exitmonitor $r2;
+
+     label15:
+        return;
+
+        catch java.lang.Throwable from label01 to label05 with label04;
+        catch java.lang.Throwable from label06 to label15 with label04;
+    }
+    public void enableLocalizedCollators()
+    {
+        io.requery.android.database.sqlite.SQLiteConnectionPool r0;
+        java.lang.Object $r1;
+        boolean $z0;
+        java.util.WeakHashMap $r2;
+        io.requery.android.database.sqlite.SQLiteConnection $r3;
+        java.lang.IllegalStateException $r4;
+        java.lang.Throwable $r5;
+
+        r0 := @this: io.requery.android.database.sqlite.SQLiteConnectionPool;
+
+        $r1 = r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: java.lang.Object mLock>;
+
+        entermonitor $r1;
+
+     label1:
+        $r2 = r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: java.util.WeakHashMap mAcquiredConnections>;
+
+        $z0 = virtualinvoke $r2.<java.util.WeakHashMap: boolean isEmpty()>();
+
+        if $z0 == 0 goto label2;
+
+        $r3 = r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: io.requery.android.database.sqlite.SQLiteConnection mAvailablePrimaryConnection>;
+
+        if $r3 != null goto label5;
+
+     label2:
+        $r4 = new java.lang.IllegalStateException;
+
+        specialinvoke $r4.<java.lang.IllegalStateException: void <init>(java.lang.String)>("Cannot enable localized collators while database is in use");
+
+        throw $r4;
+
+     label3:
+        $r5 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label4:
+        throw $r5;
+
+     label5:
+        $r3 = r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: io.requery.android.database.sqlite.SQLiteConnection mAvailablePrimaryConnection>;
+
+        virtualinvoke $r3.<io.requery.android.database.sqlite.SQLiteConnection: void enableLocalizedCollators()>();
+
+        exitmonitor $r1;
+
+     label6:
+        return;
+
+        catch java.lang.Throwable from label1 to label4 with label3;
+        catch java.lang.Throwable from label5 to label6 with label3;
+    }
+    protected void finalize() throws java.lang.Throwable
+    {
+        io.requery.android.database.sqlite.SQLiteConnectionPool r0;
+        java.lang.Throwable $r1;
+
+        r0 := @this: io.requery.android.database.sqlite.SQLiteConnectionPool;
+
+     label1:
+        specialinvoke r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: void dispose(boolean)>(1);
+
+     label2:
+        specialinvoke r0.<java.lang.Object: void finalize()>();
+
+        return;
+
+     label3:
+        $r1 := @caughtexception;
+
+        specialinvoke r0.<java.lang.Object: void finalize()>();
+
+        throw $r1;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+    void onConnectionLeaked()
+    {
+        io.requery.android.database.sqlite.SQLiteConnectionPool r0;
+        java.lang.StringBuilder $r1;
+        io.requery.android.database.sqlite.SQLiteDatabaseConfiguration $r2;
+        java.lang.String $r3;
+        java.util.concurrent.atomic.AtomicBoolean $r4;
+
+        r0 := @this: io.requery.android.database.sqlite.SQLiteConnectionPool;
+
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r1 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("A SQLiteConnection object for database \'");
+
+        $r2 = r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: io.requery.android.database.sqlite.SQLiteDatabaseConfiguration mConfiguration>;
+
+        $r3 = $r2.<io.requery.android.database.sqlite.SQLiteDatabaseConfiguration: java.lang.String label>;
+
+        $r1 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r1 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\' was leaked!  Please fix your application to end transactions in progress properly and to close the database when it is no longer needed.");
+
+        $r3 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String)>("SQLiteConnectionPool", $r3);
+
+        $r4 = r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: java.util.concurrent.atomic.AtomicBoolean mConnectionLeaked>;
+
+        virtualinvoke $r4.<java.util.concurrent.atomic.AtomicBoolean: void set(boolean)>(1);
+
+        return;
+    }
+    public void reconfigure(io.requery.android.database.sqlite.SQLiteDatabaseConfiguration)
+    {
+        io.requery.android.database.sqlite.SQLiteConnectionPool r0;
+        io.requery.android.database.sqlite.SQLiteDatabaseConfiguration $r1, $r4;
+        boolean z0, z1, $z2, $z3;
+        java.lang.IllegalArgumentException $r2;
+        java.lang.Object $r3;
+        int $i0, $i1;
+        java.util.WeakHashMap $r5;
+        java.lang.IllegalStateException $r6;
+        java.lang.Throwable $r7;
+        java.util.ArrayList $r8;
+        java.lang.AssertionError $r9;
+        io.requery.android.database.sqlite.SQLiteConnection $r10;
+
+        r0 := @this: io.requery.android.database.sqlite.SQLiteConnectionPool;
+
+        $r1 := @parameter0: io.requery.android.database.sqlite.SQLiteDatabaseConfiguration;
+
+        z0 = 1;
+
+        if $r1 != null goto label01;
+
+        $r2 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r2.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("configuration must not be null.");
+
+        throw $r2;
+
+     label01:
+        $r3 = r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: java.lang.Object mLock>;
+
+        entermonitor $r3;
+
+     label02:
+        specialinvoke r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: void throwIfClosedLocked()>();
+
+        $i0 = $r1.<io.requery.android.database.sqlite.SQLiteDatabaseConfiguration: int openFlags>;
+
+        $r4 = r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: io.requery.android.database.sqlite.SQLiteDatabaseConfiguration mConfiguration>;
+
+        $i1 = $r4.<io.requery.android.database.sqlite.SQLiteDatabaseConfiguration: int openFlags>;
+
+        $i0 = $i0 ^ $i1;
+
+        $i0 = $i0 & 536870912;
+
+        if $i0 == 0 goto label06;
+
+        z1 = 1;
+
+     label03:
+        if z1 == 0 goto label08;
+
+        $r5 = r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: java.util.WeakHashMap mAcquiredConnections>;
+
+        $z2 = virtualinvoke $r5.<java.util.WeakHashMap: boolean isEmpty()>();
+
+        if $z2 != 0 goto label07;
+
+        $r6 = new java.lang.IllegalStateException;
+
+        specialinvoke $r6.<java.lang.IllegalStateException: void <init>(java.lang.String)>("Write Ahead Logging (WAL) mode cannot be enabled or disabled while there are transactions in progress.  Finish all transactions and release all active database connections first.");
+
+        throw $r6;
+
+     label04:
+        $r7 := @caughtexception;
+
+        exitmonitor $r3;
+
+     label05:
+        throw $r7;
+
+     label06:
+        z1 = 0;
+
+        goto label03;
+
+     label07:
+        specialinvoke r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: void closeAvailableNonPrimaryConnectionsAndLogExceptionsLocked()>();
+
+        $z2 = <io.requery.android.database.sqlite.SQLiteConnectionPool: boolean $assertionsDisabled>;
+
+        if $z2 != 0 goto label08;
+
+        $r8 = r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: java.util.ArrayList mAvailableNonPrimaryConnections>;
+
+        $z2 = virtualinvoke $r8.<java.util.ArrayList: boolean isEmpty()>();
+
+        if $z2 != 0 goto label08;
+
+        $r9 = new java.lang.AssertionError;
+
+        specialinvoke $r9.<java.lang.AssertionError: void <init>()>();
+
+        throw $r9;
+
+     label08:
+        $z2 = $r1.<io.requery.android.database.sqlite.SQLiteDatabaseConfiguration: boolean foreignKeyConstraintsEnabled>;
+
+        $r4 = r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: io.requery.android.database.sqlite.SQLiteDatabaseConfiguration mConfiguration>;
+
+        $z3 = $r4.<io.requery.android.database.sqlite.SQLiteDatabaseConfiguration: boolean foreignKeyConstraintsEnabled>;
+
+        if $z2 == $z3 goto label10;
+
+     label09:
+        if z0 == 0 goto label11;
+
+        $r5 = r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: java.util.WeakHashMap mAcquiredConnections>;
+
+        z0 = virtualinvoke $r5.<java.util.WeakHashMap: boolean isEmpty()>();
+
+        if z0 != 0 goto label11;
+
+        $r6 = new java.lang.IllegalStateException;
+
+        specialinvoke $r6.<java.lang.IllegalStateException: void <init>(java.lang.String)>("Foreign Key Constraints cannot be enabled or disabled while there are transactions in progress.  Finish all transactions and release all active database connections first.");
+
+        throw $r6;
+
+     label10:
+        z0 = 0;
+
+        goto label09;
+
+     label11:
+        $r4 = r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: io.requery.android.database.sqlite.SQLiteDatabaseConfiguration mConfiguration>;
+
+        $i0 = $r4.<io.requery.android.database.sqlite.SQLiteDatabaseConfiguration: int openFlags>;
+
+        $i1 = $r1.<io.requery.android.database.sqlite.SQLiteDatabaseConfiguration: int openFlags>;
+
+        if $i0 == $i1 goto label15;
+
+        if z1 == 0 goto label12;
+
+        specialinvoke r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: void closeAvailableConnectionsAndLogExceptionsLocked()>();
+
+     label12:
+        $r10 = specialinvoke r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: io.requery.android.database.sqlite.SQLiteConnection openConnectionLocked(io.requery.android.database.sqlite.SQLiteDatabaseConfiguration,boolean)>($r1, 1);
+
+        specialinvoke r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: void closeAvailableConnectionsAndLogExceptionsLocked()>();
+
+        specialinvoke r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: void discardAcquiredConnectionsLocked()>();
+
+        r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: io.requery.android.database.sqlite.SQLiteConnection mAvailablePrimaryConnection> = $r10;
+
+        $r4 = r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: io.requery.android.database.sqlite.SQLiteDatabaseConfiguration mConfiguration>;
+
+        virtualinvoke $r4.<io.requery.android.database.sqlite.SQLiteDatabaseConfiguration: void updateParametersFrom(io.requery.android.database.sqlite.SQLiteDatabaseConfiguration)>($r1);
+
+        specialinvoke r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: void setMaxConnectionPoolSizeLocked()>();
+
+     label13:
+        specialinvoke r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: void wakeConnectionWaitersLocked()>();
+
+        exitmonitor $r3;
+
+     label14:
+        return;
+
+     label15:
+        $r4 = r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: io.requery.android.database.sqlite.SQLiteDatabaseConfiguration mConfiguration>;
+
+        virtualinvoke $r4.<io.requery.android.database.sqlite.SQLiteDatabaseConfiguration: void updateParametersFrom(io.requery.android.database.sqlite.SQLiteDatabaseConfiguration)>($r1);
+
+        specialinvoke r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: void setMaxConnectionPoolSizeLocked()>();
+
+        specialinvoke r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: void closeExcessConnectionsAndLogExceptionsLocked()>();
+
+        specialinvoke r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: void reconfigureAllConnectionsLocked()>();
+
+     label16:
+        goto label13;
+
+        catch java.lang.Throwable from label02 to label05 with label04;
+        catch java.lang.Throwable from label07 to label14 with label04;
+        catch java.lang.Throwable from label15 to label16 with label04;
+    }
+    public void releaseConnection(io.requery.android.database.sqlite.SQLiteConnection)
+    {
+        io.requery.android.database.sqlite.SQLiteConnectionPool r0;
+        io.requery.android.database.sqlite.SQLiteConnection $r1, $r8;
+        java.lang.Object $r2, $r4;
+        java.util.WeakHashMap $r3;
+        io.requery.android.database.sqlite.SQLiteConnectionPool$AcquiredConnectionStatus r5;
+        java.lang.IllegalStateException $r6;
+        java.lang.Throwable $r7;
+        boolean $z0;
+        java.lang.AssertionError $r9;
+        java.util.ArrayList $r10;
+        int $i0, $i1;
+
+        r0 := @this: io.requery.android.database.sqlite.SQLiteConnectionPool;
+
+        $r1 := @parameter0: io.requery.android.database.sqlite.SQLiteConnection;
+
+        $r2 = r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: java.lang.Object mLock>;
+
+        entermonitor $r2;
+
+     label01:
+        $r3 = r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: java.util.WeakHashMap mAcquiredConnections>;
+
+        $r4 = virtualinvoke $r3.<java.util.WeakHashMap: java.lang.Object remove(java.lang.Object)>($r1);
+
+        r5 = (io.requery.android.database.sqlite.SQLiteConnectionPool$AcquiredConnectionStatus) $r4;
+
+        if r5 != null goto label04;
+
+        $r6 = new java.lang.IllegalStateException;
+
+        specialinvoke $r6.<java.lang.IllegalStateException: void <init>(java.lang.String)>("Cannot perform this operation because the specified connection was not acquired from this pool or has already been released.");
+
+        throw $r6;
+
+     label02:
+        $r7 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label03:
+        throw $r7;
+
+     label04:
+        $z0 = r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: boolean mIsOpen>;
+
+        if $z0 != 0 goto label07;
+
+        specialinvoke r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: void closeConnectionAndLogExceptionsLocked(io.requery.android.database.sqlite.SQLiteConnection)>($r1);
+
+     label05:
+        exitmonitor $r2;
+
+     label06:
+        return;
+
+     label07:
+        $z0 = virtualinvoke $r1.<io.requery.android.database.sqlite.SQLiteConnection: boolean isPrimaryConnection()>();
+
+        if $z0 == 0 goto label10;
+
+        $z0 = specialinvoke r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: boolean recycleConnectionLocked(io.requery.android.database.sqlite.SQLiteConnection,io.requery.android.database.sqlite.SQLiteConnectionPool$AcquiredConnectionStatus)>($r1, r5);
+
+        if $z0 == 0 goto label09;
+
+        $z0 = <io.requery.android.database.sqlite.SQLiteConnectionPool: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label08;
+
+        $r8 = r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: io.requery.android.database.sqlite.SQLiteConnection mAvailablePrimaryConnection>;
+
+        if $r8 == null goto label08;
+
+        $r9 = new java.lang.AssertionError;
+
+        specialinvoke $r9.<java.lang.AssertionError: void <init>()>();
+
+        throw $r9;
+
+     label08:
+        r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: io.requery.android.database.sqlite.SQLiteConnection mAvailablePrimaryConnection> = $r1;
+
+     label09:
+        specialinvoke r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: void wakeConnectionWaitersLocked()>();
+
+        goto label05;
+
+     label10:
+        $r10 = r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: java.util.ArrayList mAvailableNonPrimaryConnections>;
+
+        $i0 = virtualinvoke $r10.<java.util.ArrayList: int size()>();
+
+        $i1 = r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: int mMaxConnectionPoolSize>;
+
+        $i1 = $i1 + -1;
+
+        if $i0 < $i1 goto label11;
+
+        specialinvoke r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: void closeConnectionAndLogExceptionsLocked(io.requery.android.database.sqlite.SQLiteConnection)>($r1);
+
+        goto label05;
+
+     label11:
+        $z0 = specialinvoke r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: boolean recycleConnectionLocked(io.requery.android.database.sqlite.SQLiteConnection,io.requery.android.database.sqlite.SQLiteConnectionPool$AcquiredConnectionStatus)>($r1, r5);
+
+        if $z0 == 0 goto label12;
+
+        $r10 = r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: java.util.ArrayList mAvailableNonPrimaryConnections>;
+
+        virtualinvoke $r10.<java.util.ArrayList: boolean add(java.lang.Object)>($r1);
+
+     label12:
+        specialinvoke r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: void wakeConnectionWaitersLocked()>();
+
+     label13:
+        goto label05;
+
+        catch java.lang.Throwable from label01 to label03 with label02;
+        catch java.lang.Throwable from label04 to label06 with label02;
+        catch java.lang.Throwable from label07 to label13 with label02;
+    }
+    public boolean shouldYieldConnection(io.requery.android.database.sqlite.SQLiteConnection, int)
+    {
+        io.requery.android.database.sqlite.SQLiteConnectionPool r0;
+        io.requery.android.database.sqlite.SQLiteConnection $r1;
+        int $i0;
+        java.lang.Object $r2;
+        java.util.WeakHashMap $r3;
+        boolean $z0;
+        java.lang.IllegalStateException $r4;
+        java.lang.Throwable $r5;
+
+        r0 := @this: io.requery.android.database.sqlite.SQLiteConnectionPool;
+
+        $r1 := @parameter0: io.requery.android.database.sqlite.SQLiteConnection;
+
+        $i0 := @parameter1: int;
+
+        $r2 = r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: java.lang.Object mLock>;
+
+        entermonitor $r2;
+
+     label1:
+        $r3 = r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: java.util.WeakHashMap mAcquiredConnections>;
+
+        $z0 = virtualinvoke $r3.<java.util.WeakHashMap: boolean containsKey(java.lang.Object)>($r1);
+
+        if $z0 != 0 goto label4;
+
+        $r4 = new java.lang.IllegalStateException;
+
+        specialinvoke $r4.<java.lang.IllegalStateException: void <init>(java.lang.String)>("Cannot perform this operation because the specified connection was not acquired from this pool or has already been released.");
+
+        throw $r4;
+
+     label2:
+        $r5 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label3:
+        throw $r5;
+
+     label4:
+        $z0 = r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: boolean mIsOpen>;
+
+        if $z0 != 0 goto label6;
+
+        exitmonitor $r2;
+
+     label5:
+        return 0;
+
+     label6:
+        $z0 = virtualinvoke $r1.<io.requery.android.database.sqlite.SQLiteConnection: boolean isPrimaryConnection()>();
+
+        $z0 = specialinvoke r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: boolean isSessionBlockingImportantConnectionWaitersLocked(boolean,int)>($z0, $i0);
+
+        exitmonitor $r2;
+
+     label7:
+        return $z0;
+
+        catch java.lang.Throwable from label1 to label3 with label2;
+        catch java.lang.Throwable from label4 to label5 with label2;
+        catch java.lang.Throwable from label6 to label7 with label2;
+    }
+    public java.lang.String toString()
+    {
+        io.requery.android.database.sqlite.SQLiteConnectionPool r0;
+        java.lang.StringBuilder $r1;
+        io.requery.android.database.sqlite.SQLiteDatabaseConfiguration $r2;
+        java.lang.String $r3;
+
+        r0 := @this: io.requery.android.database.sqlite.SQLiteConnectionPool;
+
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r1 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("SQLiteConnectionPool: ");
+
+        $r2 = r0.<io.requery.android.database.sqlite.SQLiteConnectionPool: io.requery.android.database.sqlite.SQLiteDatabaseConfiguration mConfiguration>;
+
+        $r3 = $r2.<io.requery.android.database.sqlite.SQLiteDatabaseConfiguration: java.lang.String path>;
+
+        $r1 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r3 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r3;
+    }

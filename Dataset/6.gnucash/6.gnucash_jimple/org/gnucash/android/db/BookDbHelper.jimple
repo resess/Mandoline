@@ -1,0 +1,449 @@
+org.gnucash.android.db.BookDbHelper extends android.database.sqlite.SQLiteOpenHelper
+private static final java.lang.String BOOKS_TABLE_CREATE
+public static final java.lang.String LOG_TAG
+private android.content.Context mContext
+    static void <clinit>()
+    {
+        java.lang.StringBuilder $r0;
+        java.lang.String $r1;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $r0 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("CREATE TABLE books (_id integer primary key autoincrement, uid varchar(255) not null UNIQUE, name varchar(255) not null, root_account_guid varchar(255) not null, root_template_guid varchar(255), is_active tinyint default 0, uri varchar(255), last_export_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, modified_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP );");
+
+        $r1 = staticinvoke <org.gnucash.android.db.DatabaseHelper: java.lang.String createUpdatedAtTrigger(java.lang.String)>("books");
+
+        $r0 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r1 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        <org.gnucash.android.db.BookDbHelper: java.lang.String BOOKS_TABLE_CREATE> = $r1;
+
+        return;
+    }
+    public void <init>(android.content.Context)
+    {
+        org.gnucash.android.db.BookDbHelper r0;
+        android.content.Context $r1;
+
+        r0 := @this: org.gnucash.android.db.BookDbHelper;
+
+        $r1 := @parameter0: android.content.Context;
+
+        specialinvoke r0.<android.database.sqlite.SQLiteOpenHelper: void <init>(android.content.Context,java.lang.String,android.database.sqlite.SQLiteDatabase$CursorFactory,int)>($r1, "gnucash_books.db", null, 1);
+
+        r0.<org.gnucash.android.db.BookDbHelper: android.content.Context mContext> = $r1;
+
+        return;
+    }
+    public static android.database.sqlite.SQLiteDatabase getDatabase(java.lang.String)
+    {
+        java.lang.String $r0;
+        org.gnucash.android.db.DatabaseHelper r1;
+        android.content.Context $r2;
+        android.database.sqlite.SQLiteDatabase $r3;
+
+        $r0 := @parameter0: java.lang.String;
+
+        r1 = new org.gnucash.android.db.DatabaseHelper;
+
+        $r2 = staticinvoke <org.gnucash.android.app.GnuCashApplication: android.content.Context getAppContext()>();
+
+        specialinvoke r1.<org.gnucash.android.db.DatabaseHelper: void <init>(android.content.Context,java.lang.String)>($r2, $r0);
+
+        $r3 = virtualinvoke r1.<org.gnucash.android.db.DatabaseHelper: android.database.sqlite.SQLiteDatabase getWritableDatabase()>();
+
+        return $r3;
+    }
+    private void insertBook(android.database.sqlite.SQLiteDatabase, org.gnucash.android.model.Book)
+    {
+        org.gnucash.android.db.BookDbHelper r0;
+        android.database.sqlite.SQLiteDatabase $r1;
+        org.gnucash.android.model.Book $r2;
+        android.content.ContentValues r3;
+        java.lang.String $r4;
+        org.gnucash.android.db.adapter.BooksDbAdapter $r5;
+        boolean $z0;
+        byte $b0;
+        java.lang.Integer $r6;
+
+        r0 := @this: org.gnucash.android.db.BookDbHelper;
+
+        $r1 := @parameter0: android.database.sqlite.SQLiteDatabase;
+
+        $r2 := @parameter1: org.gnucash.android.model.Book;
+
+        r3 = new android.content.ContentValues;
+
+        specialinvoke r3.<android.content.ContentValues: void <init>()>();
+
+        $r4 = virtualinvoke $r2.<org.gnucash.android.model.Book: java.lang.String getUID()>();
+
+        virtualinvoke r3.<android.content.ContentValues: void put(java.lang.String,java.lang.String)>("uid", $r4);
+
+        $r4 = virtualinvoke $r2.<org.gnucash.android.model.Book: java.lang.String getRootAccountUID()>();
+
+        virtualinvoke r3.<android.content.ContentValues: void put(java.lang.String,java.lang.String)>("root_account_guid", $r4);
+
+        $r4 = staticinvoke <org.gnucash.android.model.Book: java.lang.String generateUID()>();
+
+        virtualinvoke r3.<android.content.ContentValues: void put(java.lang.String,java.lang.String)>("root_template_guid", $r4);
+
+        $r5 = new org.gnucash.android.db.adapter.BooksDbAdapter;
+
+        specialinvoke $r5.<org.gnucash.android.db.adapter.BooksDbAdapter: void <init>(android.database.sqlite.SQLiteDatabase)>($r1);
+
+        $r4 = virtualinvoke $r5.<org.gnucash.android.db.adapter.BooksDbAdapter: java.lang.String generateDefaultBookName()>();
+
+        virtualinvoke r3.<android.content.ContentValues: void put(java.lang.String,java.lang.String)>("name", $r4);
+
+        $z0 = virtualinvoke $r2.<org.gnucash.android.model.Book: boolean isActive()>();
+
+        if $z0 == 0 goto label2;
+
+        $b0 = 1;
+
+     label1:
+        $r6 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($b0);
+
+        virtualinvoke r3.<android.content.ContentValues: void put(java.lang.String,java.lang.Integer)>("is_active", $r6);
+
+        virtualinvoke $r1.<android.database.sqlite.SQLiteDatabase: long insert(java.lang.String,java.lang.String,android.content.ContentValues)>("books", null, r3);
+
+        return;
+
+     label2:
+        $b0 = 0;
+
+        goto label1;
+    }
+    private void migrateBackupFiles(java.lang.String)
+    {
+        org.gnucash.android.db.BookDbHelper r0;
+        java.lang.String $r1, $r6;
+        java.io.IOException r2;
+        java.io.File r3, r4, r7;
+        java.lang.StringBuilder $r5;
+        java.lang.Thread $r8;
+        org.gnucash.android.util.RecursiveMoveFiles $r9;
+
+        r0 := @this: org.gnucash.android.db.BookDbHelper;
+
+        $r1 := @parameter0: java.lang.String;
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("BookDbHelper", "Moving export and backup files to book-specific folders");
+
+        r4 = new java.io.File;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = <org.gnucash.android.export.Exporter: java.lang.String BASE_FOLDER_PATH>;
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("/");
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke r4.<java.io.File: void <init>(java.lang.String)>($r6);
+
+        virtualinvoke r4.<java.io.File: boolean mkdirs()>();
+
+        r3 = new java.io.File;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = <org.gnucash.android.export.Exporter: java.lang.String BASE_FOLDER_PATH>;
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("/backups/");
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke r3.<java.io.File: void <init>(java.lang.String)>($r6);
+
+        r7 = new java.io.File;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = <org.gnucash.android.export.Exporter: java.lang.String BASE_FOLDER_PATH>;
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("/");
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("/backups/");
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke r7.<java.io.File: void <init>(java.lang.String)>($r6);
+
+        $r8 = new java.lang.Thread;
+
+        $r9 = new org.gnucash.android.util.RecursiveMoveFiles;
+
+        specialinvoke $r9.<org.gnucash.android.util.RecursiveMoveFiles: void <init>(java.io.File,java.io.File)>(r3, r7);
+
+        specialinvoke $r8.<java.lang.Thread: void <init>(java.lang.Runnable)>($r9);
+
+        virtualinvoke $r8.<java.lang.Thread: void start()>();
+
+        r3 = new java.io.File;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = <org.gnucash.android.export.Exporter: java.lang.String BASE_FOLDER_PATH>;
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("/exports/");
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke r3.<java.io.File: void <init>(java.lang.String)>($r6);
+
+        r7 = new java.io.File;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = <org.gnucash.android.export.Exporter: java.lang.String BASE_FOLDER_PATH>;
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("/");
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("/exports/");
+
+        $r1 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke r7.<java.io.File: void <init>(java.lang.String)>($r1);
+
+        $r8 = new java.lang.Thread;
+
+        $r9 = new org.gnucash.android.util.RecursiveMoveFiles;
+
+        specialinvoke $r9.<org.gnucash.android.util.RecursiveMoveFiles: void <init>(java.io.File,java.io.File)>(r3, r7);
+
+        specialinvoke $r8.<java.lang.Thread: void <init>(java.lang.Runnable)>($r9);
+
+        virtualinvoke $r8.<java.lang.Thread: void start()>();
+
+        r3 = new java.io.File;
+
+        specialinvoke r3.<java.io.File: void <init>(java.io.File,java.lang.String)>(r4, "Book 1");
+
+     label1:
+        virtualinvoke r3.<java.io.File: boolean createNewFile()>();
+
+     label2:
+        return;
+
+     label3:
+        r2 := @caughtexception;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Error creating name file for the database: ");
+
+        $r1 = virtualinvoke r3.<java.io.File: java.lang.String getName()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r1 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String)>("BookDbHelper", $r1);
+
+        virtualinvoke r2.<java.io.IOException: void printStackTrace()>();
+
+        return;
+
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+    public void onCreate(android.database.sqlite.SQLiteDatabase)
+    {
+        org.gnucash.android.db.BookDbHelper r0;
+        android.database.sqlite.SQLiteDatabase $r1, $r8;
+        java.io.File r2, r4;
+        java.io.IOException r3;
+        java.lang.String $r5, $r13;
+        android.content.Context $r6;
+        boolean $z0;
+        org.gnucash.android.db.DatabaseHelper r7;
+        org.gnucash.android.db.adapter.AccountsDbAdapter r9;
+        org.gnucash.android.db.adapter.TransactionsDbAdapter $r10;
+        org.gnucash.android.db.adapter.SplitsDbAdapter $r11;
+        org.gnucash.android.model.Book r12;
+        android.database.sqlite.SQLiteStatement $r14;
+        long $l0;
+        byte $b1;
+
+        r0 := @this: org.gnucash.android.db.BookDbHelper;
+
+        $r1 := @parameter0: android.database.sqlite.SQLiteDatabase;
+
+        $r5 = <org.gnucash.android.db.BookDbHelper: java.lang.String BOOKS_TABLE_CREATE>;
+
+        virtualinvoke $r1.<android.database.sqlite.SQLiteDatabase: void execSQL(java.lang.String)>($r5);
+
+        $r6 = r0.<org.gnucash.android.db.BookDbHelper: android.content.Context mContext>;
+
+        r2 = virtualinvoke $r6.<android.content.Context: java.io.File getDatabasePath(java.lang.String)>("gnucash_db");
+
+        $z0 = virtualinvoke r2.<java.io.File: boolean exists()>();
+
+        if $z0 == 0 goto label3;
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("BookDbHelper", "Legacy database found. Migrating to multibook format");
+
+        r7 = new org.gnucash.android.db.DatabaseHelper;
+
+        $r6 = staticinvoke <org.gnucash.android.app.GnuCashApplication: android.content.Context getAppContext()>();
+
+        specialinvoke r7.<org.gnucash.android.db.DatabaseHelper: void <init>(android.content.Context,java.lang.String)>($r6, "gnucash_db");
+
+        $r8 = virtualinvoke r7.<org.gnucash.android.db.DatabaseHelper: android.database.sqlite.SQLiteDatabase getWritableDatabase()>();
+
+        r9 = new org.gnucash.android.db.adapter.AccountsDbAdapter;
+
+        $r10 = new org.gnucash.android.db.adapter.TransactionsDbAdapter;
+
+        $r11 = new org.gnucash.android.db.adapter.SplitsDbAdapter;
+
+        specialinvoke $r11.<org.gnucash.android.db.adapter.SplitsDbAdapter: void <init>(android.database.sqlite.SQLiteDatabase)>($r8);
+
+        specialinvoke $r10.<org.gnucash.android.db.adapter.TransactionsDbAdapter: void <init>(android.database.sqlite.SQLiteDatabase,org.gnucash.android.db.adapter.SplitsDbAdapter)>($r8, $r11);
+
+        specialinvoke r9.<org.gnucash.android.db.adapter.AccountsDbAdapter: void <init>(android.database.sqlite.SQLiteDatabase,org.gnucash.android.db.adapter.TransactionsDbAdapter)>($r8, $r10);
+
+        $r5 = virtualinvoke r9.<org.gnucash.android.db.adapter.AccountsDbAdapter: java.lang.String getOrCreateGnuCashRootAccountUID()>();
+
+        r12 = new org.gnucash.android.model.Book;
+
+        specialinvoke r12.<org.gnucash.android.model.Book: void <init>(java.lang.String)>($r5);
+
+        virtualinvoke r12.<org.gnucash.android.model.Book: void setActive(boolean)>(1);
+
+        specialinvoke r0.<org.gnucash.android.db.BookDbHelper: void insertBook(android.database.sqlite.SQLiteDatabase,org.gnucash.android.model.Book)>($r1, r12);
+
+        $r5 = virtualinvoke $r8.<android.database.sqlite.SQLiteDatabase: java.lang.String getPath()>();
+
+        virtualinvoke r7.<org.gnucash.android.db.DatabaseHelper: void close()>();
+
+        r4 = new java.io.File;
+
+        specialinvoke r4.<java.io.File: void <init>(java.lang.String)>($r5);
+
+        r2 = new java.io.File;
+
+        $r5 = virtualinvoke r4.<java.io.File: java.lang.String getParent()>();
+
+        $r13 = virtualinvoke r12.<org.gnucash.android.model.Book: java.lang.String getUID()>();
+
+        specialinvoke r2.<java.io.File: void <init>(java.lang.String,java.lang.String)>($r5, $r13);
+
+     label1:
+        staticinvoke <org.gnucash.android.db.MigrationHelper: void moveFile(java.io.File,java.io.File)>(r4, r2);
+
+     label2:
+        $r5 = virtualinvoke r12.<org.gnucash.android.model.Book: java.lang.String getUID()>();
+
+        specialinvoke r0.<org.gnucash.android.db.BookDbHelper: void migrateBackupFiles(java.lang.String)>($r5);
+
+     label3:
+        $r14 = virtualinvoke $r1.<android.database.sqlite.SQLiteDatabase: android.database.sqlite.SQLiteStatement compileStatement(java.lang.String)>("SELECT COUNT(*) FROM books");
+
+        $l0 = virtualinvoke $r14.<android.database.sqlite.SQLiteStatement: long simpleQueryForLong()>();
+
+        $b1 = $l0 cmp 0L;
+
+        if $b1 != 0 goto label5;
+
+        staticinvoke <android.util.Log: int i(java.lang.String,java.lang.String)>("BookDbHelper", "No books found in database, creating default book");
+
+        r12 = new org.gnucash.android.model.Book;
+
+        specialinvoke r12.<org.gnucash.android.model.Book: void <init>()>();
+
+        r7 = new org.gnucash.android.db.DatabaseHelper;
+
+        $r6 = staticinvoke <org.gnucash.android.app.GnuCashApplication: android.content.Context getAppContext()>();
+
+        $r5 = virtualinvoke r12.<org.gnucash.android.model.Book: java.lang.String getUID()>();
+
+        specialinvoke r7.<org.gnucash.android.db.DatabaseHelper: void <init>(android.content.Context,java.lang.String)>($r6, $r5);
+
+        $r8 = virtualinvoke r7.<org.gnucash.android.db.DatabaseHelper: android.database.sqlite.SQLiteDatabase getWritableDatabase()>();
+
+        r9 = new org.gnucash.android.db.adapter.AccountsDbAdapter;
+
+        $r10 = new org.gnucash.android.db.adapter.TransactionsDbAdapter;
+
+        $r11 = new org.gnucash.android.db.adapter.SplitsDbAdapter;
+
+        specialinvoke $r11.<org.gnucash.android.db.adapter.SplitsDbAdapter: void <init>(android.database.sqlite.SQLiteDatabase)>($r8);
+
+        specialinvoke $r10.<org.gnucash.android.db.adapter.TransactionsDbAdapter: void <init>(android.database.sqlite.SQLiteDatabase,org.gnucash.android.db.adapter.SplitsDbAdapter)>($r8, $r11);
+
+        specialinvoke r9.<org.gnucash.android.db.adapter.AccountsDbAdapter: void <init>(android.database.sqlite.SQLiteDatabase,org.gnucash.android.db.adapter.TransactionsDbAdapter)>($r8, $r10);
+
+        $r5 = virtualinvoke r9.<org.gnucash.android.db.adapter.AccountsDbAdapter: java.lang.String getOrCreateGnuCashRootAccountUID()>();
+
+        virtualinvoke r12.<org.gnucash.android.model.Book: void setRootAccountUID(java.lang.String)>($r5);
+
+        virtualinvoke r12.<org.gnucash.android.model.Book: void setActive(boolean)>(1);
+
+        specialinvoke r0.<org.gnucash.android.db.BookDbHelper: void insertBook(android.database.sqlite.SQLiteDatabase,org.gnucash.android.model.Book)>($r1, r12);
+
+        return;
+
+     label4:
+        r3 := @caughtexception;
+
+        staticinvoke <com.crashlytics.android.Crashlytics: void log(java.lang.String)>("Error renaming database file");
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String,java.lang.Throwable)>("BookDbHelper", "Error renaming database file", r3);
+
+        goto label2;
+
+     label5:
+        return;
+
+        catch java.io.IOException from label1 to label2 with label4;
+    }
+    public void onUpgrade(android.database.sqlite.SQLiteDatabase, int, int)
+    {
+        org.gnucash.android.db.BookDbHelper r0;
+        android.database.sqlite.SQLiteDatabase $r1;
+        int $i0, $i1;
+
+        r0 := @this: org.gnucash.android.db.BookDbHelper;
+
+        $r1 := @parameter0: android.database.sqlite.SQLiteDatabase;
+
+        $i0 := @parameter1: int;
+
+        $i1 := @parameter2: int;
+
+        return;
+    }

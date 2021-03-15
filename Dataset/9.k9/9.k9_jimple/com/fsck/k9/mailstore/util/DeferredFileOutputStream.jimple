@@ -1,0 +1,177 @@
+com.fsck.k9.mailstore.util.DeferredFileOutputStream extends org.apache.commons.io.output.ThresholdingOutputStream
+private java.io.OutputStream currentOutputStream
+private final com.fsck.k9.mailstore.util.FileFactory fileFactory
+private java.io.File outputFile
+    public void <init>(int, com.fsck.k9.mailstore.util.FileFactory)
+    {
+        com.fsck.k9.mailstore.util.DeferredFileOutputStream r0;
+        int $i0;
+        com.fsck.k9.mailstore.util.FileFactory $r1;
+        java.io.ByteArrayOutputStream $r2;
+
+        r0 := @this: com.fsck.k9.mailstore.util.DeferredFileOutputStream;
+
+        $i0 := @parameter0: int;
+
+        $r1 := @parameter1: com.fsck.k9.mailstore.util.FileFactory;
+
+        specialinvoke r0.<org.apache.commons.io.output.ThresholdingOutputStream: void <init>(int)>($i0);
+
+        r0.<com.fsck.k9.mailstore.util.DeferredFileOutputStream: com.fsck.k9.mailstore.util.FileFactory fileFactory> = $r1;
+
+        if $i0 >= 1024 goto label2;
+
+        $i0 = 256;
+
+     label1:
+        $r2 = new java.io.ByteArrayOutputStream;
+
+        specialinvoke $r2.<java.io.ByteArrayOutputStream: void <init>(int)>($i0);
+
+        r0.<com.fsck.k9.mailstore.util.DeferredFileOutputStream: java.io.OutputStream currentOutputStream> = $r2;
+
+        return;
+
+     label2:
+        $i0 = $i0 / 4;
+
+        goto label1;
+    }
+    private boolean isMemoryBacked()
+    {
+        com.fsck.k9.mailstore.util.DeferredFileOutputStream r0;
+        java.io.OutputStream $r1;
+        boolean $z0;
+
+        r0 := @this: com.fsck.k9.mailstore.util.DeferredFileOutputStream;
+
+        $r1 = r0.<com.fsck.k9.mailstore.util.DeferredFileOutputStream: java.io.OutputStream currentOutputStream>;
+
+        $z0 = $r1 instanceof java.io.ByteArrayOutputStream;
+
+        return $z0;
+    }
+    public byte[] getData()
+    {
+        com.fsck.k9.mailstore.util.DeferredFileOutputStream r0;
+        boolean $z0;
+        java.lang.IllegalStateException $r1;
+        java.io.OutputStream $r2;
+        java.io.ByteArrayOutputStream $r3;
+        byte[] $r4;
+
+        r0 := @this: com.fsck.k9.mailstore.util.DeferredFileOutputStream;
+
+        $z0 = specialinvoke r0.<com.fsck.k9.mailstore.util.DeferredFileOutputStream: boolean isMemoryBacked()>();
+
+        if $z0 != 0 goto label1;
+
+        $r1 = new java.lang.IllegalStateException;
+
+        specialinvoke $r1.<java.lang.IllegalStateException: void <init>(java.lang.String)>("getData must only be called in memory-backed state!");
+
+        throw $r1;
+
+     label1:
+        $r2 = r0.<com.fsck.k9.mailstore.util.DeferredFileOutputStream: java.io.OutputStream currentOutputStream>;
+
+        $r3 = (java.io.ByteArrayOutputStream) $r2;
+
+        $r4 = virtualinvoke $r3.<java.io.ByteArrayOutputStream: byte[] toByteArray()>();
+
+        return $r4;
+    }
+    public java.io.File getFile()
+    {
+        com.fsck.k9.mailstore.util.DeferredFileOutputStream r0;
+        boolean $z0;
+        java.lang.IllegalStateException $r1;
+        java.io.File r2;
+
+        r0 := @this: com.fsck.k9.mailstore.util.DeferredFileOutputStream;
+
+        $z0 = specialinvoke r0.<com.fsck.k9.mailstore.util.DeferredFileOutputStream: boolean isMemoryBacked()>();
+
+        if $z0 == 0 goto label1;
+
+        $r1 = new java.lang.IllegalStateException;
+
+        specialinvoke $r1.<java.lang.IllegalStateException: void <init>(java.lang.String)>("getFile must only be called in file-backed state!");
+
+        throw $r1;
+
+     label1:
+        r2 = r0.<com.fsck.k9.mailstore.util.DeferredFileOutputStream: java.io.File outputFile>;
+
+        return r2;
+    }
+    protected java.io.OutputStream getStream() throws java.io.IOException
+    {
+        com.fsck.k9.mailstore.util.DeferredFileOutputStream r0;
+        java.io.OutputStream r1;
+
+        r0 := @this: com.fsck.k9.mailstore.util.DeferredFileOutputStream;
+
+        r1 = r0.<com.fsck.k9.mailstore.util.DeferredFileOutputStream: java.io.OutputStream currentOutputStream>;
+
+        return r1;
+    }
+    protected void thresholdReached() throws java.io.IOException
+    {
+        com.fsck.k9.mailstore.util.DeferredFileOutputStream r0;
+        java.io.File $r1;
+        java.lang.IllegalStateException $r2;
+        boolean $z0;
+        java.io.OutputStream r3;
+        java.io.ByteArrayOutputStream r4;
+        com.fsck.k9.mailstore.util.FileFactory $r5;
+        java.io.FileOutputStream $r6;
+
+        r0 := @this: com.fsck.k9.mailstore.util.DeferredFileOutputStream;
+
+        $r1 = r0.<com.fsck.k9.mailstore.util.DeferredFileOutputStream: java.io.File outputFile>;
+
+        if $r1 == null goto label1;
+
+        $r2 = new java.lang.IllegalStateException;
+
+        specialinvoke $r2.<java.lang.IllegalStateException: void <init>(java.lang.String)>("thresholdReached must not be called if we already have an output file!");
+
+        throw $r2;
+
+     label1:
+        $z0 = specialinvoke r0.<com.fsck.k9.mailstore.util.DeferredFileOutputStream: boolean isMemoryBacked()>();
+
+        if $z0 != 0 goto label2;
+
+        $r2 = new java.lang.IllegalStateException;
+
+        specialinvoke $r2.<java.lang.IllegalStateException: void <init>(java.lang.String)>("currentOutputStream must be memory-based at this point!");
+
+        throw $r2;
+
+     label2:
+        r3 = r0.<com.fsck.k9.mailstore.util.DeferredFileOutputStream: java.io.OutputStream currentOutputStream>;
+
+        r4 = (java.io.ByteArrayOutputStream) r3;
+
+        $r5 = r0.<com.fsck.k9.mailstore.util.DeferredFileOutputStream: com.fsck.k9.mailstore.util.FileFactory fileFactory>;
+
+        $r1 = interfaceinvoke $r5.<com.fsck.k9.mailstore.util.FileFactory: java.io.File createFile()>();
+
+        r0.<com.fsck.k9.mailstore.util.DeferredFileOutputStream: java.io.File outputFile> = $r1;
+
+        $r6 = new java.io.FileOutputStream;
+
+        $r1 = r0.<com.fsck.k9.mailstore.util.DeferredFileOutputStream: java.io.File outputFile>;
+
+        specialinvoke $r6.<java.io.FileOutputStream: void <init>(java.io.File)>($r1);
+
+        r0.<com.fsck.k9.mailstore.util.DeferredFileOutputStream: java.io.OutputStream currentOutputStream> = $r6;
+
+        r3 = r0.<com.fsck.k9.mailstore.util.DeferredFileOutputStream: java.io.OutputStream currentOutputStream>;
+
+        virtualinvoke r4.<java.io.ByteArrayOutputStream: void writeTo(java.io.OutputStream)>(r3);
+
+        return;
+    }

@@ -1,0 +1,989 @@
+javax.jmdns.impl.DNSStatefulObject$DefaultImplementation extends java.util.concurrent.locks.ReentrantLock implements javax.jmdns.impl.DNSStatefulObject
+private static java.util.logging.Logger logger
+private final javax.jmdns.impl.DNSStatefulObject$DNSStatefulObjectSemaphore _announcing
+private final javax.jmdns.impl.DNSStatefulObject$DNSStatefulObjectSemaphore _canceling
+private volatile javax.jmdns.impl.JmDNSImpl _dns
+protected volatile javax.jmdns.impl.constants.DNSState _state
+protected volatile javax.jmdns.impl.tasks.DNSTask _task
+    static void <clinit>()
+    {
+        java.lang.Class $r0;
+        java.lang.String $r1;
+        java.util.logging.Logger $r2;
+
+        $r0 = class "Ljavax/jmdns/impl/DNSStatefulObject$DefaultImplementation;";
+
+        $r1 = virtualinvoke $r0.<java.lang.Class: java.lang.String getName()>();
+
+        $r2 = staticinvoke <java.util.logging.Logger: java.util.logging.Logger getLogger(java.lang.String)>($r1);
+
+        <javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: java.util.logging.Logger logger> = $r2;
+
+        return;
+    }
+    public void <init>()
+    {
+        javax.jmdns.impl.DNSStatefulObject$DefaultImplementation r0;
+        javax.jmdns.impl.constants.DNSState $r1;
+        javax.jmdns.impl.DNSStatefulObject$DNSStatefulObjectSemaphore $r2;
+
+        r0 := @this: javax.jmdns.impl.DNSStatefulObject$DefaultImplementation;
+
+        specialinvoke r0.<java.util.concurrent.locks.ReentrantLock: void <init>()>();
+
+        r0.<javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: javax.jmdns.impl.JmDNSImpl _dns> = null;
+
+        r0.<javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: javax.jmdns.impl.tasks.DNSTask _task> = null;
+
+        $r1 = <javax.jmdns.impl.constants.DNSState: javax.jmdns.impl.constants.DNSState PROBING_1>;
+
+        r0.<javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: javax.jmdns.impl.constants.DNSState _state> = $r1;
+
+        $r2 = new javax.jmdns.impl.DNSStatefulObject$DNSStatefulObjectSemaphore;
+
+        specialinvoke $r2.<javax.jmdns.impl.DNSStatefulObject$DNSStatefulObjectSemaphore: void <init>(java.lang.String)>("Announce");
+
+        r0.<javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: javax.jmdns.impl.DNSStatefulObject$DNSStatefulObjectSemaphore _announcing> = $r2;
+
+        $r2 = new javax.jmdns.impl.DNSStatefulObject$DNSStatefulObjectSemaphore;
+
+        specialinvoke $r2.<javax.jmdns.impl.DNSStatefulObject$DNSStatefulObjectSemaphore: void <init>(java.lang.String)>("Cancel");
+
+        r0.<javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: javax.jmdns.impl.DNSStatefulObject$DNSStatefulObjectSemaphore _canceling> = $r2;
+
+        return;
+    }
+    private boolean willCancel()
+    {
+        javax.jmdns.impl.DNSStatefulObject$DefaultImplementation r0;
+        javax.jmdns.impl.constants.DNSState $r1;
+        boolean $z0;
+
+        r0 := @this: javax.jmdns.impl.DNSStatefulObject$DefaultImplementation;
+
+        $r1 = r0.<javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: javax.jmdns.impl.constants.DNSState _state>;
+
+        $z0 = virtualinvoke $r1.<javax.jmdns.impl.constants.DNSState: boolean isCanceled()>();
+
+        if $z0 != 0 goto label1;
+
+        $r1 = r0.<javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: javax.jmdns.impl.constants.DNSState _state>;
+
+        $z0 = virtualinvoke $r1.<javax.jmdns.impl.constants.DNSState: boolean isCanceling()>();
+
+        if $z0 == 0 goto label2;
+
+     label1:
+        return 1;
+
+     label2:
+        return 0;
+    }
+    private boolean willClose()
+    {
+        javax.jmdns.impl.DNSStatefulObject$DefaultImplementation r0;
+        javax.jmdns.impl.constants.DNSState $r1;
+        boolean $z0;
+
+        r0 := @this: javax.jmdns.impl.DNSStatefulObject$DefaultImplementation;
+
+        $r1 = r0.<javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: javax.jmdns.impl.constants.DNSState _state>;
+
+        $z0 = virtualinvoke $r1.<javax.jmdns.impl.constants.DNSState: boolean isClosed()>();
+
+        if $z0 != 0 goto label1;
+
+        $r1 = r0.<javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: javax.jmdns.impl.constants.DNSState _state>;
+
+        $z0 = virtualinvoke $r1.<javax.jmdns.impl.constants.DNSState: boolean isClosing()>();
+
+        if $z0 == 0 goto label2;
+
+     label1:
+        return 1;
+
+     label2:
+        return 0;
+    }
+    public boolean advanceState(javax.jmdns.impl.tasks.DNSTask)
+    {
+        javax.jmdns.impl.DNSStatefulObject$DefaultImplementation r0;
+        javax.jmdns.impl.tasks.DNSTask $r1, $r2;
+        javax.jmdns.impl.constants.DNSState $r3;
+        java.util.logging.Logger $r4;
+        java.lang.StringBuilder $r5;
+        java.lang.String $r6;
+        java.lang.Throwable $r7;
+
+        r0 := @this: javax.jmdns.impl.DNSStatefulObject$DefaultImplementation;
+
+        $r1 := @parameter0: javax.jmdns.impl.tasks.DNSTask;
+
+        $r2 = r0.<javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: javax.jmdns.impl.tasks.DNSTask _task>;
+
+        if $r2 != $r1 goto label8;
+
+        virtualinvoke r0.<javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: void lock()>();
+
+     label1:
+        $r2 = r0.<javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: javax.jmdns.impl.tasks.DNSTask _task>;
+
+     label2:
+        if $r2 != $r1 goto label5;
+
+     label3:
+        $r3 = r0.<javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: javax.jmdns.impl.constants.DNSState _state>;
+
+        $r3 = virtualinvoke $r3.<javax.jmdns.impl.constants.DNSState: javax.jmdns.impl.constants.DNSState advance()>();
+
+        virtualinvoke r0.<javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: void setState(javax.jmdns.impl.constants.DNSState)>($r3);
+
+     label4:
+        virtualinvoke r0.<javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: void unlock()>();
+
+        return 1;
+
+     label5:
+        $r4 = <javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: java.util.logging.Logger logger>;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Trying to advance state whhen not the owner. owner: ");
+
+        $r2 = r0.<javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: javax.jmdns.impl.tasks.DNSTask _task>;
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r2);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" perpetrator: ");
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r1);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r4.<java.util.logging.Logger: void warning(java.lang.String)>($r6);
+
+     label6:
+        goto label4;
+
+     label7:
+        $r7 := @caughtexception;
+
+        virtualinvoke r0.<javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: void unlock()>();
+
+        throw $r7;
+
+     label8:
+        return 1;
+
+        catch java.lang.Throwable from label1 to label2 with label7;
+        catch java.lang.Throwable from label3 to label4 with label7;
+        catch java.lang.Throwable from label5 to label6 with label7;
+    }
+    public void associateWithTask(javax.jmdns.impl.tasks.DNSTask, javax.jmdns.impl.constants.DNSState)
+    {
+        javax.jmdns.impl.DNSStatefulObject$DefaultImplementation r0;
+        javax.jmdns.impl.tasks.DNSTask $r1, $r3;
+        javax.jmdns.impl.constants.DNSState $r2, $r4;
+        java.lang.Throwable $r5;
+
+        r0 := @this: javax.jmdns.impl.DNSStatefulObject$DefaultImplementation;
+
+        $r1 := @parameter0: javax.jmdns.impl.tasks.DNSTask;
+
+        $r2 := @parameter1: javax.jmdns.impl.constants.DNSState;
+
+        $r3 = r0.<javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: javax.jmdns.impl.tasks.DNSTask _task>;
+
+        if $r3 != null goto label8;
+
+        $r4 = r0.<javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: javax.jmdns.impl.constants.DNSState _state>;
+
+        if $r4 != $r2 goto label8;
+
+        virtualinvoke r0.<javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: void lock()>();
+
+     label1:
+        $r3 = r0.<javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: javax.jmdns.impl.tasks.DNSTask _task>;
+
+     label2:
+        if $r3 != null goto label6;
+
+     label3:
+        $r4 = r0.<javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: javax.jmdns.impl.constants.DNSState _state>;
+
+     label4:
+        if $r4 != $r2 goto label6;
+
+     label5:
+        virtualinvoke r0.<javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: void setTask(javax.jmdns.impl.tasks.DNSTask)>($r1);
+
+     label6:
+        virtualinvoke r0.<javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: void unlock()>();
+
+        return;
+
+     label7:
+        $r5 := @caughtexception;
+
+        virtualinvoke r0.<javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: void unlock()>();
+
+        throw $r5;
+
+     label8:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label7;
+        catch java.lang.Throwable from label3 to label4 with label7;
+        catch java.lang.Throwable from label5 to label6 with label7;
+    }
+    public boolean cancelState()
+    {
+        javax.jmdns.impl.DNSStatefulObject$DefaultImplementation r0;
+        boolean z0, $z1;
+        javax.jmdns.impl.constants.DNSState $r1;
+        java.lang.Throwable $r2;
+
+        r0 := @this: javax.jmdns.impl.DNSStatefulObject$DefaultImplementation;
+
+        z0 = 0;
+
+        $z1 = specialinvoke r0.<javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: boolean willCancel()>();
+
+        if $z1 != 0 goto label7;
+
+        virtualinvoke r0.<javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: void lock()>();
+
+     label1:
+        $z1 = specialinvoke r0.<javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: boolean willCancel()>();
+
+     label2:
+        if $z1 != 0 goto label5;
+
+     label3:
+        $r1 = <javax.jmdns.impl.constants.DNSState: javax.jmdns.impl.constants.DNSState CANCELING_1>;
+
+        virtualinvoke r0.<javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: void setState(javax.jmdns.impl.constants.DNSState)>($r1);
+
+        virtualinvoke r0.<javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: void setTask(javax.jmdns.impl.tasks.DNSTask)>(null);
+
+     label4:
+        z0 = 1;
+
+     label5:
+        virtualinvoke r0.<javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: void unlock()>();
+
+        return z0;
+
+     label6:
+        $r2 := @caughtexception;
+
+        virtualinvoke r0.<javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: void unlock()>();
+
+        throw $r2;
+
+     label7:
+        return 0;
+
+        catch java.lang.Throwable from label1 to label2 with label6;
+        catch java.lang.Throwable from label3 to label4 with label6;
+    }
+    public boolean closeState()
+    {
+        javax.jmdns.impl.DNSStatefulObject$DefaultImplementation r0;
+        boolean z0, $z1;
+        javax.jmdns.impl.constants.DNSState $r1;
+        java.lang.Throwable $r2;
+
+        r0 := @this: javax.jmdns.impl.DNSStatefulObject$DefaultImplementation;
+
+        z0 = 0;
+
+        $z1 = specialinvoke r0.<javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: boolean willClose()>();
+
+        if $z1 != 0 goto label7;
+
+        virtualinvoke r0.<javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: void lock()>();
+
+     label1:
+        $z1 = specialinvoke r0.<javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: boolean willClose()>();
+
+     label2:
+        if $z1 != 0 goto label5;
+
+     label3:
+        $r1 = <javax.jmdns.impl.constants.DNSState: javax.jmdns.impl.constants.DNSState CLOSING>;
+
+        virtualinvoke r0.<javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: void setState(javax.jmdns.impl.constants.DNSState)>($r1);
+
+        virtualinvoke r0.<javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: void setTask(javax.jmdns.impl.tasks.DNSTask)>(null);
+
+     label4:
+        z0 = 1;
+
+     label5:
+        virtualinvoke r0.<javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: void unlock()>();
+
+        return z0;
+
+     label6:
+        $r2 := @caughtexception;
+
+        virtualinvoke r0.<javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: void unlock()>();
+
+        throw $r2;
+
+     label7:
+        return 0;
+
+        catch java.lang.Throwable from label1 to label2 with label6;
+        catch java.lang.Throwable from label3 to label4 with label6;
+    }
+    public javax.jmdns.impl.JmDNSImpl getDns()
+    {
+        javax.jmdns.impl.DNSStatefulObject$DefaultImplementation r0;
+        javax.jmdns.impl.JmDNSImpl r1;
+
+        r0 := @this: javax.jmdns.impl.DNSStatefulObject$DefaultImplementation;
+
+        r1 = r0.<javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: javax.jmdns.impl.JmDNSImpl _dns>;
+
+        return r1;
+    }
+    public boolean isAnnounced()
+    {
+        javax.jmdns.impl.DNSStatefulObject$DefaultImplementation r0;
+        boolean $z0;
+        javax.jmdns.impl.constants.DNSState $r1;
+
+        r0 := @this: javax.jmdns.impl.DNSStatefulObject$DefaultImplementation;
+
+        $r1 = r0.<javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: javax.jmdns.impl.constants.DNSState _state>;
+
+        $z0 = virtualinvoke $r1.<javax.jmdns.impl.constants.DNSState: boolean isAnnounced()>();
+
+        return $z0;
+    }
+    public boolean isAnnouncing()
+    {
+        javax.jmdns.impl.DNSStatefulObject$DefaultImplementation r0;
+        boolean $z0;
+        javax.jmdns.impl.constants.DNSState $r1;
+
+        r0 := @this: javax.jmdns.impl.DNSStatefulObject$DefaultImplementation;
+
+        $r1 = r0.<javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: javax.jmdns.impl.constants.DNSState _state>;
+
+        $z0 = virtualinvoke $r1.<javax.jmdns.impl.constants.DNSState: boolean isAnnouncing()>();
+
+        return $z0;
+    }
+    public boolean isAssociatedWithTask(javax.jmdns.impl.tasks.DNSTask, javax.jmdns.impl.constants.DNSState)
+    {
+        javax.jmdns.impl.DNSStatefulObject$DefaultImplementation r0;
+        javax.jmdns.impl.tasks.DNSTask $r1, $r3;
+        javax.jmdns.impl.constants.DNSState $r2, $r4;
+        boolean $z0;
+        java.lang.Throwable $r5;
+
+        r0 := @this: javax.jmdns.impl.DNSStatefulObject$DefaultImplementation;
+
+        $r1 := @parameter0: javax.jmdns.impl.tasks.DNSTask;
+
+        $r2 := @parameter1: javax.jmdns.impl.constants.DNSState;
+
+        virtualinvoke r0.<javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: void lock()>();
+
+     label1:
+        $r3 = r0.<javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: javax.jmdns.impl.tasks.DNSTask _task>;
+
+     label2:
+        if $r3 != $r1 goto label6;
+
+     label3:
+        $r4 = r0.<javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: javax.jmdns.impl.constants.DNSState _state>;
+
+     label4:
+        if $r4 != $r2 goto label6;
+
+        $z0 = 1;
+
+     label5:
+        virtualinvoke r0.<javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: void unlock()>();
+
+        return $z0;
+
+     label6:
+        $z0 = 0;
+
+        goto label5;
+
+     label7:
+        $r5 := @caughtexception;
+
+        virtualinvoke r0.<javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: void unlock()>();
+
+        throw $r5;
+
+        catch java.lang.Throwable from label1 to label2 with label7;
+        catch java.lang.Throwable from label3 to label4 with label7;
+    }
+    public boolean isCanceled()
+    {
+        javax.jmdns.impl.DNSStatefulObject$DefaultImplementation r0;
+        boolean $z0;
+        javax.jmdns.impl.constants.DNSState $r1;
+
+        r0 := @this: javax.jmdns.impl.DNSStatefulObject$DefaultImplementation;
+
+        $r1 = r0.<javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: javax.jmdns.impl.constants.DNSState _state>;
+
+        $z0 = virtualinvoke $r1.<javax.jmdns.impl.constants.DNSState: boolean isCanceled()>();
+
+        return $z0;
+    }
+    public boolean isCanceling()
+    {
+        javax.jmdns.impl.DNSStatefulObject$DefaultImplementation r0;
+        boolean $z0;
+        javax.jmdns.impl.constants.DNSState $r1;
+
+        r0 := @this: javax.jmdns.impl.DNSStatefulObject$DefaultImplementation;
+
+        $r1 = r0.<javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: javax.jmdns.impl.constants.DNSState _state>;
+
+        $z0 = virtualinvoke $r1.<javax.jmdns.impl.constants.DNSState: boolean isCanceling()>();
+
+        return $z0;
+    }
+    public boolean isClosed()
+    {
+        javax.jmdns.impl.DNSStatefulObject$DefaultImplementation r0;
+        boolean $z0;
+        javax.jmdns.impl.constants.DNSState $r1;
+
+        r0 := @this: javax.jmdns.impl.DNSStatefulObject$DefaultImplementation;
+
+        $r1 = r0.<javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: javax.jmdns.impl.constants.DNSState _state>;
+
+        $z0 = virtualinvoke $r1.<javax.jmdns.impl.constants.DNSState: boolean isClosed()>();
+
+        return $z0;
+    }
+    public boolean isClosing()
+    {
+        javax.jmdns.impl.DNSStatefulObject$DefaultImplementation r0;
+        boolean $z0;
+        javax.jmdns.impl.constants.DNSState $r1;
+
+        r0 := @this: javax.jmdns.impl.DNSStatefulObject$DefaultImplementation;
+
+        $r1 = r0.<javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: javax.jmdns.impl.constants.DNSState _state>;
+
+        $z0 = virtualinvoke $r1.<javax.jmdns.impl.constants.DNSState: boolean isClosing()>();
+
+        return $z0;
+    }
+    public boolean isProbing()
+    {
+        javax.jmdns.impl.DNSStatefulObject$DefaultImplementation r0;
+        boolean $z0;
+        javax.jmdns.impl.constants.DNSState $r1;
+
+        r0 := @this: javax.jmdns.impl.DNSStatefulObject$DefaultImplementation;
+
+        $r1 = r0.<javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: javax.jmdns.impl.constants.DNSState _state>;
+
+        $z0 = virtualinvoke $r1.<javax.jmdns.impl.constants.DNSState: boolean isProbing()>();
+
+        return $z0;
+    }
+    public boolean recoverState()
+    {
+        javax.jmdns.impl.DNSStatefulObject$DefaultImplementation r0;
+        javax.jmdns.impl.constants.DNSState $r1;
+        java.lang.Throwable $r2;
+
+        r0 := @this: javax.jmdns.impl.DNSStatefulObject$DefaultImplementation;
+
+        virtualinvoke r0.<javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: void lock()>();
+
+     label1:
+        $r1 = <javax.jmdns.impl.constants.DNSState: javax.jmdns.impl.constants.DNSState PROBING_1>;
+
+        virtualinvoke r0.<javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: void setState(javax.jmdns.impl.constants.DNSState)>($r1);
+
+        virtualinvoke r0.<javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: void setTask(javax.jmdns.impl.tasks.DNSTask)>(null);
+
+     label2:
+        virtualinvoke r0.<javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: void unlock()>();
+
+        return 0;
+
+     label3:
+        $r2 := @caughtexception;
+
+        virtualinvoke r0.<javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: void unlock()>();
+
+        throw $r2;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+    public void removeAssociationWithTask(javax.jmdns.impl.tasks.DNSTask)
+    {
+        javax.jmdns.impl.DNSStatefulObject$DefaultImplementation r0;
+        javax.jmdns.impl.tasks.DNSTask $r1, $r2;
+        java.lang.Throwable $r3;
+
+        r0 := @this: javax.jmdns.impl.DNSStatefulObject$DefaultImplementation;
+
+        $r1 := @parameter0: javax.jmdns.impl.tasks.DNSTask;
+
+        $r2 = r0.<javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: javax.jmdns.impl.tasks.DNSTask _task>;
+
+        if $r2 != $r1 goto label6;
+
+        virtualinvoke r0.<javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: void lock()>();
+
+     label1:
+        $r2 = r0.<javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: javax.jmdns.impl.tasks.DNSTask _task>;
+
+     label2:
+        if $r2 != $r1 goto label4;
+
+     label3:
+        virtualinvoke r0.<javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: void setTask(javax.jmdns.impl.tasks.DNSTask)>(null);
+
+     label4:
+        virtualinvoke r0.<javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: void unlock()>();
+
+        return;
+
+     label5:
+        $r3 := @caughtexception;
+
+        virtualinvoke r0.<javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: void unlock()>();
+
+        throw $r3;
+
+     label6:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label5;
+        catch java.lang.Throwable from label3 to label4 with label5;
+    }
+    public boolean revertState()
+    {
+        javax.jmdns.impl.DNSStatefulObject$DefaultImplementation r0;
+        boolean $z0;
+        javax.jmdns.impl.constants.DNSState $r1;
+        java.lang.Throwable $r2;
+
+        r0 := @this: javax.jmdns.impl.DNSStatefulObject$DefaultImplementation;
+
+        $z0 = specialinvoke r0.<javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: boolean willCancel()>();
+
+        if $z0 != 0 goto label6;
+
+        virtualinvoke r0.<javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: void lock()>();
+
+     label1:
+        $z0 = specialinvoke r0.<javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: boolean willCancel()>();
+
+     label2:
+        if $z0 != 0 goto label4;
+
+     label3:
+        $r1 = r0.<javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: javax.jmdns.impl.constants.DNSState _state>;
+
+        $r1 = virtualinvoke $r1.<javax.jmdns.impl.constants.DNSState: javax.jmdns.impl.constants.DNSState revert()>();
+
+        virtualinvoke r0.<javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: void setState(javax.jmdns.impl.constants.DNSState)>($r1);
+
+        virtualinvoke r0.<javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: void setTask(javax.jmdns.impl.tasks.DNSTask)>(null);
+
+     label4:
+        virtualinvoke r0.<javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: void unlock()>();
+
+        return 1;
+
+     label5:
+        $r2 := @caughtexception;
+
+        virtualinvoke r0.<javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: void unlock()>();
+
+        throw $r2;
+
+     label6:
+        return 1;
+
+        catch java.lang.Throwable from label1 to label2 with label5;
+        catch java.lang.Throwable from label3 to label4 with label5;
+    }
+    protected void setDns(javax.jmdns.impl.JmDNSImpl)
+    {
+        javax.jmdns.impl.DNSStatefulObject$DefaultImplementation r0;
+        javax.jmdns.impl.JmDNSImpl $r1;
+
+        r0 := @this: javax.jmdns.impl.DNSStatefulObject$DefaultImplementation;
+
+        $r1 := @parameter0: javax.jmdns.impl.JmDNSImpl;
+
+        r0.<javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: javax.jmdns.impl.JmDNSImpl _dns> = $r1;
+
+        return;
+    }
+    protected void setState(javax.jmdns.impl.constants.DNSState)
+    {
+        javax.jmdns.impl.DNSStatefulObject$DefaultImplementation r0;
+        javax.jmdns.impl.constants.DNSState $r1;
+        boolean $z0;
+        javax.jmdns.impl.DNSStatefulObject$DNSStatefulObjectSemaphore $r2;
+        java.lang.Throwable $r3;
+
+        r0 := @this: javax.jmdns.impl.DNSStatefulObject$DefaultImplementation;
+
+        $r1 := @parameter0: javax.jmdns.impl.constants.DNSState;
+
+        virtualinvoke r0.<javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: void lock()>();
+
+     label1:
+        r0.<javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: javax.jmdns.impl.constants.DNSState _state> = $r1;
+
+        $z0 = virtualinvoke r0.<javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: boolean isAnnounced()>();
+
+     label2:
+        if $z0 == 0 goto label4;
+
+     label3:
+        $r2 = r0.<javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: javax.jmdns.impl.DNSStatefulObject$DNSStatefulObjectSemaphore _announcing>;
+
+        virtualinvoke $r2.<javax.jmdns.impl.DNSStatefulObject$DNSStatefulObjectSemaphore: void signalEvent()>();
+
+     label4:
+        $z0 = virtualinvoke r0.<javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: boolean isCanceled()>();
+
+     label5:
+        if $z0 == 0 goto label7;
+
+     label6:
+        $r2 = r0.<javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: javax.jmdns.impl.DNSStatefulObject$DNSStatefulObjectSemaphore _canceling>;
+
+        virtualinvoke $r2.<javax.jmdns.impl.DNSStatefulObject$DNSStatefulObjectSemaphore: void signalEvent()>();
+
+        $r2 = r0.<javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: javax.jmdns.impl.DNSStatefulObject$DNSStatefulObjectSemaphore _announcing>;
+
+        virtualinvoke $r2.<javax.jmdns.impl.DNSStatefulObject$DNSStatefulObjectSemaphore: void signalEvent()>();
+
+     label7:
+        virtualinvoke r0.<javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: void unlock()>();
+
+        return;
+
+     label8:
+        $r3 := @caughtexception;
+
+        virtualinvoke r0.<javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: void unlock()>();
+
+        throw $r3;
+
+        catch java.lang.Throwable from label1 to label2 with label8;
+        catch java.lang.Throwable from label3 to label5 with label8;
+        catch java.lang.Throwable from label6 to label7 with label8;
+    }
+    protected void setTask(javax.jmdns.impl.tasks.DNSTask)
+    {
+        javax.jmdns.impl.DNSStatefulObject$DefaultImplementation r0;
+        javax.jmdns.impl.tasks.DNSTask $r1;
+
+        r0 := @this: javax.jmdns.impl.DNSStatefulObject$DefaultImplementation;
+
+        $r1 := @parameter0: javax.jmdns.impl.tasks.DNSTask;
+
+        r0.<javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: javax.jmdns.impl.tasks.DNSTask _task> = $r1;
+
+        return;
+    }
+    public java.lang.String toString()
+    {
+        javax.jmdns.impl.DNSStatefulObject$DefaultImplementation r0;
+        java.io.IOException r1;
+        java.lang.StringBuilder $r2, $r4;
+        javax.jmdns.impl.JmDNSImpl $r3;
+        java.lang.String $r5;
+        java.net.InetAddress $r6;
+        javax.jmdns.impl.constants.DNSState $r7;
+        javax.jmdns.impl.tasks.DNSTask $r8;
+
+        r0 := @this: javax.jmdns.impl.DNSStatefulObject$DefaultImplementation;
+
+        $r2 = new java.lang.StringBuilder;
+
+     label01:
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+     label02:
+        $r3 = r0.<javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: javax.jmdns.impl.JmDNSImpl _dns>;
+
+        if $r3 == null goto label14;
+
+        $r4 = new java.lang.StringBuilder;
+
+     label03:
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("DNS: ");
+
+     label04:
+        $r3 = r0.<javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: javax.jmdns.impl.JmDNSImpl _dns>;
+
+     label05:
+        $r5 = virtualinvoke $r3.<javax.jmdns.impl.JmDNSImpl: java.lang.String getName()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" [");
+
+     label06:
+        $r3 = r0.<javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: javax.jmdns.impl.JmDNSImpl _dns>;
+
+     label07:
+        $r6 = virtualinvoke $r3.<javax.jmdns.impl.JmDNSImpl: java.net.InetAddress getInetAddress()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r6);
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("]");
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label08:
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" state: ");
+
+     label09:
+        $r7 = r0.<javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: javax.jmdns.impl.constants.DNSState _state>;
+
+     label10:
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r7);
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" task: ");
+
+     label11:
+        $r8 = r0.<javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: javax.jmdns.impl.tasks.DNSTask _task>;
+
+     label12:
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r8);
+
+        $r5 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label13:
+        return $r5;
+
+     label14:
+        $r5 = "NO DNS";
+
+        goto label08;
+
+     label15:
+        r1 := @caughtexception;
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = r0.<javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: javax.jmdns.impl.JmDNSImpl _dns>;
+
+        if $r3 == null goto label17;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("DNS: ");
+
+        $r3 = r0.<javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: javax.jmdns.impl.JmDNSImpl _dns>;
+
+        $r5 = virtualinvoke $r3.<javax.jmdns.impl.JmDNSImpl: java.lang.String getName()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label16:
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" state: ");
+
+        $r7 = r0.<javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: javax.jmdns.impl.constants.DNSState _state>;
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r7);
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" task: ");
+
+        $r8 = r0.<javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: javax.jmdns.impl.tasks.DNSTask _task>;
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r8);
+
+        $r5 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r5;
+
+     label17:
+        $r5 = "NO DNS";
+
+        goto label16;
+
+        catch java.io.IOException from label01 to label02 with label15;
+        catch java.io.IOException from label03 to label04 with label15;
+        catch java.io.IOException from label05 to label06 with label15;
+        catch java.io.IOException from label07 to label08 with label15;
+        catch java.io.IOException from label08 to label09 with label15;
+        catch java.io.IOException from label10 to label11 with label15;
+        catch java.io.IOException from label12 to label13 with label15;
+    }
+    public boolean waitForAnnounced(long)
+    {
+        javax.jmdns.impl.DNSStatefulObject$DefaultImplementation r0;
+        long $l0;
+        boolean $z0;
+        javax.jmdns.impl.DNSStatefulObject$DNSStatefulObjectSemaphore $r1;
+        java.util.logging.Logger $r2;
+        java.lang.StringBuilder $r3;
+        java.lang.String $r4;
+
+        r0 := @this: javax.jmdns.impl.DNSStatefulObject$DefaultImplementation;
+
+        $l0 := @parameter0: long;
+
+        $z0 = virtualinvoke r0.<javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: boolean isAnnounced()>();
+
+        if $z0 != 0 goto label1;
+
+        $z0 = specialinvoke r0.<javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: boolean willCancel()>();
+
+        if $z0 != 0 goto label1;
+
+        $r1 = r0.<javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: javax.jmdns.impl.DNSStatefulObject$DNSStatefulObjectSemaphore _announcing>;
+
+        $l0 = $l0 + 10L;
+
+        virtualinvoke $r1.<javax.jmdns.impl.DNSStatefulObject$DNSStatefulObjectSemaphore: void waitForEvent(long)>($l0);
+
+     label1:
+        $z0 = virtualinvoke r0.<javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: boolean isAnnounced()>();
+
+        if $z0 != 0 goto label3;
+
+        $r1 = r0.<javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: javax.jmdns.impl.DNSStatefulObject$DNSStatefulObjectSemaphore _announcing>;
+
+        virtualinvoke $r1.<javax.jmdns.impl.DNSStatefulObject$DNSStatefulObjectSemaphore: void waitForEvent(long)>(10L);
+
+        $z0 = virtualinvoke r0.<javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: boolean isAnnounced()>();
+
+        if $z0 != 0 goto label3;
+
+        $z0 = specialinvoke r0.<javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: boolean willCancel()>();
+
+        if $z0 != 0 goto label2;
+
+        $z0 = specialinvoke r0.<javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: boolean willClose()>();
+
+        if $z0 == 0 goto label4;
+
+     label2:
+        $r2 = <javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: java.util.logging.Logger logger>;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Wait for announced cancelled: ");
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r2.<java.util.logging.Logger: void fine(java.lang.String)>($r4);
+
+     label3:
+        $z0 = virtualinvoke r0.<javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: boolean isAnnounced()>();
+
+        return $z0;
+
+     label4:
+        $r2 = <javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: java.util.logging.Logger logger>;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Wait for announced timed out: ");
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r2.<java.util.logging.Logger: void warning(java.lang.String)>($r4);
+
+        goto label3;
+    }
+    public boolean waitForCanceled(long)
+    {
+        javax.jmdns.impl.DNSStatefulObject$DefaultImplementation r0;
+        long $l0;
+        boolean $z0;
+        javax.jmdns.impl.DNSStatefulObject$DNSStatefulObjectSemaphore $r1;
+        java.util.logging.Logger $r2;
+        java.lang.StringBuilder $r3;
+        java.lang.String $r4;
+
+        r0 := @this: javax.jmdns.impl.DNSStatefulObject$DefaultImplementation;
+
+        $l0 := @parameter0: long;
+
+        $z0 = virtualinvoke r0.<javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: boolean isCanceled()>();
+
+        if $z0 != 0 goto label1;
+
+        $r1 = r0.<javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: javax.jmdns.impl.DNSStatefulObject$DNSStatefulObjectSemaphore _canceling>;
+
+        virtualinvoke $r1.<javax.jmdns.impl.DNSStatefulObject$DNSStatefulObjectSemaphore: void waitForEvent(long)>($l0);
+
+     label1:
+        $z0 = virtualinvoke r0.<javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: boolean isCanceled()>();
+
+        if $z0 != 0 goto label2;
+
+        $r1 = r0.<javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: javax.jmdns.impl.DNSStatefulObject$DNSStatefulObjectSemaphore _canceling>;
+
+        virtualinvoke $r1.<javax.jmdns.impl.DNSStatefulObject$DNSStatefulObjectSemaphore: void waitForEvent(long)>(10L);
+
+        $z0 = virtualinvoke r0.<javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: boolean isCanceled()>();
+
+        if $z0 != 0 goto label2;
+
+        $z0 = specialinvoke r0.<javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: boolean willClose()>();
+
+        if $z0 != 0 goto label2;
+
+        $r2 = <javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: java.util.logging.Logger logger>;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Wait for canceled timed out: ");
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r0);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r2.<java.util.logging.Logger: void warning(java.lang.String)>($r4);
+
+     label2:
+        $z0 = virtualinvoke r0.<javax.jmdns.impl.DNSStatefulObject$DefaultImplementation: boolean isCanceled()>();
+
+        return $z0;
+    }

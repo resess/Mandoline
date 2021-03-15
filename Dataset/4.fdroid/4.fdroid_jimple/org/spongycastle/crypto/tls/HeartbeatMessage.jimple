@@ -1,0 +1,166 @@
+org.spongycastle.crypto.tls.HeartbeatMessage extends java.lang.Object
+protected int paddingLength
+protected byte[] payload
+protected short type
+    public void <init>(short, byte[], int)
+    {
+        org.spongycastle.crypto.tls.HeartbeatMessage r0;
+        short $s0;
+        byte[] $r1;
+        int $i1, $i2;
+        boolean $z0;
+        java.lang.IllegalArgumentException $r2;
+
+        r0 := @this: org.spongycastle.crypto.tls.HeartbeatMessage;
+
+        $s0 := @parameter0: short;
+
+        $r1 := @parameter1: byte[];
+
+        $i1 := @parameter2: int;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $z0 = staticinvoke <org.spongycastle.crypto.tls.HeartbeatMessageType: boolean isValid(short)>($s0);
+
+        if $z0 != 0 goto label1;
+
+        $r2 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r2.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("\'type\' is not a valid HeartbeatMessageType value");
+
+        throw $r2;
+
+     label1:
+        if $r1 == null goto label2;
+
+        $i2 = lengthof $r1;
+
+        if $i2 < 65536 goto label3;
+
+     label2:
+        $r2 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r2.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("\'payload\' must have length < 2^16");
+
+        throw $r2;
+
+     label3:
+        if $i1 >= 16 goto label4;
+
+        $r2 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r2.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("\'paddingLength\' must be at least 16");
+
+        throw $r2;
+
+     label4:
+        r0.<org.spongycastle.crypto.tls.HeartbeatMessage: short type> = $s0;
+
+        r0.<org.spongycastle.crypto.tls.HeartbeatMessage: byte[] payload> = $r1;
+
+        r0.<org.spongycastle.crypto.tls.HeartbeatMessage: int paddingLength> = $i1;
+
+        return;
+    }
+    public static org.spongycastle.crypto.tls.HeartbeatMessage parse(java.io.InputStream) throws java.io.IOException
+    {
+        java.io.InputStream $r0;
+        org.spongycastle.crypto.tls.HeartbeatMessage$PayloadBuffer r1;
+        int i0, $i2;
+        short $s1;
+        boolean $z0;
+        org.spongycastle.crypto.tls.TlsFatalAlert $r2;
+        byte[] $r3;
+        org.spongycastle.crypto.tls.HeartbeatMessage $r4;
+
+        $r0 := @parameter0: java.io.InputStream;
+
+        $s1 = staticinvoke <org.spongycastle.crypto.tls.TlsUtils: short readUint8(java.io.InputStream)>($r0);
+
+        $z0 = staticinvoke <org.spongycastle.crypto.tls.HeartbeatMessageType: boolean isValid(short)>($s1);
+
+        if $z0 != 0 goto label1;
+
+        $r2 = new org.spongycastle.crypto.tls.TlsFatalAlert;
+
+        specialinvoke $r2.<org.spongycastle.crypto.tls.TlsFatalAlert: void <init>(short)>(47);
+
+        throw $r2;
+
+     label1:
+        i0 = staticinvoke <org.spongycastle.crypto.tls.TlsUtils: int readUint16(java.io.InputStream)>($r0);
+
+        r1 = new org.spongycastle.crypto.tls.HeartbeatMessage$PayloadBuffer;
+
+        specialinvoke r1.<org.spongycastle.crypto.tls.HeartbeatMessage$PayloadBuffer: void <init>()>();
+
+        staticinvoke <org.spongycastle.util.io.Streams: void pipeAll(java.io.InputStream,java.io.OutputStream)>($r0, r1);
+
+        $r3 = virtualinvoke r1.<org.spongycastle.crypto.tls.HeartbeatMessage$PayloadBuffer: byte[] toTruncatedByteArray(int)>(i0);
+
+        if $r3 != null goto label2;
+
+        return null;
+
+     label2:
+        i0 = virtualinvoke r1.<org.spongycastle.crypto.tls.HeartbeatMessage$PayloadBuffer: int size()>();
+
+        $i2 = lengthof $r3;
+
+        i0 = i0 - $i2;
+
+        $r4 = new org.spongycastle.crypto.tls.HeartbeatMessage;
+
+        specialinvoke $r4.<org.spongycastle.crypto.tls.HeartbeatMessage: void <init>(short,byte[],int)>($s1, $r3, i0);
+
+        return $r4;
+    }
+    public void encode(org.spongycastle.crypto.tls.TlsContext, java.io.OutputStream) throws java.io.IOException
+    {
+        org.spongycastle.crypto.tls.HeartbeatMessage r0;
+        org.spongycastle.crypto.tls.TlsContext $r1;
+        java.io.OutputStream $r2;
+        byte[] r3;
+        org.spongycastle.crypto.prng.RandomGenerator $r4;
+        short $s0;
+        int $i1;
+
+        r0 := @this: org.spongycastle.crypto.tls.HeartbeatMessage;
+
+        $r1 := @parameter0: org.spongycastle.crypto.tls.TlsContext;
+
+        $r2 := @parameter1: java.io.OutputStream;
+
+        $s0 = r0.<org.spongycastle.crypto.tls.HeartbeatMessage: short type>;
+
+        staticinvoke <org.spongycastle.crypto.tls.TlsUtils: void writeUint8(short,java.io.OutputStream)>($s0, $r2);
+
+        r3 = r0.<org.spongycastle.crypto.tls.HeartbeatMessage: byte[] payload>;
+
+        $i1 = lengthof r3;
+
+        staticinvoke <org.spongycastle.crypto.tls.TlsUtils: void checkUint16(int)>($i1);
+
+        r3 = r0.<org.spongycastle.crypto.tls.HeartbeatMessage: byte[] payload>;
+
+        $i1 = lengthof r3;
+
+        staticinvoke <org.spongycastle.crypto.tls.TlsUtils: void writeUint16(int,java.io.OutputStream)>($i1, $r2);
+
+        r3 = r0.<org.spongycastle.crypto.tls.HeartbeatMessage: byte[] payload>;
+
+        virtualinvoke $r2.<java.io.OutputStream: void write(byte[])>(r3);
+
+        $i1 = r0.<org.spongycastle.crypto.tls.HeartbeatMessage: int paddingLength>;
+
+        r3 = newarray (byte)[$i1];
+
+        $r4 = interfaceinvoke $r1.<org.spongycastle.crypto.tls.TlsContext: org.spongycastle.crypto.prng.RandomGenerator getNonceRandomGenerator()>();
+
+        interfaceinvoke $r4.<org.spongycastle.crypto.prng.RandomGenerator: void nextBytes(byte[])>(r3);
+
+        virtualinvoke $r2.<java.io.OutputStream: void write(byte[])>(r3);
+
+        return;
+    }

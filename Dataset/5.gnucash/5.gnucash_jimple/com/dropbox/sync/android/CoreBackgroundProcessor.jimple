@@ -1,0 +1,364 @@
+com.dropbox.sync.android.CoreBackgroundProcessor extends java.lang.Object
+private static final int NUM_THREADS
+private static final java.lang.String TAG
+private static final java.lang.Object sInitLock
+private static com.dropbox.sync.android.CoreBackgroundProcessor sInstance
+private com.dropbox.sync.android.DbxSyncService$ActivityTracker mActivityTracker
+private android.content.Context mContext
+private final java.util.concurrent.ScheduledExecutorService mSched
+int mTaskCount
+    static void <clinit>()
+    {
+        java.lang.String $r0;
+        java.lang.Class $r1;
+        java.lang.Object $r2;
+
+        $r1 = class "Lcom/dropbox/sync/android/CoreBackgroundProcessor;";
+
+        $r0 = virtualinvoke $r1.<java.lang.Class: java.lang.String getName()>();
+
+        <com.dropbox.sync.android.CoreBackgroundProcessor: java.lang.String TAG> = $r0;
+
+        $r2 = new java.lang.Object;
+
+        specialinvoke $r2.<java.lang.Object: void <init>()>();
+
+        <com.dropbox.sync.android.CoreBackgroundProcessor: java.lang.Object sInitLock> = $r2;
+
+        return;
+    }
+    private void <init>()
+    {
+        com.dropbox.sync.android.CoreBackgroundProcessor r0;
+        com.dropbox.sync.android.CoreBackgroundProcessor$BackgroundThreadFactory $r1;
+        java.util.concurrent.ScheduledExecutorService $r2;
+
+        r0 := @this: com.dropbox.sync.android.CoreBackgroundProcessor;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<com.dropbox.sync.android.CoreBackgroundProcessor: int mTaskCount> = 0;
+
+        $r1 = new com.dropbox.sync.android.CoreBackgroundProcessor$BackgroundThreadFactory;
+
+        specialinvoke $r1.<com.dropbox.sync.android.CoreBackgroundProcessor$BackgroundThreadFactory: void <init>()>();
+
+        $r2 = staticinvoke <java.util.concurrent.Executors: java.util.concurrent.ScheduledExecutorService newScheduledThreadPool(int,java.util.concurrent.ThreadFactory)>(1, $r1);
+
+        r0.<com.dropbox.sync.android.CoreBackgroundProcessor: java.util.concurrent.ScheduledExecutorService mSched> = $r2;
+
+        return;
+    }
+    static java.lang.String access$000()
+    {
+        java.lang.String r0;
+
+        r0 = <com.dropbox.sync.android.CoreBackgroundProcessor: java.lang.String TAG>;
+
+        return r0;
+    }
+    static void access$100(com.dropbox.sync.android.CoreBackgroundProcessor)
+    {
+        com.dropbox.sync.android.CoreBackgroundProcessor $r0;
+
+        $r0 := @parameter0: com.dropbox.sync.android.CoreBackgroundProcessor;
+
+        specialinvoke $r0.<com.dropbox.sync.android.CoreBackgroundProcessor: void incTaskCount()>();
+
+        return;
+    }
+    static java.util.concurrent.ScheduledExecutorService access$200(com.dropbox.sync.android.CoreBackgroundProcessor)
+    {
+        com.dropbox.sync.android.CoreBackgroundProcessor $r0;
+        java.util.concurrent.ScheduledExecutorService r1;
+
+        $r0 := @parameter0: com.dropbox.sync.android.CoreBackgroundProcessor;
+
+        r1 = $r0.<com.dropbox.sync.android.CoreBackgroundProcessor: java.util.concurrent.ScheduledExecutorService mSched>;
+
+        return r1;
+    }
+    static void access$300(com.dropbox.sync.android.CoreBackgroundProcessor)
+    {
+        com.dropbox.sync.android.CoreBackgroundProcessor $r0;
+
+        $r0 := @parameter0: com.dropbox.sync.android.CoreBackgroundProcessor;
+
+        specialinvoke $r0.<com.dropbox.sync.android.CoreBackgroundProcessor: void decTaskCount()>();
+
+        return;
+    }
+    private void decTaskCount()
+    {
+        com.dropbox.sync.android.CoreBackgroundProcessor r0;
+        com.dropbox.sync.android.DbxSyncService$ActivityTracker$State $r1;
+        int $i0;
+        boolean $z0;
+        com.dropbox.sync.android.DbxSyncService$ActivityTracker $r2;
+        java.lang.Throwable $r3;
+
+        r0 := @this: com.dropbox.sync.android.CoreBackgroundProcessor;
+
+        entermonitor r0;
+
+     label1:
+        $i0 = r0.<com.dropbox.sync.android.CoreBackgroundProcessor: int mTaskCount>;
+
+        if $i0 <= 0 goto label4;
+
+        $z0 = 1;
+
+     label2:
+        staticinvoke <com.dropbox.sync.android.CoreAssert: void isTrue(boolean)>($z0);
+
+        $i0 = r0.<com.dropbox.sync.android.CoreBackgroundProcessor: int mTaskCount>;
+
+        $i0 = $i0 + -1;
+
+        r0.<com.dropbox.sync.android.CoreBackgroundProcessor: int mTaskCount> = $i0;
+
+        $r2 = r0.<com.dropbox.sync.android.CoreBackgroundProcessor: com.dropbox.sync.android.DbxSyncService$ActivityTracker mActivityTracker>;
+
+        if $r2 == null goto label3;
+
+        $i0 = r0.<com.dropbox.sync.android.CoreBackgroundProcessor: int mTaskCount>;
+
+        if $i0 != 0 goto label3;
+
+        $r2 = r0.<com.dropbox.sync.android.CoreBackgroundProcessor: com.dropbox.sync.android.DbxSyncService$ActivityTracker mActivityTracker>;
+
+        $r1 = <com.dropbox.sync.android.DbxSyncService$ActivityTracker$State: com.dropbox.sync.android.DbxSyncService$ActivityTracker$State IDLE>;
+
+        virtualinvoke $r2.<com.dropbox.sync.android.DbxSyncService$ActivityTracker: void setState(com.dropbox.sync.android.DbxSyncService$ActivityTracker$State)>($r1);
+
+     label3:
+        exitmonitor r0;
+
+        return;
+
+     label4:
+        $z0 = 0;
+
+        goto label2;
+
+     label5:
+        $r3 := @caughtexception;
+
+        exitmonitor r0;
+
+        throw $r3;
+
+        catch java.lang.Throwable from label1 to label3 with label5;
+    }
+    private void executeTask(java.lang.Runnable)
+    {
+        com.dropbox.sync.android.CoreBackgroundProcessor r0;
+        java.lang.Runnable $r1;
+        java.util.concurrent.ScheduledExecutorService $r2;
+
+        r0 := @this: com.dropbox.sync.android.CoreBackgroundProcessor;
+
+        $r1 := @parameter0: java.lang.Runnable;
+
+        specialinvoke r0.<com.dropbox.sync.android.CoreBackgroundProcessor: void incTaskCount()>();
+
+        $r2 = r0.<com.dropbox.sync.android.CoreBackgroundProcessor: java.util.concurrent.ScheduledExecutorService mSched>;
+
+        interfaceinvoke $r2.<java.util.concurrent.ScheduledExecutorService: void execute(java.lang.Runnable)>($r1);
+
+        return;
+    }
+    public static com.dropbox.sync.android.CoreBackgroundProcessor getInstance()
+    {
+        java.lang.Object $r0;
+        com.dropbox.sync.android.CoreBackgroundProcessor $r1;
+        java.lang.Throwable $r2;
+
+        $r0 = <com.dropbox.sync.android.CoreBackgroundProcessor: java.lang.Object sInitLock>;
+
+        entermonitor $r0;
+
+     label1:
+        $r1 = <com.dropbox.sync.android.CoreBackgroundProcessor: com.dropbox.sync.android.CoreBackgroundProcessor sInstance>;
+
+        if $r1 != null goto label2;
+
+        $r1 = new com.dropbox.sync.android.CoreBackgroundProcessor;
+
+        specialinvoke $r1.<com.dropbox.sync.android.CoreBackgroundProcessor: void <init>()>();
+
+        <com.dropbox.sync.android.CoreBackgroundProcessor: com.dropbox.sync.android.CoreBackgroundProcessor sInstance> = $r1;
+
+     label2:
+        $r1 = <com.dropbox.sync.android.CoreBackgroundProcessor: com.dropbox.sync.android.CoreBackgroundProcessor sInstance>;
+
+        exitmonitor $r0;
+
+     label3:
+        return $r1;
+
+     label4:
+        $r2 := @caughtexception;
+
+        exitmonitor $r0;
+
+     label5:
+        throw $r2;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+    private void incTaskCount()
+    {
+        com.dropbox.sync.android.CoreBackgroundProcessor r0;
+        com.dropbox.sync.android.DbxSyncService$ActivityTracker$State $r1;
+        int $i0;
+        com.dropbox.sync.android.DbxSyncService$ActivityTracker $r2;
+        java.lang.Throwable $r3;
+
+        r0 := @this: com.dropbox.sync.android.CoreBackgroundProcessor;
+
+        entermonitor r0;
+
+     label1:
+        $i0 = r0.<com.dropbox.sync.android.CoreBackgroundProcessor: int mTaskCount>;
+
+        $i0 = $i0 + 1;
+
+        r0.<com.dropbox.sync.android.CoreBackgroundProcessor: int mTaskCount> = $i0;
+
+        $r2 = r0.<com.dropbox.sync.android.CoreBackgroundProcessor: com.dropbox.sync.android.DbxSyncService$ActivityTracker mActivityTracker>;
+
+        if $r2 == null goto label2;
+
+        $r2 = r0.<com.dropbox.sync.android.CoreBackgroundProcessor: com.dropbox.sync.android.DbxSyncService$ActivityTracker mActivityTracker>;
+
+        $r1 = <com.dropbox.sync.android.DbxSyncService$ActivityTracker$State: com.dropbox.sync.android.DbxSyncService$ActivityTracker$State FOREGROUND>;
+
+        virtualinvoke $r2.<com.dropbox.sync.android.DbxSyncService$ActivityTracker: void setState(com.dropbox.sync.android.DbxSyncService$ActivityTracker$State)>($r1);
+
+     label2:
+        exitmonitor r0;
+
+        return;
+
+     label3:
+        $r3 := @caughtexception;
+
+        exitmonitor r0;
+
+        throw $r3;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+    void notifyServerOfLocalUnlink(com.dropbox.sync.android.DbxAccount)
+    {
+        com.dropbox.sync.android.CoreBackgroundProcessor r0;
+        com.dropbox.sync.android.DbxAccount $r1;
+        boolean $z0;
+        com.dropbox.sync.android.CoreBackgroundProcessor$RunNotifyServerOfLocalUnlink $r2;
+
+        r0 := @this: com.dropbox.sync.android.CoreBackgroundProcessor;
+
+        $r1 := @parameter0: com.dropbox.sync.android.DbxAccount;
+
+        $z0 = virtualinvoke $r1.<com.dropbox.sync.android.DbxAccount: boolean isLinked()>();
+
+        if $z0 != 0 goto label2;
+
+        $z0 = 1;
+
+     label1:
+        staticinvoke <com.dropbox.sync.android.CoreAssert: void isTrue(boolean)>($z0);
+
+        $r2 = new com.dropbox.sync.android.CoreBackgroundProcessor$RunNotifyServerOfLocalUnlink;
+
+        specialinvoke $r2.<com.dropbox.sync.android.CoreBackgroundProcessor$RunNotifyServerOfLocalUnlink: void <init>(com.dropbox.sync.android.CoreBackgroundProcessor,com.dropbox.sync.android.DbxAccount)>(r0, $r1);
+
+        specialinvoke r0.<com.dropbox.sync.android.CoreBackgroundProcessor: void executeTask(java.lang.Runnable)>($r2);
+
+        return;
+
+     label2:
+        $z0 = 0;
+
+        goto label1;
+    }
+    void processServerInitiatedUnlink(com.dropbox.sync.android.DbxAccount)
+    {
+        com.dropbox.sync.android.CoreBackgroundProcessor r0;
+        com.dropbox.sync.android.DbxAccount $r1;
+        com.dropbox.sync.android.CoreBackgroundProcessor$RunServerInitiatedUnlink $r2;
+
+        r0 := @this: com.dropbox.sync.android.CoreBackgroundProcessor;
+
+        $r1 := @parameter0: com.dropbox.sync.android.DbxAccount;
+
+        $r2 = new com.dropbox.sync.android.CoreBackgroundProcessor$RunServerInitiatedUnlink;
+
+        specialinvoke $r2.<com.dropbox.sync.android.CoreBackgroundProcessor$RunServerInitiatedUnlink: void <init>(com.dropbox.sync.android.CoreBackgroundProcessor,com.dropbox.sync.android.DbxAccount)>(r0, $r1);
+
+        specialinvoke r0.<com.dropbox.sync.android.CoreBackgroundProcessor: void executeTask(java.lang.Runnable)>($r2);
+
+        return;
+    }
+    void setContext(android.content.Context)
+    {
+        com.dropbox.sync.android.CoreBackgroundProcessor r0;
+        android.content.Context $r1, $r2;
+        com.dropbox.sync.android.DbxSyncService$ActivityTracker $r3;
+        java.lang.Throwable $r4;
+
+        r0 := @this: com.dropbox.sync.android.CoreBackgroundProcessor;
+
+        $r1 := @parameter0: android.content.Context;
+
+        entermonitor r0;
+
+     label1:
+        $r2 = r0.<com.dropbox.sync.android.CoreBackgroundProcessor: android.content.Context mContext>;
+
+        if $r2 != null goto label2;
+
+        r0.<com.dropbox.sync.android.CoreBackgroundProcessor: android.content.Context mContext> = $r1;
+
+        $r3 = new com.dropbox.sync.android.DbxSyncService$ActivityTracker;
+
+        $r1 = r0.<com.dropbox.sync.android.CoreBackgroundProcessor: android.content.Context mContext>;
+
+        specialinvoke $r3.<com.dropbox.sync.android.DbxSyncService$ActivityTracker: void <init>(android.content.Context)>($r1);
+
+        r0.<com.dropbox.sync.android.CoreBackgroundProcessor: com.dropbox.sync.android.DbxSyncService$ActivityTracker mActivityTracker> = $r3;
+
+     label2:
+        exitmonitor r0;
+
+        return;
+
+     label3:
+        $r4 := @caughtexception;
+
+        exitmonitor r0;
+
+        throw $r4;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+    void updateAccountInfo(com.dropbox.sync.android.DbxAccount)
+    {
+        com.dropbox.sync.android.CoreBackgroundProcessor r0;
+        com.dropbox.sync.android.DbxAccount $r1;
+        com.dropbox.sync.android.CoreBackgroundProcessor$RunAccountInfoUpdate $r2;
+
+        r0 := @this: com.dropbox.sync.android.CoreBackgroundProcessor;
+
+        $r1 := @parameter0: com.dropbox.sync.android.DbxAccount;
+
+        $r2 = new com.dropbox.sync.android.CoreBackgroundProcessor$RunAccountInfoUpdate;
+
+        specialinvoke $r2.<com.dropbox.sync.android.CoreBackgroundProcessor$RunAccountInfoUpdate: void <init>(com.dropbox.sync.android.CoreBackgroundProcessor,com.dropbox.sync.android.DbxAccount)>(r0, $r1);
+
+        specialinvoke r0.<com.dropbox.sync.android.CoreBackgroundProcessor: void executeTask(java.lang.Runnable)>($r2);
+
+        return;
+    }

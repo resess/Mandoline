@@ -1,0 +1,490 @@
+eu.chainfire.libsuperuser.Shell extends java.lang.Object
+protected static java.lang.String[] availableTestCommands
+    static void <clinit>()
+    {
+        java.lang.String[] $r0;
+
+        $r0 = newarray (java.lang.String)[2];
+
+        $r0[0] = "echo -BOC-";
+
+        $r0[1] = "id";
+
+        <eu.chainfire.libsuperuser.Shell: java.lang.String[] availableTestCommands> = $r0;
+
+        return;
+    }
+    protected static boolean parseAvailableResult(java.util.List, boolean)
+    {
+        java.util.List r0;
+        boolean $z0, z1, $z2;
+        java.util.Iterator $r1;
+        java.lang.Object $r2;
+        java.lang.String r3;
+
+        r0 := @parameter0: java.util.List;
+
+        $z0 := @parameter1: boolean;
+
+        if r0 != null goto label1;
+
+        return 0;
+
+     label1:
+        z1 = 0;
+
+        $r1 = interfaceinvoke r0.<java.util.List: java.util.Iterator iterator()>();
+
+     label2:
+        $z2 = interfaceinvoke $r1.<java.util.Iterator: boolean hasNext()>();
+
+        if $z2 == 0 goto label5;
+
+        $r2 = interfaceinvoke $r1.<java.util.Iterator: java.lang.Object next()>();
+
+        r3 = (java.lang.String) $r2;
+
+        $z2 = virtualinvoke r3.<java.lang.String: boolean contains(java.lang.CharSequence)>("uid=");
+
+        if $z2 == 0 goto label4;
+
+        if $z0 == 0 goto label3;
+
+        $z0 = virtualinvoke r3.<java.lang.String: boolean contains(java.lang.CharSequence)>("uid=0");
+
+        if $z0 == 0 goto label6;
+
+     label3:
+        return 1;
+
+     label4:
+        $z2 = virtualinvoke r3.<java.lang.String: boolean contains(java.lang.CharSequence)>("-BOC-");
+
+        if $z2 == 0 goto label2;
+
+        z1 = 1;
+
+        goto label2;
+
+     label5:
+        return z1;
+
+     label6:
+        return 0;
+    }
+    public static java.util.List run(java.lang.String, java.lang.String[], java.lang.String[], boolean)
+    {
+        java.lang.String $r0, r5, r7, $r10;
+        java.lang.String[] $r1, $r8, r17;
+        boolean $z0, $z1;
+        eu.chainfire.libsuperuser.StreamGobbler r2, r4;
+        java.io.DataOutputStream r3;
+        java.util.HashMap r6;
+        java.util.Locale $r9;
+        eu.chainfire.libsuperuser.ShellOnMainThreadException $r11;
+        java.lang.Object[] $r12;
+        java.util.ArrayList $r13;
+        java.util.List $r14, r15;
+        java.util.Map $r16;
+        int i0, i1, $i2;
+        java.util.Set $r18;
+        java.util.Iterator $r19;
+        java.lang.Object $r20;
+        java.util.Map$Entry r21;
+        java.lang.StringBuilder $r22;
+        java.lang.Runtime $r23;
+        java.lang.Process $r24;
+        java.io.OutputStream $r25;
+        java.io.InputStream $r26;
+        byte[] $r27;
+        java.io.IOException r28, r29, $r31;
+        java.lang.InterruptedException r30;
+
+        $r0 := @parameter0: java.lang.String;
+
+        $r1 := @parameter1: java.lang.String[];
+
+        $r8 := @parameter2: java.lang.String[];
+
+        $z0 := @parameter3: boolean;
+
+        $r9 = <java.util.Locale: java.util.Locale ENGLISH>;
+
+        $r10 = virtualinvoke $r0.<java.lang.String: java.lang.String toUpperCase(java.util.Locale)>($r9);
+
+        $z1 = staticinvoke <eu.chainfire.libsuperuser.Debug: boolean getSanityChecksEnabledEffective()>();
+
+        if $z1 == 0 goto label01;
+
+        $z1 = staticinvoke <eu.chainfire.libsuperuser.Debug: boolean onMainThread()>();
+
+        if $z1 == 0 goto label01;
+
+        staticinvoke <eu.chainfire.libsuperuser.Debug: void log(java.lang.String)>("Application attempted to run a shell command from the main thread");
+
+        $r11 = new eu.chainfire.libsuperuser.ShellOnMainThreadException;
+
+        specialinvoke $r11.<eu.chainfire.libsuperuser.ShellOnMainThreadException: void <init>(java.lang.String)>("Application attempted to run a shell command from the main thread");
+
+        throw $r11;
+
+     label01:
+        $r12 = newarray (java.lang.Object)[1];
+
+        $r12[0] = $r10;
+
+        r7 = staticinvoke <java.lang.String: java.lang.String format(java.lang.String,java.lang.Object[])>("[%s%%] START", $r12);
+
+        staticinvoke <eu.chainfire.libsuperuser.Debug: void logCommand(java.lang.String)>(r7);
+
+        $r13 = new java.util.ArrayList;
+
+        specialinvoke $r13.<java.util.ArrayList: void <init>()>();
+
+        $r14 = staticinvoke <java.util.Collections: java.util.List synchronizedList(java.util.List)>($r13);
+
+        r15 = $r14;
+
+        if $r8 == null goto label25;
+
+        r6 = new java.util.HashMap;
+
+     label02:
+        specialinvoke r6.<java.util.HashMap: void <init>()>();
+
+        $r16 = staticinvoke <java.lang.System: java.util.Map getenv()>();
+
+        interfaceinvoke r6.<java.util.Map: void putAll(java.util.Map)>($r16);
+
+     label03:
+        r17 = $r8;
+
+        i0 = lengthof $r8;
+
+        i1 = 0;
+
+     label04:
+        if i1 >= i0 goto label11;
+
+        r5 = r17[i1];
+
+     label05:
+        $i2 = virtualinvoke r5.<java.lang.String: int indexOf(java.lang.String)>("=");
+
+     label06:
+        if $i2 < 0 goto label10;
+
+     label07:
+        r7 = virtualinvoke r5.<java.lang.String: java.lang.String substring(int,int)>(0, $i2);
+
+     label08:
+        $i2 = $i2 + 1;
+
+     label09:
+        r5 = virtualinvoke r5.<java.lang.String: java.lang.String substring(int)>($i2);
+
+        interfaceinvoke r6.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>(r7, r5);
+
+     label10:
+        i1 = i1 + 1;
+
+        goto label04;
+
+     label11:
+        i0 = 0;
+
+     label12:
+        i1 = interfaceinvoke r6.<java.util.Map: int size()>();
+
+     label13:
+        r17 = newarray (java.lang.String)[i1];
+
+        $r8 = r17;
+
+     label14:
+        $r18 = interfaceinvoke r6.<java.util.Map: java.util.Set entrySet()>();
+
+        $r19 = interfaceinvoke $r18.<java.util.Set: java.util.Iterator iterator()>();
+
+     label15:
+        $z1 = interfaceinvoke $r19.<java.util.Iterator: boolean hasNext()>();
+
+     label16:
+        if $z1 == 0 goto label25;
+
+     label17:
+        $r20 = interfaceinvoke $r19.<java.util.Iterator: java.lang.Object next()>();
+
+     label18:
+        r21 = (java.util.Map$Entry) $r20;
+
+        $r22 = new java.lang.StringBuilder;
+
+     label19:
+        specialinvoke $r22.<java.lang.StringBuilder: void <init>()>();
+
+        $r20 = interfaceinvoke r21.<java.util.Map$Entry: java.lang.Object getKey()>();
+
+     label20:
+        r7 = (java.lang.String) $r20;
+
+     label21:
+        $r22 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r7);
+
+        $r22 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("=");
+
+        $r20 = interfaceinvoke r21.<java.util.Map$Entry: java.lang.Object getValue()>();
+
+     label22:
+        r7 = (java.lang.String) $r20;
+
+     label23:
+        $r22 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r7);
+
+        r7 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label24:
+        r17[i0] = r7;
+
+        i0 = i0 + 1;
+
+        goto label15;
+
+     label25:
+        $r23 = staticinvoke <java.lang.Runtime: java.lang.Runtime getRuntime()>();
+
+        $r24 = virtualinvoke $r23.<java.lang.Runtime: java.lang.Process exec(java.lang.String,java.lang.String[])>($r0, $r8);
+
+     label26:
+        r3 = new java.io.DataOutputStream;
+
+     label27:
+        $r25 = virtualinvoke $r24.<java.lang.Process: java.io.OutputStream getOutputStream()>();
+
+        specialinvoke r3.<java.io.DataOutputStream: void <init>(java.io.OutputStream)>($r25);
+
+     label28:
+        r4 = new eu.chainfire.libsuperuser.StreamGobbler;
+
+        $r22 = new java.lang.StringBuilder;
+
+     label29:
+        specialinvoke $r22.<java.lang.StringBuilder: void <init>()>();
+
+        $r22 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r10);
+
+        $r22 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("-");
+
+        r7 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r26 = virtualinvoke $r24.<java.lang.Process: java.io.InputStream getInputStream()>();
+
+        specialinvoke r4.<eu.chainfire.libsuperuser.StreamGobbler: void <init>(java.lang.String,java.io.InputStream,java.util.List)>(r7, $r26, $r14);
+
+     label30:
+        r2 = new eu.chainfire.libsuperuser.StreamGobbler;
+
+        $r22 = new java.lang.StringBuilder;
+
+     label31:
+        specialinvoke $r22.<java.lang.StringBuilder: void <init>()>();
+
+        $r22 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r10);
+
+        $r22 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("*");
+
+        r7 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r26 = virtualinvoke $r24.<java.lang.Process: java.io.InputStream getErrorStream()>();
+
+     label32:
+        if $z0 == 0 goto label40;
+
+     label33:
+        specialinvoke r2.<eu.chainfire.libsuperuser.StreamGobbler: void <init>(java.lang.String,java.io.InputStream,java.util.List)>(r7, $r26, $r14);
+
+        virtualinvoke r4.<eu.chainfire.libsuperuser.StreamGobbler: void start()>();
+
+        virtualinvoke r2.<eu.chainfire.libsuperuser.StreamGobbler: void start()>();
+
+     label34:
+        i0 = lengthof $r1;
+
+        i1 = 0;
+
+     label35:
+        if i1 >= i0 goto label41;
+
+        r7 = $r1[i1];
+
+        $r12 = newarray (java.lang.Object)[2];
+
+        $r12[0] = $r10;
+
+        $r12[1] = r7;
+
+     label36:
+        r5 = staticinvoke <java.lang.String: java.lang.String format(java.lang.String,java.lang.Object[])>("[%s+] %s", $r12);
+
+        staticinvoke <eu.chainfire.libsuperuser.Debug: void logCommand(java.lang.String)>(r5);
+
+     label37:
+        $r22 = new java.lang.StringBuilder;
+
+     label38:
+        specialinvoke $r22.<java.lang.StringBuilder: void <init>()>();
+
+        $r22 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r7);
+
+        $r22 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\n");
+
+        r7 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r27 = virtualinvoke r7.<java.lang.String: byte[] getBytes(java.lang.String)>("UTF-8");
+
+        virtualinvoke r3.<java.io.DataOutputStream: void write(byte[])>($r27);
+
+        virtualinvoke r3.<java.io.DataOutputStream: void flush()>();
+
+     label39:
+        i1 = i1 + 1;
+
+        goto label35;
+
+     label40:
+        $r14 = null;
+
+        goto label33;
+
+     label41:
+        $r10 = "exit\n";
+
+     label42:
+        $r27 = virtualinvoke $r10.<java.lang.String: byte[] getBytes(java.lang.String)>("UTF-8");
+
+        virtualinvoke r3.<java.io.DataOutputStream: void write(byte[])>($r27);
+
+        virtualinvoke r3.<java.io.DataOutputStream: void flush()>();
+
+     label43:
+        virtualinvoke $r24.<java.lang.Process: int waitFor()>();
+
+     label44:
+        virtualinvoke r3.<java.io.DataOutputStream: void close()>();
+
+     label45:
+        virtualinvoke r4.<eu.chainfire.libsuperuser.StreamGobbler: void join()>();
+
+        virtualinvoke r2.<eu.chainfire.libsuperuser.StreamGobbler: void join()>();
+
+        virtualinvoke $r24.<java.lang.Process: void destroy()>();
+
+        $z0 = staticinvoke <eu.chainfire.libsuperuser.Shell$SU: boolean isSU(java.lang.String)>($r0);
+
+     label46:
+        if $z0 == 0 goto label49;
+
+     label47:
+        i0 = virtualinvoke $r24.<java.lang.Process: int exitValue()>();
+
+     label48:
+        if i0 != 255 goto label49;
+
+        r15 = null;
+
+     label49:
+        $r12 = newarray (java.lang.Object)[1];
+
+        $r9 = <java.util.Locale: java.util.Locale ENGLISH>;
+
+        $r0 = virtualinvoke $r0.<java.lang.String: java.lang.String toUpperCase(java.util.Locale)>($r9);
+
+        $r12[0] = $r0;
+
+        $r0 = staticinvoke <java.lang.String: java.lang.String format(java.lang.String,java.lang.Object[])>("[%s%%] END", $r12);
+
+        staticinvoke <eu.chainfire.libsuperuser.Debug: void logCommand(java.lang.String)>($r0);
+
+        return r15;
+
+     label50:
+        r28 := @caughtexception;
+
+     label51:
+        $r10 = virtualinvoke r28.<java.io.IOException: java.lang.String getMessage()>();
+
+        $z0 = virtualinvoke $r10.<java.lang.String: boolean contains(java.lang.CharSequence)>("EPIPE");
+
+     label52:
+        if $z0 != 0 goto label43;
+
+     label53:
+        throw r28;
+
+     label54:
+        r29 := @caughtexception;
+
+        r15 = null;
+
+        goto label49;
+
+     label55:
+        r30 := @caughtexception;
+
+        r15 = null;
+
+        goto label49;
+
+     label56:
+        $r31 := @caughtexception;
+
+        goto label45;
+
+        catch java.io.IOException from label02 to label03 with label54;
+        catch java.io.IOException from label05 to label06 with label54;
+        catch java.io.IOException from label07 to label08 with label54;
+        catch java.io.IOException from label09 to label10 with label54;
+        catch java.io.IOException from label12 to label13 with label54;
+        catch java.io.IOException from label14 to label16 with label54;
+        catch java.io.IOException from label17 to label18 with label54;
+        catch java.io.IOException from label19 to label20 with label54;
+        catch java.io.IOException from label21 to label22 with label54;
+        catch java.io.IOException from label23 to label24 with label54;
+        catch java.io.IOException from label25 to label26 with label54;
+        catch java.io.IOException from label27 to label28 with label54;
+        catch java.io.IOException from label29 to label30 with label54;
+        catch java.io.IOException from label31 to label32 with label54;
+        catch java.io.IOException from label33 to label34 with label54;
+        catch java.lang.InterruptedException from label02 to label03 with label55;
+        catch java.lang.InterruptedException from label05 to label06 with label55;
+        catch java.lang.InterruptedException from label07 to label08 with label55;
+        catch java.lang.InterruptedException from label09 to label10 with label55;
+        catch java.lang.InterruptedException from label12 to label13 with label55;
+        catch java.lang.InterruptedException from label14 to label16 with label55;
+        catch java.lang.InterruptedException from label17 to label18 with label55;
+        catch java.lang.InterruptedException from label19 to label20 with label55;
+        catch java.lang.InterruptedException from label21 to label22 with label55;
+        catch java.lang.InterruptedException from label23 to label24 with label55;
+        catch java.lang.InterruptedException from label25 to label26 with label55;
+        catch java.lang.InterruptedException from label27 to label28 with label55;
+        catch java.lang.InterruptedException from label29 to label30 with label55;
+        catch java.lang.InterruptedException from label31 to label32 with label55;
+        catch java.lang.InterruptedException from label33 to label34 with label55;
+        catch java.io.IOException from label36 to label37 with label50;
+        catch java.io.IOException from label38 to label39 with label50;
+        catch java.io.IOException from label42 to label43 with label50;
+        catch java.lang.InterruptedException from label36 to label37 with label55;
+        catch java.lang.InterruptedException from label38 to label39 with label55;
+        catch java.lang.InterruptedException from label42 to label43 with label55;
+        catch java.io.IOException from label43 to label44 with label54;
+        catch java.lang.InterruptedException from label43 to label44 with label55;
+        catch java.io.IOException from label44 to label45 with label56;
+        catch java.lang.InterruptedException from label44 to label45 with label55;
+        catch java.io.IOException from label45 to label46 with label54;
+        catch java.io.IOException from label47 to label48 with label54;
+        catch java.lang.InterruptedException from label45 to label46 with label55;
+        catch java.lang.InterruptedException from label47 to label48 with label55;
+        catch java.io.IOException from label51 to label52 with label54;
+        catch java.io.IOException from label53 to label54 with label54;
+        catch java.lang.InterruptedException from label51 to label52 with label55;
+    }

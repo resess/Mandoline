@@ -1,0 +1,403 @@
+com.crashlytics.android.core.ReportUploader extends java.lang.Object
+private static final java.lang.String CLS_FILE_EXT
+static final java.util.Map HEADER_INVALID_CLS_FILE
+private static final short[] RETRY_INTERVALS
+private static final java.io.FilenameFilter crashFileFilter
+private final com.crashlytics.android.core.CreateReportSpiCall createReportCall
+private final java.lang.Object fileAccessLock
+private java.lang.Thread uploadThread
+    static void <clinit>()
+    {
+        java.util.Map $r0;
+        com.crashlytics.android.core.ReportUploader$1 $r1;
+        short[] $r2;
+
+        $r1 = new com.crashlytics.android.core.ReportUploader$1;
+
+        specialinvoke $r1.<com.crashlytics.android.core.ReportUploader$1: void <init>()>();
+
+        <com.crashlytics.android.core.ReportUploader: java.io.FilenameFilter crashFileFilter> = $r1;
+
+        $r0 = staticinvoke <java.util.Collections: java.util.Map singletonMap(java.lang.Object,java.lang.Object)>("X-CRASHLYTICS-INVALID-SESSION", "1");
+
+        <com.crashlytics.android.core.ReportUploader: java.util.Map HEADER_INVALID_CLS_FILE> = $r0;
+
+        $r2 = newarray (short)[6];
+
+        $r2[0] = 10;
+
+        $r2[1] = 20;
+
+        $r2[2] = 30;
+
+        $r2[3] = 60;
+
+        $r2[4] = 120;
+
+        $r2[5] = 300;
+
+        <com.crashlytics.android.core.ReportUploader: short[] RETRY_INTERVALS> = $r2;
+
+        return;
+    }
+    public void <init>(com.crashlytics.android.core.CreateReportSpiCall)
+    {
+        com.crashlytics.android.core.ReportUploader r0;
+        com.crashlytics.android.core.CreateReportSpiCall $r1;
+        java.lang.Object $r2;
+        java.lang.IllegalArgumentException $r3;
+
+        r0 := @this: com.crashlytics.android.core.ReportUploader;
+
+        $r1 := @parameter0: com.crashlytics.android.core.CreateReportSpiCall;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r2 = new java.lang.Object;
+
+        specialinvoke $r2.<java.lang.Object: void <init>()>();
+
+        r0.<com.crashlytics.android.core.ReportUploader: java.lang.Object fileAccessLock> = $r2;
+
+        if $r1 != null goto label1;
+
+        $r3 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r3.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("createReportCall must not be null.");
+
+        throw $r3;
+
+     label1:
+        r0.<com.crashlytics.android.core.ReportUploader: com.crashlytics.android.core.CreateReportSpiCall createReportCall> = $r1;
+
+        return;
+    }
+    static java.lang.Thread access$002(com.crashlytics.android.core.ReportUploader, java.lang.Thread)
+    {
+        com.crashlytics.android.core.ReportUploader $r0;
+        java.lang.Thread $r1;
+
+        $r0 := @parameter0: com.crashlytics.android.core.ReportUploader;
+
+        $r1 := @parameter1: java.lang.Thread;
+
+        $r0.<com.crashlytics.android.core.ReportUploader: java.lang.Thread uploadThread> = $r1;
+
+        return $r1;
+    }
+    static short[] access$100()
+    {
+        short[] r0;
+
+        r0 = <com.crashlytics.android.core.ReportUploader: short[] RETRY_INTERVALS>;
+
+        return r0;
+    }
+    java.util.List findReports()
+    {
+        com.crashlytics.android.core.ReportUploader r0;
+        java.io.File r1;
+        int i0, i1;
+        java.util.LinkedList r2;
+        io.fabric.sdk.android.Logger $r3;
+        java.lang.Object $r4;
+        com.crashlytics.android.core.CrashlyticsCore $r5;
+        java.io.FilenameFilter $r6;
+        java.io.File[] $r7;
+        java.lang.StringBuilder $r8;
+        java.lang.String $r9;
+        com.crashlytics.android.core.SessionReport $r10;
+        java.lang.Throwable $r11;
+        boolean $z0;
+
+        r0 := @this: com.crashlytics.android.core.ReportUploader;
+
+        $r3 = staticinvoke <io.fabric.sdk.android.Fabric: io.fabric.sdk.android.Logger getLogger()>();
+
+        interfaceinvoke $r3.<io.fabric.sdk.android.Logger: void d(java.lang.String,java.lang.String)>("CrashlyticsCore", "Checking for crash reports...");
+
+        $r4 = r0.<com.crashlytics.android.core.ReportUploader: java.lang.Object fileAccessLock>;
+
+        entermonitor $r4;
+
+     label1:
+        $r5 = staticinvoke <com.crashlytics.android.core.CrashlyticsCore: com.crashlytics.android.core.CrashlyticsCore getInstance()>();
+
+        r1 = virtualinvoke $r5.<com.crashlytics.android.core.CrashlyticsCore: java.io.File getSdkDirectory()>();
+
+        $r6 = <com.crashlytics.android.core.ReportUploader: java.io.FilenameFilter crashFileFilter>;
+
+        $r7 = virtualinvoke r1.<java.io.File: java.io.File[] listFiles(java.io.FilenameFilter)>($r6);
+
+        exitmonitor $r4;
+
+     label2:
+        r2 = new java.util.LinkedList;
+
+        specialinvoke r2.<java.util.LinkedList: void <init>()>();
+
+        i0 = lengthof $r7;
+
+        i1 = 0;
+
+     label3:
+        if i1 >= i0 goto label7;
+
+        r1 = $r7[i1];
+
+        $r3 = staticinvoke <io.fabric.sdk.android.Fabric: io.fabric.sdk.android.Logger getLogger()>();
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Found crash report ");
+
+        $r9 = virtualinvoke r1.<java.io.File: java.lang.String getPath()>();
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r9);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        interfaceinvoke $r3.<io.fabric.sdk.android.Logger: void d(java.lang.String,java.lang.String)>("CrashlyticsCore", $r9);
+
+        $r10 = new com.crashlytics.android.core.SessionReport;
+
+        specialinvoke $r10.<com.crashlytics.android.core.SessionReport: void <init>(java.io.File)>(r1);
+
+        interfaceinvoke r2.<java.util.List: boolean add(java.lang.Object)>($r10);
+
+        i1 = i1 + 1;
+
+        goto label3;
+
+     label4:
+        $r11 := @caughtexception;
+
+     label5:
+        exitmonitor $r4;
+
+     label6:
+        throw $r11;
+
+     label7:
+        $z0 = interfaceinvoke r2.<java.util.List: boolean isEmpty()>();
+
+        if $z0 == 0 goto label8;
+
+        $r3 = staticinvoke <io.fabric.sdk.android.Fabric: io.fabric.sdk.android.Logger getLogger()>();
+
+        interfaceinvoke $r3.<io.fabric.sdk.android.Logger: void d(java.lang.String,java.lang.String)>("CrashlyticsCore", "No reports found.");
+
+     label8:
+        return r2;
+
+        catch java.lang.Throwable from label1 to label2 with label4;
+        catch java.lang.Throwable from label5 to label6 with label4;
+    }
+    boolean forceUpload(com.crashlytics.android.core.Report)
+    {
+        com.crashlytics.android.core.ReportUploader r0;
+        com.crashlytics.android.core.Report $r1;
+        java.lang.Exception r2;
+        com.crashlytics.android.core.CreateReportRequest r3;
+        java.lang.Object $r4;
+        boolean z0, $z1;
+        com.crashlytics.android.core.CrashlyticsCore $r5;
+        android.content.Context $r6;
+        io.fabric.sdk.android.services.common.ApiKey $r7;
+        java.lang.String $r8;
+        com.crashlytics.android.core.CreateReportSpiCall $r9;
+        io.fabric.sdk.android.Logger $r10;
+        java.lang.StringBuilder $r11;
+        java.lang.Throwable $r12;
+
+        r0 := @this: com.crashlytics.android.core.ReportUploader;
+
+        $r1 := @parameter0: com.crashlytics.android.core.Report;
+
+        z0 = 0;
+
+        $r4 = r0.<com.crashlytics.android.core.ReportUploader: java.lang.Object fileAccessLock>;
+
+        entermonitor $r4;
+
+     label01:
+        $r5 = staticinvoke <com.crashlytics.android.core.CrashlyticsCore: com.crashlytics.android.core.CrashlyticsCore getInstance()>();
+
+        $r6 = virtualinvoke $r5.<com.crashlytics.android.core.CrashlyticsCore: android.content.Context getContext()>();
+
+     label02:
+        r3 = new com.crashlytics.android.core.CreateReportRequest;
+
+        $r7 = new io.fabric.sdk.android.services.common.ApiKey;
+
+     label03:
+        specialinvoke $r7.<io.fabric.sdk.android.services.common.ApiKey: void <init>()>();
+
+        $r8 = virtualinvoke $r7.<io.fabric.sdk.android.services.common.ApiKey: java.lang.String getValue(android.content.Context)>($r6);
+
+        specialinvoke r3.<com.crashlytics.android.core.CreateReportRequest: void <init>(java.lang.String,com.crashlytics.android.core.Report)>($r8, $r1);
+
+        $r9 = r0.<com.crashlytics.android.core.ReportUploader: com.crashlytics.android.core.CreateReportSpiCall createReportCall>;
+
+        $z1 = interfaceinvoke $r9.<com.crashlytics.android.core.CreateReportSpiCall: boolean invoke(com.crashlytics.android.core.CreateReportRequest)>(r3);
+
+        $r10 = staticinvoke <io.fabric.sdk.android.Fabric: io.fabric.sdk.android.Logger getLogger()>();
+
+     label04:
+        $r11 = new java.lang.StringBuilder;
+
+     label05:
+        specialinvoke $r11.<java.lang.StringBuilder: void <init>()>();
+
+        $r11 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Crashlytics report upload ");
+
+     label06:
+        if $z1 == 0 goto label13;
+
+        $r8 = "complete: ";
+
+     label07:
+        $r11 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r8);
+
+        $r8 = interfaceinvoke $r1.<com.crashlytics.android.core.Report: java.lang.String getFileName()>();
+
+        $r11 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r8);
+
+        $r8 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        interfaceinvoke $r10.<io.fabric.sdk.android.Logger: void i(java.lang.String,java.lang.String)>("CrashlyticsCore", $r8);
+
+     label08:
+        if $z1 == 0 goto label11;
+
+     label09:
+        interfaceinvoke $r1.<com.crashlytics.android.core.Report: boolean remove()>();
+
+     label10:
+        z0 = 1;
+
+     label11:
+        exitmonitor $r4;
+
+     label12:
+        return z0;
+
+     label13:
+        $r8 = "FAILED: ";
+
+     label14:
+        goto label07;
+
+     label15:
+        r2 := @caughtexception;
+
+     label16:
+        $r10 = staticinvoke <io.fabric.sdk.android.Fabric: io.fabric.sdk.android.Logger getLogger()>();
+
+        $r11 = new java.lang.StringBuilder;
+
+        specialinvoke $r11.<java.lang.StringBuilder: void <init>()>();
+
+        $r11 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Error occurred sending report ");
+
+        $r11 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r1);
+
+        $r8 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        interfaceinvoke $r10.<io.fabric.sdk.android.Logger: void e(java.lang.String,java.lang.String,java.lang.Throwable)>("CrashlyticsCore", $r8, r2);
+
+        goto label11;
+
+     label17:
+        $r12 := @caughtexception;
+
+        exitmonitor $r4;
+
+     label18:
+        throw $r12;
+
+        catch java.lang.Exception from label01 to label02 with label15;
+        catch java.lang.Exception from label03 to label04 with label15;
+        catch java.lang.Exception from label05 to label06 with label15;
+        catch java.lang.Exception from label07 to label08 with label15;
+        catch java.lang.Exception from label09 to label10 with label15;
+        catch java.lang.Throwable from label01 to label10 with label17;
+        catch java.lang.Throwable from label11 to label12 with label17;
+        catch java.lang.Throwable from label13 to label14 with label17;
+        catch java.lang.Throwable from label16 to label18 with label17;
+    }
+    boolean isUploading()
+    {
+        com.crashlytics.android.core.ReportUploader r0;
+        java.lang.Thread $r1;
+
+        r0 := @this: com.crashlytics.android.core.ReportUploader;
+
+        $r1 = r0.<com.crashlytics.android.core.ReportUploader: java.lang.Thread uploadThread>;
+
+        if $r1 == null goto label1;
+
+        return 1;
+
+     label1:
+        return 0;
+    }
+    public void uploadReports()
+    {
+        com.crashlytics.android.core.ReportUploader r0;
+
+        r0 := @this: com.crashlytics.android.core.ReportUploader;
+
+        virtualinvoke r0.<com.crashlytics.android.core.ReportUploader: void uploadReports(float)>(0.0F);
+
+        return;
+    }
+    public void uploadReports(float)
+    {
+        com.crashlytics.android.core.ReportUploader r0;
+        float $f0;
+        com.crashlytics.android.core.ReportUploader$Worker $r1;
+        java.lang.Thread $r2;
+        java.lang.Throwable $r3;
+
+        r0 := @this: com.crashlytics.android.core.ReportUploader;
+
+        $f0 := @parameter0: float;
+
+        entermonitor r0;
+
+     label1:
+        $r2 = r0.<com.crashlytics.android.core.ReportUploader: java.lang.Thread uploadThread>;
+
+        if $r2 != null goto label2;
+
+        $r2 = new java.lang.Thread;
+
+        $r1 = new com.crashlytics.android.core.ReportUploader$Worker;
+
+        specialinvoke $r1.<com.crashlytics.android.core.ReportUploader$Worker: void <init>(com.crashlytics.android.core.ReportUploader,float)>(r0, $f0);
+
+        specialinvoke $r2.<java.lang.Thread: void <init>(java.lang.Runnable,java.lang.String)>($r1, "Crashlytics Report Uploader");
+
+        r0.<com.crashlytics.android.core.ReportUploader: java.lang.Thread uploadThread> = $r2;
+
+        $r2 = r0.<com.crashlytics.android.core.ReportUploader: java.lang.Thread uploadThread>;
+
+        virtualinvoke $r2.<java.lang.Thread: void start()>();
+
+     label2:
+        exitmonitor r0;
+
+        return;
+
+     label3:
+        $r3 := @caughtexception;
+
+        exitmonitor r0;
+
+        throw $r3;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }

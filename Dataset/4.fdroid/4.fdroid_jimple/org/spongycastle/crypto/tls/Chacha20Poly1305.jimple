@@ -1,0 +1,370 @@
+org.spongycastle.crypto.tls.Chacha20Poly1305 extends java.lang.Object implements org.spongycastle.crypto.tls.TlsCipher
+protected org.spongycastle.crypto.tls.TlsContext context
+protected org.spongycastle.crypto.engines.ChaChaEngine decryptCipher
+protected org.spongycastle.crypto.engines.ChaChaEngine encryptCipher
+    public void <init>(org.spongycastle.crypto.tls.TlsContext) throws java.io.IOException
+    {
+        org.spongycastle.crypto.tls.Chacha20Poly1305 r0;
+        org.spongycastle.crypto.tls.TlsContext $r1;
+        org.spongycastle.crypto.params.KeyParameter r2, r4, r7;
+        byte[] r3;
+        boolean $z0;
+        org.spongycastle.crypto.tls.TlsFatalAlert $r5;
+        org.spongycastle.crypto.engines.ChaChaEngine $r6;
+        org.spongycastle.crypto.params.ParametersWithIV $r8;
+
+        r0 := @this: org.spongycastle.crypto.tls.Chacha20Poly1305;
+
+        $r1 := @parameter0: org.spongycastle.crypto.tls.TlsContext;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $z0 = staticinvoke <org.spongycastle.crypto.tls.TlsUtils: boolean isTLSv12(org.spongycastle.crypto.tls.TlsContext)>($r1);
+
+        if $z0 != 0 goto label1;
+
+        $r5 = new org.spongycastle.crypto.tls.TlsFatalAlert;
+
+        specialinvoke $r5.<org.spongycastle.crypto.tls.TlsFatalAlert: void <init>(short)>(80);
+
+        throw $r5;
+
+     label1:
+        r0.<org.spongycastle.crypto.tls.Chacha20Poly1305: org.spongycastle.crypto.tls.TlsContext context> = $r1;
+
+        r3 = staticinvoke <org.spongycastle.crypto.tls.TlsUtils: byte[] calculateKeyBlock(org.spongycastle.crypto.tls.TlsContext,int)>($r1, 64);
+
+        r2 = new org.spongycastle.crypto.params.KeyParameter;
+
+        specialinvoke r2.<org.spongycastle.crypto.params.KeyParameter: void <init>(byte[],int,int)>(r3, 0, 32);
+
+        r4 = new org.spongycastle.crypto.params.KeyParameter;
+
+        specialinvoke r4.<org.spongycastle.crypto.params.KeyParameter: void <init>(byte[],int,int)>(r3, 32, 32);
+
+        $r6 = new org.spongycastle.crypto.engines.ChaChaEngine;
+
+        specialinvoke $r6.<org.spongycastle.crypto.engines.ChaChaEngine: void <init>(int)>(20);
+
+        r0.<org.spongycastle.crypto.tls.Chacha20Poly1305: org.spongycastle.crypto.engines.ChaChaEngine encryptCipher> = $r6;
+
+        $r6 = new org.spongycastle.crypto.engines.ChaChaEngine;
+
+        specialinvoke $r6.<org.spongycastle.crypto.engines.ChaChaEngine: void <init>(int)>(20);
+
+        r0.<org.spongycastle.crypto.tls.Chacha20Poly1305: org.spongycastle.crypto.engines.ChaChaEngine decryptCipher> = $r6;
+
+        $z0 = interfaceinvoke $r1.<org.spongycastle.crypto.tls.TlsContext: boolean isServer()>();
+
+        if $z0 == 0 goto label3;
+
+        r7 = r4;
+
+     label2:
+        r3 = newarray (byte)[8];
+
+        $r6 = r0.<org.spongycastle.crypto.tls.Chacha20Poly1305: org.spongycastle.crypto.engines.ChaChaEngine encryptCipher>;
+
+        $r8 = new org.spongycastle.crypto.params.ParametersWithIV;
+
+        specialinvoke $r8.<org.spongycastle.crypto.params.ParametersWithIV: void <init>(org.spongycastle.crypto.CipherParameters,byte[])>(r7, r3);
+
+        virtualinvoke $r6.<org.spongycastle.crypto.engines.ChaChaEngine: void init(boolean,org.spongycastle.crypto.CipherParameters)>(1, $r8);
+
+        $r6 = r0.<org.spongycastle.crypto.tls.Chacha20Poly1305: org.spongycastle.crypto.engines.ChaChaEngine decryptCipher>;
+
+        $r8 = new org.spongycastle.crypto.params.ParametersWithIV;
+
+        specialinvoke $r8.<org.spongycastle.crypto.params.ParametersWithIV: void <init>(org.spongycastle.crypto.CipherParameters,byte[])>(r2, r3);
+
+        virtualinvoke $r6.<org.spongycastle.crypto.engines.ChaChaEngine: void init(boolean,org.spongycastle.crypto.CipherParameters)>(0, $r8);
+
+        return;
+
+     label3:
+        r7 = r2;
+
+        r2 = r4;
+
+        goto label2;
+    }
+    protected byte[] calculateRecordMAC(org.spongycastle.crypto.params.KeyParameter, byte[], byte[], int, int)
+    {
+        org.spongycastle.crypto.tls.Chacha20Poly1305 r0;
+        org.spongycastle.crypto.params.KeyParameter $r1;
+        byte[] $r2, $r3;
+        int $i0, $i1, $i2;
+        org.spongycastle.crypto.macs.Poly1305 r4;
+
+        r0 := @this: org.spongycastle.crypto.tls.Chacha20Poly1305;
+
+        $r1 := @parameter0: org.spongycastle.crypto.params.KeyParameter;
+
+        $r2 := @parameter1: byte[];
+
+        $r3 := @parameter2: byte[];
+
+        $i0 := @parameter3: int;
+
+        $i1 := @parameter4: int;
+
+        r4 = new org.spongycastle.crypto.macs.Poly1305;
+
+        specialinvoke r4.<org.spongycastle.crypto.macs.Poly1305: void <init>()>();
+
+        interfaceinvoke r4.<org.spongycastle.crypto.Mac: void init(org.spongycastle.crypto.CipherParameters)>($r1);
+
+        $i2 = lengthof $r2;
+
+        virtualinvoke r0.<org.spongycastle.crypto.tls.Chacha20Poly1305: void updateRecordMAC(org.spongycastle.crypto.Mac,byte[],int,int)>(r4, $r2, 0, $i2);
+
+        virtualinvoke r0.<org.spongycastle.crypto.tls.Chacha20Poly1305: void updateRecordMAC(org.spongycastle.crypto.Mac,byte[],int,int)>(r4, $r3, $i0, $i1);
+
+        $i0 = interfaceinvoke r4.<org.spongycastle.crypto.Mac: int getMacSize()>();
+
+        $r2 = newarray (byte)[$i0];
+
+        interfaceinvoke r4.<org.spongycastle.crypto.Mac: int doFinal(byte[],int)>($r2, 0);
+
+        return $r2;
+    }
+    public byte[] decodeCiphertext(long, short, byte[], int, int) throws java.io.IOException
+    {
+        org.spongycastle.crypto.tls.Chacha20Poly1305 r0;
+        long $l0;
+        short $s1;
+        byte[] $r1, r3, $r6;
+        int $i2, $i3, i4, $i5;
+        org.spongycastle.crypto.engines.ChaChaEngine $r2;
+        org.spongycastle.crypto.tls.TlsFatalAlert $r4;
+        org.spongycastle.crypto.params.KeyParameter $r5;
+        boolean $z0;
+
+        r0 := @this: org.spongycastle.crypto.tls.Chacha20Poly1305;
+
+        $l0 := @parameter0: long;
+
+        $s1 := @parameter1: short;
+
+        $r1 := @parameter2: byte[];
+
+        $i2 := @parameter3: int;
+
+        $i3 := @parameter4: int;
+
+        i4 = virtualinvoke r0.<org.spongycastle.crypto.tls.Chacha20Poly1305: int getPlaintextLimit(int)>($i3);
+
+        if i4 >= 0 goto label1;
+
+        $r4 = new org.spongycastle.crypto.tls.TlsFatalAlert;
+
+        specialinvoke $r4.<org.spongycastle.crypto.tls.TlsFatalAlert: void <init>(short)>(50);
+
+        throw $r4;
+
+     label1:
+        i4 = $i3 + -16;
+
+        $i5 = $i2 + i4;
+
+        $i3 = $i2 + $i3;
+
+        r3 = staticinvoke <org.spongycastle.util.Arrays: byte[] copyOfRange(byte[],int,int)>($r1, $i5, $i3);
+
+        $r2 = r0.<org.spongycastle.crypto.tls.Chacha20Poly1305: org.spongycastle.crypto.engines.ChaChaEngine decryptCipher>;
+
+        $r5 = virtualinvoke r0.<org.spongycastle.crypto.tls.Chacha20Poly1305: org.spongycastle.crypto.params.KeyParameter initRecordMAC(org.spongycastle.crypto.engines.ChaChaEngine,boolean,long)>($r2, 0, $l0);
+
+        $r6 = virtualinvoke r0.<org.spongycastle.crypto.tls.Chacha20Poly1305: byte[] getAdditionalData(long,short,int)>($l0, $s1, i4);
+
+        $r6 = virtualinvoke r0.<org.spongycastle.crypto.tls.Chacha20Poly1305: byte[] calculateRecordMAC(org.spongycastle.crypto.params.KeyParameter,byte[],byte[],int,int)>($r5, $r6, $r1, $i2, i4);
+
+        $z0 = staticinvoke <org.spongycastle.util.Arrays: boolean constantTimeAreEqual(byte[],byte[])>($r6, r3);
+
+        if $z0 != 0 goto label2;
+
+        $r4 = new org.spongycastle.crypto.tls.TlsFatalAlert;
+
+        specialinvoke $r4.<org.spongycastle.crypto.tls.TlsFatalAlert: void <init>(short)>(20);
+
+        throw $r4;
+
+     label2:
+        r3 = newarray (byte)[i4];
+
+        $r2 = r0.<org.spongycastle.crypto.tls.Chacha20Poly1305: org.spongycastle.crypto.engines.ChaChaEngine decryptCipher>;
+
+        virtualinvoke $r2.<org.spongycastle.crypto.engines.ChaChaEngine: int processBytes(byte[],int,int,byte[],int)>($r1, $i2, i4, r3, 0);
+
+        return r3;
+    }
+    public byte[] encodePlaintext(long, short, byte[], int, int) throws java.io.IOException
+    {
+        org.spongycastle.crypto.tls.Chacha20Poly1305 r0;
+        long $l0;
+        short $s1;
+        byte[] $r1, r2;
+        int $i2, $i3, i4;
+        org.spongycastle.crypto.engines.ChaChaEngine $r3;
+        org.spongycastle.crypto.params.KeyParameter $r4;
+
+        r0 := @this: org.spongycastle.crypto.tls.Chacha20Poly1305;
+
+        $l0 := @parameter0: long;
+
+        $s1 := @parameter1: short;
+
+        $r1 := @parameter2: byte[];
+
+        $i2 := @parameter3: int;
+
+        $i3 := @parameter4: int;
+
+        i4 = $i3 + 16;
+
+        $r3 = r0.<org.spongycastle.crypto.tls.Chacha20Poly1305: org.spongycastle.crypto.engines.ChaChaEngine encryptCipher>;
+
+        $r4 = virtualinvoke r0.<org.spongycastle.crypto.tls.Chacha20Poly1305: org.spongycastle.crypto.params.KeyParameter initRecordMAC(org.spongycastle.crypto.engines.ChaChaEngine,boolean,long)>($r3, 1, $l0);
+
+        r2 = newarray (byte)[i4];
+
+        $r3 = r0.<org.spongycastle.crypto.tls.Chacha20Poly1305: org.spongycastle.crypto.engines.ChaChaEngine encryptCipher>;
+
+        virtualinvoke $r3.<org.spongycastle.crypto.engines.ChaChaEngine: int processBytes(byte[],int,int,byte[],int)>($r1, $i2, $i3, r2, 0);
+
+        $r1 = virtualinvoke r0.<org.spongycastle.crypto.tls.Chacha20Poly1305: byte[] getAdditionalData(long,short,int)>($l0, $s1, $i3);
+
+        $r1 = virtualinvoke r0.<org.spongycastle.crypto.tls.Chacha20Poly1305: byte[] calculateRecordMAC(org.spongycastle.crypto.params.KeyParameter,byte[],byte[],int,int)>($r4, $r1, r2, 0, $i3);
+
+        $i2 = lengthof $r1;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r1, 0, r2, $i3, $i2);
+
+        return r2;
+    }
+    protected byte[] getAdditionalData(long, short, int) throws java.io.IOException
+    {
+        org.spongycastle.crypto.tls.Chacha20Poly1305 r0;
+        long $l0;
+        short $s1;
+        int $i2;
+        byte[] r1;
+        org.spongycastle.crypto.tls.ProtocolVersion $r2;
+        org.spongycastle.crypto.tls.TlsContext $r3;
+
+        r0 := @this: org.spongycastle.crypto.tls.Chacha20Poly1305;
+
+        $l0 := @parameter0: long;
+
+        $s1 := @parameter1: short;
+
+        $i2 := @parameter2: int;
+
+        r1 = newarray (byte)[13];
+
+        staticinvoke <org.spongycastle.crypto.tls.TlsUtils: void writeUint64(long,byte[],int)>($l0, r1, 0);
+
+        staticinvoke <org.spongycastle.crypto.tls.TlsUtils: void writeUint8(short,byte[],int)>($s1, r1, 8);
+
+        $r3 = r0.<org.spongycastle.crypto.tls.Chacha20Poly1305: org.spongycastle.crypto.tls.TlsContext context>;
+
+        $r2 = interfaceinvoke $r3.<org.spongycastle.crypto.tls.TlsContext: org.spongycastle.crypto.tls.ProtocolVersion getServerVersion()>();
+
+        staticinvoke <org.spongycastle.crypto.tls.TlsUtils: void writeVersion(org.spongycastle.crypto.tls.ProtocolVersion,byte[],int)>($r2, r1, 9);
+
+        staticinvoke <org.spongycastle.crypto.tls.TlsUtils: void writeUint16(int,byte[],int)>($i2, r1, 11);
+
+        return r1;
+    }
+    public int getPlaintextLimit(int)
+    {
+        org.spongycastle.crypto.tls.Chacha20Poly1305 r0;
+        int $i0;
+
+        r0 := @this: org.spongycastle.crypto.tls.Chacha20Poly1305;
+
+        $i0 := @parameter0: int;
+
+        $i0 = $i0 + -16;
+
+        return $i0;
+    }
+    protected org.spongycastle.crypto.params.KeyParameter initRecordMAC(org.spongycastle.crypto.engines.ChaChaEngine, boolean, long)
+    {
+        org.spongycastle.crypto.tls.Chacha20Poly1305 r0;
+        org.spongycastle.crypto.engines.ChaChaEngine $r1;
+        boolean $z0;
+        long $l0;
+        byte[] r2;
+        org.spongycastle.crypto.params.KeyParameter r3;
+        org.spongycastle.crypto.params.ParametersWithIV $r4;
+        int $i1;
+
+        r0 := @this: org.spongycastle.crypto.tls.Chacha20Poly1305;
+
+        $r1 := @parameter0: org.spongycastle.crypto.engines.ChaChaEngine;
+
+        $z0 := @parameter1: boolean;
+
+        $l0 := @parameter2: long;
+
+        r2 = newarray (byte)[8];
+
+        staticinvoke <org.spongycastle.crypto.tls.TlsUtils: void writeUint64(long,byte[],int)>($l0, r2, 0);
+
+        $r4 = new org.spongycastle.crypto.params.ParametersWithIV;
+
+        specialinvoke $r4.<org.spongycastle.crypto.params.ParametersWithIV: void <init>(org.spongycastle.crypto.CipherParameters,byte[])>(null, r2);
+
+        virtualinvoke $r1.<org.spongycastle.crypto.engines.ChaChaEngine: void init(boolean,org.spongycastle.crypto.CipherParameters)>($z0, $r4);
+
+        r2 = newarray (byte)[64];
+
+        $i1 = lengthof r2;
+
+        virtualinvoke $r1.<org.spongycastle.crypto.engines.ChaChaEngine: int processBytes(byte[],int,int,byte[],int)>(r2, 0, $i1, r2, 0);
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r2, 0, r2, 32, 16);
+
+        r3 = new org.spongycastle.crypto.params.KeyParameter;
+
+        specialinvoke r3.<org.spongycastle.crypto.params.KeyParameter: void <init>(byte[],int,int)>(r2, 16, 32);
+
+        r2 = virtualinvoke r3.<org.spongycastle.crypto.params.KeyParameter: byte[] getKey()>();
+
+        staticinvoke <org.spongycastle.crypto.generators.Poly1305KeyGenerator: void clamp(byte[])>(r2);
+
+        return r3;
+    }
+    protected void updateRecordMAC(org.spongycastle.crypto.Mac, byte[], int, int)
+    {
+        org.spongycastle.crypto.tls.Chacha20Poly1305 r0;
+        org.spongycastle.crypto.Mac $r1;
+        byte[] $r2;
+        int $i0, $i1;
+        long $l2;
+
+        r0 := @this: org.spongycastle.crypto.tls.Chacha20Poly1305;
+
+        $r1 := @parameter0: org.spongycastle.crypto.Mac;
+
+        $r2 := @parameter1: byte[];
+
+        $i0 := @parameter2: int;
+
+        $i1 := @parameter3: int;
+
+        interfaceinvoke $r1.<org.spongycastle.crypto.Mac: void update(byte[],int,int)>($r2, $i0, $i1);
+
+        $l2 = (long) $i1;
+
+        $l2 = $l2 & 4294967295L;
+
+        $r2 = staticinvoke <org.spongycastle.util.Pack: byte[] longToLittleEndian(long)>($l2);
+
+        $i0 = lengthof $r2;
+
+        interfaceinvoke $r1.<org.spongycastle.crypto.Mac: void update(byte[],int,int)>($r2, 0, $i0);
+
+        return;
+    }

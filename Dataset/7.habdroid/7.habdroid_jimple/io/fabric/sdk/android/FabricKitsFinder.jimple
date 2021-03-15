@@ -1,0 +1,362 @@
+io.fabric.sdk.android.FabricKitsFinder extends java.lang.Object implements java.util.concurrent.Callable
+private static final java.lang.String FABRIC_BUILD_TYPE_KEY
+static final java.lang.String FABRIC_DIR
+private static final java.lang.String FABRIC_IDENTIFIER_KEY
+private static final java.lang.String FABRIC_VERSION_KEY
+final java.lang.String apkFileName
+    void <init>(java.lang.String)
+    {
+        io.fabric.sdk.android.FabricKitsFinder r0;
+        java.lang.String $r1;
+
+        r0 := @this: io.fabric.sdk.android.FabricKitsFinder;
+
+        $r1 := @parameter0: java.lang.String;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<io.fabric.sdk.android.FabricKitsFinder: java.lang.String apkFileName> = $r1;
+
+        return;
+    }
+    private java.util.Map findImplicitKits()
+    {
+        io.fabric.sdk.android.FabricKitsFinder r0;
+        io.fabric.sdk.android.KitInfo r1;
+        java.util.HashMap r2;
+        java.lang.String $r3;
+        io.fabric.sdk.android.Logger $r4;
+        java.lang.Exception $r5;
+
+        r0 := @this: io.fabric.sdk.android.FabricKitsFinder;
+
+        r2 = new java.util.HashMap;
+
+        specialinvoke r2.<java.util.HashMap: void <init>()>();
+
+     label1:
+        staticinvoke <java.lang.Class: java.lang.Class forName(java.lang.String)>("com.google.android.gms.ads.AdView");
+
+     label2:
+        r1 = new io.fabric.sdk.android.KitInfo;
+
+     label3:
+        specialinvoke r1.<io.fabric.sdk.android.KitInfo: void <init>(java.lang.String,java.lang.String,java.lang.String)>("com.google.firebase.firebase-ads", "0.0.0", "binary");
+
+        $r3 = virtualinvoke r1.<io.fabric.sdk.android.KitInfo: java.lang.String getIdentifier()>();
+
+        interfaceinvoke r2.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r3, r1);
+
+        $r4 = staticinvoke <io.fabric.sdk.android.Fabric: io.fabric.sdk.android.Logger getLogger()>();
+
+        interfaceinvoke $r4.<io.fabric.sdk.android.Logger: void v(java.lang.String,java.lang.String)>("Fabric", "Found kit: com.google.firebase.firebase-ads");
+
+     label4:
+        return r2;
+
+     label5:
+        $r5 := @caughtexception;
+
+        return r2;
+
+        catch java.lang.Exception from label1 to label2 with label5;
+        catch java.lang.Exception from label3 to label4 with label5;
+    }
+    private java.util.Map findRegisteredKits() throws java.lang.Exception
+    {
+        io.fabric.sdk.android.FabricKitsFinder r0;
+        java.util.HashMap r1;
+        java.util.zip.ZipFile $r2;
+        java.util.Enumeration $r3;
+        boolean $z0;
+        java.lang.Object $r4;
+        java.util.zip.ZipEntry r5;
+        java.lang.String $r6;
+        int $i0, $i1;
+        io.fabric.sdk.android.KitInfo $r7;
+        io.fabric.sdk.android.Logger $r8;
+        java.lang.Object[] $r9;
+        java.io.IOException $r10;
+
+        r0 := @this: io.fabric.sdk.android.FabricKitsFinder;
+
+        r1 = new java.util.HashMap;
+
+        specialinvoke r1.<java.util.HashMap: void <init>()>();
+
+        $r2 = virtualinvoke r0.<io.fabric.sdk.android.FabricKitsFinder: java.util.zip.ZipFile loadApkFile()>();
+
+        $r3 = virtualinvoke $r2.<java.util.zip.ZipFile: java.util.Enumeration entries()>();
+
+     label1:
+        $z0 = interfaceinvoke $r3.<java.util.Enumeration: boolean hasMoreElements()>();
+
+        if $z0 == 0 goto label2;
+
+        $r4 = interfaceinvoke $r3.<java.util.Enumeration: java.lang.Object nextElement()>();
+
+        r5 = (java.util.zip.ZipEntry) $r4;
+
+        $r6 = virtualinvoke r5.<java.util.zip.ZipEntry: java.lang.String getName()>();
+
+        $z0 = virtualinvoke $r6.<java.lang.String: boolean startsWith(java.lang.String)>("fabric/");
+
+        if $z0 == 0 goto label1;
+
+        $r6 = virtualinvoke r5.<java.util.zip.ZipEntry: java.lang.String getName()>();
+
+        $i0 = virtualinvoke $r6.<java.lang.String: int length()>();
+
+        $r6 = "fabric/";
+
+        $i1 = virtualinvoke $r6.<java.lang.String: int length()>();
+
+        if $i0 <= $i1 goto label1;
+
+        $r7 = specialinvoke r0.<io.fabric.sdk.android.FabricKitsFinder: io.fabric.sdk.android.KitInfo loadKitInfo(java.util.zip.ZipEntry,java.util.zip.ZipFile)>(r5, $r2);
+
+        if $r7 == null goto label1;
+
+        $r6 = virtualinvoke $r7.<io.fabric.sdk.android.KitInfo: java.lang.String getIdentifier()>();
+
+        interfaceinvoke r1.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r6, $r7);
+
+        $r8 = staticinvoke <io.fabric.sdk.android.Fabric: io.fabric.sdk.android.Logger getLogger()>();
+
+        $r9 = newarray (java.lang.Object)[2];
+
+        $r6 = virtualinvoke $r7.<io.fabric.sdk.android.KitInfo: java.lang.String getIdentifier()>();
+
+        $r9[0] = $r6;
+
+        $r6 = virtualinvoke $r7.<io.fabric.sdk.android.KitInfo: java.lang.String getVersion()>();
+
+        $r9[1] = $r6;
+
+        $r6 = staticinvoke <java.lang.String: java.lang.String format(java.lang.String,java.lang.Object[])>("Found kit:[%s] version:[%s]", $r9);
+
+        interfaceinvoke $r8.<io.fabric.sdk.android.Logger: void v(java.lang.String,java.lang.String)>("Fabric", $r6);
+
+        goto label1;
+
+     label2:
+        if $r2 == null goto label6;
+
+     label3:
+        virtualinvoke $r2.<java.util.zip.ZipFile: void close()>();
+
+     label4:
+        return r1;
+
+     label5:
+        $r10 := @caughtexception;
+
+     label6:
+        return r1;
+
+        catch java.io.IOException from label3 to label4 with label5;
+    }
+    private io.fabric.sdk.android.KitInfo loadKitInfo(java.util.zip.ZipEntry, java.util.zip.ZipFile)
+    {
+        io.fabric.sdk.android.FabricKitsFinder r0;
+        java.util.zip.ZipEntry $r1;
+        java.util.zip.ZipFile $r2;
+        java.io.IOException r3;
+        java.util.Properties r4;
+        java.io.InputStream r5, $r6;
+        java.lang.String $r7, $r8, $r9;
+        boolean $z0;
+        java.lang.IllegalStateException $r10;
+        java.lang.StringBuilder $r11;
+        io.fabric.sdk.android.Logger $r12;
+        io.fabric.sdk.android.KitInfo $r13;
+        java.lang.Throwable $r14;
+
+        r0 := @this: io.fabric.sdk.android.FabricKitsFinder;
+
+        $r1 := @parameter0: java.util.zip.ZipEntry;
+
+        $r2 := @parameter1: java.util.zip.ZipFile;
+
+        r5 = null;
+
+     label01:
+        $r6 = virtualinvoke $r2.<java.util.zip.ZipFile: java.io.InputStream getInputStream(java.util.zip.ZipEntry)>($r1);
+
+     label02:
+        r5 = $r6;
+
+     label03:
+        r4 = new java.util.Properties;
+
+     label04:
+        specialinvoke r4.<java.util.Properties: void <init>()>();
+
+        virtualinvoke r4.<java.util.Properties: void load(java.io.InputStream)>($r6);
+
+        $r7 = virtualinvoke r4.<java.util.Properties: java.lang.String getProperty(java.lang.String)>("fabric-identifier");
+
+        $r8 = virtualinvoke r4.<java.util.Properties: java.lang.String getProperty(java.lang.String)>("fabric-version");
+
+        $r9 = virtualinvoke r4.<java.util.Properties: java.lang.String getProperty(java.lang.String)>("fabric-build-type");
+
+        $z0 = staticinvoke <android.text.TextUtils: boolean isEmpty(java.lang.CharSequence)>($r7);
+
+     label05:
+        if $z0 != 0 goto label08;
+
+     label06:
+        $z0 = staticinvoke <android.text.TextUtils: boolean isEmpty(java.lang.CharSequence)>($r8);
+
+     label07:
+        if $z0 == 0 goto label14;
+
+     label08:
+        $r10 = new java.lang.IllegalStateException;
+
+        $r11 = new java.lang.StringBuilder;
+
+     label09:
+        specialinvoke $r11.<java.lang.StringBuilder: void <init>()>();
+
+        $r11 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Invalid format of fabric file,");
+
+        $r7 = virtualinvoke $r1.<java.util.zip.ZipEntry: java.lang.String getName()>();
+
+        $r11 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r7);
+
+        $r7 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r10.<java.lang.IllegalStateException: void <init>(java.lang.String)>($r7);
+
+     label10:
+        throw $r10;
+
+     label11:
+        r3 := @caughtexception;
+
+     label12:
+        $r12 = staticinvoke <io.fabric.sdk.android.Fabric: io.fabric.sdk.android.Logger getLogger()>();
+
+        $r11 = new java.lang.StringBuilder;
+
+        specialinvoke $r11.<java.lang.StringBuilder: void <init>()>();
+
+        $r11 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Error when parsing fabric properties ");
+
+        $r7 = virtualinvoke $r1.<java.util.zip.ZipEntry: java.lang.String getName()>();
+
+        $r11 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r7);
+
+        $r7 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        interfaceinvoke $r12.<io.fabric.sdk.android.Logger: void e(java.lang.String,java.lang.String,java.lang.Throwable)>("Fabric", $r7, r3);
+
+     label13:
+        staticinvoke <io.fabric.sdk.android.services.common.CommonUtils: void closeQuietly(java.io.Closeable)>(r5);
+
+        return null;
+
+     label14:
+        $r13 = new io.fabric.sdk.android.KitInfo;
+
+     label15:
+        specialinvoke $r13.<io.fabric.sdk.android.KitInfo: void <init>(java.lang.String,java.lang.String,java.lang.String)>($r7, $r8, $r9);
+
+     label16:
+        staticinvoke <io.fabric.sdk.android.services.common.CommonUtils: void closeQuietly(java.io.Closeable)>($r6);
+
+        return $r13;
+
+     label17:
+        $r14 := @caughtexception;
+
+        staticinvoke <io.fabric.sdk.android.services.common.CommonUtils: void closeQuietly(java.io.Closeable)>(r5);
+
+        throw $r14;
+
+        catch java.io.IOException from label01 to label02 with label11;
+        catch java.io.IOException from label04 to label05 with label11;
+        catch java.io.IOException from label06 to label07 with label11;
+        catch java.io.IOException from label09 to label10 with label11;
+        catch java.lang.Throwable from label01 to label02 with label17;
+        catch java.lang.Throwable from label03 to label05 with label17;
+        catch java.lang.Throwable from label06 to label07 with label17;
+        catch java.lang.Throwable from label08 to label11 with label17;
+        catch java.lang.Throwable from label12 to label13 with label17;
+        catch java.io.IOException from label15 to label16 with label11;
+        catch java.lang.Throwable from label14 to label16 with label17;
+    }
+    public volatile java.lang.Object call() throws java.lang.Exception
+    {
+        io.fabric.sdk.android.FabricKitsFinder r0;
+        java.util.Map $r1;
+
+        r0 := @this: io.fabric.sdk.android.FabricKitsFinder;
+
+        $r1 = virtualinvoke r0.<io.fabric.sdk.android.FabricKitsFinder: java.util.Map call()>();
+
+        return $r1;
+    }
+    public java.util.Map call() throws java.lang.Exception
+    {
+        io.fabric.sdk.android.FabricKitsFinder r0;
+        java.util.HashMap r1;
+        long $l0, $l1;
+        java.util.Map $r2;
+        io.fabric.sdk.android.Logger $r3;
+        java.lang.StringBuilder $r4;
+        java.lang.String $r5;
+
+        r0 := @this: io.fabric.sdk.android.FabricKitsFinder;
+
+        r1 = new java.util.HashMap;
+
+        specialinvoke r1.<java.util.HashMap: void <init>()>();
+
+        $l0 = staticinvoke <android.os.SystemClock: long elapsedRealtime()>();
+
+        $r2 = specialinvoke r0.<io.fabric.sdk.android.FabricKitsFinder: java.util.Map findImplicitKits()>();
+
+        interfaceinvoke r1.<java.util.Map: void putAll(java.util.Map)>($r2);
+
+        $r2 = specialinvoke r0.<io.fabric.sdk.android.FabricKitsFinder: java.util.Map findRegisteredKits()>();
+
+        interfaceinvoke r1.<java.util.Map: void putAll(java.util.Map)>($r2);
+
+        $r3 = staticinvoke <io.fabric.sdk.android.Fabric: io.fabric.sdk.android.Logger getLogger()>();
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("finish scanning in ");
+
+        $l1 = staticinvoke <android.os.SystemClock: long elapsedRealtime()>();
+
+        $l0 = $l1 - $l0;
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l0);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        interfaceinvoke $r3.<io.fabric.sdk.android.Logger: void v(java.lang.String,java.lang.String)>("Fabric", $r5);
+
+        return r1;
+    }
+    protected java.util.zip.ZipFile loadApkFile() throws java.io.IOException
+    {
+        io.fabric.sdk.android.FabricKitsFinder r0;
+        java.util.zip.ZipFile $r1;
+        java.lang.String $r2;
+
+        r0 := @this: io.fabric.sdk.android.FabricKitsFinder;
+
+        $r1 = new java.util.zip.ZipFile;
+
+        $r2 = r0.<io.fabric.sdk.android.FabricKitsFinder: java.lang.String apkFileName>;
+
+        specialinvoke $r1.<java.util.zip.ZipFile: void <init>(java.lang.String)>($r2);
+
+        return $r1;
+    }

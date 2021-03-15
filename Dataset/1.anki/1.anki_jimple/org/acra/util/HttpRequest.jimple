@@ -1,0 +1,756 @@
+org.acra.util.HttpRequest extends java.lang.Object
+private int connectionTimeOut
+private java.util.Map headers
+private java.lang.String login
+private int maxNrRetries
+private java.lang.String password
+private int socketTimeOut
+    public void <init>()
+    {
+        org.acra.util.HttpRequest r0;
+
+        r0 := @this: org.acra.util.HttpRequest;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<org.acra.util.HttpRequest: int connectionTimeOut> = 3000;
+
+        r0.<org.acra.util.HttpRequest: int socketTimeOut> = 3000;
+
+        r0.<org.acra.util.HttpRequest: int maxNrRetries> = 3;
+
+        return;
+    }
+    private org.apache.http.auth.UsernamePasswordCredentials getCredentials()
+    {
+        org.acra.util.HttpRequest r0;
+        java.lang.String $r1, $r2;
+        org.apache.http.auth.UsernamePasswordCredentials $r3;
+
+        r0 := @this: org.acra.util.HttpRequest;
+
+        $r1 = r0.<org.acra.util.HttpRequest: java.lang.String login>;
+
+        if $r1 != null goto label1;
+
+        $r1 = r0.<org.acra.util.HttpRequest: java.lang.String password>;
+
+        if $r1 == null goto label2;
+
+     label1:
+        $r3 = new org.apache.http.auth.UsernamePasswordCredentials;
+
+        $r1 = r0.<org.acra.util.HttpRequest: java.lang.String login>;
+
+        $r2 = r0.<org.acra.util.HttpRequest: java.lang.String password>;
+
+        specialinvoke $r3.<org.apache.http.auth.UsernamePasswordCredentials: void <init>(java.lang.String,java.lang.String)>($r1, $r2);
+
+        return $r3;
+
+     label2:
+        return null;
+    }
+    private org.apache.http.client.HttpClient getHttpClient(android.content.Context)
+    {
+        org.acra.util.HttpRequest r0;
+        android.content.Context $r1;
+        org.apache.http.conn.ssl.SSLSocketFactory r5, $r24;
+        int $i0;
+        org.acra.ACRAConfiguration $r7;
+        boolean $z0;
+        java.security.KeyStore $r8;
+        org.apache.http.conn.ssl.X509HostnameVerifier $r9;
+        java.security.KeyManagementException r10;
+        java.security.UnrecoverableKeyException r11;
+        java.security.NoSuchAlgorithmException r12;
+        java.security.KeyStoreException r13;
+        org.acra.util.HttpsSocketFactoryFactory $r14;
+        org.apache.http.conn.scheme.SocketFactory $r15;
+        org.apache.http.params.BasicHttpParams $r16;
+        org.apache.http.conn.scheme.SchemeRegistry $r17;
+        org.apache.http.conn.scheme.PlainSocketFactory $r18;
+        org.apache.http.conn.scheme.Scheme $r19;
+        org.acra.util.FakeSocketFactory $r20;
+        org.apache.http.impl.conn.SingleClientConnManager $r21;
+        org.apache.http.impl.client.DefaultHttpClient $r22;
+        org.acra.util.HttpRequest$SocketTimeOutRetryHandler $r23;
+        org.apache.http.params.HttpParams $r25;
+        org.apache.http.conn.ClientConnectionManager $r26;
+        org.apache.http.client.HttpClient $r27;
+
+        r0 := @this: org.acra.util.HttpRequest;
+
+        $r1 := @parameter0: android.content.Context;
+
+        $r16 = new org.apache.http.params.BasicHttpParams;
+
+        specialinvoke $r16.<org.apache.http.params.BasicHttpParams: void <init>()>();
+
+        $r25 = (org.apache.http.params.HttpParams) $r16;
+
+        interfaceinvoke $r25.<org.apache.http.params.HttpParams: org.apache.http.params.HttpParams setParameter(java.lang.String,java.lang.Object)>("http.protocol.cookie-policy", "rfc2109");
+
+        $i0 = r0.<org.acra.util.HttpRequest: int connectionTimeOut>;
+
+        $r25 = (org.apache.http.params.HttpParams) $r16;
+
+        staticinvoke <org.apache.http.params.HttpConnectionParams: void setConnectionTimeout(org.apache.http.params.HttpParams,int)>($r25, $i0);
+
+        $i0 = r0.<org.acra.util.HttpRequest: int socketTimeOut>;
+
+        $r25 = (org.apache.http.params.HttpParams) $r16;
+
+        staticinvoke <org.apache.http.params.HttpConnectionParams: void setSoTimeout(org.apache.http.params.HttpParams,int)>($r25, $i0);
+
+        $r25 = (org.apache.http.params.HttpParams) $r16;
+
+        staticinvoke <org.apache.http.params.HttpConnectionParams: void setSocketBufferSize(org.apache.http.params.HttpParams,int)>($r25, 8192);
+
+        $r17 = new org.apache.http.conn.scheme.SchemeRegistry;
+
+        specialinvoke $r17.<org.apache.http.conn.scheme.SchemeRegistry: void <init>()>();
+
+        $r19 = new org.apache.http.conn.scheme.Scheme;
+
+        $r18 = new org.apache.http.conn.scheme.PlainSocketFactory;
+
+        specialinvoke $r18.<org.apache.http.conn.scheme.PlainSocketFactory: void <init>()>();
+
+        $r15 = (org.apache.http.conn.scheme.SocketFactory) $r18;
+
+        specialinvoke $r19.<org.apache.http.conn.scheme.Scheme: void <init>(java.lang.String,org.apache.http.conn.scheme.SocketFactory,int)>("http", $r15, 80);
+
+        virtualinvoke $r17.<org.apache.http.conn.scheme.SchemeRegistry: org.apache.http.conn.scheme.Scheme register(org.apache.http.conn.scheme.Scheme)>($r19);
+
+        $r7 = staticinvoke <org.acra.ACRA: org.acra.ACRAConfiguration getConfig()>();
+
+        $z0 = virtualinvoke $r7.<org.acra.ACRAConfiguration: boolean disableSSLCertValidation()>();
+
+        if $z0 == 0 goto label02;
+
+        $r19 = new org.apache.http.conn.scheme.Scheme;
+
+        $r20 = new org.acra.util.FakeSocketFactory;
+
+        specialinvoke $r20.<org.acra.util.FakeSocketFactory: void <init>()>();
+
+        specialinvoke $r19.<org.apache.http.conn.scheme.Scheme: void <init>(java.lang.String,org.apache.http.conn.scheme.SocketFactory,int)>("https", $r20, 443);
+
+        virtualinvoke $r17.<org.apache.http.conn.scheme.SchemeRegistry: org.apache.http.conn.scheme.Scheme register(org.apache.http.conn.scheme.Scheme)>($r19);
+
+     label01:
+        $r21 = new org.apache.http.impl.conn.SingleClientConnManager;
+
+        $r25 = (org.apache.http.params.HttpParams) $r16;
+
+        specialinvoke $r21.<org.apache.http.impl.conn.SingleClientConnManager: void <init>(org.apache.http.params.HttpParams,org.apache.http.conn.scheme.SchemeRegistry)>($r25, $r17);
+
+        $r22 = new org.apache.http.impl.client.DefaultHttpClient;
+
+        $r26 = (org.apache.http.conn.ClientConnectionManager) $r21;
+
+        $r25 = (org.apache.http.params.HttpParams) $r16;
+
+        specialinvoke $r22.<org.apache.http.impl.client.DefaultHttpClient: void <init>(org.apache.http.conn.ClientConnectionManager,org.apache.http.params.HttpParams)>($r26, $r25);
+
+        $r23 = new org.acra.util.HttpRequest$SocketTimeOutRetryHandler;
+
+        $i0 = r0.<org.acra.util.HttpRequest: int maxNrRetries>;
+
+        $r25 = (org.apache.http.params.HttpParams) $r16;
+
+        specialinvoke $r23.<org.acra.util.HttpRequest$SocketTimeOutRetryHandler: void <init>(org.apache.http.params.HttpParams,int,org.acra.util.HttpRequest$1)>($r25, $i0, null);
+
+        virtualinvoke $r22.<org.apache.http.impl.client.DefaultHttpClient: void setHttpRequestRetryHandler(org.apache.http.client.HttpRequestRetryHandler)>($r23);
+
+        $r27 = (org.apache.http.client.HttpClient) $r22;
+
+        return $r27;
+
+     label02:
+        $r7 = staticinvoke <org.acra.ACRA: org.acra.ACRAConfiguration getConfig()>();
+
+        $r8 = virtualinvoke $r7.<org.acra.ACRAConfiguration: java.security.KeyStore keyStore()>();
+
+        if $r8 == null goto label13;
+
+        $r24 = new org.apache.http.conn.ssl.SSLSocketFactory;
+
+     label03:
+        $r7 = staticinvoke <org.acra.ACRA: org.acra.ACRAConfiguration getConfig()>();
+
+        $r8 = virtualinvoke $r7.<org.acra.ACRAConfiguration: java.security.KeyStore keyStore()>();
+
+        specialinvoke $r24.<org.apache.http.conn.ssl.SSLSocketFactory: void <init>(java.security.KeyStore)>($r8);
+
+     label04:
+        $r9 = <org.apache.http.conn.ssl.SSLSocketFactory: org.apache.http.conn.ssl.X509HostnameVerifier STRICT_HOSTNAME_VERIFIER>;
+
+     label05:
+        virtualinvoke $r24.<org.apache.http.conn.ssl.SSLSocketFactory: void setHostnameVerifier(org.apache.http.conn.ssl.X509HostnameVerifier)>($r9);
+
+     label06:
+        $r19 = new org.apache.http.conn.scheme.Scheme;
+
+     label07:
+        specialinvoke $r19.<org.apache.http.conn.scheme.Scheme: void <init>(java.lang.String,org.apache.http.conn.scheme.SocketFactory,int)>("https", $r24, 443);
+
+        virtualinvoke $r17.<org.apache.http.conn.scheme.SchemeRegistry: org.apache.http.conn.scheme.Scheme register(org.apache.http.conn.scheme.Scheme)>($r19);
+
+     label08:
+        goto label01;
+
+     label09:
+        r10 := @caughtexception;
+
+        $r19 = new org.apache.http.conn.scheme.Scheme;
+
+        r5 = staticinvoke <org.apache.http.conn.ssl.SSLSocketFactory: org.apache.http.conn.ssl.SSLSocketFactory getSocketFactory()>();
+
+        specialinvoke $r19.<org.apache.http.conn.scheme.Scheme: void <init>(java.lang.String,org.apache.http.conn.scheme.SocketFactory,int)>("https", r5, 443);
+
+        virtualinvoke $r17.<org.apache.http.conn.scheme.SchemeRegistry: org.apache.http.conn.scheme.Scheme register(org.apache.http.conn.scheme.Scheme)>($r19);
+
+        goto label01;
+
+     label10:
+        r11 := @caughtexception;
+
+        $r19 = new org.apache.http.conn.scheme.Scheme;
+
+        r5 = staticinvoke <org.apache.http.conn.ssl.SSLSocketFactory: org.apache.http.conn.ssl.SSLSocketFactory getSocketFactory()>();
+
+        specialinvoke $r19.<org.apache.http.conn.scheme.Scheme: void <init>(java.lang.String,org.apache.http.conn.scheme.SocketFactory,int)>("https", r5, 443);
+
+        virtualinvoke $r17.<org.apache.http.conn.scheme.SchemeRegistry: org.apache.http.conn.scheme.Scheme register(org.apache.http.conn.scheme.Scheme)>($r19);
+
+        goto label01;
+
+     label11:
+        r12 := @caughtexception;
+
+        $r19 = new org.apache.http.conn.scheme.Scheme;
+
+        r5 = staticinvoke <org.apache.http.conn.ssl.SSLSocketFactory: org.apache.http.conn.ssl.SSLSocketFactory getSocketFactory()>();
+
+        specialinvoke $r19.<org.apache.http.conn.scheme.Scheme: void <init>(java.lang.String,org.apache.http.conn.scheme.SocketFactory,int)>("https", r5, 443);
+
+        virtualinvoke $r17.<org.apache.http.conn.scheme.SchemeRegistry: org.apache.http.conn.scheme.Scheme register(org.apache.http.conn.scheme.Scheme)>($r19);
+
+        goto label01;
+
+     label12:
+        r13 := @caughtexception;
+
+        $r19 = new org.apache.http.conn.scheme.Scheme;
+
+        r5 = staticinvoke <org.apache.http.conn.ssl.SSLSocketFactory: org.apache.http.conn.ssl.SSLSocketFactory getSocketFactory()>();
+
+        specialinvoke $r19.<org.apache.http.conn.scheme.Scheme: void <init>(java.lang.String,org.apache.http.conn.scheme.SocketFactory,int)>("https", r5, 443);
+
+        virtualinvoke $r17.<org.apache.http.conn.scheme.SchemeRegistry: org.apache.http.conn.scheme.Scheme register(org.apache.http.conn.scheme.Scheme)>($r19);
+
+        goto label01;
+
+     label13:
+        $r7 = staticinvoke <org.acra.ACRA: org.acra.ACRAConfiguration getConfig()>();
+
+        $r14 = virtualinvoke $r7.<org.acra.ACRAConfiguration: org.acra.util.HttpsSocketFactoryFactory getHttpSocketFactoryFactory()>();
+
+        $r15 = interfaceinvoke $r14.<org.acra.util.HttpsSocketFactoryFactory: org.apache.http.conn.scheme.SocketFactory create(android.content.Context)>($r1);
+
+        $r19 = new org.apache.http.conn.scheme.Scheme;
+
+        specialinvoke $r19.<org.apache.http.conn.scheme.Scheme: void <init>(java.lang.String,org.apache.http.conn.scheme.SocketFactory,int)>("https", $r15, 443);
+
+        virtualinvoke $r17.<org.apache.http.conn.scheme.SchemeRegistry: org.apache.http.conn.scheme.Scheme register(org.apache.http.conn.scheme.Scheme)>($r19);
+
+        goto label01;
+
+        catch java.security.KeyManagementException from label03 to label04 with label09;
+        catch java.security.KeyManagementException from label05 to label06 with label09;
+        catch java.security.KeyManagementException from label07 to label08 with label09;
+        catch java.security.UnrecoverableKeyException from label03 to label04 with label10;
+        catch java.security.UnrecoverableKeyException from label05 to label06 with label10;
+        catch java.security.UnrecoverableKeyException from label07 to label08 with label10;
+        catch java.security.NoSuchAlgorithmException from label03 to label04 with label11;
+        catch java.security.NoSuchAlgorithmException from label05 to label06 with label11;
+        catch java.security.NoSuchAlgorithmException from label07 to label08 with label11;
+        catch java.security.KeyStoreException from label03 to label04 with label12;
+        catch java.security.KeyStoreException from label05 to label06 with label12;
+        catch java.security.KeyStoreException from label07 to label08 with label12;
+    }
+    private org.apache.http.client.methods.HttpEntityEnclosingRequestBase getHttpRequest(java.net.URL, org.acra.sender.HttpSender$Method, java.lang.String, org.acra.sender.HttpSender$Type) throws java.io.UnsupportedEncodingException, java.lang.UnsupportedOperationException
+    {
+        org.acra.util.HttpRequest r0;
+        java.net.URL $r1;
+        org.acra.sender.HttpSender$Method $r2;
+        java.lang.String $r3, $r8, r15;
+        org.acra.sender.HttpSender$Type $r4;
+        int[] $r5;
+        int $i0;
+        java.lang.StringBuilder $r6, $r16;
+        java.lang.Object r7, $r14;
+        org.apache.http.auth.UsernamePasswordCredentials $r9;
+        org.apache.http.Header $r10;
+        java.util.Map $r11;
+        java.util.Set $r12;
+        java.util.Iterator $r13;
+        boolean $z0;
+        java.lang.UnsupportedOperationException $r17;
+        org.apache.http.client.methods.HttpPost $r18;
+        org.apache.http.client.methods.HttpPut $r19;
+        org.apache.http.entity.StringEntity $r20;
+        org.apache.http.auth.Credentials $r21;
+        org.apache.http.client.methods.HttpEntityEnclosingRequestBase $r22;
+        org.apache.http.HttpEntity $r23;
+
+        r0 := @this: org.acra.util.HttpRequest;
+
+        $r1 := @parameter0: java.net.URL;
+
+        $r2 := @parameter1: org.acra.sender.HttpSender$Method;
+
+        $r3 := @parameter2: java.lang.String;
+
+        $r4 := @parameter3: org.acra.sender.HttpSender$Type;
+
+        $r5 = <org.acra.util.HttpRequest$1: int[] $SwitchMap$org$acra$sender$HttpSender$Method>;
+
+        $i0 = virtualinvoke $r2.<org.acra.sender.HttpSender$Method: int ordinal()>();
+
+        $i0 = $r5[$i0];
+
+        lookupswitch($i0)
+        {
+            case 1: goto label2;
+            case 2: goto label6;
+            default: goto label1;
+        };
+
+     label1:
+        $r17 = new java.lang.UnsupportedOperationException;
+
+        $r16 = new java.lang.StringBuilder;
+
+        specialinvoke $r16.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unknown method: ");
+
+        $r3 = virtualinvoke $r2.<org.acra.sender.HttpSender$Method: java.lang.String name()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r3 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r17.<java.lang.UnsupportedOperationException: void <init>(java.lang.String)>($r3);
+
+        throw $r17;
+
+     label2:
+        $r18 = new org.apache.http.client.methods.HttpPost;
+
+        r7 = $r18;
+
+        $r8 = virtualinvoke $r1.<java.net.URL: java.lang.String toString()>();
+
+        specialinvoke $r18.<org.apache.http.client.methods.HttpPost: void <init>(java.lang.String)>($r8);
+
+     label3:
+        $r9 = specialinvoke r0.<org.acra.util.HttpRequest: org.apache.http.auth.UsernamePasswordCredentials getCredentials()>();
+
+        if $r9 == null goto label4;
+
+        $r21 = (org.apache.http.auth.Credentials) $r9;
+
+        $r10 = staticinvoke <org.apache.http.impl.auth.BasicScheme: org.apache.http.Header authenticate(org.apache.http.auth.Credentials,java.lang.String,boolean)>($r21, "UTF-8", 0);
+
+        $r22 = (org.apache.http.client.methods.HttpEntityEnclosingRequestBase) r7;
+
+        virtualinvoke $r22.<org.apache.http.client.methods.HttpEntityEnclosingRequestBase: void addHeader(org.apache.http.Header)>($r10);
+
+     label4:
+        $r22 = (org.apache.http.client.methods.HttpEntityEnclosingRequestBase) r7;
+
+        virtualinvoke $r22.<org.apache.http.client.methods.HttpEntityEnclosingRequestBase: void setHeader(java.lang.String,java.lang.String)>("User-Agent", "Android");
+
+        $r22 = (org.apache.http.client.methods.HttpEntityEnclosingRequestBase) r7;
+
+        virtualinvoke $r22.<org.apache.http.client.methods.HttpEntityEnclosingRequestBase: void setHeader(java.lang.String,java.lang.String)>("Accept", "text/html,application/xml,application/json,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5");
+
+        $r8 = virtualinvoke $r4.<org.acra.sender.HttpSender$Type: java.lang.String getContentType()>();
+
+        $r22 = (org.apache.http.client.methods.HttpEntityEnclosingRequestBase) r7;
+
+        virtualinvoke $r22.<org.apache.http.client.methods.HttpEntityEnclosingRequestBase: void setHeader(java.lang.String,java.lang.String)>("Content-Type", $r8);
+
+        $r11 = r0.<org.acra.util.HttpRequest: java.util.Map headers>;
+
+        if $r11 == null goto label7;
+
+        $r11 = r0.<org.acra.util.HttpRequest: java.util.Map headers>;
+
+        $r12 = interfaceinvoke $r11.<java.util.Map: java.util.Set keySet()>();
+
+        $r13 = interfaceinvoke $r12.<java.util.Set: java.util.Iterator iterator()>();
+
+     label5:
+        $z0 = interfaceinvoke $r13.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label7;
+
+        $r14 = interfaceinvoke $r13.<java.util.Iterator: java.lang.Object next()>();
+
+        $r8 = (java.lang.String) $r14;
+
+        $r11 = r0.<org.acra.util.HttpRequest: java.util.Map headers>;
+
+        $r14 = interfaceinvoke $r11.<java.util.Map: java.lang.Object get(java.lang.Object)>($r8);
+
+        r15 = (java.lang.String) $r14;
+
+        $r22 = (org.apache.http.client.methods.HttpEntityEnclosingRequestBase) r7;
+
+        virtualinvoke $r22.<org.apache.http.client.methods.HttpEntityEnclosingRequestBase: void setHeader(java.lang.String,java.lang.String)>($r8, r15);
+
+        goto label5;
+
+     label6:
+        $r19 = new org.apache.http.client.methods.HttpPut;
+
+        r7 = $r19;
+
+        $r8 = virtualinvoke $r1.<java.net.URL: java.lang.String toString()>();
+
+        specialinvoke $r19.<org.apache.http.client.methods.HttpPut: void <init>(java.lang.String)>($r8);
+
+        goto label3;
+
+     label7:
+        $r20 = new org.apache.http.entity.StringEntity;
+
+        specialinvoke $r20.<org.apache.http.entity.StringEntity: void <init>(java.lang.String,java.lang.String)>($r3, "UTF-8");
+
+        $r22 = (org.apache.http.client.methods.HttpEntityEnclosingRequestBase) r7;
+
+        $r23 = (org.apache.http.HttpEntity) $r20;
+
+        virtualinvoke $r22.<org.apache.http.client.methods.HttpEntityEnclosingRequestBase: void setEntity(org.apache.http.HttpEntity)>($r23);
+
+        $r22 = (org.apache.http.client.methods.HttpEntityEnclosingRequestBase) r7;
+
+        return $r22;
+    }
+    public static java.lang.String getParamsAsFormString(java.util.Map) throws java.io.UnsupportedEncodingException
+    {
+        java.util.Map r0;
+        java.lang.StringBuilder r1;
+        java.util.Set $r2;
+        java.util.Iterator $r3;
+        boolean $z0;
+        java.lang.Object $r4, $r5;
+        int $i0;
+        java.lang.String $r6;
+
+        r0 := @parameter0: java.util.Map;
+
+        r1 = new java.lang.StringBuilder;
+
+        specialinvoke r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = interfaceinvoke r0.<java.util.Map: java.util.Set keySet()>();
+
+        $r3 = interfaceinvoke $r2.<java.util.Set: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r3.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label5;
+
+        $r4 = interfaceinvoke $r3.<java.util.Iterator: java.lang.Object next()>();
+
+        $i0 = virtualinvoke r1.<java.lang.StringBuilder: int length()>();
+
+        if $i0 == 0 goto label2;
+
+        virtualinvoke r1.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(38);
+
+     label2:
+        $r5 = interfaceinvoke r0.<java.util.Map: java.lang.Object get(java.lang.Object)>($r4);
+
+        if $r5 != null goto label4;
+
+        $r5 = "";
+
+     label3:
+        $r6 = virtualinvoke $r4.<java.lang.Object: java.lang.String toString()>();
+
+        $r6 = staticinvoke <java.net.URLEncoder: java.lang.String encode(java.lang.String,java.lang.String)>($r6, "UTF-8");
+
+        virtualinvoke r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        virtualinvoke r1.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(61);
+
+        $r6 = virtualinvoke $r5.<java.lang.Object: java.lang.String toString()>();
+
+        $r6 = staticinvoke <java.net.URLEncoder: java.lang.String encode(java.lang.String,java.lang.String)>($r6, "UTF-8");
+
+        virtualinvoke r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        goto label1;
+
+     label4:
+        goto label3;
+
+     label5:
+        $r6 = virtualinvoke r1.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r6;
+    }
+    public void send(android.content.Context, java.net.URL, org.acra.sender.HttpSender$Method, java.lang.String, org.acra.sender.HttpSender$Type) throws java.io.IOException
+    {
+        org.acra.util.HttpRequest r0;
+        android.content.Context $r1;
+        java.net.URL $r2;
+        org.acra.sender.HttpSender$Method $r3;
+        java.lang.String $r4, $r10;
+        org.acra.sender.HttpSender$Type $r5;
+        org.apache.http.client.HttpClient $r6;
+        org.apache.http.client.methods.HttpEntityEnclosingRequestBase $r7;
+        org.acra.log.ACRALog $r8;
+        java.lang.StringBuilder $r9, $r18;
+        org.apache.http.HttpResponse r11, $r13;
+        org.apache.http.StatusLine $r14;
+        int $i0;
+        boolean $z0;
+        java.lang.Throwable $r16;
+        org.apache.http.HttpEntity $r17;
+        org.apache.http.protocol.BasicHttpContext $r19;
+        java.io.IOException $r20;
+        org.apache.http.client.methods.HttpUriRequest $r21;
+        org.apache.http.protocol.HttpContext $r22;
+
+        r0 := @this: org.acra.util.HttpRequest;
+
+        $r1 := @parameter0: android.content.Context;
+
+        $r2 := @parameter1: java.net.URL;
+
+        $r3 := @parameter2: org.acra.sender.HttpSender$Method;
+
+        $r4 := @parameter3: java.lang.String;
+
+        $r5 := @parameter4: org.acra.sender.HttpSender$Type;
+
+        $r6 = specialinvoke r0.<org.acra.util.HttpRequest: org.apache.http.client.HttpClient getHttpClient(android.content.Context)>($r1);
+
+        $r7 = specialinvoke r0.<org.acra.util.HttpRequest: org.apache.http.client.methods.HttpEntityEnclosingRequestBase getHttpRequest(java.net.URL,org.acra.sender.HttpSender$Method,java.lang.String,org.acra.sender.HttpSender$Type)>($r2, $r3, $r4, $r5);
+
+        $r8 = <org.acra.ACRA: org.acra.log.ACRALog log>;
+
+        $r4 = <org.acra.ACRA: java.lang.String LOG_TAG>;
+
+        $r18 = new java.lang.StringBuilder;
+
+        specialinvoke $r18.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Sending request to ");
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r2);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        interfaceinvoke $r8.<org.acra.log.ACRALog: int d(java.lang.String,java.lang.String)>($r4, $r10);
+
+        r11 = null;
+
+     label01:
+        $r19 = new org.apache.http.protocol.BasicHttpContext;
+
+     label02:
+        specialinvoke $r19.<org.apache.http.protocol.BasicHttpContext: void <init>()>();
+
+        $r21 = (org.apache.http.client.methods.HttpUriRequest) $r7;
+
+        $r22 = (org.apache.http.protocol.HttpContext) $r19;
+
+        $r13 = interfaceinvoke $r6.<org.apache.http.client.HttpClient: org.apache.http.HttpResponse execute(org.apache.http.client.methods.HttpUriRequest,org.apache.http.protocol.HttpContext)>($r21, $r22);
+
+     label03:
+        r11 = $r13;
+
+        if $r13 == null goto label20;
+
+     label04:
+        $r14 = interfaceinvoke $r13.<org.apache.http.HttpResponse: org.apache.http.StatusLine getStatusLine()>();
+
+     label05:
+        if $r14 == null goto label19;
+
+     label06:
+        $r14 = interfaceinvoke $r13.<org.apache.http.HttpResponse: org.apache.http.StatusLine getStatusLine()>();
+
+        $i0 = interfaceinvoke $r14.<org.apache.http.StatusLine: int getStatusCode()>();
+
+        $r4 = staticinvoke <java.lang.Integer: java.lang.String toString(int)>($i0);
+
+        $z0 = virtualinvoke $r4.<java.lang.String: boolean equals(java.lang.Object)>("409");
+
+     label07:
+        if $z0 != 0 goto label19;
+
+     label08:
+        $z0 = virtualinvoke $r4.<java.lang.String: boolean equals(java.lang.Object)>("403");
+
+     label09:
+        if $z0 != 0 goto label19;
+
+     label10:
+        $z0 = virtualinvoke $r4.<java.lang.String: boolean startsWith(java.lang.String)>("4");
+
+     label11:
+        if $z0 != 0 goto label14;
+
+     label12:
+        $z0 = virtualinvoke $r4.<java.lang.String: boolean startsWith(java.lang.String)>("5");
+
+     label13:
+        if $z0 == 0 goto label19;
+
+     label14:
+        $r20 = new java.io.IOException;
+
+     label15:
+        $r18 = new java.lang.StringBuilder;
+
+     label16:
+        specialinvoke $r18.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Host returned error code ");
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r4 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r20.<java.io.IOException: void <init>(java.lang.String)>($r4);
+
+        throw $r20;
+
+     label17:
+        $r16 := @caughtexception;
+
+        if r11 == null goto label18;
+
+        $r17 = interfaceinvoke r11.<org.apache.http.HttpResponse: org.apache.http.HttpEntity getEntity()>();
+
+        interfaceinvoke $r17.<org.apache.http.HttpEntity: void consumeContent()>();
+
+     label18:
+        throw $r16;
+
+     label19:
+        $r17 = interfaceinvoke $r13.<org.apache.http.HttpResponse: org.apache.http.HttpEntity getEntity()>();
+
+        staticinvoke <org.apache.http.util.EntityUtils: java.lang.String toString(org.apache.http.HttpEntity)>($r17);
+
+     label20:
+        if $r13 == null goto label21;
+
+        $r17 = interfaceinvoke $r13.<org.apache.http.HttpResponse: org.apache.http.HttpEntity getEntity()>();
+
+        interfaceinvoke $r17.<org.apache.http.HttpEntity: void consumeContent()>();
+
+     label21:
+        return;
+
+        catch java.lang.Throwable from label01 to label02 with label17;
+        catch java.lang.Throwable from label02 to label03 with label17;
+        catch java.lang.Throwable from label04 to label05 with label17;
+        catch java.lang.Throwable from label06 to label07 with label17;
+        catch java.lang.Throwable from label08 to label09 with label17;
+        catch java.lang.Throwable from label10 to label11 with label17;
+        catch java.lang.Throwable from label12 to label13 with label17;
+        catch java.lang.Throwable from label14 to label15 with label17;
+        catch java.lang.Throwable from label15 to label16 with label17;
+        catch java.lang.Throwable from label16 to label17 with label17;
+        catch java.lang.Throwable from label19 to label20 with label17;
+    }
+    public void setConnectionTimeOut(int)
+    {
+        org.acra.util.HttpRequest r0;
+        int $i0;
+
+        r0 := @this: org.acra.util.HttpRequest;
+
+        $i0 := @parameter0: int;
+
+        r0.<org.acra.util.HttpRequest: int connectionTimeOut> = $i0;
+
+        return;
+    }
+    public void setHeaders(java.util.Map)
+    {
+        org.acra.util.HttpRequest r0;
+        java.util.Map r1;
+
+        r0 := @this: org.acra.util.HttpRequest;
+
+        r1 := @parameter0: java.util.Map;
+
+        r0.<org.acra.util.HttpRequest: java.util.Map headers> = r1;
+
+        return;
+    }
+    public void setLogin(java.lang.String)
+    {
+        org.acra.util.HttpRequest r0;
+        java.lang.String $r1;
+
+        r0 := @this: org.acra.util.HttpRequest;
+
+        $r1 := @parameter0: java.lang.String;
+
+        r0.<org.acra.util.HttpRequest: java.lang.String login> = $r1;
+
+        return;
+    }
+    public void setMaxNrRetries(int)
+    {
+        org.acra.util.HttpRequest r0;
+        int $i0;
+
+        r0 := @this: org.acra.util.HttpRequest;
+
+        $i0 := @parameter0: int;
+
+        r0.<org.acra.util.HttpRequest: int maxNrRetries> = $i0;
+
+        return;
+    }
+    public void setPassword(java.lang.String)
+    {
+        org.acra.util.HttpRequest r0;
+        java.lang.String $r1;
+
+        r0 := @this: org.acra.util.HttpRequest;
+
+        $r1 := @parameter0: java.lang.String;
+
+        r0.<org.acra.util.HttpRequest: java.lang.String password> = $r1;
+
+        return;
+    }
+    public void setSocketTimeOut(int)
+    {
+        org.acra.util.HttpRequest r0;
+        int $i0;
+
+        r0 := @this: org.acra.util.HttpRequest;
+
+        $i0 := @parameter0: int;
+
+        r0.<org.acra.util.HttpRequest: int socketTimeOut> = $i0;
+
+        return;
+    }

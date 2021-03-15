@@ -1,0 +1,764 @@
+com.squareup.okhttp.Dispatcher extends java.lang.Object
+private final java.util.Deque executedCalls
+private java.util.concurrent.ExecutorService executorService
+private int maxRequests
+private int maxRequestsPerHost
+private final java.util.Deque readyCalls
+private final java.util.Deque runningCalls
+    public void <init>()
+    {
+        com.squareup.okhttp.Dispatcher r0;
+        java.util.ArrayDeque $r1;
+
+        r0 := @this: com.squareup.okhttp.Dispatcher;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<com.squareup.okhttp.Dispatcher: int maxRequests> = 64;
+
+        r0.<com.squareup.okhttp.Dispatcher: int maxRequestsPerHost> = 5;
+
+        $r1 = new java.util.ArrayDeque;
+
+        specialinvoke $r1.<java.util.ArrayDeque: void <init>()>();
+
+        r0.<com.squareup.okhttp.Dispatcher: java.util.Deque readyCalls> = $r1;
+
+        $r1 = new java.util.ArrayDeque;
+
+        specialinvoke $r1.<java.util.ArrayDeque: void <init>()>();
+
+        r0.<com.squareup.okhttp.Dispatcher: java.util.Deque runningCalls> = $r1;
+
+        $r1 = new java.util.ArrayDeque;
+
+        specialinvoke $r1.<java.util.ArrayDeque: void <init>()>();
+
+        r0.<com.squareup.okhttp.Dispatcher: java.util.Deque executedCalls> = $r1;
+
+        return;
+    }
+    public void <init>(java.util.concurrent.ExecutorService)
+    {
+        com.squareup.okhttp.Dispatcher r0;
+        java.util.concurrent.ExecutorService $r1;
+        java.util.ArrayDeque $r2;
+
+        r0 := @this: com.squareup.okhttp.Dispatcher;
+
+        $r1 := @parameter0: java.util.concurrent.ExecutorService;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<com.squareup.okhttp.Dispatcher: int maxRequests> = 64;
+
+        r0.<com.squareup.okhttp.Dispatcher: int maxRequestsPerHost> = 5;
+
+        $r2 = new java.util.ArrayDeque;
+
+        specialinvoke $r2.<java.util.ArrayDeque: void <init>()>();
+
+        r0.<com.squareup.okhttp.Dispatcher: java.util.Deque readyCalls> = $r2;
+
+        $r2 = new java.util.ArrayDeque;
+
+        specialinvoke $r2.<java.util.ArrayDeque: void <init>()>();
+
+        r0.<com.squareup.okhttp.Dispatcher: java.util.Deque runningCalls> = $r2;
+
+        $r2 = new java.util.ArrayDeque;
+
+        specialinvoke $r2.<java.util.ArrayDeque: void <init>()>();
+
+        r0.<com.squareup.okhttp.Dispatcher: java.util.Deque executedCalls> = $r2;
+
+        r0.<com.squareup.okhttp.Dispatcher: java.util.concurrent.ExecutorService executorService> = $r1;
+
+        return;
+    }
+    private void promoteCalls()
+    {
+        com.squareup.okhttp.Dispatcher r0;
+        java.util.Deque $r1;
+        int $i0, $i1;
+        boolean $z0;
+        java.util.Iterator $r2;
+        java.lang.Object $r3;
+        com.squareup.okhttp.Call$AsyncCall r4;
+        java.util.concurrent.ExecutorService $r5;
+
+        r0 := @this: com.squareup.okhttp.Dispatcher;
+
+        $r1 = r0.<com.squareup.okhttp.Dispatcher: java.util.Deque runningCalls>;
+
+        $i0 = interfaceinvoke $r1.<java.util.Deque: int size()>();
+
+        $i1 = r0.<com.squareup.okhttp.Dispatcher: int maxRequests>;
+
+        if $i0 < $i1 goto label1;
+
+        return;
+
+     label1:
+        $r1 = r0.<com.squareup.okhttp.Dispatcher: java.util.Deque readyCalls>;
+
+        $z0 = interfaceinvoke $r1.<java.util.Deque: boolean isEmpty()>();
+
+        if $z0 != 0 goto label4;
+
+        $r1 = r0.<com.squareup.okhttp.Dispatcher: java.util.Deque readyCalls>;
+
+        $r2 = interfaceinvoke $r1.<java.util.Deque: java.util.Iterator iterator()>();
+
+     label2:
+        $z0 = interfaceinvoke $r2.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label4;
+
+        $r3 = interfaceinvoke $r2.<java.util.Iterator: java.lang.Object next()>();
+
+        r4 = (com.squareup.okhttp.Call$AsyncCall) $r3;
+
+        $i0 = specialinvoke r0.<com.squareup.okhttp.Dispatcher: int runningCallsForHost(com.squareup.okhttp.Call$AsyncCall)>(r4);
+
+        $i1 = r0.<com.squareup.okhttp.Dispatcher: int maxRequestsPerHost>;
+
+        if $i0 >= $i1 goto label3;
+
+        interfaceinvoke $r2.<java.util.Iterator: void remove()>();
+
+        $r1 = r0.<com.squareup.okhttp.Dispatcher: java.util.Deque runningCalls>;
+
+        interfaceinvoke $r1.<java.util.Deque: boolean add(java.lang.Object)>(r4);
+
+        $r5 = virtualinvoke r0.<com.squareup.okhttp.Dispatcher: java.util.concurrent.ExecutorService getExecutorService()>();
+
+        interfaceinvoke $r5.<java.util.concurrent.ExecutorService: void execute(java.lang.Runnable)>(r4);
+
+     label3:
+        $r1 = r0.<com.squareup.okhttp.Dispatcher: java.util.Deque runningCalls>;
+
+        $i0 = interfaceinvoke $r1.<java.util.Deque: int size()>();
+
+        $i1 = r0.<com.squareup.okhttp.Dispatcher: int maxRequests>;
+
+        if $i0 < $i1 goto label2;
+
+     label4:
+        return;
+    }
+    private int runningCallsForHost(com.squareup.okhttp.Call$AsyncCall)
+    {
+        com.squareup.okhttp.Dispatcher r0;
+        com.squareup.okhttp.Call$AsyncCall $r1, r5;
+        int i0;
+        java.util.Deque $r2;
+        java.util.Iterator $r3;
+        boolean $z0;
+        java.lang.Object $r4;
+        java.lang.String $r6, $r7;
+
+        r0 := @this: com.squareup.okhttp.Dispatcher;
+
+        $r1 := @parameter0: com.squareup.okhttp.Call$AsyncCall;
+
+        i0 = 0;
+
+        $r2 = r0.<com.squareup.okhttp.Dispatcher: java.util.Deque runningCalls>;
+
+        $r3 = interfaceinvoke $r2.<java.util.Deque: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r3.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label2;
+
+        $r4 = interfaceinvoke $r3.<java.util.Iterator: java.lang.Object next()>();
+
+        r5 = (com.squareup.okhttp.Call$AsyncCall) $r4;
+
+        $r6 = virtualinvoke r5.<com.squareup.okhttp.Call$AsyncCall: java.lang.String host()>();
+
+        $r7 = virtualinvoke $r1.<com.squareup.okhttp.Call$AsyncCall: java.lang.String host()>();
+
+        $z0 = virtualinvoke $r6.<java.lang.String: boolean equals(java.lang.Object)>($r7);
+
+        if $z0 == 0 goto label1;
+
+        i0 = i0 + 1;
+
+        goto label1;
+
+     label2:
+        return i0;
+    }
+    public void cancel(java.lang.Object)
+    {
+        com.squareup.okhttp.Dispatcher r0;
+        java.lang.Object $r1, $r5;
+        com.squareup.okhttp.internal.http.HttpEngine r2;
+        java.util.Deque $r3;
+        java.util.Iterator $r4;
+        boolean $z0;
+        com.squareup.okhttp.Call$AsyncCall r6;
+        java.lang.Throwable $r7;
+        com.squareup.okhttp.Call $r8;
+
+        r0 := @this: com.squareup.okhttp.Dispatcher;
+
+        $r1 := @parameter0: java.lang.Object;
+
+        entermonitor r0;
+
+     label01:
+        $r3 = r0.<com.squareup.okhttp.Dispatcher: java.util.Deque readyCalls>;
+
+        $r4 = interfaceinvoke $r3.<java.util.Deque: java.util.Iterator iterator()>();
+
+     label02:
+        $z0 = interfaceinvoke $r4.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label05;
+
+        $r5 = interfaceinvoke $r4.<java.util.Iterator: java.lang.Object next()>();
+
+        r6 = (com.squareup.okhttp.Call$AsyncCall) $r5;
+
+        $r5 = virtualinvoke r6.<com.squareup.okhttp.Call$AsyncCall: java.lang.Object tag()>();
+
+        $z0 = staticinvoke <com.squareup.okhttp.internal.Util: boolean equal(java.lang.Object,java.lang.Object)>($r1, $r5);
+
+        if $z0 == 0 goto label02;
+
+        virtualinvoke r6.<com.squareup.okhttp.Call$AsyncCall: void cancel()>();
+
+     label03:
+        goto label02;
+
+     label04:
+        $r7 := @caughtexception;
+
+        exitmonitor r0;
+
+        throw $r7;
+
+     label05:
+        $r3 = r0.<com.squareup.okhttp.Dispatcher: java.util.Deque runningCalls>;
+
+        $r4 = interfaceinvoke $r3.<java.util.Deque: java.util.Iterator iterator()>();
+
+     label06:
+        $z0 = interfaceinvoke $r4.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label07;
+
+        $r5 = interfaceinvoke $r4.<java.util.Iterator: java.lang.Object next()>();
+
+        r6 = (com.squareup.okhttp.Call$AsyncCall) $r5;
+
+        $r5 = virtualinvoke r6.<com.squareup.okhttp.Call$AsyncCall: java.lang.Object tag()>();
+
+        $z0 = staticinvoke <com.squareup.okhttp.internal.Util: boolean equal(java.lang.Object,java.lang.Object)>($r1, $r5);
+
+        if $z0 == 0 goto label06;
+
+        $r8 = virtualinvoke r6.<com.squareup.okhttp.Call$AsyncCall: com.squareup.okhttp.Call get()>();
+
+        $r8.<com.squareup.okhttp.Call: boolean canceled> = 1;
+
+        $r8 = virtualinvoke r6.<com.squareup.okhttp.Call$AsyncCall: com.squareup.okhttp.Call get()>();
+
+        r2 = $r8.<com.squareup.okhttp.Call: com.squareup.okhttp.internal.http.HttpEngine engine>;
+
+        if r2 == null goto label06;
+
+        virtualinvoke r2.<com.squareup.okhttp.internal.http.HttpEngine: void disconnect()>();
+
+        goto label06;
+
+     label07:
+        $r3 = r0.<com.squareup.okhttp.Dispatcher: java.util.Deque executedCalls>;
+
+        $r4 = interfaceinvoke $r3.<java.util.Deque: java.util.Iterator iterator()>();
+
+     label08:
+        $z0 = interfaceinvoke $r4.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label10;
+
+        $r5 = interfaceinvoke $r4.<java.util.Iterator: java.lang.Object next()>();
+
+        $r8 = (com.squareup.okhttp.Call) $r5;
+
+        $r5 = virtualinvoke $r8.<com.squareup.okhttp.Call: java.lang.Object tag()>();
+
+        $z0 = staticinvoke <com.squareup.okhttp.internal.Util: boolean equal(java.lang.Object,java.lang.Object)>($r1, $r5);
+
+        if $z0 == 0 goto label08;
+
+        virtualinvoke $r8.<com.squareup.okhttp.Call: void cancel()>();
+
+     label09:
+        goto label08;
+
+     label10:
+        exitmonitor r0;
+
+        return;
+
+        catch java.lang.Throwable from label01 to label03 with label04;
+        catch java.lang.Throwable from label05 to label09 with label04;
+    }
+    void enqueue(com.squareup.okhttp.Call$AsyncCall)
+    {
+        com.squareup.okhttp.Dispatcher r0;
+        com.squareup.okhttp.Call$AsyncCall $r1;
+        java.util.Deque $r2;
+        int $i0, $i1;
+        java.util.concurrent.ExecutorService $r3;
+        java.lang.Throwable $r4;
+
+        r0 := @this: com.squareup.okhttp.Dispatcher;
+
+        $r1 := @parameter0: com.squareup.okhttp.Call$AsyncCall;
+
+        entermonitor r0;
+
+     label1:
+        $r2 = r0.<com.squareup.okhttp.Dispatcher: java.util.Deque runningCalls>;
+
+        $i0 = interfaceinvoke $r2.<java.util.Deque: int size()>();
+
+        $i1 = r0.<com.squareup.okhttp.Dispatcher: int maxRequests>;
+
+        if $i0 >= $i1 goto label3;
+
+        $i0 = specialinvoke r0.<com.squareup.okhttp.Dispatcher: int runningCallsForHost(com.squareup.okhttp.Call$AsyncCall)>($r1);
+
+        $i1 = r0.<com.squareup.okhttp.Dispatcher: int maxRequestsPerHost>;
+
+        if $i0 >= $i1 goto label3;
+
+        $r2 = r0.<com.squareup.okhttp.Dispatcher: java.util.Deque runningCalls>;
+
+        interfaceinvoke $r2.<java.util.Deque: boolean add(java.lang.Object)>($r1);
+
+        $r3 = virtualinvoke r0.<com.squareup.okhttp.Dispatcher: java.util.concurrent.ExecutorService getExecutorService()>();
+
+        interfaceinvoke $r3.<java.util.concurrent.ExecutorService: void execute(java.lang.Runnable)>($r1);
+
+     label2:
+        exitmonitor r0;
+
+        return;
+
+     label3:
+        $r2 = r0.<com.squareup.okhttp.Dispatcher: java.util.Deque readyCalls>;
+
+        interfaceinvoke $r2.<java.util.Deque: boolean add(java.lang.Object)>($r1);
+
+     label4:
+        goto label2;
+
+     label5:
+        $r4 := @caughtexception;
+
+        exitmonitor r0;
+
+        throw $r4;
+
+        catch java.lang.Throwable from label1 to label2 with label5;
+        catch java.lang.Throwable from label3 to label4 with label5;
+    }
+    void executed(com.squareup.okhttp.Call)
+    {
+        com.squareup.okhttp.Dispatcher r0;
+        com.squareup.okhttp.Call $r1;
+        java.util.Deque $r2;
+        java.lang.Throwable $r3;
+
+        r0 := @this: com.squareup.okhttp.Dispatcher;
+
+        $r1 := @parameter0: com.squareup.okhttp.Call;
+
+        entermonitor r0;
+
+     label1:
+        $r2 = r0.<com.squareup.okhttp.Dispatcher: java.util.Deque executedCalls>;
+
+        interfaceinvoke $r2.<java.util.Deque: boolean add(java.lang.Object)>($r1);
+
+     label2:
+        exitmonitor r0;
+
+        return;
+
+     label3:
+        $r3 := @caughtexception;
+
+        exitmonitor r0;
+
+        throw $r3;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+    void finished(com.squareup.okhttp.Call$AsyncCall)
+    {
+        com.squareup.okhttp.Dispatcher r0;
+        com.squareup.okhttp.Call$AsyncCall $r1;
+        boolean $z0;
+        java.util.Deque $r2;
+        java.lang.AssertionError $r3;
+        java.lang.Throwable $r4;
+
+        r0 := @this: com.squareup.okhttp.Dispatcher;
+
+        $r1 := @parameter0: com.squareup.okhttp.Call$AsyncCall;
+
+        entermonitor r0;
+
+     label1:
+        $r2 = r0.<com.squareup.okhttp.Dispatcher: java.util.Deque runningCalls>;
+
+        $z0 = interfaceinvoke $r2.<java.util.Deque: boolean remove(java.lang.Object)>($r1);
+
+        if $z0 != 0 goto label3;
+
+        $r3 = new java.lang.AssertionError;
+
+        specialinvoke $r3.<java.lang.AssertionError: void <init>(java.lang.Object)>("AsyncCall wasn\'t running!");
+
+        throw $r3;
+
+     label2:
+        $r4 := @caughtexception;
+
+        exitmonitor r0;
+
+        throw $r4;
+
+     label3:
+        specialinvoke r0.<com.squareup.okhttp.Dispatcher: void promoteCalls()>();
+
+     label4:
+        exitmonitor r0;
+
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label2;
+        catch java.lang.Throwable from label3 to label4 with label2;
+    }
+    void finished(com.squareup.okhttp.Call)
+    {
+        com.squareup.okhttp.Dispatcher r0;
+        com.squareup.okhttp.Call $r1;
+        boolean $z0;
+        java.util.Deque $r2;
+        java.lang.AssertionError $r3;
+        java.lang.Throwable $r4;
+
+        r0 := @this: com.squareup.okhttp.Dispatcher;
+
+        $r1 := @parameter0: com.squareup.okhttp.Call;
+
+        entermonitor r0;
+
+     label1:
+        $r2 = r0.<com.squareup.okhttp.Dispatcher: java.util.Deque executedCalls>;
+
+        $z0 = interfaceinvoke $r2.<java.util.Deque: boolean remove(java.lang.Object)>($r1);
+
+        if $z0 != 0 goto label3;
+
+        $r3 = new java.lang.AssertionError;
+
+        specialinvoke $r3.<java.lang.AssertionError: void <init>(java.lang.Object)>("Call wasn\'t in-flight!");
+
+        throw $r3;
+
+     label2:
+        $r4 := @caughtexception;
+
+        exitmonitor r0;
+
+        throw $r4;
+
+     label3:
+        exitmonitor r0;
+
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label2;
+    }
+    public java.util.concurrent.ExecutorService getExecutorService()
+    {
+        com.squareup.okhttp.Dispatcher r0;
+        java.util.concurrent.ThreadPoolExecutor $r1;
+        java.util.concurrent.TimeUnit $r2;
+        java.util.concurrent.SynchronousQueue $r3;
+        java.util.concurrent.ThreadFactory $r4;
+        java.util.concurrent.ExecutorService $r5;
+        java.lang.Throwable $r6;
+
+        r0 := @this: com.squareup.okhttp.Dispatcher;
+
+        entermonitor r0;
+
+     label1:
+        $r5 = r0.<com.squareup.okhttp.Dispatcher: java.util.concurrent.ExecutorService executorService>;
+
+        if $r5 != null goto label2;
+
+        $r1 = new java.util.concurrent.ThreadPoolExecutor;
+
+        $r2 = <java.util.concurrent.TimeUnit: java.util.concurrent.TimeUnit SECONDS>;
+
+        $r3 = new java.util.concurrent.SynchronousQueue;
+
+        specialinvoke $r3.<java.util.concurrent.SynchronousQueue: void <init>()>();
+
+        $r4 = staticinvoke <com.squareup.okhttp.internal.Util: java.util.concurrent.ThreadFactory threadFactory(java.lang.String,boolean)>("OkHttp Dispatcher", 0);
+
+        specialinvoke $r1.<java.util.concurrent.ThreadPoolExecutor: void <init>(int,int,long,java.util.concurrent.TimeUnit,java.util.concurrent.BlockingQueue,java.util.concurrent.ThreadFactory)>(0, 2147483647, 60L, $r2, $r3, $r4);
+
+        r0.<com.squareup.okhttp.Dispatcher: java.util.concurrent.ExecutorService executorService> = $r1;
+
+     label2:
+        $r5 = r0.<com.squareup.okhttp.Dispatcher: java.util.concurrent.ExecutorService executorService>;
+
+     label3:
+        exitmonitor r0;
+
+        return $r5;
+
+     label4:
+        $r6 := @caughtexception;
+
+        exitmonitor r0;
+
+        throw $r6;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+    }
+    public int getMaxRequests()
+    {
+        com.squareup.okhttp.Dispatcher r0;
+        java.lang.Throwable $r1;
+        int i0;
+
+        r0 := @this: com.squareup.okhttp.Dispatcher;
+
+        entermonitor r0;
+
+     label1:
+        i0 = r0.<com.squareup.okhttp.Dispatcher: int maxRequests>;
+
+     label2:
+        exitmonitor r0;
+
+        return i0;
+
+     label3:
+        $r1 := @caughtexception;
+
+        exitmonitor r0;
+
+        throw $r1;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+    public int getMaxRequestsPerHost()
+    {
+        com.squareup.okhttp.Dispatcher r0;
+        java.lang.Throwable $r1;
+        int i0;
+
+        r0 := @this: com.squareup.okhttp.Dispatcher;
+
+        entermonitor r0;
+
+     label1:
+        i0 = r0.<com.squareup.okhttp.Dispatcher: int maxRequestsPerHost>;
+
+     label2:
+        exitmonitor r0;
+
+        return i0;
+
+     label3:
+        $r1 := @caughtexception;
+
+        exitmonitor r0;
+
+        throw $r1;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+    public int getQueuedCallCount()
+    {
+        com.squareup.okhttp.Dispatcher r0;
+        int $i0;
+        java.util.Deque $r1;
+        java.lang.Throwable $r2;
+
+        r0 := @this: com.squareup.okhttp.Dispatcher;
+
+        entermonitor r0;
+
+     label1:
+        $r1 = r0.<com.squareup.okhttp.Dispatcher: java.util.Deque readyCalls>;
+
+        $i0 = interfaceinvoke $r1.<java.util.Deque: int size()>();
+
+     label2:
+        exitmonitor r0;
+
+        return $i0;
+
+     label3:
+        $r2 := @caughtexception;
+
+        exitmonitor r0;
+
+        throw $r2;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+    public int getRunningCallCount()
+    {
+        com.squareup.okhttp.Dispatcher r0;
+        int $i0;
+        java.util.Deque $r1;
+        java.lang.Throwable $r2;
+
+        r0 := @this: com.squareup.okhttp.Dispatcher;
+
+        entermonitor r0;
+
+     label1:
+        $r1 = r0.<com.squareup.okhttp.Dispatcher: java.util.Deque runningCalls>;
+
+        $i0 = interfaceinvoke $r1.<java.util.Deque: int size()>();
+
+     label2:
+        exitmonitor r0;
+
+        return $i0;
+
+     label3:
+        $r2 := @caughtexception;
+
+        exitmonitor r0;
+
+        throw $r2;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+    public void setMaxRequests(int)
+    {
+        com.squareup.okhttp.Dispatcher r0;
+        int $i0;
+        java.lang.IllegalArgumentException $r1;
+        java.lang.StringBuilder $r2;
+        java.lang.String $r3;
+        java.lang.Throwable $r4;
+
+        r0 := @this: com.squareup.okhttp.Dispatcher;
+
+        $i0 := @parameter0: int;
+
+        entermonitor r0;
+
+        if $i0 >= 1 goto label3;
+
+     label1:
+        $r1 = new java.lang.IllegalArgumentException;
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("max < 1: ");
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r1.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r3);
+
+        throw $r1;
+
+     label2:
+        $r4 := @caughtexception;
+
+        exitmonitor r0;
+
+        throw $r4;
+
+     label3:
+        r0.<com.squareup.okhttp.Dispatcher: int maxRequests> = $i0;
+
+        specialinvoke r0.<com.squareup.okhttp.Dispatcher: void promoteCalls()>();
+
+     label4:
+        exitmonitor r0;
+
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label2;
+        catch java.lang.Throwable from label3 to label4 with label2;
+    }
+    public void setMaxRequestsPerHost(int)
+    {
+        com.squareup.okhttp.Dispatcher r0;
+        int $i0;
+        java.lang.IllegalArgumentException $r1;
+        java.lang.StringBuilder $r2;
+        java.lang.String $r3;
+        java.lang.Throwable $r4;
+
+        r0 := @this: com.squareup.okhttp.Dispatcher;
+
+        $i0 := @parameter0: int;
+
+        entermonitor r0;
+
+        if $i0 >= 1 goto label3;
+
+     label1:
+        $r1 = new java.lang.IllegalArgumentException;
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("max < 1: ");
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r1.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r3);
+
+        throw $r1;
+
+     label2:
+        $r4 := @caughtexception;
+
+        exitmonitor r0;
+
+        throw $r4;
+
+     label3:
+        r0.<com.squareup.okhttp.Dispatcher: int maxRequestsPerHost> = $i0;
+
+        specialinvoke r0.<com.squareup.okhttp.Dispatcher: void promoteCalls()>();
+
+     label4:
+        exitmonitor r0;
+
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label2;
+        catch java.lang.Throwable from label3 to label4 with label2;
+    }

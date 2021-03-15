@@ -1,0 +1,591 @@
+org.acra.ACRA extends java.lang.Object
+public static final boolean DEV_LOGGING
+public static final java.lang.String LOG_TAG
+public static final java.lang.String PREF_ALWAYS_ACCEPT
+public static final java.lang.String PREF_DISABLE_ACRA
+public static final java.lang.String PREF_ENABLE_ACRA
+public static final java.lang.String PREF_ENABLE_DEVICE_ID
+public static final java.lang.String PREF_ENABLE_SYSTEM_LOGS
+public static final java.lang.String PREF_LAST_VERSION_NR
+public static final java.lang.String PREF_USER_EMAIL_ADDRESS
+private static org.acra.ACRAConfiguration configProxy
+private static org.acra.ErrorReporter errorReporterSingleton
+public static org.acra.log.ACRALog log
+private static android.app.Application mApplication
+private static android.content.SharedPreferences$OnSharedPreferenceChangeListener mPrefListener
+    static void <clinit>()
+    {
+        java.lang.String $r0;
+        java.lang.Class $r1;
+        org.acra.log.AndroidLogDelegate $r2;
+
+        $r1 = class "Lorg/acra/ACRA;";
+
+        $r0 = virtualinvoke $r1.<java.lang.Class: java.lang.String getSimpleName()>();
+
+        <org.acra.ACRA: java.lang.String LOG_TAG> = $r0;
+
+        $r2 = new org.acra.log.AndroidLogDelegate;
+
+        specialinvoke $r2.<org.acra.log.AndroidLogDelegate: void <init>()>();
+
+        <org.acra.ACRA: org.acra.log.ACRALog log> = $r2;
+
+        return;
+    }
+    public void <init>()
+    {
+        org.acra.ACRA r0;
+
+        r0 := @this: org.acra.ACRA;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+    static boolean access$000(android.content.SharedPreferences)
+    {
+        android.content.SharedPreferences $r0;
+        boolean $z0;
+
+        $r0 := @parameter0: android.content.SharedPreferences;
+
+        $z0 = staticinvoke <org.acra.ACRA: boolean shouldDisableACRA(android.content.SharedPreferences)>($r0);
+
+        return $z0;
+    }
+    static void checkCrashResources(org.acra.'annotation'.ReportsCrashes) throws org.acra.ACRAConfigurationException
+    {
+        org.acra.'annotation'.ReportsCrashes $r0;
+        int[] $r1;
+        org.acra.ReportingInteractionMode $r2;
+        int $i0;
+        org.acra.ACRAConfigurationException $r3;
+        java.lang.Class $r4, $r5;
+        boolean $z0;
+
+        $r0 := @parameter0: org.acra.'annotation'.ReportsCrashes;
+
+        $r1 = <org.acra.ACRA$2: int[] $SwitchMap$org$acra$ReportingInteractionMode>;
+
+        $r2 = interfaceinvoke $r0.<org.acra.'annotation'.ReportsCrashes: org.acra.ReportingInteractionMode mode()>();
+
+        $i0 = virtualinvoke $r2.<org.acra.ReportingInteractionMode: int ordinal()>();
+
+        $i0 = $r1[$i0];
+
+        lookupswitch($i0)
+        {
+            case 1: goto label2;
+            case 2: goto label3;
+            case 3: goto label6;
+            default: goto label1;
+        };
+
+     label1:
+        return;
+
+     label2:
+        $i0 = interfaceinvoke $r0.<org.acra.'annotation'.ReportsCrashes: int resToastText()>();
+
+        if $i0 != 0 goto label7;
+
+        $r3 = new org.acra.ACRAConfigurationException;
+
+        specialinvoke $r3.<org.acra.ACRAConfigurationException: void <init>(java.lang.String)>("TOAST mode: you have to define the resToastText parameter in your application @ReportsCrashes() annotation.");
+
+        throw $r3;
+
+     label3:
+        $i0 = interfaceinvoke $r0.<org.acra.'annotation'.ReportsCrashes: int resNotifTickerText()>();
+
+        if $i0 == 0 goto label4;
+
+        $i0 = interfaceinvoke $r0.<org.acra.'annotation'.ReportsCrashes: int resNotifTitle()>();
+
+        if $i0 == 0 goto label4;
+
+        $i0 = interfaceinvoke $r0.<org.acra.'annotation'.ReportsCrashes: int resNotifText()>();
+
+        if $i0 != 0 goto label5;
+
+     label4:
+        $r3 = new org.acra.ACRAConfigurationException;
+
+        specialinvoke $r3.<org.acra.ACRAConfigurationException: void <init>(java.lang.String)>("NOTIFICATION mode: you have to define at least the resNotifTickerText, resNotifTitle, resNotifText parameters in your application @ReportsCrashes() annotation.");
+
+        throw $r3;
+
+     label5:
+        $r4 = class "Lorg/acra/CrashReportDialog;";
+
+        $r5 = interfaceinvoke $r0.<org.acra.'annotation'.ReportsCrashes: java.lang.Class reportDialogClass()>();
+
+        $z0 = virtualinvoke $r4.<java.lang.Object: boolean equals(java.lang.Object)>($r5);
+
+        if $z0 == 0 goto label7;
+
+        $i0 = interfaceinvoke $r0.<org.acra.'annotation'.ReportsCrashes: int resDialogText()>();
+
+        if $i0 != 0 goto label7;
+
+        $r3 = new org.acra.ACRAConfigurationException;
+
+        specialinvoke $r3.<org.acra.ACRAConfigurationException: void <init>(java.lang.String)>("NOTIFICATION mode: using the (default) CrashReportDialog requires you have to define the resDialogText parameter in your application @ReportsCrashes() annotation.");
+
+        throw $r3;
+
+     label6:
+        $r4 = class "Lorg/acra/CrashReportDialog;";
+
+        $r5 = interfaceinvoke $r0.<org.acra.'annotation'.ReportsCrashes: java.lang.Class reportDialogClass()>();
+
+        $z0 = virtualinvoke $r4.<java.lang.Object: boolean equals(java.lang.Object)>($r5);
+
+        if $z0 == 0 goto label7;
+
+        $i0 = interfaceinvoke $r0.<org.acra.'annotation'.ReportsCrashes: int resDialogText()>();
+
+        if $i0 != 0 goto label7;
+
+        $r3 = new org.acra.ACRAConfigurationException;
+
+        specialinvoke $r3.<org.acra.ACRAConfigurationException: void <init>(java.lang.String)>("DIALOG mode: using the (default) CrashReportDialog requires you to define the resDialogText parameter in your application @ReportsCrashes() annotation.");
+
+        throw $r3;
+
+     label7:
+        return;
+    }
+    public static android.content.SharedPreferences getACRASharedPreferences()
+    {
+        org.acra.ACRAConfiguration $r0;
+        java.lang.String $r1, $r2;
+        boolean $z0;
+        android.app.Application $r3;
+        int $i0;
+        android.content.SharedPreferences $r4;
+
+        $r0 = staticinvoke <org.acra.ACRA: org.acra.ACRAConfiguration getConfig()>();
+
+        $r1 = "";
+
+        $r2 = interfaceinvoke $r0.<org.acra.'annotation'.ReportsCrashes: java.lang.String sharedPreferencesName()>();
+
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean equals(java.lang.Object)>($r2);
+
+        if $z0 != 0 goto label1;
+
+        $r3 = <org.acra.ACRA: android.app.Application mApplication>;
+
+        $r1 = interfaceinvoke $r0.<org.acra.'annotation'.ReportsCrashes: java.lang.String sharedPreferencesName()>();
+
+        $i0 = interfaceinvoke $r0.<org.acra.'annotation'.ReportsCrashes: int sharedPreferencesMode()>();
+
+        $r4 = virtualinvoke $r3.<android.app.Application: android.content.SharedPreferences getSharedPreferences(java.lang.String,int)>($r1, $i0);
+
+        return $r4;
+
+     label1:
+        $r3 = <org.acra.ACRA: android.app.Application mApplication>;
+
+        $r4 = staticinvoke <android.preference.PreferenceManager: android.content.SharedPreferences getDefaultSharedPreferences(android.content.Context)>($r3);
+
+        return $r4;
+    }
+    static android.app.Application getApplication()
+    {
+        android.app.Application r0;
+
+        r0 = <org.acra.ACRA: android.app.Application mApplication>;
+
+        return r0;
+    }
+    public static org.acra.ACRAConfiguration getConfig()
+    {
+        java.lang.String $r0;
+        org.acra.ACRAConfiguration $r1;
+        android.app.Application $r2;
+        org.acra.log.ACRALog $r3;
+
+        $r1 = <org.acra.ACRA: org.acra.ACRAConfiguration configProxy>;
+
+        if $r1 != null goto label2;
+
+        $r2 = <org.acra.ACRA: android.app.Application mApplication>;
+
+        if $r2 != null goto label1;
+
+        $r3 = <org.acra.ACRA: org.acra.log.ACRALog log>;
+
+        $r0 = <org.acra.ACRA: java.lang.String LOG_TAG>;
+
+        interfaceinvoke $r3.<org.acra.log.ACRALog: int w(java.lang.String,java.lang.String)>($r0, "Calling ACRA.getConfig() before ACRA.init() gives you an empty configuration instance. You might prefer calling ACRA.getNewDefaultConfig(Application) to get an instance with default values taken from a @ReportsCrashes annotation.");
+
+     label1:
+        $r2 = <org.acra.ACRA: android.app.Application mApplication>;
+
+        $r1 = staticinvoke <org.acra.ACRA: org.acra.ACRAConfiguration getNewDefaultConfig(android.app.Application)>($r2);
+
+        <org.acra.ACRA: org.acra.ACRAConfiguration configProxy> = $r1;
+
+     label2:
+        $r1 = <org.acra.ACRA: org.acra.ACRAConfiguration configProxy>;
+
+        return $r1;
+    }
+    public static org.acra.ErrorReporter getErrorReporter()
+    {
+        org.acra.ErrorReporter $r0;
+        java.lang.IllegalStateException $r1;
+
+        $r0 = <org.acra.ACRA: org.acra.ErrorReporter errorReporterSingleton>;
+
+        if $r0 != null goto label1;
+
+        $r1 = new java.lang.IllegalStateException;
+
+        specialinvoke $r1.<java.lang.IllegalStateException: void <init>(java.lang.String)>("Cannot access ErrorReporter before ACRA#init");
+
+        throw $r1;
+
+     label1:
+        $r0 = <org.acra.ACRA: org.acra.ErrorReporter errorReporterSingleton>;
+
+        return $r0;
+    }
+    public static org.acra.ACRAConfiguration getNewDefaultConfig(android.app.Application)
+    {
+        android.app.Application $r0;
+        org.acra.ACRAConfiguration $r1;
+        java.lang.Class $r2;
+        java.lang.'annotation'.Annotation $r3;
+        org.acra.'annotation'.ReportsCrashes $r4;
+
+        $r0 := @parameter0: android.app.Application;
+
+        if $r0 == null goto label1;
+
+        $r1 = new org.acra.ACRAConfiguration;
+
+        $r2 = virtualinvoke $r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r3 = virtualinvoke $r2.<java.lang.Class: java.lang.'annotation'.Annotation getAnnotation(java.lang.Class)>(class "Lorg/acra/annotation/ReportsCrashes;");
+
+        $r4 = (org.acra.'annotation'.ReportsCrashes) $r3;
+
+        specialinvoke $r1.<org.acra.ACRAConfiguration: void <init>(org.acra.'annotation'.ReportsCrashes)>($r4);
+
+        return $r1;
+
+     label1:
+        $r1 = new org.acra.ACRAConfiguration;
+
+        specialinvoke $r1.<org.acra.ACRAConfiguration: void <init>(org.acra.'annotation'.ReportsCrashes)>(null);
+
+        return $r1;
+    }
+    public static void init(android.app.Application)
+    {
+        android.app.Application $r0;
+        java.lang.Class $r1;
+        java.lang.'annotation'.Annotation $r2;
+        org.acra.'annotation'.ReportsCrashes r3;
+        org.acra.log.ACRALog $r4;
+        java.lang.String $r5, $r7;
+        java.lang.StringBuilder $r6;
+        org.acra.ACRAConfiguration $r8;
+
+        $r0 := @parameter0: android.app.Application;
+
+        $r1 = virtualinvoke $r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r2 = virtualinvoke $r1.<java.lang.Class: java.lang.'annotation'.Annotation getAnnotation(java.lang.Class)>(class "Lorg/acra/annotation/ReportsCrashes;");
+
+        r3 = (org.acra.'annotation'.ReportsCrashes) $r2;
+
+        if r3 != null goto label1;
+
+        $r4 = <org.acra.ACRA: org.acra.log.ACRALog log>;
+
+        $r5 = <org.acra.ACRA: java.lang.String LOG_TAG>;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("ACRA#init called but no ReportsCrashes annotation on Application ");
+
+        $r7 = virtualinvoke $r0.<android.app.Application: java.lang.String getPackageName()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r7);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        interfaceinvoke $r4.<org.acra.log.ACRALog: int e(java.lang.String,java.lang.String)>($r5, $r7);
+
+        return;
+
+     label1:
+        $r8 = new org.acra.ACRAConfiguration;
+
+        specialinvoke $r8.<org.acra.ACRAConfiguration: void <init>(org.acra.'annotation'.ReportsCrashes)>(r3);
+
+        staticinvoke <org.acra.ACRA: void init(android.app.Application,org.acra.ACRAConfiguration)>($r0, $r8);
+
+        return;
+    }
+    public static void init(android.app.Application, org.acra.ACRAConfiguration)
+    {
+        android.app.Application $r0;
+        org.acra.ACRAConfiguration $r1;
+
+        $r0 := @parameter0: android.app.Application;
+
+        $r1 := @parameter1: org.acra.ACRAConfiguration;
+
+        staticinvoke <org.acra.ACRA: void init(android.app.Application,org.acra.ACRAConfiguration,boolean)>($r0, $r1, 1);
+
+        return;
+    }
+    public static void init(android.app.Application, org.acra.ACRAConfiguration, boolean)
+    {
+        android.app.Application $r0, $r4;
+        org.acra.ACRAConfiguration $r1;
+        boolean $z0, $z1;
+        org.acra.ACRAConfigurationException r2;
+        org.acra.ErrorReporter r3;
+        org.acra.log.ACRALog $r5;
+        java.lang.String $r6, $r9;
+        android.content.SharedPreferences $r7;
+        java.lang.StringBuilder $r8;
+        org.acra.ACRA$1 $r10;
+        android.content.SharedPreferences$OnSharedPreferenceChangeListener $r11;
+
+        $r0 := @parameter0: android.app.Application;
+
+        $r1 := @parameter1: org.acra.ACRAConfiguration;
+
+        $z0 := @parameter2: boolean;
+
+        $r4 = <org.acra.ACRA: android.app.Application mApplication>;
+
+        if $r4 == null goto label01;
+
+        $r5 = <org.acra.ACRA: org.acra.log.ACRALog log>;
+
+        $r6 = <org.acra.ACRA: java.lang.String LOG_TAG>;
+
+        interfaceinvoke $r5.<org.acra.log.ACRALog: int w(java.lang.String,java.lang.String)>($r6, "ACRA#init called more than once. Won\'t do anything more.");
+
+        return;
+
+     label01:
+        <org.acra.ACRA: android.app.Application mApplication> = $r0;
+
+        if $r1 != null goto label02;
+
+        $r5 = <org.acra.ACRA: org.acra.log.ACRALog log>;
+
+        $r6 = <org.acra.ACRA: java.lang.String LOG_TAG>;
+
+        interfaceinvoke $r5.<org.acra.log.ACRALog: int e(java.lang.String,java.lang.String)>($r6, "ACRA#init called but no ACRAConfiguration provided");
+
+        return;
+
+     label02:
+        staticinvoke <org.acra.ACRA: void setConfig(org.acra.ACRAConfiguration)>($r1);
+
+        $r7 = staticinvoke <org.acra.ACRA: android.content.SharedPreferences getACRASharedPreferences()>();
+
+     label03:
+        staticinvoke <org.acra.ACRA: void checkCrashResources(org.acra.'annotation'.ReportsCrashes)>($r1);
+
+     label04:
+        $r5 = <org.acra.ACRA: org.acra.log.ACRALog log>;
+
+        $r6 = <org.acra.ACRA: java.lang.String LOG_TAG>;
+
+        $r8 = new java.lang.StringBuilder;
+
+     label05:
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("ACRA is enabled for ");
+
+     label06:
+        $r0 = <org.acra.ACRA: android.app.Application mApplication>;
+
+     label07:
+        $r9 = virtualinvoke $r0.<android.app.Application: java.lang.String getPackageName()>();
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r9);
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", initializing...");
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        interfaceinvoke $r5.<org.acra.log.ACRALog: int d(java.lang.String,java.lang.String)>($r6, $r9);
+
+        $z1 = staticinvoke <org.acra.ACRA: boolean shouldDisableACRA(android.content.SharedPreferences)>($r7);
+
+     label08:
+        if $z1 != 0 goto label14;
+
+        $z1 = 1;
+
+     label09:
+        r3 = new org.acra.ErrorReporter;
+
+        $r0 = <org.acra.ACRA: android.app.Application mApplication>;
+
+     label10:
+        specialinvoke r3.<org.acra.ErrorReporter: void <init>(android.app.Application,android.content.SharedPreferences,boolean)>($r0, $r7, $z1);
+
+        virtualinvoke r3.<org.acra.ErrorReporter: void setDefaultReportSenders()>();
+
+     label11:
+        <org.acra.ACRA: org.acra.ErrorReporter errorReporterSingleton> = r3;
+
+        if $z0 == 0 goto label13;
+
+     label12:
+        virtualinvoke r3.<org.acra.ErrorReporter: void checkReportsOnApplicationStart()>();
+
+     label13:
+        $r10 = new org.acra.ACRA$1;
+
+        specialinvoke $r10.<org.acra.ACRA$1: void <init>()>();
+
+        <org.acra.ACRA: android.content.SharedPreferences$OnSharedPreferenceChangeListener mPrefListener> = $r10;
+
+        $r11 = <org.acra.ACRA: android.content.SharedPreferences$OnSharedPreferenceChangeListener mPrefListener>;
+
+        interfaceinvoke $r7.<android.content.SharedPreferences: void registerOnSharedPreferenceChangeListener(android.content.SharedPreferences$OnSharedPreferenceChangeListener)>($r11);
+
+        return;
+
+     label14:
+        $z1 = 0;
+
+        goto label09;
+
+     label15:
+        r2 := @caughtexception;
+
+        $r5 = <org.acra.ACRA: org.acra.log.ACRALog log>;
+
+        $r6 = <org.acra.ACRA: java.lang.String LOG_TAG>;
+
+        interfaceinvoke $r5.<org.acra.log.ACRALog: int w(java.lang.String,java.lang.String,java.lang.Throwable)>($r6, "Error : ", r2);
+
+        goto label13;
+
+        catch org.acra.ACRAConfigurationException from label03 to label04 with label15;
+        catch org.acra.ACRAConfigurationException from label05 to label06 with label15;
+        catch org.acra.ACRAConfigurationException from label07 to label08 with label15;
+        catch org.acra.ACRAConfigurationException from label10 to label11 with label15;
+        catch org.acra.ACRAConfigurationException from label12 to label13 with label15;
+    }
+    static boolean isDebuggable()
+    {
+        android.content.pm.PackageManager$NameNotFoundException r0;
+        android.app.Application $r1;
+        android.content.pm.PackageManager $r2;
+        java.lang.String $r3;
+        android.content.pm.ApplicationInfo $r4;
+        int $i0;
+
+        $r1 = <org.acra.ACRA: android.app.Application mApplication>;
+
+        $r2 = virtualinvoke $r1.<android.app.Application: android.content.pm.PackageManager getPackageManager()>();
+
+        $r1 = <org.acra.ACRA: android.app.Application mApplication>;
+
+     label1:
+        $r3 = virtualinvoke $r1.<android.app.Application: java.lang.String getPackageName()>();
+
+        $r4 = virtualinvoke $r2.<android.content.pm.PackageManager: android.content.pm.ApplicationInfo getApplicationInfo(java.lang.String,int)>($r3, 0);
+
+     label2:
+        $i0 = $r4.<android.content.pm.ApplicationInfo: int flags>;
+
+        $i0 = $i0 & 2;
+
+        if $i0 <= 0 goto label4;
+
+        return 1;
+
+     label3:
+        r0 := @caughtexception;
+
+     label4:
+        return 0;
+
+        catch android.content.pm.PackageManager$NameNotFoundException from label1 to label2 with label3;
+    }
+    public static void setConfig(org.acra.ACRAConfiguration)
+    {
+        org.acra.ACRAConfiguration $r0;
+
+        $r0 := @parameter0: org.acra.ACRAConfiguration;
+
+        <org.acra.ACRA: org.acra.ACRAConfiguration configProxy> = $r0;
+
+        return;
+    }
+    public static void setLog(org.acra.log.ACRALog)
+    {
+        org.acra.log.ACRALog $r0;
+        java.lang.NullPointerException $r1;
+
+        $r0 := @parameter0: org.acra.log.ACRALog;
+
+        if $r0 != null goto label1;
+
+        $r1 = new java.lang.NullPointerException;
+
+        specialinvoke $r1.<java.lang.NullPointerException: void <init>(java.lang.String)>("ACRALog cannot be null");
+
+        throw $r1;
+
+     label1:
+        <org.acra.ACRA: org.acra.log.ACRALog log> = $r0;
+
+        return;
+    }
+    private static boolean shouldDisableACRA(android.content.SharedPreferences)
+    {
+        android.content.SharedPreferences $r0;
+        boolean $z0, $z1;
+        java.lang.Exception $r1;
+
+        $r0 := @parameter0: android.content.SharedPreferences;
+
+        $z0 = 1;
+
+     label1:
+        $z1 = interfaceinvoke $r0.<android.content.SharedPreferences: boolean getBoolean(java.lang.String,boolean)>("acra.enable", 1);
+
+     label2:
+        if $z1 != 0 goto label5;
+
+     label3:
+        $z0 = interfaceinvoke $r0.<android.content.SharedPreferences: boolean getBoolean(java.lang.String,boolean)>("acra.disable", $z0);
+
+     label4:
+        return $z0;
+
+     label5:
+        $z0 = 0;
+
+        goto label3;
+
+     label6:
+        $r1 := @caughtexception;
+
+        return 0;
+
+        catch java.lang.Exception from label1 to label2 with label6;
+        catch java.lang.Exception from label3 to label4 with label6;
+    }

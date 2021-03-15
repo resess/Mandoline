@@ -1,0 +1,226 @@
+org.openhab.habdroid.util.MjpegInputStream extends java.io.DataInputStream
+private static final int FRAME_MAX_LENGTH
+private static final int HEADER_MAX_LENGTH
+private static final java.lang.String TAG
+private final java.lang.String CONTENT_LENGTH
+private final byte[] EOF_MARKER
+private final byte[] SOI_MARKER
+private int mContentLength
+    static void <clinit>()
+    {
+        java.lang.String $r0;
+        java.lang.Class $r1;
+
+        $r1 = class "Lorg/openhab/habdroid/util/MjpegInputStream;";
+
+        $r0 = virtualinvoke $r1.<java.lang.Class: java.lang.String getSimpleName()>();
+
+        <org.openhab.habdroid.util.MjpegInputStream: java.lang.String TAG> = $r0;
+
+        return;
+    }
+    public void <init>(java.io.InputStream)
+    {
+        org.openhab.habdroid.util.MjpegInputStream r0;
+        java.io.InputStream $r1;
+        java.io.BufferedInputStream $r2;
+        byte[] $r3;
+
+        r0 := @this: org.openhab.habdroid.util.MjpegInputStream;
+
+        $r1 := @parameter0: java.io.InputStream;
+
+        $r2 = new java.io.BufferedInputStream;
+
+        specialinvoke $r2.<java.io.BufferedInputStream: void <init>(java.io.InputStream,int)>($r1, 400100);
+
+        specialinvoke r0.<java.io.DataInputStream: void <init>(java.io.InputStream)>($r2);
+
+        $r3 = newarray (byte)[2];
+
+        $r3[0] = -1;
+
+        $r3[1] = -40;
+
+        r0.<org.openhab.habdroid.util.MjpegInputStream: byte[] SOI_MARKER> = $r3;
+
+        $r3 = newarray (byte)[2];
+
+        $r3[0] = -1;
+
+        $r3[1] = -39;
+
+        r0.<org.openhab.habdroid.util.MjpegInputStream: byte[] EOF_MARKER> = $r3;
+
+        r0.<org.openhab.habdroid.util.MjpegInputStream: java.lang.String CONTENT_LENGTH> = "Content-Length";
+
+        r0.<org.openhab.habdroid.util.MjpegInputStream: int mContentLength> = -1;
+
+        return;
+    }
+    private int getEndOfSeqeunce(java.io.DataInputStream, byte[]) throws java.io.IOException
+    {
+        org.openhab.habdroid.util.MjpegInputStream r0;
+        java.io.DataInputStream $r1;
+        byte[] $r2;
+        byte b0, $b4;
+        int $i1, i2, i3;
+
+        r0 := @this: org.openhab.habdroid.util.MjpegInputStream;
+
+        $r1 := @parameter0: java.io.DataInputStream;
+
+        $r2 := @parameter1: byte[];
+
+        i2 = 0;
+
+        i3 = 0;
+
+     label1:
+        if i3 >= 400100 goto label4;
+
+        $i1 = virtualinvoke $r1.<java.io.DataInputStream: int readUnsignedByte()>();
+
+        b0 = (byte) $i1;
+
+        $b4 = $r2[i2];
+
+        if b0 != $b4 goto label2;
+
+        i2 = i2 + 1;
+
+        $i1 = lengthof $r2;
+
+        if i2 != $i1 goto label3;
+
+        i2 = i3 + 1;
+
+        return i2;
+
+     label2:
+        i2 = 0;
+
+     label3:
+        i3 = i3 + 1;
+
+        goto label1;
+
+     label4:
+        return -1;
+    }
+    private int getStartOfSequence(java.io.DataInputStream, byte[]) throws java.io.IOException
+    {
+        org.openhab.habdroid.util.MjpegInputStream r0;
+        java.io.DataInputStream $r1;
+        byte[] $r2;
+        int $i0, $i1;
+
+        r0 := @this: org.openhab.habdroid.util.MjpegInputStream;
+
+        $r1 := @parameter0: java.io.DataInputStream;
+
+        $r2 := @parameter1: byte[];
+
+        $i0 = specialinvoke r0.<org.openhab.habdroid.util.MjpegInputStream: int getEndOfSeqeunce(java.io.DataInputStream,byte[])>($r1, $r2);
+
+        if $i0 >= 0 goto label1;
+
+        return -1;
+
+     label1:
+        $i1 = lengthof $r2;
+
+        $i0 = $i0 - $i1;
+
+        return $i0;
+    }
+    private int parseContentLength(byte[]) throws java.io.IOException, java.lang.NumberFormatException
+    {
+        org.openhab.habdroid.util.MjpegInputStream r0;
+        byte[] $r1;
+        java.io.ByteArrayInputStream r2;
+        java.util.Properties r3;
+        java.lang.String $r4;
+        int $i0;
+
+        r0 := @this: org.openhab.habdroid.util.MjpegInputStream;
+
+        $r1 := @parameter0: byte[];
+
+        r2 = new java.io.ByteArrayInputStream;
+
+        specialinvoke r2.<java.io.ByteArrayInputStream: void <init>(byte[])>($r1);
+
+        r3 = new java.util.Properties;
+
+        specialinvoke r3.<java.util.Properties: void <init>()>();
+
+        virtualinvoke r3.<java.util.Properties: void load(java.io.InputStream)>(r2);
+
+        $r4 = virtualinvoke r3.<java.util.Properties: java.lang.String getProperty(java.lang.String)>("Content-Length");
+
+        $i0 = staticinvoke <java.lang.Integer: int parseInt(java.lang.String)>($r4);
+
+        return $i0;
+    }
+    public android.graphics.Bitmap readMjpegFrame() throws java.io.IOException
+    {
+        org.openhab.habdroid.util.MjpegInputStream r0;
+        byte[] r1;
+        java.lang.NumberFormatException r2;
+        int $i0, $i1;
+        java.io.ByteArrayInputStream $r3;
+        android.graphics.Bitmap $r4;
+
+        r0 := @this: org.openhab.habdroid.util.MjpegInputStream;
+
+        virtualinvoke r0.<org.openhab.habdroid.util.MjpegInputStream: void mark(int)>(400100);
+
+        r1 = r0.<org.openhab.habdroid.util.MjpegInputStream: byte[] SOI_MARKER>;
+
+        $i0 = specialinvoke r0.<org.openhab.habdroid.util.MjpegInputStream: int getStartOfSequence(java.io.DataInputStream,byte[])>(r0, r1);
+
+        virtualinvoke r0.<org.openhab.habdroid.util.MjpegInputStream: void reset()>();
+
+        r1 = newarray (byte)[$i0];
+
+        virtualinvoke r0.<org.openhab.habdroid.util.MjpegInputStream: void readFully(byte[])>(r1);
+
+     label1:
+        $i1 = specialinvoke r0.<org.openhab.habdroid.util.MjpegInputStream: int parseContentLength(byte[])>(r1);
+
+     label2:
+        r0.<org.openhab.habdroid.util.MjpegInputStream: int mContentLength> = $i1;
+
+     label3:
+        virtualinvoke r0.<org.openhab.habdroid.util.MjpegInputStream: void reset()>();
+
+        $i1 = r0.<org.openhab.habdroid.util.MjpegInputStream: int mContentLength>;
+
+        r1 = newarray (byte)[$i1];
+
+        virtualinvoke r0.<org.openhab.habdroid.util.MjpegInputStream: int skipBytes(int)>($i0);
+
+        virtualinvoke r0.<org.openhab.habdroid.util.MjpegInputStream: void readFully(byte[])>(r1);
+
+        $r3 = new java.io.ByteArrayInputStream;
+
+        specialinvoke $r3.<java.io.ByteArrayInputStream: void <init>(byte[])>(r1);
+
+        $r4 = staticinvoke <android.graphics.BitmapFactory: android.graphics.Bitmap decodeStream(java.io.InputStream)>($r3);
+
+        return $r4;
+
+     label4:
+        r2 := @caughtexception;
+
+        r1 = r0.<org.openhab.habdroid.util.MjpegInputStream: byte[] EOF_MARKER>;
+
+        $i1 = specialinvoke r0.<org.openhab.habdroid.util.MjpegInputStream: int getEndOfSeqeunce(java.io.DataInputStream,byte[])>(r0, r1);
+
+        r0.<org.openhab.habdroid.util.MjpegInputStream: int mContentLength> = $i1;
+
+        goto label3;
+
+        catch java.lang.NumberFormatException from label1 to label2 with label4;
+    }

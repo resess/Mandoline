@@ -1,0 +1,853 @@
+okhttp3.internal.http.RetryAndFollowUpInterceptor extends java.lang.Object implements okhttp3.Interceptor
+private static final int MAX_FOLLOW_UPS
+private java.lang.Object callStackTrace
+private volatile boolean canceled
+private final okhttp3.OkHttpClient client
+private final boolean forWebSocket
+private okhttp3.internal.connection.StreamAllocation streamAllocation
+    public void <init>(okhttp3.OkHttpClient, boolean)
+    {
+        okhttp3.internal.http.RetryAndFollowUpInterceptor r0;
+        okhttp3.OkHttpClient $r1;
+        boolean $z0;
+
+        r0 := @this: okhttp3.internal.http.RetryAndFollowUpInterceptor;
+
+        $r1 := @parameter0: okhttp3.OkHttpClient;
+
+        $z0 := @parameter1: boolean;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<okhttp3.internal.http.RetryAndFollowUpInterceptor: okhttp3.OkHttpClient client> = $r1;
+
+        r0.<okhttp3.internal.http.RetryAndFollowUpInterceptor: boolean forWebSocket> = $z0;
+
+        return;
+    }
+    private okhttp3.Address createAddress(okhttp3.HttpUrl)
+    {
+        okhttp3.internal.http.RetryAndFollowUpInterceptor r0;
+        okhttp3.HttpUrl $r1;
+        javax.net.ssl.SSLSocketFactory r2;
+        javax.net.ssl.HostnameVerifier r3;
+        okhttp3.CertificatePinner r4;
+        boolean $z0;
+        okhttp3.OkHttpClient $r5;
+        okhttp3.Address $r6;
+        java.lang.String $r7;
+        int $i0;
+        okhttp3.Dns $r8;
+        javax.net.SocketFactory $r9;
+        okhttp3.Authenticator $r10;
+        java.net.Proxy $r11;
+        java.util.List $r12, $r13;
+        java.net.ProxySelector $r14;
+
+        r0 := @this: okhttp3.internal.http.RetryAndFollowUpInterceptor;
+
+        $r1 := @parameter0: okhttp3.HttpUrl;
+
+        r2 = null;
+
+        r3 = null;
+
+        r4 = null;
+
+        $z0 = virtualinvoke $r1.<okhttp3.HttpUrl: boolean isHttps()>();
+
+        if $z0 == 0 goto label1;
+
+        $r5 = r0.<okhttp3.internal.http.RetryAndFollowUpInterceptor: okhttp3.OkHttpClient client>;
+
+        r2 = virtualinvoke $r5.<okhttp3.OkHttpClient: javax.net.ssl.SSLSocketFactory sslSocketFactory()>();
+
+        $r5 = r0.<okhttp3.internal.http.RetryAndFollowUpInterceptor: okhttp3.OkHttpClient client>;
+
+        r3 = virtualinvoke $r5.<okhttp3.OkHttpClient: javax.net.ssl.HostnameVerifier hostnameVerifier()>();
+
+        $r5 = r0.<okhttp3.internal.http.RetryAndFollowUpInterceptor: okhttp3.OkHttpClient client>;
+
+        r4 = virtualinvoke $r5.<okhttp3.OkHttpClient: okhttp3.CertificatePinner certificatePinner()>();
+
+     label1:
+        $r6 = new okhttp3.Address;
+
+        $r7 = virtualinvoke $r1.<okhttp3.HttpUrl: java.lang.String host()>();
+
+        $i0 = virtualinvoke $r1.<okhttp3.HttpUrl: int port()>();
+
+        $r5 = r0.<okhttp3.internal.http.RetryAndFollowUpInterceptor: okhttp3.OkHttpClient client>;
+
+        $r8 = virtualinvoke $r5.<okhttp3.OkHttpClient: okhttp3.Dns dns()>();
+
+        $r5 = r0.<okhttp3.internal.http.RetryAndFollowUpInterceptor: okhttp3.OkHttpClient client>;
+
+        $r9 = virtualinvoke $r5.<okhttp3.OkHttpClient: javax.net.SocketFactory socketFactory()>();
+
+        $r5 = r0.<okhttp3.internal.http.RetryAndFollowUpInterceptor: okhttp3.OkHttpClient client>;
+
+        $r10 = virtualinvoke $r5.<okhttp3.OkHttpClient: okhttp3.Authenticator proxyAuthenticator()>();
+
+        $r5 = r0.<okhttp3.internal.http.RetryAndFollowUpInterceptor: okhttp3.OkHttpClient client>;
+
+        $r11 = virtualinvoke $r5.<okhttp3.OkHttpClient: java.net.Proxy proxy()>();
+
+        $r5 = r0.<okhttp3.internal.http.RetryAndFollowUpInterceptor: okhttp3.OkHttpClient client>;
+
+        $r12 = virtualinvoke $r5.<okhttp3.OkHttpClient: java.util.List protocols()>();
+
+        $r5 = r0.<okhttp3.internal.http.RetryAndFollowUpInterceptor: okhttp3.OkHttpClient client>;
+
+        $r13 = virtualinvoke $r5.<okhttp3.OkHttpClient: java.util.List connectionSpecs()>();
+
+        $r5 = r0.<okhttp3.internal.http.RetryAndFollowUpInterceptor: okhttp3.OkHttpClient client>;
+
+        $r14 = virtualinvoke $r5.<okhttp3.OkHttpClient: java.net.ProxySelector proxySelector()>();
+
+        specialinvoke $r6.<okhttp3.Address: void <init>(java.lang.String,int,okhttp3.Dns,javax.net.SocketFactory,javax.net.ssl.SSLSocketFactory,javax.net.ssl.HostnameVerifier,okhttp3.CertificatePinner,okhttp3.Authenticator,java.net.Proxy,java.util.List,java.util.List,java.net.ProxySelector)>($r7, $i0, $r8, $r9, r2, r3, r4, $r10, $r11, $r12, $r13, $r14);
+
+        return $r6;
+    }
+    private okhttp3.Request followUpRequest(okhttp3.Response) throws java.io.IOException
+    {
+        okhttp3.internal.http.RetryAndFollowUpInterceptor r0;
+        okhttp3.Response $r1;
+        java.lang.IllegalStateException $r2;
+        okhttp3.internal.connection.StreamAllocation $r3;
+        okhttp3.internal.connection.RealConnection $r4;
+        okhttp3.Route $r5;
+        int $i0;
+        okhttp3.Request $r6;
+        java.lang.String $r7, $r14, $r17;
+        java.net.Proxy $r8;
+        java.net.Proxy$Type $r9, $r10;
+        java.net.ProtocolException $r11;
+        okhttp3.OkHttpClient $r12;
+        okhttp3.Authenticator $r13;
+        boolean $z0, $z1;
+        okhttp3.HttpUrl $r15, $r16;
+        okhttp3.Request$Builder $r18;
+        okhttp3.RequestBody $r19;
+
+        r0 := @this: okhttp3.internal.http.RetryAndFollowUpInterceptor;
+
+        $r1 := @parameter0: okhttp3.Response;
+
+        if $r1 != null goto label01;
+
+        $r2 = new java.lang.IllegalStateException;
+
+        specialinvoke $r2.<java.lang.IllegalStateException: void <init>()>();
+
+        throw $r2;
+
+     label01:
+        $r3 = r0.<okhttp3.internal.http.RetryAndFollowUpInterceptor: okhttp3.internal.connection.StreamAllocation streamAllocation>;
+
+        $r4 = virtualinvoke $r3.<okhttp3.internal.connection.StreamAllocation: okhttp3.internal.connection.RealConnection connection()>();
+
+        if $r4 == null goto label04;
+
+        $r5 = interfaceinvoke $r4.<okhttp3.Connection: okhttp3.Route route()>();
+
+     label02:
+        $i0 = virtualinvoke $r1.<okhttp3.Response: int code()>();
+
+        $r6 = virtualinvoke $r1.<okhttp3.Response: okhttp3.Request request()>();
+
+        $r7 = virtualinvoke $r6.<okhttp3.Request: java.lang.String method()>();
+
+        lookupswitch($i0)
+        {
+            case 300: goto label11;
+            case 301: goto label11;
+            case 302: goto label11;
+            case 303: goto label11;
+            case 307: goto label10;
+            case 308: goto label10;
+            case 401: goto label09;
+            case 407: goto label05;
+            case 408: goto label19;
+            default: goto label03;
+        };
+
+     label03:
+        return null;
+
+     label04:
+        $r5 = null;
+
+        goto label02;
+
+     label05:
+        if $r5 == null goto label07;
+
+        $r8 = virtualinvoke $r5.<okhttp3.Route: java.net.Proxy proxy()>();
+
+     label06:
+        $r9 = virtualinvoke $r8.<java.net.Proxy: java.net.Proxy$Type type()>();
+
+        $r10 = <java.net.Proxy$Type: java.net.Proxy$Type HTTP>;
+
+        if $r9 == $r10 goto label08;
+
+        $r11 = new java.net.ProtocolException;
+
+        specialinvoke $r11.<java.net.ProtocolException: void <init>(java.lang.String)>("Received HTTP_PROXY_AUTH (407) code while not using proxy");
+
+        throw $r11;
+
+     label07:
+        $r12 = r0.<okhttp3.internal.http.RetryAndFollowUpInterceptor: okhttp3.OkHttpClient client>;
+
+        $r8 = virtualinvoke $r12.<okhttp3.OkHttpClient: java.net.Proxy proxy()>();
+
+        goto label06;
+
+     label08:
+        $r12 = r0.<okhttp3.internal.http.RetryAndFollowUpInterceptor: okhttp3.OkHttpClient client>;
+
+        $r13 = virtualinvoke $r12.<okhttp3.OkHttpClient: okhttp3.Authenticator proxyAuthenticator()>();
+
+        $r6 = interfaceinvoke $r13.<okhttp3.Authenticator: okhttp3.Request authenticate(okhttp3.Route,okhttp3.Response)>($r5, $r1);
+
+        return $r6;
+
+     label09:
+        $r12 = r0.<okhttp3.internal.http.RetryAndFollowUpInterceptor: okhttp3.OkHttpClient client>;
+
+        $r13 = virtualinvoke $r12.<okhttp3.OkHttpClient: okhttp3.Authenticator authenticator()>();
+
+        $r6 = interfaceinvoke $r13.<okhttp3.Authenticator: okhttp3.Request authenticate(okhttp3.Route,okhttp3.Response)>($r5, $r1);
+
+        return $r6;
+
+     label10:
+        $z0 = virtualinvoke $r7.<java.lang.String: boolean equals(java.lang.Object)>("GET");
+
+        if $z0 != 0 goto label11;
+
+        $z0 = virtualinvoke $r7.<java.lang.String: boolean equals(java.lang.Object)>("HEAD");
+
+        if $z0 == 0 goto label20;
+
+     label11:
+        $r12 = r0.<okhttp3.internal.http.RetryAndFollowUpInterceptor: okhttp3.OkHttpClient client>;
+
+        $z0 = virtualinvoke $r12.<okhttp3.OkHttpClient: boolean followRedirects()>();
+
+        if $z0 == 0 goto label20;
+
+        $r14 = virtualinvoke $r1.<okhttp3.Response: java.lang.String header(java.lang.String)>("Location");
+
+        if $r14 == null goto label20;
+
+        $r6 = virtualinvoke $r1.<okhttp3.Response: okhttp3.Request request()>();
+
+        $r15 = virtualinvoke $r6.<okhttp3.Request: okhttp3.HttpUrl url()>();
+
+        $r15 = virtualinvoke $r15.<okhttp3.HttpUrl: okhttp3.HttpUrl resolve(java.lang.String)>($r14);
+
+        if $r15 == null goto label20;
+
+        $r14 = virtualinvoke $r15.<okhttp3.HttpUrl: java.lang.String scheme()>();
+
+        $r6 = virtualinvoke $r1.<okhttp3.Response: okhttp3.Request request()>();
+
+        $r16 = virtualinvoke $r6.<okhttp3.Request: okhttp3.HttpUrl url()>();
+
+        $r17 = virtualinvoke $r16.<okhttp3.HttpUrl: java.lang.String scheme()>();
+
+        $z0 = virtualinvoke $r14.<java.lang.String: boolean equals(java.lang.Object)>($r17);
+
+        if $z0 != 0 goto label12;
+
+        $r12 = r0.<okhttp3.internal.http.RetryAndFollowUpInterceptor: okhttp3.OkHttpClient client>;
+
+        $z0 = virtualinvoke $r12.<okhttp3.OkHttpClient: boolean followSslRedirects()>();
+
+        if $z0 == 0 goto label20;
+
+     label12:
+        $r6 = virtualinvoke $r1.<okhttp3.Response: okhttp3.Request request()>();
+
+        $r18 = virtualinvoke $r6.<okhttp3.Request: okhttp3.Request$Builder newBuilder()>();
+
+        $z0 = staticinvoke <okhttp3.internal.http.HttpMethod: boolean permitsRequestBody(java.lang.String)>($r7);
+
+        if $z0 == 0 goto label14;
+
+        $z0 = staticinvoke <okhttp3.internal.http.HttpMethod: boolean redirectsWithBody(java.lang.String)>($r7);
+
+        $z1 = staticinvoke <okhttp3.internal.http.HttpMethod: boolean redirectsToGet(java.lang.String)>($r7);
+
+        if $z1 == 0 goto label16;
+
+        virtualinvoke $r18.<okhttp3.Request$Builder: okhttp3.Request$Builder method(java.lang.String,okhttp3.RequestBody)>("GET", null);
+
+     label13:
+        if $z0 != 0 goto label14;
+
+        virtualinvoke $r18.<okhttp3.Request$Builder: okhttp3.Request$Builder removeHeader(java.lang.String)>("Transfer-Encoding");
+
+        virtualinvoke $r18.<okhttp3.Request$Builder: okhttp3.Request$Builder removeHeader(java.lang.String)>("Content-Length");
+
+        virtualinvoke $r18.<okhttp3.Request$Builder: okhttp3.Request$Builder removeHeader(java.lang.String)>("Content-Type");
+
+     label14:
+        $z0 = specialinvoke r0.<okhttp3.internal.http.RetryAndFollowUpInterceptor: boolean sameConnection(okhttp3.Response,okhttp3.HttpUrl)>($r1, $r15);
+
+        if $z0 != 0 goto label15;
+
+        virtualinvoke $r18.<okhttp3.Request$Builder: okhttp3.Request$Builder removeHeader(java.lang.String)>("Authorization");
+
+     label15:
+        $r18 = virtualinvoke $r18.<okhttp3.Request$Builder: okhttp3.Request$Builder url(okhttp3.HttpUrl)>($r15);
+
+        $r6 = virtualinvoke $r18.<okhttp3.Request$Builder: okhttp3.Request build()>();
+
+        return $r6;
+
+     label16:
+        if $z0 == 0 goto label18;
+
+        $r6 = virtualinvoke $r1.<okhttp3.Response: okhttp3.Request request()>();
+
+        $r19 = virtualinvoke $r6.<okhttp3.Request: okhttp3.RequestBody body()>();
+
+     label17:
+        virtualinvoke $r18.<okhttp3.Request$Builder: okhttp3.Request$Builder method(java.lang.String,okhttp3.RequestBody)>($r7, $r19);
+
+        goto label13;
+
+     label18:
+        $r19 = null;
+
+        goto label17;
+
+     label19:
+        $r6 = virtualinvoke $r1.<okhttp3.Response: okhttp3.Request request()>();
+
+        $r19 = virtualinvoke $r6.<okhttp3.Request: okhttp3.RequestBody body()>();
+
+        $z0 = $r19 instanceof okhttp3.internal.http.UnrepeatableRequestBody;
+
+        if $z0 != 0 goto label20;
+
+        $r6 = virtualinvoke $r1.<okhttp3.Response: okhttp3.Request request()>();
+
+        return $r6;
+
+     label20:
+        return null;
+    }
+    private boolean isRecoverable(java.io.IOException, boolean)
+    {
+        okhttp3.internal.http.RetryAndFollowUpInterceptor r0;
+        java.io.IOException $r1;
+        boolean $z0, $z1, $z2;
+        java.lang.Throwable $r2;
+
+        r0 := @this: okhttp3.internal.http.RetryAndFollowUpInterceptor;
+
+        $r1 := @parameter0: java.io.IOException;
+
+        $z0 := @parameter1: boolean;
+
+        $z1 = 1;
+
+        $z2 = $r1 instanceof java.net.ProtocolException;
+
+        if $z2 == 0 goto label1;
+
+        return 0;
+
+     label1:
+        $z2 = $r1 instanceof java.io.InterruptedIOException;
+
+        if $z2 == 0 goto label4;
+
+        $z2 = $r1 instanceof java.net.SocketTimeoutException;
+
+        if $z2 == 0 goto label3;
+
+        if $z0 != 0 goto label3;
+
+     label2:
+        return $z1;
+
+     label3:
+        $z1 = 0;
+
+        goto label2;
+
+     label4:
+        $z0 = $r1 instanceof javax.net.ssl.SSLHandshakeException;
+
+        if $z0 == 0 goto label5;
+
+        $r2 = virtualinvoke $r1.<java.io.IOException: java.lang.Throwable getCause()>();
+
+        $z0 = $r2 instanceof java.security.cert.CertificateException;
+
+        if $z0 != 0 goto label6;
+
+     label5:
+        $z0 = $r1 instanceof javax.net.ssl.SSLPeerUnverifiedException;
+
+        if $z0 != 0 goto label6;
+
+        return 1;
+
+     label6:
+        return 0;
+    }
+    private boolean recover(java.io.IOException, boolean, okhttp3.Request)
+    {
+        okhttp3.internal.http.RetryAndFollowUpInterceptor r0;
+        java.io.IOException $r1;
+        boolean $z0, $z1;
+        okhttp3.Request $r2;
+        okhttp3.internal.connection.StreamAllocation $r3;
+        okhttp3.OkHttpClient $r4;
+        okhttp3.RequestBody $r5;
+
+        r0 := @this: okhttp3.internal.http.RetryAndFollowUpInterceptor;
+
+        $r1 := @parameter0: java.io.IOException;
+
+        $z0 := @parameter1: boolean;
+
+        $r2 := @parameter2: okhttp3.Request;
+
+        $r3 = r0.<okhttp3.internal.http.RetryAndFollowUpInterceptor: okhttp3.internal.connection.StreamAllocation streamAllocation>;
+
+        virtualinvoke $r3.<okhttp3.internal.connection.StreamAllocation: void streamFailed(java.io.IOException)>($r1);
+
+        $r4 = r0.<okhttp3.internal.http.RetryAndFollowUpInterceptor: okhttp3.OkHttpClient client>;
+
+        $z1 = virtualinvoke $r4.<okhttp3.OkHttpClient: boolean retryOnConnectionFailure()>();
+
+        if $z1 != 0 goto label1;
+
+        return 0;
+
+     label1:
+        if $z0 == 0 goto label2;
+
+        $r5 = virtualinvoke $r2.<okhttp3.Request: okhttp3.RequestBody body()>();
+
+        $z1 = $r5 instanceof okhttp3.internal.http.UnrepeatableRequestBody;
+
+        if $z1 != 0 goto label3;
+
+     label2:
+        $z0 = specialinvoke r0.<okhttp3.internal.http.RetryAndFollowUpInterceptor: boolean isRecoverable(java.io.IOException,boolean)>($r1, $z0);
+
+        if $z0 == 0 goto label3;
+
+        $r3 = r0.<okhttp3.internal.http.RetryAndFollowUpInterceptor: okhttp3.internal.connection.StreamAllocation streamAllocation>;
+
+        $z0 = virtualinvoke $r3.<okhttp3.internal.connection.StreamAllocation: boolean hasMoreRoutes()>();
+
+        if $z0 == 0 goto label3;
+
+        return 1;
+
+     label3:
+        return 0;
+    }
+    private boolean sameConnection(okhttp3.Response, okhttp3.HttpUrl)
+    {
+        okhttp3.internal.http.RetryAndFollowUpInterceptor r0;
+        okhttp3.Response $r1;
+        okhttp3.HttpUrl $r2, $r4;
+        okhttp3.Request $r3;
+        java.lang.String $r5, $r6;
+        boolean $z0;
+        int $i0, $i1;
+
+        r0 := @this: okhttp3.internal.http.RetryAndFollowUpInterceptor;
+
+        $r1 := @parameter0: okhttp3.Response;
+
+        $r2 := @parameter1: okhttp3.HttpUrl;
+
+        $r3 = virtualinvoke $r1.<okhttp3.Response: okhttp3.Request request()>();
+
+        $r4 = virtualinvoke $r3.<okhttp3.Request: okhttp3.HttpUrl url()>();
+
+        $r5 = virtualinvoke $r4.<okhttp3.HttpUrl: java.lang.String host()>();
+
+        $r6 = virtualinvoke $r2.<okhttp3.HttpUrl: java.lang.String host()>();
+
+        $z0 = virtualinvoke $r5.<java.lang.String: boolean equals(java.lang.Object)>($r6);
+
+        if $z0 == 0 goto label1;
+
+        $i0 = virtualinvoke $r4.<okhttp3.HttpUrl: int port()>();
+
+        $i1 = virtualinvoke $r2.<okhttp3.HttpUrl: int port()>();
+
+        if $i0 != $i1 goto label1;
+
+        $r5 = virtualinvoke $r4.<okhttp3.HttpUrl: java.lang.String scheme()>();
+
+        $r6 = virtualinvoke $r2.<okhttp3.HttpUrl: java.lang.String scheme()>();
+
+        $z0 = virtualinvoke $r5.<java.lang.String: boolean equals(java.lang.Object)>($r6);
+
+        if $z0 == 0 goto label1;
+
+        return 1;
+
+     label1:
+        return 0;
+    }
+    public void cancel()
+    {
+        okhttp3.internal.http.RetryAndFollowUpInterceptor r0;
+        okhttp3.internal.connection.StreamAllocation r1;
+
+        r0 := @this: okhttp3.internal.http.RetryAndFollowUpInterceptor;
+
+        r0.<okhttp3.internal.http.RetryAndFollowUpInterceptor: boolean canceled> = 1;
+
+        r1 = r0.<okhttp3.internal.http.RetryAndFollowUpInterceptor: okhttp3.internal.connection.StreamAllocation streamAllocation>;
+
+        if r1 == null goto label1;
+
+        virtualinvoke r1.<okhttp3.internal.connection.StreamAllocation: void cancel()>();
+
+     label1:
+        return;
+    }
+    public okhttp3.Response intercept(okhttp3.Interceptor$Chain) throws java.io.IOException
+    {
+        okhttp3.internal.http.RetryAndFollowUpInterceptor r0;
+        okhttp3.Interceptor$Chain $r1;
+        okhttp3.Request $r2, r3;
+        okhttp3.internal.connection.StreamAllocation $r4;
+        okhttp3.OkHttpClient $r5;
+        okhttp3.ConnectionPool $r6;
+        okhttp3.HttpUrl $r7;
+        okhttp3.Address $r8;
+        java.lang.Object $r9;
+        int i0;
+        okhttp3.Response r10, $r13, r14;
+        boolean $z0;
+        java.io.IOException $r11;
+        okhttp3.internal.http.RealInterceptorChain $r12;
+        okhttp3.Response$Builder $r15, $r16;
+        okhttp3.internal.connection.RouteException r17;
+        java.lang.Throwable $r18;
+        okhttp3.ResponseBody $r19;
+        java.net.ProtocolException $r20;
+        java.lang.StringBuilder $r21;
+        java.lang.String $r22;
+        okhttp3.RequestBody $r23;
+        java.net.HttpRetryException $r24;
+        okhttp3.internal.http.HttpCodec $r25;
+        java.lang.IllegalStateException $r26;
+
+        r0 := @this: okhttp3.internal.http.RetryAndFollowUpInterceptor;
+
+        $r1 := @parameter0: okhttp3.Interceptor$Chain;
+
+        $r2 = interfaceinvoke $r1.<okhttp3.Interceptor$Chain: okhttp3.Request request()>();
+
+        r3 = $r2;
+
+        $r4 = new okhttp3.internal.connection.StreamAllocation;
+
+        $r5 = r0.<okhttp3.internal.http.RetryAndFollowUpInterceptor: okhttp3.OkHttpClient client>;
+
+        $r6 = virtualinvoke $r5.<okhttp3.OkHttpClient: okhttp3.ConnectionPool connectionPool()>();
+
+        $r7 = virtualinvoke $r2.<okhttp3.Request: okhttp3.HttpUrl url()>();
+
+        $r8 = specialinvoke r0.<okhttp3.internal.http.RetryAndFollowUpInterceptor: okhttp3.Address createAddress(okhttp3.HttpUrl)>($r7);
+
+        $r9 = r0.<okhttp3.internal.http.RetryAndFollowUpInterceptor: java.lang.Object callStackTrace>;
+
+        specialinvoke $r4.<okhttp3.internal.connection.StreamAllocation: void <init>(okhttp3.ConnectionPool,okhttp3.Address,java.lang.Object)>($r6, $r8, $r9);
+
+        r0.<okhttp3.internal.http.RetryAndFollowUpInterceptor: okhttp3.internal.connection.StreamAllocation streamAllocation> = $r4;
+
+        i0 = 0;
+
+        r10 = null;
+
+     label01:
+        $z0 = r0.<okhttp3.internal.http.RetryAndFollowUpInterceptor: boolean canceled>;
+
+        if $z0 == 0 goto label02;
+
+        $r4 = r0.<okhttp3.internal.http.RetryAndFollowUpInterceptor: okhttp3.internal.connection.StreamAllocation streamAllocation>;
+
+        virtualinvoke $r4.<okhttp3.internal.connection.StreamAllocation: void release()>();
+
+        $r11 = new java.io.IOException;
+
+        specialinvoke $r11.<java.io.IOException: void <init>(java.lang.String)>("Canceled");
+
+        throw $r11;
+
+     label02:
+        $r12 = (okhttp3.internal.http.RealInterceptorChain) $r1;
+
+        $r4 = r0.<okhttp3.internal.http.RetryAndFollowUpInterceptor: okhttp3.internal.connection.StreamAllocation streamAllocation>;
+
+     label03:
+        $r13 = virtualinvoke $r12.<okhttp3.internal.http.RealInterceptorChain: okhttp3.Response proceed(okhttp3.Request,okhttp3.internal.connection.StreamAllocation,okhttp3.internal.http.HttpCodec,okhttp3.Connection)>(r3, $r4, null, null);
+
+     label04:
+        r14 = $r13;
+
+        goto label05;
+
+     label05:
+        if r10 == null goto label06;
+
+        $r15 = virtualinvoke $r13.<okhttp3.Response: okhttp3.Response$Builder newBuilder()>();
+
+        $r16 = virtualinvoke r10.<okhttp3.Response: okhttp3.Response$Builder newBuilder()>();
+
+        $r16 = virtualinvoke $r16.<okhttp3.Response$Builder: okhttp3.Response$Builder body(okhttp3.ResponseBody)>(null);
+
+        r10 = virtualinvoke $r16.<okhttp3.Response$Builder: okhttp3.Response build()>();
+
+        $r15 = virtualinvoke $r15.<okhttp3.Response$Builder: okhttp3.Response$Builder priorResponse(okhttp3.Response)>(r10);
+
+        r14 = virtualinvoke $r15.<okhttp3.Response$Builder: okhttp3.Response build()>();
+
+     label06:
+        $r2 = specialinvoke r0.<okhttp3.internal.http.RetryAndFollowUpInterceptor: okhttp3.Request followUpRequest(okhttp3.Response)>(r14);
+
+        if $r2 != null goto label21;
+
+        $z0 = r0.<okhttp3.internal.http.RetryAndFollowUpInterceptor: boolean forWebSocket>;
+
+        if $z0 != 0 goto label26;
+
+        $r4 = r0.<okhttp3.internal.http.RetryAndFollowUpInterceptor: okhttp3.internal.connection.StreamAllocation streamAllocation>;
+
+        virtualinvoke $r4.<okhttp3.internal.connection.StreamAllocation: void release()>();
+
+        return r14;
+
+     label07:
+        r17 := @caughtexception;
+
+     label08:
+        $r11 = virtualinvoke r17.<okhttp3.internal.connection.RouteException: java.io.IOException getLastConnectException()>();
+
+        $z0 = specialinvoke r0.<okhttp3.internal.http.RetryAndFollowUpInterceptor: boolean recover(java.io.IOException,boolean,okhttp3.Request)>($r11, 0, r3);
+
+     label09:
+        if $z0 != 0 goto label12;
+
+     label10:
+        $r11 = virtualinvoke r17.<okhttp3.internal.connection.RouteException: java.io.IOException getLastConnectException()>();
+
+        throw $r11;
+
+     label11:
+        $r18 := @caughtexception;
+
+        $r4 = r0.<okhttp3.internal.http.RetryAndFollowUpInterceptor: okhttp3.internal.connection.StreamAllocation streamAllocation>;
+
+        virtualinvoke $r4.<okhttp3.internal.connection.StreamAllocation: void streamFailed(java.io.IOException)>(null);
+
+        $r4 = r0.<okhttp3.internal.http.RetryAndFollowUpInterceptor: okhttp3.internal.connection.StreamAllocation streamAllocation>;
+
+        virtualinvoke $r4.<okhttp3.internal.connection.StreamAllocation: void release()>();
+
+        throw $r18;
+
+     label12:
+        goto label01;
+
+     label13:
+        $r11 := @caughtexception;
+
+     label14:
+        $z0 = $r11 instanceof okhttp3.internal.http2.ConnectionShutdownException;
+
+     label15:
+        if $z0 != 0 goto label19;
+
+        $z0 = 1;
+
+     label16:
+        $z0 = specialinvoke r0.<okhttp3.internal.http.RetryAndFollowUpInterceptor: boolean recover(java.io.IOException,boolean,okhttp3.Request)>($r11, $z0, r3);
+
+     label17:
+        if $z0 != 0 goto label20;
+
+     label18:
+        throw $r11;
+
+     label19:
+        $z0 = 0;
+
+        goto label16;
+
+     label20:
+        goto label01;
+
+     label21:
+        $r19 = virtualinvoke r14.<okhttp3.Response: okhttp3.ResponseBody body()>();
+
+        staticinvoke <okhttp3.internal.Util: void closeQuietly(java.io.Closeable)>($r19);
+
+        i0 = i0 + 1;
+
+        if i0 <= 20 goto label22;
+
+        $r4 = r0.<okhttp3.internal.http.RetryAndFollowUpInterceptor: okhttp3.internal.connection.StreamAllocation streamAllocation>;
+
+        virtualinvoke $r4.<okhttp3.internal.connection.StreamAllocation: void release()>();
+
+        $r20 = new java.net.ProtocolException;
+
+        $r21 = new java.lang.StringBuilder;
+
+        specialinvoke $r21.<java.lang.StringBuilder: void <init>()>();
+
+        $r21 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Too many follow-up requests: ");
+
+        $r21 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i0);
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r20.<java.net.ProtocolException: void <init>(java.lang.String)>($r22);
+
+        throw $r20;
+
+     label22:
+        $r23 = virtualinvoke $r2.<okhttp3.Request: okhttp3.RequestBody body()>();
+
+        $z0 = $r23 instanceof okhttp3.internal.http.UnrepeatableRequestBody;
+
+        if $z0 == 0 goto label23;
+
+        $r4 = r0.<okhttp3.internal.http.RetryAndFollowUpInterceptor: okhttp3.internal.connection.StreamAllocation streamAllocation>;
+
+        virtualinvoke $r4.<okhttp3.internal.connection.StreamAllocation: void release()>();
+
+        $r24 = new java.net.HttpRetryException;
+
+        i0 = virtualinvoke r14.<okhttp3.Response: int code()>();
+
+        specialinvoke $r24.<java.net.HttpRetryException: void <init>(java.lang.String,int)>("Cannot retry streamed HTTP body", i0);
+
+        throw $r24;
+
+     label23:
+        $r7 = virtualinvoke $r2.<okhttp3.Request: okhttp3.HttpUrl url()>();
+
+        $z0 = specialinvoke r0.<okhttp3.internal.http.RetryAndFollowUpInterceptor: boolean sameConnection(okhttp3.Response,okhttp3.HttpUrl)>(r14, $r7);
+
+        if $z0 != 0 goto label25;
+
+        $r4 = r0.<okhttp3.internal.http.RetryAndFollowUpInterceptor: okhttp3.internal.connection.StreamAllocation streamAllocation>;
+
+        virtualinvoke $r4.<okhttp3.internal.connection.StreamAllocation: void release()>();
+
+        $r4 = new okhttp3.internal.connection.StreamAllocation;
+
+        $r5 = r0.<okhttp3.internal.http.RetryAndFollowUpInterceptor: okhttp3.OkHttpClient client>;
+
+        $r6 = virtualinvoke $r5.<okhttp3.OkHttpClient: okhttp3.ConnectionPool connectionPool()>();
+
+        $r7 = virtualinvoke $r2.<okhttp3.Request: okhttp3.HttpUrl url()>();
+
+        $r8 = specialinvoke r0.<okhttp3.internal.http.RetryAndFollowUpInterceptor: okhttp3.Address createAddress(okhttp3.HttpUrl)>($r7);
+
+        $r9 = r0.<okhttp3.internal.http.RetryAndFollowUpInterceptor: java.lang.Object callStackTrace>;
+
+        specialinvoke $r4.<okhttp3.internal.connection.StreamAllocation: void <init>(okhttp3.ConnectionPool,okhttp3.Address,java.lang.Object)>($r6, $r8, $r9);
+
+        r0.<okhttp3.internal.http.RetryAndFollowUpInterceptor: okhttp3.internal.connection.StreamAllocation streamAllocation> = $r4;
+
+     label24:
+        r3 = $r2;
+
+        r10 = r14;
+
+        goto label01;
+
+     label25:
+        $r4 = r0.<okhttp3.internal.http.RetryAndFollowUpInterceptor: okhttp3.internal.connection.StreamAllocation streamAllocation>;
+
+        $r25 = virtualinvoke $r4.<okhttp3.internal.connection.StreamAllocation: okhttp3.internal.http.HttpCodec codec()>();
+
+        if $r25 == null goto label24;
+
+        $r26 = new java.lang.IllegalStateException;
+
+        $r21 = new java.lang.StringBuilder;
+
+        specialinvoke $r21.<java.lang.StringBuilder: void <init>()>();
+
+        $r21 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Closing the body of ");
+
+        $r21 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r14);
+
+        $r21 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" didn\'t close its backing stream. Bad interceptor?");
+
+        $r22 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r26.<java.lang.IllegalStateException: void <init>(java.lang.String)>($r22);
+
+        throw $r26;
+
+     label26:
+        return r14;
+
+        catch okhttp3.internal.connection.RouteException from label03 to label04 with label07;
+        catch java.io.IOException from label03 to label04 with label13;
+        catch java.lang.Throwable from label02 to label04 with label11;
+        catch java.lang.Throwable from label08 to label09 with label11;
+        catch java.lang.Throwable from label10 to label11 with label11;
+        catch java.lang.Throwable from label14 to label15 with label11;
+        catch java.lang.Throwable from label16 to label17 with label11;
+        catch java.lang.Throwable from label18 to label19 with label11;
+    }
+    public boolean isCanceled()
+    {
+        okhttp3.internal.http.RetryAndFollowUpInterceptor r0;
+        boolean z0;
+
+        r0 := @this: okhttp3.internal.http.RetryAndFollowUpInterceptor;
+
+        z0 = r0.<okhttp3.internal.http.RetryAndFollowUpInterceptor: boolean canceled>;
+
+        return z0;
+    }
+    public void setCallStackTrace(java.lang.Object)
+    {
+        okhttp3.internal.http.RetryAndFollowUpInterceptor r0;
+        java.lang.Object $r1;
+
+        r0 := @this: okhttp3.internal.http.RetryAndFollowUpInterceptor;
+
+        $r1 := @parameter0: java.lang.Object;
+
+        r0.<okhttp3.internal.http.RetryAndFollowUpInterceptor: java.lang.Object callStackTrace> = $r1;
+
+        return;
+    }
+    public okhttp3.internal.connection.StreamAllocation streamAllocation()
+    {
+        okhttp3.internal.http.RetryAndFollowUpInterceptor r0;
+        okhttp3.internal.connection.StreamAllocation r1;
+
+        r0 := @this: okhttp3.internal.http.RetryAndFollowUpInterceptor;
+
+        r1 = r0.<okhttp3.internal.http.RetryAndFollowUpInterceptor: okhttp3.internal.connection.StreamAllocation streamAllocation>;
+
+        return r1;
+    }

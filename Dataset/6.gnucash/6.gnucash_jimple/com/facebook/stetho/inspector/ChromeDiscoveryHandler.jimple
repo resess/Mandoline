@@ -1,0 +1,479 @@
+com.facebook.stetho.inspector.ChromeDiscoveryHandler extends java.lang.Object implements com.facebook.stetho.server.http.HttpHandler
+private static final java.lang.String PAGE_ID
+private static final java.lang.String PATH_ACTIVATE
+private static final java.lang.String PATH_PAGE_LIST
+private static final java.lang.String PATH_VERSION
+private static final java.lang.String PROTOCOL_VERSION
+private static final java.lang.String USER_AGENT
+private static final java.lang.String WEBKIT_REV
+private static final java.lang.String WEBKIT_VERSION
+private final android.content.Context mContext
+private final java.lang.String mInspectorPath
+private com.facebook.stetho.server.http.LightHttpBody mPageListResponse
+private com.facebook.stetho.server.http.LightHttpBody mVersionResponse
+    public void <init>(android.content.Context, java.lang.String)
+    {
+        com.facebook.stetho.inspector.ChromeDiscoveryHandler r0;
+        android.content.Context $r1;
+        java.lang.String $r2;
+
+        r0 := @this: com.facebook.stetho.inspector.ChromeDiscoveryHandler;
+
+        $r1 := @parameter0: android.content.Context;
+
+        $r2 := @parameter1: java.lang.String;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<com.facebook.stetho.inspector.ChromeDiscoveryHandler: android.content.Context mContext> = $r1;
+
+        r0.<com.facebook.stetho.inspector.ChromeDiscoveryHandler: java.lang.String mInspectorPath> = $r2;
+
+        return;
+    }
+    private java.lang.CharSequence getAppLabel()
+    {
+        com.facebook.stetho.inspector.ChromeDiscoveryHandler r0;
+        android.content.Context $r1;
+        android.content.pm.PackageManager $r2;
+        android.content.pm.ApplicationInfo $r3;
+        java.lang.CharSequence $r4;
+
+        r0 := @this: com.facebook.stetho.inspector.ChromeDiscoveryHandler;
+
+        $r1 = r0.<com.facebook.stetho.inspector.ChromeDiscoveryHandler: android.content.Context mContext>;
+
+        $r2 = virtualinvoke $r1.<android.content.Context: android.content.pm.PackageManager getPackageManager()>();
+
+        $r1 = r0.<com.facebook.stetho.inspector.ChromeDiscoveryHandler: android.content.Context mContext>;
+
+        $r3 = virtualinvoke $r1.<android.content.Context: android.content.pm.ApplicationInfo getApplicationInfo()>();
+
+        $r4 = virtualinvoke $r2.<android.content.pm.PackageManager: java.lang.CharSequence getApplicationLabel(android.content.pm.ApplicationInfo)>($r3);
+
+        return $r4;
+    }
+    private java.lang.String getAppLabelAndVersion()
+    {
+        com.facebook.stetho.inspector.ChromeDiscoveryHandler r0;
+        java.lang.StringBuilder r1;
+        android.content.pm.PackageManager$NameNotFoundException r2;
+        android.content.Context $r3;
+        android.content.pm.PackageManager $r4;
+        java.lang.CharSequence $r5;
+        java.lang.String $r6;
+        android.content.pm.PackageInfo $r7;
+        java.lang.RuntimeException $r8;
+
+        r0 := @this: com.facebook.stetho.inspector.ChromeDiscoveryHandler;
+
+        r1 = new java.lang.StringBuilder;
+
+        specialinvoke r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = r0.<com.facebook.stetho.inspector.ChromeDiscoveryHandler: android.content.Context mContext>;
+
+        $r4 = virtualinvoke $r3.<android.content.Context: android.content.pm.PackageManager getPackageManager()>();
+
+        $r5 = specialinvoke r0.<com.facebook.stetho.inspector.ChromeDiscoveryHandler: java.lang.CharSequence getAppLabel()>();
+
+        virtualinvoke r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.CharSequence)>($r5);
+
+        virtualinvoke r1.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(47);
+
+        $r3 = r0.<com.facebook.stetho.inspector.ChromeDiscoveryHandler: android.content.Context mContext>;
+
+     label1:
+        $r6 = virtualinvoke $r3.<android.content.Context: java.lang.String getPackageName()>();
+
+        $r7 = virtualinvoke $r4.<android.content.pm.PackageManager: android.content.pm.PackageInfo getPackageInfo(java.lang.String,int)>($r6, 0);
+
+     label2:
+        $r6 = $r7.<android.content.pm.PackageInfo: java.lang.String versionName>;
+
+     label3:
+        virtualinvoke r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+     label4:
+        $r6 = virtualinvoke r1.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r6;
+
+     label5:
+        r2 := @caughtexception;
+
+        $r8 = new java.lang.RuntimeException;
+
+        specialinvoke $r8.<java.lang.RuntimeException: void <init>(java.lang.Throwable)>(r2);
+
+        throw $r8;
+
+        catch android.content.pm.PackageManager$NameNotFoundException from label1 to label2 with label5;
+        catch android.content.pm.PackageManager$NameNotFoundException from label3 to label4 with label5;
+    }
+    private void handleActivate(com.facebook.stetho.server.http.LightHttpResponse)
+    {
+        com.facebook.stetho.inspector.ChromeDiscoveryHandler r0;
+        com.facebook.stetho.server.http.LightHttpResponse $r1;
+        com.facebook.stetho.server.http.LightHttpBody $r2;
+
+        r0 := @this: com.facebook.stetho.inspector.ChromeDiscoveryHandler;
+
+        $r1 := @parameter0: com.facebook.stetho.server.http.LightHttpResponse;
+
+        $r2 = staticinvoke <com.facebook.stetho.server.http.LightHttpBody: com.facebook.stetho.server.http.LightHttpBody create(java.lang.String,java.lang.String)>("Target activation ignored\n", "text/plain");
+
+        staticinvoke <com.facebook.stetho.inspector.ChromeDiscoveryHandler: void setSuccessfulResponse(com.facebook.stetho.server.http.LightHttpResponse,com.facebook.stetho.server.http.LightHttpBody)>($r1, $r2);
+
+        return;
+    }
+    private void handlePageList(com.facebook.stetho.server.http.LightHttpResponse) throws org.json.JSONException
+    {
+        com.facebook.stetho.inspector.ChromeDiscoveryHandler r0;
+        com.facebook.stetho.server.http.LightHttpResponse $r1;
+        org.json.JSONObject r2;
+        org.json.JSONArray r3;
+        com.facebook.stetho.server.http.LightHttpBody $r4;
+        java.lang.String $r5;
+        java.lang.StringBuilder $r6;
+        android.net.Uri$Builder $r7;
+        android.net.Uri $r8;
+
+        r0 := @this: com.facebook.stetho.inspector.ChromeDiscoveryHandler;
+
+        $r1 := @parameter0: com.facebook.stetho.server.http.LightHttpResponse;
+
+        $r4 = r0.<com.facebook.stetho.inspector.ChromeDiscoveryHandler: com.facebook.stetho.server.http.LightHttpBody mPageListResponse>;
+
+        if $r4 != null goto label1;
+
+        r3 = new org.json.JSONArray;
+
+        specialinvoke r3.<org.json.JSONArray: void <init>()>();
+
+        r2 = new org.json.JSONObject;
+
+        specialinvoke r2.<org.json.JSONObject: void <init>()>();
+
+        virtualinvoke r2.<org.json.JSONObject: org.json.JSONObject put(java.lang.String,java.lang.Object)>("type", "app");
+
+        $r5 = specialinvoke r0.<com.facebook.stetho.inspector.ChromeDiscoveryHandler: java.lang.String makeTitle()>();
+
+        virtualinvoke r2.<org.json.JSONObject: org.json.JSONObject put(java.lang.String,java.lang.Object)>("title", $r5);
+
+        virtualinvoke r2.<org.json.JSONObject: org.json.JSONObject put(java.lang.String,java.lang.Object)>("id", "1");
+
+        virtualinvoke r2.<org.json.JSONObject: org.json.JSONObject put(java.lang.String,java.lang.Object)>("description", "");
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("ws://");
+
+        $r5 = r0.<com.facebook.stetho.inspector.ChromeDiscoveryHandler: java.lang.String mInspectorPath>;
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r5 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r2.<org.json.JSONObject: org.json.JSONObject put(java.lang.String,java.lang.Object)>("webSocketDebuggerUrl", $r5);
+
+        $r7 = new android.net.Uri$Builder;
+
+        specialinvoke $r7.<android.net.Uri$Builder: void <init>()>();
+
+        $r7 = virtualinvoke $r7.<android.net.Uri$Builder: android.net.Uri$Builder scheme(java.lang.String)>("http");
+
+        $r7 = virtualinvoke $r7.<android.net.Uri$Builder: android.net.Uri$Builder authority(java.lang.String)>("chrome-devtools-frontend.appspot.com");
+
+        $r7 = virtualinvoke $r7.<android.net.Uri$Builder: android.net.Uri$Builder appendEncodedPath(java.lang.String)>("serve_rev");
+
+        $r7 = virtualinvoke $r7.<android.net.Uri$Builder: android.net.Uri$Builder appendEncodedPath(java.lang.String)>("@188492");
+
+        $r7 = virtualinvoke $r7.<android.net.Uri$Builder: android.net.Uri$Builder appendEncodedPath(java.lang.String)>("devtools.html");
+
+        $r5 = r0.<com.facebook.stetho.inspector.ChromeDiscoveryHandler: java.lang.String mInspectorPath>;
+
+        $r7 = virtualinvoke $r7.<android.net.Uri$Builder: android.net.Uri$Builder appendQueryParameter(java.lang.String,java.lang.String)>("ws", $r5);
+
+        $r8 = virtualinvoke $r7.<android.net.Uri$Builder: android.net.Uri build()>();
+
+        $r5 = virtualinvoke $r8.<android.net.Uri: java.lang.String toString()>();
+
+        virtualinvoke r2.<org.json.JSONObject: org.json.JSONObject put(java.lang.String,java.lang.Object)>("devtoolsFrontendUrl", $r5);
+
+        virtualinvoke r3.<org.json.JSONArray: org.json.JSONArray put(java.lang.Object)>(r2);
+
+        $r5 = virtualinvoke r3.<org.json.JSONArray: java.lang.String toString()>();
+
+        $r4 = staticinvoke <com.facebook.stetho.server.http.LightHttpBody: com.facebook.stetho.server.http.LightHttpBody create(java.lang.String,java.lang.String)>($r5, "application/json");
+
+        r0.<com.facebook.stetho.inspector.ChromeDiscoveryHandler: com.facebook.stetho.server.http.LightHttpBody mPageListResponse> = $r4;
+
+     label1:
+        $r4 = r0.<com.facebook.stetho.inspector.ChromeDiscoveryHandler: com.facebook.stetho.server.http.LightHttpBody mPageListResponse>;
+
+        staticinvoke <com.facebook.stetho.inspector.ChromeDiscoveryHandler: void setSuccessfulResponse(com.facebook.stetho.server.http.LightHttpResponse,com.facebook.stetho.server.http.LightHttpBody)>($r1, $r4);
+
+        return;
+    }
+    private void handleVersion(com.facebook.stetho.server.http.LightHttpResponse) throws org.json.JSONException
+    {
+        com.facebook.stetho.inspector.ChromeDiscoveryHandler r0;
+        com.facebook.stetho.server.http.LightHttpResponse $r1;
+        org.json.JSONObject r2;
+        com.facebook.stetho.server.http.LightHttpBody $r3;
+        java.lang.String $r4;
+        android.content.Context $r5;
+
+        r0 := @this: com.facebook.stetho.inspector.ChromeDiscoveryHandler;
+
+        $r1 := @parameter0: com.facebook.stetho.server.http.LightHttpResponse;
+
+        $r3 = r0.<com.facebook.stetho.inspector.ChromeDiscoveryHandler: com.facebook.stetho.server.http.LightHttpBody mVersionResponse>;
+
+        if $r3 != null goto label1;
+
+        r2 = new org.json.JSONObject;
+
+        specialinvoke r2.<org.json.JSONObject: void <init>()>();
+
+        virtualinvoke r2.<org.json.JSONObject: org.json.JSONObject put(java.lang.String,java.lang.Object)>("WebKit-Version", "537.36 (@188492)");
+
+        virtualinvoke r2.<org.json.JSONObject: org.json.JSONObject put(java.lang.String,java.lang.Object)>("User-Agent", "Stetho");
+
+        virtualinvoke r2.<org.json.JSONObject: org.json.JSONObject put(java.lang.String,java.lang.Object)>("Protocol-Version", "1.1");
+
+        $r4 = specialinvoke r0.<com.facebook.stetho.inspector.ChromeDiscoveryHandler: java.lang.String getAppLabelAndVersion()>();
+
+        virtualinvoke r2.<org.json.JSONObject: org.json.JSONObject put(java.lang.String,java.lang.Object)>("Browser", $r4);
+
+        $r5 = r0.<com.facebook.stetho.inspector.ChromeDiscoveryHandler: android.content.Context mContext>;
+
+        $r4 = virtualinvoke $r5.<android.content.Context: java.lang.String getPackageName()>();
+
+        virtualinvoke r2.<org.json.JSONObject: org.json.JSONObject put(java.lang.String,java.lang.Object)>("Android-Package", $r4);
+
+        $r4 = virtualinvoke r2.<org.json.JSONObject: java.lang.String toString()>();
+
+        $r3 = staticinvoke <com.facebook.stetho.server.http.LightHttpBody: com.facebook.stetho.server.http.LightHttpBody create(java.lang.String,java.lang.String)>($r4, "application/json");
+
+        r0.<com.facebook.stetho.inspector.ChromeDiscoveryHandler: com.facebook.stetho.server.http.LightHttpBody mVersionResponse> = $r3;
+
+     label1:
+        $r3 = r0.<com.facebook.stetho.inspector.ChromeDiscoveryHandler: com.facebook.stetho.server.http.LightHttpBody mVersionResponse>;
+
+        staticinvoke <com.facebook.stetho.inspector.ChromeDiscoveryHandler: void setSuccessfulResponse(com.facebook.stetho.server.http.LightHttpResponse,com.facebook.stetho.server.http.LightHttpBody)>($r1, $r3);
+
+        return;
+    }
+    private java.lang.String makeTitle()
+    {
+        com.facebook.stetho.inspector.ChromeDiscoveryHandler r0;
+        java.lang.StringBuilder r1;
+        java.lang.CharSequence $r2;
+        java.lang.String $r3;
+        int $i0;
+
+        r0 := @this: com.facebook.stetho.inspector.ChromeDiscoveryHandler;
+
+        r1 = new java.lang.StringBuilder;
+
+        specialinvoke r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = specialinvoke r0.<com.facebook.stetho.inspector.ChromeDiscoveryHandler: java.lang.CharSequence getAppLabel()>();
+
+        virtualinvoke r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.CharSequence)>($r2);
+
+        virtualinvoke r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" (powered by Stetho)");
+
+        $r3 = staticinvoke <com.facebook.stetho.common.ProcessUtil: java.lang.String getProcessName()>();
+
+        $i0 = virtualinvoke $r3.<java.lang.String: int indexOf(int)>(58);
+
+        if $i0 < 0 goto label1;
+
+        $r3 = virtualinvoke $r3.<java.lang.String: java.lang.String substring(int)>($i0);
+
+        virtualinvoke r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+     label1:
+        $r3 = virtualinvoke r1.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r3;
+    }
+    private static void setSuccessfulResponse(com.facebook.stetho.server.http.LightHttpResponse, com.facebook.stetho.server.http.LightHttpBody)
+    {
+        com.facebook.stetho.server.http.LightHttpResponse $r0;
+        com.facebook.stetho.server.http.LightHttpBody $r1;
+
+        $r0 := @parameter0: com.facebook.stetho.server.http.LightHttpResponse;
+
+        $r1 := @parameter1: com.facebook.stetho.server.http.LightHttpBody;
+
+        $r0.<com.facebook.stetho.server.http.LightHttpResponse: int code> = 200;
+
+        $r0.<com.facebook.stetho.server.http.LightHttpResponse: java.lang.String reasonPhrase> = "OK";
+
+        $r0.<com.facebook.stetho.server.http.LightHttpResponse: com.facebook.stetho.server.http.LightHttpBody body> = $r1;
+
+        return;
+    }
+    public boolean handleRequest(com.facebook.stetho.server.SocketLike, com.facebook.stetho.server.http.LightHttpRequest, com.facebook.stetho.server.http.LightHttpResponse)
+    {
+        com.facebook.stetho.inspector.ChromeDiscoveryHandler r0;
+        com.facebook.stetho.server.SocketLike $r1;
+        com.facebook.stetho.server.http.LightHttpRequest $r2;
+        com.facebook.stetho.server.http.LightHttpResponse $r3;
+        org.json.JSONException r4;
+        android.net.Uri $r5;
+        java.lang.String $r6, $r7;
+        boolean $z0;
+        java.lang.StringBuilder $r8;
+        com.facebook.stetho.server.http.LightHttpBody $r9;
+
+        r0 := @this: com.facebook.stetho.inspector.ChromeDiscoveryHandler;
+
+        $r1 := @parameter0: com.facebook.stetho.server.SocketLike;
+
+        $r2 := @parameter1: com.facebook.stetho.server.http.LightHttpRequest;
+
+        $r3 := @parameter2: com.facebook.stetho.server.http.LightHttpResponse;
+
+        $r5 = $r2.<com.facebook.stetho.server.http.LightHttpRequest: android.net.Uri uri>;
+
+        $r6 = virtualinvoke $r5.<android.net.Uri: java.lang.String getPath()>();
+
+        $r7 = "/json/version";
+
+     label01:
+        $z0 = virtualinvoke $r7.<java.lang.String: boolean equals(java.lang.Object)>($r6);
+
+     label02:
+        if $z0 == 0 goto label05;
+
+     label03:
+        specialinvoke r0.<com.facebook.stetho.inspector.ChromeDiscoveryHandler: void handleVersion(com.facebook.stetho.server.http.LightHttpResponse)>($r3);
+
+     label04:
+        return 1;
+
+     label05:
+        $r7 = "/json";
+
+     label06:
+        $z0 = virtualinvoke $r7.<java.lang.String: boolean equals(java.lang.Object)>($r6);
+
+     label07:
+        if $z0 == 0 goto label11;
+
+     label08:
+        specialinvoke r0.<com.facebook.stetho.inspector.ChromeDiscoveryHandler: void handlePageList(com.facebook.stetho.server.http.LightHttpResponse)>($r3);
+
+     label09:
+        goto label04;
+
+     label10:
+        r4 := @caughtexception;
+
+        $r3.<com.facebook.stetho.server.http.LightHttpResponse: int code> = 500;
+
+        $r3.<com.facebook.stetho.server.http.LightHttpResponse: java.lang.String reasonPhrase> = "Internal server error";
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke r4.<org.json.JSONException: java.lang.String toString()>();
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\n");
+
+        $r6 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r9 = staticinvoke <com.facebook.stetho.server.http.LightHttpBody: com.facebook.stetho.server.http.LightHttpBody create(java.lang.String,java.lang.String)>($r6, "text/plain");
+
+        $r3.<com.facebook.stetho.server.http.LightHttpResponse: com.facebook.stetho.server.http.LightHttpBody body> = $r9;
+
+        goto label04;
+
+     label11:
+        $r7 = "/json/activate/1";
+
+     label12:
+        $z0 = virtualinvoke $r7.<java.lang.String: boolean equals(java.lang.Object)>($r6);
+
+     label13:
+        if $z0 == 0 goto label16;
+
+     label14:
+        specialinvoke r0.<com.facebook.stetho.inspector.ChromeDiscoveryHandler: void handleActivate(com.facebook.stetho.server.http.LightHttpResponse)>($r3);
+
+     label15:
+        goto label04;
+
+     label16:
+        $r3.<com.facebook.stetho.server.http.LightHttpResponse: int code> = 501;
+
+        $r3.<com.facebook.stetho.server.http.LightHttpResponse: java.lang.String reasonPhrase> = "Not implemented";
+
+        $r8 = new java.lang.StringBuilder;
+
+     label17:
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("No support for ");
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\n");
+
+        $r6 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r9 = staticinvoke <com.facebook.stetho.server.http.LightHttpBody: com.facebook.stetho.server.http.LightHttpBody create(java.lang.String,java.lang.String)>($r6, "text/plain");
+
+     label18:
+        $r3.<com.facebook.stetho.server.http.LightHttpResponse: com.facebook.stetho.server.http.LightHttpBody body> = $r9;
+
+        goto label04;
+
+        catch org.json.JSONException from label01 to label02 with label10;
+        catch org.json.JSONException from label03 to label04 with label10;
+        catch org.json.JSONException from label06 to label07 with label10;
+        catch org.json.JSONException from label08 to label09 with label10;
+        catch org.json.JSONException from label12 to label13 with label10;
+        catch org.json.JSONException from label14 to label15 with label10;
+        catch org.json.JSONException from label17 to label18 with label10;
+    }
+    public void register(com.facebook.stetho.server.http.HandlerRegistry)
+    {
+        com.facebook.stetho.inspector.ChromeDiscoveryHandler r0;
+        com.facebook.stetho.server.http.HandlerRegistry $r1;
+        com.facebook.stetho.server.http.ExactPathMatcher $r2;
+
+        r0 := @this: com.facebook.stetho.inspector.ChromeDiscoveryHandler;
+
+        $r1 := @parameter0: com.facebook.stetho.server.http.HandlerRegistry;
+
+        $r2 = new com.facebook.stetho.server.http.ExactPathMatcher;
+
+        specialinvoke $r2.<com.facebook.stetho.server.http.ExactPathMatcher: void <init>(java.lang.String)>("/json");
+
+        virtualinvoke $r1.<com.facebook.stetho.server.http.HandlerRegistry: void register(com.facebook.stetho.server.http.PathMatcher,com.facebook.stetho.server.http.HttpHandler)>($r2, r0);
+
+        $r2 = new com.facebook.stetho.server.http.ExactPathMatcher;
+
+        specialinvoke $r2.<com.facebook.stetho.server.http.ExactPathMatcher: void <init>(java.lang.String)>("/json/version");
+
+        virtualinvoke $r1.<com.facebook.stetho.server.http.HandlerRegistry: void register(com.facebook.stetho.server.http.PathMatcher,com.facebook.stetho.server.http.HttpHandler)>($r2, r0);
+
+        $r2 = new com.facebook.stetho.server.http.ExactPathMatcher;
+
+        specialinvoke $r2.<com.facebook.stetho.server.http.ExactPathMatcher: void <init>(java.lang.String)>("/json/activate/1");
+
+        virtualinvoke $r1.<com.facebook.stetho.server.http.HandlerRegistry: void register(com.facebook.stetho.server.http.PathMatcher,com.facebook.stetho.server.http.HttpHandler)>($r2, r0);
+
+        return;
+    }

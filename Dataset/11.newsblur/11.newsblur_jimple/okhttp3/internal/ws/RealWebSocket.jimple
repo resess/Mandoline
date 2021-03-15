@@ -1,0 +1,1672 @@
+okhttp3.internal.ws.RealWebSocket extends java.lang.Object implements okhttp3.WebSocket okhttp3.internal.ws.WebSocketReader$FrameCallback
+static final boolean $assertionsDisabled
+private static final long CANCEL_AFTER_CLOSE_MILLIS
+private static final long MAX_QUEUE_SIZE
+private static final java.util.List ONLY_HTTP1
+private okhttp3.Call call
+private java.util.concurrent.ScheduledFuture cancelFuture
+private boolean enqueuedClose
+private java.util.concurrent.ScheduledExecutorService executor
+private boolean failed
+private final java.lang.String key
+final okhttp3.WebSocketListener listener
+private final java.util.ArrayDeque messageAndCloseQueue
+private final okhttp3.Request originalRequest
+int pingCount
+int pongCount
+private final java.util.ArrayDeque pongQueue
+private long queueSize
+private final java.util.Random random
+private okhttp3.internal.ws.WebSocketReader reader
+private int receivedCloseCode
+private java.lang.String receivedCloseReason
+private okhttp3.internal.ws.RealWebSocket$Streams streams
+private okhttp3.internal.ws.WebSocketWriter writer
+private final java.lang.Runnable writerRunnable
+    static void <clinit>()
+    {
+        java.lang.Class $r0;
+        boolean $z0;
+        okhttp3.Protocol $r1;
+        java.util.List $r2;
+
+        $r0 = class "Lokhttp3/internal/ws/RealWebSocket;";
+
+        $z0 = virtualinvoke $r0.<java.lang.Class: boolean desiredAssertionStatus()>();
+
+        if $z0 != 0 goto label2;
+
+        $z0 = 1;
+
+     label1:
+        <okhttp3.internal.ws.RealWebSocket: boolean $assertionsDisabled> = $z0;
+
+        $r1 = <okhttp3.Protocol: okhttp3.Protocol HTTP_1_1>;
+
+        $r2 = staticinvoke <java.util.Collections: java.util.List singletonList(java.lang.Object)>($r1);
+
+        <okhttp3.internal.ws.RealWebSocket: java.util.List ONLY_HTTP1> = $r2;
+
+        return;
+
+     label2:
+        $z0 = 0;
+
+        goto label1;
+    }
+    public void <init>(okhttp3.Request, okhttp3.WebSocketListener, java.util.Random)
+    {
+        okhttp3.internal.ws.RealWebSocket r0;
+        okhttp3.Request $r1;
+        okhttp3.WebSocketListener $r2;
+        java.util.Random $r3;
+        byte[] r4;
+        java.util.ArrayDeque $r5;
+        java.lang.String $r6, $r7;
+        boolean $z0;
+        java.lang.IllegalArgumentException $r8;
+        java.lang.StringBuilder $r9;
+        okio.ByteString $r10;
+        okhttp3.internal.ws.RealWebSocket$1 $r11;
+
+        r0 := @this: okhttp3.internal.ws.RealWebSocket;
+
+        $r1 := @parameter0: okhttp3.Request;
+
+        $r2 := @parameter1: okhttp3.WebSocketListener;
+
+        $r3 := @parameter2: java.util.Random;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r5 = new java.util.ArrayDeque;
+
+        specialinvoke $r5.<java.util.ArrayDeque: void <init>()>();
+
+        r0.<okhttp3.internal.ws.RealWebSocket: java.util.ArrayDeque pongQueue> = $r5;
+
+        $r5 = new java.util.ArrayDeque;
+
+        specialinvoke $r5.<java.util.ArrayDeque: void <init>()>();
+
+        r0.<okhttp3.internal.ws.RealWebSocket: java.util.ArrayDeque messageAndCloseQueue> = $r5;
+
+        r0.<okhttp3.internal.ws.RealWebSocket: int receivedCloseCode> = -1;
+
+        $r6 = "GET";
+
+        $r7 = virtualinvoke $r1.<okhttp3.Request: java.lang.String method()>();
+
+        $z0 = virtualinvoke $r6.<java.lang.String: boolean equals(java.lang.Object)>($r7);
+
+        if $z0 != 0 goto label1;
+
+        $r8 = new java.lang.IllegalArgumentException;
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Request must be GET: ");
+
+        $r6 = virtualinvoke $r1.<okhttp3.Request: java.lang.String method()>();
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r6 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r8.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r6);
+
+        throw $r8;
+
+     label1:
+        r0.<okhttp3.internal.ws.RealWebSocket: okhttp3.Request originalRequest> = $r1;
+
+        r0.<okhttp3.internal.ws.RealWebSocket: okhttp3.WebSocketListener listener> = $r2;
+
+        r0.<okhttp3.internal.ws.RealWebSocket: java.util.Random random> = $r3;
+
+        r4 = newarray (byte)[16];
+
+        virtualinvoke $r3.<java.util.Random: void nextBytes(byte[])>(r4);
+
+        $r10 = staticinvoke <okio.ByteString: okio.ByteString of(byte[])>(r4);
+
+        $r6 = virtualinvoke $r10.<okio.ByteString: java.lang.String base64()>();
+
+        r0.<okhttp3.internal.ws.RealWebSocket: java.lang.String key> = $r6;
+
+        $r11 = new okhttp3.internal.ws.RealWebSocket$1;
+
+        specialinvoke $r11.<okhttp3.internal.ws.RealWebSocket$1: void <init>(okhttp3.internal.ws.RealWebSocket)>(r0);
+
+        r0.<okhttp3.internal.ws.RealWebSocket: java.lang.Runnable writerRunnable> = $r11;
+
+        return;
+    }
+    private void runWriter()
+    {
+        okhttp3.internal.ws.RealWebSocket r0;
+        java.lang.Runnable $r1;
+        boolean $z0;
+        java.lang.AssertionError $r2;
+        java.util.concurrent.ScheduledExecutorService $r3;
+
+        r0 := @this: okhttp3.internal.ws.RealWebSocket;
+
+        $z0 = <okhttp3.internal.ws.RealWebSocket: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label1;
+
+        $z0 = staticinvoke <java.lang.Thread: boolean holdsLock(java.lang.Object)>(r0);
+
+        if $z0 != 0 goto label1;
+
+        $r2 = new java.lang.AssertionError;
+
+        specialinvoke $r2.<java.lang.AssertionError: void <init>()>();
+
+        throw $r2;
+
+     label1:
+        $r3 = r0.<okhttp3.internal.ws.RealWebSocket: java.util.concurrent.ScheduledExecutorService executor>;
+
+        if $r3 == null goto label2;
+
+        $r3 = r0.<okhttp3.internal.ws.RealWebSocket: java.util.concurrent.ScheduledExecutorService executor>;
+
+        $r1 = r0.<okhttp3.internal.ws.RealWebSocket: java.lang.Runnable writerRunnable>;
+
+        interfaceinvoke $r3.<java.util.concurrent.ScheduledExecutorService: void execute(java.lang.Runnable)>($r1);
+
+     label2:
+        return;
+    }
+    private boolean send(okio.ByteString, int)
+    {
+        okhttp3.internal.ws.RealWebSocket r0;
+        okio.ByteString $r1;
+        int $i0, $i2;
+        boolean $z0, $z1;
+        long $l1, $l3;
+        byte $b4;
+        java.lang.Throwable $r2;
+        java.util.ArrayDeque $r3;
+        okhttp3.internal.ws.RealWebSocket$Message $r4;
+
+        r0 := @this: okhttp3.internal.ws.RealWebSocket;
+
+        $r1 := @parameter0: okio.ByteString;
+
+        $i0 := @parameter1: int;
+
+        $z0 = 0;
+
+        entermonitor r0;
+
+     label1:
+        $z1 = r0.<okhttp3.internal.ws.RealWebSocket: boolean failed>;
+
+        if $z1 != 0 goto label3;
+
+        $z1 = r0.<okhttp3.internal.ws.RealWebSocket: boolean enqueuedClose>;
+
+     label2:
+        if $z1 == 0 goto label4;
+
+     label3:
+        exitmonitor r0;
+
+        return $z0;
+
+     label4:
+        $l1 = r0.<okhttp3.internal.ws.RealWebSocket: long queueSize>;
+
+        $i2 = virtualinvoke $r1.<okio.ByteString: int size()>();
+
+        $l3 = (long) $i2;
+
+        $l1 = $l1 + $l3;
+
+        $b4 = $l1 cmp 16777216L;
+
+        if $b4 <= 0 goto label7;
+
+        virtualinvoke r0.<okhttp3.internal.ws.RealWebSocket: boolean close(int,java.lang.String)>(1001, null);
+
+     label5:
+        goto label3;
+
+     label6:
+        $r2 := @caughtexception;
+
+        exitmonitor r0;
+
+        throw $r2;
+
+     label7:
+        $l1 = r0.<okhttp3.internal.ws.RealWebSocket: long queueSize>;
+
+        $i2 = virtualinvoke $r1.<okio.ByteString: int size()>();
+
+        $l3 = (long) $i2;
+
+        $l1 = $l1 + $l3;
+
+        r0.<okhttp3.internal.ws.RealWebSocket: long queueSize> = $l1;
+
+        $r3 = r0.<okhttp3.internal.ws.RealWebSocket: java.util.ArrayDeque messageAndCloseQueue>;
+
+        $r4 = new okhttp3.internal.ws.RealWebSocket$Message;
+
+        specialinvoke $r4.<okhttp3.internal.ws.RealWebSocket$Message: void <init>(int,okio.ByteString)>($i0, $r1);
+
+        virtualinvoke $r3.<java.util.ArrayDeque: boolean add(java.lang.Object)>($r4);
+
+        specialinvoke r0.<okhttp3.internal.ws.RealWebSocket: void runWriter()>();
+
+     label8:
+        $z0 = 1;
+
+        goto label3;
+
+        catch java.lang.Throwable from label1 to label2 with label6;
+        catch java.lang.Throwable from label4 to label5 with label6;
+        catch java.lang.Throwable from label7 to label8 with label6;
+    }
+    void awaitTermination(int, java.util.concurrent.TimeUnit) throws java.lang.InterruptedException
+    {
+        okhttp3.internal.ws.RealWebSocket r0;
+        int $i0;
+        java.util.concurrent.TimeUnit $r1;
+        java.util.concurrent.ScheduledExecutorService $r2;
+        long $l1;
+
+        r0 := @this: okhttp3.internal.ws.RealWebSocket;
+
+        $i0 := @parameter0: int;
+
+        $r1 := @parameter1: java.util.concurrent.TimeUnit;
+
+        $r2 = r0.<okhttp3.internal.ws.RealWebSocket: java.util.concurrent.ScheduledExecutorService executor>;
+
+        $l1 = (long) $i0;
+
+        interfaceinvoke $r2.<java.util.concurrent.ScheduledExecutorService: boolean awaitTermination(long,java.util.concurrent.TimeUnit)>($l1, $r1);
+
+        return;
+    }
+    public void cancel()
+    {
+        okhttp3.internal.ws.RealWebSocket r0;
+        okhttp3.Call $r1;
+
+        r0 := @this: okhttp3.internal.ws.RealWebSocket;
+
+        $r1 = r0.<okhttp3.internal.ws.RealWebSocket: okhttp3.Call call>;
+
+        interfaceinvoke $r1.<okhttp3.Call: void cancel()>();
+
+        return;
+    }
+    void checkResponse(okhttp3.Response) throws java.net.ProtocolException
+    {
+        okhttp3.internal.ws.RealWebSocket r0;
+        okhttp3.Response $r1;
+        int $i0;
+        java.net.ProtocolException $r2;
+        java.lang.StringBuilder $r3;
+        java.lang.String $r4, $r5;
+        boolean $z0;
+        okio.ByteString $r6;
+
+        r0 := @this: okhttp3.internal.ws.RealWebSocket;
+
+        $r1 := @parameter0: okhttp3.Response;
+
+        $i0 = virtualinvoke $r1.<okhttp3.Response: int code()>();
+
+        if $i0 == 101 goto label1;
+
+        $r2 = new java.net.ProtocolException;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Expected HTTP 101 response but was \'");
+
+        $i0 = virtualinvoke $r1.<okhttp3.Response: int code()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ");
+
+        $r4 = virtualinvoke $r1.<okhttp3.Response: java.lang.String message()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\'");
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r2.<java.net.ProtocolException: void <init>(java.lang.String)>($r4);
+
+        throw $r2;
+
+     label1:
+        $r4 = virtualinvoke $r1.<okhttp3.Response: java.lang.String header(java.lang.String)>("Connection");
+
+        $r5 = "Upgrade";
+
+        $z0 = virtualinvoke $r5.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>($r4);
+
+        if $z0 != 0 goto label2;
+
+        $r2 = new java.net.ProtocolException;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Expected \'Connection\' header value \'Upgrade\' but was \'");
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\'");
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r2.<java.net.ProtocolException: void <init>(java.lang.String)>($r4);
+
+        throw $r2;
+
+     label2:
+        $r4 = virtualinvoke $r1.<okhttp3.Response: java.lang.String header(java.lang.String)>("Upgrade");
+
+        $r5 = "websocket";
+
+        $z0 = virtualinvoke $r5.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>($r4);
+
+        if $z0 != 0 goto label3;
+
+        $r2 = new java.net.ProtocolException;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Expected \'Upgrade\' header value \'websocket\' but was \'");
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\'");
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r2.<java.net.ProtocolException: void <init>(java.lang.String)>($r4);
+
+        throw $r2;
+
+     label3:
+        $r4 = virtualinvoke $r1.<okhttp3.Response: java.lang.String header(java.lang.String)>("Sec-WebSocket-Accept");
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = r0.<okhttp3.internal.ws.RealWebSocket: java.lang.String key>;
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("258EAFA5-E914-47DA-95CA-C5AB0DC85B11");
+
+        $r5 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r6 = staticinvoke <okio.ByteString: okio.ByteString encodeUtf8(java.lang.String)>($r5);
+
+        $r6 = virtualinvoke $r6.<okio.ByteString: okio.ByteString sha1()>();
+
+        $r5 = virtualinvoke $r6.<okio.ByteString: java.lang.String base64()>();
+
+        $z0 = virtualinvoke $r5.<java.lang.String: boolean equals(java.lang.Object)>($r4);
+
+        if $z0 != 0 goto label4;
+
+        $r2 = new java.net.ProtocolException;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Expected \'Sec-WebSocket-Accept\' header value \'");
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\' but was \'");
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\'");
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r2.<java.net.ProtocolException: void <init>(java.lang.String)>($r4);
+
+        throw $r2;
+
+     label4:
+        return;
+    }
+    public boolean close(int, java.lang.String)
+    {
+        okhttp3.internal.ws.RealWebSocket r0;
+        int $i0;
+        java.lang.String $r1;
+        boolean $z0;
+
+        r0 := @this: okhttp3.internal.ws.RealWebSocket;
+
+        $i0 := @parameter0: int;
+
+        $r1 := @parameter1: java.lang.String;
+
+        $z0 = virtualinvoke r0.<okhttp3.internal.ws.RealWebSocket: boolean close(int,java.lang.String,long)>($i0, $r1, 60000L);
+
+        return $z0;
+    }
+    boolean close(int, java.lang.String, long)
+    {
+        okhttp3.internal.ws.RealWebSocket r0;
+        int $i0, $i2;
+        java.lang.String $r1;
+        long $l1, $l3;
+        boolean $z0, $z1;
+        okio.ByteString r2, $r3;
+        byte $b4;
+        java.lang.IllegalArgumentException $r4;
+        java.lang.StringBuilder $r5;
+        java.lang.Throwable $r6;
+        java.util.ArrayDeque $r7;
+        okhttp3.internal.ws.RealWebSocket$Close $r8;
+
+        r0 := @this: okhttp3.internal.ws.RealWebSocket;
+
+        $i0 := @parameter0: int;
+
+        $r1 := @parameter1: java.lang.String;
+
+        $l1 := @parameter2: long;
+
+        $z0 = 1;
+
+        entermonitor r0;
+
+     label1:
+        staticinvoke <okhttp3.internal.ws.WebSocketProtocol: void validateCloseCode(int)>($i0);
+
+        r2 = null;
+
+        if $r1 == null goto label3;
+
+        $r3 = staticinvoke <okio.ByteString: okio.ByteString encodeUtf8(java.lang.String)>($r1);
+
+        r2 = $r3;
+
+        $i2 = virtualinvoke $r3.<okio.ByteString: int size()>();
+
+        $l3 = (long) $i2;
+
+        $b4 = $l3 cmp 123L;
+
+        if $b4 <= 0 goto label3;
+
+        $r4 = new java.lang.IllegalArgumentException;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("reason.size() > 123: ");
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r1 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r4.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r1);
+
+        throw $r4;
+
+     label2:
+        $r6 := @caughtexception;
+
+        exitmonitor r0;
+
+        throw $r6;
+
+     label3:
+        $z1 = r0.<okhttp3.internal.ws.RealWebSocket: boolean failed>;
+
+        if $z1 != 0 goto label5;
+
+        $z1 = r0.<okhttp3.internal.ws.RealWebSocket: boolean enqueuedClose>;
+
+     label4:
+        if $z1 == 0 goto label7;
+
+     label5:
+        $z0 = 0;
+
+     label6:
+        exitmonitor r0;
+
+        return $z0;
+
+     label7:
+        r0.<okhttp3.internal.ws.RealWebSocket: boolean enqueuedClose> = 1;
+
+        $r7 = r0.<okhttp3.internal.ws.RealWebSocket: java.util.ArrayDeque messageAndCloseQueue>;
+
+        $r8 = new okhttp3.internal.ws.RealWebSocket$Close;
+
+        specialinvoke $r8.<okhttp3.internal.ws.RealWebSocket$Close: void <init>(int,okio.ByteString,long)>($i0, r2, $l1);
+
+        virtualinvoke $r7.<java.util.ArrayDeque: boolean add(java.lang.Object)>($r8);
+
+        specialinvoke r0.<okhttp3.internal.ws.RealWebSocket: void runWriter()>();
+
+     label8:
+        goto label6;
+
+        catch java.lang.Throwable from label1 to label2 with label2;
+        catch java.lang.Throwable from label3 to label4 with label2;
+        catch java.lang.Throwable from label7 to label8 with label2;
+    }
+    public void connect(okhttp3.OkHttpClient)
+    {
+        okhttp3.internal.ws.RealWebSocket r0;
+        okhttp3.OkHttpClient $r1;
+        okhttp3.OkHttpClient$Builder $r2;
+        java.util.List $r3;
+        int $i0;
+        okhttp3.Request $r4;
+        okhttp3.Request$Builder $r5;
+        java.lang.String $r6;
+        okhttp3.internal.Internal $r7;
+        okhttp3.Call $r8;
+        okhttp3.internal.ws.RealWebSocket$2 $r9;
+
+        r0 := @this: okhttp3.internal.ws.RealWebSocket;
+
+        $r1 := @parameter0: okhttp3.OkHttpClient;
+
+        $r2 = virtualinvoke $r1.<okhttp3.OkHttpClient: okhttp3.OkHttpClient$Builder newBuilder()>();
+
+        $r3 = <okhttp3.internal.ws.RealWebSocket: java.util.List ONLY_HTTP1>;
+
+        $r2 = virtualinvoke $r2.<okhttp3.OkHttpClient$Builder: okhttp3.OkHttpClient$Builder protocols(java.util.List)>($r3);
+
+        $r1 = virtualinvoke $r2.<okhttp3.OkHttpClient$Builder: okhttp3.OkHttpClient build()>();
+
+        $i0 = virtualinvoke $r1.<okhttp3.OkHttpClient: int pingIntervalMillis()>();
+
+        $r4 = r0.<okhttp3.internal.ws.RealWebSocket: okhttp3.Request originalRequest>;
+
+        $r5 = virtualinvoke $r4.<okhttp3.Request: okhttp3.Request$Builder newBuilder()>();
+
+        $r5 = virtualinvoke $r5.<okhttp3.Request$Builder: okhttp3.Request$Builder header(java.lang.String,java.lang.String)>("Upgrade", "websocket");
+
+        $r5 = virtualinvoke $r5.<okhttp3.Request$Builder: okhttp3.Request$Builder header(java.lang.String,java.lang.String)>("Connection", "Upgrade");
+
+        $r6 = r0.<okhttp3.internal.ws.RealWebSocket: java.lang.String key>;
+
+        $r5 = virtualinvoke $r5.<okhttp3.Request$Builder: okhttp3.Request$Builder header(java.lang.String,java.lang.String)>("Sec-WebSocket-Key", $r6);
+
+        $r5 = virtualinvoke $r5.<okhttp3.Request$Builder: okhttp3.Request$Builder header(java.lang.String,java.lang.String)>("Sec-WebSocket-Version", "13");
+
+        $r4 = virtualinvoke $r5.<okhttp3.Request$Builder: okhttp3.Request build()>();
+
+        $r7 = <okhttp3.internal.Internal: okhttp3.internal.Internal instance>;
+
+        $r8 = virtualinvoke $r7.<okhttp3.internal.Internal: okhttp3.Call newWebSocketCall(okhttp3.OkHttpClient,okhttp3.Request)>($r1, $r4);
+
+        r0.<okhttp3.internal.ws.RealWebSocket: okhttp3.Call call> = $r8;
+
+        $r8 = r0.<okhttp3.internal.ws.RealWebSocket: okhttp3.Call call>;
+
+        $r9 = new okhttp3.internal.ws.RealWebSocket$2;
+
+        specialinvoke $r9.<okhttp3.internal.ws.RealWebSocket$2: void <init>(okhttp3.internal.ws.RealWebSocket,okhttp3.Request,int)>(r0, $r4, $i0);
+
+        interfaceinvoke $r8.<okhttp3.Call: void enqueue(okhttp3.Callback)>($r9);
+
+        return;
+    }
+    public void failWebSocket(java.lang.Exception, okhttp3.Response)
+    {
+        okhttp3.internal.ws.RealWebSocket r0;
+        java.lang.Exception $r1;
+        okhttp3.Response $r2;
+        okhttp3.internal.ws.RealWebSocket$Streams r3;
+        boolean $z0;
+        java.util.concurrent.ScheduledFuture $r4;
+        java.util.concurrent.ScheduledExecutorService $r5;
+        okhttp3.WebSocketListener $r6;
+        java.lang.Throwable $r7, $r8;
+
+        r0 := @this: okhttp3.internal.ws.RealWebSocket;
+
+        $r1 := @parameter0: java.lang.Exception;
+
+        $r2 := @parameter1: okhttp3.Response;
+
+        entermonitor r0;
+
+     label01:
+        $z0 = r0.<okhttp3.internal.ws.RealWebSocket: boolean failed>;
+
+        if $z0 == 0 goto label03;
+
+        exitmonitor r0;
+
+     label02:
+        return;
+
+     label03:
+        r0.<okhttp3.internal.ws.RealWebSocket: boolean failed> = 1;
+
+        r3 = r0.<okhttp3.internal.ws.RealWebSocket: okhttp3.internal.ws.RealWebSocket$Streams streams>;
+
+        r0.<okhttp3.internal.ws.RealWebSocket: okhttp3.internal.ws.RealWebSocket$Streams streams> = null;
+
+        $r4 = r0.<okhttp3.internal.ws.RealWebSocket: java.util.concurrent.ScheduledFuture cancelFuture>;
+
+        if $r4 == null goto label04;
+
+        $r4 = r0.<okhttp3.internal.ws.RealWebSocket: java.util.concurrent.ScheduledFuture cancelFuture>;
+
+        interfaceinvoke $r4.<java.util.concurrent.ScheduledFuture: boolean cancel(boolean)>(0);
+
+     label04:
+        $r5 = r0.<okhttp3.internal.ws.RealWebSocket: java.util.concurrent.ScheduledExecutorService executor>;
+
+        if $r5 == null goto label05;
+
+        $r5 = r0.<okhttp3.internal.ws.RealWebSocket: java.util.concurrent.ScheduledExecutorService executor>;
+
+        interfaceinvoke $r5.<java.util.concurrent.ScheduledExecutorService: void shutdown()>();
+
+     label05:
+        exitmonitor r0;
+
+     label06:
+        $r6 = r0.<okhttp3.internal.ws.RealWebSocket: okhttp3.WebSocketListener listener>;
+
+        virtualinvoke $r6.<okhttp3.WebSocketListener: void onFailure(okhttp3.WebSocket,java.lang.Throwable,okhttp3.Response)>(r0, $r1, $r2);
+
+     label07:
+        staticinvoke <okhttp3.internal.Util: void closeQuietly(java.io.Closeable)>(r3);
+
+        return;
+
+     label08:
+        $r7 := @caughtexception;
+
+     label09:
+        exitmonitor r0;
+
+     label10:
+        throw $r7;
+
+     label11:
+        $r8 := @caughtexception;
+
+        staticinvoke <okhttp3.internal.Util: void closeQuietly(java.io.Closeable)>(r3);
+
+        throw $r8;
+
+        catch java.lang.Throwable from label01 to label02 with label08;
+        catch java.lang.Throwable from label03 to label06 with label08;
+        catch java.lang.Throwable from label06 to label07 with label11;
+        catch java.lang.Throwable from label09 to label10 with label08;
+    }
+    public void initReaderAndWriter(java.lang.String, long, okhttp3.internal.ws.RealWebSocket$Streams) throws java.io.IOException
+    {
+        okhttp3.internal.ws.RealWebSocket r0;
+        java.lang.String $r1;
+        long $l0;
+        okhttp3.internal.ws.RealWebSocket$Streams $r2;
+        java.util.Random $r3;
+        java.util.concurrent.TimeUnit $r4;
+        okhttp3.internal.ws.WebSocketWriter $r5;
+        boolean $z0;
+        okio.BufferedSink $r6;
+        java.util.concurrent.ScheduledThreadPoolExecutor $r7;
+        java.util.concurrent.ThreadFactory $r8;
+        byte $b1;
+        java.util.concurrent.ScheduledExecutorService $r9;
+        okhttp3.internal.ws.RealWebSocket$PingRunnable $r10;
+        java.util.ArrayDeque $r11;
+        okhttp3.internal.ws.WebSocketReader $r12;
+        okio.BufferedSource $r13;
+        java.lang.Throwable $r14;
+
+        r0 := @this: okhttp3.internal.ws.RealWebSocket;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $l0 := @parameter1: long;
+
+        $r2 := @parameter2: okhttp3.internal.ws.RealWebSocket$Streams;
+
+        entermonitor r0;
+
+     label1:
+        r0.<okhttp3.internal.ws.RealWebSocket: okhttp3.internal.ws.RealWebSocket$Streams streams> = $r2;
+
+        $r5 = new okhttp3.internal.ws.WebSocketWriter;
+
+        $z0 = $r2.<okhttp3.internal.ws.RealWebSocket$Streams: boolean client>;
+
+        $r6 = $r2.<okhttp3.internal.ws.RealWebSocket$Streams: okio.BufferedSink sink>;
+
+        $r3 = r0.<okhttp3.internal.ws.RealWebSocket: java.util.Random random>;
+
+        specialinvoke $r5.<okhttp3.internal.ws.WebSocketWriter: void <init>(boolean,okio.BufferedSink,java.util.Random)>($z0, $r6, $r3);
+
+        r0.<okhttp3.internal.ws.RealWebSocket: okhttp3.internal.ws.WebSocketWriter writer> = $r5;
+
+        $r7 = new java.util.concurrent.ScheduledThreadPoolExecutor;
+
+        $r8 = staticinvoke <okhttp3.internal.Util: java.util.concurrent.ThreadFactory threadFactory(java.lang.String,boolean)>($r1, 0);
+
+        specialinvoke $r7.<java.util.concurrent.ScheduledThreadPoolExecutor: void <init>(int,java.util.concurrent.ThreadFactory)>(1, $r8);
+
+        r0.<okhttp3.internal.ws.RealWebSocket: java.util.concurrent.ScheduledExecutorService executor> = $r7;
+
+        $b1 = $l0 cmp 0L;
+
+        if $b1 == 0 goto label2;
+
+        $r9 = r0.<okhttp3.internal.ws.RealWebSocket: java.util.concurrent.ScheduledExecutorService executor>;
+
+        $r10 = new okhttp3.internal.ws.RealWebSocket$PingRunnable;
+
+        specialinvoke $r10.<okhttp3.internal.ws.RealWebSocket$PingRunnable: void <init>(okhttp3.internal.ws.RealWebSocket)>(r0);
+
+        $r4 = <java.util.concurrent.TimeUnit: java.util.concurrent.TimeUnit MILLISECONDS>;
+
+        interfaceinvoke $r9.<java.util.concurrent.ScheduledExecutorService: java.util.concurrent.ScheduledFuture scheduleAtFixedRate(java.lang.Runnable,long,long,java.util.concurrent.TimeUnit)>($r10, $l0, $l0, $r4);
+
+     label2:
+        $r11 = r0.<okhttp3.internal.ws.RealWebSocket: java.util.ArrayDeque messageAndCloseQueue>;
+
+        $z0 = virtualinvoke $r11.<java.util.ArrayDeque: boolean isEmpty()>();
+
+        if $z0 != 0 goto label3;
+
+        specialinvoke r0.<okhttp3.internal.ws.RealWebSocket: void runWriter()>();
+
+     label3:
+        exitmonitor r0;
+
+     label4:
+        $r12 = new okhttp3.internal.ws.WebSocketReader;
+
+        $z0 = $r2.<okhttp3.internal.ws.RealWebSocket$Streams: boolean client>;
+
+        $r13 = $r2.<okhttp3.internal.ws.RealWebSocket$Streams: okio.BufferedSource source>;
+
+        specialinvoke $r12.<okhttp3.internal.ws.WebSocketReader: void <init>(boolean,okio.BufferedSource,okhttp3.internal.ws.WebSocketReader$FrameCallback)>($z0, $r13, r0);
+
+        r0.<okhttp3.internal.ws.RealWebSocket: okhttp3.internal.ws.WebSocketReader reader> = $r12;
+
+        return;
+
+     label5:
+        $r14 := @caughtexception;
+
+     label6:
+        exitmonitor r0;
+
+     label7:
+        throw $r14;
+
+        catch java.lang.Throwable from label1 to label4 with label5;
+        catch java.lang.Throwable from label6 to label7 with label5;
+    }
+    public void loopReader() throws java.io.IOException
+    {
+        okhttp3.internal.ws.RealWebSocket r0;
+        int $i0;
+        okhttp3.internal.ws.WebSocketReader $r1;
+
+        r0 := @this: okhttp3.internal.ws.RealWebSocket;
+
+     label1:
+        $i0 = r0.<okhttp3.internal.ws.RealWebSocket: int receivedCloseCode>;
+
+        if $i0 != -1 goto label2;
+
+        $r1 = r0.<okhttp3.internal.ws.RealWebSocket: okhttp3.internal.ws.WebSocketReader reader>;
+
+        virtualinvoke $r1.<okhttp3.internal.ws.WebSocketReader: void processNextFrame()>();
+
+        goto label1;
+
+     label2:
+        return;
+    }
+    public void onReadClose(int, java.lang.String)
+    {
+        okhttp3.internal.ws.RealWebSocket r0;
+        int $i0, $i1;
+        java.lang.String $r1;
+        boolean $z0;
+        java.lang.IllegalArgumentException $r2;
+        okhttp3.internal.ws.RealWebSocket$Streams r3;
+        java.lang.IllegalStateException $r4;
+        java.lang.Throwable $r5, $r10;
+        java.util.ArrayDeque $r6;
+        java.util.concurrent.ScheduledFuture $r7;
+        java.util.concurrent.ScheduledExecutorService $r8;
+        okhttp3.WebSocketListener $r9;
+
+        r0 := @this: okhttp3.internal.ws.RealWebSocket;
+
+        $i0 := @parameter0: int;
+
+        $r1 := @parameter1: java.lang.String;
+
+        if $i0 != -1 goto label01;
+
+        $r2 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r2.<java.lang.IllegalArgumentException: void <init>()>();
+
+        throw $r2;
+
+     label01:
+        r3 = null;
+
+        entermonitor r0;
+
+     label02:
+        $i1 = r0.<okhttp3.internal.ws.RealWebSocket: int receivedCloseCode>;
+
+        if $i1 == -1 goto label05;
+
+        $r4 = new java.lang.IllegalStateException;
+
+        specialinvoke $r4.<java.lang.IllegalStateException: void <init>(java.lang.String)>("already closed");
+
+        throw $r4;
+
+     label03:
+        $r5 := @caughtexception;
+
+        exitmonitor r0;
+
+     label04:
+        throw $r5;
+
+     label05:
+        r0.<okhttp3.internal.ws.RealWebSocket: int receivedCloseCode> = $i0;
+
+        r0.<okhttp3.internal.ws.RealWebSocket: java.lang.String receivedCloseReason> = $r1;
+
+        $z0 = r0.<okhttp3.internal.ws.RealWebSocket: boolean enqueuedClose>;
+
+        if $z0 == 0 goto label07;
+
+        $r6 = r0.<okhttp3.internal.ws.RealWebSocket: java.util.ArrayDeque messageAndCloseQueue>;
+
+        $z0 = virtualinvoke $r6.<java.util.ArrayDeque: boolean isEmpty()>();
+
+        if $z0 == 0 goto label07;
+
+        r3 = r0.<okhttp3.internal.ws.RealWebSocket: okhttp3.internal.ws.RealWebSocket$Streams streams>;
+
+        r0.<okhttp3.internal.ws.RealWebSocket: okhttp3.internal.ws.RealWebSocket$Streams streams> = null;
+
+        $r7 = r0.<okhttp3.internal.ws.RealWebSocket: java.util.concurrent.ScheduledFuture cancelFuture>;
+
+        if $r7 == null goto label06;
+
+        $r7 = r0.<okhttp3.internal.ws.RealWebSocket: java.util.concurrent.ScheduledFuture cancelFuture>;
+
+        interfaceinvoke $r7.<java.util.concurrent.ScheduledFuture: boolean cancel(boolean)>(0);
+
+     label06:
+        $r8 = r0.<okhttp3.internal.ws.RealWebSocket: java.util.concurrent.ScheduledExecutorService executor>;
+
+        interfaceinvoke $r8.<java.util.concurrent.ScheduledExecutorService: void shutdown()>();
+
+     label07:
+        exitmonitor r0;
+
+     label08:
+        $r9 = r0.<okhttp3.internal.ws.RealWebSocket: okhttp3.WebSocketListener listener>;
+
+        virtualinvoke $r9.<okhttp3.WebSocketListener: void onClosing(okhttp3.WebSocket,int,java.lang.String)>(r0, $i0, $r1);
+
+     label09:
+        if r3 == null goto label11;
+
+     label10:
+        $r9 = r0.<okhttp3.internal.ws.RealWebSocket: okhttp3.WebSocketListener listener>;
+
+        virtualinvoke $r9.<okhttp3.WebSocketListener: void onClosed(okhttp3.WebSocket,int,java.lang.String)>(r0, $i0, $r1);
+
+     label11:
+        staticinvoke <okhttp3.internal.Util: void closeQuietly(java.io.Closeable)>(r3);
+
+        return;
+
+     label12:
+        $r10 := @caughtexception;
+
+        staticinvoke <okhttp3.internal.Util: void closeQuietly(java.io.Closeable)>(r3);
+
+        throw $r10;
+
+        catch java.lang.Throwable from label02 to label04 with label03;
+        catch java.lang.Throwable from label05 to label08 with label03;
+        catch java.lang.Throwable from label08 to label09 with label12;
+        catch java.lang.Throwable from label10 to label11 with label12;
+    }
+    public void onReadMessage(java.lang.String) throws java.io.IOException
+    {
+        okhttp3.internal.ws.RealWebSocket r0;
+        java.lang.String $r1;
+        okhttp3.WebSocketListener $r2;
+
+        r0 := @this: okhttp3.internal.ws.RealWebSocket;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = r0.<okhttp3.internal.ws.RealWebSocket: okhttp3.WebSocketListener listener>;
+
+        virtualinvoke $r2.<okhttp3.WebSocketListener: void onMessage(okhttp3.WebSocket,java.lang.String)>(r0, $r1);
+
+        return;
+    }
+    public void onReadMessage(okio.ByteString) throws java.io.IOException
+    {
+        okhttp3.internal.ws.RealWebSocket r0;
+        okio.ByteString $r1;
+        okhttp3.WebSocketListener $r2;
+
+        r0 := @this: okhttp3.internal.ws.RealWebSocket;
+
+        $r1 := @parameter0: okio.ByteString;
+
+        $r2 = r0.<okhttp3.internal.ws.RealWebSocket: okhttp3.WebSocketListener listener>;
+
+        virtualinvoke $r2.<okhttp3.WebSocketListener: void onMessage(okhttp3.WebSocket,okio.ByteString)>(r0, $r1);
+
+        return;
+    }
+    public void onReadPing(okio.ByteString)
+    {
+        okhttp3.internal.ws.RealWebSocket r0;
+        okio.ByteString $r1;
+        boolean $z0;
+        java.util.ArrayDeque $r2;
+        int $i0;
+        java.lang.Throwable $r3;
+
+        r0 := @this: okhttp3.internal.ws.RealWebSocket;
+
+        $r1 := @parameter0: okio.ByteString;
+
+        entermonitor r0;
+
+     label1:
+        $z0 = r0.<okhttp3.internal.ws.RealWebSocket: boolean failed>;
+
+        if $z0 != 0 goto label3;
+
+        $z0 = r0.<okhttp3.internal.ws.RealWebSocket: boolean enqueuedClose>;
+
+        if $z0 == 0 goto label4;
+
+        $r2 = r0.<okhttp3.internal.ws.RealWebSocket: java.util.ArrayDeque messageAndCloseQueue>;
+
+        $z0 = virtualinvoke $r2.<java.util.ArrayDeque: boolean isEmpty()>();
+
+     label2:
+        if $z0 == 0 goto label4;
+
+     label3:
+        exitmonitor r0;
+
+        return;
+
+     label4:
+        $r2 = r0.<okhttp3.internal.ws.RealWebSocket: java.util.ArrayDeque pongQueue>;
+
+        virtualinvoke $r2.<java.util.ArrayDeque: boolean add(java.lang.Object)>($r1);
+
+        specialinvoke r0.<okhttp3.internal.ws.RealWebSocket: void runWriter()>();
+
+        $i0 = r0.<okhttp3.internal.ws.RealWebSocket: int pingCount>;
+
+        $i0 = $i0 + 1;
+
+        r0.<okhttp3.internal.ws.RealWebSocket: int pingCount> = $i0;
+
+     label5:
+        goto label3;
+
+     label6:
+        $r3 := @caughtexception;
+
+        exitmonitor r0;
+
+        throw $r3;
+
+        catch java.lang.Throwable from label1 to label2 with label6;
+        catch java.lang.Throwable from label4 to label5 with label6;
+    }
+    public void onReadPong(okio.ByteString)
+    {
+        okhttp3.internal.ws.RealWebSocket r0;
+        okio.ByteString $r1;
+        int $i0;
+        java.lang.Throwable $r2;
+
+        r0 := @this: okhttp3.internal.ws.RealWebSocket;
+
+        $r1 := @parameter0: okio.ByteString;
+
+        entermonitor r0;
+
+     label1:
+        $i0 = r0.<okhttp3.internal.ws.RealWebSocket: int pongCount>;
+
+        $i0 = $i0 + 1;
+
+        r0.<okhttp3.internal.ws.RealWebSocket: int pongCount> = $i0;
+
+     label2:
+        exitmonitor r0;
+
+        return;
+
+     label3:
+        $r2 := @caughtexception;
+
+        exitmonitor r0;
+
+        throw $r2;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+    int pingCount()
+    {
+        okhttp3.internal.ws.RealWebSocket r0;
+        java.lang.Throwable $r1;
+        int i0;
+
+        r0 := @this: okhttp3.internal.ws.RealWebSocket;
+
+        entermonitor r0;
+
+     label1:
+        i0 = r0.<okhttp3.internal.ws.RealWebSocket: int pingCount>;
+
+     label2:
+        exitmonitor r0;
+
+        return i0;
+
+     label3:
+        $r1 := @caughtexception;
+
+        exitmonitor r0;
+
+        throw $r1;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+    boolean pong(okio.ByteString)
+    {
+        okhttp3.internal.ws.RealWebSocket r0;
+        okio.ByteString $r1;
+        boolean $z0;
+        java.util.ArrayDeque $r2;
+        java.lang.Throwable $r3;
+
+        r0 := @this: okhttp3.internal.ws.RealWebSocket;
+
+        $r1 := @parameter0: okio.ByteString;
+
+        entermonitor r0;
+
+     label1:
+        $z0 = r0.<okhttp3.internal.ws.RealWebSocket: boolean failed>;
+
+        if $z0 != 0 goto label3;
+
+        $z0 = r0.<okhttp3.internal.ws.RealWebSocket: boolean enqueuedClose>;
+
+        if $z0 == 0 goto label5;
+
+        $r2 = r0.<okhttp3.internal.ws.RealWebSocket: java.util.ArrayDeque messageAndCloseQueue>;
+
+        $z0 = virtualinvoke $r2.<java.util.ArrayDeque: boolean isEmpty()>();
+
+     label2:
+        if $z0 == 0 goto label5;
+
+     label3:
+        $z0 = 0;
+
+     label4:
+        exitmonitor r0;
+
+        return $z0;
+
+     label5:
+        $r2 = r0.<okhttp3.internal.ws.RealWebSocket: java.util.ArrayDeque pongQueue>;
+
+        virtualinvoke $r2.<java.util.ArrayDeque: boolean add(java.lang.Object)>($r1);
+
+        specialinvoke r0.<okhttp3.internal.ws.RealWebSocket: void runWriter()>();
+
+     label6:
+        $z0 = 1;
+
+        goto label4;
+
+     label7:
+        $r3 := @caughtexception;
+
+        exitmonitor r0;
+
+        throw $r3;
+
+        catch java.lang.Throwable from label1 to label2 with label7;
+        catch java.lang.Throwable from label5 to label6 with label7;
+    }
+    int pongCount()
+    {
+        okhttp3.internal.ws.RealWebSocket r0;
+        java.lang.Throwable $r1;
+        int i0;
+
+        r0 := @this: okhttp3.internal.ws.RealWebSocket;
+
+        entermonitor r0;
+
+     label1:
+        i0 = r0.<okhttp3.internal.ws.RealWebSocket: int pongCount>;
+
+     label2:
+        exitmonitor r0;
+
+        return i0;
+
+     label3:
+        $r1 := @caughtexception;
+
+        exitmonitor r0;
+
+        throw $r1;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+    boolean processNextFrame() throws java.io.IOException
+    {
+        okhttp3.internal.ws.RealWebSocket r0;
+        java.lang.Exception r1;
+        okhttp3.internal.ws.WebSocketReader $r2;
+        int $i0;
+
+        r0 := @this: okhttp3.internal.ws.RealWebSocket;
+
+     label1:
+        $r2 = r0.<okhttp3.internal.ws.RealWebSocket: okhttp3.internal.ws.WebSocketReader reader>;
+
+        virtualinvoke $r2.<okhttp3.internal.ws.WebSocketReader: void processNextFrame()>();
+
+        $i0 = r0.<okhttp3.internal.ws.RealWebSocket: int receivedCloseCode>;
+
+     label2:
+        if $i0 != -1 goto label4;
+
+        return 1;
+
+     label3:
+        r1 := @caughtexception;
+
+        virtualinvoke r0.<okhttp3.internal.ws.RealWebSocket: void failWebSocket(java.lang.Exception,okhttp3.Response)>(r1, null);
+
+     label4:
+        return 0;
+
+        catch java.lang.Exception from label1 to label2 with label3;
+    }
+    public long queueSize()
+    {
+        okhttp3.internal.ws.RealWebSocket r0;
+        java.lang.Throwable $r1;
+        long l0;
+
+        r0 := @this: okhttp3.internal.ws.RealWebSocket;
+
+        entermonitor r0;
+
+     label1:
+        l0 = r0.<okhttp3.internal.ws.RealWebSocket: long queueSize>;
+
+     label2:
+        exitmonitor r0;
+
+        return l0;
+
+     label3:
+        $r1 := @caughtexception;
+
+        exitmonitor r0;
+
+        throw $r1;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+    public okhttp3.Request request()
+    {
+        okhttp3.internal.ws.RealWebSocket r0;
+        okhttp3.Request r1;
+
+        r0 := @this: okhttp3.internal.ws.RealWebSocket;
+
+        r1 = r0.<okhttp3.internal.ws.RealWebSocket: okhttp3.Request originalRequest>;
+
+        return r1;
+    }
+    public boolean send(java.lang.String)
+    {
+        okhttp3.internal.ws.RealWebSocket r0;
+        java.lang.String $r1;
+        java.lang.NullPointerException $r2;
+        okio.ByteString $r3;
+        boolean $z0;
+
+        r0 := @this: okhttp3.internal.ws.RealWebSocket;
+
+        $r1 := @parameter0: java.lang.String;
+
+        if $r1 != null goto label1;
+
+        $r2 = new java.lang.NullPointerException;
+
+        specialinvoke $r2.<java.lang.NullPointerException: void <init>(java.lang.String)>("text == null");
+
+        throw $r2;
+
+     label1:
+        $r3 = staticinvoke <okio.ByteString: okio.ByteString encodeUtf8(java.lang.String)>($r1);
+
+        $z0 = specialinvoke r0.<okhttp3.internal.ws.RealWebSocket: boolean send(okio.ByteString,int)>($r3, 1);
+
+        return $z0;
+    }
+    public boolean send(okio.ByteString)
+    {
+        okhttp3.internal.ws.RealWebSocket r0;
+        okio.ByteString $r1;
+        boolean $z0;
+        java.lang.NullPointerException $r2;
+
+        r0 := @this: okhttp3.internal.ws.RealWebSocket;
+
+        $r1 := @parameter0: okio.ByteString;
+
+        if $r1 != null goto label1;
+
+        $r2 = new java.lang.NullPointerException;
+
+        specialinvoke $r2.<java.lang.NullPointerException: void <init>(java.lang.String)>("bytes == null");
+
+        throw $r2;
+
+     label1:
+        $z0 = specialinvoke r0.<okhttp3.internal.ws.RealWebSocket: boolean send(okio.ByteString,int)>($r1, 2);
+
+        return $z0;
+    }
+    void tearDown() throws java.lang.InterruptedException
+    {
+        okhttp3.internal.ws.RealWebSocket r0;
+        java.util.concurrent.ScheduledFuture $r1;
+        java.util.concurrent.ScheduledExecutorService $r2;
+        java.util.concurrent.TimeUnit $r3;
+
+        r0 := @this: okhttp3.internal.ws.RealWebSocket;
+
+        $r1 = r0.<okhttp3.internal.ws.RealWebSocket: java.util.concurrent.ScheduledFuture cancelFuture>;
+
+        if $r1 == null goto label1;
+
+        $r1 = r0.<okhttp3.internal.ws.RealWebSocket: java.util.concurrent.ScheduledFuture cancelFuture>;
+
+        interfaceinvoke $r1.<java.util.concurrent.ScheduledFuture: boolean cancel(boolean)>(0);
+
+     label1:
+        $r2 = r0.<okhttp3.internal.ws.RealWebSocket: java.util.concurrent.ScheduledExecutorService executor>;
+
+        interfaceinvoke $r2.<java.util.concurrent.ScheduledExecutorService: void shutdown()>();
+
+        $r2 = r0.<okhttp3.internal.ws.RealWebSocket: java.util.concurrent.ScheduledExecutorService executor>;
+
+        $r3 = <java.util.concurrent.TimeUnit: java.util.concurrent.TimeUnit SECONDS>;
+
+        interfaceinvoke $r2.<java.util.concurrent.ScheduledExecutorService: boolean awaitTermination(long,java.util.concurrent.TimeUnit)>(10L, $r3);
+
+        return;
+    }
+    boolean writeOneFrame() throws java.io.IOException
+    {
+        okhttp3.internal.ws.RealWebSocket r0;
+        okio.ByteString r1;
+        okhttp3.internal.ws.WebSocketWriter r2;
+        okhttp3.internal.ws.RealWebSocket$CancelRunnable $r3;
+        java.lang.Object r4, $r8;
+        int i0, $i2;
+        java.lang.String r5;
+        okhttp3.internal.ws.RealWebSocket$Streams r6;
+        boolean $z0;
+        java.util.ArrayDeque $r7;
+        java.util.concurrent.ScheduledExecutorService $r9;
+        okhttp3.internal.ws.RealWebSocket$Close $r10;
+        long $l1, $l3;
+        java.util.concurrent.TimeUnit $r11;
+        java.util.concurrent.ScheduledFuture $r12;
+        java.lang.Throwable $r13, $r17, $r18;
+        okhttp3.internal.ws.RealWebSocket$Message $r14;
+        okio.Sink $r15;
+        okio.BufferedSink $r16;
+        okhttp3.WebSocketListener $r19;
+        java.lang.AssertionError $r20;
+
+        r0 := @this: okhttp3.internal.ws.RealWebSocket;
+
+        r4 = null;
+
+        i0 = -1;
+
+        r5 = null;
+
+        r6 = null;
+
+        entermonitor r0;
+
+     label01:
+        $z0 = r0.<okhttp3.internal.ws.RealWebSocket: boolean failed>;
+
+        if $z0 == 0 goto label03;
+
+        exitmonitor r0;
+
+     label02:
+        return 0;
+
+     label03:
+        r2 = r0.<okhttp3.internal.ws.RealWebSocket: okhttp3.internal.ws.WebSocketWriter writer>;
+
+        $r7 = r0.<okhttp3.internal.ws.RealWebSocket: java.util.ArrayDeque pongQueue>;
+
+        $r8 = virtualinvoke $r7.<java.util.ArrayDeque: java.lang.Object poll()>();
+
+        r1 = (okio.ByteString) $r8;
+
+        if r1 != null goto label04;
+
+        $r7 = r0.<okhttp3.internal.ws.RealWebSocket: java.util.ArrayDeque messageAndCloseQueue>;
+
+        $r8 = virtualinvoke $r7.<java.util.ArrayDeque: java.lang.Object poll()>();
+
+        r4 = $r8;
+
+        $z0 = $r8 instanceof okhttp3.internal.ws.RealWebSocket$Close;
+
+        if $z0 == 0 goto label11;
+
+        i0 = r0.<okhttp3.internal.ws.RealWebSocket: int receivedCloseCode>;
+
+        r5 = r0.<okhttp3.internal.ws.RealWebSocket: java.lang.String receivedCloseReason>;
+
+        if i0 == -1 goto label08;
+
+        r6 = r0.<okhttp3.internal.ws.RealWebSocket: okhttp3.internal.ws.RealWebSocket$Streams streams>;
+
+        r0.<okhttp3.internal.ws.RealWebSocket: okhttp3.internal.ws.RealWebSocket$Streams streams> = null;
+
+        $r9 = r0.<okhttp3.internal.ws.RealWebSocket: java.util.concurrent.ScheduledExecutorService executor>;
+
+        interfaceinvoke $r9.<java.util.concurrent.ScheduledExecutorService: void shutdown()>();
+
+     label04:
+        exitmonitor r0;
+
+     label05:
+        if r1 == null goto label14;
+
+     label06:
+        virtualinvoke r2.<okhttp3.internal.ws.WebSocketWriter: void writePong(okio.ByteString)>(r1);
+
+     label07:
+        staticinvoke <okhttp3.internal.Util: void closeQuietly(java.io.Closeable)>(r6);
+
+        return 1;
+
+     label08:
+        $r9 = r0.<okhttp3.internal.ws.RealWebSocket: java.util.concurrent.ScheduledExecutorService executor>;
+
+        $r3 = new okhttp3.internal.ws.RealWebSocket$CancelRunnable;
+
+        specialinvoke $r3.<okhttp3.internal.ws.RealWebSocket$CancelRunnable: void <init>(okhttp3.internal.ws.RealWebSocket)>(r0);
+
+        $r10 = (okhttp3.internal.ws.RealWebSocket$Close) $r8;
+
+        $l1 = $r10.<okhttp3.internal.ws.RealWebSocket$Close: long cancelAfterCloseMillis>;
+
+        $r11 = <java.util.concurrent.TimeUnit: java.util.concurrent.TimeUnit MILLISECONDS>;
+
+        $r12 = interfaceinvoke $r9.<java.util.concurrent.ScheduledExecutorService: java.util.concurrent.ScheduledFuture schedule(java.lang.Runnable,long,java.util.concurrent.TimeUnit)>($r3, $l1, $r11);
+
+        r0.<okhttp3.internal.ws.RealWebSocket: java.util.concurrent.ScheduledFuture cancelFuture> = $r12;
+
+        goto label04;
+
+     label09:
+        $r13 := @caughtexception;
+
+        exitmonitor r0;
+
+     label10:
+        throw $r13;
+
+     label11:
+        if $r8 != null goto label04;
+
+     label12:
+        exitmonitor r0;
+
+     label13:
+        return 0;
+
+     label14:
+        $z0 = r4 instanceof okhttp3.internal.ws.RealWebSocket$Message;
+
+     label15:
+        if $z0 == 0 goto label24;
+
+     label16:
+        $r14 = (okhttp3.internal.ws.RealWebSocket$Message) r4;
+
+        r1 = $r14.<okhttp3.internal.ws.RealWebSocket$Message: okio.ByteString data>;
+
+        $r14 = (okhttp3.internal.ws.RealWebSocket$Message) r4;
+
+        i0 = $r14.<okhttp3.internal.ws.RealWebSocket$Message: int formatOpcode>;
+
+        $i2 = virtualinvoke r1.<okio.ByteString: int size()>();
+
+     label17:
+        $l1 = (long) $i2;
+
+     label18:
+        $r15 = virtualinvoke r2.<okhttp3.internal.ws.WebSocketWriter: okio.Sink newMessageSink(int,long)>(i0, $l1);
+
+        $r16 = staticinvoke <okio.Okio: okio.BufferedSink buffer(okio.Sink)>($r15);
+
+        interfaceinvoke $r16.<okio.BufferedSink: okio.BufferedSink write(okio.ByteString)>(r1);
+
+        interfaceinvoke $r16.<okio.BufferedSink: void close()>();
+
+        entermonitor r0;
+
+     label19:
+        $l1 = r0.<okhttp3.internal.ws.RealWebSocket: long queueSize>;
+
+        i0 = virtualinvoke r1.<okio.ByteString: int size()>();
+
+        $l3 = (long) i0;
+
+        $l1 = $l1 - $l3;
+
+        r0.<okhttp3.internal.ws.RealWebSocket: long queueSize> = $l1;
+
+        exitmonitor r0;
+
+     label20:
+        goto label07;
+
+     label21:
+        $r17 := @caughtexception;
+
+        exitmonitor r0;
+
+     label22:
+        throw $r17;
+
+     label23:
+        $r18 := @caughtexception;
+
+        staticinvoke <okhttp3.internal.Util: void closeQuietly(java.io.Closeable)>(r6);
+
+        throw $r18;
+
+     label24:
+        $z0 = r4 instanceof okhttp3.internal.ws.RealWebSocket$Close;
+
+     label25:
+        if $z0 == 0 goto label30;
+
+     label26:
+        $r10 = (okhttp3.internal.ws.RealWebSocket$Close) r4;
+
+        $i2 = $r10.<okhttp3.internal.ws.RealWebSocket$Close: int code>;
+
+        r1 = $r10.<okhttp3.internal.ws.RealWebSocket$Close: okio.ByteString reason>;
+
+        virtualinvoke r2.<okhttp3.internal.ws.WebSocketWriter: void writeClose(int,okio.ByteString)>($i2, r1);
+
+     label27:
+        if r6 == null goto label07;
+
+     label28:
+        $r19 = r0.<okhttp3.internal.ws.RealWebSocket: okhttp3.WebSocketListener listener>;
+
+        virtualinvoke $r19.<okhttp3.WebSocketListener: void onClosed(okhttp3.WebSocket,int,java.lang.String)>(r0, i0, r5);
+
+     label29:
+        goto label07;
+
+     label30:
+        $r20 = new java.lang.AssertionError;
+
+        specialinvoke $r20.<java.lang.AssertionError: void <init>()>();
+
+        throw $r20;
+
+     label31:
+        nop;
+
+        catch java.lang.Throwable from label01 to label02 with label09;
+        catch java.lang.Throwable from label03 to label05 with label09;
+        catch java.lang.Throwable from label06 to label07 with label23;
+        catch java.lang.Throwable from label08 to label10 with label09;
+        catch java.lang.Throwable from label12 to label13 with label09;
+        catch java.lang.Throwable from label14 to label15 with label23;
+        catch java.lang.Throwable from label16 to label17 with label23;
+        catch java.lang.Throwable from label18 to label19 with label23;
+        catch java.lang.Throwable from label19 to label20 with label21;
+        catch java.lang.Throwable from label21 to label22 with label21;
+        catch java.lang.Throwable from label22 to label23 with label23;
+        catch java.lang.Throwable from label24 to label25 with label23;
+        catch java.lang.Throwable from label26 to label27 with label23;
+        catch java.lang.Throwable from label28 to label29 with label23;
+        catch java.lang.Throwable from label30 to label31 with label23;
+    }
+    void writePingFrame()
+    {
+        okhttp3.internal.ws.RealWebSocket r0;
+        java.io.IOException r1;
+        okhttp3.internal.ws.WebSocketWriter r2;
+        boolean $z0;
+        okio.ByteString $r3;
+        java.lang.Throwable $r4;
+
+        r0 := @this: okhttp3.internal.ws.RealWebSocket;
+
+        entermonitor r0;
+
+     label01:
+        $z0 = r0.<okhttp3.internal.ws.RealWebSocket: boolean failed>;
+
+        if $z0 == 0 goto label03;
+
+        exitmonitor r0;
+
+     label02:
+        return;
+
+     label03:
+        r2 = r0.<okhttp3.internal.ws.RealWebSocket: okhttp3.internal.ws.WebSocketWriter writer>;
+
+        exitmonitor r0;
+
+     label04:
+        $r3 = <okio.ByteString: okio.ByteString EMPTY>;
+
+     label05:
+        virtualinvoke r2.<okhttp3.internal.ws.WebSocketWriter: void writePing(okio.ByteString)>($r3);
+
+     label06:
+        return;
+
+     label07:
+        r1 := @caughtexception;
+
+        virtualinvoke r0.<okhttp3.internal.ws.RealWebSocket: void failWebSocket(java.lang.Exception,okhttp3.Response)>(r1, null);
+
+        return;
+
+     label08:
+        $r4 := @caughtexception;
+
+     label09:
+        exitmonitor r0;
+
+     label10:
+        throw $r4;
+
+        catch java.lang.Throwable from label01 to label02 with label08;
+        catch java.lang.Throwable from label03 to label04 with label08;
+        catch java.io.IOException from label05 to label06 with label07;
+        catch java.lang.Throwable from label09 to label10 with label08;
+    }

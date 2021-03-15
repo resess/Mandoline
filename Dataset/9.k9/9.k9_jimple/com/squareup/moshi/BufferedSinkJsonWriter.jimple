@@ -1,0 +1,1265 @@
+com.squareup.moshi.BufferedSinkJsonWriter extends com.squareup.moshi.JsonWriter
+private static final java.lang.String[] REPLACEMENT_CHARS
+private java.lang.String deferredName
+private java.lang.String indent
+private boolean lenient
+private int[] pathIndices
+private java.lang.String[] pathNames
+private boolean promoteNameToValue
+private java.lang.String separator
+private boolean serializeNulls
+private final okio.BufferedSink sink
+private int[] stack
+private int stackSize
+    static void <clinit>()
+    {
+        java.lang.String[] $r0;
+        int i0;
+        java.lang.Object[] $r1;
+        java.lang.Integer $r2;
+        java.lang.String $r3;
+
+        $r0 = newarray (java.lang.String)[128];
+
+        <com.squareup.moshi.BufferedSinkJsonWriter: java.lang.String[] REPLACEMENT_CHARS> = $r0;
+
+        i0 = 0;
+
+     label1:
+        if i0 > 31 goto label2;
+
+        $r0 = <com.squareup.moshi.BufferedSinkJsonWriter: java.lang.String[] REPLACEMENT_CHARS>;
+
+        $r1 = newarray (java.lang.Object)[1];
+
+        $r2 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(i0);
+
+        $r1[0] = $r2;
+
+        $r3 = staticinvoke <java.lang.String: java.lang.String format(java.lang.String,java.lang.Object[])>("\\u%04x", $r1);
+
+        $r0[i0] = $r3;
+
+        i0 = i0 + 1;
+
+        goto label1;
+
+     label2:
+        $r0 = <com.squareup.moshi.BufferedSinkJsonWriter: java.lang.String[] REPLACEMENT_CHARS>;
+
+        $r0[34] = "\\\"";
+
+        $r0 = <com.squareup.moshi.BufferedSinkJsonWriter: java.lang.String[] REPLACEMENT_CHARS>;
+
+        $r0[92] = "\\\\";
+
+        $r0 = <com.squareup.moshi.BufferedSinkJsonWriter: java.lang.String[] REPLACEMENT_CHARS>;
+
+        $r0[9] = "\\t";
+
+        $r0 = <com.squareup.moshi.BufferedSinkJsonWriter: java.lang.String[] REPLACEMENT_CHARS>;
+
+        $r0[8] = "\\b";
+
+        $r0 = <com.squareup.moshi.BufferedSinkJsonWriter: java.lang.String[] REPLACEMENT_CHARS>;
+
+        $r0[10] = "\\n";
+
+        $r0 = <com.squareup.moshi.BufferedSinkJsonWriter: java.lang.String[] REPLACEMENT_CHARS>;
+
+        $r0[13] = "\\r";
+
+        $r0 = <com.squareup.moshi.BufferedSinkJsonWriter: java.lang.String[] REPLACEMENT_CHARS>;
+
+        $r0[12] = "\\f";
+
+        return;
+    }
+    void <init>(okio.BufferedSink)
+    {
+        com.squareup.moshi.BufferedSinkJsonWriter r0;
+        okio.BufferedSink $r1;
+        int[] $r2;
+        java.lang.String[] $r3;
+        java.lang.NullPointerException $r4;
+
+        r0 := @this: com.squareup.moshi.BufferedSinkJsonWriter;
+
+        $r1 := @parameter0: okio.BufferedSink;
+
+        specialinvoke r0.<com.squareup.moshi.JsonWriter: void <init>()>();
+
+        $r2 = newarray (int)[32];
+
+        r0.<com.squareup.moshi.BufferedSinkJsonWriter: int[] stack> = $r2;
+
+        r0.<com.squareup.moshi.BufferedSinkJsonWriter: int stackSize> = 0;
+
+        specialinvoke r0.<com.squareup.moshi.BufferedSinkJsonWriter: void push(int)>(6);
+
+        $r3 = newarray (java.lang.String)[32];
+
+        r0.<com.squareup.moshi.BufferedSinkJsonWriter: java.lang.String[] pathNames> = $r3;
+
+        $r2 = newarray (int)[32];
+
+        r0.<com.squareup.moshi.BufferedSinkJsonWriter: int[] pathIndices> = $r2;
+
+        r0.<com.squareup.moshi.BufferedSinkJsonWriter: java.lang.String separator> = ":";
+
+        if $r1 != null goto label1;
+
+        $r4 = new java.lang.NullPointerException;
+
+        specialinvoke $r4.<java.lang.NullPointerException: void <init>(java.lang.String)>("sink == null");
+
+        throw $r4;
+
+     label1:
+        r0.<com.squareup.moshi.BufferedSinkJsonWriter: okio.BufferedSink sink> = $r1;
+
+        return;
+    }
+    private void beforeName() throws java.io.IOException
+    {
+        com.squareup.moshi.BufferedSinkJsonWriter r0;
+        int $i0;
+        okio.BufferedSink $r1;
+        java.lang.IllegalStateException $r2;
+
+        r0 := @this: com.squareup.moshi.BufferedSinkJsonWriter;
+
+        $i0 = specialinvoke r0.<com.squareup.moshi.BufferedSinkJsonWriter: int peek()>();
+
+        if $i0 != 5 goto label2;
+
+        $r1 = r0.<com.squareup.moshi.BufferedSinkJsonWriter: okio.BufferedSink sink>;
+
+        interfaceinvoke $r1.<okio.BufferedSink: okio.BufferedSink writeByte(int)>(44);
+
+     label1:
+        specialinvoke r0.<com.squareup.moshi.BufferedSinkJsonWriter: void newline()>();
+
+        specialinvoke r0.<com.squareup.moshi.BufferedSinkJsonWriter: void replaceTop(int)>(4);
+
+        return;
+
+     label2:
+        if $i0 == 3 goto label1;
+
+        $r2 = new java.lang.IllegalStateException;
+
+        specialinvoke $r2.<java.lang.IllegalStateException: void <init>(java.lang.String)>("Nesting problem.");
+
+        throw $r2;
+    }
+    private void beforeValue() throws java.io.IOException
+    {
+        com.squareup.moshi.BufferedSinkJsonWriter r0;
+        int $i0;
+        java.lang.IllegalStateException $r1;
+        boolean $z0;
+        okio.BufferedSink $r2;
+        java.lang.String $r3;
+
+        r0 := @this: com.squareup.moshi.BufferedSinkJsonWriter;
+
+        $i0 = specialinvoke r0.<com.squareup.moshi.BufferedSinkJsonWriter: int peek()>();
+
+        lookupswitch($i0)
+        {
+            case 1: goto label4;
+            case 2: goto label5;
+            case 3: goto label1;
+            case 4: goto label6;
+            case 5: goto label1;
+            case 6: goto label3;
+            case 7: goto label2;
+            default: goto label1;
+        };
+
+     label1:
+        $r1 = new java.lang.IllegalStateException;
+
+        specialinvoke $r1.<java.lang.IllegalStateException: void <init>(java.lang.String)>("Nesting problem.");
+
+        throw $r1;
+
+     label2:
+        $z0 = r0.<com.squareup.moshi.BufferedSinkJsonWriter: boolean lenient>;
+
+        if $z0 != 0 goto label3;
+
+        $r1 = new java.lang.IllegalStateException;
+
+        specialinvoke $r1.<java.lang.IllegalStateException: void <init>(java.lang.String)>("JSON must have only one top-level value.");
+
+        throw $r1;
+
+     label3:
+        specialinvoke r0.<com.squareup.moshi.BufferedSinkJsonWriter: void replaceTop(int)>(7);
+
+        return;
+
+     label4:
+        specialinvoke r0.<com.squareup.moshi.BufferedSinkJsonWriter: void replaceTop(int)>(2);
+
+        specialinvoke r0.<com.squareup.moshi.BufferedSinkJsonWriter: void newline()>();
+
+        return;
+
+     label5:
+        $r2 = r0.<com.squareup.moshi.BufferedSinkJsonWriter: okio.BufferedSink sink>;
+
+        interfaceinvoke $r2.<okio.BufferedSink: okio.BufferedSink writeByte(int)>(44);
+
+        specialinvoke r0.<com.squareup.moshi.BufferedSinkJsonWriter: void newline()>();
+
+        return;
+
+     label6:
+        $r2 = r0.<com.squareup.moshi.BufferedSinkJsonWriter: okio.BufferedSink sink>;
+
+        $r3 = r0.<com.squareup.moshi.BufferedSinkJsonWriter: java.lang.String separator>;
+
+        interfaceinvoke $r2.<okio.BufferedSink: okio.BufferedSink writeUtf8(java.lang.String)>($r3);
+
+        specialinvoke r0.<com.squareup.moshi.BufferedSinkJsonWriter: void replaceTop(int)>(5);
+
+        return;
+    }
+    private com.squareup.moshi.JsonWriter close(int, int, java.lang.String) throws java.io.IOException
+    {
+        com.squareup.moshi.BufferedSinkJsonWriter r0;
+        int $i0, $i1, $i2, $i3;
+        java.lang.String $r1, $r3;
+        java.lang.IllegalStateException $r2;
+        java.lang.StringBuilder $r4;
+        java.lang.String[] $r5;
+        int[] $r6;
+        okio.BufferedSink $r7;
+
+        r0 := @this: com.squareup.moshi.BufferedSinkJsonWriter;
+
+        $i0 := @parameter0: int;
+
+        $i1 := @parameter1: int;
+
+        $r1 := @parameter2: java.lang.String;
+
+        $i2 = specialinvoke r0.<com.squareup.moshi.BufferedSinkJsonWriter: int peek()>();
+
+        if $i2 == $i1 goto label1;
+
+        if $i2 == $i0 goto label1;
+
+        $r2 = new java.lang.IllegalStateException;
+
+        specialinvoke $r2.<java.lang.IllegalStateException: void <init>(java.lang.String)>("Nesting problem.");
+
+        throw $r2;
+
+     label1:
+        $r3 = r0.<com.squareup.moshi.BufferedSinkJsonWriter: java.lang.String deferredName>;
+
+        if $r3 == null goto label2;
+
+        $r2 = new java.lang.IllegalStateException;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Dangling name: ");
+
+        $r1 = r0.<com.squareup.moshi.BufferedSinkJsonWriter: java.lang.String deferredName>;
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r1 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r2.<java.lang.IllegalStateException: void <init>(java.lang.String)>($r1);
+
+        throw $r2;
+
+     label2:
+        $i0 = r0.<com.squareup.moshi.BufferedSinkJsonWriter: int stackSize>;
+
+        $i0 = $i0 + -1;
+
+        r0.<com.squareup.moshi.BufferedSinkJsonWriter: int stackSize> = $i0;
+
+        $r5 = r0.<com.squareup.moshi.BufferedSinkJsonWriter: java.lang.String[] pathNames>;
+
+        $i0 = r0.<com.squareup.moshi.BufferedSinkJsonWriter: int stackSize>;
+
+        $r5[$i0] = null;
+
+        $r6 = r0.<com.squareup.moshi.BufferedSinkJsonWriter: int[] pathIndices>;
+
+        $i0 = r0.<com.squareup.moshi.BufferedSinkJsonWriter: int stackSize>;
+
+        $i0 = $i0 + -1;
+
+        $i3 = $r6[$i0];
+
+        $i3 = $i3 + 1;
+
+        $r6[$i0] = $i3;
+
+        if $i2 != $i1 goto label3;
+
+        specialinvoke r0.<com.squareup.moshi.BufferedSinkJsonWriter: void newline()>();
+
+     label3:
+        $r7 = r0.<com.squareup.moshi.BufferedSinkJsonWriter: okio.BufferedSink sink>;
+
+        interfaceinvoke $r7.<okio.BufferedSink: okio.BufferedSink writeUtf8(java.lang.String)>($r1);
+
+        return r0;
+    }
+    private void newline() throws java.io.IOException
+    {
+        com.squareup.moshi.BufferedSinkJsonWriter r0;
+        int i0, i1;
+        java.lang.String $r1;
+        okio.BufferedSink $r2;
+
+        r0 := @this: com.squareup.moshi.BufferedSinkJsonWriter;
+
+        $r1 = r0.<com.squareup.moshi.BufferedSinkJsonWriter: java.lang.String indent>;
+
+        if $r1 != null goto label1;
+
+        return;
+
+     label1:
+        $r2 = r0.<com.squareup.moshi.BufferedSinkJsonWriter: okio.BufferedSink sink>;
+
+        interfaceinvoke $r2.<okio.BufferedSink: okio.BufferedSink writeByte(int)>(10);
+
+        i1 = 1;
+
+        i0 = r0.<com.squareup.moshi.BufferedSinkJsonWriter: int stackSize>;
+
+     label2:
+        if i1 >= i0 goto label3;
+
+        $r2 = r0.<com.squareup.moshi.BufferedSinkJsonWriter: okio.BufferedSink sink>;
+
+        $r1 = r0.<com.squareup.moshi.BufferedSinkJsonWriter: java.lang.String indent>;
+
+        interfaceinvoke $r2.<okio.BufferedSink: okio.BufferedSink writeUtf8(java.lang.String)>($r1);
+
+        i1 = i1 + 1;
+
+        goto label2;
+
+     label3:
+        return;
+    }
+    private com.squareup.moshi.JsonWriter open(int, java.lang.String) throws java.io.IOException
+    {
+        com.squareup.moshi.BufferedSinkJsonWriter r0;
+        int $i0, $i1;
+        java.lang.String $r1;
+        int[] $r2;
+        okio.BufferedSink $r3;
+
+        r0 := @this: com.squareup.moshi.BufferedSinkJsonWriter;
+
+        $i0 := @parameter0: int;
+
+        $r1 := @parameter1: java.lang.String;
+
+        specialinvoke r0.<com.squareup.moshi.BufferedSinkJsonWriter: void beforeValue()>();
+
+        $r2 = r0.<com.squareup.moshi.BufferedSinkJsonWriter: int[] pathIndices>;
+
+        $i1 = r0.<com.squareup.moshi.BufferedSinkJsonWriter: int stackSize>;
+
+        $r2[$i1] = 0;
+
+        specialinvoke r0.<com.squareup.moshi.BufferedSinkJsonWriter: void push(int)>($i0);
+
+        $r3 = r0.<com.squareup.moshi.BufferedSinkJsonWriter: okio.BufferedSink sink>;
+
+        interfaceinvoke $r3.<okio.BufferedSink: okio.BufferedSink writeUtf8(java.lang.String)>($r1);
+
+        return r0;
+    }
+    private int peek()
+    {
+        com.squareup.moshi.BufferedSinkJsonWriter r0;
+        int $i0;
+        java.lang.IllegalStateException $r1;
+        int[] $r2;
+
+        r0 := @this: com.squareup.moshi.BufferedSinkJsonWriter;
+
+        $i0 = r0.<com.squareup.moshi.BufferedSinkJsonWriter: int stackSize>;
+
+        if $i0 != 0 goto label1;
+
+        $r1 = new java.lang.IllegalStateException;
+
+        specialinvoke $r1.<java.lang.IllegalStateException: void <init>(java.lang.String)>("JsonWriter is closed.");
+
+        throw $r1;
+
+     label1:
+        $r2 = r0.<com.squareup.moshi.BufferedSinkJsonWriter: int[] stack>;
+
+        $i0 = r0.<com.squareup.moshi.BufferedSinkJsonWriter: int stackSize>;
+
+        $i0 = $i0 + -1;
+
+        $i0 = $r2[$i0];
+
+        return $i0;
+    }
+    private void push(int)
+    {
+        com.squareup.moshi.BufferedSinkJsonWriter r0;
+        int $i0, $i1, $i2;
+        int[] r1, $r2;
+
+        r0 := @this: com.squareup.moshi.BufferedSinkJsonWriter;
+
+        $i0 := @parameter0: int;
+
+        $i1 = r0.<com.squareup.moshi.BufferedSinkJsonWriter: int stackSize>;
+
+        r1 = r0.<com.squareup.moshi.BufferedSinkJsonWriter: int[] stack>;
+
+        $i2 = lengthof r1;
+
+        if $i1 != $i2 goto label1;
+
+        $i1 = r0.<com.squareup.moshi.BufferedSinkJsonWriter: int stackSize>;
+
+        $i1 = $i1 * 2;
+
+        r1 = newarray (int)[$i1];
+
+        $r2 = r0.<com.squareup.moshi.BufferedSinkJsonWriter: int[] stack>;
+
+        $i1 = r0.<com.squareup.moshi.BufferedSinkJsonWriter: int stackSize>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r2, 0, r1, 0, $i1);
+
+        r0.<com.squareup.moshi.BufferedSinkJsonWriter: int[] stack> = r1;
+
+     label1:
+        r1 = r0.<com.squareup.moshi.BufferedSinkJsonWriter: int[] stack>;
+
+        $i1 = r0.<com.squareup.moshi.BufferedSinkJsonWriter: int stackSize>;
+
+        $i2 = $i1 + 1;
+
+        r0.<com.squareup.moshi.BufferedSinkJsonWriter: int stackSize> = $i2;
+
+        r1[$i1] = $i0;
+
+        return;
+    }
+    private void replaceTop(int)
+    {
+        com.squareup.moshi.BufferedSinkJsonWriter r0;
+        int $i0, $i1;
+        int[] $r1;
+
+        r0 := @this: com.squareup.moshi.BufferedSinkJsonWriter;
+
+        $i0 := @parameter0: int;
+
+        $r1 = r0.<com.squareup.moshi.BufferedSinkJsonWriter: int[] stack>;
+
+        $i1 = r0.<com.squareup.moshi.BufferedSinkJsonWriter: int stackSize>;
+
+        $i1 = $i1 + -1;
+
+        $r1[$i1] = $i0;
+
+        return;
+    }
+    static void string(okio.BufferedSink, java.lang.String) throws java.io.IOException
+    {
+        okio.BufferedSink $r0;
+        java.lang.String $r1, r3;
+        java.lang.String[] r2;
+        int i0, $i1, i2;
+        char $c3;
+
+        $r0 := @parameter0: okio.BufferedSink;
+
+        $r1 := @parameter1: java.lang.String;
+
+        r2 = <com.squareup.moshi.BufferedSinkJsonWriter: java.lang.String[] REPLACEMENT_CHARS>;
+
+        interfaceinvoke $r0.<okio.BufferedSink: okio.BufferedSink writeByte(int)>(34);
+
+        i0 = 0;
+
+        $i1 = virtualinvoke $r1.<java.lang.String: int length()>();
+
+        i2 = 0;
+
+     label1:
+        if i2 >= $i1 goto label7;
+
+        $c3 = virtualinvoke $r1.<java.lang.String: char charAt(int)>(i2);
+
+        if $c3 >= 128 goto label3;
+
+        r3 = r2[$c3];
+
+        if r3 != null goto label4;
+
+     label2:
+        i2 = i2 + 1;
+
+        goto label1;
+
+     label3:
+        if $c3 != 8232 goto label6;
+
+        r3 = "\\u2028";
+
+     label4:
+        if i0 >= i2 goto label5;
+
+        interfaceinvoke $r0.<okio.BufferedSink: okio.BufferedSink writeUtf8(java.lang.String,int,int)>($r1, i0, i2);
+
+     label5:
+        interfaceinvoke $r0.<okio.BufferedSink: okio.BufferedSink writeUtf8(java.lang.String)>(r3);
+
+        i0 = i2 + 1;
+
+        goto label2;
+
+     label6:
+        if $c3 != 8233 goto label2;
+
+        r3 = "\\u2029";
+
+        goto label4;
+
+     label7:
+        if i0 >= $i1 goto label8;
+
+        interfaceinvoke $r0.<okio.BufferedSink: okio.BufferedSink writeUtf8(java.lang.String,int,int)>($r1, i0, $i1);
+
+     label8:
+        interfaceinvoke $r0.<okio.BufferedSink: okio.BufferedSink writeByte(int)>(34);
+
+        return;
+    }
+    private void writeDeferredName() throws java.io.IOException
+    {
+        com.squareup.moshi.BufferedSinkJsonWriter r0;
+        java.lang.String $r1;
+        okio.BufferedSink $r2;
+
+        r0 := @this: com.squareup.moshi.BufferedSinkJsonWriter;
+
+        $r1 = r0.<com.squareup.moshi.BufferedSinkJsonWriter: java.lang.String deferredName>;
+
+        if $r1 == null goto label1;
+
+        specialinvoke r0.<com.squareup.moshi.BufferedSinkJsonWriter: void beforeName()>();
+
+        $r2 = r0.<com.squareup.moshi.BufferedSinkJsonWriter: okio.BufferedSink sink>;
+
+        $r1 = r0.<com.squareup.moshi.BufferedSinkJsonWriter: java.lang.String deferredName>;
+
+        staticinvoke <com.squareup.moshi.BufferedSinkJsonWriter: void string(okio.BufferedSink,java.lang.String)>($r2, $r1);
+
+        r0.<com.squareup.moshi.BufferedSinkJsonWriter: java.lang.String deferredName> = null;
+
+     label1:
+        return;
+    }
+    public com.squareup.moshi.JsonWriter beginArray() throws java.io.IOException
+    {
+        com.squareup.moshi.BufferedSinkJsonWriter r0;
+        com.squareup.moshi.JsonWriter $r1;
+
+        r0 := @this: com.squareup.moshi.BufferedSinkJsonWriter;
+
+        specialinvoke r0.<com.squareup.moshi.BufferedSinkJsonWriter: void writeDeferredName()>();
+
+        $r1 = specialinvoke r0.<com.squareup.moshi.BufferedSinkJsonWriter: com.squareup.moshi.JsonWriter open(int,java.lang.String)>(1, "[");
+
+        return $r1;
+    }
+    public com.squareup.moshi.JsonWriter beginObject() throws java.io.IOException
+    {
+        com.squareup.moshi.BufferedSinkJsonWriter r0;
+        com.squareup.moshi.JsonWriter $r1;
+
+        r0 := @this: com.squareup.moshi.BufferedSinkJsonWriter;
+
+        specialinvoke r0.<com.squareup.moshi.BufferedSinkJsonWriter: void writeDeferredName()>();
+
+        $r1 = specialinvoke r0.<com.squareup.moshi.BufferedSinkJsonWriter: com.squareup.moshi.JsonWriter open(int,java.lang.String)>(3, "{");
+
+        return $r1;
+    }
+    public void close() throws java.io.IOException
+    {
+        com.squareup.moshi.BufferedSinkJsonWriter r0;
+        int i0;
+        okio.BufferedSink $r1;
+        int[] $r2;
+        java.io.IOException $r3;
+
+        r0 := @this: com.squareup.moshi.BufferedSinkJsonWriter;
+
+        $r1 = r0.<com.squareup.moshi.BufferedSinkJsonWriter: okio.BufferedSink sink>;
+
+        interfaceinvoke $r1.<okio.BufferedSink: void close()>();
+
+        i0 = r0.<com.squareup.moshi.BufferedSinkJsonWriter: int stackSize>;
+
+        if i0 > 1 goto label1;
+
+        if i0 != 1 goto label2;
+
+        $r2 = r0.<com.squareup.moshi.BufferedSinkJsonWriter: int[] stack>;
+
+        i0 = i0 + -1;
+
+        i0 = $r2[i0];
+
+        if i0 == 7 goto label2;
+
+     label1:
+        $r3 = new java.io.IOException;
+
+        specialinvoke $r3.<java.io.IOException: void <init>(java.lang.String)>("Incomplete document");
+
+        throw $r3;
+
+     label2:
+        r0.<com.squareup.moshi.BufferedSinkJsonWriter: int stackSize> = 0;
+
+        return;
+    }
+    public com.squareup.moshi.JsonWriter endArray() throws java.io.IOException
+    {
+        com.squareup.moshi.BufferedSinkJsonWriter r0;
+        com.squareup.moshi.JsonWriter $r1;
+
+        r0 := @this: com.squareup.moshi.BufferedSinkJsonWriter;
+
+        $r1 = specialinvoke r0.<com.squareup.moshi.BufferedSinkJsonWriter: com.squareup.moshi.JsonWriter close(int,int,java.lang.String)>(1, 2, "]");
+
+        return $r1;
+    }
+    public com.squareup.moshi.JsonWriter endObject() throws java.io.IOException
+    {
+        com.squareup.moshi.BufferedSinkJsonWriter r0;
+        com.squareup.moshi.JsonWriter $r1;
+
+        r0 := @this: com.squareup.moshi.BufferedSinkJsonWriter;
+
+        r0.<com.squareup.moshi.BufferedSinkJsonWriter: boolean promoteNameToValue> = 0;
+
+        $r1 = specialinvoke r0.<com.squareup.moshi.BufferedSinkJsonWriter: com.squareup.moshi.JsonWriter close(int,int,java.lang.String)>(3, 5, "}");
+
+        return $r1;
+    }
+    public void flush() throws java.io.IOException
+    {
+        com.squareup.moshi.BufferedSinkJsonWriter r0;
+        int $i0;
+        java.lang.IllegalStateException $r1;
+        okio.BufferedSink $r2;
+
+        r0 := @this: com.squareup.moshi.BufferedSinkJsonWriter;
+
+        $i0 = r0.<com.squareup.moshi.BufferedSinkJsonWriter: int stackSize>;
+
+        if $i0 != 0 goto label1;
+
+        $r1 = new java.lang.IllegalStateException;
+
+        specialinvoke $r1.<java.lang.IllegalStateException: void <init>(java.lang.String)>("JsonWriter is closed.");
+
+        throw $r1;
+
+     label1:
+        $r2 = r0.<com.squareup.moshi.BufferedSinkJsonWriter: okio.BufferedSink sink>;
+
+        interfaceinvoke $r2.<okio.BufferedSink: void flush()>();
+
+        return;
+    }
+    public java.lang.String getPath()
+    {
+        com.squareup.moshi.BufferedSinkJsonWriter r0;
+        int[] $r1, $r3;
+        java.lang.String[] $r2;
+        java.lang.String $r4;
+        int $i0;
+
+        r0 := @this: com.squareup.moshi.BufferedSinkJsonWriter;
+
+        $i0 = r0.<com.squareup.moshi.BufferedSinkJsonWriter: int stackSize>;
+
+        $r1 = r0.<com.squareup.moshi.BufferedSinkJsonWriter: int[] stack>;
+
+        $r2 = r0.<com.squareup.moshi.BufferedSinkJsonWriter: java.lang.String[] pathNames>;
+
+        $r3 = r0.<com.squareup.moshi.BufferedSinkJsonWriter: int[] pathIndices>;
+
+        $r4 = staticinvoke <com.squareup.moshi.JsonScope: java.lang.String getPath(int,int[],java.lang.String[],int[])>($i0, $r1, $r2, $r3);
+
+        return $r4;
+    }
+    public final boolean getSerializeNulls()
+    {
+        com.squareup.moshi.BufferedSinkJsonWriter r0;
+        boolean z0;
+
+        r0 := @this: com.squareup.moshi.BufferedSinkJsonWriter;
+
+        z0 = r0.<com.squareup.moshi.BufferedSinkJsonWriter: boolean serializeNulls>;
+
+        return z0;
+    }
+    public boolean isLenient()
+    {
+        com.squareup.moshi.BufferedSinkJsonWriter r0;
+        boolean z0;
+
+        r0 := @this: com.squareup.moshi.BufferedSinkJsonWriter;
+
+        z0 = r0.<com.squareup.moshi.BufferedSinkJsonWriter: boolean lenient>;
+
+        return z0;
+    }
+    public com.squareup.moshi.JsonWriter name(java.lang.String) throws java.io.IOException
+    {
+        com.squareup.moshi.BufferedSinkJsonWriter r0;
+        java.lang.String $r1, $r4;
+        java.lang.NullPointerException $r2;
+        int $i0;
+        java.lang.IllegalStateException $r3;
+        java.lang.String[] $r5;
+
+        r0 := @this: com.squareup.moshi.BufferedSinkJsonWriter;
+
+        $r1 := @parameter0: java.lang.String;
+
+        if $r1 != null goto label1;
+
+        $r2 = new java.lang.NullPointerException;
+
+        specialinvoke $r2.<java.lang.NullPointerException: void <init>(java.lang.String)>("name == null");
+
+        throw $r2;
+
+     label1:
+        $i0 = r0.<com.squareup.moshi.BufferedSinkJsonWriter: int stackSize>;
+
+        if $i0 != 0 goto label2;
+
+        $r3 = new java.lang.IllegalStateException;
+
+        specialinvoke $r3.<java.lang.IllegalStateException: void <init>(java.lang.String)>("JsonWriter is closed.");
+
+        throw $r3;
+
+     label2:
+        $r4 = r0.<com.squareup.moshi.BufferedSinkJsonWriter: java.lang.String deferredName>;
+
+        if $r4 == null goto label3;
+
+        $r3 = new java.lang.IllegalStateException;
+
+        specialinvoke $r3.<java.lang.IllegalStateException: void <init>()>();
+
+        throw $r3;
+
+     label3:
+        r0.<com.squareup.moshi.BufferedSinkJsonWriter: java.lang.String deferredName> = $r1;
+
+        $r5 = r0.<com.squareup.moshi.BufferedSinkJsonWriter: java.lang.String[] pathNames>;
+
+        $i0 = r0.<com.squareup.moshi.BufferedSinkJsonWriter: int stackSize>;
+
+        $i0 = $i0 + -1;
+
+        $r5[$i0] = $r1;
+
+        r0.<com.squareup.moshi.BufferedSinkJsonWriter: boolean promoteNameToValue> = 0;
+
+        return r0;
+    }
+    public com.squareup.moshi.JsonWriter nullValue() throws java.io.IOException
+    {
+        com.squareup.moshi.BufferedSinkJsonWriter r0;
+        java.lang.String $r1;
+        boolean $z0;
+        okio.BufferedSink $r2;
+        int[] $r3;
+        int $i0, $i1;
+
+        r0 := @this: com.squareup.moshi.BufferedSinkJsonWriter;
+
+        $r1 = r0.<com.squareup.moshi.BufferedSinkJsonWriter: java.lang.String deferredName>;
+
+        if $r1 == null goto label1;
+
+        $z0 = r0.<com.squareup.moshi.BufferedSinkJsonWriter: boolean serializeNulls>;
+
+        if $z0 == 0 goto label2;
+
+        specialinvoke r0.<com.squareup.moshi.BufferedSinkJsonWriter: void writeDeferredName()>();
+
+     label1:
+        specialinvoke r0.<com.squareup.moshi.BufferedSinkJsonWriter: void beforeValue()>();
+
+        $r2 = r0.<com.squareup.moshi.BufferedSinkJsonWriter: okio.BufferedSink sink>;
+
+        interfaceinvoke $r2.<okio.BufferedSink: okio.BufferedSink writeUtf8(java.lang.String)>("null");
+
+        $r3 = r0.<com.squareup.moshi.BufferedSinkJsonWriter: int[] pathIndices>;
+
+        $i0 = r0.<com.squareup.moshi.BufferedSinkJsonWriter: int stackSize>;
+
+        $i0 = $i0 + -1;
+
+        $i1 = $r3[$i0];
+
+        $i1 = $i1 + 1;
+
+        $r3[$i0] = $i1;
+
+        return r0;
+
+     label2:
+        r0.<com.squareup.moshi.BufferedSinkJsonWriter: java.lang.String deferredName> = null;
+
+        return r0;
+    }
+    void promoteNameToValue() throws java.io.IOException
+    {
+        com.squareup.moshi.BufferedSinkJsonWriter r0;
+        int $i0;
+        java.lang.IllegalStateException $r1;
+
+        r0 := @this: com.squareup.moshi.BufferedSinkJsonWriter;
+
+        $i0 = specialinvoke r0.<com.squareup.moshi.BufferedSinkJsonWriter: int peek()>();
+
+        if $i0 == 5 goto label1;
+
+        if $i0 == 3 goto label1;
+
+        $r1 = new java.lang.IllegalStateException;
+
+        specialinvoke $r1.<java.lang.IllegalStateException: void <init>(java.lang.String)>("Nesting problem.");
+
+        throw $r1;
+
+     label1:
+        r0.<com.squareup.moshi.BufferedSinkJsonWriter: boolean promoteNameToValue> = 1;
+
+        return;
+    }
+    public final void setIndent(java.lang.String)
+    {
+        com.squareup.moshi.BufferedSinkJsonWriter r0;
+        java.lang.String $r1;
+        int $i0;
+
+        r0 := @this: com.squareup.moshi.BufferedSinkJsonWriter;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $i0 = virtualinvoke $r1.<java.lang.String: int length()>();
+
+        if $i0 != 0 goto label1;
+
+        r0.<com.squareup.moshi.BufferedSinkJsonWriter: java.lang.String indent> = null;
+
+        r0.<com.squareup.moshi.BufferedSinkJsonWriter: java.lang.String separator> = ":";
+
+        return;
+
+     label1:
+        r0.<com.squareup.moshi.BufferedSinkJsonWriter: java.lang.String indent> = $r1;
+
+        r0.<com.squareup.moshi.BufferedSinkJsonWriter: java.lang.String separator> = ": ";
+
+        return;
+    }
+    public final void setLenient(boolean)
+    {
+        com.squareup.moshi.BufferedSinkJsonWriter r0;
+        boolean $z0;
+
+        r0 := @this: com.squareup.moshi.BufferedSinkJsonWriter;
+
+        $z0 := @parameter0: boolean;
+
+        r0.<com.squareup.moshi.BufferedSinkJsonWriter: boolean lenient> = $z0;
+
+        return;
+    }
+    public final void setSerializeNulls(boolean)
+    {
+        com.squareup.moshi.BufferedSinkJsonWriter r0;
+        boolean $z0;
+
+        r0 := @this: com.squareup.moshi.BufferedSinkJsonWriter;
+
+        $z0 := @parameter0: boolean;
+
+        r0.<com.squareup.moshi.BufferedSinkJsonWriter: boolean serializeNulls> = $z0;
+
+        return;
+    }
+    public com.squareup.moshi.JsonWriter value(double) throws java.io.IOException
+    {
+        double $d0;
+        com.squareup.moshi.BufferedSinkJsonWriter r0;
+        boolean $z0;
+        java.lang.IllegalArgumentException $r1;
+        java.lang.StringBuilder $r2;
+        java.lang.String $r3;
+        com.squareup.moshi.JsonWriter $r4;
+        okio.BufferedSink $r5;
+        int[] $r6;
+        int $i0, $i1;
+
+        r0 := @this: com.squareup.moshi.BufferedSinkJsonWriter;
+
+        $d0 := @parameter0: double;
+
+        $z0 = staticinvoke <java.lang.Double: boolean isNaN(double)>($d0);
+
+        if $z0 != 0 goto label1;
+
+        $z0 = staticinvoke <java.lang.Double: boolean isInfinite(double)>($d0);
+
+        if $z0 == 0 goto label2;
+
+     label1:
+        $r1 = new java.lang.IllegalArgumentException;
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Numeric values must be finite, but was ");
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(double)>($d0);
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r1.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r3);
+
+        throw $r1;
+
+     label2:
+        $z0 = r0.<com.squareup.moshi.BufferedSinkJsonWriter: boolean promoteNameToValue>;
+
+        if $z0 == 0 goto label3;
+
+        $r3 = staticinvoke <java.lang.Double: java.lang.String toString(double)>($d0);
+
+        $r4 = virtualinvoke r0.<com.squareup.moshi.BufferedSinkJsonWriter: com.squareup.moshi.JsonWriter name(java.lang.String)>($r3);
+
+        return $r4;
+
+     label3:
+        specialinvoke r0.<com.squareup.moshi.BufferedSinkJsonWriter: void writeDeferredName()>();
+
+        specialinvoke r0.<com.squareup.moshi.BufferedSinkJsonWriter: void beforeValue()>();
+
+        $r5 = r0.<com.squareup.moshi.BufferedSinkJsonWriter: okio.BufferedSink sink>;
+
+        $r3 = staticinvoke <java.lang.Double: java.lang.String toString(double)>($d0);
+
+        interfaceinvoke $r5.<okio.BufferedSink: okio.BufferedSink writeUtf8(java.lang.String)>($r3);
+
+        $r6 = r0.<com.squareup.moshi.BufferedSinkJsonWriter: int[] pathIndices>;
+
+        $i0 = r0.<com.squareup.moshi.BufferedSinkJsonWriter: int stackSize>;
+
+        $i0 = $i0 + -1;
+
+        $i1 = $r6[$i0];
+
+        $i1 = $i1 + 1;
+
+        $r6[$i0] = $i1;
+
+        return r0;
+    }
+    public com.squareup.moshi.JsonWriter value(long) throws java.io.IOException
+    {
+        long $l0;
+        com.squareup.moshi.BufferedSinkJsonWriter r0;
+        boolean $z0;
+        java.lang.String $r1;
+        com.squareup.moshi.JsonWriter $r2;
+        okio.BufferedSink $r3;
+        int[] $r4;
+        int $i1, $i2;
+
+        r0 := @this: com.squareup.moshi.BufferedSinkJsonWriter;
+
+        $l0 := @parameter0: long;
+
+        $z0 = r0.<com.squareup.moshi.BufferedSinkJsonWriter: boolean promoteNameToValue>;
+
+        if $z0 == 0 goto label1;
+
+        $r1 = staticinvoke <java.lang.Long: java.lang.String toString(long)>($l0);
+
+        $r2 = virtualinvoke r0.<com.squareup.moshi.BufferedSinkJsonWriter: com.squareup.moshi.JsonWriter name(java.lang.String)>($r1);
+
+        return $r2;
+
+     label1:
+        specialinvoke r0.<com.squareup.moshi.BufferedSinkJsonWriter: void writeDeferredName()>();
+
+        specialinvoke r0.<com.squareup.moshi.BufferedSinkJsonWriter: void beforeValue()>();
+
+        $r3 = r0.<com.squareup.moshi.BufferedSinkJsonWriter: okio.BufferedSink sink>;
+
+        $r1 = staticinvoke <java.lang.Long: java.lang.String toString(long)>($l0);
+
+        interfaceinvoke $r3.<okio.BufferedSink: okio.BufferedSink writeUtf8(java.lang.String)>($r1);
+
+        $r4 = r0.<com.squareup.moshi.BufferedSinkJsonWriter: int[] pathIndices>;
+
+        $i1 = r0.<com.squareup.moshi.BufferedSinkJsonWriter: int stackSize>;
+
+        $i1 = $i1 + -1;
+
+        $i2 = $r4[$i1];
+
+        $i2 = $i2 + 1;
+
+        $r4[$i1] = $i2;
+
+        return r0;
+    }
+    public com.squareup.moshi.JsonWriter value(java.lang.Boolean) throws java.io.IOException
+    {
+        com.squareup.moshi.BufferedSinkJsonWriter r0;
+        java.lang.Boolean $r1;
+        com.squareup.moshi.JsonWriter $r2;
+        boolean $z0;
+
+        r0 := @this: com.squareup.moshi.BufferedSinkJsonWriter;
+
+        $r1 := @parameter0: java.lang.Boolean;
+
+        if $r1 != null goto label1;
+
+        $r2 = virtualinvoke r0.<com.squareup.moshi.BufferedSinkJsonWriter: com.squareup.moshi.JsonWriter nullValue()>();
+
+        return $r2;
+
+     label1:
+        $z0 = virtualinvoke $r1.<java.lang.Boolean: boolean booleanValue()>();
+
+        $r2 = virtualinvoke r0.<com.squareup.moshi.BufferedSinkJsonWriter: com.squareup.moshi.JsonWriter value(boolean)>($z0);
+
+        return $r2;
+    }
+    public com.squareup.moshi.JsonWriter value(java.lang.Number) throws java.io.IOException
+    {
+        java.lang.Number $r0;
+        com.squareup.moshi.BufferedSinkJsonWriter r1;
+        com.squareup.moshi.JsonWriter $r2;
+        java.lang.String $r3;
+        boolean $z0;
+        java.lang.IllegalArgumentException $r4;
+        java.lang.StringBuilder $r5;
+        okio.BufferedSink $r6;
+        int[] $r7;
+        int $i0, $i1;
+
+        r1 := @this: com.squareup.moshi.BufferedSinkJsonWriter;
+
+        $r0 := @parameter0: java.lang.Number;
+
+        if $r0 != null goto label1;
+
+        $r2 = virtualinvoke r1.<com.squareup.moshi.BufferedSinkJsonWriter: com.squareup.moshi.JsonWriter nullValue()>();
+
+        return $r2;
+
+     label1:
+        $r3 = virtualinvoke $r0.<java.lang.Object: java.lang.String toString()>();
+
+        $z0 = r1.<com.squareup.moshi.BufferedSinkJsonWriter: boolean lenient>;
+
+        if $z0 != 0 goto label3;
+
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("-Infinity");
+
+        if $z0 != 0 goto label2;
+
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("Infinity");
+
+        if $z0 != 0 goto label2;
+
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("NaN");
+
+        if $z0 == 0 goto label3;
+
+     label2:
+        $r4 = new java.lang.IllegalArgumentException;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Numeric values must be finite, but was ");
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r0);
+
+        $r3 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r4.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r3);
+
+        throw $r4;
+
+     label3:
+        $z0 = r1.<com.squareup.moshi.BufferedSinkJsonWriter: boolean promoteNameToValue>;
+
+        if $z0 == 0 goto label4;
+
+        $r2 = virtualinvoke r1.<com.squareup.moshi.BufferedSinkJsonWriter: com.squareup.moshi.JsonWriter name(java.lang.String)>($r3);
+
+        return $r2;
+
+     label4:
+        specialinvoke r1.<com.squareup.moshi.BufferedSinkJsonWriter: void writeDeferredName()>();
+
+        specialinvoke r1.<com.squareup.moshi.BufferedSinkJsonWriter: void beforeValue()>();
+
+        $r6 = r1.<com.squareup.moshi.BufferedSinkJsonWriter: okio.BufferedSink sink>;
+
+        interfaceinvoke $r6.<okio.BufferedSink: okio.BufferedSink writeUtf8(java.lang.String)>($r3);
+
+        $r7 = r1.<com.squareup.moshi.BufferedSinkJsonWriter: int[] pathIndices>;
+
+        $i0 = r1.<com.squareup.moshi.BufferedSinkJsonWriter: int stackSize>;
+
+        $i0 = $i0 + -1;
+
+        $i1 = $r7[$i0];
+
+        $i1 = $i1 + 1;
+
+        $r7[$i0] = $i1;
+
+        return r1;
+    }
+    public com.squareup.moshi.JsonWriter value(java.lang.String) throws java.io.IOException
+    {
+        java.lang.String $r0;
+        com.squareup.moshi.BufferedSinkJsonWriter r1;
+        com.squareup.moshi.JsonWriter $r2;
+        boolean $z0;
+        okio.BufferedSink $r3;
+        int[] $r4;
+        int $i0, $i1;
+
+        r1 := @this: com.squareup.moshi.BufferedSinkJsonWriter;
+
+        $r0 := @parameter0: java.lang.String;
+
+        if $r0 != null goto label1;
+
+        $r2 = virtualinvoke r1.<com.squareup.moshi.BufferedSinkJsonWriter: com.squareup.moshi.JsonWriter nullValue()>();
+
+        return $r2;
+
+     label1:
+        $z0 = r1.<com.squareup.moshi.BufferedSinkJsonWriter: boolean promoteNameToValue>;
+
+        if $z0 == 0 goto label2;
+
+        $r2 = virtualinvoke r1.<com.squareup.moshi.BufferedSinkJsonWriter: com.squareup.moshi.JsonWriter name(java.lang.String)>($r0);
+
+        return $r2;
+
+     label2:
+        specialinvoke r1.<com.squareup.moshi.BufferedSinkJsonWriter: void writeDeferredName()>();
+
+        specialinvoke r1.<com.squareup.moshi.BufferedSinkJsonWriter: void beforeValue()>();
+
+        $r3 = r1.<com.squareup.moshi.BufferedSinkJsonWriter: okio.BufferedSink sink>;
+
+        staticinvoke <com.squareup.moshi.BufferedSinkJsonWriter: void string(okio.BufferedSink,java.lang.String)>($r3, $r0);
+
+        $r4 = r1.<com.squareup.moshi.BufferedSinkJsonWriter: int[] pathIndices>;
+
+        $i0 = r1.<com.squareup.moshi.BufferedSinkJsonWriter: int stackSize>;
+
+        $i0 = $i0 + -1;
+
+        $i1 = $r4[$i0];
+
+        $i1 = $i1 + 1;
+
+        $r4[$i0] = $i1;
+
+        return r1;
+    }
+    public com.squareup.moshi.JsonWriter value(boolean) throws java.io.IOException
+    {
+        com.squareup.moshi.BufferedSinkJsonWriter r0;
+        boolean $z0;
+        okio.BufferedSink $r1;
+        java.lang.String $r2;
+        int[] $r3;
+        int $i0, $i1;
+
+        r0 := @this: com.squareup.moshi.BufferedSinkJsonWriter;
+
+        $z0 := @parameter0: boolean;
+
+        specialinvoke r0.<com.squareup.moshi.BufferedSinkJsonWriter: void writeDeferredName()>();
+
+        specialinvoke r0.<com.squareup.moshi.BufferedSinkJsonWriter: void beforeValue()>();
+
+        $r1 = r0.<com.squareup.moshi.BufferedSinkJsonWriter: okio.BufferedSink sink>;
+
+        if $z0 == 0 goto label2;
+
+        $r2 = "true";
+
+     label1:
+        interfaceinvoke $r1.<okio.BufferedSink: okio.BufferedSink writeUtf8(java.lang.String)>($r2);
+
+        $r3 = r0.<com.squareup.moshi.BufferedSinkJsonWriter: int[] pathIndices>;
+
+        $i0 = r0.<com.squareup.moshi.BufferedSinkJsonWriter: int stackSize>;
+
+        $i0 = $i0 + -1;
+
+        $i1 = $r3[$i0];
+
+        $i1 = $i1 + 1;
+
+        $r3[$i0] = $i1;
+
+        return r0;
+
+     label2:
+        $r2 = "false";
+
+        goto label1;
+    }

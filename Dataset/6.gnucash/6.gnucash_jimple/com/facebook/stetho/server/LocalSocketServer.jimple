@@ -1,0 +1,389 @@
+com.facebook.stetho.server.LocalSocketServer extends java.lang.Object
+private static final int MAX_BIND_RETRIES
+private static final int TIME_BETWEEN_BIND_RETRIES_MS
+private static final java.lang.String WORKER_THREAD_NAME_PREFIX
+private final java.lang.String mAddress
+private final java.lang.String mFriendlyName
+private java.lang.Thread mListenerThread
+private android.net.LocalServerSocket mServerSocket
+private final com.facebook.stetho.server.SocketHandler mSocketHandler
+private boolean mStopped
+private final java.util.concurrent.atomic.AtomicInteger mThreadId
+    public void <init>(java.lang.String, java.lang.String, com.facebook.stetho.server.SocketHandler)
+    {
+        com.facebook.stetho.server.LocalSocketServer r0;
+        java.lang.String $r1, $r2;
+        com.facebook.stetho.server.SocketHandler $r3;
+        java.util.concurrent.atomic.AtomicInteger $r4;
+        java.lang.Object $r5;
+
+        r0 := @this: com.facebook.stetho.server.LocalSocketServer;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $r3 := @parameter2: com.facebook.stetho.server.SocketHandler;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r4 = new java.util.concurrent.atomic.AtomicInteger;
+
+        specialinvoke $r4.<java.util.concurrent.atomic.AtomicInteger: void <init>()>();
+
+        r0.<com.facebook.stetho.server.LocalSocketServer: java.util.concurrent.atomic.AtomicInteger mThreadId> = $r4;
+
+        $r5 = staticinvoke <com.facebook.stetho.common.Util: java.lang.Object throwIfNull(java.lang.Object)>($r1);
+
+        $r1 = (java.lang.String) $r5;
+
+        r0.<com.facebook.stetho.server.LocalSocketServer: java.lang.String mFriendlyName> = $r1;
+
+        $r5 = staticinvoke <com.facebook.stetho.common.Util: java.lang.Object throwIfNull(java.lang.Object)>($r2);
+
+        $r1 = (java.lang.String) $r5;
+
+        r0.<com.facebook.stetho.server.LocalSocketServer: java.lang.String mAddress> = $r1;
+
+        r0.<com.facebook.stetho.server.LocalSocketServer: com.facebook.stetho.server.SocketHandler mSocketHandler> = $r3;
+
+        return;
+    }
+    private static android.net.LocalServerSocket bindToSocket(java.lang.String) throws java.io.IOException
+    {
+        java.lang.String $r0, $r4;
+        java.net.BindException r1, r2;
+        int i0;
+        boolean $z0;
+        java.lang.StringBuilder $r3;
+        android.net.LocalServerSocket $r5;
+
+        $r0 := @parameter0: java.lang.String;
+
+        r2 = null;
+
+        i0 = 2;
+
+     label1:
+        $z0 = staticinvoke <com.facebook.stetho.common.LogUtil: boolean isLoggable(int)>(3);
+
+     label2:
+        if $z0 == 0 goto label4;
+
+        $r3 = new java.lang.StringBuilder;
+
+     label3:
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Trying to bind to @");
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r0);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.facebook.stetho.common.LogUtil: void d(java.lang.String)>($r4);
+
+     label4:
+        $r5 = new android.net.LocalServerSocket;
+
+     label5:
+        specialinvoke $r5.<android.net.LocalServerSocket: void <init>(java.lang.String)>($r0);
+
+     label6:
+        return $r5;
+
+     label7:
+        r1 := @caughtexception;
+
+        staticinvoke <com.facebook.stetho.common.LogUtil: void w(java.lang.Throwable,java.lang.String)>(r1, "Binding error, sleep 1000 ms...");
+
+        if r2 != null goto label8;
+
+        r2 = r1;
+
+     label8:
+        staticinvoke <com.facebook.stetho.common.Util: void sleepUninterruptibly(long)>(1000L);
+
+        if i0 > 0 goto label9;
+
+        throw r2;
+
+     label9:
+        i0 = i0 + -1;
+
+        goto label1;
+
+        catch java.net.BindException from label1 to label2 with label7;
+        catch java.net.BindException from label3 to label4 with label7;
+        catch java.net.BindException from label5 to label6 with label7;
+    }
+    private void listenOnAddress(java.lang.String) throws java.io.IOException
+    {
+        com.facebook.stetho.server.LocalSocketServer r0;
+        java.lang.String $r1, $r8;
+        java.io.IOException r2;
+        java.io.InterruptedIOException r3;
+        java.net.SocketException r4;
+        com.facebook.stetho.server.LocalSocketServer$WorkerThread r5;
+        android.net.LocalServerSocket $r6;
+        java.lang.StringBuilder $r7;
+        boolean $z0;
+        android.net.LocalSocket $r9;
+        com.facebook.stetho.server.SocketHandler $r10;
+        java.util.concurrent.atomic.AtomicInteger $r11;
+        int $i0;
+
+        r0 := @this: com.facebook.stetho.server.LocalSocketServer;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r6 = staticinvoke <com.facebook.stetho.server.LocalSocketServer: android.net.LocalServerSocket bindToSocket(java.lang.String)>($r1);
+
+        r0.<com.facebook.stetho.server.LocalSocketServer: android.net.LocalServerSocket mServerSocket> = $r6;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Listening on @");
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.facebook.stetho.common.LogUtil: void i(java.lang.String)>($r8);
+
+     label01:
+        $z0 = staticinvoke <java.lang.Thread: boolean interrupted()>();
+
+        if $z0 != 0 goto label13;
+
+        $r6 = r0.<com.facebook.stetho.server.LocalSocketServer: android.net.LocalServerSocket mServerSocket>;
+
+     label02:
+        $r9 = virtualinvoke $r6.<android.net.LocalServerSocket: android.net.LocalSocket accept()>();
+
+     label03:
+        r5 = new com.facebook.stetho.server.LocalSocketServer$WorkerThread;
+
+        $r10 = r0.<com.facebook.stetho.server.LocalSocketServer: com.facebook.stetho.server.SocketHandler mSocketHandler>;
+
+     label04:
+        specialinvoke r5.<com.facebook.stetho.server.LocalSocketServer$WorkerThread: void <init>(android.net.LocalSocket,com.facebook.stetho.server.SocketHandler)>($r9, $r10);
+
+     label05:
+        $r7 = new java.lang.StringBuilder;
+
+     label06:
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("StethoWorker-");
+
+     label07:
+        $r8 = r0.<com.facebook.stetho.server.LocalSocketServer: java.lang.String mFriendlyName>;
+
+     label08:
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r8);
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("-");
+
+     label09:
+        $r11 = r0.<com.facebook.stetho.server.LocalSocketServer: java.util.concurrent.atomic.AtomicInteger mThreadId>;
+
+     label10:
+        $i0 = virtualinvoke $r11.<java.util.concurrent.atomic.AtomicInteger: int incrementAndGet()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r5.<java.lang.Thread: void setName(java.lang.String)>($r8);
+
+        virtualinvoke r5.<java.lang.Thread: void setDaemon(boolean)>(1);
+
+        virtualinvoke r5.<java.lang.Thread: void start()>();
+
+     label11:
+        goto label01;
+
+     label12:
+        r4 := @caughtexception;
+
+        $z0 = staticinvoke <java.lang.Thread: boolean interrupted()>();
+
+        if $z0 == 0 goto label14;
+
+     label13:
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Server shutdown on @");
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r1 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.facebook.stetho.common.LogUtil: void i(java.lang.String)>($r1);
+
+        return;
+
+     label14:
+        staticinvoke <com.facebook.stetho.common.LogUtil: void w(java.lang.Throwable,java.lang.String)>(r4, "I/O error");
+
+        goto label01;
+
+     label15:
+        r3 := @caughtexception;
+
+        goto label13;
+
+     label16:
+        r2 := @caughtexception;
+
+        staticinvoke <com.facebook.stetho.common.LogUtil: void w(java.lang.Throwable,java.lang.String)>(r2, "I/O error initialising connection thread");
+
+        goto label13;
+
+        catch java.net.SocketException from label02 to label03 with label12;
+        catch java.net.SocketException from label04 to label05 with label12;
+        catch java.net.SocketException from label06 to label07 with label12;
+        catch java.net.SocketException from label08 to label09 with label12;
+        catch java.net.SocketException from label10 to label11 with label12;
+        catch java.io.InterruptedIOException from label02 to label03 with label15;
+        catch java.io.InterruptedIOException from label04 to label05 with label15;
+        catch java.io.InterruptedIOException from label06 to label07 with label15;
+        catch java.io.InterruptedIOException from label08 to label09 with label15;
+        catch java.io.InterruptedIOException from label10 to label11 with label15;
+        catch java.io.IOException from label02 to label03 with label16;
+        catch java.io.IOException from label04 to label05 with label16;
+        catch java.io.IOException from label06 to label07 with label16;
+        catch java.io.IOException from label08 to label09 with label16;
+        catch java.io.IOException from label10 to label11 with label16;
+    }
+    public java.lang.String getName()
+    {
+        com.facebook.stetho.server.LocalSocketServer r0;
+        java.lang.String r1;
+
+        r0 := @this: com.facebook.stetho.server.LocalSocketServer;
+
+        r1 = r0.<com.facebook.stetho.server.LocalSocketServer: java.lang.String mFriendlyName>;
+
+        return r1;
+    }
+    public void run() throws java.io.IOException
+    {
+        com.facebook.stetho.server.LocalSocketServer r0;
+        java.lang.Thread $r1;
+        boolean $z0;
+        java.lang.String $r2;
+        java.lang.Throwable $r3;
+
+        r0 := @this: com.facebook.stetho.server.LocalSocketServer;
+
+        entermonitor r0;
+
+     label1:
+        $z0 = r0.<com.facebook.stetho.server.LocalSocketServer: boolean mStopped>;
+
+        if $z0 == 0 goto label3;
+
+        exitmonitor r0;
+
+     label2:
+        return;
+
+     label3:
+        $r1 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        r0.<com.facebook.stetho.server.LocalSocketServer: java.lang.Thread mListenerThread> = $r1;
+
+        exitmonitor r0;
+
+     label4:
+        $r2 = r0.<com.facebook.stetho.server.LocalSocketServer: java.lang.String mAddress>;
+
+        specialinvoke r0.<com.facebook.stetho.server.LocalSocketServer: void listenOnAddress(java.lang.String)>($r2);
+
+        return;
+
+     label5:
+        $r3 := @caughtexception;
+
+     label6:
+        exitmonitor r0;
+
+     label7:
+        throw $r3;
+
+        catch java.lang.Throwable from label1 to label2 with label5;
+        catch java.lang.Throwable from label3 to label4 with label5;
+        catch java.lang.Throwable from label6 to label7 with label5;
+    }
+    public void stop()
+    {
+        com.facebook.stetho.server.LocalSocketServer r0;
+        java.lang.Thread $r1;
+        android.net.LocalServerSocket $r2;
+        java.io.IOException $r3;
+        java.lang.Throwable $r4;
+
+        r0 := @this: com.facebook.stetho.server.LocalSocketServer;
+
+        entermonitor r0;
+
+     label01:
+        r0.<com.facebook.stetho.server.LocalSocketServer: boolean mStopped> = 1;
+
+        $r1 = r0.<com.facebook.stetho.server.LocalSocketServer: java.lang.Thread mListenerThread>;
+
+        if $r1 != null goto label03;
+
+        exitmonitor r0;
+
+     label02:
+        return;
+
+     label03:
+        exitmonitor r0;
+
+     label04:
+        $r1 = r0.<com.facebook.stetho.server.LocalSocketServer: java.lang.Thread mListenerThread>;
+
+        virtualinvoke $r1.<java.lang.Thread: void interrupt()>();
+
+        $r2 = r0.<com.facebook.stetho.server.LocalSocketServer: android.net.LocalServerSocket mServerSocket>;
+
+        if $r2 == null goto label11;
+
+        $r2 = r0.<com.facebook.stetho.server.LocalSocketServer: android.net.LocalServerSocket mServerSocket>;
+
+     label05:
+        virtualinvoke $r2.<android.net.LocalServerSocket: void close()>();
+
+     label06:
+        return;
+
+     label07:
+        $r3 := @caughtexception;
+
+        return;
+
+     label08:
+        $r4 := @caughtexception;
+
+     label09:
+        exitmonitor r0;
+
+     label10:
+        throw $r4;
+
+     label11:
+        return;
+
+        catch java.lang.Throwable from label01 to label02 with label08;
+        catch java.lang.Throwable from label03 to label04 with label08;
+        catch java.io.IOException from label05 to label06 with label07;
+        catch java.lang.Throwable from label09 to label10 with label08;
+    }

@@ -1,0 +1,417 @@
+org.fdroid.fdroid.net.HttpDownloader extends org.fdroid.fdroid.net.Downloader
+protected static final java.lang.String HEADER_FIELD_ETAG
+protected static final java.lang.String HEADER_IF_NONE_MATCH
+private static final java.lang.String TAG
+protected java.net.HttpURLConnection connection
+private org.fdroid.fdroid.data.Credentials credentials
+private int statusCode
+    void <init>(android.content.Context, java.net.URL, java.io.File) throws java.io.FileNotFoundException, java.net.MalformedURLException
+    {
+        org.fdroid.fdroid.net.HttpDownloader r0;
+        android.content.Context $r1;
+        java.net.URL $r2;
+        java.io.File $r3;
+
+        r0 := @this: org.fdroid.fdroid.net.HttpDownloader;
+
+        $r1 := @parameter0: android.content.Context;
+
+        $r2 := @parameter1: java.net.URL;
+
+        $r3 := @parameter2: java.io.File;
+
+        specialinvoke r0.<org.fdroid.fdroid.net.HttpDownloader: void <init>(android.content.Context,java.net.URL,java.io.File,org.fdroid.fdroid.data.Credentials)>($r1, $r2, $r3, null);
+
+        return;
+    }
+    void <init>(android.content.Context, java.net.URL, java.io.File, org.fdroid.fdroid.data.Credentials) throws java.io.FileNotFoundException, java.net.MalformedURLException
+    {
+        org.fdroid.fdroid.net.HttpDownloader r0;
+        android.content.Context $r1;
+        java.net.URL $r2;
+        java.io.File $r3;
+        org.fdroid.fdroid.data.Credentials $r4;
+
+        r0 := @this: org.fdroid.fdroid.net.HttpDownloader;
+
+        $r1 := @parameter0: android.content.Context;
+
+        $r2 := @parameter1: java.net.URL;
+
+        $r3 := @parameter2: java.io.File;
+
+        $r4 := @parameter3: org.fdroid.fdroid.data.Credentials;
+
+        specialinvoke r0.<org.fdroid.fdroid.net.Downloader: void <init>(android.content.Context,java.net.URL,java.io.File)>($r1, $r2, $r3);
+
+        r0.<org.fdroid.fdroid.net.HttpDownloader: int statusCode> = -1;
+
+        r0.<org.fdroid.fdroid.net.HttpDownloader: org.fdroid.fdroid.data.Credentials credentials> = $r4;
+
+        return;
+    }
+    private void setupCacheCheck()
+    {
+        org.fdroid.fdroid.net.HttpDownloader r0;
+        java.lang.String $r1;
+        java.net.HttpURLConnection $r2;
+
+        r0 := @this: org.fdroid.fdroid.net.HttpDownloader;
+
+        $r1 = r0.<org.fdroid.fdroid.net.HttpDownloader: java.lang.String cacheTag>;
+
+        if $r1 == null goto label1;
+
+        $r2 = r0.<org.fdroid.fdroid.net.HttpDownloader: java.net.HttpURLConnection connection>;
+
+        $r1 = r0.<org.fdroid.fdroid.net.HttpDownloader: java.lang.String cacheTag>;
+
+        virtualinvoke $r2.<java.net.HttpURLConnection: void setRequestProperty(java.lang.String,java.lang.String)>("If-None-Match", $r1);
+
+     label1:
+        return;
+    }
+    private void updateCacheCheck()
+    {
+        org.fdroid.fdroid.net.HttpDownloader r0;
+        java.lang.String $r1;
+        java.net.HttpURLConnection $r2;
+
+        r0 := @this: org.fdroid.fdroid.net.HttpDownloader;
+
+        $r2 = r0.<org.fdroid.fdroid.net.HttpDownloader: java.net.HttpURLConnection connection>;
+
+        $r1 = virtualinvoke $r2.<java.net.HttpURLConnection: java.lang.String getHeaderField(java.lang.String)>("ETag");
+
+        r0.<org.fdroid.fdroid.net.HttpDownloader: java.lang.String cacheTag> = $r1;
+
+        return;
+    }
+    public void close()
+    {
+        org.fdroid.fdroid.net.HttpDownloader r0;
+        java.net.HttpURLConnection $r1;
+
+        r0 := @this: org.fdroid.fdroid.net.HttpDownloader;
+
+        $r1 = r0.<org.fdroid.fdroid.net.HttpDownloader: java.net.HttpURLConnection connection>;
+
+        virtualinvoke $r1.<java.net.HttpURLConnection: void disconnect()>();
+
+        return;
+    }
+    protected void doDownload() throws java.io.IOException, java.lang.InterruptedException
+    {
+        org.fdroid.fdroid.net.HttpDownloader r0;
+        boolean $z0;
+        java.lang.StringBuilder $r1;
+        java.net.URL $r2;
+        java.lang.String $r3;
+        java.net.HttpURLConnection $r4;
+        int $i0;
+
+        r0 := @this: org.fdroid.fdroid.net.HttpDownloader;
+
+        $z0 = virtualinvoke r0.<org.fdroid.fdroid.net.HttpDownloader: boolean wantToCheckCache()>();
+
+        if $z0 == 0 goto label1;
+
+        specialinvoke r0.<org.fdroid.fdroid.net.HttpDownloader: void setupCacheCheck()>();
+
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r1 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Checking cached status of ");
+
+        $r2 = r0.<org.fdroid.fdroid.net.HttpDownloader: java.net.URL sourceUrl>;
+
+        $r1 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r2);
+
+        $r3 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <org.fdroid.fdroid.Utils: void debugLog(java.lang.String,java.lang.String)>("HttpDownloader", $r3);
+
+        $r4 = r0.<org.fdroid.fdroid.net.HttpDownloader: java.net.HttpURLConnection connection>;
+
+        $i0 = virtualinvoke $r4.<java.net.HttpURLConnection: int getResponseCode()>();
+
+        r0.<org.fdroid.fdroid.net.HttpDownloader: int statusCode> = $i0;
+
+     label1:
+        $z0 = virtualinvoke r0.<org.fdroid.fdroid.net.HttpDownloader: boolean isCached()>();
+
+        if $z0 == 0 goto label2;
+
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = r0.<org.fdroid.fdroid.net.HttpDownloader: java.net.URL sourceUrl>;
+
+        $r1 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r2);
+
+        $r1 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" is cached, so not downloading (HTTP ");
+
+        $i0 = r0.<org.fdroid.fdroid.net.HttpDownloader: int statusCode>;
+
+        $r1 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r1 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(")");
+
+        $r3 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <org.fdroid.fdroid.Utils: void debugLog(java.lang.String,java.lang.String)>("HttpDownloader", $r3);
+
+        return;
+
+     label2:
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r1 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Downloading from ");
+
+        $r2 = r0.<org.fdroid.fdroid.net.HttpDownloader: java.net.URL sourceUrl>;
+
+        $r1 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r2);
+
+        $r3 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <org.fdroid.fdroid.Utils: void debugLog(java.lang.String,java.lang.String)>("HttpDownloader", $r3);
+
+        virtualinvoke r0.<org.fdroid.fdroid.net.HttpDownloader: void downloadFromStream(int)>(4096);
+
+        specialinvoke r0.<org.fdroid.fdroid.net.HttpDownloader: void updateCacheCheck()>();
+
+        return;
+    }
+    public void download() throws java.io.IOException, java.lang.InterruptedException
+    {
+        org.fdroid.fdroid.net.HttpDownloader r0;
+        javax.net.ssl.SSLHandshakeException r1;
+        java.io.IOException $r2;
+        java.lang.StringBuilder $r3;
+        java.lang.String $r4;
+
+        r0 := @this: org.fdroid.fdroid.net.HttpDownloader;
+
+     label1:
+        virtualinvoke r0.<org.fdroid.fdroid.net.HttpDownloader: void setupConnection()>();
+
+        virtualinvoke r0.<org.fdroid.fdroid.net.HttpDownloader: void doDownload()>();
+
+     label2:
+        return;
+
+     label3:
+        r1 := @caughtexception;
+
+        $r2 = new java.io.IOException;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("A problem occurred while establishing an SSL connection. If this problem persists, AND you have a very old device, you could try using http instead of https for the repo URL.");
+
+        $r4 = staticinvoke <android.util.Log: java.lang.String getStackTraceString(java.lang.Throwable)>(r1);
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r2.<java.io.IOException: void <init>(java.lang.String)>($r4);
+
+        throw $r2;
+
+        catch javax.net.ssl.SSLHandshakeException from label1 to label2 with label3;
+    }
+    protected java.io.InputStream getDownloadersInputStream() throws java.io.IOException
+    {
+        org.fdroid.fdroid.net.HttpDownloader r0;
+        java.io.BufferedInputStream $r1;
+        java.io.InputStream $r2;
+        java.net.HttpURLConnection $r3;
+
+        r0 := @this: org.fdroid.fdroid.net.HttpDownloader;
+
+        virtualinvoke r0.<org.fdroid.fdroid.net.HttpDownloader: void setupConnection()>();
+
+        $r1 = new java.io.BufferedInputStream;
+
+        $r3 = r0.<org.fdroid.fdroid.net.HttpDownloader: java.net.HttpURLConnection connection>;
+
+        $r2 = virtualinvoke $r3.<java.net.HttpURLConnection: java.io.InputStream getInputStream()>();
+
+        specialinvoke $r1.<java.io.BufferedInputStream: void <init>(java.io.InputStream)>($r2);
+
+        return $r1;
+    }
+    public boolean hasChanged()
+    {
+        org.fdroid.fdroid.net.HttpDownloader r0;
+        int $i0;
+
+        r0 := @this: org.fdroid.fdroid.net.HttpDownloader;
+
+        $i0 = r0.<org.fdroid.fdroid.net.HttpDownloader: int statusCode>;
+
+        if $i0 == 304 goto label1;
+
+        return 1;
+
+     label1:
+        return 0;
+    }
+    public boolean isCached()
+    {
+        org.fdroid.fdroid.net.HttpDownloader r0;
+        boolean $z0;
+        int $i0;
+
+        r0 := @this: org.fdroid.fdroid.net.HttpDownloader;
+
+        $z0 = virtualinvoke r0.<org.fdroid.fdroid.net.HttpDownloader: boolean wantToCheckCache()>();
+
+        if $z0 == 0 goto label1;
+
+        $i0 = r0.<org.fdroid.fdroid.net.HttpDownloader: int statusCode>;
+
+        if $i0 != 304 goto label1;
+
+        return 1;
+
+     label1:
+        return 0;
+    }
+    boolean isSwapUrl()
+    {
+        org.fdroid.fdroid.net.HttpDownloader r0;
+        java.net.URL $r1;
+        java.lang.String $r2;
+        int $i0;
+        boolean $z0;
+        org.apache.commons.net.util.SubnetUtils$SubnetInfo $r3;
+
+        r0 := @this: org.fdroid.fdroid.net.HttpDownloader;
+
+        $r1 = r0.<org.fdroid.fdroid.net.HttpDownloader: java.net.URL sourceUrl>;
+
+        $r2 = virtualinvoke $r1.<java.net.URL: java.lang.String getHost()>();
+
+        $r1 = r0.<org.fdroid.fdroid.net.HttpDownloader: java.net.URL sourceUrl>;
+
+        $i0 = virtualinvoke $r1.<java.net.URL: int getPort()>();
+
+        if $i0 <= 1023 goto label1;
+
+        $z0 = virtualinvoke $r2.<java.lang.String: boolean matches(java.lang.String)>("[0-9.]+");
+
+        if $z0 == 0 goto label1;
+
+        $r3 = <org.fdroid.fdroid.FDroidApp: org.apache.commons.net.util.SubnetUtils$SubnetInfo subnetInfo>;
+
+        $z0 = virtualinvoke $r3.<org.apache.commons.net.util.SubnetUtils$SubnetInfo: boolean isInRange(java.lang.String)>($r2);
+
+        if $z0 == 0 goto label1;
+
+        return 1;
+
+     label1:
+        return 0;
+    }
+    protected void setupConnection() throws java.io.IOException
+    {
+        org.fdroid.fdroid.net.HttpDownloader r0;
+        java.net.Proxy r1;
+        java.net.InetSocketAddress r2;
+        java.net.HttpURLConnection $r3;
+        org.fdroid.fdroid.Preferences $r4;
+        boolean $z0;
+        java.lang.String $r5;
+        int $i0;
+        java.net.Proxy$Type $r6;
+        java.net.URL $r7;
+        java.net.URLConnection $r8;
+        org.fdroid.fdroid.data.Credentials $r9;
+
+        r0 := @this: org.fdroid.fdroid.net.HttpDownloader;
+
+        $r3 = r0.<org.fdroid.fdroid.net.HttpDownloader: java.net.HttpURLConnection connection>;
+
+        if $r3 == null goto label1;
+
+        return;
+
+     label1:
+        $r4 = staticinvoke <org.fdroid.fdroid.Preferences: org.fdroid.fdroid.Preferences get()>();
+
+        $z0 = virtualinvoke $r4.<org.fdroid.fdroid.Preferences: boolean isProxyEnabled()>();
+
+        if $z0 == 0 goto label2;
+
+        $z0 = virtualinvoke r0.<org.fdroid.fdroid.net.HttpDownloader: boolean isSwapUrl()>();
+
+        if $z0 != 0 goto label2;
+
+        r2 = new java.net.InetSocketAddress;
+
+        $r5 = virtualinvoke $r4.<org.fdroid.fdroid.Preferences: java.lang.String getProxyHost()>();
+
+        $i0 = virtualinvoke $r4.<org.fdroid.fdroid.Preferences: int getProxyPort()>();
+
+        specialinvoke r2.<java.net.InetSocketAddress: void <init>(java.lang.String,int)>($r5, $i0);
+
+        r1 = new java.net.Proxy;
+
+        $r6 = <java.net.Proxy$Type: java.net.Proxy$Type HTTP>;
+
+        specialinvoke r1.<java.net.Proxy: void <init>(java.net.Proxy$Type,java.net.SocketAddress)>($r6, r2);
+
+        $r7 = r0.<org.fdroid.fdroid.net.HttpDownloader: java.net.URL sourceUrl>;
+
+        $r8 = virtualinvoke $r7.<java.net.URL: java.net.URLConnection openConnection(java.net.Proxy)>(r1);
+
+        $r3 = (java.net.HttpURLConnection) $r8;
+
+        r0.<org.fdroid.fdroid.net.HttpDownloader: java.net.HttpURLConnection connection> = $r3;
+
+        return;
+
+     label2:
+        $r7 = r0.<org.fdroid.fdroid.net.HttpDownloader: java.net.URL sourceUrl>;
+
+        $r8 = virtualinvoke $r7.<java.net.URL: java.net.URLConnection openConnection()>();
+
+        $r3 = (java.net.HttpURLConnection) $r8;
+
+        r0.<org.fdroid.fdroid.net.HttpDownloader: java.net.HttpURLConnection connection> = $r3;
+
+        $r9 = r0.<org.fdroid.fdroid.net.HttpDownloader: org.fdroid.fdroid.data.Credentials credentials>;
+
+        if $r9 == null goto label3;
+
+        $r9 = r0.<org.fdroid.fdroid.net.HttpDownloader: org.fdroid.fdroid.data.Credentials credentials>;
+
+        $r3 = r0.<org.fdroid.fdroid.net.HttpDownloader: java.net.HttpURLConnection connection>;
+
+        interfaceinvoke $r9.<org.fdroid.fdroid.data.Credentials: void authenticate(java.net.HttpURLConnection)>($r3);
+
+     label3:
+        return;
+    }
+    public int totalDownloadSize()
+    {
+        org.fdroid.fdroid.net.HttpDownloader r0;
+        int $i0;
+        java.net.HttpURLConnection $r1;
+
+        r0 := @this: org.fdroid.fdroid.net.HttpDownloader;
+
+        $r1 = r0.<org.fdroid.fdroid.net.HttpDownloader: java.net.HttpURLConnection connection>;
+
+        $i0 = virtualinvoke $r1.<java.net.HttpURLConnection: int getContentLength()>();
+
+        return $i0;
+    }

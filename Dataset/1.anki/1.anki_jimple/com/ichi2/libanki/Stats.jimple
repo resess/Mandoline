@@ -1,0 +1,5375 @@
+com.ichi2.libanki.Stats extends java.lang.Object
+public static double SECONDS_PER_DAY
+private static com.ichi2.libanki.Stats sCurrentInstance
+private java.lang.String mAverage
+private int[] mAxisTitles
+private boolean mBackwards
+private com.ichi2.libanki.Collection mCol
+private int[] mColors
+private double[][] mCumulative
+private boolean mDynamicAxis
+private double mFirstElement
+private boolean mFoundCramCards
+private boolean mFoundLearnCards
+private boolean mFoundRelearnCards
+private boolean mHasColoredCumulative
+private double mLastElement
+private java.lang.String mLongest
+private int mMaxCards
+private int mMaxElements
+private double mMcount
+private double mPeak
+private double[][] mSeriesList
+private int mTitle
+private com.ichi2.libanki.Stats$AxisType mType
+private int[] mValueLabels
+private boolean mWholeCollection
+private int mZeroIndex
+    static void <clinit>()
+    {
+        <com.ichi2.libanki.Stats: double SECONDS_PER_DAY> = 86400.0;
+
+        return;
+    }
+    public void <init>(com.ichi2.libanki.Collection, boolean)
+    {
+        com.ichi2.libanki.Stats r0;
+        com.ichi2.libanki.Collection $r1;
+        boolean $z0;
+
+        r0 := @this: com.ichi2.libanki.Stats;
+
+        $r1 := @parameter0: com.ichi2.libanki.Collection;
+
+        $z0 := @parameter1: boolean;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<com.ichi2.libanki.Stats: boolean mDynamicAxis> = 0;
+
+        r0.<com.ichi2.libanki.Stats: boolean mHasColoredCumulative> = 0;
+
+        r0.<com.ichi2.libanki.Stats: int mMaxCards> = 0;
+
+        r0.<com.ichi2.libanki.Stats: int mMaxElements> = 0;
+
+        r0.<com.ichi2.libanki.Stats: double mFirstElement> = 0.0;
+
+        r0.<com.ichi2.libanki.Stats: double mLastElement> = 0.0;
+
+        r0.<com.ichi2.libanki.Stats: int mZeroIndex> = 0;
+
+        r0.<com.ichi2.libanki.Stats: boolean mFoundLearnCards> = 0;
+
+        r0.<com.ichi2.libanki.Stats: boolean mFoundCramCards> = 0;
+
+        r0.<com.ichi2.libanki.Stats: double[][] mCumulative> = null;
+
+        r0.<com.ichi2.libanki.Stats: com.ichi2.libanki.Collection mCol> = $r1;
+
+        r0.<com.ichi2.libanki.Stats: boolean mWholeCollection> = $z0;
+
+        <com.ichi2.libanki.Stats: com.ichi2.libanki.Stats sCurrentInstance> = r0;
+
+        return;
+    }
+    private java.lang.String _getDeckFilter()
+    {
+        com.ichi2.libanki.Stats r0;
+        boolean $z0;
+        java.lang.StringBuilder $r1;
+        com.ichi2.libanki.Collection $r2;
+        com.ichi2.libanki.Decks $r3;
+        java.util.LinkedList $r4;
+        java.lang.String $r5;
+
+        r0 := @this: com.ichi2.libanki.Stats;
+
+        $z0 = r0.<com.ichi2.libanki.Stats: boolean mWholeCollection>;
+
+        if $z0 == 0 goto label1;
+
+        return "";
+
+     label1:
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r1 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("cid IN (SELECT id FROM cards WHERE did IN ");
+
+        $r2 = r0.<com.ichi2.libanki.Stats: com.ichi2.libanki.Collection mCol>;
+
+        $r3 = virtualinvoke $r2.<com.ichi2.libanki.Collection: com.ichi2.libanki.Decks getDecks()>();
+
+        $r4 = virtualinvoke $r3.<com.ichi2.libanki.Decks: java.util.LinkedList active()>();
+
+        $r5 = staticinvoke <com.ichi2.libanki.Utils: java.lang.String ids2str(java.util.List)>($r4);
+
+        $r1 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r1 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(")");
+
+        $r5 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r5;
+    }
+    private java.lang.String _limit()
+    {
+        com.ichi2.libanki.Stats r0;
+        org.json.JSONException r1;
+        java.util.ArrayList r2, $r5;
+        boolean $z0;
+        com.ichi2.libanki.Collection $r3;
+        com.ichi2.libanki.Decks $r4;
+        java.util.Iterator $r6;
+        java.lang.Object $r7;
+        org.json.JSONObject r8;
+        long $l0;
+        java.lang.Long $r9;
+        java.lang.RuntimeException $r10;
+        long[] $r11;
+        java.lang.String $r12;
+        com.ichi2.libanki.Sched $r13;
+
+        r0 := @this: com.ichi2.libanki.Stats;
+
+        $z0 = r0.<com.ichi2.libanki.Stats: boolean mWholeCollection>;
+
+        if $z0 == 0 goto label6;
+
+        r2 = new java.util.ArrayList;
+
+        specialinvoke r2.<java.util.ArrayList: void <init>()>();
+
+        $r3 = r0.<com.ichi2.libanki.Stats: com.ichi2.libanki.Collection mCol>;
+
+        $r4 = virtualinvoke $r3.<com.ichi2.libanki.Collection: com.ichi2.libanki.Decks getDecks()>();
+
+        $r5 = virtualinvoke $r4.<com.ichi2.libanki.Decks: java.util.ArrayList all()>();
+
+        $r6 = virtualinvoke $r5.<java.util.ArrayList: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r6.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label5;
+
+        $r7 = interfaceinvoke $r6.<java.util.Iterator: java.lang.Object next()>();
+
+        r8 = (org.json.JSONObject) $r7;
+
+     label2:
+        $l0 = virtualinvoke r8.<org.json.JSONObject: long getLong(java.lang.String)>("id");
+
+        $r9 = staticinvoke <java.lang.Long: java.lang.Long valueOf(long)>($l0);
+
+        virtualinvoke r2.<java.util.ArrayList: boolean add(java.lang.Object)>($r9);
+
+     label3:
+        goto label1;
+
+     label4:
+        r1 := @caughtexception;
+
+        $r10 = new java.lang.RuntimeException;
+
+        specialinvoke $r10.<java.lang.RuntimeException: void <init>(java.lang.Throwable)>(r1);
+
+        throw $r10;
+
+     label5:
+        $r11 = staticinvoke <com.ichi2.libanki.Utils: long[] arrayList2array(java.util.List)>(r2);
+
+        $r12 = staticinvoke <com.ichi2.libanki.Utils: java.lang.String ids2str(long[])>($r11);
+
+        return $r12;
+
+     label6:
+        $r3 = r0.<com.ichi2.libanki.Stats: com.ichi2.libanki.Collection mCol>;
+
+        $r13 = virtualinvoke $r3.<com.ichi2.libanki.Collection: com.ichi2.libanki.Sched getSched()>();
+
+        $r12 = virtualinvoke $r13.<com.ichi2.libanki.Sched: java.lang.String _deckLimit()>();
+
+        return $r12;
+
+        catch org.json.JSONException from label2 to label3 with label4;
+    }
+    private int _periodDays()
+    {
+        com.ichi2.libanki.Stats r0;
+        int $i0;
+        int[] $r1;
+        com.ichi2.libanki.Stats$AxisType $r2;
+
+        r0 := @this: com.ichi2.libanki.Stats;
+
+        $r1 = <com.ichi2.libanki.Stats$2: int[] $SwitchMap$com$ichi2$libanki$Stats$AxisType>;
+
+        $r2 = r0.<com.ichi2.libanki.Stats: com.ichi2.libanki.Stats$AxisType mType>;
+
+        $i0 = virtualinvoke $r2.<com.ichi2.libanki.Stats$AxisType: int ordinal()>();
+
+        $i0 = $r1[$i0];
+
+        lookupswitch($i0)
+        {
+            case 1: goto label2;
+            case 2: goto label3;
+            default: goto label1;
+        };
+
+     label1:
+        return -1;
+
+     label2:
+        return 30;
+
+     label3:
+        return 365;
+    }
+    private boolean calculateDone(com.ichi2.libanki.Stats$AxisType, com.ichi2.libanki.Stats$ChartType)
+    {
+        com.ichi2.libanki.Stats r0;
+        com.ichi2.libanki.Stats$AxisType $r1, $r12, $r13;
+        com.ichi2.libanki.Stats$ChartType $r2, $r4;
+        java.util.ArrayList r3;
+        double $d0, $d1, $d2;
+        int[] $r5;
+        int $i0, $i4, $i5;
+        byte b1, b2;
+        java.lang.StringBuilder $r6;
+        com.ichi2.libanki.Collection $r7;
+        com.ichi2.libanki.Sched $r8;
+        long $l3;
+        java.lang.String $r9, r11, r14;
+        java.lang.Object $r10;
+        android.database.Cursor r15, $r19;
+        java.lang.Object[] $r16;
+        com.ichi2.libanki.DB $r17;
+        io.requery.android.database.sqlite.SQLiteDatabase $r18;
+        boolean $z0;
+        double[] $r20, $r24;
+        java.lang.Throwable $r21;
+        java.lang.Class $r22;
+        double[][] $r23, $r25;
+
+        r0 := @this: com.ichi2.libanki.Stats;
+
+        $r1 := @parameter0: com.ichi2.libanki.Stats$AxisType;
+
+        $r2 := @parameter1: com.ichi2.libanki.Stats$ChartType;
+
+        r0.<com.ichi2.libanki.Stats: boolean mHasColoredCumulative> = 1;
+
+        r0.<com.ichi2.libanki.Stats: boolean mDynamicAxis> = 1;
+
+        r0.<com.ichi2.libanki.Stats: com.ichi2.libanki.Stats$AxisType mType> = $r1;
+
+        r0.<com.ichi2.libanki.Stats: boolean mBackwards> = 1;
+
+        $r4 = <com.ichi2.libanki.Stats$ChartType: com.ichi2.libanki.Stats$ChartType REVIEW_COUNT>;
+
+        if $r2 != $r4 goto label06;
+
+        r0.<com.ichi2.libanki.Stats: int mTitle> = 2131231352;
+
+        $r5 = newarray (int)[3];
+
+        $i0 = virtualinvoke $r1.<com.ichi2.libanki.Stats$AxisType: int ordinal()>();
+
+        $r5[0] = $i0;
+
+        $r5[1] = 2131231312;
+
+        $r5[2] = 2131231318;
+
+        r0.<com.ichi2.libanki.Stats: int[] mAxisTitles> = $r5;
+
+     label01:
+        $r5 = newarray (int)[5];
+
+        $r5[0] = 2131231301;
+
+        $r5[1] = 2131231302;
+
+        $r5[2] = 2131231304;
+
+        $r5[3] = 2131231307;
+
+        $r5[4] = 2131231303;
+
+        r0.<com.ichi2.libanki.Stats: int[] mValueLabels> = $r5;
+
+        $r5 = newarray (int)[5];
+
+        $r5[0] = 2130772041;
+
+        $r5[1] = 2130772045;
+
+        $r5[2] = 2130772047;
+
+        $r5[3] = 2130772050;
+
+        $r5[4] = 2130772046;
+
+        r0.<com.ichi2.libanki.Stats: int[] mColors> = $r5;
+
+        b1 = 0;
+
+        b2 = 0;
+
+        $r5 = <com.ichi2.libanki.Stats$2: int[] $SwitchMap$com$ichi2$libanki$Stats$AxisType>;
+
+        $i0 = virtualinvoke $r1.<com.ichi2.libanki.Stats$AxisType: int ordinal()>();
+
+        $i0 = $r5[$i0];
+
+        lookupswitch($i0)
+        {
+            case 1: goto label07;
+            case 2: goto label08;
+            case 3: goto label09;
+            default: goto label02;
+        };
+
+     label02:
+        r3 = new java.util.ArrayList;
+
+        specialinvoke r3.<java.util.ArrayList: void <init>()>();
+
+        if b1 == -1 goto label03;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("id > ");
+
+        $r7 = r0.<com.ichi2.libanki.Stats: com.ichi2.libanki.Collection mCol>;
+
+        $r8 = virtualinvoke $r7.<com.ichi2.libanki.Collection: com.ichi2.libanki.Sched getSched()>();
+
+        $l3 = virtualinvoke $r8.<com.ichi2.libanki.Sched: long getDayCutoff()>();
+
+        $d1 = (double) $l3;
+
+        $i0 = b1 + 1;
+
+        $i0 = $i0 * b2;
+
+        $d2 = (double) $i0;
+
+        $d0 = <com.ichi2.libanki.Stats: double SECONDS_PER_DAY>;
+
+        $d0 = $d2 * $d0;
+
+        $d1 = $d1 - $d0;
+
+        $d1 = $d1 * 1000.0;
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(double)>($d1);
+
+        $r9 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r3.<java.util.ArrayList: boolean add(java.lang.Object)>($r9);
+
+     label03:
+        $r9 = specialinvoke r0.<com.ichi2.libanki.Stats: java.lang.String _getDeckFilter()>();
+
+        $r9 = virtualinvoke $r9.<java.lang.String: java.lang.String replaceAll(java.lang.String,java.lang.String)>("[\\[\\]]", "");
+
+        $i0 = virtualinvoke $r9.<java.lang.String: int length()>();
+
+        if $i0 <= 0 goto label04;
+
+        virtualinvoke r3.<java.util.ArrayList: boolean add(java.lang.Object)>($r9);
+
+     label04:
+        $i0 = virtualinvoke r3.<java.util.ArrayList: int size()>();
+
+        if $i0 <= 0 goto label21;
+
+        $r9 = "WHERE ";
+
+     label05:
+        $i0 = virtualinvoke r3.<java.util.ArrayList: int size()>();
+
+        if $i0 <= 1 goto label10;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r9);
+
+        $r10 = virtualinvoke r3.<java.util.ArrayList: java.lang.Object remove(int)>(0);
+
+        $r9 = (java.lang.String) $r10;
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r9);
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" AND ");
+
+        $r9 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        goto label05;
+
+     label06:
+        $r4 = <com.ichi2.libanki.Stats$ChartType: com.ichi2.libanki.Stats$ChartType REVIEW_TIME>;
+
+        if $r2 != $r4 goto label01;
+
+        r0.<com.ichi2.libanki.Stats: int mTitle> = 2131231354;
+
+        goto label01;
+
+     label07:
+        b1 = 31;
+
+        b2 = 1;
+
+        goto label02;
+
+     label08:
+        b1 = 52;
+
+        b2 = 7;
+
+        goto label02;
+
+     label09:
+        b1 = -1;
+
+        b2 = 30;
+
+        goto label02;
+
+     label10:
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r9);
+
+        $r10 = virtualinvoke r3.<java.util.ArrayList: java.lang.Object remove(int)>(0);
+
+        $r9 = (java.lang.String) $r10;
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r9);
+
+        $r9 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label11:
+        $r4 = <com.ichi2.libanki.Stats$ChartType: com.ichi2.libanki.Stats$ChartType REVIEW_TIME>;
+
+        if $r2 != $r4 goto label23;
+
+        r11 = "time/1000.0";
+
+        $r12 = r0.<com.ichi2.libanki.Stats: com.ichi2.libanki.Stats$AxisType mType>;
+
+        $r13 = <com.ichi2.libanki.Stats$AxisType: com.ichi2.libanki.Stats$AxisType TYPE_MONTH>;
+
+        if $r12 != $r13 goto label22;
+
+        r14 = "/60.0";
+
+        $r5 = newarray (int)[3];
+
+        $i0 = virtualinvoke $r1.<com.ichi2.libanki.Stats$AxisType: int ordinal()>();
+
+        $r5[0] = $i0;
+
+        $r5[1] = 2131231328;
+
+        $r5[2] = 2131231323;
+
+        r0.<com.ichi2.libanki.Stats: int[] mAxisTitles> = $r5;
+
+     label12:
+        r3 = new java.util.ArrayList;
+
+        specialinvoke r3.<java.util.ArrayList: void <init>()>();
+
+        r15 = null;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("SELECT (cast((id/1000 - ");
+
+        $r7 = r0.<com.ichi2.libanki.Stats: com.ichi2.libanki.Collection mCol>;
+
+        $r8 = virtualinvoke $r7.<com.ichi2.libanki.Collection: com.ichi2.libanki.Sched getSched()>();
+
+        $l3 = virtualinvoke $r8.<com.ichi2.libanki.Sched: long getDayCutoff()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l3);
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(") / ");
+
+        $d1 = <com.ichi2.libanki.Stats: double SECONDS_PER_DAY>;
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(double)>($d1);
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" AS INT))/");
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(b2);
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" AS day, sum(CASE WHEN type = 0 THEN ");
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r11);
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ELSE 0 END)");
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r14);
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", sum(CASE WHEN type = 1 AND lastIvl < 21 THEN ");
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r11);
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ELSE 0 END)");
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r14);
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", sum(CASE WHEN type = 1 AND lastIvl >= 21 THEN ");
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r11);
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ELSE 0 END)");
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r14);
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", sum(CASE WHEN type = 2 THEN ");
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r11);
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ELSE 0 END)");
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r14);
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", sum(CASE WHEN type = 3 THEN ");
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r11);
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ELSE 0 END)");
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r14);
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" FROM revlog ");
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r9);
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" GROUP BY day ORDER BY day");
+
+        $r9 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r16 = newarray (java.lang.Object)[1];
+
+        $r16[0] = $r9;
+
+        staticinvoke <timber.log.Timber: void d(java.lang.String,java.lang.Object[])>("ReviewCount query: %s", $r16);
+
+     label13:
+        $r7 = r0.<com.ichi2.libanki.Stats: com.ichi2.libanki.Collection mCol>;
+
+        $r17 = virtualinvoke $r7.<com.ichi2.libanki.Collection: com.ichi2.libanki.DB getDb()>();
+
+        $r18 = virtualinvoke $r17.<com.ichi2.libanki.DB: io.requery.android.database.sqlite.SQLiteDatabase getDatabase()>();
+
+        $r19 = virtualinvoke $r18.<io.requery.android.database.sqlite.SQLiteDatabase: android.database.Cursor rawQuery(java.lang.String,java.lang.Object[])>($r9, null);
+
+     label14:
+        r15 = $r19;
+
+     label15:
+        $z0 = interfaceinvoke $r19.<android.database.Cursor: boolean moveToNext()>();
+
+     label16:
+        if $z0 == 0 goto label24;
+
+     label17:
+        $r20 = newarray (double)[6];
+
+        $d1 = interfaceinvoke $r19.<android.database.Cursor: double getDouble(int)>(0);
+
+        $r20[0] = $d1;
+
+        $d1 = interfaceinvoke $r19.<android.database.Cursor: double getDouble(int)>(5);
+
+        $r20[1] = $d1;
+
+        $d1 = interfaceinvoke $r19.<android.database.Cursor: double getDouble(int)>(1);
+
+        $r20[2] = $d1;
+
+        $d1 = interfaceinvoke $r19.<android.database.Cursor: double getDouble(int)>(4);
+
+        $r20[3] = $d1;
+
+        $d1 = interfaceinvoke $r19.<android.database.Cursor: double getDouble(int)>(2);
+
+        $r20[4] = $d1;
+
+        $d1 = interfaceinvoke $r19.<android.database.Cursor: double getDouble(int)>(3);
+
+        $r20[5] = $d1;
+
+        virtualinvoke r3.<java.util.ArrayList: boolean add(java.lang.Object)>($r20);
+
+     label18:
+        goto label15;
+
+     label19:
+        $r21 := @caughtexception;
+
+        if r15 == null goto label20;
+
+        $z0 = interfaceinvoke r15.<android.database.Cursor: boolean isClosed()>();
+
+        if $z0 != 0 goto label20;
+
+        interfaceinvoke r15.<android.database.Cursor: void close()>();
+
+     label20:
+        throw $r21;
+
+     label21:
+        $r9 = "";
+
+        goto label11;
+
+     label22:
+        r14 = "/3600.0";
+
+        $r5 = newarray (int)[3];
+
+        $i0 = virtualinvoke $r1.<com.ichi2.libanki.Stats$AxisType: int ordinal()>();
+
+        $r5[0] = $i0;
+
+        $r5[1] = 2131231327;
+
+        $r5[2] = 2131231322;
+
+        r0.<com.ichi2.libanki.Stats: int[] mAxisTitles> = $r5;
+
+        goto label12;
+
+     label23:
+        r11 = "1";
+
+        r14 = "";
+
+        goto label12;
+
+     label24:
+        if $r19 == null goto label25;
+
+        $z0 = interfaceinvoke $r19.<android.database.Cursor: boolean isClosed()>();
+
+        if $z0 != 0 goto label25;
+
+        interfaceinvoke $r19.<android.database.Cursor: void close()>();
+
+     label25:
+        $r12 = <com.ichi2.libanki.Stats$AxisType: com.ichi2.libanki.Stats$AxisType TYPE_LIFE>;
+
+        if $r1 == $r12 goto label37;
+
+        $i0 = virtualinvoke r3.<java.util.ArrayList: int size()>();
+
+        if $i0 == 0 goto label26;
+
+        $r10 = virtualinvoke r3.<java.util.ArrayList: java.lang.Object get(int)>(0);
+
+        $r20 = (double[]) $r10;
+
+        $d1 = $r20[0];
+
+        b2 = neg b1;
+
+        $d0 = (double) b2;
+
+        b2 = $d1 cmpl $d0;
+
+        if b2 <= 0 goto label37;
+
+     label26:
+        $r20 = newarray (double)[6];
+
+        b1 = neg b1;
+
+        $d1 = (double) b1;
+
+        $r20[0] = $d1;
+
+        $r20[1] = 0.0;
+
+        $r20[2] = 0.0;
+
+        $r20[3] = 0.0;
+
+        $r20[4] = 0.0;
+
+        $r20[5] = 0.0;
+
+        virtualinvoke r3.<java.util.ArrayList: void add(int,java.lang.Object)>(0, $r20);
+
+     label27:
+        $i0 = virtualinvoke r3.<java.util.ArrayList: int size()>();
+
+        $i0 = $i0 + -1;
+
+        $r10 = virtualinvoke r3.<java.util.ArrayList: java.lang.Object get(int)>($i0);
+
+        $r20 = (double[]) $r10;
+
+        $d1 = $r20[0];
+
+        b1 = $d1 cmpg 0.0;
+
+        if b1 >= 0 goto label28;
+
+        $r20 = newarray (double)[6];
+
+        $r20[0] = 0.0;
+
+        $r20[1] = 0.0;
+
+        $r20[2] = 0.0;
+
+        $r20[3] = 0.0;
+
+        $r20[4] = 0.0;
+
+        $r20[5] = 0.0;
+
+        virtualinvoke r3.<java.util.ArrayList: boolean add(java.lang.Object)>($r20);
+
+     label28:
+        $i0 = virtualinvoke r3.<java.util.ArrayList: int size()>();
+
+        $r5 = newarray (int)[2];
+
+        $r5[0] = 6;
+
+        $r5[1] = $i0;
+
+        $r22 = <java.lang.Double: java.lang.Class TYPE>;
+
+        $r10 = staticinvoke <java.lang.reflect.Array: java.lang.Object newInstance(java.lang.Class,int[])>($r22, $r5);
+
+        $r23 = (double[][]) $r10;
+
+        r0.<com.ichi2.libanki.Stats: double[][] mSeriesList> = $r23;
+
+        $i0 = 0;
+
+     label29:
+        $i4 = virtualinvoke r3.<java.util.ArrayList: int size()>();
+
+        if $i0 >= $i4 goto label38;
+
+        $r10 = virtualinvoke r3.<java.util.ArrayList: java.lang.Object get(int)>($i0);
+
+        $r20 = (double[]) $r10;
+
+        $r23 = r0.<com.ichi2.libanki.Stats: double[][] mSeriesList>;
+
+        $r24 = $r23[0];
+
+        $d1 = $r20[0];
+
+        $r24[$i0] = $d1;
+
+        $r23 = r0.<com.ichi2.libanki.Stats: double[][] mSeriesList>;
+
+        $r24 = $r23[1];
+
+        $d1 = $r20[1];
+
+        $d0 = $r20[2];
+
+        $d1 = $d1 + $d0;
+
+        $d0 = $r20[3];
+
+        $d1 = $d1 + $d0;
+
+        $d0 = $r20[4];
+
+        $d1 = $d1 + $d0;
+
+        $d0 = $r20[5];
+
+        $d1 = $d1 + $d0;
+
+        $r24[$i0] = $d1;
+
+        $r23 = r0.<com.ichi2.libanki.Stats: double[][] mSeriesList>;
+
+        $r24 = $r23[2];
+
+        $d1 = $r20[2];
+
+        $d0 = $r20[3];
+
+        $d1 = $d1 + $d0;
+
+        $d0 = $r20[4];
+
+        $d1 = $d1 + $d0;
+
+        $d0 = $r20[5];
+
+        $d1 = $d1 + $d0;
+
+        $r24[$i0] = $d1;
+
+        $r23 = r0.<com.ichi2.libanki.Stats: double[][] mSeriesList>;
+
+        $r24 = $r23[3];
+
+        $d1 = $r20[3];
+
+        $d0 = $r20[4];
+
+        $d1 = $d1 + $d0;
+
+        $d0 = $r20[5];
+
+        $d1 = $d1 + $d0;
+
+        $r24[$i0] = $d1;
+
+        $r23 = r0.<com.ichi2.libanki.Stats: double[][] mSeriesList>;
+
+        $r24 = $r23[4];
+
+        $d1 = $r20[4];
+
+        $d0 = $r20[5];
+
+        $d1 = $d1 + $d0;
+
+        $r24[$i0] = $d1;
+
+        $r23 = r0.<com.ichi2.libanki.Stats: double[][] mSeriesList>;
+
+        $r24 = $r23[5];
+
+        $d1 = $r20[5];
+
+        $r24[$i0] = $d1;
+
+        $r23 = r0.<com.ichi2.libanki.Stats: double[][] mSeriesList>;
+
+        $r24 = $r23[1];
+
+        $d1 = $r24[$i0];
+
+        $i4 = r0.<com.ichi2.libanki.Stats: int mMaxCards>;
+
+        $d0 = (double) $i4;
+
+        b1 = $d1 cmpl $d0;
+
+        if b1 <= 0 goto label30;
+
+        $d1 = $r20[1];
+
+        $d0 = $r20[2];
+
+        $d1 = $d1 + $d0;
+
+        $d0 = $r20[3];
+
+        $d1 = $d1 + $d0;
+
+        $d0 = $r20[4];
+
+        $d1 = $d1 + $d0;
+
+        $d0 = $r20[5];
+
+        $d1 = $d1 + $d0;
+
+        $l3 = staticinvoke <java.lang.Math: long round(double)>($d1);
+
+        $i4 = (int) $l3;
+
+        r0.<com.ichi2.libanki.Stats: int mMaxCards> = $i4;
+
+     label30:
+        $d1 = $r20[5];
+
+        b1 = $d1 cmpl 0.999;
+
+        if b1 < 0 goto label31;
+
+        r0.<com.ichi2.libanki.Stats: boolean mFoundCramCards> = 1;
+
+     label31:
+        $d1 = $r20[1];
+
+        b1 = $d1 cmpl 0.999;
+
+        if b1 < 0 goto label32;
+
+        r0.<com.ichi2.libanki.Stats: boolean mFoundLearnCards> = 1;
+
+     label32:
+        $d1 = $r20[2];
+
+        b1 = $d1 cmpl 0.999;
+
+        if b1 < 0 goto label33;
+
+        r0.<com.ichi2.libanki.Stats: boolean mFoundRelearnCards> = 1;
+
+     label33:
+        $d1 = $r20[0];
+
+        $d0 = r0.<com.ichi2.libanki.Stats: double mLastElement>;
+
+        b1 = $d1 cmpl $d0;
+
+        if b1 <= 0 goto label34;
+
+        $d1 = $r20[0];
+
+        r0.<com.ichi2.libanki.Stats: double mLastElement> = $d1;
+
+     label34:
+        $d1 = $r20[0];
+
+        $d0 = r0.<com.ichi2.libanki.Stats: double mFirstElement>;
+
+        b1 = $d1 cmpg $d0;
+
+        if b1 >= 0 goto label35;
+
+        $d1 = $r20[0];
+
+        r0.<com.ichi2.libanki.Stats: double mFirstElement> = $d1;
+
+     label35:
+        $d1 = $r20[0];
+
+        b1 = $d1 cmpl 0.0;
+
+        if b1 != 0 goto label36;
+
+        r0.<com.ichi2.libanki.Stats: int mZeroIndex> = $i0;
+
+     label36:
+        $i0 = $i0 + 1;
+
+        goto label29;
+
+     label37:
+        $r12 = <com.ichi2.libanki.Stats$AxisType: com.ichi2.libanki.Stats$AxisType TYPE_LIFE>;
+
+        if $r1 != $r12 goto label27;
+
+        $i0 = virtualinvoke r3.<java.util.ArrayList: int size()>();
+
+        if $i0 != 0 goto label27;
+
+        $r20 = newarray (double)[6];
+
+        $r20[0] = -12.0;
+
+        $r20[1] = 0.0;
+
+        $r20[2] = 0.0;
+
+        $r20[3] = 0.0;
+
+        $r20[4] = 0.0;
+
+        $r20[5] = 0.0;
+
+        virtualinvoke r3.<java.util.ArrayList: void add(int,java.lang.Object)>(0, $r20);
+
+        goto label27;
+
+     label38:
+        $i0 = virtualinvoke r3.<java.util.ArrayList: int size()>();
+
+        $i0 = $i0 + -1;
+
+        r0.<com.ichi2.libanki.Stats: int mMaxElements> = $i0;
+
+        $r23 = newarray (double[])[6];
+
+        r0.<com.ichi2.libanki.Stats: double[][] mCumulative> = $r23;
+
+        $r23 = r0.<com.ichi2.libanki.Stats: double[][] mCumulative>;
+
+        $r25 = r0.<com.ichi2.libanki.Stats: double[][] mSeriesList>;
+
+        $r20 = $r25[0];
+
+        $r23[0] = $r20;
+
+        $i0 = 1;
+
+     label39:
+        $r23 = r0.<com.ichi2.libanki.Stats: double[][] mSeriesList>;
+
+        $i4 = lengthof $r23;
+
+        if $i0 >= $i4 goto label42;
+
+        $r23 = r0.<com.ichi2.libanki.Stats: double[][] mCumulative>;
+
+        $r25 = r0.<com.ichi2.libanki.Stats: double[][] mSeriesList>;
+
+        $r20 = $r25[$i0];
+
+        $r20 = staticinvoke <com.ichi2.libanki.Stats: double[] createCumulative(double[])>($r20);
+
+        $r23[$i0] = $r20;
+
+        if $i0 <= 1 goto label41;
+
+        $i4 = 0;
+
+     label40:
+        $r23 = r0.<com.ichi2.libanki.Stats: double[][] mCumulative>;
+
+        $i5 = $i0 + -1;
+
+        $r20 = $r23[$i5];
+
+        $i5 = lengthof $r20;
+
+        if $i4 >= $i5 goto label41;
+
+        $r23 = r0.<com.ichi2.libanki.Stats: double[][] mCumulative>;
+
+        $i5 = $i0 + -1;
+
+        $r20 = $r23[$i5];
+
+        $d1 = $r20[$i4];
+
+        $r23 = r0.<com.ichi2.libanki.Stats: double[][] mCumulative>;
+
+        $r24 = $r23[$i0];
+
+        $d0 = $r24[$i4];
+
+        $d1 = $d1 - $d0;
+
+        $r20[$i4] = $d1;
+
+        $i4 = $i4 + 1;
+
+        goto label40;
+
+     label41:
+        $i0 = $i0 + 1;
+
+        goto label39;
+
+     label42:
+        $r5 = <com.ichi2.libanki.Stats$2: int[] $SwitchMap$com$ichi2$libanki$Stats$AxisType>;
+
+        $r1 = r0.<com.ichi2.libanki.Stats: com.ichi2.libanki.Stats$AxisType mType>;
+
+        $i0 = virtualinvoke $r1.<com.ichi2.libanki.Stats$AxisType: int ordinal()>();
+
+        $i0 = $r5[$i0];
+
+        lookupswitch($i0)
+        {
+            case 1: goto label47;
+            case 2: goto label48;
+            default: goto label43;
+        };
+
+     label43:
+        r0.<com.ichi2.libanki.Stats: double mMcount> = 0.0;
+
+        $i0 = 1;
+
+     label44:
+        $r23 = r0.<com.ichi2.libanki.Stats: double[][] mCumulative>;
+
+        $i4 = lengthof $r23;
+
+        if $i0 >= $i4 goto label50;
+
+        $i4 = 0;
+
+     label45:
+        $r23 = r0.<com.ichi2.libanki.Stats: double[][] mCumulative>;
+
+        $r20 = $r23[$i0];
+
+        $i5 = lengthof $r20;
+
+        if $i4 >= $i5 goto label49;
+
+        $d1 = r0.<com.ichi2.libanki.Stats: double mMcount>;
+
+        $r23 = r0.<com.ichi2.libanki.Stats: double[][] mCumulative>;
+
+        $r20 = $r23[$i0];
+
+        $d0 = $r20[$i4];
+
+        b1 = $d1 cmpg $d0;
+
+        if b1 >= 0 goto label46;
+
+        $r23 = r0.<com.ichi2.libanki.Stats: double[][] mCumulative>;
+
+        $r20 = $r23[$i0];
+
+        $d1 = $r20[$i4];
+
+        r0.<com.ichi2.libanki.Stats: double mMcount> = $d1;
+
+     label46:
+        $i4 = $i4 + 1;
+
+        goto label45;
+
+     label47:
+        r0.<com.ichi2.libanki.Stats: double mFirstElement> = -31.0;
+
+        goto label43;
+
+     label48:
+        r0.<com.ichi2.libanki.Stats: double mFirstElement> = -52.0;
+
+        goto label43;
+
+     label49:
+        $i0 = $i0 + 1;
+
+        goto label44;
+
+     label50:
+        $i0 = r0.<com.ichi2.libanki.Stats: int mMaxCards>;
+
+        if $i0 != 0 goto label51;
+
+        r0.<com.ichi2.libanki.Stats: int mMaxCards> = 10;
+
+     label51:
+        $i0 = r0.<com.ichi2.libanki.Stats: int mMaxElements>;
+
+        if $i0 != 0 goto label52;
+
+        r0.<com.ichi2.libanki.Stats: int mMaxElements> = 10;
+
+     label52:
+        $d1 = r0.<com.ichi2.libanki.Stats: double mMcount>;
+
+        b1 = $d1 cmpl 0.0;
+
+        if b1 != 0 goto label53;
+
+        r0.<com.ichi2.libanki.Stats: double mMcount> = 10.0;
+
+     label53:
+        $d1 = r0.<com.ichi2.libanki.Stats: double mFirstElement>;
+
+        $d0 = r0.<com.ichi2.libanki.Stats: double mLastElement>;
+
+        b1 = $d1 cmpl $d0;
+
+        if b1 != 0 goto label54;
+
+        r0.<com.ichi2.libanki.Stats: double mFirstElement> = -10.0;
+
+        r0.<com.ichi2.libanki.Stats: double mLastElement> = 0.0;
+
+     label54:
+        $i0 = virtualinvoke r3.<java.util.ArrayList: int size()>();
+
+        if $i0 <= 0 goto label55;
+
+        return 1;
+
+     label55:
+        return 0;
+
+        catch java.lang.Throwable from label13 to label14 with label19;
+        catch java.lang.Throwable from label15 to label16 with label19;
+        catch java.lang.Throwable from label17 to label18 with label19;
+    }
+    private boolean calculateDue(com.ichi2.libanki.Stats$AxisType)
+    {
+        com.ichi2.libanki.Stats r0;
+        com.ichi2.libanki.Stats$AxisType $r1, $r16;
+        java.util.ArrayList r2;
+        int[] $r3, $r20;
+        int $i0, $i3, $i4;
+        byte b1, b2;
+        java.lang.String r4, $r9;
+        java.lang.StringBuilder $r5;
+        android.database.Cursor r6, $r13;
+        com.ichi2.libanki.Collection $r7;
+        com.ichi2.libanki.Sched $r8;
+        java.lang.Object[] $r10;
+        com.ichi2.libanki.DB $r11;
+        io.requery.android.database.sqlite.SQLiteDatabase $r12;
+        boolean $z0;
+        java.lang.Throwable $r14;
+        java.lang.Object $r15;
+        java.lang.Class $r17;
+        double[][] $r18, $r21;
+        double[] $r19, $r22;
+        double $d0, $d1;
+
+        r0 := @this: com.ichi2.libanki.Stats;
+
+        $r1 := @parameter0: com.ichi2.libanki.Stats$AxisType;
+
+        r0.<com.ichi2.libanki.Stats: boolean mHasColoredCumulative> = 0;
+
+        r0.<com.ichi2.libanki.Stats: com.ichi2.libanki.Stats$AxisType mType> = $r1;
+
+        r0.<com.ichi2.libanki.Stats: boolean mDynamicAxis> = 1;
+
+        r0.<com.ichi2.libanki.Stats: boolean mBackwards> = 1;
+
+        r0.<com.ichi2.libanki.Stats: int mTitle> = 2131231326;
+
+        $r3 = newarray (int)[2];
+
+        $r3[0] = 2131231307;
+
+        $r3[1] = 2131231303;
+
+        r0.<com.ichi2.libanki.Stats: int[] mValueLabels> = $r3;
+
+        $r3 = newarray (int)[2];
+
+        $r3[0] = 2130772050;
+
+        $r3[1] = 2130772046;
+
+        r0.<com.ichi2.libanki.Stats: int[] mColors> = $r3;
+
+        $r3 = newarray (int)[3];
+
+        $i0 = virtualinvoke $r1.<com.ichi2.libanki.Stats$AxisType: int ordinal()>();
+
+        $r3[0] = $i0;
+
+        $r3[1] = 2131231314;
+
+        $r3[2] = 2131231319;
+
+        r0.<com.ichi2.libanki.Stats: int[] mAxisTitles> = $r3;
+
+        b1 = 0;
+
+        b2 = 0;
+
+        $r3 = <com.ichi2.libanki.Stats$2: int[] $SwitchMap$com$ichi2$libanki$Stats$AxisType>;
+
+        $i0 = virtualinvoke $r1.<com.ichi2.libanki.Stats$AxisType: int ordinal()>();
+
+        $i0 = $r3[$i0];
+
+        lookupswitch($i0)
+        {
+            case 1: goto label11;
+            case 2: goto label12;
+            case 3: goto label13;
+            default: goto label01;
+        };
+
+     label01:
+        r4 = "";
+
+        if b1 == -1 goto label02;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("");
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" AND day <= ");
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(b1);
+
+        r4 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label02:
+        r2 = new java.util.ArrayList;
+
+        specialinvoke r2.<java.util.ArrayList: void <init>()>();
+
+        r6 = null;
+
+     label03:
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("SELECT (due - ");
+
+        $r7 = r0.<com.ichi2.libanki.Stats: com.ichi2.libanki.Collection mCol>;
+
+        $r8 = virtualinvoke $r7.<com.ichi2.libanki.Collection: com.ichi2.libanki.Sched getSched()>();
+
+        $i0 = virtualinvoke $r8.<com.ichi2.libanki.Sched: int getToday()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(")/");
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(b2);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" AS day, count(), sum(CASE WHEN ivl >= 21 THEN 1 ELSE 0 END) FROM cards WHERE did IN ");
+
+        $r9 = specialinvoke r0.<com.ichi2.libanki.Stats: java.lang.String _limit()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r9);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" AND queue IN (2,3)");
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r4);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" GROUP BY day ORDER BY day");
+
+        r4 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r10 = newarray (java.lang.Object)[1];
+
+        $r10[0] = r4;
+
+        staticinvoke <timber.log.Timber: void d(java.lang.String,java.lang.Object[])>("Forecast query: %s", $r10);
+
+        $r7 = r0.<com.ichi2.libanki.Stats: com.ichi2.libanki.Collection mCol>;
+
+        $r11 = virtualinvoke $r7.<com.ichi2.libanki.Collection: com.ichi2.libanki.DB getDb()>();
+
+        $r12 = virtualinvoke $r11.<com.ichi2.libanki.DB: io.requery.android.database.sqlite.SQLiteDatabase getDatabase()>();
+
+        $r13 = virtualinvoke $r12.<io.requery.android.database.sqlite.SQLiteDatabase: android.database.Cursor rawQuery(java.lang.String,java.lang.Object[])>(r4, null);
+
+     label04:
+        r6 = $r13;
+
+     label05:
+        $z0 = interfaceinvoke $r13.<android.database.Cursor: boolean moveToNext()>();
+
+     label06:
+        if $z0 == 0 goto label14;
+
+     label07:
+        $r3 = newarray (int)[3];
+
+        $i0 = interfaceinvoke $r13.<android.database.Cursor: int getInt(int)>(0);
+
+        $r3[0] = $i0;
+
+        $i0 = interfaceinvoke $r13.<android.database.Cursor: int getInt(int)>(1);
+
+        $r3[1] = $i0;
+
+        $i0 = interfaceinvoke $r13.<android.database.Cursor: int getInt(int)>(2);
+
+        $r3[2] = $i0;
+
+        virtualinvoke r2.<java.util.ArrayList: boolean add(java.lang.Object)>($r3);
+
+     label08:
+        goto label05;
+
+     label09:
+        $r14 := @caughtexception;
+
+        if r6 == null goto label10;
+
+        $z0 = interfaceinvoke r6.<android.database.Cursor: boolean isClosed()>();
+
+        if $z0 != 0 goto label10;
+
+        interfaceinvoke r6.<android.database.Cursor: void close()>();
+
+     label10:
+        throw $r14;
+
+     label11:
+        b1 = 31;
+
+        b2 = 1;
+
+        goto label01;
+
+     label12:
+        b1 = 52;
+
+        b2 = 7;
+
+        goto label01;
+
+     label13:
+        b1 = -1;
+
+        b2 = 30;
+
+        goto label01;
+
+     label14:
+        if $r13 == null goto label15;
+
+        $z0 = interfaceinvoke $r13.<android.database.Cursor: boolean isClosed()>();
+
+        if $z0 != 0 goto label15;
+
+        interfaceinvoke $r13.<android.database.Cursor: void close()>();
+
+     label15:
+        $i0 = virtualinvoke r2.<java.util.ArrayList: int size()>();
+
+        if $i0 == 0 goto label16;
+
+        $r15 = virtualinvoke r2.<java.util.ArrayList: java.lang.Object get(int)>(0);
+
+        $r3 = (int[]) $r15;
+
+        $i0 = $r3[0];
+
+        if $i0 <= 0 goto label17;
+
+     label16:
+        $r3 = newarray (int)[3];
+
+        $r3[0] = 0;
+
+        $r3[1] = 0;
+
+        $r3[2] = 0;
+
+        virtualinvoke r2.<java.util.ArrayList: void add(int,java.lang.Object)>(0, $r3);
+
+     label17:
+        if b1 != -1 goto label18;
+
+        $i0 = virtualinvoke r2.<java.util.ArrayList: int size()>();
+
+        if $i0 >= 2 goto label18;
+
+        b1 = 31;
+
+     label18:
+        $r16 = <com.ichi2.libanki.Stats$AxisType: com.ichi2.libanki.Stats$AxisType TYPE_LIFE>;
+
+        if $r1 == $r16 goto label24;
+
+        $i0 = virtualinvoke r2.<java.util.ArrayList: int size()>();
+
+        $i0 = $i0 + -1;
+
+        $r15 = virtualinvoke r2.<java.util.ArrayList: java.lang.Object get(int)>($i0);
+
+        $r3 = (int[]) $r15;
+
+        $i0 = $r3[0];
+
+        if $i0 >= b1 goto label24;
+
+        $r3 = newarray (int)[3];
+
+        $r3[0] = b1;
+
+        $r3[1] = 0;
+
+        $r3[2] = 0;
+
+        virtualinvoke r2.<java.util.ArrayList: boolean add(java.lang.Object)>($r3);
+
+     label19:
+        $i0 = virtualinvoke r2.<java.util.ArrayList: int size()>();
+
+        $r3 = newarray (int)[2];
+
+        $r3[0] = 3;
+
+        $r3[1] = $i0;
+
+        $r17 = <java.lang.Double: java.lang.Class TYPE>;
+
+        $r15 = staticinvoke <java.lang.reflect.Array: java.lang.Object newInstance(java.lang.Class,int[])>($r17, $r3);
+
+        $r18 = (double[][]) $r15;
+
+        r0.<com.ichi2.libanki.Stats: double[][] mSeriesList> = $r18;
+
+        $i0 = 0;
+
+     label20:
+        $i3 = virtualinvoke r2.<java.util.ArrayList: int size()>();
+
+        if $i0 >= $i3 goto label25;
+
+        $r15 = virtualinvoke r2.<java.util.ArrayList: java.lang.Object get(int)>($i0);
+
+        $r3 = (int[]) $r15;
+
+        $i3 = $r3[1];
+
+        $i4 = r0.<com.ichi2.libanki.Stats: int mMaxCards>;
+
+        if $i3 <= $i4 goto label21;
+
+        $i3 = $r3[1];
+
+        r0.<com.ichi2.libanki.Stats: int mMaxCards> = $i3;
+
+     label21:
+        $r18 = r0.<com.ichi2.libanki.Stats: double[][] mSeriesList>;
+
+        $r19 = $r18[0];
+
+        $i3 = $r3[0];
+
+        $d0 = (double) $i3;
+
+        $r19[$i0] = $d0;
+
+        $r18 = r0.<com.ichi2.libanki.Stats: double[][] mSeriesList>;
+
+        $r19 = $r18[1];
+
+        $i3 = $r3[1];
+
+        $d0 = (double) $i3;
+
+        $r19[$i0] = $d0;
+
+        $r18 = r0.<com.ichi2.libanki.Stats: double[][] mSeriesList>;
+
+        $r19 = $r18[2];
+
+        $i3 = $r3[2];
+
+        $d0 = (double) $i3;
+
+        $r19[$i0] = $d0;
+
+        $i3 = $r3[0];
+
+        $d0 = (double) $i3;
+
+        $d1 = r0.<com.ichi2.libanki.Stats: double mLastElement>;
+
+        b1 = $d0 cmpl $d1;
+
+        if b1 <= 0 goto label22;
+
+        $i3 = $r3[0];
+
+        $d0 = (double) $i3;
+
+        r0.<com.ichi2.libanki.Stats: double mLastElement> = $d0;
+
+     label22:
+        $i3 = $r3[0];
+
+        if $i3 != 0 goto label23;
+
+        r0.<com.ichi2.libanki.Stats: int mZeroIndex> = $i0;
+
+     label23:
+        $i0 = $i0 + 1;
+
+        goto label20;
+
+     label24:
+        $r16 = <com.ichi2.libanki.Stats$AxisType: com.ichi2.libanki.Stats$AxisType TYPE_LIFE>;
+
+        if $r1 != $r16 goto label19;
+
+        $i0 = virtualinvoke r2.<java.util.ArrayList: int size()>();
+
+        if $i0 >= 2 goto label19;
+
+        $r3 = newarray (int)[3];
+
+        $i0 = virtualinvoke r2.<java.util.ArrayList: int size()>();
+
+        $i0 = $i0 + -1;
+
+        $r15 = virtualinvoke r2.<java.util.ArrayList: java.lang.Object get(int)>($i0);
+
+        $r20 = (int[]) $r15;
+
+        $i0 = $r20[0];
+
+        $i0 = $i0 + 1;
+
+        $i0 = staticinvoke <java.lang.Math: int max(int,int)>(12, $i0);
+
+        $r3[0] = $i0;
+
+        $r3[1] = 0;
+
+        $r3[2] = 0;
+
+        virtualinvoke r2.<java.util.ArrayList: boolean add(java.lang.Object)>($r3);
+
+        goto label19;
+
+     label25:
+        $i0 = virtualinvoke r2.<java.util.ArrayList: int size()>();
+
+        $i0 = $i0 + -1;
+
+        r0.<com.ichi2.libanki.Stats: int mMaxElements> = $i0;
+
+        $r3 = <com.ichi2.libanki.Stats$2: int[] $SwitchMap$com$ichi2$libanki$Stats$AxisType>;
+
+        $r1 = r0.<com.ichi2.libanki.Stats: com.ichi2.libanki.Stats$AxisType mType>;
+
+        $i0 = virtualinvoke $r1.<com.ichi2.libanki.Stats$AxisType: int ordinal()>();
+
+        $i0 = $r3[$i0];
+
+        lookupswitch($i0)
+        {
+            case 1: goto label31;
+            case 2: goto label32;
+            default: goto label26;
+        };
+
+     label26:
+        r0.<com.ichi2.libanki.Stats: double mFirstElement> = 0.0;
+
+        r0.<com.ichi2.libanki.Stats: boolean mHasColoredCumulative> = 0;
+
+        $r18 = newarray (double[])[2];
+
+        $r21 = r0.<com.ichi2.libanki.Stats: double[][] mSeriesList>;
+
+        $r19 = $r21[0];
+
+        $r18[0] = $r19;
+
+        $r21 = r0.<com.ichi2.libanki.Stats: double[][] mSeriesList>;
+
+        $r19 = $r21[1];
+
+        $r18[1] = $r19;
+
+        $i0 = r0.<com.ichi2.libanki.Stats: int mZeroIndex>;
+
+        $r18 = staticinvoke <com.ichi2.libanki.Stats: double[][] createCumulative(double[][],int)>($r18, $i0);
+
+        r0.<com.ichi2.libanki.Stats: double[][] mCumulative> = $r18;
+
+        $r18 = r0.<com.ichi2.libanki.Stats: double[][] mCumulative>;
+
+        $r19 = $r18[1];
+
+        $r18 = r0.<com.ichi2.libanki.Stats: double[][] mCumulative>;
+
+        $r22 = $r18[1];
+
+        $i0 = lengthof $r22;
+
+        $i0 = $i0 + -1;
+
+        $d0 = $r19[$i0];
+
+        r0.<com.ichi2.libanki.Stats: double mMcount> = $d0;
+
+        $i0 = r0.<com.ichi2.libanki.Stats: int mMaxElements>;
+
+        if $i0 != 0 goto label27;
+
+        r0.<com.ichi2.libanki.Stats: int mMaxElements> = 10;
+
+     label27:
+        $d0 = r0.<com.ichi2.libanki.Stats: double mMcount>;
+
+        b1 = $d0 cmpl 0.0;
+
+        if b1 != 0 goto label28;
+
+        r0.<com.ichi2.libanki.Stats: double mMcount> = 10.0;
+
+     label28:
+        $d0 = r0.<com.ichi2.libanki.Stats: double mFirstElement>;
+
+        $d1 = r0.<com.ichi2.libanki.Stats: double mLastElement>;
+
+        b1 = $d0 cmpl $d1;
+
+        if b1 != 0 goto label29;
+
+        r0.<com.ichi2.libanki.Stats: double mFirstElement> = 0.0;
+
+        r0.<com.ichi2.libanki.Stats: double mLastElement> = 6.0;
+
+     label29:
+        $i0 = r0.<com.ichi2.libanki.Stats: int mMaxCards>;
+
+        if $i0 != 0 goto label30;
+
+        r0.<com.ichi2.libanki.Stats: int mMaxCards> = 10;
+
+     label30:
+        $i0 = virtualinvoke r2.<java.util.ArrayList: int size()>();
+
+        if $i0 <= 0 goto label33;
+
+        return 1;
+
+     label31:
+        r0.<com.ichi2.libanki.Stats: double mLastElement> = 31.0;
+
+        goto label26;
+
+     label32:
+        r0.<com.ichi2.libanki.Stats: double mLastElement> = 52.0;
+
+        goto label26;
+
+     label33:
+        return 0;
+
+        catch java.lang.Throwable from label03 to label04 with label09;
+        catch java.lang.Throwable from label05 to label06 with label09;
+        catch java.lang.Throwable from label07 to label08 with label09;
+    }
+    public static double[] createCumulative(double[])
+    {
+        double[] $r0, r1;
+        int $i0, $i1;
+        double $d0, $d1;
+
+        $r0 := @parameter0: double[];
+
+        $i0 = lengthof $r0;
+
+        r1 = newarray (double)[$i0];
+
+        $d0 = $r0[0];
+
+        r1[0] = $d0;
+
+        $i0 = 1;
+
+     label1:
+        $i1 = lengthof $r0;
+
+        if $i0 >= $i1 goto label2;
+
+        $i1 = $i0 + -1;
+
+        $d0 = r1[$i1];
+
+        $d1 = $r0[$i0];
+
+        $d0 = $d0 + $d1;
+
+        r1[$i0] = $d0;
+
+        $i0 = $i0 + 1;
+
+        goto label1;
+
+     label2:
+        return r1;
+    }
+    public static double[][] createCumulative(double[][])
+    {
+        double[][] $r0, r5;
+        double $d0, $d1;
+        double[] $r1, $r6;
+        int $i0, $i1;
+        int[] $r2;
+        java.lang.Class $r3;
+        java.lang.Object $r4;
+
+        $r0 := @parameter0: double[][];
+
+        $r1 = $r0[0];
+
+        $i0 = lengthof $r1;
+
+        $r2 = newarray (int)[2];
+
+        $r2[0] = 2;
+
+        $r2[1] = $i0;
+
+        $r3 = <java.lang.Double: java.lang.Class TYPE>;
+
+        $r4 = staticinvoke <java.lang.reflect.Array: java.lang.Object newInstance(java.lang.Class,int[])>($r3, $r2);
+
+        r5 = (double[][]) $r4;
+
+        $r1 = r5[0];
+
+        $r6 = $r0[0];
+
+        $d0 = $r6[0];
+
+        $r1[0] = $d0;
+
+        $r1 = r5[1];
+
+        $r6 = $r0[1];
+
+        $d0 = $r6[0];
+
+        $r1[0] = $d0;
+
+        $i0 = 1;
+
+     label1:
+        $r1 = $r0[0];
+
+        $i1 = lengthof $r1;
+
+        if $i0 >= $i1 goto label2;
+
+        $r1 = r5[0];
+
+        $r6 = $r0[0];
+
+        $d0 = $r6[$i0];
+
+        $r1[$i0] = $d0;
+
+        $r1 = r5[1];
+
+        $r6 = r5[1];
+
+        $i1 = $i0 + -1;
+
+        $d1 = $r6[$i1];
+
+        $r6 = $r0[1];
+
+        $d0 = $r6[$i0];
+
+        $d0 = $d1 + $d0;
+
+        $r1[$i0] = $d0;
+
+        $i0 = $i0 + 1;
+
+        goto label1;
+
+     label2:
+        return r5;
+    }
+    public static double[][] createCumulative(double[][], int)
+    {
+        double[][] $r0, r5;
+        int $i0, $i1, $i2, $i3;
+        double[] $r1, $r6;
+        int[] $r2;
+        java.lang.Class $r3;
+        java.lang.Object $r4;
+        double $d0, $d1;
+
+        $r0 := @parameter0: double[][];
+
+        $i0 := @parameter1: int;
+
+        $r1 = $r0[0];
+
+        $i1 = lengthof $r1;
+
+        $i1 = $i1 - $i0;
+
+        $r2 = newarray (int)[2];
+
+        $r2[0] = 2;
+
+        $r2[1] = $i1;
+
+        $r3 = <java.lang.Double: java.lang.Class TYPE>;
+
+        $r4 = staticinvoke <java.lang.reflect.Array: java.lang.Object newInstance(java.lang.Class,int[])>($r3, $r2);
+
+        r5 = (double[][]) $r4;
+
+        $r1 = r5[0];
+
+        $r6 = $r0[0];
+
+        $d0 = $r6[$i0];
+
+        $r1[0] = $d0;
+
+        $r1 = r5[1];
+
+        $r6 = $r0[1];
+
+        $d0 = $r6[$i0];
+
+        $r1[0] = $d0;
+
+        $i1 = $i0 + 1;
+
+     label1:
+        $r1 = $r0[0];
+
+        $i2 = lengthof $r1;
+
+        if $i1 >= $i2 goto label2;
+
+        $r1 = r5[0];
+
+        $i2 = $i1 - $i0;
+
+        $r6 = $r0[0];
+
+        $d0 = $r6[$i1];
+
+        $r1[$i2] = $d0;
+
+        $r1 = r5[1];
+
+        $i2 = $i1 - $i0;
+
+        $r6 = r5[1];
+
+        $i3 = $i1 + -1;
+
+        $i3 = $i3 - $i0;
+
+        $d0 = $r6[$i3];
+
+        $r6 = $r0[1];
+
+        $d1 = $r6[$i1];
+
+        $d0 = $d0 + $d1;
+
+        $r1[$i2] = $d0;
+
+        $i1 = $i1 + 1;
+
+        goto label1;
+
+     label2:
+        return r5;
+    }
+    private java.lang.String getRevlogTimeFilter(com.ichi2.libanki.Stats$AxisType, boolean)
+    {
+        com.ichi2.libanki.Stats r0;
+        com.ichi2.libanki.Stats$AxisType $r1, $r2;
+        boolean $z0;
+        double $d0, $d1, $d2;
+        java.lang.String r3;
+        java.lang.StringBuilder $r4;
+        com.ichi2.libanki.Collection $r5;
+        com.ichi2.libanki.Sched $r6;
+        long $l0;
+        int $i1;
+
+        r0 := @this: com.ichi2.libanki.Stats;
+
+        $r1 := @parameter0: com.ichi2.libanki.Stats$AxisType;
+
+        $z0 := @parameter1: boolean;
+
+        $r2 = <com.ichi2.libanki.Stats$AxisType: com.ichi2.libanki.Stats$AxisType TYPE_LIFE>;
+
+        if $r1 != $r2 goto label1;
+
+        return "";
+
+     label1:
+        if $z0 == 0 goto label3;
+
+        r3 = "<= ";
+
+     label2:
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("id ");
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r3);
+
+        $r5 = r0.<com.ichi2.libanki.Stats: com.ichi2.libanki.Collection mCol>;
+
+        $r6 = virtualinvoke $r5.<com.ichi2.libanki.Collection: com.ichi2.libanki.Sched getSched()>();
+
+        $l0 = virtualinvoke $r6.<com.ichi2.libanki.Sched: long getDayCutoff()>();
+
+        $d1 = (double) $l0;
+
+        $i1 = $r1.<com.ichi2.libanki.Stats$AxisType: int days>;
+
+        $d2 = (double) $i1;
+
+        $d0 = <com.ichi2.libanki.Stats: double SECONDS_PER_DAY>;
+
+        $d0 = $d2 * $d0;
+
+        $d1 = $d1 - $d0;
+
+        $d1 = $d1 * 1000.0;
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(double)>($d1);
+
+        r3 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return r3;
+
+     label3:
+        r3 = "> ";
+
+        goto label2;
+    }
+    public boolean calculateAnswerButtons(com.ichi2.libanki.Stats$AxisType)
+    {
+        com.ichi2.libanki.Stats r0;
+        com.ichi2.libanki.Stats$AxisType $r1, $r6;
+        double d0, $d1, $d2;
+        int i0, $i1;
+        java.util.Vector r2;
+        java.util.ArrayList r3;
+        int[] $r4;
+        java.lang.String $r5;
+        short s2;
+        java.lang.StringBuilder $r7;
+        com.ichi2.libanki.Collection $r8;
+        com.ichi2.libanki.Sched $r9;
+        long $l3;
+        java.lang.Object $r10;
+        android.database.Cursor r11, $r15;
+        java.lang.Object[] $r12;
+        com.ichi2.libanki.DB $r13;
+        io.requery.android.database.sqlite.SQLiteDatabase $r14;
+        boolean $z0;
+        double[] $r16;
+        java.lang.Throwable $r17;
+        java.lang.Class $r18;
+        double[][] $r19;
+        byte $b4;
+
+        r0 := @this: com.ichi2.libanki.Stats;
+
+        $r1 := @parameter0: com.ichi2.libanki.Stats$AxisType;
+
+        r0.<com.ichi2.libanki.Stats: boolean mHasColoredCumulative> = 0;
+
+        r0.<com.ichi2.libanki.Stats: double[][] mCumulative> = null;
+
+        r0.<com.ichi2.libanki.Stats: int mTitle> = 2131231310;
+
+        r0.<com.ichi2.libanki.Stats: boolean mBackwards> = 0;
+
+        $r4 = newarray (int)[2];
+
+        $r4[0] = 2131231311;
+
+        $r4[1] = 2131231312;
+
+        r0.<com.ichi2.libanki.Stats: int[] mAxisTitles> = $r4;
+
+        $r4 = newarray (int)[3];
+
+        $r4[0] = 2131231302;
+
+        $r4[1] = 2131231307;
+
+        $r4[2] = 2131231303;
+
+        r0.<com.ichi2.libanki.Stats: int[] mValueLabels> = $r4;
+
+        $r4 = newarray (int)[3];
+
+        $r4[0] = 2130772045;
+
+        $r4[1] = 2130772050;
+
+        $r4[2] = 2130772046;
+
+        r0.<com.ichi2.libanki.Stats: int[] mColors> = $r4;
+
+        r0.<com.ichi2.libanki.Stats: com.ichi2.libanki.Stats$AxisType mType> = $r1;
+
+        $r5 = specialinvoke r0.<com.ichi2.libanki.Stats: java.lang.String _getDeckFilter()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.String: java.lang.String replaceAll(java.lang.String,java.lang.String)>("[\\[\\]]", "");
+
+        r2 = new java.util.Vector;
+
+        specialinvoke r2.<java.util.Vector: void <init>()>();
+
+        $i1 = virtualinvoke $r5.<java.lang.String: int length()>();
+
+        if $i1 <= 0 goto label01;
+
+        virtualinvoke r2.<java.util.Vector: boolean add(java.lang.Object)>($r5);
+
+     label01:
+        $r6 = <com.ichi2.libanki.Stats$AxisType: com.ichi2.libanki.Stats$AxisType TYPE_MONTH>;
+
+        if $r1 != $r6 goto label05;
+
+        s2 = 30;
+
+     label02:
+        if s2 <= 0 goto label03;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("id > ");
+
+        $r8 = r0.<com.ichi2.libanki.Stats: com.ichi2.libanki.Collection mCol>;
+
+        $r9 = virtualinvoke $r8.<com.ichi2.libanki.Collection: com.ichi2.libanki.Sched getSched()>();
+
+        $l3 = virtualinvoke $r9.<com.ichi2.libanki.Sched: long getDayCutoff()>();
+
+        d0 = (double) $l3;
+
+        $d2 = (double) s2;
+
+        $d1 = <com.ichi2.libanki.Stats: double SECONDS_PER_DAY>;
+
+        $d1 = $d2 * $d1;
+
+        d0 = d0 - $d1;
+
+        d0 = d0 * 1000.0;
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(double)>(d0);
+
+        $r5 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r2.<java.util.Vector: boolean add(java.lang.Object)>($r5);
+
+     label03:
+        $i1 = virtualinvoke r2.<java.util.Vector: int size()>();
+
+        if $i1 <= 0 goto label07;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("where ");
+
+        $r10 = virtualinvoke r2.<java.util.Vector: java.lang.Object get(int)>(0);
+
+        $r5 = (java.lang.String) $r10;
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r5 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $i1 = 1;
+
+     label04:
+        i0 = virtualinvoke r2.<java.util.Vector: int size()>();
+
+        if $i1 >= i0 goto label08;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" and ");
+
+        $r10 = virtualinvoke r2.<java.util.Vector: java.lang.Object get(int)>($i1);
+
+        $r5 = (java.lang.String) $r10;
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r5 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $i1 = $i1 + 1;
+
+        goto label04;
+
+     label05:
+        $r6 = <com.ichi2.libanki.Stats$AxisType: com.ichi2.libanki.Stats$AxisType TYPE_YEAR>;
+
+        if $r1 != $r6 goto label06;
+
+        s2 = 365;
+
+        goto label02;
+
+     label06:
+        s2 = -1;
+
+        goto label02;
+
+     label07:
+        $r5 = "";
+
+     label08:
+        r3 = new java.util.ArrayList;
+
+        specialinvoke r3.<java.util.ArrayList: void <init>()>();
+
+        r11 = null;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("select (case                 when type in (0,2) then 0         when lastIvl < 21 then 1         else 2 end) as thetype,         (case when type in (0,2) and ease = 4 then 3 else ease end), count() from revlog ");
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("         group by thetype, ease         order by thetype, ease");
+
+        $r5 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r12 = newarray (java.lang.Object)[1];
+
+        $r12[0] = $r5;
+
+        staticinvoke <timber.log.Timber: void d(java.lang.String,java.lang.Object[])>("AnswerButtons query: %s", $r12);
+
+     label09:
+        $r8 = r0.<com.ichi2.libanki.Stats: com.ichi2.libanki.Collection mCol>;
+
+        $r13 = virtualinvoke $r8.<com.ichi2.libanki.Collection: com.ichi2.libanki.DB getDb()>();
+
+        $r14 = virtualinvoke $r13.<com.ichi2.libanki.DB: io.requery.android.database.sqlite.SQLiteDatabase getDatabase()>();
+
+        $r15 = virtualinvoke $r14.<io.requery.android.database.sqlite.SQLiteDatabase: android.database.Cursor rawQuery(java.lang.String,java.lang.Object[])>($r5, null);
+
+     label10:
+        r11 = $r15;
+
+     label11:
+        $z0 = interfaceinvoke $r15.<android.database.Cursor: boolean moveToNext()>();
+
+     label12:
+        if $z0 == 0 goto label17;
+
+     label13:
+        $r16 = newarray (double)[3];
+
+        d0 = interfaceinvoke $r15.<android.database.Cursor: double getDouble(int)>(0);
+
+        $r16[0] = d0;
+
+        d0 = interfaceinvoke $r15.<android.database.Cursor: double getDouble(int)>(1);
+
+        $r16[1] = d0;
+
+        d0 = interfaceinvoke $r15.<android.database.Cursor: double getDouble(int)>(2);
+
+        $r16[2] = d0;
+
+        virtualinvoke r3.<java.util.ArrayList: boolean add(java.lang.Object)>($r16);
+
+     label14:
+        goto label11;
+
+     label15:
+        $r17 := @caughtexception;
+
+        if r11 == null goto label16;
+
+        $z0 = interfaceinvoke r11.<android.database.Cursor: boolean isClosed()>();
+
+        if $z0 != 0 goto label16;
+
+        interfaceinvoke r11.<android.database.Cursor: void close()>();
+
+     label16:
+        throw $r17;
+
+     label17:
+        if $r15 == null goto label18;
+
+        $z0 = interfaceinvoke $r15.<android.database.Cursor: boolean isClosed()>();
+
+        if $z0 != 0 goto label18;
+
+        interfaceinvoke $r15.<android.database.Cursor: void close()>();
+
+     label18:
+        $i1 = virtualinvoke r3.<java.util.ArrayList: int size()>();
+
+        if $i1 != 0 goto label19;
+
+        $r16 = newarray (double)[3];
+
+        $r16[0] = 0.0;
+
+        $r16[1] = 1.0;
+
+        $r16[2] = 0.0;
+
+        virtualinvoke r3.<java.util.ArrayList: void add(int,java.lang.Object)>(0, $r16);
+
+     label19:
+        $i1 = virtualinvoke r3.<java.util.ArrayList: int size()>();
+
+        $i1 = $i1 + 1;
+
+        $r4 = newarray (int)[2];
+
+        $r4[0] = 4;
+
+        $r4[1] = $i1;
+
+        $r18 = <java.lang.Double: java.lang.Class TYPE>;
+
+        $r10 = staticinvoke <java.lang.reflect.Array: java.lang.Object newInstance(java.lang.Class,int[])>($r18, $r4);
+
+        $r19 = (double[][]) $r10;
+
+        r0.<com.ichi2.libanki.Stats: double[][] mSeriesList> = $r19;
+
+        $i1 = 0;
+
+     label20:
+        i0 = virtualinvoke r3.<java.util.ArrayList: int size()>();
+
+        if $i1 >= i0 goto label24;
+
+        $r10 = virtualinvoke r3.<java.util.ArrayList: java.lang.Object get(int)>($i1);
+
+        $r16 = (double[]) $r10;
+
+        d0 = $r16[0];
+
+        i0 = (int) d0;
+
+        $d1 = $r16[1];
+
+        d0 = $r16[2];
+
+        if i0 != 1 goto label23;
+
+        $d1 = $d1 + 5.0;
+
+     label21:
+        $r19 = r0.<com.ichi2.libanki.Stats: double[][] mSeriesList>;
+
+        $r16 = $r19[0];
+
+        $r16[$i1] = $d1;
+
+        $r19 = r0.<com.ichi2.libanki.Stats: double[][] mSeriesList>;
+
+        i0 = i0 + 1;
+
+        $r16 = $r19[i0];
+
+        $r16[$i1] = d0;
+
+        i0 = r0.<com.ichi2.libanki.Stats: int mMaxCards>;
+
+        $d1 = (double) i0;
+
+        $b4 = d0 cmpl $d1;
+
+        if $b4 <= 0 goto label22;
+
+        i0 = (int) d0;
+
+        r0.<com.ichi2.libanki.Stats: int mMaxCards> = i0;
+
+     label22:
+        $i1 = $i1 + 1;
+
+        goto label20;
+
+     label23:
+        if i0 != 2 goto label21;
+
+        $d1 = $d1 + 10.0;
+
+        goto label21;
+
+     label24:
+        $r19 = r0.<com.ichi2.libanki.Stats: double[][] mSeriesList>;
+
+        $r16 = $r19[0];
+
+        $i1 = virtualinvoke r3.<java.util.ArrayList: int size()>();
+
+        $r16[$i1] = 15.0;
+
+        r0.<com.ichi2.libanki.Stats: double mFirstElement> = 0.5;
+
+        r0.<com.ichi2.libanki.Stats: double mLastElement> = 14.5;
+
+        r0.<com.ichi2.libanki.Stats: double mMcount> = 100.0;
+
+        r0.<com.ichi2.libanki.Stats: int mMaxElements> = 15;
+
+        $i1 = r0.<com.ichi2.libanki.Stats: int mMaxCards>;
+
+        if $i1 != 0 goto label25;
+
+        r0.<com.ichi2.libanki.Stats: int mMaxCards> = 10;
+
+     label25:
+        $i1 = virtualinvoke r3.<java.util.ArrayList: int size()>();
+
+        if $i1 <= 0 goto label26;
+
+        return 1;
+
+     label26:
+        return 0;
+
+        catch java.lang.Throwable from label09 to label10 with label15;
+        catch java.lang.Throwable from label11 to label12 with label15;
+        catch java.lang.Throwable from label13 to label14 with label15;
+    }
+    public boolean calculateBreakdown(com.ichi2.libanki.Stats$AxisType)
+    {
+        com.ichi2.libanki.Stats r0;
+        com.ichi2.libanki.Stats$AxisType $r1;
+        long l0, $l3;
+        int i1, $i2;
+        java.util.ArrayList r2;
+        double d0, d1, $d2, $d3;
+        int[] $r3;
+        java.lang.String $r4, r5;
+        java.lang.StringBuilder $r6;
+        java.util.Calendar $r7;
+        com.ichi2.libanki.Collection $r8;
+        com.ichi2.libanki.Sched $r9;
+        android.database.Cursor r10, $r14;
+        java.lang.Object[] $r11;
+        com.ichi2.libanki.DB $r12;
+        io.requery.android.database.sqlite.SQLiteDatabase $r13;
+        boolean $z0;
+        double[] $r15, $r21;
+        java.lang.Throwable $r16;
+        java.lang.Object $r17;
+        com.ichi2.libanki.Stats$1 $r18;
+        java.lang.Class $r19;
+        double[][] $r20;
+        byte $b4;
+
+        r0 := @this: com.ichi2.libanki.Stats;
+
+        $r1 := @parameter0: com.ichi2.libanki.Stats$AxisType;
+
+        r0.<com.ichi2.libanki.Stats: int mTitle> = 2131231313;
+
+        r0.<com.ichi2.libanki.Stats: boolean mBackwards> = 0;
+
+        $r3 = newarray (int)[3];
+
+        $r3[0] = 2131231357;
+
+        $r3[1] = 2131231348;
+
+        $r3[2] = 2131231355;
+
+        r0.<com.ichi2.libanki.Stats: int[] mAxisTitles> = $r3;
+
+        $r3 = newarray (int)[2];
+
+        $r3[0] = 2131231348;
+
+        $r3[1] = 2131231312;
+
+        r0.<com.ichi2.libanki.Stats: int[] mValueLabels> = $r3;
+
+        $r3 = newarray (int)[2];
+
+        $r3[0] = 2130772040;
+
+        $r3[1] = 2130772043;
+
+        r0.<com.ichi2.libanki.Stats: int[] mColors> = $r3;
+
+        r0.<com.ichi2.libanki.Stats: com.ichi2.libanki.Stats$AxisType mType> = $r1;
+
+        $r4 = specialinvoke r0.<com.ichi2.libanki.Stats: java.lang.String _getDeckFilter()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.String: java.lang.String replaceAll(java.lang.String,java.lang.String)>("[\\[\\]]", "");
+
+        r5 = $r4;
+
+        $i2 = virtualinvoke $r4.<java.lang.String: int length()>();
+
+        if $i2 <= 0 goto label01;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" and ");
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        r5 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label01:
+        $r7 = staticinvoke <java.util.GregorianCalendar: java.util.Calendar getInstance()>();
+
+        $r8 = r0.<com.ichi2.libanki.Stats: com.ichi2.libanki.Collection mCol>;
+
+        $l3 = virtualinvoke $r8.<com.ichi2.libanki.Collection: long getCrt()>();
+
+        $l3 = $l3 * 1000L;
+
+        virtualinvoke $r7.<java.util.Calendar: void setTimeInMillis(long)>($l3);
+
+        $i2 = specialinvoke r0.<com.ichi2.libanki.Stats: int _periodDays()>();
+
+        if $i2 <= 0 goto label02;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r5);
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" and id > ");
+
+        $r8 = r0.<com.ichi2.libanki.Stats: com.ichi2.libanki.Collection mCol>;
+
+        $r9 = virtualinvoke $r8.<com.ichi2.libanki.Collection: com.ichi2.libanki.Sched getSched()>();
+
+        $l3 = virtualinvoke $r9.<com.ichi2.libanki.Sched: long getDayCutoff()>();
+
+        $d2 = (double) $l3;
+
+        $d3 = <com.ichi2.libanki.Stats: double SECONDS_PER_DAY>;
+
+        d1 = (double) $i2;
+
+        $d3 = $d3 * d1;
+
+        $d2 = $d2 - $d3;
+
+        $d2 = $d2 * 1000.0;
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(double)>($d2);
+
+        r5 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label02:
+        $r8 = r0.<com.ichi2.libanki.Stats: com.ichi2.libanki.Collection mCol>;
+
+        $r9 = virtualinvoke $r8.<com.ichi2.libanki.Collection: com.ichi2.libanki.Sched getSched()>();
+
+        $l3 = virtualinvoke $r9.<com.ichi2.libanki.Sched: long getDayCutoff()>();
+
+        $i2 = virtualinvoke $r7.<java.util.Calendar: int get(int)>(11);
+
+        $i2 = $i2 * 3600;
+
+        l0 = (long) $i2;
+
+        l0 = $l3 - l0;
+
+        r2 = new java.util.ArrayList;
+
+        specialinvoke r2.<java.util.ArrayList: void <init>()>();
+
+        r10 = null;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("select 23 - ((cast((");
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>(l0);
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" - id/1000) / 3600.0 as int)) % 24) as hour, sum(case when ease = 1 then 0 else 1 end) / cast(count() as float) * 100, count() from revlog where type in (0,1,2) ");
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r5);
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" group by hour having count() > 30 order by hour");
+
+        $r4 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $i2 = virtualinvoke $r7.<java.util.Calendar: int get(int)>(11);
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i2);
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" : ");
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l3);
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" breakdown query: %s");
+
+        r5 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r11 = newarray (java.lang.Object)[1];
+
+        $r11[0] = $r4;
+
+        staticinvoke <timber.log.Timber: void d(java.lang.String,java.lang.Object[])>(r5, $r11);
+
+     label03:
+        $r8 = r0.<com.ichi2.libanki.Stats: com.ichi2.libanki.Collection mCol>;
+
+        $r12 = virtualinvoke $r8.<com.ichi2.libanki.Collection: com.ichi2.libanki.DB getDb()>();
+
+        $r13 = virtualinvoke $r12.<com.ichi2.libanki.DB: io.requery.android.database.sqlite.SQLiteDatabase getDatabase()>();
+
+        $r14 = virtualinvoke $r13.<io.requery.android.database.sqlite.SQLiteDatabase: android.database.Cursor rawQuery(java.lang.String,java.lang.Object[])>($r4, null);
+
+     label04:
+        r10 = $r14;
+
+     label05:
+        $z0 = interfaceinvoke $r14.<android.database.Cursor: boolean moveToNext()>();
+
+     label06:
+        if $z0 == 0 goto label11;
+
+     label07:
+        $r15 = newarray (double)[3];
+
+        $d2 = interfaceinvoke $r14.<android.database.Cursor: double getDouble(int)>(0);
+
+        $r15[0] = $d2;
+
+        $d2 = interfaceinvoke $r14.<android.database.Cursor: double getDouble(int)>(1);
+
+        $r15[1] = $d2;
+
+        $d2 = interfaceinvoke $r14.<android.database.Cursor: double getDouble(int)>(2);
+
+        $r15[2] = $d2;
+
+        virtualinvoke r2.<java.util.ArrayList: boolean add(java.lang.Object)>($r15);
+
+     label08:
+        goto label05;
+
+     label09:
+        $r16 := @caughtexception;
+
+        if r10 == null goto label10;
+
+        $z0 = interfaceinvoke r10.<android.database.Cursor: boolean isClosed()>();
+
+        if $z0 != 0 goto label10;
+
+        interfaceinvoke r10.<android.database.Cursor: void close()>();
+
+     label10:
+        throw $r16;
+
+     label11:
+        if $r14 == null goto label12;
+
+        $z0 = interfaceinvoke $r14.<android.database.Cursor: boolean isClosed()>();
+
+        if $z0 != 0 goto label12;
+
+        interfaceinvoke $r14.<android.database.Cursor: void close()>();
+
+     label12:
+        $i2 = virtualinvoke r2.<java.util.ArrayList: int size()>();
+
+        if $i2 != 0 goto label13;
+
+        $r15 = newarray (double)[3];
+
+        $r15[0] = 0.0;
+
+        $r15[1] = 0.0;
+
+        $r15[2] = 0.0;
+
+        virtualinvoke r2.<java.util.ArrayList: void add(int,java.lang.Object)>(0, $r15);
+
+     label13:
+        $i2 = 0;
+
+     label14:
+        i1 = virtualinvoke r2.<java.util.ArrayList: int size()>();
+
+        if $i2 >= i1 goto label16;
+
+        $r17 = virtualinvoke r2.<java.util.ArrayList: java.lang.Object get(int)>($i2);
+
+        $r15 = (double[]) $r17;
+
+        $d2 = $r15[0];
+
+        i1 = (int) $d2;
+
+        i1 = i1 + -4;
+
+        i1 = i1 % 24;
+
+        if i1 >= 0 goto label15;
+
+        i1 = i1 + 24;
+
+     label15:
+        $d2 = (double) i1;
+
+        $r15[0] = $d2;
+
+        virtualinvoke r2.<java.util.ArrayList: java.lang.Object set(int,java.lang.Object)>($i2, $r15);
+
+        $i2 = $i2 + 1;
+
+        goto label14;
+
+     label16:
+        $r18 = new com.ichi2.libanki.Stats$1;
+
+        specialinvoke $r18.<com.ichi2.libanki.Stats$1: void <init>(com.ichi2.libanki.Stats)>(r0);
+
+        staticinvoke <java.util.Collections: void sort(java.util.List,java.util.Comparator)>(r2, $r18);
+
+        $i2 = virtualinvoke r2.<java.util.ArrayList: int size()>();
+
+        $r3 = newarray (int)[2];
+
+        $r3[0] = 4;
+
+        $r3[1] = $i2;
+
+        $r19 = <java.lang.Double: java.lang.Class TYPE>;
+
+        $r17 = staticinvoke <java.lang.reflect.Array: java.lang.Object newInstance(java.lang.Class,int[])>($r19, $r3);
+
+        $r20 = (double[][]) $r17;
+
+        r0.<com.ichi2.libanki.Stats: double[][] mSeriesList> = $r20;
+
+        r0.<com.ichi2.libanki.Stats: double mPeak> = 0.0;
+
+        r0.<com.ichi2.libanki.Stats: double mMcount> = 0.0;
+
+        $d2 = 1.7976931348623157E308;
+
+        $d3 = 0.0;
+
+        $i2 = 0;
+
+     label17:
+        i1 = virtualinvoke r2.<java.util.ArrayList: int size()>();
+
+        if $i2 >= i1 goto label25;
+
+        $r17 = virtualinvoke r2.<java.util.ArrayList: java.lang.Object get(int)>($i2);
+
+        $r15 = (double[]) $r17;
+
+        d1 = $r15[0];
+
+        i1 = (int) d1;
+
+        d1 = (double) i1;
+
+        $b4 = d1 cmpg $d2;
+
+        if $b4 >= 0 goto label18;
+
+        $d2 = (double) i1;
+
+     label18:
+        d1 = (double) i1;
+
+        $b4 = d1 cmpl $d3;
+
+        if $b4 <= 0 goto label19;
+
+        $d3 = (double) i1;
+
+     label19:
+        d0 = $r15[1];
+
+        d1 = r0.<com.ichi2.libanki.Stats: double mPeak>;
+
+        $b4 = d0 cmpl d1;
+
+        if $b4 <= 0 goto label20;
+
+        r0.<com.ichi2.libanki.Stats: double mPeak> = d0;
+
+     label20:
+        $r20 = r0.<com.ichi2.libanki.Stats: double[][] mSeriesList>;
+
+        $r21 = $r20[0];
+
+        d1 = (double) i1;
+
+        $r21[$i2] = d1;
+
+        $r20 = r0.<com.ichi2.libanki.Stats: double[][] mSeriesList>;
+
+        $r21 = $r20[1];
+
+        $r21[$i2] = d0;
+
+        $r20 = r0.<com.ichi2.libanki.Stats: double[][] mSeriesList>;
+
+        $r21 = $r20[2];
+
+        d1 = $r15[2];
+
+        $r21[$i2] = d1;
+
+        if $i2 != 0 goto label24;
+
+        $r20 = r0.<com.ichi2.libanki.Stats: double[][] mSeriesList>;
+
+        $r21 = $r20[3];
+
+        $r21[$i2] = d0;
+
+     label21:
+        d1 = $r15[2];
+
+        d0 = r0.<com.ichi2.libanki.Stats: double mMcount>;
+
+        $b4 = d1 cmpl d0;
+
+        if $b4 <= 0 goto label22;
+
+        d1 = $r15[2];
+
+        r0.<com.ichi2.libanki.Stats: double mMcount> = d1;
+
+     label22:
+        $r20 = r0.<com.ichi2.libanki.Stats: double[][] mSeriesList>;
+
+        $r15 = $r20[1];
+
+        d1 = $r15[$i2];
+
+        i1 = r0.<com.ichi2.libanki.Stats: int mMaxCards>;
+
+        d0 = (double) i1;
+
+        $b4 = d1 cmpl d0;
+
+        if $b4 <= 0 goto label23;
+
+        $r20 = r0.<com.ichi2.libanki.Stats: double[][] mSeriesList>;
+
+        $r15 = $r20[1];
+
+        d1 = $r15[$i2];
+
+        i1 = (int) d1;
+
+        r0.<com.ichi2.libanki.Stats: int mMaxCards> = i1;
+
+     label23:
+        $i2 = $i2 + 1;
+
+        goto label17;
+
+     label24:
+        $r20 = r0.<com.ichi2.libanki.Stats: double[][] mSeriesList>;
+
+        $r21 = $r20[3];
+
+        i1 = $i2 + -1;
+
+        d1 = $r21[i1];
+
+        d0 = d0 - d1;
+
+        d0 = d0 / 3.0;
+
+        d0 = 10.0 * d0;
+
+        $l3 = staticinvoke <java.lang.Math: long round(double)>(d0);
+
+        d0 = (double) $l3;
+
+        d0 = d0 / 10.0;
+
+        $r20 = r0.<com.ichi2.libanki.Stats: double[][] mSeriesList>;
+
+        $r21 = $r20[3];
+
+        d1 = d1 + d0;
+
+        $r21[$i2] = d1;
+
+        goto label21;
+
+     label25:
+        $r20 = r0.<com.ichi2.libanki.Stats: double[][] mSeriesList>;
+
+        $r15 = $r20[0];
+
+        d1 = $r15[0];
+
+        r0.<com.ichi2.libanki.Stats: double mFirstElement> = d1;
+
+        $r20 = r0.<com.ichi2.libanki.Stats: double[][] mSeriesList>;
+
+        $r15 = $r20[0];
+
+        $r20 = r0.<com.ichi2.libanki.Stats: double[][] mSeriesList>;
+
+        $r21 = $r20[0];
+
+        $i2 = lengthof $r21;
+
+        $i2 = $i2 + -1;
+
+        d1 = $r15[$i2];
+
+        r0.<com.ichi2.libanki.Stats: double mLastElement> = d1;
+
+        $d2 = $d3 - $d2;
+
+        $i2 = (int) $d2;
+
+        r0.<com.ichi2.libanki.Stats: int mMaxElements> = $i2;
+
+        $i2 = r0.<com.ichi2.libanki.Stats: int mMaxElements>;
+
+        if $i2 != 0 goto label26;
+
+        r0.<com.ichi2.libanki.Stats: int mMaxElements> = 10;
+
+     label26:
+        $d2 = r0.<com.ichi2.libanki.Stats: double mMcount>;
+
+        $b4 = $d2 cmpl 0.0;
+
+        if $b4 != 0 goto label27;
+
+        r0.<com.ichi2.libanki.Stats: double mMcount> = 10.0;
+
+     label27:
+        $d2 = r0.<com.ichi2.libanki.Stats: double mFirstElement>;
+
+        $d3 = r0.<com.ichi2.libanki.Stats: double mLastElement>;
+
+        $b4 = $d2 cmpl $d3;
+
+        if $b4 != 0 goto label28;
+
+        r0.<com.ichi2.libanki.Stats: double mFirstElement> = 0.0;
+
+        r0.<com.ichi2.libanki.Stats: double mLastElement> = 23.0;
+
+     label28:
+        $i2 = r0.<com.ichi2.libanki.Stats: int mMaxCards>;
+
+        if $i2 != 0 goto label29;
+
+        r0.<com.ichi2.libanki.Stats: int mMaxCards> = 10;
+
+     label29:
+        $i2 = virtualinvoke r2.<java.util.ArrayList: int size()>();
+
+        if $i2 <= 0 goto label30;
+
+        return 1;
+
+     label30:
+        return 0;
+
+        catch java.lang.Throwable from label03 to label04 with label09;
+        catch java.lang.Throwable from label05 to label06 with label09;
+        catch java.lang.Throwable from label07 to label08 with label09;
+    }
+    public boolean calculateCardTypes(com.ichi2.libanki.Stats$AxisType)
+    {
+        com.ichi2.libanki.Stats r0;
+        com.ichi2.libanki.Stats$AxisType $r1;
+        java.util.ArrayList r2;
+        double[] r3;
+        int[] $r4;
+        android.database.Cursor r5, $r12;
+        java.lang.StringBuilder $r6;
+        java.lang.String $r7;
+        java.lang.Object[] $r8;
+        com.ichi2.libanki.Collection $r9;
+        com.ichi2.libanki.DB $r10;
+        io.requery.android.database.sqlite.SQLiteDatabase $r11;
+        double $d0;
+        boolean $z0;
+        java.lang.Class $r13;
+        java.lang.Object $r14;
+        double[][] $r15;
+        int $i0;
+        java.lang.Throwable $r16;
+
+        r0 := @this: com.ichi2.libanki.Stats;
+
+        $r1 := @parameter0: com.ichi2.libanki.Stats$AxisType;
+
+        r0.<com.ichi2.libanki.Stats: int mTitle> = 2131231316;
+
+        r0.<com.ichi2.libanki.Stats: boolean mBackwards> = 0;
+
+        $r4 = newarray (int)[3];
+
+        $r4[0] = 2131231311;
+
+        $r4[1] = 2131231312;
+
+        $r4[2] = 2131231320;
+
+        r0.<com.ichi2.libanki.Stats: int[] mAxisTitles> = $r4;
+
+        $r4 = newarray (int)[4];
+
+        $r4[0] = 2131231303;
+
+        $r4[1] = 2131231308;
+
+        $r4[2] = 2131231306;
+
+        $r4[3] = 2131231305;
+
+        r0.<com.ichi2.libanki.Stats: int[] mValueLabels> = $r4;
+
+        $r4 = newarray (int)[4];
+
+        $r4[0] = 2130772046;
+
+        $r4[1] = 2130772050;
+
+        $r4[2] = 2130772049;
+
+        $r4[3] = 2130772048;
+
+        r0.<com.ichi2.libanki.Stats: int[] mColors> = $r4;
+
+        r0.<com.ichi2.libanki.Stats: com.ichi2.libanki.Stats$AxisType mType> = $r1;
+
+        r2 = new java.util.ArrayList;
+
+        specialinvoke r2.<java.util.ArrayList: void <init>()>();
+
+        r5 = null;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("select sum(case when queue=2 and ivl >= 21 then 1 else 0 end), -- mtr\nsum(case when queue in (1,3) or (queue=2 and ivl < 21) then 1 else 0 end), -- yng/lrn\nsum(case when queue=0 then 1 else 0 end), -- new\nsum(case when queue<0 then 1 else 0 end) -- susp\nfrom cards where did in ");
+
+        $r7 = specialinvoke r0.<com.ichi2.libanki.Stats: java.lang.String _limit()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r7);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r8 = newarray (java.lang.Object)[1];
+
+        $r8[0] = $r7;
+
+        staticinvoke <timber.log.Timber: void d(java.lang.String,java.lang.Object[])>("CardsTypes query: %s", $r8);
+
+     label1:
+        $r9 = r0.<com.ichi2.libanki.Stats: com.ichi2.libanki.Collection mCol>;
+
+        $r10 = virtualinvoke $r9.<com.ichi2.libanki.Collection: com.ichi2.libanki.DB getDb()>();
+
+        $r11 = virtualinvoke $r10.<com.ichi2.libanki.DB: io.requery.android.database.sqlite.SQLiteDatabase getDatabase()>();
+
+        $r12 = virtualinvoke $r11.<io.requery.android.database.sqlite.SQLiteDatabase: android.database.Cursor rawQuery(java.lang.String,java.lang.Object[])>($r7, null);
+
+     label2:
+        r5 = $r12;
+
+     label3:
+        interfaceinvoke $r12.<android.database.Cursor: boolean moveToFirst()>();
+
+        r3 = newarray (double)[4];
+
+        $d0 = interfaceinvoke $r12.<android.database.Cursor: double getDouble(int)>(0);
+
+        r3[0] = $d0;
+
+        $d0 = interfaceinvoke $r12.<android.database.Cursor: double getDouble(int)>(1);
+
+        r3[1] = $d0;
+
+        $d0 = interfaceinvoke $r12.<android.database.Cursor: double getDouble(int)>(2);
+
+        r3[2] = $d0;
+
+        $d0 = interfaceinvoke $r12.<android.database.Cursor: double getDouble(int)>(3);
+
+        r3[3] = $d0;
+
+     label4:
+        if $r12 == null goto label5;
+
+        $z0 = interfaceinvoke $r12.<android.database.Cursor: boolean isClosed()>();
+
+        if $z0 != 0 goto label5;
+
+        interfaceinvoke $r12.<android.database.Cursor: void close()>();
+
+     label5:
+        $r4 = newarray (int)[2];
+
+        $r4[0] = 1;
+
+        $r4[1] = 4;
+
+        $r13 = <java.lang.Double: java.lang.Class TYPE>;
+
+        $r14 = staticinvoke <java.lang.reflect.Array: java.lang.Object newInstance(java.lang.Class,int[])>($r13, $r4);
+
+        $r15 = (double[][]) $r14;
+
+        r0.<com.ichi2.libanki.Stats: double[][] mSeriesList> = $r15;
+
+        $r15 = r0.<com.ichi2.libanki.Stats: double[][] mSeriesList>;
+
+        $r15[0] = r3;
+
+        r0.<com.ichi2.libanki.Stats: double mFirstElement> = 0.5;
+
+        r0.<com.ichi2.libanki.Stats: double mLastElement> = 9.5;
+
+        r0.<com.ichi2.libanki.Stats: double mMcount> = 100.0;
+
+        r0.<com.ichi2.libanki.Stats: int mMaxElements> = 10;
+
+        $i0 = r0.<com.ichi2.libanki.Stats: int mMaxCards>;
+
+        if $i0 != 0 goto label6;
+
+        r0.<com.ichi2.libanki.Stats: int mMaxCards> = 10;
+
+     label6:
+        $i0 = virtualinvoke r2.<java.util.ArrayList: int size()>();
+
+        if $i0 <= 0 goto label9;
+
+        return 1;
+
+     label7:
+        $r16 := @caughtexception;
+
+        if r5 == null goto label8;
+
+        $z0 = interfaceinvoke r5.<android.database.Cursor: boolean isClosed()>();
+
+        if $z0 != 0 goto label8;
+
+        interfaceinvoke r5.<android.database.Cursor: void close()>();
+
+     label8:
+        throw $r16;
+
+     label9:
+        return 0;
+
+        catch java.lang.Throwable from label1 to label2 with label7;
+        catch java.lang.Throwable from label3 to label4 with label7;
+    }
+    public boolean calculateDue(android.content.Context, com.ichi2.libanki.Stats$AxisType)
+    {
+        com.ichi2.libanki.Stats r0;
+        android.content.Context $r1;
+        com.ichi2.libanki.Stats$AxisType $r2;
+        com.ichi2.anki.stats.StatsMetaInfo r3;
+        java.lang.Object[] $r4;
+        java.lang.String $r5;
+        java.lang.Object $r6;
+        boolean $z0;
+        int $i0;
+        int[] $r7;
+        double $d0;
+        double[][] $r8;
+
+        r0 := @this: com.ichi2.libanki.Stats;
+
+        $r1 := @parameter0: android.content.Context;
+
+        $r2 := @parameter1: com.ichi2.libanki.Stats$AxisType;
+
+        r3 = new com.ichi2.anki.stats.StatsMetaInfo;
+
+        specialinvoke r3.<com.ichi2.anki.stats.StatsMetaInfo: void <init>()>();
+
+        staticinvoke <com.ichi2.libanki.hooks.Hooks: com.ichi2.libanki.hooks.Hooks getInstance(android.content.Context)>($r1);
+
+        $r4 = newarray (java.lang.Object)[3];
+
+        $r4[0] = $r2;
+
+        $r4[1] = $r1;
+
+        $r5 = specialinvoke r0.<com.ichi2.libanki.Stats: java.lang.String _limit()>();
+
+        $r4[2] = $r5;
+
+        $r6 = staticinvoke <com.ichi2.libanki.hooks.Hooks: java.lang.Object runFilter(java.lang.String,java.lang.Object,java.lang.Object[])>("advancedStatistics", r3, $r4);
+
+        r3 = (com.ichi2.anki.stats.StatsMetaInfo) $r6;
+
+        $z0 = virtualinvoke r3.<com.ichi2.anki.stats.StatsMetaInfo: boolean isStatsCalculated()>();
+
+        if $z0 == 0 goto label1;
+
+        $z0 = virtualinvoke r3.<com.ichi2.anki.stats.StatsMetaInfo: boolean ismDynamicAxis()>();
+
+        r0.<com.ichi2.libanki.Stats: boolean mDynamicAxis> = $z0;
+
+        $z0 = virtualinvoke r3.<com.ichi2.anki.stats.StatsMetaInfo: boolean ismHasColoredCumulative()>();
+
+        r0.<com.ichi2.libanki.Stats: boolean mHasColoredCumulative> = $z0;
+
+        $r2 = virtualinvoke r3.<com.ichi2.anki.stats.StatsMetaInfo: com.ichi2.libanki.Stats$AxisType getmType()>();
+
+        r0.<com.ichi2.libanki.Stats: com.ichi2.libanki.Stats$AxisType mType> = $r2;
+
+        $i0 = virtualinvoke r3.<com.ichi2.anki.stats.StatsMetaInfo: int getmTitle()>();
+
+        r0.<com.ichi2.libanki.Stats: int mTitle> = $i0;
+
+        $z0 = virtualinvoke r3.<com.ichi2.anki.stats.StatsMetaInfo: boolean ismBackwards()>();
+
+        r0.<com.ichi2.libanki.Stats: boolean mBackwards> = $z0;
+
+        $r7 = virtualinvoke r3.<com.ichi2.anki.stats.StatsMetaInfo: int[] getmValueLabels()>();
+
+        r0.<com.ichi2.libanki.Stats: int[] mValueLabels> = $r7;
+
+        $r7 = virtualinvoke r3.<com.ichi2.anki.stats.StatsMetaInfo: int[] getmColors()>();
+
+        r0.<com.ichi2.libanki.Stats: int[] mColors> = $r7;
+
+        $r7 = virtualinvoke r3.<com.ichi2.anki.stats.StatsMetaInfo: int[] getmAxisTitles()>();
+
+        r0.<com.ichi2.libanki.Stats: int[] mAxisTitles> = $r7;
+
+        $i0 = virtualinvoke r3.<com.ichi2.anki.stats.StatsMetaInfo: int getmMaxCards()>();
+
+        r0.<com.ichi2.libanki.Stats: int mMaxCards> = $i0;
+
+        $i0 = virtualinvoke r3.<com.ichi2.anki.stats.StatsMetaInfo: int getmMaxElements()>();
+
+        r0.<com.ichi2.libanki.Stats: int mMaxElements> = $i0;
+
+        $d0 = virtualinvoke r3.<com.ichi2.anki.stats.StatsMetaInfo: double getmFirstElement()>();
+
+        r0.<com.ichi2.libanki.Stats: double mFirstElement> = $d0;
+
+        $d0 = virtualinvoke r3.<com.ichi2.anki.stats.StatsMetaInfo: double getmLastElement()>();
+
+        r0.<com.ichi2.libanki.Stats: double mLastElement> = $d0;
+
+        $i0 = virtualinvoke r3.<com.ichi2.anki.stats.StatsMetaInfo: int getmZeroIndex()>();
+
+        r0.<com.ichi2.libanki.Stats: int mZeroIndex> = $i0;
+
+        $r8 = virtualinvoke r3.<com.ichi2.anki.stats.StatsMetaInfo: double[][] getmCumulative()>();
+
+        r0.<com.ichi2.libanki.Stats: double[][] mCumulative> = $r8;
+
+        $d0 = virtualinvoke r3.<com.ichi2.anki.stats.StatsMetaInfo: double getmMcount()>();
+
+        r0.<com.ichi2.libanki.Stats: double mMcount> = $d0;
+
+        $r8 = virtualinvoke r3.<com.ichi2.anki.stats.StatsMetaInfo: double[][] getmSeriesList()>();
+
+        r0.<com.ichi2.libanki.Stats: double[][] mSeriesList> = $r8;
+
+        $z0 = virtualinvoke r3.<com.ichi2.anki.stats.StatsMetaInfo: boolean isDataAvailable()>();
+
+        return $z0;
+
+     label1:
+        $z0 = specialinvoke r0.<com.ichi2.libanki.Stats: boolean calculateDue(com.ichi2.libanki.Stats$AxisType)>($r2);
+
+        return $z0;
+    }
+    public boolean calculateIntervals(android.content.Context, com.ichi2.libanki.Stats$AxisType)
+    {
+        com.ichi2.libanki.Stats r0;
+        android.content.Context $r1;
+        com.ichi2.libanki.Stats$AxisType $r2, $r16;
+        java.util.ArrayList r3;
+        int[] $r4;
+        int $i0, $i3;
+        byte b1, b2;
+        java.lang.String r5, $r11;
+        android.database.Cursor r6, $r12;
+        com.ichi2.libanki.Collection $r7;
+        com.ichi2.libanki.DB $r8;
+        io.requery.android.database.sqlite.SQLiteDatabase $r9;
+        java.lang.StringBuilder $r10;
+        boolean $z0;
+        double[] $r13, $r19;
+        double $d0, $d1, $d2, $d3, $d4;
+        java.lang.Throwable $r14;
+        java.lang.Object $r15;
+        java.lang.Class $r17;
+        double[][] $r18;
+        long $l4;
+
+        r0 := @this: com.ichi2.libanki.Stats;
+
+        $r1 := @parameter0: android.content.Context;
+
+        $r2 := @parameter1: com.ichi2.libanki.Stats$AxisType;
+
+        r0.<com.ichi2.libanki.Stats: boolean mDynamicAxis> = 1;
+
+        r0.<com.ichi2.libanki.Stats: com.ichi2.libanki.Stats$AxisType mType> = $r2;
+
+        r0.<com.ichi2.libanki.Stats: boolean mBackwards> = 0;
+
+        r0.<com.ichi2.libanki.Stats: int mTitle> = 2131231353;
+
+        $r4 = newarray (int)[3];
+
+        $i0 = virtualinvoke $r2.<com.ichi2.libanki.Stats$AxisType: int ordinal()>();
+
+        $r4[0] = $i0;
+
+        $r4[1] = 2131231314;
+
+        $r4[2] = 2131231347;
+
+        r0.<com.ichi2.libanki.Stats: int[] mAxisTitles> = $r4;
+
+        $r4 = newarray (int)[1];
+
+        $r4[0] = 2131231315;
+
+        r0.<com.ichi2.libanki.Stats: int[] mValueLabels> = $r4;
+
+        $r4 = newarray (int)[1];
+
+        $r4[0] = 2130772044;
+
+        r0.<com.ichi2.libanki.Stats: int[] mColors> = $r4;
+
+        b1 = 0;
+
+        r5 = "";
+
+        b2 = 0;
+
+        $r4 = <com.ichi2.libanki.Stats$2: int[] $SwitchMap$com$ichi2$libanki$Stats$AxisType>;
+
+        $i0 = virtualinvoke $r2.<com.ichi2.libanki.Stats$AxisType: int ordinal()>();
+
+        $i0 = $r4[$i0];
+
+        lookupswitch($i0)
+        {
+            case 1: goto label10;
+            case 2: goto label11;
+            case 3: goto label12;
+            default: goto label01;
+        };
+
+     label01:
+        r3 = new java.util.ArrayList;
+
+        specialinvoke r3.<java.util.ArrayList: void <init>()>();
+
+        r6 = null;
+
+     label02:
+        $r7 = r0.<com.ichi2.libanki.Stats: com.ichi2.libanki.Collection mCol>;
+
+        $r8 = virtualinvoke $r7.<com.ichi2.libanki.Collection: com.ichi2.libanki.DB getDb()>();
+
+        $r9 = virtualinvoke $r8.<com.ichi2.libanki.DB: io.requery.android.database.sqlite.SQLiteDatabase getDatabase()>();
+
+        $r10 = new java.lang.StringBuilder;
+
+        specialinvoke $r10.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("select ivl / ");
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(b2);
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" as grp, count() from cards where did in ");
+
+        $r11 = specialinvoke r0.<com.ichi2.libanki.Stats: java.lang.String _limit()>();
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r11);
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" and queue = 2 ");
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r5);
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" group by grp order by grp");
+
+        r5 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r12 = virtualinvoke $r9.<io.requery.android.database.sqlite.SQLiteDatabase: android.database.Cursor rawQuery(java.lang.String,java.lang.Object[])>(r5, null);
+
+     label03:
+        r6 = $r12;
+
+     label04:
+        $z0 = interfaceinvoke $r12.<android.database.Cursor: boolean moveToNext()>();
+
+     label05:
+        if $z0 == 0 goto label13;
+
+     label06:
+        $r13 = newarray (double)[2];
+
+        $d0 = interfaceinvoke $r12.<android.database.Cursor: double getDouble(int)>(0);
+
+        $r13[0] = $d0;
+
+        $d0 = interfaceinvoke $r12.<android.database.Cursor: double getDouble(int)>(1);
+
+        $r13[1] = $d0;
+
+        virtualinvoke r3.<java.util.ArrayList: boolean add(java.lang.Object)>($r13);
+
+     label07:
+        goto label04;
+
+     label08:
+        $r14 := @caughtexception;
+
+        if r6 == null goto label09;
+
+        $z0 = interfaceinvoke r6.<android.database.Cursor: boolean isClosed()>();
+
+        if $z0 != 0 goto label09;
+
+        interfaceinvoke r6.<android.database.Cursor: void close()>();
+
+     label09:
+        throw $r14;
+
+     label10:
+        b1 = 31;
+
+        b2 = 1;
+
+        r5 = " and grp <= 30";
+
+        goto label01;
+
+     label11:
+        b1 = 52;
+
+        b2 = 7;
+
+        r5 = " and grp <= 52";
+
+        goto label01;
+
+     label12:
+        b1 = -1;
+
+        b2 = 30;
+
+        r5 = "";
+
+        goto label01;
+
+     label13:
+        interfaceinvoke $r12.<android.database.Cursor: void close()>();
+
+        $r7 = r0.<com.ichi2.libanki.Stats: com.ichi2.libanki.Collection mCol>;
+
+        $r8 = virtualinvoke $r7.<com.ichi2.libanki.Collection: com.ichi2.libanki.DB getDb()>();
+
+        $r9 = virtualinvoke $r8.<com.ichi2.libanki.DB: io.requery.android.database.sqlite.SQLiteDatabase getDatabase()>();
+
+        $r10 = new java.lang.StringBuilder;
+
+        specialinvoke $r10.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("select count(), avg(ivl), max(ivl) from cards where did in ");
+
+        r5 = specialinvoke r0.<com.ichi2.libanki.Stats: java.lang.String _limit()>();
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r5);
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" and queue = 2");
+
+        r5 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r12 = virtualinvoke $r9.<io.requery.android.database.sqlite.SQLiteDatabase: android.database.Cursor rawQuery(java.lang.String,java.lang.Object[])>(r5, null);
+
+     label14:
+        r6 = $r12;
+
+     label15:
+        interfaceinvoke $r12.<android.database.Cursor: boolean moveToFirst()>();
+
+        $d1 = interfaceinvoke $r12.<android.database.Cursor: double getDouble(int)>(0);
+
+        $d2 = interfaceinvoke $r12.<android.database.Cursor: double getDouble(int)>(1);
+
+        $d0 = interfaceinvoke $r12.<android.database.Cursor: double getDouble(int)>(2);
+
+     label16:
+        if $r12 == null goto label17;
+
+        $z0 = interfaceinvoke $r12.<android.database.Cursor: boolean isClosed()>();
+
+        if $z0 != 0 goto label17;
+
+        interfaceinvoke $r12.<android.database.Cursor: void close()>();
+
+     label17:
+        $i0 = virtualinvoke r3.<java.util.ArrayList: int size()>();
+
+        if $i0 == 0 goto label18;
+
+        $r15 = virtualinvoke r3.<java.util.ArrayList: java.lang.Object get(int)>(0);
+
+        $r13 = (double[]) $r15;
+
+        $d3 = $r13[0];
+
+        b2 = $d3 cmpl 0.0;
+
+        if b2 <= 0 goto label19;
+
+     label18:
+        $r13 = newarray (double)[3];
+
+        $r13[0] = 0.0;
+
+        $r13[1] = 0.0;
+
+        $r13[2] = 0.0;
+
+        virtualinvoke r3.<java.util.ArrayList: void add(int,java.lang.Object)>(0, $r13);
+
+     label19:
+        if b1 != -1 goto label20;
+
+        $i0 = virtualinvoke r3.<java.util.ArrayList: int size()>();
+
+        if $i0 >= 2 goto label20;
+
+        b1 = 31;
+
+     label20:
+        $r16 = <com.ichi2.libanki.Stats$AxisType: com.ichi2.libanki.Stats$AxisType TYPE_LIFE>;
+
+        if $r2 == $r16 goto label25;
+
+        $i0 = virtualinvoke r3.<java.util.ArrayList: int size()>();
+
+        $i0 = $i0 + -1;
+
+        $r15 = virtualinvoke r3.<java.util.ArrayList: java.lang.Object get(int)>($i0);
+
+        $r13 = (double[]) $r15;
+
+        $d3 = $r13[0];
+
+        $d4 = (double) b1;
+
+        b2 = $d3 cmpg $d4;
+
+        if b2 >= 0 goto label25;
+
+        $r13 = newarray (double)[2];
+
+        $d3 = (double) b1;
+
+        $r13[0] = $d3;
+
+        $r13[1] = 0.0;
+
+        virtualinvoke r3.<java.util.ArrayList: boolean add(java.lang.Object)>($r13);
+
+     label21:
+        r0.<com.ichi2.libanki.Stats: double mLastElement> = 0.0;
+
+        $i0 = virtualinvoke r3.<java.util.ArrayList: int size()>();
+
+        $r4 = newarray (int)[2];
+
+        $r4[0] = 2;
+
+        $r4[1] = $i0;
+
+        $r17 = <java.lang.Double: java.lang.Class TYPE>;
+
+        $r15 = staticinvoke <java.lang.reflect.Array: java.lang.Object newInstance(java.lang.Class,int[])>($r17, $r4);
+
+        $r18 = (double[][]) $r15;
+
+        r0.<com.ichi2.libanki.Stats: double[][] mSeriesList> = $r18;
+
+        $i0 = 0;
+
+     label22:
+        $i3 = virtualinvoke r3.<java.util.ArrayList: int size()>();
+
+        if $i0 >= $i3 goto label26;
+
+        $r15 = virtualinvoke r3.<java.util.ArrayList: java.lang.Object get(int)>($i0);
+
+        $r13 = (double[]) $r15;
+
+        $r18 = r0.<com.ichi2.libanki.Stats: double[][] mSeriesList>;
+
+        $r19 = $r18[0];
+
+        $d3 = $r13[0];
+
+        $r19[$i0] = $d3;
+
+        $r18 = r0.<com.ichi2.libanki.Stats: double[][] mSeriesList>;
+
+        $r19 = $r18[1];
+
+        $d3 = $r13[1];
+
+        $r19[$i0] = $d3;
+
+        $r18 = r0.<com.ichi2.libanki.Stats: double[][] mSeriesList>;
+
+        $r19 = $r18[1];
+
+        $d3 = $r19[$i0];
+
+        $i3 = r0.<com.ichi2.libanki.Stats: int mMaxCards>;
+
+        $d4 = (double) $i3;
+
+        b1 = $d3 cmpl $d4;
+
+        if b1 <= 0 goto label23;
+
+        $d3 = $r13[1];
+
+        $l4 = staticinvoke <java.lang.Math: long round(double)>($d3);
+
+        $i3 = (int) $l4;
+
+        r0.<com.ichi2.libanki.Stats: int mMaxCards> = $i3;
+
+     label23:
+        $d3 = $r13[0];
+
+        $d4 = r0.<com.ichi2.libanki.Stats: double mLastElement>;
+
+        b1 = $d3 cmpl $d4;
+
+        if b1 <= 0 goto label24;
+
+        $d3 = $r13[0];
+
+        r0.<com.ichi2.libanki.Stats: double mLastElement> = $d3;
+
+     label24:
+        $i0 = $i0 + 1;
+
+        goto label22;
+
+     label25:
+        $r16 = <com.ichi2.libanki.Stats$AxisType: com.ichi2.libanki.Stats$AxisType TYPE_LIFE>;
+
+        if $r2 != $r16 goto label21;
+
+        $i0 = virtualinvoke r3.<java.util.ArrayList: int size()>();
+
+        if $i0 >= 2 goto label21;
+
+        $r13 = newarray (double)[2];
+
+        $i0 = virtualinvoke r3.<java.util.ArrayList: int size()>();
+
+        $i0 = $i0 + -1;
+
+        $r15 = virtualinvoke r3.<java.util.ArrayList: java.lang.Object get(int)>($i0);
+
+        $r19 = (double[]) $r15;
+
+        $d3 = $r19[0];
+
+        $d3 = $d3 + 1.0;
+
+        $d3 = staticinvoke <java.lang.Math: double max(double,double)>(12.0, $d3);
+
+        $r13[0] = $d3;
+
+        $r13[1] = 0.0;
+
+        virtualinvoke r3.<java.util.ArrayList: boolean add(java.lang.Object)>($r13);
+
+        goto label21;
+
+     label26:
+        $r18 = r0.<com.ichi2.libanki.Stats: double[][] mSeriesList>;
+
+        $r18 = staticinvoke <com.ichi2.libanki.Stats: double[][] createCumulative(double[][])>($r18);
+
+        r0.<com.ichi2.libanki.Stats: double[][] mCumulative> = $r18;
+
+        $i0 = 0;
+
+     label27:
+        $i3 = virtualinvoke r3.<java.util.ArrayList: int size()>();
+
+        if $i0 >= $i3 goto label28;
+
+        $r18 = r0.<com.ichi2.libanki.Stats: double[][] mCumulative>;
+
+        $r13 = $r18[1];
+
+        $d3 = $r13[$i0];
+
+        $d4 = $d1 / 100.0;
+
+        $d3 = $d3 / $d4;
+
+        $r13[$i0] = $d3;
+
+        $i0 = $i0 + 1;
+
+        goto label27;
+
+     label28:
+        r0.<com.ichi2.libanki.Stats: double mMcount> = 100.0;
+
+        $r4 = <com.ichi2.libanki.Stats$2: int[] $SwitchMap$com$ichi2$libanki$Stats$AxisType>;
+
+        $r2 = r0.<com.ichi2.libanki.Stats: com.ichi2.libanki.Stats$AxisType mType>;
+
+        $i0 = virtualinvoke $r2.<com.ichi2.libanki.Stats$AxisType: int ordinal()>();
+
+        $i0 = $r4[$i0];
+
+        lookupswitch($i0)
+        {
+            case 1: goto label34;
+            case 2: goto label35;
+            default: goto label29;
+        };
+
+     label29:
+        r0.<com.ichi2.libanki.Stats: double mFirstElement> = 0.0;
+
+        $i0 = virtualinvoke r3.<java.util.ArrayList: int size()>();
+
+        $i0 = $i0 + -1;
+
+        r0.<com.ichi2.libanki.Stats: int mMaxElements> = $i0;
+
+        $d1 = <com.ichi2.libanki.Stats: double SECONDS_PER_DAY>;
+
+        $d2 = $d1 * $d2;
+
+        $l4 = staticinvoke <java.lang.Math: long round(double)>($d2);
+
+        $i0 = (int) $l4;
+
+        r5 = staticinvoke <com.ichi2.libanki.Utils: java.lang.String timeSpan(android.content.Context,int)>($r1, $i0);
+
+        r0.<com.ichi2.libanki.Stats: java.lang.String mAverage> = r5;
+
+        $d2 = <com.ichi2.libanki.Stats: double SECONDS_PER_DAY>;
+
+        $d0 = $d2 * $d0;
+
+        $l4 = staticinvoke <java.lang.Math: long round(double)>($d0);
+
+        $i0 = (int) $l4;
+
+        r5 = staticinvoke <com.ichi2.libanki.Utils: java.lang.String timeSpan(android.content.Context,int)>($r1, $i0);
+
+        r0.<com.ichi2.libanki.Stats: java.lang.String mLongest> = r5;
+
+        $i0 = r0.<com.ichi2.libanki.Stats: int mMaxElements>;
+
+        if $i0 != 0 goto label30;
+
+        r0.<com.ichi2.libanki.Stats: int mMaxElements> = 10;
+
+     label30:
+        $d0 = r0.<com.ichi2.libanki.Stats: double mMcount>;
+
+        b1 = $d0 cmpl 0.0;
+
+        if b1 != 0 goto label31;
+
+        r0.<com.ichi2.libanki.Stats: double mMcount> = 10.0;
+
+     label31:
+        $d0 = r0.<com.ichi2.libanki.Stats: double mFirstElement>;
+
+        $d2 = r0.<com.ichi2.libanki.Stats: double mLastElement>;
+
+        b1 = $d0 cmpl $d2;
+
+        if b1 != 0 goto label32;
+
+        r0.<com.ichi2.libanki.Stats: double mFirstElement> = 0.0;
+
+        r0.<com.ichi2.libanki.Stats: double mLastElement> = 6.0;
+
+     label32:
+        $i0 = r0.<com.ichi2.libanki.Stats: int mMaxCards>;
+
+        if $i0 != 0 goto label33;
+
+        r0.<com.ichi2.libanki.Stats: int mMaxCards> = 10;
+
+     label33:
+        $i0 = virtualinvoke r3.<java.util.ArrayList: int size()>();
+
+        if $i0 <= 0 goto label36;
+
+        return 1;
+
+     label34:
+        r0.<com.ichi2.libanki.Stats: double mLastElement> = 31.0;
+
+        goto label29;
+
+     label35:
+        r0.<com.ichi2.libanki.Stats: double mLastElement> = 52.0;
+
+        goto label29;
+
+     label36:
+        return 0;
+
+        catch java.lang.Throwable from label02 to label03 with label08;
+        catch java.lang.Throwable from label04 to label05 with label08;
+        catch java.lang.Throwable from label06 to label07 with label08;
+        catch java.lang.Throwable from label13 to label14 with label08;
+        catch java.lang.Throwable from label15 to label16 with label08;
+    }
+    public void calculateOverviewStatistics(com.ichi2.libanki.Stats$AxisType, com.ichi2.anki.stats.OverviewStatsBuilder$OverviewStats)
+    {
+        com.ichi2.libanki.Stats r0;
+        com.ichi2.libanki.Stats$AxisType $r1, $r14;
+        com.ichi2.anki.stats.OverviewStatsBuilder$OverviewStats $r2;
+        double $d0, $d1, $d2;
+        int $i0;
+        java.lang.String $r3, $r9;
+        android.database.Cursor r4, $r10;
+        com.ichi2.libanki.Collection $r5;
+        com.ichi2.libanki.DB $r6;
+        io.requery.android.database.sqlite.SQLiteDatabase $r7;
+        java.lang.StringBuilder $r8;
+        boolean $z0;
+        java.lang.Throwable $r11, $r15, $r16;
+        com.ichi2.libanki.Sched $r12;
+        long $l1;
+        java.lang.Object[] $r13;
+
+        r0 := @this: com.ichi2.libanki.Stats;
+
+        $r1 := @parameter0: com.ichi2.libanki.Stats$AxisType;
+
+        $r2 := @parameter1: com.ichi2.anki.stats.OverviewStatsBuilder$OverviewStats;
+
+        $d0 = 0.0;
+
+        $i0 = $r1.<com.ichi2.libanki.Stats$AxisType: int days>;
+
+        $r2.<com.ichi2.anki.stats.OverviewStatsBuilder$OverviewStats: int allDays> = $i0;
+
+        $r3 = virtualinvoke r0.<com.ichi2.libanki.Stats: java.lang.String getRevlogFilter(com.ichi2.libanki.Stats$AxisType,boolean)>($r1, 0);
+
+        r4 = null;
+
+     label01:
+        $r5 = r0.<com.ichi2.libanki.Stats: com.ichi2.libanki.Collection mCol>;
+
+        $r6 = virtualinvoke $r5.<com.ichi2.libanki.Collection: com.ichi2.libanki.DB getDb()>();
+
+        $r7 = virtualinvoke $r6.<com.ichi2.libanki.DB: io.requery.android.database.sqlite.SQLiteDatabase getDatabase()>();
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("SELECT COUNT(*) as num_reviews, sum(case when type = 0 then 1 else 0 end) as new_cards FROM revlog ");
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r10 = virtualinvoke $r7.<io.requery.android.database.sqlite.SQLiteDatabase: android.database.Cursor rawQuery(java.lang.String,java.lang.Object[])>($r9, null);
+
+     label02:
+        r4 = $r10;
+
+     label03:
+        $z0 = interfaceinvoke $r10.<android.database.Cursor: boolean moveToNext()>();
+
+     label04:
+        if $z0 == 0 goto label09;
+
+     label05:
+        $i0 = interfaceinvoke $r10.<android.database.Cursor: int getInt(int)>(0);
+
+        $r2.<com.ichi2.anki.stats.OverviewStatsBuilder$OverviewStats: int totalReviews> = $i0;
+
+     label06:
+        goto label03;
+
+     label07:
+        $r11 := @caughtexception;
+
+        if r4 == null goto label08;
+
+        $z0 = interfaceinvoke r4.<android.database.Cursor: boolean isClosed()>();
+
+        if $z0 != 0 goto label08;
+
+        interfaceinvoke r4.<android.database.Cursor: void close()>();
+
+     label08:
+        throw $r11;
+
+     label09:
+        if $r10 == null goto label10;
+
+        $z0 = interfaceinvoke $r10.<android.database.Cursor: boolean isClosed()>();
+
+        if $z0 != 0 goto label10;
+
+        interfaceinvoke $r10.<android.database.Cursor: void close()>();
+
+     label10:
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("SELECT  COUNT(*) numDays, MIN(day) firstDay, SUM(time_per_day) sum_time  from ( SELECT (cast((id/1000 - ");
+
+        $r5 = r0.<com.ichi2.libanki.Stats: com.ichi2.libanki.Collection mCol>;
+
+        $r12 = virtualinvoke $r5.<com.ichi2.libanki.Collection: com.ichi2.libanki.Sched getSched()>();
+
+        $l1 = virtualinvoke $r12.<com.ichi2.libanki.Sched: long getDayCutoff()>();
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l1);
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(") / ");
+
+        $d1 = <com.ichi2.libanki.Stats: double SECONDS_PER_DAY>;
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(double)>($d1);
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" AS INT)) AS day,  sum(time/1000.0/60.0) AS time_per_day FROM revlog ");
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" GROUP BY day ORDER BY day)");
+
+        $r3 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r13 = newarray (java.lang.Object)[1];
+
+        $r13[0] = $r3;
+
+        staticinvoke <timber.log.Timber: void d(java.lang.String,java.lang.Object[])>("Count cntquery: %s", $r13);
+
+     label11:
+        $r5 = r0.<com.ichi2.libanki.Stats: com.ichi2.libanki.Collection mCol>;
+
+        $r6 = virtualinvoke $r5.<com.ichi2.libanki.Collection: com.ichi2.libanki.DB getDb()>();
+
+        $r7 = virtualinvoke $r6.<com.ichi2.libanki.DB: io.requery.android.database.sqlite.SQLiteDatabase getDatabase()>();
+
+        $r10 = virtualinvoke $r7.<io.requery.android.database.sqlite.SQLiteDatabase: android.database.Cursor rawQuery(java.lang.String,java.lang.Object[])>($r3, null);
+
+     label12:
+        r4 = $r10;
+
+     label13:
+        $z0 = interfaceinvoke $r10.<android.database.Cursor: boolean moveToNext()>();
+
+     label14:
+        if $z0 == 0 goto label23;
+
+     label15:
+        $i0 = interfaceinvoke $r10.<android.database.Cursor: int getInt(int)>(0);
+
+        $r2.<com.ichi2.anki.stats.OverviewStatsBuilder$OverviewStats: int daysStudied> = $i0;
+
+        $d1 = interfaceinvoke $r10.<android.database.Cursor: double getDouble(int)>(2);
+
+        $r2.<com.ichi2.anki.stats.OverviewStatsBuilder$OverviewStats: double totalTime> = $d1;
+
+        $r14 = <com.ichi2.libanki.Stats$AxisType: com.ichi2.libanki.Stats$AxisType TYPE_LIFE>;
+
+     label16:
+        if $r1 != $r14 goto label13;
+
+     label17:
+        $i0 = interfaceinvoke $r10.<android.database.Cursor: int getInt(int)>(1);
+
+        $i0 = staticinvoke <java.lang.Math: int abs(int)>($i0);
+
+     label18:
+        $i0 = $i0 + 1;
+
+     label19:
+        $r2.<com.ichi2.anki.stats.OverviewStatsBuilder$OverviewStats: int allDays> = $i0;
+
+     label20:
+        goto label13;
+
+     label21:
+        $r15 := @caughtexception;
+
+        if r4 == null goto label22;
+
+        $z0 = interfaceinvoke r4.<android.database.Cursor: boolean isClosed()>();
+
+        if $z0 != 0 goto label22;
+
+        interfaceinvoke r4.<android.database.Cursor: void close()>();
+
+     label22:
+        throw $r15;
+
+     label23:
+        if $r10 == null goto label24;
+
+        $z0 = interfaceinvoke $r10.<android.database.Cursor: boolean isClosed()>();
+
+        if $z0 != 0 goto label24;
+
+        interfaceinvoke $r10.<android.database.Cursor: void close()>();
+
+     label24:
+        $r5 = r0.<com.ichi2.libanki.Stats: com.ichi2.libanki.Collection mCol>;
+
+        $r6 = virtualinvoke $r5.<com.ichi2.libanki.Collection: com.ichi2.libanki.DB getDb()>();
+
+        $r7 = virtualinvoke $r6.<com.ichi2.libanki.DB: io.requery.android.database.sqlite.SQLiteDatabase getDatabase()>();
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("select avg(ivl), max(ivl) from cards where did in ");
+
+        $r3 = specialinvoke r0.<com.ichi2.libanki.Stats: java.lang.String _limit()>();
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" and queue = 2");
+
+        $r3 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r10 = virtualinvoke $r7.<io.requery.android.database.sqlite.SQLiteDatabase: android.database.Cursor rawQuery(java.lang.String,java.lang.Object[])>($r3, null);
+
+     label25:
+        r4 = $r10;
+
+     label26:
+        interfaceinvoke $r10.<android.database.Cursor: boolean moveToFirst()>();
+
+        $d1 = interfaceinvoke $r10.<android.database.Cursor: double getDouble(int)>(0);
+
+        $r2.<com.ichi2.anki.stats.OverviewStatsBuilder$OverviewStats: double averageInterval> = $d1;
+
+        $d1 = interfaceinvoke $r10.<android.database.Cursor: double getDouble(int)>(1);
+
+        $r2.<com.ichi2.anki.stats.OverviewStatsBuilder$OverviewStats: double longestInterval> = $d1;
+
+     label27:
+        if $r10 == null goto label28;
+
+        $z0 = interfaceinvoke $r10.<android.database.Cursor: boolean isClosed()>();
+
+        if $z0 != 0 goto label28;
+
+        interfaceinvoke $r10.<android.database.Cursor: void close()>();
+
+     label28:
+        $i0 = $r2.<com.ichi2.anki.stats.OverviewStatsBuilder$OverviewStats: int totalReviews>;
+
+        $d1 = (double) $i0;
+
+        $i0 = $r2.<com.ichi2.anki.stats.OverviewStatsBuilder$OverviewStats: int allDays>;
+
+        $d2 = (double) $i0;
+
+        $d1 = $d1 / $d2;
+
+        $r2.<com.ichi2.anki.stats.OverviewStatsBuilder$OverviewStats: double reviewsPerDayOnAll> = $d1;
+
+        $i0 = $r2.<com.ichi2.anki.stats.OverviewStatsBuilder$OverviewStats: int daysStudied>;
+
+        if $i0 != 0 goto label33;
+
+        $d1 = 0.0;
+
+     label29:
+        $r2.<com.ichi2.anki.stats.OverviewStatsBuilder$OverviewStats: double reviewsPerDayOnStudyDays> = $d1;
+
+        $d1 = $r2.<com.ichi2.anki.stats.OverviewStatsBuilder$OverviewStats: double totalTime>;
+
+        $i0 = $r2.<com.ichi2.anki.stats.OverviewStatsBuilder$OverviewStats: int allDays>;
+
+        $d2 = (double) $i0;
+
+        $d1 = $d1 / $d2;
+
+        $r2.<com.ichi2.anki.stats.OverviewStatsBuilder$OverviewStats: double timePerDayOnAll> = $d1;
+
+        $i0 = $r2.<com.ichi2.anki.stats.OverviewStatsBuilder$OverviewStats: int daysStudied>;
+
+        if $i0 != 0 goto label34;
+
+     label30:
+        $r2.<com.ichi2.anki.stats.OverviewStatsBuilder$OverviewStats: double timePerDayOnStudyDays> = $d0;
+
+        $i0 = virtualinvoke r0.<com.ichi2.libanki.Stats: int getNewCards(com.ichi2.libanki.Stats$AxisType)>($r1);
+
+        $r2.<com.ichi2.anki.stats.OverviewStatsBuilder$OverviewStats: int totalNewCards> = $i0;
+
+        $i0 = $r2.<com.ichi2.anki.stats.OverviewStatsBuilder$OverviewStats: int totalNewCards>;
+
+        $d0 = (double) $i0;
+
+        $i0 = $r2.<com.ichi2.anki.stats.OverviewStatsBuilder$OverviewStats: int allDays>;
+
+        $d1 = (double) $i0;
+
+        $d0 = $d0 / $d1;
+
+        $r2.<com.ichi2.anki.stats.OverviewStatsBuilder$OverviewStats: double newCardsPerDay> = $d0;
+
+        return;
+
+     label31:
+        $r16 := @caughtexception;
+
+        if r4 == null goto label32;
+
+        $z0 = interfaceinvoke r4.<android.database.Cursor: boolean isClosed()>();
+
+        if $z0 != 0 goto label32;
+
+        interfaceinvoke r4.<android.database.Cursor: void close()>();
+
+     label32:
+        throw $r16;
+
+     label33:
+        $i0 = $r2.<com.ichi2.anki.stats.OverviewStatsBuilder$OverviewStats: int totalReviews>;
+
+        $d1 = (double) $i0;
+
+        $i0 = $r2.<com.ichi2.anki.stats.OverviewStatsBuilder$OverviewStats: int daysStudied>;
+
+        $d2 = (double) $i0;
+
+        $d1 = $d1 / $d2;
+
+        goto label29;
+
+     label34:
+        $d0 = $r2.<com.ichi2.anki.stats.OverviewStatsBuilder$OverviewStats: double totalTime>;
+
+        $i0 = $r2.<com.ichi2.anki.stats.OverviewStatsBuilder$OverviewStats: int daysStudied>;
+
+        $d1 = (double) $i0;
+
+        $d0 = $d0 / $d1;
+
+        goto label30;
+
+        catch java.lang.Throwable from label01 to label02 with label07;
+        catch java.lang.Throwable from label03 to label04 with label07;
+        catch java.lang.Throwable from label05 to label06 with label07;
+        catch java.lang.Throwable from label11 to label12 with label21;
+        catch java.lang.Throwable from label13 to label14 with label21;
+        catch java.lang.Throwable from label15 to label16 with label21;
+        catch java.lang.Throwable from label17 to label18 with label21;
+        catch java.lang.Throwable from label19 to label20 with label21;
+        catch java.lang.Throwable from label24 to label25 with label31;
+        catch java.lang.Throwable from label26 to label27 with label31;
+    }
+    public boolean calculateReviewCount(com.ichi2.libanki.Stats$AxisType)
+    {
+        com.ichi2.libanki.Stats r0;
+        com.ichi2.libanki.Stats$AxisType $r1;
+        boolean $z0;
+        com.ichi2.libanki.Stats$ChartType $r2;
+
+        r0 := @this: com.ichi2.libanki.Stats;
+
+        $r1 := @parameter0: com.ichi2.libanki.Stats$AxisType;
+
+        $r2 = <com.ichi2.libanki.Stats$ChartType: com.ichi2.libanki.Stats$ChartType REVIEW_COUNT>;
+
+        $z0 = specialinvoke r0.<com.ichi2.libanki.Stats: boolean calculateDone(com.ichi2.libanki.Stats$AxisType,com.ichi2.libanki.Stats$ChartType)>($r1, $r2);
+
+        return $z0;
+    }
+    public boolean calculateReviewTime(com.ichi2.libanki.Stats$AxisType)
+    {
+        com.ichi2.libanki.Stats r0;
+        com.ichi2.libanki.Stats$AxisType $r1;
+        boolean $z0;
+        com.ichi2.libanki.Stats$ChartType $r2;
+
+        r0 := @this: com.ichi2.libanki.Stats;
+
+        $r1 := @parameter0: com.ichi2.libanki.Stats$AxisType;
+
+        $r2 = <com.ichi2.libanki.Stats$ChartType: com.ichi2.libanki.Stats$ChartType REVIEW_TIME>;
+
+        $z0 = specialinvoke r0.<com.ichi2.libanki.Stats: boolean calculateDone(com.ichi2.libanki.Stats$AxisType,com.ichi2.libanki.Stats$ChartType)>($r1, $r2);
+
+        return $z0;
+    }
+    public int[] calculateTodayStats()
+    {
+        com.ichi2.libanki.Stats r0;
+        java.lang.String $r1, r2;
+        int $i0, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9;
+        java.lang.StringBuilder $r3;
+        android.database.Cursor r4, $r10;
+        com.ichi2.libanki.Collection $r5;
+        com.ichi2.libanki.Sched $r6;
+        long $l1;
+        double $d0, $d1;
+        java.lang.Object[] $r7;
+        com.ichi2.libanki.DB $r8;
+        io.requery.android.database.sqlite.SQLiteDatabase $r9;
+        boolean $z0;
+        int[] $r11;
+        java.lang.Throwable $r12, $r13;
+
+        r0 := @this: com.ichi2.libanki.Stats;
+
+        $r1 = specialinvoke r0.<com.ichi2.libanki.Stats: java.lang.String _getDeckFilter()>();
+
+        r2 = $r1;
+
+        $i0 = virtualinvoke $r1.<java.lang.String: int length()>();
+
+        if $i0 <= 0 goto label01;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" and ");
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        r2 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label01:
+        r4 = null;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("select count(), sum(time)/1000, sum(case when ease = 1 then 1 else 0 end), sum(case when type = 0 then 1 else 0 end), sum(case when type = 1 then 1 else 0 end), sum(case when type = 2 then 1 else 0 end), sum(case when type = 3 then 1 else 0 end) from revlog where id > ");
+
+        $r5 = r0.<com.ichi2.libanki.Stats: com.ichi2.libanki.Collection mCol>;
+
+        $r6 = virtualinvoke $r5.<com.ichi2.libanki.Collection: com.ichi2.libanki.Sched getSched()>();
+
+        $l1 = virtualinvoke $r6.<com.ichi2.libanki.Sched: long getDayCutoff()>();
+
+        $d0 = (double) $l1;
+
+        $d1 = <com.ichi2.libanki.Stats: double SECONDS_PER_DAY>;
+
+        $d0 = $d0 - $d1;
+
+        $d0 = $d0 * 1000.0;
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(double)>($d0);
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ");
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r2);
+
+        $r1 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r7 = newarray (java.lang.Object)[1];
+
+        $r7[0] = $r1;
+
+        staticinvoke <timber.log.Timber: void d(java.lang.String,java.lang.Object[])>("todays statistics query: %s", $r7);
+
+     label02:
+        $r5 = r0.<com.ichi2.libanki.Stats: com.ichi2.libanki.Collection mCol>;
+
+        $r8 = virtualinvoke $r5.<com.ichi2.libanki.Collection: com.ichi2.libanki.DB getDb()>();
+
+        $r9 = virtualinvoke $r8.<com.ichi2.libanki.DB: io.requery.android.database.sqlite.SQLiteDatabase getDatabase()>();
+
+        $r10 = virtualinvoke $r9.<io.requery.android.database.sqlite.SQLiteDatabase: android.database.Cursor rawQuery(java.lang.String,java.lang.Object[])>($r1, null);
+
+     label03:
+        r4 = $r10;
+
+     label04:
+        interfaceinvoke $r10.<android.database.Cursor: boolean moveToFirst()>();
+
+        $i0 = interfaceinvoke $r10.<android.database.Cursor: int getInt(int)>(0);
+
+        $i2 = interfaceinvoke $r10.<android.database.Cursor: int getInt(int)>(1);
+
+        $i3 = interfaceinvoke $r10.<android.database.Cursor: int getInt(int)>(2);
+
+        $i4 = interfaceinvoke $r10.<android.database.Cursor: int getInt(int)>(3);
+
+        $i5 = interfaceinvoke $r10.<android.database.Cursor: int getInt(int)>(4);
+
+        $i6 = interfaceinvoke $r10.<android.database.Cursor: int getInt(int)>(5);
+
+        $i7 = interfaceinvoke $r10.<android.database.Cursor: int getInt(int)>(6);
+
+     label05:
+        if $r10 == null goto label06;
+
+        $z0 = interfaceinvoke $r10.<android.database.Cursor: boolean isClosed()>();
+
+        if $z0 != 0 goto label06;
+
+        interfaceinvoke $r10.<android.database.Cursor: void close()>();
+
+     label06:
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("select count(), sum(case when ease = 1 then 0 else 1 end) from revlog where lastIvl >= 21 and id > ");
+
+        $r5 = r0.<com.ichi2.libanki.Stats: com.ichi2.libanki.Collection mCol>;
+
+        $r6 = virtualinvoke $r5.<com.ichi2.libanki.Collection: com.ichi2.libanki.Sched getSched()>();
+
+        $l1 = virtualinvoke $r6.<com.ichi2.libanki.Sched: long getDayCutoff()>();
+
+        $d0 = (double) $l1;
+
+        $d1 = <com.ichi2.libanki.Stats: double SECONDS_PER_DAY>;
+
+        $d0 = $d0 - $d1;
+
+        $d0 = $d0 * 1000.0;
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(double)>($d0);
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ");
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r2);
+
+        r2 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r7 = newarray (java.lang.Object)[1];
+
+        $r7[0] = r2;
+
+        staticinvoke <timber.log.Timber: void d(java.lang.String,java.lang.Object[])>("todays statistics query 2: %s", $r7);
+
+     label07:
+        $r5 = r0.<com.ichi2.libanki.Stats: com.ichi2.libanki.Collection mCol>;
+
+        $r8 = virtualinvoke $r5.<com.ichi2.libanki.Collection: com.ichi2.libanki.DB getDb()>();
+
+        $r9 = virtualinvoke $r8.<com.ichi2.libanki.DB: io.requery.android.database.sqlite.SQLiteDatabase getDatabase()>();
+
+        $r10 = virtualinvoke $r9.<io.requery.android.database.sqlite.SQLiteDatabase: android.database.Cursor rawQuery(java.lang.String,java.lang.Object[])>(r2, null);
+
+     label08:
+        r4 = $r10;
+
+     label09:
+        interfaceinvoke $r10.<android.database.Cursor: boolean moveToFirst()>();
+
+        $i8 = interfaceinvoke $r10.<android.database.Cursor: int getInt(int)>(0);
+
+        $i9 = interfaceinvoke $r10.<android.database.Cursor: int getInt(int)>(1);
+
+     label10:
+        if $r10 == null goto label11;
+
+        $z0 = interfaceinvoke $r10.<android.database.Cursor: boolean isClosed()>();
+
+        if $z0 != 0 goto label11;
+
+        interfaceinvoke $r10.<android.database.Cursor: void close()>();
+
+     label11:
+        $r11 = newarray (int)[9];
+
+        $r11[0] = $i0;
+
+        $r11[1] = $i2;
+
+        $r11[2] = $i3;
+
+        $r11[3] = $i4;
+
+        $r11[4] = $i5;
+
+        $r11[5] = $i6;
+
+        $r11[6] = $i7;
+
+        $r11[7] = $i8;
+
+        $r11[8] = $i9;
+
+        return $r11;
+
+     label12:
+        $r12 := @caughtexception;
+
+        if r4 == null goto label13;
+
+        $z0 = interfaceinvoke r4.<android.database.Cursor: boolean isClosed()>();
+
+        if $z0 != 0 goto label13;
+
+        interfaceinvoke r4.<android.database.Cursor: void close()>();
+
+     label13:
+        throw $r12;
+
+     label14:
+        $r13 := @caughtexception;
+
+        if r4 == null goto label15;
+
+        $z0 = interfaceinvoke r4.<android.database.Cursor: boolean isClosed()>();
+
+        if $z0 != 0 goto label15;
+
+        interfaceinvoke r4.<android.database.Cursor: void close()>();
+
+     label15:
+        throw $r13;
+
+        catch java.lang.Throwable from label02 to label03 with label12;
+        catch java.lang.Throwable from label04 to label05 with label12;
+        catch java.lang.Throwable from label07 to label08 with label14;
+        catch java.lang.Throwable from label09 to label10 with label14;
+    }
+    public boolean calculateWeeklyBreakdown(com.ichi2.libanki.Stats$AxisType)
+    {
+        com.ichi2.libanki.Stats r0;
+        com.ichi2.libanki.Stats$AxisType $r1;
+        int i0, $i1;
+        java.util.ArrayList r2;
+        double d0, d1, $d2, $d3;
+        int[] $r3;
+        java.lang.String $r4, r5;
+        java.lang.StringBuilder $r6;
+        java.util.Calendar $r7;
+        com.ichi2.libanki.Collection $r8;
+        com.ichi2.libanki.Sched $r9;
+        long $l2;
+        android.database.Cursor r10, $r14;
+        java.lang.Object[] $r11;
+        com.ichi2.libanki.DB $r12;
+        io.requery.android.database.sqlite.SQLiteDatabase $r13;
+        boolean $z0;
+        double[] $r15, $r20;
+        java.lang.Throwable $r16;
+        java.lang.Class $r17;
+        java.lang.Object $r18;
+        double[][] $r19;
+        byte $b3;
+
+        r0 := @this: com.ichi2.libanki.Stats;
+
+        $r1 := @parameter0: com.ichi2.libanki.Stats$AxisType;
+
+        r0.<com.ichi2.libanki.Stats: int mTitle> = 2131231364;
+
+        r0.<com.ichi2.libanki.Stats: boolean mBackwards> = 0;
+
+        $r3 = newarray (int)[3];
+
+        $r3[0] = 2131231324;
+
+        $r3[1] = 2131231348;
+
+        $r3[2] = 2131231355;
+
+        r0.<com.ichi2.libanki.Stats: int[] mAxisTitles> = $r3;
+
+        $r3 = newarray (int)[2];
+
+        $r3[0] = 2131231348;
+
+        $r3[1] = 2131231312;
+
+        r0.<com.ichi2.libanki.Stats: int[] mValueLabels> = $r3;
+
+        $r3 = newarray (int)[2];
+
+        $r3[0] = 2130772040;
+
+        $r3[1] = 2130772043;
+
+        r0.<com.ichi2.libanki.Stats: int[] mColors> = $r3;
+
+        r0.<com.ichi2.libanki.Stats: com.ichi2.libanki.Stats$AxisType mType> = $r1;
+
+        $r4 = specialinvoke r0.<com.ichi2.libanki.Stats: java.lang.String _getDeckFilter()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.String: java.lang.String replaceAll(java.lang.String,java.lang.String)>("[\\[\\]]", "");
+
+        r5 = $r4;
+
+        $i1 = virtualinvoke $r4.<java.lang.String: int length()>();
+
+        if $i1 <= 0 goto label01;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" and ");
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        r5 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label01:
+        $r7 = staticinvoke <java.util.GregorianCalendar: java.util.Calendar getInstance()>();
+
+        $r8 = r0.<com.ichi2.libanki.Stats: com.ichi2.libanki.Collection mCol>;
+
+        $r9 = virtualinvoke $r8.<com.ichi2.libanki.Collection: com.ichi2.libanki.Sched getSched()>();
+
+        $l2 = virtualinvoke $r9.<com.ichi2.libanki.Sched: long getDayCutoff()>();
+
+        $l2 = $l2 * 1000L;
+
+        virtualinvoke $r7.<java.util.Calendar: void setTimeInMillis(long)>($l2);
+
+        $i1 = specialinvoke r0.<com.ichi2.libanki.Stats: int _periodDays()>();
+
+        if $i1 <= 0 goto label02;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r5);
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" and id > ");
+
+        $r8 = r0.<com.ichi2.libanki.Stats: com.ichi2.libanki.Collection mCol>;
+
+        $r9 = virtualinvoke $r8.<com.ichi2.libanki.Collection: com.ichi2.libanki.Sched getSched()>();
+
+        $l2 = virtualinvoke $r9.<com.ichi2.libanki.Sched: long getDayCutoff()>();
+
+        $d2 = (double) $l2;
+
+        $d3 = <com.ichi2.libanki.Stats: double SECONDS_PER_DAY>;
+
+        d1 = (double) $i1;
+
+        $d3 = $d3 * d1;
+
+        $d2 = $d2 - $d3;
+
+        $d2 = $d2 * 1000.0;
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(double)>($d2);
+
+        r5 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label02:
+        $r8 = r0.<com.ichi2.libanki.Stats: com.ichi2.libanki.Collection mCol>;
+
+        $r9 = virtualinvoke $r8.<com.ichi2.libanki.Collection: com.ichi2.libanki.Sched getSched()>();
+
+        $l2 = virtualinvoke $r9.<com.ichi2.libanki.Sched: long getDayCutoff()>();
+
+        r2 = new java.util.ArrayList;
+
+        specialinvoke r2.<java.util.ArrayList: void <init>()>();
+
+        r10 = null;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("SELECT strftime(\'%w\',datetime( cast(id/ 1000  -");
+
+        $i1 = virtualinvoke $r7.<java.util.Calendar: int get(int)>(11);
+
+        $i1 = $i1 * 3600;
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i1);
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" as int), \'unixepoch\')) as wd, sum(case when ease = 1 then 0 else 1 end) / cast(count() as float) * 100, count() from revlog where type in (0,1,2) ");
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r5);
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" group by wd order by wd");
+
+        $r4 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $i1 = virtualinvoke $r7.<java.util.Calendar: int get(int)>(11);
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i1);
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" : ");
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l2);
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" weekly breakdown query: %s");
+
+        r5 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r11 = newarray (java.lang.Object)[1];
+
+        $r11[0] = $r4;
+
+        staticinvoke <timber.log.Timber: void d(java.lang.String,java.lang.Object[])>(r5, $r11);
+
+     label03:
+        $r8 = r0.<com.ichi2.libanki.Stats: com.ichi2.libanki.Collection mCol>;
+
+        $r12 = virtualinvoke $r8.<com.ichi2.libanki.Collection: com.ichi2.libanki.DB getDb()>();
+
+        $r13 = virtualinvoke $r12.<com.ichi2.libanki.DB: io.requery.android.database.sqlite.SQLiteDatabase getDatabase()>();
+
+        $r14 = virtualinvoke $r13.<io.requery.android.database.sqlite.SQLiteDatabase: android.database.Cursor rawQuery(java.lang.String,java.lang.Object[])>($r4, null);
+
+     label04:
+        r10 = $r14;
+
+     label05:
+        $z0 = interfaceinvoke $r14.<android.database.Cursor: boolean moveToNext()>();
+
+     label06:
+        if $z0 == 0 goto label11;
+
+     label07:
+        $r15 = newarray (double)[3];
+
+        $d2 = interfaceinvoke $r14.<android.database.Cursor: double getDouble(int)>(0);
+
+        $r15[0] = $d2;
+
+        $d2 = interfaceinvoke $r14.<android.database.Cursor: double getDouble(int)>(1);
+
+        $r15[1] = $d2;
+
+        $d2 = interfaceinvoke $r14.<android.database.Cursor: double getDouble(int)>(2);
+
+        $r15[2] = $d2;
+
+        virtualinvoke r2.<java.util.ArrayList: boolean add(java.lang.Object)>($r15);
+
+     label08:
+        goto label05;
+
+     label09:
+        $r16 := @caughtexception;
+
+        if r10 == null goto label10;
+
+        $z0 = interfaceinvoke r10.<android.database.Cursor: boolean isClosed()>();
+
+        if $z0 != 0 goto label10;
+
+        interfaceinvoke r10.<android.database.Cursor: void close()>();
+
+     label10:
+        throw $r16;
+
+     label11:
+        if $r14 == null goto label12;
+
+        $z0 = interfaceinvoke $r14.<android.database.Cursor: boolean isClosed()>();
+
+        if $z0 != 0 goto label12;
+
+        interfaceinvoke $r14.<android.database.Cursor: void close()>();
+
+     label12:
+        $i1 = virtualinvoke r2.<java.util.ArrayList: int size()>();
+
+        if $i1 != 0 goto label13;
+
+        $r15 = newarray (double)[3];
+
+        $r15[0] = 0.0;
+
+        $r15[1] = 0.0;
+
+        $r15[2] = 0.0;
+
+        virtualinvoke r2.<java.util.ArrayList: void add(int,java.lang.Object)>(0, $r15);
+
+     label13:
+        $i1 = virtualinvoke r2.<java.util.ArrayList: int size()>();
+
+        $r3 = newarray (int)[2];
+
+        $r3[0] = 4;
+
+        $r3[1] = $i1;
+
+        $r17 = <java.lang.Double: java.lang.Class TYPE>;
+
+        $r18 = staticinvoke <java.lang.reflect.Array: java.lang.Object newInstance(java.lang.Class,int[])>($r17, $r3);
+
+        $r19 = (double[][]) $r18;
+
+        r0.<com.ichi2.libanki.Stats: double[][] mSeriesList> = $r19;
+
+        r0.<com.ichi2.libanki.Stats: double mPeak> = 0.0;
+
+        r0.<com.ichi2.libanki.Stats: double mMcount> = 0.0;
+
+        $d3 = 1.7976931348623157E308;
+
+        $d2 = 0.0;
+
+        $i1 = 0;
+
+     label14:
+        i0 = virtualinvoke r2.<java.util.ArrayList: int size()>();
+
+        if $i1 >= i0 goto label22;
+
+        $r18 = virtualinvoke r2.<java.util.ArrayList: java.lang.Object get(int)>($i1);
+
+        $r15 = (double[]) $r18;
+
+        d1 = $r15[0];
+
+        i0 = (int) d1;
+
+        d1 = (double) i0;
+
+        $b3 = d1 cmpg $d3;
+
+        if $b3 >= 0 goto label15;
+
+        $d3 = (double) i0;
+
+     label15:
+        d1 = (double) i0;
+
+        $b3 = d1 cmpl $d2;
+
+        if $b3 <= 0 goto label16;
+
+        $d2 = (double) i0;
+
+     label16:
+        d0 = $r15[1];
+
+        d1 = r0.<com.ichi2.libanki.Stats: double mPeak>;
+
+        $b3 = d0 cmpl d1;
+
+        if $b3 <= 0 goto label17;
+
+        r0.<com.ichi2.libanki.Stats: double mPeak> = d0;
+
+     label17:
+        $r19 = r0.<com.ichi2.libanki.Stats: double[][] mSeriesList>;
+
+        $r20 = $r19[0];
+
+        d1 = (double) i0;
+
+        $r20[$i1] = d1;
+
+        $r19 = r0.<com.ichi2.libanki.Stats: double[][] mSeriesList>;
+
+        $r20 = $r19[1];
+
+        $r20[$i1] = d0;
+
+        $r19 = r0.<com.ichi2.libanki.Stats: double[][] mSeriesList>;
+
+        $r20 = $r19[2];
+
+        d1 = $r15[2];
+
+        $r20[$i1] = d1;
+
+        if $i1 != 0 goto label21;
+
+        $r19 = r0.<com.ichi2.libanki.Stats: double[][] mSeriesList>;
+
+        $r20 = $r19[3];
+
+        $r20[$i1] = d0;
+
+     label18:
+        d1 = $r15[2];
+
+        d0 = r0.<com.ichi2.libanki.Stats: double mMcount>;
+
+        $b3 = d1 cmpl d0;
+
+        if $b3 <= 0 goto label19;
+
+        d1 = $r15[2];
+
+        r0.<com.ichi2.libanki.Stats: double mMcount> = d1;
+
+     label19:
+        $r19 = r0.<com.ichi2.libanki.Stats: double[][] mSeriesList>;
+
+        $r15 = $r19[1];
+
+        d1 = $r15[$i1];
+
+        i0 = r0.<com.ichi2.libanki.Stats: int mMaxCards>;
+
+        d0 = (double) i0;
+
+        $b3 = d1 cmpl d0;
+
+        if $b3 <= 0 goto label20;
+
+        $r19 = r0.<com.ichi2.libanki.Stats: double[][] mSeriesList>;
+
+        $r15 = $r19[1];
+
+        d1 = $r15[$i1];
+
+        i0 = (int) d1;
+
+        r0.<com.ichi2.libanki.Stats: int mMaxCards> = i0;
+
+     label20:
+        $i1 = $i1 + 1;
+
+        goto label14;
+
+     label21:
+        $r19 = r0.<com.ichi2.libanki.Stats: double[][] mSeriesList>;
+
+        $r20 = $r19[3];
+
+        i0 = $i1 + -1;
+
+        d1 = $r20[i0];
+
+        d0 = d0 - d1;
+
+        d0 = d0 / 3.0;
+
+        d0 = 10.0 * d0;
+
+        $l2 = staticinvoke <java.lang.Math: long round(double)>(d0);
+
+        d0 = (double) $l2;
+
+        d0 = d0 / 10.0;
+
+        $r19 = r0.<com.ichi2.libanki.Stats: double[][] mSeriesList>;
+
+        $r20 = $r19[3];
+
+        d1 = d1 + d0;
+
+        $r20[$i1] = d1;
+
+        goto label18;
+
+     label22:
+        $r19 = r0.<com.ichi2.libanki.Stats: double[][] mSeriesList>;
+
+        $r15 = $r19[0];
+
+        d1 = $r15[0];
+
+        r0.<com.ichi2.libanki.Stats: double mFirstElement> = d1;
+
+        $r19 = r0.<com.ichi2.libanki.Stats: double[][] mSeriesList>;
+
+        $r15 = $r19[0];
+
+        $r19 = r0.<com.ichi2.libanki.Stats: double[][] mSeriesList>;
+
+        $r20 = $r19[0];
+
+        $i1 = lengthof $r20;
+
+        $i1 = $i1 + -1;
+
+        d1 = $r15[$i1];
+
+        r0.<com.ichi2.libanki.Stats: double mLastElement> = d1;
+
+        $d2 = $d2 - $d3;
+
+        $i1 = (int) $d2;
+
+        r0.<com.ichi2.libanki.Stats: int mMaxElements> = $i1;
+
+        $i1 = r0.<com.ichi2.libanki.Stats: int mMaxElements>;
+
+        if $i1 != 0 goto label23;
+
+        r0.<com.ichi2.libanki.Stats: int mMaxElements> = 10;
+
+     label23:
+        $d2 = r0.<com.ichi2.libanki.Stats: double mMcount>;
+
+        $b3 = $d2 cmpl 0.0;
+
+        if $b3 != 0 goto label24;
+
+        r0.<com.ichi2.libanki.Stats: double mMcount> = 10.0;
+
+     label24:
+        $d2 = r0.<com.ichi2.libanki.Stats: double mFirstElement>;
+
+        $d3 = r0.<com.ichi2.libanki.Stats: double mLastElement>;
+
+        $b3 = $d2 cmpl $d3;
+
+        if $b3 != 0 goto label25;
+
+        r0.<com.ichi2.libanki.Stats: double mFirstElement> = 0.0;
+
+        r0.<com.ichi2.libanki.Stats: double mLastElement> = 6.0;
+
+     label25:
+        $i1 = r0.<com.ichi2.libanki.Stats: int mMaxCards>;
+
+        if $i1 != 0 goto label26;
+
+        r0.<com.ichi2.libanki.Stats: int mMaxCards> = 10;
+
+     label26:
+        $i1 = virtualinvoke r2.<java.util.ArrayList: int size()>();
+
+        if $i1 <= 0 goto label27;
+
+        return 1;
+
+     label27:
+        return 0;
+
+        catch java.lang.Throwable from label03 to label04 with label09;
+        catch java.lang.Throwable from label05 to label06 with label09;
+        catch java.lang.Throwable from label07 to label08 with label09;
+    }
+    public double[][] getCumulative()
+    {
+        com.ichi2.libanki.Stats r0;
+        double[][] r1;
+
+        r0 := @this: com.ichi2.libanki.Stats;
+
+        r1 = r0.<com.ichi2.libanki.Stats: double[][] mCumulative>;
+
+        return r1;
+    }
+    public java.lang.Object[] getMetaInfo()
+    {
+        com.ichi2.libanki.Stats r0;
+        org.json.JSONException r1;
+        boolean $z0;
+        com.ichi2.anki.AnkiDroidApp $r2;
+        android.content.res.Resources $r3;
+        java.lang.String $r4;
+        java.lang.Object[] $r5;
+        com.ichi2.libanki.Stats$AxisType $r6;
+        int $i0;
+        java.lang.Integer $r7;
+        java.lang.Boolean $r8;
+        int[] $r9;
+        double $d0;
+        java.lang.Double $r10;
+        com.ichi2.libanki.Collection $r11;
+        com.ichi2.libanki.Decks $r12;
+        org.json.JSONObject $r13;
+        java.lang.RuntimeException $r14;
+
+        r0 := @this: com.ichi2.libanki.Stats;
+
+        $z0 = r0.<com.ichi2.libanki.Stats: boolean mWholeCollection>;
+
+        if $z0 == 0 goto label2;
+
+        $r2 = staticinvoke <com.ichi2.anki.AnkiDroidApp: com.ichi2.anki.AnkiDroidApp getInstance()>();
+
+        $r3 = virtualinvoke $r2.<com.ichi2.anki.AnkiDroidApp: android.content.res.Resources getResources()>();
+
+        $r4 = virtualinvoke $r3.<android.content.res.Resources: java.lang.String getString(int)>(2131230786);
+
+     label1:
+        $r5 = newarray (java.lang.Object)[21];
+
+        $r6 = r0.<com.ichi2.libanki.Stats: com.ichi2.libanki.Stats$AxisType mType>;
+
+        $r5[0] = $r6;
+
+        $i0 = r0.<com.ichi2.libanki.Stats: int mTitle>;
+
+        $r7 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        $r5[1] = $r7;
+
+        $z0 = r0.<com.ichi2.libanki.Stats: boolean mBackwards>;
+
+        $r8 = staticinvoke <java.lang.Boolean: java.lang.Boolean valueOf(boolean)>($z0);
+
+        $r5[2] = $r8;
+
+        $r9 = r0.<com.ichi2.libanki.Stats: int[] mValueLabels>;
+
+        $r5[3] = $r9;
+
+        $r9 = r0.<com.ichi2.libanki.Stats: int[] mColors>;
+
+        $r5[4] = $r9;
+
+        $r9 = r0.<com.ichi2.libanki.Stats: int[] mAxisTitles>;
+
+        $r5[5] = $r9;
+
+        $r5[6] = $r4;
+
+        $i0 = r0.<com.ichi2.libanki.Stats: int mMaxCards>;
+
+        $r7 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        $r5[7] = $r7;
+
+        $i0 = r0.<com.ichi2.libanki.Stats: int mMaxElements>;
+
+        $r7 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        $r5[8] = $r7;
+
+        $d0 = r0.<com.ichi2.libanki.Stats: double mFirstElement>;
+
+        $r10 = staticinvoke <java.lang.Double: java.lang.Double valueOf(double)>($d0);
+
+        $r5[9] = $r10;
+
+        $d0 = r0.<com.ichi2.libanki.Stats: double mLastElement>;
+
+        $r10 = staticinvoke <java.lang.Double: java.lang.Double valueOf(double)>($d0);
+
+        $r5[10] = $r10;
+
+        $i0 = r0.<com.ichi2.libanki.Stats: int mZeroIndex>;
+
+        $r7 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        $r5[11] = $r7;
+
+        $z0 = r0.<com.ichi2.libanki.Stats: boolean mFoundLearnCards>;
+
+        $r8 = staticinvoke <java.lang.Boolean: java.lang.Boolean valueOf(boolean)>($z0);
+
+        $r5[12] = $r8;
+
+        $z0 = r0.<com.ichi2.libanki.Stats: boolean mFoundCramCards>;
+
+        $r8 = staticinvoke <java.lang.Boolean: java.lang.Boolean valueOf(boolean)>($z0);
+
+        $r5[13] = $r8;
+
+        $z0 = r0.<com.ichi2.libanki.Stats: boolean mFoundRelearnCards>;
+
+        $r8 = staticinvoke <java.lang.Boolean: java.lang.Boolean valueOf(boolean)>($z0);
+
+        $r5[14] = $r8;
+
+        $r4 = r0.<com.ichi2.libanki.Stats: java.lang.String mAverage>;
+
+        $r5[15] = $r4;
+
+        $r4 = r0.<com.ichi2.libanki.Stats: java.lang.String mLongest>;
+
+        $r5[16] = $r4;
+
+        $d0 = r0.<com.ichi2.libanki.Stats: double mPeak>;
+
+        $r10 = staticinvoke <java.lang.Double: java.lang.Double valueOf(double)>($d0);
+
+        $r5[17] = $r10;
+
+        $d0 = r0.<com.ichi2.libanki.Stats: double mMcount>;
+
+        $r10 = staticinvoke <java.lang.Double: java.lang.Double valueOf(double)>($d0);
+
+        $r5[18] = $r10;
+
+        $z0 = r0.<com.ichi2.libanki.Stats: boolean mHasColoredCumulative>;
+
+        $r8 = staticinvoke <java.lang.Boolean: java.lang.Boolean valueOf(boolean)>($z0);
+
+        $r5[19] = $r8;
+
+        $z0 = r0.<com.ichi2.libanki.Stats: boolean mDynamicAxis>;
+
+        $r8 = staticinvoke <java.lang.Boolean: java.lang.Boolean valueOf(boolean)>($z0);
+
+        $r5[20] = $r8;
+
+        return $r5;
+
+     label2:
+        $r11 = r0.<com.ichi2.libanki.Stats: com.ichi2.libanki.Collection mCol>;
+
+     label3:
+        $r12 = virtualinvoke $r11.<com.ichi2.libanki.Collection: com.ichi2.libanki.Decks getDecks()>();
+
+        $r13 = virtualinvoke $r12.<com.ichi2.libanki.Decks: org.json.JSONObject current()>();
+
+        $r4 = virtualinvoke $r13.<org.json.JSONObject: java.lang.String getString(java.lang.String)>("name");
+
+     label4:
+        goto label1;
+
+     label5:
+        r1 := @caughtexception;
+
+        $r14 = new java.lang.RuntimeException;
+
+        specialinvoke $r14.<java.lang.RuntimeException: void <init>(java.lang.Throwable)>(r1);
+
+        throw $r14;
+
+        catch org.json.JSONException from label3 to label4 with label5;
+    }
+    public int getNewCards(com.ichi2.libanki.Stats$AxisType)
+    {
+        com.ichi2.libanki.Stats r0;
+        com.ichi2.libanki.Stats$AxisType $r1, $r4;
+        java.lang.String $r2, r3;
+        java.lang.StringBuilder $r5;
+        java.lang.Object[] $r6;
+        android.database.Cursor r7, $r11;
+        int i0;
+        com.ichi2.libanki.Collection $r8;
+        com.ichi2.libanki.DB $r9;
+        io.requery.android.database.sqlite.SQLiteDatabase $r10;
+        boolean $z0;
+        java.lang.Throwable $r12;
+
+        r0 := @this: com.ichi2.libanki.Stats;
+
+        $r1 := @parameter0: com.ichi2.libanki.Stats$AxisType;
+
+        $r2 = virtualinvoke r0.<com.ichi2.libanki.Stats: java.lang.String getRevlogFilter(com.ichi2.libanki.Stats$AxisType,boolean)>($r1, 0);
+
+        r3 = "";
+
+        $r4 = <com.ichi2.libanki.Stats$AxisType: com.ichi2.libanki.Stats$AxisType TYPE_LIFE>;
+
+        if $r1 == $r4 goto label01;
+
+        r3 = virtualinvoke r0.<com.ichi2.libanki.Stats: java.lang.String getRevlogFilter(com.ichi2.libanki.Stats$AxisType,boolean)>($r1, 1);
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" EXCEPT SELECT distinct cid FROM revlog ");
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r3);
+
+        r3 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label01:
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("SELECT COUNT(*) FROM(\n            SELECT distinct cid\n            FROM revlog \n");
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r3);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("        )");
+
+        $r2 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r6 = newarray (java.lang.Object)[1];
+
+        $r6[0] = $r2;
+
+        staticinvoke <timber.log.Timber: void d(java.lang.String,java.lang.Object[])>("New cards query: %s", $r6);
+
+        r7 = null;
+
+        i0 = 0;
+
+     label02:
+        $r8 = r0.<com.ichi2.libanki.Stats: com.ichi2.libanki.Collection mCol>;
+
+        $r9 = virtualinvoke $r8.<com.ichi2.libanki.Collection: com.ichi2.libanki.DB getDb()>();
+
+        $r10 = virtualinvoke $r9.<com.ichi2.libanki.DB: io.requery.android.database.sqlite.SQLiteDatabase getDatabase()>();
+
+        $r11 = virtualinvoke $r10.<io.requery.android.database.sqlite.SQLiteDatabase: android.database.Cursor rawQuery(java.lang.String,java.lang.Object[])>($r2, null);
+
+     label03:
+        r7 = $r11;
+
+     label04:
+        $z0 = interfaceinvoke $r11.<android.database.Cursor: boolean moveToNext()>();
+
+     label05:
+        if $z0 == 0 goto label08;
+
+     label06:
+        i0 = interfaceinvoke $r11.<android.database.Cursor: int getInt(int)>(0);
+
+     label07:
+        goto label04;
+
+     label08:
+        if $r11 == null goto label11;
+
+        $z0 = interfaceinvoke $r11.<android.database.Cursor: boolean isClosed()>();
+
+        if $z0 != 0 goto label11;
+
+        interfaceinvoke $r11.<android.database.Cursor: void close()>();
+
+        return i0;
+
+     label09:
+        $r12 := @caughtexception;
+
+        if r7 == null goto label10;
+
+        $z0 = interfaceinvoke r7.<android.database.Cursor: boolean isClosed()>();
+
+        if $z0 != 0 goto label10;
+
+        interfaceinvoke r7.<android.database.Cursor: void close()>();
+
+     label10:
+        throw $r12;
+
+     label11:
+        return i0;
+
+        catch java.lang.Throwable from label02 to label03 with label09;
+        catch java.lang.Throwable from label04 to label05 with label09;
+        catch java.lang.Throwable from label06 to label07 with label09;
+    }
+    java.lang.String getRevlogFilter(com.ichi2.libanki.Stats$AxisType, boolean)
+    {
+        com.ichi2.libanki.Stats r0;
+        com.ichi2.libanki.Stats$AxisType $r1;
+        boolean $z0;
+        java.util.ArrayList r2;
+        java.lang.String $r3;
+        int $i0;
+        java.lang.StringBuilder $r4;
+        java.lang.Object[] $r5;
+
+        r0 := @this: com.ichi2.libanki.Stats;
+
+        $r1 := @parameter0: com.ichi2.libanki.Stats$AxisType;
+
+        $z0 := @parameter1: boolean;
+
+        r2 = new java.util.ArrayList;
+
+        specialinvoke r2.<java.util.ArrayList: void <init>()>();
+
+        $r3 = specialinvoke r0.<com.ichi2.libanki.Stats: java.lang.String getRevlogTimeFilter(com.ichi2.libanki.Stats$AxisType,boolean)>($r1, $z0);
+
+        $z0 = staticinvoke <android.text.TextUtils: boolean isEmpty(java.lang.CharSequence)>($r3);
+
+        if $z0 != 0 goto label1;
+
+        virtualinvoke r2.<java.util.ArrayList: boolean add(java.lang.Object)>($r3);
+
+     label1:
+        $r3 = specialinvoke r0.<com.ichi2.libanki.Stats: java.lang.String _getDeckFilter()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.String: java.lang.String replaceAll(java.lang.String,java.lang.String)>("[\\[\\]]", "");
+
+        $i0 = virtualinvoke $r3.<java.lang.String: int length()>();
+
+        if $i0 <= 0 goto label2;
+
+        virtualinvoke r2.<java.util.ArrayList: boolean add(java.lang.Object)>($r3);
+
+     label2:
+        $z0 = virtualinvoke r2.<java.util.ArrayList: boolean isEmpty()>();
+
+        if $z0 != 0 goto label3;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("WHERE ");
+
+        $r5 = virtualinvoke r2.<java.util.ArrayList: java.lang.Object[] toArray()>();
+
+        $r3 = staticinvoke <android.text.TextUtils: java.lang.String join(java.lang.CharSequence,java.lang.Object[])>(" AND ", $r5);
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r3 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label3:
+        return $r3;
+    }
+    public double[][] getSeriesList()
+    {
+        com.ichi2.libanki.Stats r0;
+        double[][] r1;
+
+        r0 := @this: com.ichi2.libanki.Stats;
+
+        r1 = r0.<com.ichi2.libanki.Stats: double[][] mSeriesList>;
+
+        return r1;
+    }

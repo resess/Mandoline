@@ -1,0 +1,2312 @@
+com.fsck.k9.mail.transport.SmtpTransport extends com.fsck.k9.mail.Transport
+private boolean m8bitEncodingAllowed
+private com.fsck.k9.mail.AuthType mAuthType
+private java.lang.String mClientCertificateAlias
+private com.fsck.k9.mail.ConnectionSecurity mConnectionSecurity
+private java.lang.String mHost
+private com.fsck.k9.mail.filter.PeekableInputStream mIn
+private int mLargestAcceptableMessage
+private java.io.OutputStream mOut
+private java.lang.String mPassword
+private int mPort
+private java.net.Socket mSocket
+private com.fsck.k9.mail.ssl.TrustedSocketFactory mTrustedSocketFactory
+private java.lang.String mUsername
+    public void <init>(com.fsck.k9.mail.store.StoreConfig, com.fsck.k9.mail.ssl.TrustedSocketFactory) throws com.fsck.k9.mail.MessagingException
+    {
+        com.fsck.k9.mail.transport.SmtpTransport r0;
+        com.fsck.k9.mail.store.StoreConfig $r1;
+        com.fsck.k9.mail.ssl.TrustedSocketFactory $r2;
+        java.lang.IllegalArgumentException r3;
+        java.lang.String $r4;
+        com.fsck.k9.mail.ServerSettings $r5;
+        int $i0;
+        com.fsck.k9.mail.ConnectionSecurity $r6;
+        com.fsck.k9.mail.AuthType $r7;
+        com.fsck.k9.mail.MessagingException $r8;
+
+        r0 := @this: com.fsck.k9.mail.transport.SmtpTransport;
+
+        $r1 := @parameter0: com.fsck.k9.mail.store.StoreConfig;
+
+        $r2 := @parameter1: com.fsck.k9.mail.ssl.TrustedSocketFactory;
+
+        specialinvoke r0.<com.fsck.k9.mail.Transport: void <init>()>();
+
+     label1:
+        $r4 = interfaceinvoke $r1.<com.fsck.k9.mail.store.StoreConfig: java.lang.String getTransportUri()>();
+
+        $r5 = staticinvoke <com.fsck.k9.mail.transport.SmtpTransport: com.fsck.k9.mail.ServerSettings decodeUri(java.lang.String)>($r4);
+
+     label2:
+        $r4 = $r5.<com.fsck.k9.mail.ServerSettings: java.lang.String host>;
+
+        r0.<com.fsck.k9.mail.transport.SmtpTransport: java.lang.String mHost> = $r4;
+
+        $i0 = $r5.<com.fsck.k9.mail.ServerSettings: int port>;
+
+        r0.<com.fsck.k9.mail.transport.SmtpTransport: int mPort> = $i0;
+
+        $r6 = $r5.<com.fsck.k9.mail.ServerSettings: com.fsck.k9.mail.ConnectionSecurity connectionSecurity>;
+
+        r0.<com.fsck.k9.mail.transport.SmtpTransport: com.fsck.k9.mail.ConnectionSecurity mConnectionSecurity> = $r6;
+
+        $r7 = $r5.<com.fsck.k9.mail.ServerSettings: com.fsck.k9.mail.AuthType authenticationType>;
+
+        r0.<com.fsck.k9.mail.transport.SmtpTransport: com.fsck.k9.mail.AuthType mAuthType> = $r7;
+
+        $r4 = $r5.<com.fsck.k9.mail.ServerSettings: java.lang.String username>;
+
+        r0.<com.fsck.k9.mail.transport.SmtpTransport: java.lang.String mUsername> = $r4;
+
+        $r4 = $r5.<com.fsck.k9.mail.ServerSettings: java.lang.String password>;
+
+        r0.<com.fsck.k9.mail.transport.SmtpTransport: java.lang.String mPassword> = $r4;
+
+        $r4 = $r5.<com.fsck.k9.mail.ServerSettings: java.lang.String clientCertificateAlias>;
+
+        r0.<com.fsck.k9.mail.transport.SmtpTransport: java.lang.String mClientCertificateAlias> = $r4;
+
+        r0.<com.fsck.k9.mail.transport.SmtpTransport: com.fsck.k9.mail.ssl.TrustedSocketFactory mTrustedSocketFactory> = $r2;
+
+        return;
+
+     label3:
+        r3 := @caughtexception;
+
+        $r8 = new com.fsck.k9.mail.MessagingException;
+
+        specialinvoke $r8.<com.fsck.k9.mail.MessagingException: void <init>(java.lang.String,java.lang.Throwable)>("Error while decoding transport URI", r3);
+
+        throw $r8;
+
+        catch java.lang.IllegalArgumentException from label1 to label2 with label3;
+    }
+    private void checkLine(java.lang.String) throws com.fsck.k9.mail.MessagingException
+    {
+        com.fsck.k9.mail.transport.SmtpTransport r0;
+        java.lang.String $r1, r3;
+        int $i0, i2, $i3;
+        com.fsck.k9.mail.MessagingException $r2;
+        char $c1;
+        com.fsck.k9.mail.transport.SmtpTransport$NegativeSmtpReplyException $r4;
+        java.lang.NumberFormatException $r5;
+
+        r0 := @this: com.fsck.k9.mail.transport.SmtpTransport;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $i0 = virtualinvoke $r1.<java.lang.String: int length()>();
+
+        if $i0 >= 1 goto label1;
+
+        $r2 = new com.fsck.k9.mail.MessagingException;
+
+        specialinvoke $r2.<com.fsck.k9.mail.MessagingException: void <init>(java.lang.String)>("SMTP response is 0 length");
+
+        throw $r2;
+
+     label1:
+        $c1 = virtualinvoke $r1.<java.lang.String: char charAt(int)>(0);
+
+        if $c1 == 52 goto label2;
+
+        if $c1 != 53 goto label8;
+
+     label2:
+        i2 = -1;
+
+        r3 = $r1;
+
+        if $i0 < 3 goto label6;
+
+     label3:
+        r3 = virtualinvoke $r1.<java.lang.String: java.lang.String substring(int,int)>(0, 3);
+
+        $i3 = staticinvoke <java.lang.Integer: int parseInt(java.lang.String)>(r3);
+
+     label4:
+        i2 = $i3;
+
+     label5:
+        if $i0 <= 4 goto label7;
+
+        r3 = virtualinvoke $r1.<java.lang.String: java.lang.String substring(int)>(4);
+
+     label6:
+        $r4 = new com.fsck.k9.mail.transport.SmtpTransport$NegativeSmtpReplyException;
+
+        specialinvoke $r4.<com.fsck.k9.mail.transport.SmtpTransport$NegativeSmtpReplyException: void <init>(int,java.lang.String)>(i2, r3);
+
+        throw $r4;
+
+     label7:
+        r3 = "";
+
+        goto label6;
+
+     label8:
+        return;
+
+     label9:
+        $r5 := @caughtexception;
+
+        goto label5;
+
+        catch java.lang.NumberFormatException from label3 to label4 with label9;
+    }
+    public static java.lang.String createUri(com.fsck.k9.mail.ServerSettings)
+    {
+        com.fsck.k9.mail.ServerSettings $r0;
+        int $i0;
+        com.fsck.k9.mail.AuthType r1, $r9;
+        java.net.URISyntaxException r2;
+        java.lang.String $r3, r4, r5, r6;
+        int[] $r7;
+        com.fsck.k9.mail.ConnectionSecurity $r8;
+        java.lang.StringBuilder $r10;
+        java.net.URI $r11;
+        java.lang.IllegalArgumentException $r12;
+
+        $r0 := @parameter0: com.fsck.k9.mail.ServerSettings;
+
+        $r3 = $r0.<com.fsck.k9.mail.ServerSettings: java.lang.String username>;
+
+        if $r3 == null goto label09;
+
+        $r3 = $r0.<com.fsck.k9.mail.ServerSettings: java.lang.String username>;
+
+        r4 = staticinvoke <com.fsck.k9.mail.transport.SmtpTransport: java.lang.String encodeUtf8(java.lang.String)>($r3);
+
+     label01:
+        $r3 = $r0.<com.fsck.k9.mail.ServerSettings: java.lang.String password>;
+
+        if $r3 == null goto label10;
+
+        $r3 = $r0.<com.fsck.k9.mail.ServerSettings: java.lang.String password>;
+
+        r5 = staticinvoke <com.fsck.k9.mail.transport.SmtpTransport: java.lang.String encodeUtf8(java.lang.String)>($r3);
+
+     label02:
+        $r3 = $r0.<com.fsck.k9.mail.ServerSettings: java.lang.String clientCertificateAlias>;
+
+        if $r3 == null goto label11;
+
+        $r3 = $r0.<com.fsck.k9.mail.ServerSettings: java.lang.String clientCertificateAlias>;
+
+        r6 = staticinvoke <com.fsck.k9.mail.transport.SmtpTransport: java.lang.String encodeUtf8(java.lang.String)>($r3);
+
+     label03:
+        $r7 = <com.fsck.k9.mail.transport.SmtpTransport$1: int[] $SwitchMap$com$fsck$k9$mail$ConnectionSecurity>;
+
+        $r8 = $r0.<com.fsck.k9.mail.ServerSettings: com.fsck.k9.mail.ConnectionSecurity connectionSecurity>;
+
+        $i0 = virtualinvoke $r8.<com.fsck.k9.mail.ConnectionSecurity: int ordinal()>();
+
+        $i0 = $r7[$i0];
+
+        lookupswitch($i0)
+        {
+            case 1: goto label12;
+            case 2: goto label13;
+            default: goto label04;
+        };
+
+     label04:
+        $r3 = "smtp";
+
+     label05:
+        r1 = $r0.<com.fsck.k9.mail.ServerSettings: com.fsck.k9.mail.AuthType authenticationType>;
+
+        if r1 == null goto label15;
+
+        $r9 = <com.fsck.k9.mail.AuthType: com.fsck.k9.mail.AuthType EXTERNAL>;
+
+        if $r9 != r1 goto label14;
+
+        $r10 = new java.lang.StringBuilder;
+
+        specialinvoke $r10.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r4);
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(":");
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r6);
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(":");
+
+        r4 = virtualinvoke r1.<com.fsck.k9.mail.AuthType: java.lang.String name()>();
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r4);
+
+        r4 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label06:
+        $r11 = new java.net.URI;
+
+        r5 = $r0.<com.fsck.k9.mail.ServerSettings: java.lang.String host>;
+
+        $i0 = $r0.<com.fsck.k9.mail.ServerSettings: int port>;
+
+     label07:
+        specialinvoke $r11.<java.net.URI: void <init>(java.lang.String,java.lang.String,java.lang.String,int,java.lang.String,java.lang.String,java.lang.String)>($r3, r4, r5, $i0, null, null, null);
+
+        $r3 = virtualinvoke $r11.<java.net.URI: java.lang.String toString()>();
+
+     label08:
+        return $r3;
+
+     label09:
+        r4 = "";
+
+        goto label01;
+
+     label10:
+        r5 = "";
+
+        goto label02;
+
+     label11:
+        r6 = "";
+
+        goto label03;
+
+     label12:
+        $r3 = "smtp+ssl+";
+
+        goto label05;
+
+     label13:
+        $r3 = "smtp+tls+";
+
+        goto label05;
+
+     label14:
+        $r10 = new java.lang.StringBuilder;
+
+        specialinvoke $r10.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r4);
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(":");
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r5);
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(":");
+
+        r4 = virtualinvoke r1.<com.fsck.k9.mail.AuthType: java.lang.String name()>();
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r4);
+
+        r4 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        goto label06;
+
+     label15:
+        $r10 = new java.lang.StringBuilder;
+
+        specialinvoke $r10.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r4);
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(":");
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r5);
+
+        r4 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        goto label06;
+
+     label16:
+        r2 := @caughtexception;
+
+        $r12 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r12.<java.lang.IllegalArgumentException: void <init>(java.lang.String,java.lang.Throwable)>("Can\'t create SmtpTransport URI", r2);
+
+        throw $r12;
+
+        catch java.net.URISyntaxException from label07 to label08 with label16;
+    }
+    public static com.fsck.k9.mail.ServerSettings decodeUri(java.lang.String)
+    {
+        java.lang.String $r0, r4, r5, r6, $r9;
+        java.net.URI r1;
+        java.net.URISyntaxException r2;
+        com.fsck.k9.mail.AuthType r3, $r14, $r15;
+        boolean $z0;
+        com.fsck.k9.mail.ConnectionSecurity r7;
+        com.fsck.k9.mail.ServerSettings$Type $r8;
+        int i0, $i1;
+        java.lang.String[] $r10;
+        com.fsck.k9.mail.ServerSettings $r11;
+        java.lang.IllegalArgumentException $r12;
+        java.lang.StringBuilder $r13;
+
+        $r0 := @parameter0: java.lang.String;
+
+        r3 = null;
+
+        r4 = null;
+
+        r5 = null;
+
+        r6 = null;
+
+        r1 = new java.net.URI;
+
+     label01:
+        specialinvoke r1.<java.net.URI: void <init>(java.lang.String)>($r0);
+
+     label02:
+        $r0 = virtualinvoke r1.<java.net.URI: java.lang.String getScheme()>();
+
+        $z0 = virtualinvoke $r0.<java.lang.String: boolean equals(java.lang.Object)>("smtp");
+
+        if $z0 == 0 goto label07;
+
+        r7 = <com.fsck.k9.mail.ConnectionSecurity: com.fsck.k9.mail.ConnectionSecurity NONE>;
+
+        $r8 = <com.fsck.k9.mail.ServerSettings$Type: com.fsck.k9.mail.ServerSettings$Type SMTP>;
+
+        i0 = $r8.<com.fsck.k9.mail.ServerSettings$Type: int defaultPort>;
+
+     label03:
+        $r0 = virtualinvoke r1.<java.net.URI: java.lang.String getHost()>();
+
+        $i1 = virtualinvoke r1.<java.net.URI: int getPort()>();
+
+        if $i1 == -1 goto label04;
+
+        i0 = virtualinvoke r1.<java.net.URI: int getPort()>();
+
+     label04:
+        $r9 = virtualinvoke r1.<java.net.URI: java.lang.String getUserInfo()>();
+
+        if $r9 == null goto label05;
+
+        $r9 = virtualinvoke r1.<java.net.URI: java.lang.String getUserInfo()>();
+
+        $r10 = virtualinvoke $r9.<java.lang.String: java.lang.String[] split(java.lang.String)>(":");
+
+        $i1 = lengthof $r10;
+
+        if $i1 != 1 goto label10;
+
+        r3 = <com.fsck.k9.mail.AuthType: com.fsck.k9.mail.AuthType PLAIN>;
+
+        r4 = $r10[0];
+
+        r4 = staticinvoke <com.fsck.k9.mail.transport.SmtpTransport: java.lang.String decodeUtf8(java.lang.String)>(r4);
+
+     label05:
+        $r11 = new com.fsck.k9.mail.ServerSettings;
+
+        $r8 = <com.fsck.k9.mail.ServerSettings$Type: com.fsck.k9.mail.ServerSettings$Type SMTP>;
+
+        specialinvoke $r11.<com.fsck.k9.mail.ServerSettings: void <init>(com.fsck.k9.mail.ServerSettings$Type,java.lang.String,int,com.fsck.k9.mail.ConnectionSecurity,com.fsck.k9.mail.AuthType,java.lang.String,java.lang.String,java.lang.String)>($r8, $r0, i0, r7, r3, r4, r5, r6);
+
+        return $r11;
+
+     label06:
+        r2 := @caughtexception;
+
+        $r12 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r12.<java.lang.IllegalArgumentException: void <init>(java.lang.String,java.lang.Throwable)>("Invalid SmtpTransport URI", r2);
+
+        throw $r12;
+
+     label07:
+        $z0 = virtualinvoke $r0.<java.lang.String: boolean startsWith(java.lang.String)>("smtp+tls");
+
+        if $z0 == 0 goto label08;
+
+        r7 = <com.fsck.k9.mail.ConnectionSecurity: com.fsck.k9.mail.ConnectionSecurity STARTTLS_REQUIRED>;
+
+        $r8 = <com.fsck.k9.mail.ServerSettings$Type: com.fsck.k9.mail.ServerSettings$Type SMTP>;
+
+        i0 = $r8.<com.fsck.k9.mail.ServerSettings$Type: int defaultPort>;
+
+        goto label03;
+
+     label08:
+        $z0 = virtualinvoke $r0.<java.lang.String: boolean startsWith(java.lang.String)>("smtp+ssl");
+
+        if $z0 == 0 goto label09;
+
+        r7 = <com.fsck.k9.mail.ConnectionSecurity: com.fsck.k9.mail.ConnectionSecurity SSL_TLS_REQUIRED>;
+
+        $r8 = <com.fsck.k9.mail.ServerSettings$Type: com.fsck.k9.mail.ServerSettings$Type SMTP>;
+
+        i0 = $r8.<com.fsck.k9.mail.ServerSettings$Type: int defaultTlsPort>;
+
+        goto label03;
+
+     label09:
+        $r12 = new java.lang.IllegalArgumentException;
+
+        $r13 = new java.lang.StringBuilder;
+
+        specialinvoke $r13.<java.lang.StringBuilder: void <init>()>();
+
+        $r13 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unsupported protocol (");
+
+        $r13 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r0);
+
+        $r13 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(")");
+
+        $r0 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r12.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r0);
+
+        throw $r12;
+
+     label10:
+        $i1 = lengthof $r10;
+
+        if $i1 != 2 goto label11;
+
+        r3 = <com.fsck.k9.mail.AuthType: com.fsck.k9.mail.AuthType PLAIN>;
+
+        r5 = $r10[0];
+
+        r4 = staticinvoke <com.fsck.k9.mail.transport.SmtpTransport: java.lang.String decodeUtf8(java.lang.String)>(r5);
+
+        r5 = $r10[1];
+
+        r5 = staticinvoke <com.fsck.k9.mail.transport.SmtpTransport: java.lang.String decodeUtf8(java.lang.String)>(r5);
+
+        goto label05;
+
+     label11:
+        $i1 = lengthof $r10;
+
+        if $i1 != 3 goto label05;
+
+        r4 = $r10[2];
+
+        $r14 = staticinvoke <com.fsck.k9.mail.AuthType: com.fsck.k9.mail.AuthType valueOf(java.lang.String)>(r4);
+
+        r3 = $r14;
+
+        r4 = $r10[0];
+
+        r4 = staticinvoke <com.fsck.k9.mail.transport.SmtpTransport: java.lang.String decodeUtf8(java.lang.String)>(r4);
+
+        $r15 = <com.fsck.k9.mail.AuthType: com.fsck.k9.mail.AuthType EXTERNAL>;
+
+        if $r14 != $r15 goto label12;
+
+        r6 = $r10[1];
+
+        r6 = staticinvoke <com.fsck.k9.mail.transport.SmtpTransport: java.lang.String decodeUtf8(java.lang.String)>(r6);
+
+        goto label05;
+
+     label12:
+        r5 = $r10[1];
+
+        r5 = staticinvoke <com.fsck.k9.mail.transport.SmtpTransport: java.lang.String decodeUtf8(java.lang.String)>(r5);
+
+        goto label05;
+
+        catch java.net.URISyntaxException from label01 to label02 with label06;
+    }
+    private java.util.List executeSimpleCommand(java.lang.String) throws java.io.IOException, com.fsck.k9.mail.MessagingException
+    {
+        com.fsck.k9.mail.transport.SmtpTransport r0;
+        java.lang.String $r1;
+        java.util.List $r2;
+
+        r0 := @this: com.fsck.k9.mail.transport.SmtpTransport;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = specialinvoke r0.<com.fsck.k9.mail.transport.SmtpTransport: java.util.List executeSimpleCommand(java.lang.String,boolean)>($r1, 0);
+
+        return $r2;
+    }
+    private java.util.List executeSimpleCommand(java.lang.String, boolean) throws java.io.IOException, com.fsck.k9.mail.MessagingException
+    {
+        com.fsck.k9.mail.transport.SmtpTransport r0;
+        java.lang.String $r1, $r3;
+        boolean $z0;
+        java.util.ArrayList r2;
+        int $i0;
+        char $c1;
+
+        r0 := @this: com.fsck.k9.mail.transport.SmtpTransport;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $z0 := @parameter1: boolean;
+
+        r2 = new java.util.ArrayList;
+
+        specialinvoke r2.<java.util.ArrayList: void <init>()>();
+
+        if $r1 == null goto label1;
+
+        specialinvoke r0.<com.fsck.k9.mail.transport.SmtpTransport: void writeLine(java.lang.String,boolean)>($r1, $z0);
+
+     label1:
+        $r1 = specialinvoke r0.<com.fsck.k9.mail.transport.SmtpTransport: java.lang.String readLine()>();
+
+     label2:
+        $i0 = virtualinvoke $r1.<java.lang.String: int length()>();
+
+        if $i0 < 4 goto label4;
+
+        $i0 = virtualinvoke $r1.<java.lang.String: int length()>();
+
+        if $i0 <= 4 goto label3;
+
+        $r3 = virtualinvoke $r1.<java.lang.String: java.lang.String substring(int)>(4);
+
+        interfaceinvoke r2.<java.util.List: boolean add(java.lang.Object)>($r3);
+
+     label3:
+        $c1 = virtualinvoke $r1.<java.lang.String: char charAt(int)>(3);
+
+        if $c1 == 45 goto label5;
+
+     label4:
+        specialinvoke r0.<com.fsck.k9.mail.transport.SmtpTransport: void checkLine(java.lang.String)>($r1);
+
+        return r2;
+
+     label5:
+        $r1 = specialinvoke r0.<com.fsck.k9.mail.transport.SmtpTransport: java.lang.String readLine()>();
+
+        goto label2;
+    }
+    private void parseOptionalSizeValue(java.util.Map)
+    {
+        com.fsck.k9.mail.transport.SmtpTransport r0;
+        java.util.Map r1;
+        java.lang.NumberFormatException r2;
+        boolean $z0;
+        java.lang.Object $r3;
+        java.lang.String r4;
+        int $i0;
+        java.lang.StringBuilder $r5;
+
+        r0 := @this: com.fsck.k9.mail.transport.SmtpTransport;
+
+        r1 := @parameter0: java.util.Map;
+
+        $z0 = interfaceinvoke r1.<java.util.Map: boolean containsKey(java.lang.Object)>("SIZE");
+
+        if $z0 == 0 goto label4;
+
+        $r3 = interfaceinvoke r1.<java.util.Map: java.lang.Object get(java.lang.Object)>("SIZE");
+
+        r4 = (java.lang.String) $r3;
+
+        if r4 == null goto label4;
+
+        if r4 == "" goto label4;
+
+     label1:
+        $i0 = staticinvoke <java.lang.Integer: int parseInt(java.lang.String)>(r4);
+
+     label2:
+        r0.<com.fsck.k9.mail.transport.SmtpTransport: int mLargestAcceptableMessage> = $i0;
+
+        return;
+
+     label3:
+        r2 := @caughtexception;
+
+        $z0 = staticinvoke <com.fsck.k9.mail.K9MailLib: boolean isDebug()>();
+
+        if $z0 == 0 goto label4;
+
+        $z0 = <com.fsck.k9.mail.K9MailLib: boolean DEBUG_PROTOCOL_SMTP>;
+
+        if $z0 == 0 goto label4;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Tried to parse ");
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r4);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" and get an int");
+
+        r4 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String,java.lang.Throwable)>("k9", r4, r2);
+
+     label4:
+        return;
+
+        catch java.lang.NumberFormatException from label1 to label2 with label3;
+    }
+    private java.lang.String readLine() throws java.io.IOException
+    {
+        com.fsck.k9.mail.transport.SmtpTransport r0;
+        java.lang.StringBuilder r1;
+        com.fsck.k9.mail.filter.PeekableInputStream $r2;
+        int $i0;
+        char $c1;
+        java.lang.String $r3, $r4;
+        boolean $z0;
+
+        r0 := @this: com.fsck.k9.mail.transport.SmtpTransport;
+
+        r1 = new java.lang.StringBuilder;
+
+        specialinvoke r1.<java.lang.StringBuilder: void <init>()>();
+
+     label1:
+        $r2 = r0.<com.fsck.k9.mail.transport.SmtpTransport: com.fsck.k9.mail.filter.PeekableInputStream mIn>;
+
+        $i0 = virtualinvoke $r2.<com.fsck.k9.mail.filter.PeekableInputStream: int read()>();
+
+        if $i0 == -1 goto label2;
+
+        $c1 = (char) $i0;
+
+        if $c1 == 13 goto label1;
+
+        $c1 = (char) $i0;
+
+        if $c1 != 10 goto label3;
+
+     label2:
+        $r3 = virtualinvoke r1.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $z0 = staticinvoke <com.fsck.k9.mail.K9MailLib: boolean isDebug()>();
+
+        if $z0 == 0 goto label4;
+
+        $z0 = <com.fsck.k9.mail.K9MailLib: boolean DEBUG_PROTOCOL_SMTP>;
+
+        if $z0 == 0 goto label4;
+
+        r1 = new java.lang.StringBuilder;
+
+        specialinvoke r1.<java.lang.StringBuilder: void <init>()>();
+
+        r1 = virtualinvoke r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("SMTP <<< ");
+
+        r1 = virtualinvoke r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r4 = virtualinvoke r1.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("k9", $r4);
+
+        return $r3;
+
+     label3:
+        $c1 = (char) $i0;
+
+        virtualinvoke r1.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>($c1);
+
+        goto label1;
+
+     label4:
+        return $r3;
+    }
+    private void saslAuthCramMD5(java.lang.String, java.lang.String) throws com.fsck.k9.mail.MessagingException, com.fsck.k9.mail.AuthenticationFailedException, java.io.IOException
+    {
+        com.fsck.k9.mail.transport.SmtpTransport r0;
+        java.lang.String $r1, $r2, $r7;
+        com.fsck.k9.mail.transport.SmtpTransport$NegativeSmtpReplyException r3;
+        java.util.List $r4;
+        int $i0;
+        com.fsck.k9.mail.MessagingException $r5;
+        java.lang.Object $r6;
+        com.fsck.k9.mail.AuthenticationFailedException $r8;
+
+        r0 := @this: com.fsck.k9.mail.transport.SmtpTransport;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $r4 = specialinvoke r0.<com.fsck.k9.mail.transport.SmtpTransport: java.util.List executeSimpleCommand(java.lang.String)>("AUTH CRAM-MD5");
+
+        $i0 = interfaceinvoke $r4.<java.util.List: int size()>();
+
+        if $i0 == 1 goto label1;
+
+        $r5 = new com.fsck.k9.mail.MessagingException;
+
+        specialinvoke $r5.<com.fsck.k9.mail.MessagingException: void <init>(java.lang.String)>("Unable to negotiate CRAM-MD5");
+
+        throw $r5;
+
+     label1:
+        $r6 = interfaceinvoke $r4.<java.util.List: java.lang.Object get(int)>(0);
+
+        $r1 = (java.lang.String) $r6;
+
+        $r2 = r0.<com.fsck.k9.mail.transport.SmtpTransport: java.lang.String mUsername>;
+
+        $r7 = r0.<com.fsck.k9.mail.transport.SmtpTransport: java.lang.String mPassword>;
+
+        $r1 = staticinvoke <com.fsck.k9.mail.Authentication: java.lang.String computeCramMd5(java.lang.String,java.lang.String,java.lang.String)>($r2, $r7, $r1);
+
+     label2:
+        specialinvoke r0.<com.fsck.k9.mail.transport.SmtpTransport: java.util.List executeSimpleCommand(java.lang.String,boolean)>($r1, 1);
+
+     label3:
+        return;
+
+     label4:
+        r3 := @caughtexception;
+
+        $i0 = virtualinvoke r3.<com.fsck.k9.mail.transport.SmtpTransport$NegativeSmtpReplyException: int getReplyCode()>();
+
+        if $i0 != 535 goto label5;
+
+        $r8 = new com.fsck.k9.mail.AuthenticationFailedException;
+
+        $r1 = virtualinvoke r3.<com.fsck.k9.mail.transport.SmtpTransport$NegativeSmtpReplyException: java.lang.String getMessage()>();
+
+        specialinvoke $r8.<com.fsck.k9.mail.AuthenticationFailedException: void <init>(java.lang.String,java.lang.Throwable)>($r1, r3);
+
+        throw $r8;
+
+     label5:
+        throw r3;
+
+        catch com.fsck.k9.mail.transport.SmtpTransport$NegativeSmtpReplyException from label2 to label3 with label4;
+    }
+    private void saslAuthExternal(java.lang.String) throws com.fsck.k9.mail.MessagingException, java.io.IOException
+    {
+        com.fsck.k9.mail.transport.SmtpTransport r0;
+        java.lang.String $r1;
+        java.lang.Object[] $r2;
+
+        r0 := @this: com.fsck.k9.mail.transport.SmtpTransport;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = newarray (java.lang.Object)[1];
+
+        $r1 = staticinvoke <com.fsck.k9.mail.filter.Base64: java.lang.String encode(java.lang.String)>($r1);
+
+        $r2[0] = $r1;
+
+        $r1 = staticinvoke <java.lang.String: java.lang.String format(java.lang.String,java.lang.Object[])>("AUTH EXTERNAL %s", $r2);
+
+        specialinvoke r0.<com.fsck.k9.mail.transport.SmtpTransport: java.util.List executeSimpleCommand(java.lang.String,boolean)>($r1, 0);
+
+        return;
+    }
+    private void saslAuthLogin(java.lang.String, java.lang.String) throws com.fsck.k9.mail.MessagingException, com.fsck.k9.mail.AuthenticationFailedException, java.io.IOException
+    {
+        com.fsck.k9.mail.transport.SmtpTransport r0;
+        java.lang.String $r1, $r2;
+        com.fsck.k9.mail.transport.SmtpTransport$NegativeSmtpReplyException r3;
+        int $i0;
+        com.fsck.k9.mail.AuthenticationFailedException $r4;
+        java.lang.StringBuilder $r5;
+
+        r0 := @this: com.fsck.k9.mail.transport.SmtpTransport;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.lang.String;
+
+     label1:
+        specialinvoke r0.<com.fsck.k9.mail.transport.SmtpTransport: java.util.List executeSimpleCommand(java.lang.String)>("AUTH LOGIN");
+
+        $r1 = staticinvoke <com.fsck.k9.mail.filter.Base64: java.lang.String encode(java.lang.String)>($r1);
+
+        specialinvoke r0.<com.fsck.k9.mail.transport.SmtpTransport: java.util.List executeSimpleCommand(java.lang.String,boolean)>($r1, 1);
+
+        $r1 = staticinvoke <com.fsck.k9.mail.filter.Base64: java.lang.String encode(java.lang.String)>($r2);
+
+        specialinvoke r0.<com.fsck.k9.mail.transport.SmtpTransport: java.util.List executeSimpleCommand(java.lang.String,boolean)>($r1, 1);
+
+     label2:
+        return;
+
+     label3:
+        r3 := @caughtexception;
+
+        $i0 = virtualinvoke r3.<com.fsck.k9.mail.transport.SmtpTransport$NegativeSmtpReplyException: int getReplyCode()>();
+
+        if $i0 != 535 goto label4;
+
+        $r4 = new com.fsck.k9.mail.AuthenticationFailedException;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("AUTH LOGIN failed (");
+
+        $r1 = virtualinvoke r3.<com.fsck.k9.mail.transport.SmtpTransport$NegativeSmtpReplyException: java.lang.String getMessage()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(")");
+
+        $r1 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r4.<com.fsck.k9.mail.AuthenticationFailedException: void <init>(java.lang.String)>($r1);
+
+        throw $r4;
+
+     label4:
+        throw r3;
+
+        catch com.fsck.k9.mail.transport.SmtpTransport$NegativeSmtpReplyException from label1 to label2 with label3;
+    }
+    private void saslAuthPlain(java.lang.String, java.lang.String) throws com.fsck.k9.mail.MessagingException, com.fsck.k9.mail.AuthenticationFailedException, java.io.IOException
+    {
+        com.fsck.k9.mail.transport.SmtpTransport r0;
+        java.lang.String $r1, $r2;
+        com.fsck.k9.mail.transport.SmtpTransport$NegativeSmtpReplyException r3;
+        java.lang.StringBuilder $r4;
+        int $i0;
+        com.fsck.k9.mail.AuthenticationFailedException $r5;
+
+        r0 := @this: com.fsck.k9.mail.transport.SmtpTransport;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\u0000");
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\u0000");
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r1 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r1 = staticinvoke <com.fsck.k9.mail.filter.Base64: java.lang.String encode(java.lang.String)>($r1);
+
+        $r4 = new java.lang.StringBuilder;
+
+     label1:
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("AUTH PLAIN ");
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r1 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke r0.<com.fsck.k9.mail.transport.SmtpTransport: java.util.List executeSimpleCommand(java.lang.String,boolean)>($r1, 1);
+
+     label2:
+        return;
+
+     label3:
+        r3 := @caughtexception;
+
+        $i0 = virtualinvoke r3.<com.fsck.k9.mail.transport.SmtpTransport$NegativeSmtpReplyException: int getReplyCode()>();
+
+        if $i0 != 535 goto label4;
+
+        $r5 = new com.fsck.k9.mail.AuthenticationFailedException;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("AUTH PLAIN failed (");
+
+        $r1 = virtualinvoke r3.<com.fsck.k9.mail.transport.SmtpTransport$NegativeSmtpReplyException: java.lang.String getMessage()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(")");
+
+        $r1 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r5.<com.fsck.k9.mail.AuthenticationFailedException: void <init>(java.lang.String)>($r1);
+
+        throw $r5;
+
+     label4:
+        throw r3;
+
+        catch com.fsck.k9.mail.transport.SmtpTransport$NegativeSmtpReplyException from label1 to label2 with label3;
+    }
+    private java.util.Map sendHello(java.lang.String) throws java.io.IOException, com.fsck.k9.mail.MessagingException
+    {
+        com.fsck.k9.mail.transport.SmtpTransport r0;
+        java.lang.String $r1, $r6, $r12;
+        com.fsck.k9.mail.transport.SmtpTransport$NegativeSmtpReplyException r2, r3;
+        java.util.HashMap r4;
+        java.lang.StringBuilder $r5;
+        java.util.List $r7;
+        java.util.Iterator $r8;
+        boolean $z0;
+        java.lang.Object $r9;
+        java.lang.String[] $r10;
+        java.util.Locale $r11;
+        int $i0;
+
+        r0 := @this: com.fsck.k9.mail.transport.SmtpTransport;
+
+        $r1 := @parameter0: java.lang.String;
+
+        r4 = new java.util.HashMap;
+
+        specialinvoke r4.<java.util.HashMap: void <init>()>();
+
+        $r5 = new java.lang.StringBuilder;
+
+     label01:
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("EHLO ");
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r7 = specialinvoke r0.<com.fsck.k9.mail.transport.SmtpTransport: java.util.List executeSimpleCommand(java.lang.String)>($r6);
+
+        interfaceinvoke $r7.<java.util.List: java.lang.Object remove(int)>(0);
+
+        $r8 = interfaceinvoke $r7.<java.util.List: java.util.Iterator iterator()>();
+
+     label02:
+        $z0 = interfaceinvoke $r8.<java.util.Iterator: boolean hasNext()>();
+
+     label03:
+        if $z0 == 0 goto label18;
+
+     label04:
+        $r9 = interfaceinvoke $r8.<java.util.Iterator: java.lang.Object next()>();
+
+     label05:
+        $r6 = (java.lang.String) $r9;
+
+     label06:
+        $r10 = virtualinvoke $r6.<java.lang.String: java.lang.String[] split(java.lang.String,int)>(" ", 2);
+
+     label07:
+        $r6 = $r10[0];
+
+        $r11 = <java.util.Locale: java.util.Locale US>;
+
+     label08:
+        $r6 = virtualinvoke $r6.<java.lang.String: java.lang.String toUpperCase(java.util.Locale)>($r11);
+
+     label09:
+        $i0 = lengthof $r10;
+
+        if $i0 != 1 goto label16;
+
+        $r12 = "";
+
+     label10:
+        interfaceinvoke r4.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r6, $r12);
+
+     label11:
+        goto label02;
+
+     label12:
+        r2 := @caughtexception;
+
+        $z0 = staticinvoke <com.fsck.k9.mail.K9MailLib: boolean isDebug()>();
+
+        if $z0 == 0 goto label13;
+
+        staticinvoke <android.util.Log: int v(java.lang.String,java.lang.String)>("k9", "Server doesn\'t support the EHLO command. Trying HELO...");
+
+     label13:
+        $r5 = new java.lang.StringBuilder;
+
+     label14:
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("HELO ");
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r1 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke r0.<com.fsck.k9.mail.transport.SmtpTransport: java.util.List executeSimpleCommand(java.lang.String)>($r1);
+
+     label15:
+        return r4;
+
+     label16:
+        $r12 = $r10[1];
+
+        goto label10;
+
+     label17:
+        r3 := @caughtexception;
+
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String)>("k9", "Server doesn\'t support the HELO command. Continuing anyway.");
+
+     label18:
+        return r4;
+
+        catch com.fsck.k9.mail.transport.SmtpTransport$NegativeSmtpReplyException from label01 to label03 with label12;
+        catch com.fsck.k9.mail.transport.SmtpTransport$NegativeSmtpReplyException from label04 to label05 with label12;
+        catch com.fsck.k9.mail.transport.SmtpTransport$NegativeSmtpReplyException from label06 to label07 with label12;
+        catch com.fsck.k9.mail.transport.SmtpTransport$NegativeSmtpReplyException from label08 to label09 with label12;
+        catch com.fsck.k9.mail.transport.SmtpTransport$NegativeSmtpReplyException from label10 to label11 with label12;
+        catch com.fsck.k9.mail.transport.SmtpTransport$NegativeSmtpReplyException from label14 to label15 with label17;
+    }
+    private void sendMessageTo(java.util.List, com.fsck.k9.mail.Message) throws com.fsck.k9.mail.MessagingException
+    {
+        com.fsck.k9.mail.transport.SmtpTransport r0;
+        java.util.List r1;
+        com.fsck.k9.mail.Message $r2;
+        com.fsck.k9.mail.MessagingException r3;
+        com.fsck.k9.mail.filter.EOLConvertingOutputStream r4;
+        boolean $z0, $z1;
+        int $i0;
+        long $l1, $l2;
+        byte $b3;
+        com.fsck.k9.mail.Address[] $r5;
+        java.lang.StringBuilder $r6;
+        com.fsck.k9.mail.Address $r7;
+        java.lang.String $r8;
+        java.util.Iterator $r9;
+        java.lang.Object $r10;
+        com.fsck.k9.mail.transport.SmtpTransport$NegativeSmtpReplyException r11;
+        java.lang.Throwable $r12;
+        com.fsck.k9.mail.filter.LineWrapOutputStream $r13;
+        com.fsck.k9.mail.filter.SmtpDataStuffing $r14;
+        java.io.OutputStream $r15;
+        java.lang.Exception r16;
+
+        r0 := @this: com.fsck.k9.mail.transport.SmtpTransport;
+
+        r1 := @parameter0: java.util.List;
+
+        $r2 := @parameter1: com.fsck.k9.mail.Message;
+
+        virtualinvoke r0.<com.fsck.k9.mail.transport.SmtpTransport: void close()>();
+
+        virtualinvoke r0.<com.fsck.k9.mail.transport.SmtpTransport: void open()>();
+
+        $z0 = r0.<com.fsck.k9.mail.transport.SmtpTransport: boolean m8bitEncodingAllowed>;
+
+        if $z0 != 0 goto label01;
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("k9", "Server does not support 8bit transfer encoding");
+
+     label01:
+        $i0 = r0.<com.fsck.k9.mail.transport.SmtpTransport: int mLargestAcceptableMessage>;
+
+        if $i0 <= 0 goto label02;
+
+        $z0 = virtualinvoke $r2.<com.fsck.k9.mail.Message: boolean hasAttachments()>();
+
+        if $z0 == 0 goto label02;
+
+        $l1 = virtualinvoke $r2.<com.fsck.k9.mail.Message: long calculateSize()>();
+
+        $i0 = r0.<com.fsck.k9.mail.transport.SmtpTransport: int mLargestAcceptableMessage>;
+
+        $l2 = (long) $i0;
+
+        $b3 = $l1 cmp $l2;
+
+        if $b3 <= 0 goto label02;
+
+        r3 = new com.fsck.k9.mail.MessagingException;
+
+        specialinvoke r3.<com.fsck.k9.mail.MessagingException: void <init>(java.lang.String,boolean)>("Message too large for server", 1);
+
+        throw r3;
+
+     label02:
+        $z0 = 0;
+
+        $r5 = virtualinvoke $r2.<com.fsck.k9.mail.Message: com.fsck.k9.mail.Address[] getFrom()>();
+
+     label03:
+        $r6 = new java.lang.StringBuilder;
+
+     label04:
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("MAIL FROM:<");
+
+     label05:
+        $r7 = $r5[0];
+
+     label06:
+        $r8 = virtualinvoke $r7.<com.fsck.k9.mail.Address: java.lang.String getAddress()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r8);
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(">");
+
+     label07:
+        $z1 = r0.<com.fsck.k9.mail.transport.SmtpTransport: boolean m8bitEncodingAllowed>;
+
+     label08:
+        if $z1 == 0 goto label20;
+
+        $r8 = " BODY=8BITMIME";
+
+     label09:
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r8);
+
+        $r8 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke r0.<com.fsck.k9.mail.transport.SmtpTransport: java.util.List executeSimpleCommand(java.lang.String)>($r8);
+
+        $r9 = interfaceinvoke r1.<java.util.List: java.util.Iterator iterator()>();
+
+     label10:
+        $z1 = interfaceinvoke $r9.<java.util.Iterator: boolean hasNext()>();
+
+     label11:
+        if $z1 == 0 goto label21;
+
+     label12:
+        $r10 = interfaceinvoke $r9.<java.util.Iterator: java.lang.Object next()>();
+
+     label13:
+        $r8 = (java.lang.String) $r10;
+
+     label14:
+        $r6 = new java.lang.StringBuilder;
+
+     label15:
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("RCPT TO:<");
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r8);
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(">");
+
+        $r8 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke r0.<com.fsck.k9.mail.transport.SmtpTransport: java.util.List executeSimpleCommand(java.lang.String)>($r8);
+
+     label16:
+        goto label10;
+
+     label17:
+        r11 := @caughtexception;
+
+     label18:
+        throw r11;
+
+     label19:
+        $r12 := @caughtexception;
+
+        virtualinvoke r0.<com.fsck.k9.mail.transport.SmtpTransport: void close()>();
+
+        throw $r12;
+
+     label20:
+        $r8 = "";
+
+        goto label09;
+
+     label21:
+        specialinvoke r0.<com.fsck.k9.mail.transport.SmtpTransport: java.util.List executeSimpleCommand(java.lang.String)>("DATA");
+
+     label22:
+        r4 = new com.fsck.k9.mail.filter.EOLConvertingOutputStream;
+
+        $r13 = new com.fsck.k9.mail.filter.LineWrapOutputStream;
+
+        $r14 = new com.fsck.k9.mail.filter.SmtpDataStuffing;
+
+     label23:
+        $r15 = r0.<com.fsck.k9.mail.transport.SmtpTransport: java.io.OutputStream mOut>;
+
+     label24:
+        specialinvoke $r14.<com.fsck.k9.mail.filter.SmtpDataStuffing: void <init>(java.io.OutputStream)>($r15);
+
+        specialinvoke $r13.<com.fsck.k9.mail.filter.LineWrapOutputStream: void <init>(java.io.OutputStream,int)>($r14, 1000);
+
+        specialinvoke r4.<com.fsck.k9.mail.filter.EOLConvertingOutputStream: void <init>(java.io.OutputStream)>($r13);
+
+        virtualinvoke $r2.<com.fsck.k9.mail.Message: void writeTo(java.io.OutputStream)>(r4);
+
+        virtualinvoke r4.<com.fsck.k9.mail.filter.EOLConvertingOutputStream: void endWithCrLfAndFlush()>();
+
+     label25:
+        $z0 = 1;
+
+     label26:
+        specialinvoke r0.<com.fsck.k9.mail.transport.SmtpTransport: java.util.List executeSimpleCommand(java.lang.String)>(".");
+
+     label27:
+        virtualinvoke r0.<com.fsck.k9.mail.transport.SmtpTransport: void close()>();
+
+        return;
+
+     label28:
+        r16 := @caughtexception;
+
+     label29:
+        r3 = new com.fsck.k9.mail.MessagingException;
+
+        specialinvoke r3.<com.fsck.k9.mail.MessagingException: void <init>(java.lang.String,java.lang.Throwable)>("Unable to send message", r16);
+
+        virtualinvoke r3.<com.fsck.k9.mail.MessagingException: void setPermanentFailure(boolean)>($z0);
+
+        throw r3;
+
+     label30:
+        nop;
+
+        catch com.fsck.k9.mail.transport.SmtpTransport$NegativeSmtpReplyException from label04 to label05 with label17;
+        catch com.fsck.k9.mail.transport.SmtpTransport$NegativeSmtpReplyException from label06 to label07 with label17;
+        catch com.fsck.k9.mail.transport.SmtpTransport$NegativeSmtpReplyException from label09 to label11 with label17;
+        catch com.fsck.k9.mail.transport.SmtpTransport$NegativeSmtpReplyException from label12 to label13 with label17;
+        catch com.fsck.k9.mail.transport.SmtpTransport$NegativeSmtpReplyException from label15 to label16 with label17;
+        catch java.lang.Exception from label04 to label08 with label28;
+        catch java.lang.Exception from label09 to label11 with label28;
+        catch java.lang.Exception from label12 to label14 with label28;
+        catch java.lang.Exception from label15 to label16 with label28;
+        catch java.lang.Throwable from label03 to label05 with label19;
+        catch java.lang.Throwable from label06 to label08 with label19;
+        catch java.lang.Throwable from label09 to label11 with label19;
+        catch java.lang.Throwable from label12 to label16 with label19;
+        catch java.lang.Throwable from label18 to label19 with label19;
+        catch com.fsck.k9.mail.transport.SmtpTransport$NegativeSmtpReplyException from label21 to label22 with label17;
+        catch com.fsck.k9.mail.transport.SmtpTransport$NegativeSmtpReplyException from label24 to label25 with label17;
+        catch com.fsck.k9.mail.transport.SmtpTransport$NegativeSmtpReplyException from label26 to label27 with label17;
+        catch java.lang.Exception from label21 to label22 with label28;
+        catch java.lang.Exception from label23 to label25 with label28;
+        catch java.lang.Exception from label26 to label27 with label28;
+        catch java.lang.Throwable from label21 to label25 with label19;
+        catch java.lang.Throwable from label26 to label27 with label19;
+        catch java.lang.Throwable from label29 to label30 with label19;
+    }
+    private void writeLine(java.lang.String, boolean) throws java.io.IOException
+    {
+        com.fsck.k9.mail.transport.SmtpTransport r0;
+        java.lang.String $r1, r2;
+        boolean $z0, $z1;
+        byte[] $r3;
+        java.io.OutputStream $r4;
+        java.lang.StringBuilder $r5;
+
+        r0 := @this: com.fsck.k9.mail.transport.SmtpTransport;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $z0 := @parameter1: boolean;
+
+        $z1 = staticinvoke <com.fsck.k9.mail.K9MailLib: boolean isDebug()>();
+
+        if $z1 == 0 goto label2;
+
+        $z1 = <com.fsck.k9.mail.K9MailLib: boolean DEBUG_PROTOCOL_SMTP>;
+
+        if $z1 == 0 goto label2;
+
+        if $z0 == 0 goto label3;
+
+        $z0 = staticinvoke <com.fsck.k9.mail.K9MailLib: boolean isDebugSensitive()>();
+
+        if $z0 != 0 goto label3;
+
+        r2 = "SMTP >>> *sensitive*";
+
+     label1:
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("k9", r2);
+
+     label2:
+        $r1 = virtualinvoke $r1.<java.lang.String: java.lang.String concat(java.lang.String)>("\r\n");
+
+        $r3 = virtualinvoke $r1.<java.lang.String: byte[] getBytes()>();
+
+        $r4 = r0.<com.fsck.k9.mail.transport.SmtpTransport: java.io.OutputStream mOut>;
+
+        virtualinvoke $r4.<java.io.OutputStream: void write(byte[])>($r3);
+
+        $r4 = r0.<com.fsck.k9.mail.transport.SmtpTransport: java.io.OutputStream mOut>;
+
+        virtualinvoke $r4.<java.io.OutputStream: void flush()>();
+
+        return;
+
+     label3:
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("SMTP >>> ");
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        r2 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        goto label1;
+    }
+    public void close()
+    {
+        com.fsck.k9.mail.transport.SmtpTransport r0;
+        com.fsck.k9.mail.filter.PeekableInputStream $r1;
+        java.io.OutputStream $r2;
+        java.net.Socket $r3;
+        java.lang.Exception $r4, $r5, $r6, $r7;
+
+        r0 := @this: com.fsck.k9.mail.transport.SmtpTransport;
+
+     label1:
+        specialinvoke r0.<com.fsck.k9.mail.transport.SmtpTransport: java.util.List executeSimpleCommand(java.lang.String)>("QUIT");
+
+     label2:
+        $r1 = r0.<com.fsck.k9.mail.transport.SmtpTransport: com.fsck.k9.mail.filter.PeekableInputStream mIn>;
+
+        virtualinvoke $r1.<com.fsck.k9.mail.filter.PeekableInputStream: void close()>();
+
+     label3:
+        $r2 = r0.<com.fsck.k9.mail.transport.SmtpTransport: java.io.OutputStream mOut>;
+
+        virtualinvoke $r2.<java.io.OutputStream: void close()>();
+
+     label4:
+        $r3 = r0.<com.fsck.k9.mail.transport.SmtpTransport: java.net.Socket mSocket>;
+
+        virtualinvoke $r3.<java.net.Socket: void close()>();
+
+     label5:
+        r0.<com.fsck.k9.mail.transport.SmtpTransport: com.fsck.k9.mail.filter.PeekableInputStream mIn> = null;
+
+        r0.<com.fsck.k9.mail.transport.SmtpTransport: java.io.OutputStream mOut> = null;
+
+        r0.<com.fsck.k9.mail.transport.SmtpTransport: java.net.Socket mSocket> = null;
+
+        return;
+
+     label6:
+        $r4 := @caughtexception;
+
+        goto label5;
+
+     label7:
+        $r5 := @caughtexception;
+
+        goto label4;
+
+     label8:
+        $r6 := @caughtexception;
+
+        goto label3;
+
+     label9:
+        $r7 := @caughtexception;
+
+        goto label2;
+
+        catch java.lang.Exception from label1 to label2 with label9;
+        catch java.lang.Exception from label2 to label3 with label8;
+        catch java.lang.Exception from label3 to label4 with label7;
+        catch java.lang.Exception from label4 to label5 with label6;
+    }
+    public void open() throws com.fsck.k9.mail.MessagingException
+    {
+        com.fsck.k9.mail.transport.SmtpTransport r0;
+        java.security.GeneralSecurityException r1;
+        java.io.IOException r2;
+        java.net.InetSocketAddress r3;
+        boolean z0, $z1, z2, z3, z4, $z5;
+        java.lang.String $r4, $r10, $r17;
+        java.net.InetAddress[] $r5;
+        int i0, $i1;
+        java.net.InetAddress $r6;
+        com.fsck.k9.mail.ConnectionSecurity $r7, $r8;
+        com.fsck.k9.mail.ssl.TrustedSocketFactory $r9;
+        java.net.Socket $r11;
+        com.fsck.k9.mail.filter.PeekableInputStream $r12;
+        java.io.BufferedInputStream $r13;
+        java.io.InputStream $r14;
+        java.io.BufferedOutputStream $r15;
+        java.io.OutputStream $r16;
+        java.lang.StringBuilder $r18;
+        java.util.Map $r19, r20;
+        java.lang.Object $r21;
+        java.lang.String[] $r22;
+        java.util.List $r23;
+        com.fsck.k9.mail.AuthType $r24, $r25;
+        int[] $r26;
+        com.fsck.k9.mail.MessagingException $r27;
+        javax.net.ssl.SSLException r28;
+        com.fsck.k9.mail.CertificateValidationException $r29;
+        java.net.SocketException r30;
+        com.fsck.k9.mail.CertificateValidationException$Reason $r31;
+
+        r0 := @this: com.fsck.k9.mail.transport.SmtpTransport;
+
+        z0 = 0;
+
+        $r4 = r0.<com.fsck.k9.mail.transport.SmtpTransport: java.lang.String mHost>;
+
+     label001:
+        $r5 = staticinvoke <java.net.InetAddress: java.net.InetAddress[] getAllByName(java.lang.String)>($r4);
+
+     label002:
+        i0 = 0;
+
+     label003:
+        $i1 = lengthof $r5;
+
+        if i0 >= $i1 goto label010;
+
+        r3 = new java.net.InetSocketAddress;
+
+        $r6 = $r5[i0];
+
+        $i1 = r0.<com.fsck.k9.mail.transport.SmtpTransport: int mPort>;
+
+     label004:
+        specialinvoke r3.<java.net.InetSocketAddress: void <init>(java.net.InetAddress,int)>($r6, $i1);
+
+     label005:
+        $r7 = r0.<com.fsck.k9.mail.transport.SmtpTransport: com.fsck.k9.mail.ConnectionSecurity mConnectionSecurity>;
+
+        $r8 = <com.fsck.k9.mail.ConnectionSecurity: com.fsck.k9.mail.ConnectionSecurity SSL_TLS_REQUIRED>;
+
+        if $r7 != $r8 goto label069;
+
+        $r9 = r0.<com.fsck.k9.mail.transport.SmtpTransport: com.fsck.k9.mail.ssl.TrustedSocketFactory mTrustedSocketFactory>;
+
+        $r4 = r0.<com.fsck.k9.mail.transport.SmtpTransport: java.lang.String mHost>;
+
+        $i1 = r0.<com.fsck.k9.mail.transport.SmtpTransport: int mPort>;
+
+        $r10 = r0.<com.fsck.k9.mail.transport.SmtpTransport: java.lang.String mClientCertificateAlias>;
+
+     label006:
+        $r11 = interfaceinvoke $r9.<com.fsck.k9.mail.ssl.TrustedSocketFactory: java.net.Socket createSocket(java.net.Socket,java.lang.String,int,java.lang.String)>(null, $r4, $i1, $r10);
+
+     label007:
+        r0.<com.fsck.k9.mail.transport.SmtpTransport: java.net.Socket mSocket> = $r11;
+
+        $r11 = r0.<com.fsck.k9.mail.transport.SmtpTransport: java.net.Socket mSocket>;
+
+     label008:
+        virtualinvoke $r11.<java.net.Socket: void connect(java.net.SocketAddress,int)>(r3, 10000);
+
+     label009:
+        z0 = 1;
+
+     label010:
+        $r11 = r0.<com.fsck.k9.mail.transport.SmtpTransport: java.net.Socket mSocket>;
+
+     label011:
+        virtualinvoke $r11.<java.net.Socket: void setSoTimeout(int)>(300000);
+
+     label012:
+        $r12 = new com.fsck.k9.mail.filter.PeekableInputStream;
+
+        $r13 = new java.io.BufferedInputStream;
+
+        $r11 = r0.<com.fsck.k9.mail.transport.SmtpTransport: java.net.Socket mSocket>;
+
+     label013:
+        $r14 = virtualinvoke $r11.<java.net.Socket: java.io.InputStream getInputStream()>();
+
+        specialinvoke $r13.<java.io.BufferedInputStream: void <init>(java.io.InputStream,int)>($r14, 1024);
+
+        specialinvoke $r12.<com.fsck.k9.mail.filter.PeekableInputStream: void <init>(java.io.InputStream)>($r13);
+
+     label014:
+        r0.<com.fsck.k9.mail.transport.SmtpTransport: com.fsck.k9.mail.filter.PeekableInputStream mIn> = $r12;
+
+        $r15 = new java.io.BufferedOutputStream;
+
+        $r11 = r0.<com.fsck.k9.mail.transport.SmtpTransport: java.net.Socket mSocket>;
+
+     label015:
+        $r16 = virtualinvoke $r11.<java.net.Socket: java.io.OutputStream getOutputStream()>();
+
+        specialinvoke $r15.<java.io.BufferedOutputStream: void <init>(java.io.OutputStream,int)>($r16, 1024);
+
+     label016:
+        r0.<com.fsck.k9.mail.transport.SmtpTransport: java.io.OutputStream mOut> = $r15;
+
+     label017:
+        specialinvoke r0.<com.fsck.k9.mail.transport.SmtpTransport: java.util.List executeSimpleCommand(java.lang.String)>(null);
+
+     label018:
+        $r11 = r0.<com.fsck.k9.mail.transport.SmtpTransport: java.net.Socket mSocket>;
+
+     label019:
+        $r6 = virtualinvoke $r11.<java.net.Socket: java.net.InetAddress getLocalAddress()>();
+
+        $r10 = virtualinvoke $r6.<java.net.InetAddress: java.lang.String getCanonicalHostName()>();
+
+     label020:
+        $r4 = $r10;
+
+     label021:
+        $r17 = virtualinvoke $r6.<java.net.InetAddress: java.lang.String getHostAddress()>();
+
+        $z1 = virtualinvoke $r10.<java.lang.String: boolean equals(java.lang.Object)>("");
+
+     label022:
+        if $z1 != 0 goto label027;
+
+     label023:
+        $z1 = virtualinvoke $r10.<java.lang.String: boolean equals(java.lang.Object)>($r17);
+
+     label024:
+        if $z1 != 0 goto label027;
+
+     label025:
+        $z1 = virtualinvoke $r10.<java.lang.String: boolean contains(java.lang.CharSequence)>("_");
+
+     label026:
+        if $z1 == 0 goto label030;
+
+     label027:
+        $z1 = virtualinvoke $r17.<java.lang.String: boolean equals(java.lang.Object)>("");
+
+     label028:
+        if $z1 != 0 goto label082;
+
+        $z1 = $r6 instanceof java.net.Inet6Address;
+
+        if $z1 == 0 goto label079;
+
+        $r18 = new java.lang.StringBuilder;
+
+     label029:
+        specialinvoke $r18.<java.lang.StringBuilder: void <init>()>();
+
+        $r18 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("[IPv6:");
+
+        $r18 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r17);
+
+        $r18 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("]");
+
+        $r4 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label030:
+        $r19 = specialinvoke r0.<com.fsck.k9.mail.transport.SmtpTransport: java.util.Map sendHello(java.lang.String)>($r4);
+
+     label031:
+        r20 = $r19;
+
+     label032:
+        $z1 = interfaceinvoke $r19.<java.util.Map: boolean containsKey(java.lang.Object)>("8BITMIME");
+
+     label033:
+        r0.<com.fsck.k9.mail.transport.SmtpTransport: boolean m8bitEncodingAllowed> = $z1;
+
+        $r7 = r0.<com.fsck.k9.mail.transport.SmtpTransport: com.fsck.k9.mail.ConnectionSecurity mConnectionSecurity>;
+
+        $r8 = <com.fsck.k9.mail.ConnectionSecurity: com.fsck.k9.mail.ConnectionSecurity STARTTLS_REQUIRED>;
+
+        if $r7 != $r8 goto label046;
+
+     label034:
+        z0 = interfaceinvoke $r19.<java.util.Map: boolean containsKey(java.lang.Object)>("STARTTLS");
+
+     label035:
+        if z0 == 0 goto label083;
+
+     label036:
+        specialinvoke r0.<com.fsck.k9.mail.transport.SmtpTransport: java.util.List executeSimpleCommand(java.lang.String)>("STARTTLS");
+
+     label037:
+        $r9 = r0.<com.fsck.k9.mail.transport.SmtpTransport: com.fsck.k9.mail.ssl.TrustedSocketFactory mTrustedSocketFactory>;
+
+        $r11 = r0.<com.fsck.k9.mail.transport.SmtpTransport: java.net.Socket mSocket>;
+
+        $r10 = r0.<com.fsck.k9.mail.transport.SmtpTransport: java.lang.String mHost>;
+
+        i0 = r0.<com.fsck.k9.mail.transport.SmtpTransport: int mPort>;
+
+        $r17 = r0.<com.fsck.k9.mail.transport.SmtpTransport: java.lang.String mClientCertificateAlias>;
+
+     label038:
+        $r11 = interfaceinvoke $r9.<com.fsck.k9.mail.ssl.TrustedSocketFactory: java.net.Socket createSocket(java.net.Socket,java.lang.String,int,java.lang.String)>($r11, $r10, i0, $r17);
+
+     label039:
+        r0.<com.fsck.k9.mail.transport.SmtpTransport: java.net.Socket mSocket> = $r11;
+
+        $r12 = new com.fsck.k9.mail.filter.PeekableInputStream;
+
+        $r13 = new java.io.BufferedInputStream;
+
+        $r11 = r0.<com.fsck.k9.mail.transport.SmtpTransport: java.net.Socket mSocket>;
+
+     label040:
+        $r14 = virtualinvoke $r11.<java.net.Socket: java.io.InputStream getInputStream()>();
+
+        specialinvoke $r13.<java.io.BufferedInputStream: void <init>(java.io.InputStream,int)>($r14, 1024);
+
+        specialinvoke $r12.<com.fsck.k9.mail.filter.PeekableInputStream: void <init>(java.io.InputStream)>($r13);
+
+     label041:
+        r0.<com.fsck.k9.mail.transport.SmtpTransport: com.fsck.k9.mail.filter.PeekableInputStream mIn> = $r12;
+
+        $r15 = new java.io.BufferedOutputStream;
+
+        $r11 = r0.<com.fsck.k9.mail.transport.SmtpTransport: java.net.Socket mSocket>;
+
+     label042:
+        $r16 = virtualinvoke $r11.<java.net.Socket: java.io.OutputStream getOutputStream()>();
+
+        specialinvoke $r15.<java.io.BufferedOutputStream: void <init>(java.io.OutputStream,int)>($r16, 1024);
+
+     label043:
+        r0.<com.fsck.k9.mail.transport.SmtpTransport: java.io.OutputStream mOut> = $r15;
+
+     label044:
+        $r19 = specialinvoke r0.<com.fsck.k9.mail.transport.SmtpTransport: java.util.Map sendHello(java.lang.String)>($r4);
+
+     label045:
+        r20 = $r19;
+
+        z0 = 1;
+
+     label046:
+        $z1 = 0;
+
+        z2 = 0;
+
+        z3 = 0;
+
+        z4 = 0;
+
+     label047:
+        $z5 = interfaceinvoke r20.<java.util.Map: boolean containsKey(java.lang.Object)>("AUTH");
+
+     label048:
+        if $z5 == 0 goto label055;
+
+     label049:
+        $r21 = interfaceinvoke r20.<java.util.Map: java.lang.Object get(java.lang.Object)>("AUTH");
+
+     label050:
+        $r4 = (java.lang.String) $r21;
+
+     label051:
+        $r22 = virtualinvoke $r4.<java.lang.String: java.lang.String[] split(java.lang.String)>(" ");
+
+        $r23 = staticinvoke <java.util.Arrays: java.util.List asList(java.lang.Object[])>($r22);
+
+        $z1 = interfaceinvoke $r23.<java.util.List: boolean contains(java.lang.Object)>("LOGIN");
+
+     label052:
+        z2 = interfaceinvoke $r23.<java.util.List: boolean contains(java.lang.Object)>("PLAIN");
+
+     label053:
+        z3 = interfaceinvoke $r23.<java.util.List: boolean contains(java.lang.Object)>("CRAM-MD5");
+
+     label054:
+        z4 = interfaceinvoke $r23.<java.util.List: boolean contains(java.lang.Object)>("EXTERNAL");
+
+     label055:
+        specialinvoke r0.<com.fsck.k9.mail.transport.SmtpTransport: void parseOptionalSizeValue(java.util.Map)>(r20);
+
+     label056:
+        $r4 = r0.<com.fsck.k9.mail.transport.SmtpTransport: java.lang.String mUsername>;
+
+        if $r4 == null goto label126;
+
+        $r4 = r0.<com.fsck.k9.mail.transport.SmtpTransport: java.lang.String mUsername>;
+
+     label057:
+        i0 = virtualinvoke $r4.<java.lang.String: int length()>();
+
+     label058:
+        if i0 <= 0 goto label126;
+
+        $r4 = r0.<com.fsck.k9.mail.transport.SmtpTransport: java.lang.String mPassword>;
+
+        if $r4 == null goto label061;
+
+        $r4 = r0.<com.fsck.k9.mail.transport.SmtpTransport: java.lang.String mPassword>;
+
+     label059:
+        i0 = virtualinvoke $r4.<java.lang.String: int length()>();
+
+     label060:
+        if i0 > 0 goto label062;
+
+     label061:
+        $r24 = <com.fsck.k9.mail.AuthType: com.fsck.k9.mail.AuthType EXTERNAL>;
+
+        $r25 = r0.<com.fsck.k9.mail.transport.SmtpTransport: com.fsck.k9.mail.AuthType mAuthType>;
+
+        if $r24 != $r25 goto label126;
+
+     label062:
+        $r26 = <com.fsck.k9.mail.transport.SmtpTransport$1: int[] $SwitchMap$com$fsck$k9$mail$AuthType>;
+
+        $r24 = r0.<com.fsck.k9.mail.transport.SmtpTransport: com.fsck.k9.mail.AuthType mAuthType>;
+
+     label063:
+        i0 = virtualinvoke $r24.<com.fsck.k9.mail.AuthType: int ordinal()>();
+
+     label064:
+        i0 = $r26[i0];
+
+        lookupswitch(i0)
+        {
+            case 1: goto label087;
+            case 2: goto label087;
+            case 3: goto label096;
+            case 4: goto label102;
+            case 5: goto label108;
+            default: goto label065;
+        };
+
+     label065:
+        $r27 = new com.fsck.k9.mail.MessagingException;
+
+     label066:
+        specialinvoke $r27.<com.fsck.k9.mail.MessagingException: void <init>(java.lang.String)>("Unhandled authentication method found in the server settings (bug).");
+
+     label067:
+        throw $r27;
+
+     label068:
+        r28 := @caughtexception;
+
+        $r29 = new com.fsck.k9.mail.CertificateValidationException;
+
+        $r4 = virtualinvoke r28.<javax.net.ssl.SSLException: java.lang.String getMessage()>();
+
+        specialinvoke $r29.<com.fsck.k9.mail.CertificateValidationException: void <init>(java.lang.String,java.lang.Throwable)>($r4, r28);
+
+        throw $r29;
+
+     label069:
+        $r11 = new java.net.Socket;
+
+     label070:
+        specialinvoke $r11.<java.net.Socket: void <init>()>();
+
+     label071:
+        r0.<com.fsck.k9.mail.transport.SmtpTransport: java.net.Socket mSocket> = $r11;
+
+        $r11 = r0.<com.fsck.k9.mail.transport.SmtpTransport: java.net.Socket mSocket>;
+
+     label072:
+        virtualinvoke $r11.<java.net.Socket: void connect(java.net.SocketAddress,int)>(r3, 10000);
+
+     label073:
+        goto label010;
+
+     label074:
+        r30 := @caughtexception;
+
+        $i1 = lengthof $r5;
+
+        $i1 = $i1 + -1;
+
+        if i0 >= $i1 goto label075;
+
+        i0 = i0 + 1;
+
+        goto label003;
+
+     label075:
+        $r27 = new com.fsck.k9.mail.MessagingException;
+
+     label076:
+        specialinvoke $r27.<com.fsck.k9.mail.MessagingException: void <init>(java.lang.String,java.lang.Throwable)>("Cannot connect to host", r30);
+
+     label077:
+        throw $r27;
+
+     label078:
+        r1 := @caughtexception;
+
+        $r27 = new com.fsck.k9.mail.MessagingException;
+
+        specialinvoke $r27.<com.fsck.k9.mail.MessagingException: void <init>(java.lang.String,java.lang.Throwable)>("Unable to open connection to SMTP server due to security error.", r1);
+
+        throw $r27;
+
+     label079:
+        $r18 = new java.lang.StringBuilder;
+
+     label080:
+        specialinvoke $r18.<java.lang.StringBuilder: void <init>()>();
+
+        $r18 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("[");
+
+        $r18 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r17);
+
+        $r18 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("]");
+
+        $r4 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label081:
+        goto label030;
+
+     label082:
+        $r4 = "android";
+
+        goto label030;
+
+     label083:
+        $r29 = new com.fsck.k9.mail.CertificateValidationException;
+
+     label084:
+        specialinvoke $r29.<com.fsck.k9.mail.CertificateValidationException: void <init>(java.lang.String)>("STARTTLS connection security not available");
+
+     label085:
+        throw $r29;
+
+     label086:
+        r2 := @caughtexception;
+
+        $r27 = new com.fsck.k9.mail.MessagingException;
+
+        specialinvoke $r27.<com.fsck.k9.mail.MessagingException: void <init>(java.lang.String,java.lang.Throwable)>("Unable to open connection to SMTP server.", r2);
+
+        throw $r27;
+
+     label087:
+        if z2 == 0 goto label090;
+
+        $r4 = r0.<com.fsck.k9.mail.transport.SmtpTransport: java.lang.String mUsername>;
+
+        $r10 = r0.<com.fsck.k9.mail.transport.SmtpTransport: java.lang.String mPassword>;
+
+     label088:
+        specialinvoke r0.<com.fsck.k9.mail.transport.SmtpTransport: void saslAuthPlain(java.lang.String,java.lang.String)>($r4, $r10);
+
+     label089:
+        return;
+
+     label090:
+        if $z1 == 0 goto label093;
+
+        $r4 = r0.<com.fsck.k9.mail.transport.SmtpTransport: java.lang.String mUsername>;
+
+        $r10 = r0.<com.fsck.k9.mail.transport.SmtpTransport: java.lang.String mPassword>;
+
+     label091:
+        specialinvoke r0.<com.fsck.k9.mail.transport.SmtpTransport: void saslAuthLogin(java.lang.String,java.lang.String)>($r4, $r10);
+
+     label092:
+        return;
+
+     label093:
+        $r27 = new com.fsck.k9.mail.MessagingException;
+
+     label094:
+        specialinvoke $r27.<com.fsck.k9.mail.MessagingException: void <init>(java.lang.String)>("Authentication methods SASL PLAIN and LOGIN are unavailable.");
+
+     label095:
+        throw $r27;
+
+     label096:
+        if z3 == 0 goto label099;
+
+        $r4 = r0.<com.fsck.k9.mail.transport.SmtpTransport: java.lang.String mUsername>;
+
+        $r10 = r0.<com.fsck.k9.mail.transport.SmtpTransport: java.lang.String mPassword>;
+
+     label097:
+        specialinvoke r0.<com.fsck.k9.mail.transport.SmtpTransport: void saslAuthCramMD5(java.lang.String,java.lang.String)>($r4, $r10);
+
+     label098:
+        return;
+
+     label099:
+        $r27 = new com.fsck.k9.mail.MessagingException;
+
+     label100:
+        specialinvoke $r27.<com.fsck.k9.mail.MessagingException: void <init>(java.lang.String)>("Authentication method CRAM-MD5 is unavailable.");
+
+     label101:
+        throw $r27;
+
+     label102:
+        if z4 == 0 goto label105;
+
+        $r4 = r0.<com.fsck.k9.mail.transport.SmtpTransport: java.lang.String mUsername>;
+
+     label103:
+        specialinvoke r0.<com.fsck.k9.mail.transport.SmtpTransport: void saslAuthExternal(java.lang.String)>($r4);
+
+     label104:
+        return;
+
+     label105:
+        $r29 = new com.fsck.k9.mail.CertificateValidationException;
+
+        $r31 = <com.fsck.k9.mail.CertificateValidationException$Reason: com.fsck.k9.mail.CertificateValidationException$Reason MissingCapability>;
+
+     label106:
+        specialinvoke $r29.<com.fsck.k9.mail.CertificateValidationException: void <init>(com.fsck.k9.mail.CertificateValidationException$Reason)>($r31);
+
+     label107:
+        throw $r29;
+
+     label108:
+        if z0 == 0 goto label120;
+
+        if z2 == 0 goto label111;
+
+        $r4 = r0.<com.fsck.k9.mail.transport.SmtpTransport: java.lang.String mUsername>;
+
+        $r10 = r0.<com.fsck.k9.mail.transport.SmtpTransport: java.lang.String mPassword>;
+
+     label109:
+        specialinvoke r0.<com.fsck.k9.mail.transport.SmtpTransport: void saslAuthPlain(java.lang.String,java.lang.String)>($r4, $r10);
+
+     label110:
+        return;
+
+     label111:
+        if $z1 == 0 goto label114;
+
+        $r4 = r0.<com.fsck.k9.mail.transport.SmtpTransport: java.lang.String mUsername>;
+
+        $r10 = r0.<com.fsck.k9.mail.transport.SmtpTransport: java.lang.String mPassword>;
+
+     label112:
+        specialinvoke r0.<com.fsck.k9.mail.transport.SmtpTransport: void saslAuthLogin(java.lang.String,java.lang.String)>($r4, $r10);
+
+     label113:
+        return;
+
+     label114:
+        if z3 == 0 goto label117;
+
+        $r4 = r0.<com.fsck.k9.mail.transport.SmtpTransport: java.lang.String mUsername>;
+
+        $r10 = r0.<com.fsck.k9.mail.transport.SmtpTransport: java.lang.String mPassword>;
+
+     label115:
+        specialinvoke r0.<com.fsck.k9.mail.transport.SmtpTransport: void saslAuthCramMD5(java.lang.String,java.lang.String)>($r4, $r10);
+
+     label116:
+        return;
+
+     label117:
+        $r27 = new com.fsck.k9.mail.MessagingException;
+
+     label118:
+        specialinvoke $r27.<com.fsck.k9.mail.MessagingException: void <init>(java.lang.String)>("No supported authentication methods available.");
+
+     label119:
+        throw $r27;
+
+     label120:
+        if z3 == 0 goto label123;
+
+        $r4 = r0.<com.fsck.k9.mail.transport.SmtpTransport: java.lang.String mUsername>;
+
+        $r10 = r0.<com.fsck.k9.mail.transport.SmtpTransport: java.lang.String mPassword>;
+
+     label121:
+        specialinvoke r0.<com.fsck.k9.mail.transport.SmtpTransport: void saslAuthCramMD5(java.lang.String,java.lang.String)>($r4, $r10);
+
+     label122:
+        return;
+
+     label123:
+        $r27 = new com.fsck.k9.mail.MessagingException;
+
+     label124:
+        specialinvoke $r27.<com.fsck.k9.mail.MessagingException: void <init>(java.lang.String)>("Update your outgoing server authentication setting. AUTOMATIC auth. is unavailable.");
+
+     label125:
+        throw $r27;
+
+     label126:
+        return;
+
+        catch javax.net.ssl.SSLException from label001 to label002 with label068;
+        catch java.security.GeneralSecurityException from label001 to label002 with label078;
+        catch java.io.IOException from label001 to label002 with label086;
+        catch java.net.SocketException from label004 to label005 with label074;
+        catch java.net.SocketException from label006 to label007 with label074;
+        catch java.net.SocketException from label008 to label009 with label074;
+        catch javax.net.ssl.SSLException from label004 to label005 with label068;
+        catch javax.net.ssl.SSLException from label006 to label007 with label068;
+        catch javax.net.ssl.SSLException from label008 to label009 with label068;
+        catch java.security.GeneralSecurityException from label004 to label005 with label078;
+        catch java.security.GeneralSecurityException from label006 to label007 with label078;
+        catch java.security.GeneralSecurityException from label008 to label009 with label078;
+        catch java.io.IOException from label004 to label005 with label086;
+        catch java.io.IOException from label006 to label007 with label086;
+        catch java.io.IOException from label008 to label009 with label086;
+        catch javax.net.ssl.SSLException from label011 to label012 with label068;
+        catch javax.net.ssl.SSLException from label013 to label014 with label068;
+        catch javax.net.ssl.SSLException from label015 to label016 with label068;
+        catch javax.net.ssl.SSLException from label017 to label018 with label068;
+        catch javax.net.ssl.SSLException from label019 to label020 with label068;
+        catch javax.net.ssl.SSLException from label021 to label022 with label068;
+        catch javax.net.ssl.SSLException from label023 to label024 with label068;
+        catch javax.net.ssl.SSLException from label025 to label026 with label068;
+        catch javax.net.ssl.SSLException from label027 to label028 with label068;
+        catch javax.net.ssl.SSLException from label029 to label030 with label068;
+        catch javax.net.ssl.SSLException from label030 to label031 with label068;
+        catch javax.net.ssl.SSLException from label032 to label033 with label068;
+        catch javax.net.ssl.SSLException from label034 to label035 with label068;
+        catch javax.net.ssl.SSLException from label036 to label037 with label068;
+        catch javax.net.ssl.SSLException from label038 to label039 with label068;
+        catch javax.net.ssl.SSLException from label040 to label041 with label068;
+        catch javax.net.ssl.SSLException from label042 to label043 with label068;
+        catch javax.net.ssl.SSLException from label044 to label045 with label068;
+        catch javax.net.ssl.SSLException from label047 to label048 with label068;
+        catch javax.net.ssl.SSLException from label049 to label050 with label068;
+        catch javax.net.ssl.SSLException from label051 to label052 with label068;
+        catch javax.net.ssl.SSLException from label052 to label053 with label068;
+        catch javax.net.ssl.SSLException from label053 to label054 with label068;
+        catch javax.net.ssl.SSLException from label054 to label055 with label068;
+        catch javax.net.ssl.SSLException from label055 to label056 with label068;
+        catch javax.net.ssl.SSLException from label057 to label058 with label068;
+        catch javax.net.ssl.SSLException from label059 to label060 with label068;
+        catch javax.net.ssl.SSLException from label063 to label064 with label068;
+        catch javax.net.ssl.SSLException from label066 to label067 with label068;
+        catch java.security.GeneralSecurityException from label011 to label012 with label078;
+        catch java.security.GeneralSecurityException from label013 to label014 with label078;
+        catch java.security.GeneralSecurityException from label015 to label016 with label078;
+        catch java.security.GeneralSecurityException from label017 to label018 with label078;
+        catch java.security.GeneralSecurityException from label019 to label020 with label078;
+        catch java.security.GeneralSecurityException from label021 to label022 with label078;
+        catch java.security.GeneralSecurityException from label023 to label024 with label078;
+        catch java.security.GeneralSecurityException from label025 to label026 with label078;
+        catch java.security.GeneralSecurityException from label027 to label028 with label078;
+        catch java.security.GeneralSecurityException from label029 to label030 with label078;
+        catch java.security.GeneralSecurityException from label030 to label031 with label078;
+        catch java.security.GeneralSecurityException from label032 to label033 with label078;
+        catch java.security.GeneralSecurityException from label034 to label035 with label078;
+        catch java.security.GeneralSecurityException from label036 to label037 with label078;
+        catch java.security.GeneralSecurityException from label038 to label039 with label078;
+        catch java.security.GeneralSecurityException from label040 to label041 with label078;
+        catch java.security.GeneralSecurityException from label042 to label043 with label078;
+        catch java.security.GeneralSecurityException from label044 to label045 with label078;
+        catch java.security.GeneralSecurityException from label047 to label048 with label078;
+        catch java.security.GeneralSecurityException from label049 to label050 with label078;
+        catch java.security.GeneralSecurityException from label051 to label052 with label078;
+        catch java.security.GeneralSecurityException from label052 to label053 with label078;
+        catch java.security.GeneralSecurityException from label053 to label054 with label078;
+        catch java.security.GeneralSecurityException from label054 to label055 with label078;
+        catch java.security.GeneralSecurityException from label055 to label056 with label078;
+        catch java.security.GeneralSecurityException from label057 to label058 with label078;
+        catch java.security.GeneralSecurityException from label059 to label060 with label078;
+        catch java.security.GeneralSecurityException from label063 to label064 with label078;
+        catch java.security.GeneralSecurityException from label066 to label067 with label078;
+        catch java.io.IOException from label011 to label012 with label086;
+        catch java.io.IOException from label013 to label014 with label086;
+        catch java.io.IOException from label015 to label016 with label086;
+        catch java.io.IOException from label017 to label018 with label086;
+        catch java.io.IOException from label019 to label020 with label086;
+        catch java.io.IOException from label021 to label022 with label086;
+        catch java.io.IOException from label023 to label024 with label086;
+        catch java.io.IOException from label025 to label026 with label086;
+        catch java.io.IOException from label027 to label028 with label086;
+        catch java.io.IOException from label029 to label030 with label086;
+        catch java.io.IOException from label030 to label031 with label086;
+        catch java.io.IOException from label032 to label033 with label086;
+        catch java.io.IOException from label034 to label035 with label086;
+        catch java.io.IOException from label036 to label037 with label086;
+        catch java.io.IOException from label038 to label039 with label086;
+        catch java.io.IOException from label040 to label041 with label086;
+        catch java.io.IOException from label042 to label043 with label086;
+        catch java.io.IOException from label044 to label045 with label086;
+        catch java.io.IOException from label047 to label048 with label086;
+        catch java.io.IOException from label049 to label050 with label086;
+        catch java.io.IOException from label051 to label052 with label086;
+        catch java.io.IOException from label052 to label053 with label086;
+        catch java.io.IOException from label053 to label054 with label086;
+        catch java.io.IOException from label054 to label055 with label086;
+        catch java.io.IOException from label055 to label056 with label086;
+        catch java.io.IOException from label057 to label058 with label086;
+        catch java.io.IOException from label059 to label060 with label086;
+        catch java.io.IOException from label063 to label064 with label086;
+        catch java.io.IOException from label066 to label067 with label086;
+        catch java.net.SocketException from label070 to label071 with label074;
+        catch java.net.SocketException from label072 to label073 with label074;
+        catch javax.net.ssl.SSLException from label070 to label071 with label068;
+        catch javax.net.ssl.SSLException from label072 to label073 with label068;
+        catch java.security.GeneralSecurityException from label070 to label071 with label078;
+        catch java.security.GeneralSecurityException from label072 to label073 with label078;
+        catch java.io.IOException from label070 to label071 with label086;
+        catch java.io.IOException from label072 to label073 with label086;
+        catch javax.net.ssl.SSLException from label076 to label077 with label068;
+        catch java.security.GeneralSecurityException from label076 to label077 with label078;
+        catch java.io.IOException from label076 to label077 with label086;
+        catch javax.net.ssl.SSLException from label080 to label081 with label068;
+        catch javax.net.ssl.SSLException from label084 to label085 with label068;
+        catch java.security.GeneralSecurityException from label080 to label081 with label078;
+        catch java.security.GeneralSecurityException from label084 to label085 with label078;
+        catch java.io.IOException from label080 to label081 with label086;
+        catch java.io.IOException from label084 to label085 with label086;
+        catch javax.net.ssl.SSLException from label088 to label089 with label068;
+        catch javax.net.ssl.SSLException from label091 to label092 with label068;
+        catch javax.net.ssl.SSLException from label094 to label095 with label068;
+        catch javax.net.ssl.SSLException from label097 to label098 with label068;
+        catch javax.net.ssl.SSLException from label100 to label101 with label068;
+        catch javax.net.ssl.SSLException from label103 to label104 with label068;
+        catch javax.net.ssl.SSLException from label106 to label107 with label068;
+        catch javax.net.ssl.SSLException from label109 to label110 with label068;
+        catch javax.net.ssl.SSLException from label112 to label113 with label068;
+        catch javax.net.ssl.SSLException from label115 to label116 with label068;
+        catch javax.net.ssl.SSLException from label118 to label119 with label068;
+        catch javax.net.ssl.SSLException from label121 to label122 with label068;
+        catch javax.net.ssl.SSLException from label124 to label125 with label068;
+        catch java.security.GeneralSecurityException from label088 to label089 with label078;
+        catch java.security.GeneralSecurityException from label091 to label092 with label078;
+        catch java.security.GeneralSecurityException from label094 to label095 with label078;
+        catch java.security.GeneralSecurityException from label097 to label098 with label078;
+        catch java.security.GeneralSecurityException from label100 to label101 with label078;
+        catch java.security.GeneralSecurityException from label103 to label104 with label078;
+        catch java.security.GeneralSecurityException from label106 to label107 with label078;
+        catch java.security.GeneralSecurityException from label109 to label110 with label078;
+        catch java.security.GeneralSecurityException from label112 to label113 with label078;
+        catch java.security.GeneralSecurityException from label115 to label116 with label078;
+        catch java.security.GeneralSecurityException from label118 to label119 with label078;
+        catch java.security.GeneralSecurityException from label121 to label122 with label078;
+        catch java.security.GeneralSecurityException from label124 to label125 with label078;
+        catch java.io.IOException from label088 to label089 with label086;
+        catch java.io.IOException from label091 to label092 with label086;
+        catch java.io.IOException from label094 to label095 with label086;
+        catch java.io.IOException from label097 to label098 with label086;
+        catch java.io.IOException from label100 to label101 with label086;
+        catch java.io.IOException from label103 to label104 with label086;
+        catch java.io.IOException from label106 to label107 with label086;
+        catch java.io.IOException from label109 to label110 with label086;
+        catch java.io.IOException from label112 to label113 with label086;
+        catch java.io.IOException from label115 to label116 with label086;
+        catch java.io.IOException from label118 to label119 with label086;
+        catch java.io.IOException from label121 to label122 with label086;
+        catch java.io.IOException from label124 to label125 with label086;
+    }
+    public void sendMessage(com.fsck.k9.mail.Message) throws com.fsck.k9.mail.MessagingException
+    {
+        com.fsck.k9.mail.transport.SmtpTransport r0;
+        com.fsck.k9.mail.Message $r1;
+        java.util.ArrayList r2, $r14;
+        com.fsck.k9.mail.Message$RecipientType $r4;
+        com.fsck.k9.mail.Address[] $r5;
+        java.util.List $r6;
+        java.util.Iterator $r7;
+        boolean $z0;
+        java.lang.Object $r8;
+        com.fsck.k9.mail.Address r9;
+        java.lang.String $r10, $r11;
+        java.util.Set $r12;
+        java.util.Map$Entry r13;
+        java.util.HashMap $r15;
+
+        r0 := @this: com.fsck.k9.mail.transport.SmtpTransport;
+
+        $r1 := @parameter0: com.fsck.k9.mail.Message;
+
+        $r14 = new java.util.ArrayList;
+
+        specialinvoke $r14.<java.util.ArrayList: void <init>()>();
+
+        $r4 = <com.fsck.k9.mail.Message$RecipientType: com.fsck.k9.mail.Message$RecipientType TO>;
+
+        $r5 = virtualinvoke $r1.<com.fsck.k9.mail.Message: com.fsck.k9.mail.Address[] getRecipients(com.fsck.k9.mail.Message$RecipientType)>($r4);
+
+        $r6 = staticinvoke <java.util.Arrays: java.util.List asList(java.lang.Object[])>($r5);
+
+        interfaceinvoke $r14.<java.util.List: boolean addAll(java.util.Collection)>($r6);
+
+        $r4 = <com.fsck.k9.mail.Message$RecipientType: com.fsck.k9.mail.Message$RecipientType CC>;
+
+        $r5 = virtualinvoke $r1.<com.fsck.k9.mail.Message: com.fsck.k9.mail.Address[] getRecipients(com.fsck.k9.mail.Message$RecipientType)>($r4);
+
+        $r6 = staticinvoke <java.util.Arrays: java.util.List asList(java.lang.Object[])>($r5);
+
+        interfaceinvoke $r14.<java.util.List: boolean addAll(java.util.Collection)>($r6);
+
+        $r4 = <com.fsck.k9.mail.Message$RecipientType: com.fsck.k9.mail.Message$RecipientType BCC>;
+
+        $r5 = virtualinvoke $r1.<com.fsck.k9.mail.Message: com.fsck.k9.mail.Address[] getRecipients(com.fsck.k9.mail.Message$RecipientType)>($r4);
+
+        $r6 = staticinvoke <java.util.Arrays: java.util.List asList(java.lang.Object[])>($r5);
+
+        interfaceinvoke $r14.<java.util.List: boolean addAll(java.util.Collection)>($r6);
+
+        $r4 = <com.fsck.k9.mail.Message$RecipientType: com.fsck.k9.mail.Message$RecipientType BCC>;
+
+        virtualinvoke $r1.<com.fsck.k9.mail.Message: void setRecipients(com.fsck.k9.mail.Message$RecipientType,com.fsck.k9.mail.Address[])>($r4, null);
+
+        $r15 = new java.util.HashMap;
+
+        specialinvoke $r15.<java.util.HashMap: void <init>()>();
+
+        $r7 = interfaceinvoke $r14.<java.util.List: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r7.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label3;
+
+        $r8 = interfaceinvoke $r7.<java.util.Iterator: java.lang.Object next()>();
+
+        r9 = (com.fsck.k9.mail.Address) $r8;
+
+        $r10 = virtualinvoke r9.<com.fsck.k9.mail.Address: java.lang.String getAddress()>();
+
+        $r11 = staticinvoke <com.fsck.k9.mail.internet.CharsetSupport: java.lang.String getCharsetFromAddress(java.lang.String)>($r10);
+
+        $r8 = interfaceinvoke $r15.<java.util.Map: java.lang.Object get(java.lang.Object)>($r11);
+
+        $r6 = (java.util.List) $r8;
+
+        if $r6 != null goto label2;
+
+        r2 = new java.util.ArrayList;
+
+        $r6 = r2;
+
+        specialinvoke r2.<java.util.ArrayList: void <init>()>();
+
+        interfaceinvoke $r15.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r11, r2);
+
+     label2:
+        interfaceinvoke $r6.<java.util.List: boolean add(java.lang.Object)>($r10);
+
+        goto label1;
+
+     label3:
+        $r12 = interfaceinvoke $r15.<java.util.Map: java.util.Set entrySet()>();
+
+        $r7 = interfaceinvoke $r12.<java.util.Set: java.util.Iterator iterator()>();
+
+     label4:
+        $z0 = interfaceinvoke $r7.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label5;
+
+        $r8 = interfaceinvoke $r7.<java.util.Iterator: java.lang.Object next()>();
+
+        r13 = (java.util.Map$Entry) $r8;
+
+        $r8 = interfaceinvoke r13.<java.util.Map$Entry: java.lang.Object getKey()>();
+
+        $r10 = (java.lang.String) $r8;
+
+        $r8 = interfaceinvoke r13.<java.util.Map$Entry: java.lang.Object getValue()>();
+
+        $r6 = (java.util.List) $r8;
+
+        virtualinvoke $r1.<com.fsck.k9.mail.Message: void setCharset(java.lang.String)>($r10);
+
+        specialinvoke r0.<com.fsck.k9.mail.transport.SmtpTransport: void sendMessageTo(java.util.List,com.fsck.k9.mail.Message)>($r6, $r1);
+
+        goto label4;
+
+     label5:
+        return;
+    }

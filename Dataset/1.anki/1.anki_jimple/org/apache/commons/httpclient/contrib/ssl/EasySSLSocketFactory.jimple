@@ -1,0 +1,235 @@
+org.apache.commons.httpclient.contrib.ssl.EasySSLSocketFactory extends java.lang.Object implements org.apache.http.conn.scheme.LayeredSocketFactory org.apache.http.conn.scheme.SocketFactory
+private javax.net.ssl.SSLContext sslcontext
+    public void <init>()
+    {
+        org.apache.commons.httpclient.contrib.ssl.EasySSLSocketFactory r0;
+
+        r0 := @this: org.apache.commons.httpclient.contrib.ssl.EasySSLSocketFactory;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<org.apache.commons.httpclient.contrib.ssl.EasySSLSocketFactory: javax.net.ssl.SSLContext sslcontext> = null;
+
+        return;
+    }
+    private static javax.net.ssl.SSLContext createEasySSLContext() throws java.io.IOException
+    {
+        java.lang.Exception r0;
+        org.apache.commons.httpclient.contrib.ssl.EasyX509TrustManager $r1;
+        javax.net.ssl.SSLContext $r2;
+        javax.net.ssl.TrustManager[] $r3;
+        java.io.IOException $r4;
+        java.lang.String $r5;
+
+     label1:
+        $r2 = staticinvoke <javax.net.ssl.SSLContext: javax.net.ssl.SSLContext getInstance(java.lang.String)>("TLS");
+
+        $r3 = newarray (javax.net.ssl.TrustManager)[1];
+
+     label2:
+        $r1 = new org.apache.commons.httpclient.contrib.ssl.EasyX509TrustManager;
+
+     label3:
+        specialinvoke $r1.<org.apache.commons.httpclient.contrib.ssl.EasyX509TrustManager: void <init>(java.security.KeyStore)>(null);
+
+        $r3[0] = $r1;
+
+        virtualinvoke $r2.<javax.net.ssl.SSLContext: void init(javax.net.ssl.KeyManager[],javax.net.ssl.TrustManager[],java.security.SecureRandom)>(null, $r3, null);
+
+     label4:
+        return $r2;
+
+     label5:
+        r0 := @caughtexception;
+
+        $r4 = new java.io.IOException;
+
+        $r5 = virtualinvoke r0.<java.lang.Exception: java.lang.String getMessage()>();
+
+        specialinvoke $r4.<java.io.IOException: void <init>(java.lang.String)>($r5);
+
+        throw $r4;
+
+        catch java.lang.Exception from label1 to label2 with label5;
+        catch java.lang.Exception from label3 to label4 with label5;
+    }
+    private javax.net.ssl.SSLContext getSSLContext() throws java.io.IOException
+    {
+        org.apache.commons.httpclient.contrib.ssl.EasySSLSocketFactory r0;
+        javax.net.ssl.SSLContext $r1;
+
+        r0 := @this: org.apache.commons.httpclient.contrib.ssl.EasySSLSocketFactory;
+
+        $r1 = r0.<org.apache.commons.httpclient.contrib.ssl.EasySSLSocketFactory: javax.net.ssl.SSLContext sslcontext>;
+
+        if $r1 != null goto label1;
+
+        $r1 = staticinvoke <org.apache.commons.httpclient.contrib.ssl.EasySSLSocketFactory: javax.net.ssl.SSLContext createEasySSLContext()>();
+
+        r0.<org.apache.commons.httpclient.contrib.ssl.EasySSLSocketFactory: javax.net.ssl.SSLContext sslcontext> = $r1;
+
+     label1:
+        $r1 = r0.<org.apache.commons.httpclient.contrib.ssl.EasySSLSocketFactory: javax.net.ssl.SSLContext sslcontext>;
+
+        return $r1;
+    }
+    public java.net.Socket connectSocket(java.net.Socket, java.lang.String, int, java.net.InetAddress, int, org.apache.http.params.HttpParams) throws java.io.IOException, java.net.UnknownHostException, org.apache.http.conn.ConnectTimeoutException
+    {
+        org.apache.commons.httpclient.contrib.ssl.EasySSLSocketFactory r0;
+        java.net.Socket $r1;
+        java.lang.String $r2;
+        int $i0, $i1, $i2, $i3;
+        java.net.InetAddress $r3;
+        org.apache.http.params.HttpParams $r4;
+        java.net.InetSocketAddress r5, r6;
+        javax.net.ssl.SSLSocket $r7;
+
+        r0 := @this: org.apache.commons.httpclient.contrib.ssl.EasySSLSocketFactory;
+
+        $r1 := @parameter0: java.net.Socket;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $i0 := @parameter2: int;
+
+        $r3 := @parameter3: java.net.InetAddress;
+
+        $i1 := @parameter4: int;
+
+        $r4 := @parameter5: org.apache.http.params.HttpParams;
+
+        $i2 = staticinvoke <org.apache.http.params.HttpConnectionParams: int getConnectionTimeout(org.apache.http.params.HttpParams)>($r4);
+
+        $i3 = staticinvoke <org.apache.http.params.HttpConnectionParams: int getSoTimeout(org.apache.http.params.HttpParams)>($r4);
+
+        r6 = new java.net.InetSocketAddress;
+
+        specialinvoke r6.<java.net.InetSocketAddress: void <init>(java.lang.String,int)>($r2, $i0);
+
+        if $r1 == null goto label5;
+
+     label1:
+        $r7 = (javax.net.ssl.SSLSocket) $r1;
+
+        if $r3 != null goto label2;
+
+        if $i1 <= 0 goto label4;
+
+     label2:
+        if $i1 >= 0 goto label3;
+
+        $i1 = 0;
+
+     label3:
+        r5 = new java.net.InetSocketAddress;
+
+        specialinvoke r5.<java.net.InetSocketAddress: void <init>(java.net.InetAddress,int)>($r3, $i1);
+
+        virtualinvoke $r7.<javax.net.ssl.SSLSocket: void bind(java.net.SocketAddress)>(r5);
+
+     label4:
+        virtualinvoke $r7.<javax.net.ssl.SSLSocket: void connect(java.net.SocketAddress,int)>(r6, $i2);
+
+        virtualinvoke $r7.<javax.net.ssl.SSLSocket: void setSoTimeout(int)>($i3);
+
+        return $r7;
+
+     label5:
+        $r1 = virtualinvoke r0.<org.apache.commons.httpclient.contrib.ssl.EasySSLSocketFactory: java.net.Socket createSocket()>();
+
+        goto label1;
+    }
+    public java.net.Socket createSocket() throws java.io.IOException
+    {
+        org.apache.commons.httpclient.contrib.ssl.EasySSLSocketFactory r0;
+        javax.net.ssl.SSLContext $r1;
+        javax.net.ssl.SSLSocketFactory $r2;
+        java.net.Socket $r3;
+
+        r0 := @this: org.apache.commons.httpclient.contrib.ssl.EasySSLSocketFactory;
+
+        $r1 = specialinvoke r0.<org.apache.commons.httpclient.contrib.ssl.EasySSLSocketFactory: javax.net.ssl.SSLContext getSSLContext()>();
+
+        $r2 = virtualinvoke $r1.<javax.net.ssl.SSLContext: javax.net.ssl.SSLSocketFactory getSocketFactory()>();
+
+        $r3 = virtualinvoke $r2.<javax.net.ssl.SSLSocketFactory: java.net.Socket createSocket()>();
+
+        return $r3;
+    }
+    public java.net.Socket createSocket(java.net.Socket, java.lang.String, int, boolean) throws java.io.IOException, java.net.UnknownHostException
+    {
+        org.apache.commons.httpclient.contrib.ssl.EasySSLSocketFactory r0;
+        java.net.Socket $r1;
+        java.lang.String $r2;
+        int $i0;
+        boolean $z0;
+        javax.net.ssl.SSLContext $r3;
+        javax.net.ssl.SSLSocketFactory $r4;
+
+        r0 := @this: org.apache.commons.httpclient.contrib.ssl.EasySSLSocketFactory;
+
+        $r1 := @parameter0: java.net.Socket;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $i0 := @parameter2: int;
+
+        $z0 := @parameter3: boolean;
+
+        $r3 = specialinvoke r0.<org.apache.commons.httpclient.contrib.ssl.EasySSLSocketFactory: javax.net.ssl.SSLContext getSSLContext()>();
+
+        $r4 = virtualinvoke $r3.<javax.net.ssl.SSLContext: javax.net.ssl.SSLSocketFactory getSocketFactory()>();
+
+        $r1 = virtualinvoke $r4.<javax.net.ssl.SSLSocketFactory: java.net.Socket createSocket(java.net.Socket,java.lang.String,int,boolean)>($r1, $r2, $i0, $z0);
+
+        return $r1;
+    }
+    public boolean equals(java.lang.Object)
+    {
+        org.apache.commons.httpclient.contrib.ssl.EasySSLSocketFactory r0;
+        java.lang.Object $r1;
+        java.lang.Class $r2;
+        boolean $z0;
+
+        r0 := @this: org.apache.commons.httpclient.contrib.ssl.EasySSLSocketFactory;
+
+        $r1 := @parameter0: java.lang.Object;
+
+        if $r1 == null goto label1;
+
+        $r2 = virtualinvoke $r1.<java.lang.Object: java.lang.Class getClass()>();
+
+        $z0 = virtualinvoke $r2.<java.lang.Object: boolean equals(java.lang.Object)>(class "Lorg/apache/commons/httpclient/contrib/ssl/EasySSLSocketFactory;");
+
+        if $z0 == 0 goto label1;
+
+        return 1;
+
+     label1:
+        return 0;
+    }
+    public int hashCode()
+    {
+        org.apache.commons.httpclient.contrib.ssl.EasySSLSocketFactory r0;
+        int $i0;
+        java.lang.Class $r1;
+
+        r0 := @this: org.apache.commons.httpclient.contrib.ssl.EasySSLSocketFactory;
+
+        $r1 = class "Lorg/apache/commons/httpclient/contrib/ssl/EasySSLSocketFactory;";
+
+        $i0 = virtualinvoke $r1.<java.lang.Object: int hashCode()>();
+
+        return $i0;
+    }
+    public boolean isSecure(java.net.Socket) throws java.lang.IllegalArgumentException
+    {
+        org.apache.commons.httpclient.contrib.ssl.EasySSLSocketFactory r0;
+        java.net.Socket $r1;
+
+        r0 := @this: org.apache.commons.httpclient.contrib.ssl.EasySSLSocketFactory;
+
+        $r1 := @parameter0: java.net.Socket;
+
+        return 1;
+    }

@@ -1,0 +1,1406 @@
+org.spongycastle.crypto.modes.GCMBlockCipher extends java.lang.Object implements org.spongycastle.crypto.modes.AEADBlockCipher
+private static final int BLOCK_SIZE
+private byte[] H
+private byte[] J0
+private byte[] S
+private byte[] S_at
+private byte[] S_atPre
+private byte[] atBlock
+private int atBlockPos
+private long atLength
+private long atLengthPre
+private byte[] bufBlock
+private int bufOff
+private org.spongycastle.crypto.BlockCipher cipher
+private byte[] counter
+private org.spongycastle.crypto.modes.gcm.GCMExponentiator exp
+private boolean forEncryption
+private byte[] initialAssociatedText
+private byte[] macBlock
+private int macSize
+private org.spongycastle.crypto.modes.gcm.GCMMultiplier multiplier
+private byte[] nonce
+private long totalLength
+    public void <init>(org.spongycastle.crypto.BlockCipher)
+    {
+        org.spongycastle.crypto.modes.GCMBlockCipher r0;
+        org.spongycastle.crypto.BlockCipher $r1;
+
+        r0 := @this: org.spongycastle.crypto.modes.GCMBlockCipher;
+
+        $r1 := @parameter0: org.spongycastle.crypto.BlockCipher;
+
+        specialinvoke r0.<org.spongycastle.crypto.modes.GCMBlockCipher: void <init>(org.spongycastle.crypto.BlockCipher,org.spongycastle.crypto.modes.gcm.GCMMultiplier)>($r1, null);
+
+        return;
+    }
+    public void <init>(org.spongycastle.crypto.BlockCipher, org.spongycastle.crypto.modes.gcm.GCMMultiplier)
+    {
+        org.spongycastle.crypto.modes.GCMBlockCipher r0;
+        org.spongycastle.crypto.BlockCipher $r1;
+        int $i0;
+        java.lang.Object r2;
+        java.lang.IllegalArgumentException $r3;
+        org.spongycastle.crypto.modes.gcm.Tables8kGCMMultiplier $r4;
+        org.spongycastle.crypto.modes.gcm.GCMMultiplier $r5;
+
+        r0 := @this: org.spongycastle.crypto.modes.GCMBlockCipher;
+
+        $r1 := @parameter0: org.spongycastle.crypto.BlockCipher;
+
+        r2 := @parameter1: org.spongycastle.crypto.modes.gcm.GCMMultiplier;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $i0 = interfaceinvoke $r1.<org.spongycastle.crypto.BlockCipher: int getBlockSize()>();
+
+        if $i0 == 16 goto label1;
+
+        $r3 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r3.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("cipher required with a block size of 16.");
+
+        throw $r3;
+
+     label1:
+        if r2 != null goto label2;
+
+        $r4 = new org.spongycastle.crypto.modes.gcm.Tables8kGCMMultiplier;
+
+        r2 = $r4;
+
+        specialinvoke $r4.<org.spongycastle.crypto.modes.gcm.Tables8kGCMMultiplier: void <init>()>();
+
+     label2:
+        r0.<org.spongycastle.crypto.modes.GCMBlockCipher: org.spongycastle.crypto.BlockCipher cipher> = $r1;
+
+        $r5 = (org.spongycastle.crypto.modes.gcm.GCMMultiplier) r2;
+
+        r0.<org.spongycastle.crypto.modes.GCMBlockCipher: org.spongycastle.crypto.modes.gcm.GCMMultiplier multiplier> = $r5;
+
+        return;
+    }
+    private void gCTRBlock(byte[], byte[], int)
+    {
+        org.spongycastle.crypto.modes.GCMBlockCipher r0;
+        byte[] $r1, $r2, $r3, r4;
+        int $i0;
+        boolean $z0;
+        long $l1;
+
+        r0 := @this: org.spongycastle.crypto.modes.GCMBlockCipher;
+
+        $r1 := @parameter0: byte[];
+
+        $r2 := @parameter1: byte[];
+
+        $i0 := @parameter2: int;
+
+        $r3 = specialinvoke r0.<org.spongycastle.crypto.modes.GCMBlockCipher: byte[] getNextCounterBlock()>();
+
+        r4 = $r3;
+
+        staticinvoke <org.spongycastle.crypto.modes.gcm.GCMUtil: void xor(byte[],byte[])>($r3, $r1);
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r3, 0, $r2, $i0, 16);
+
+        $r2 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: byte[] S>;
+
+        $z0 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: boolean forEncryption>;
+
+        if $z0 == 0 goto label2;
+
+     label1:
+        specialinvoke r0.<org.spongycastle.crypto.modes.GCMBlockCipher: void gHASHBlock(byte[],byte[])>($r2, r4);
+
+        $l1 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: long totalLength>;
+
+        $l1 = $l1 + 16L;
+
+        r0.<org.spongycastle.crypto.modes.GCMBlockCipher: long totalLength> = $l1;
+
+        return;
+
+     label2:
+        r4 = $r1;
+
+        goto label1;
+    }
+    private void gCTRPartial(byte[], int, int, byte[], int)
+    {
+        org.spongycastle.crypto.modes.GCMBlockCipher r0;
+        byte[] $r1, $r2, $r3, r4;
+        int $i0, $i1, $i2;
+        long $l3, $l4;
+        boolean $z0;
+
+        r0 := @this: org.spongycastle.crypto.modes.GCMBlockCipher;
+
+        $r1 := @parameter0: byte[];
+
+        $i0 := @parameter1: int;
+
+        $i1 := @parameter2: int;
+
+        $r2 := @parameter3: byte[];
+
+        $i2 := @parameter4: int;
+
+        $r3 = specialinvoke r0.<org.spongycastle.crypto.modes.GCMBlockCipher: byte[] getNextCounterBlock()>();
+
+        r4 = $r3;
+
+        staticinvoke <org.spongycastle.crypto.modes.gcm.GCMUtil: void xor(byte[],byte[],int,int)>($r3, $r1, $i0, $i1);
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r3, 0, $r2, $i2, $i1);
+
+        $r2 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: byte[] S>;
+
+        $z0 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: boolean forEncryption>;
+
+        if $z0 == 0 goto label2;
+
+     label1:
+        specialinvoke r0.<org.spongycastle.crypto.modes.GCMBlockCipher: void gHASHPartial(byte[],byte[],int,int)>($r2, r4, 0, $i1);
+
+        $l4 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: long totalLength>;
+
+        $l3 = (long) $i1;
+
+        $l3 = $l4 + $l3;
+
+        r0.<org.spongycastle.crypto.modes.GCMBlockCipher: long totalLength> = $l3;
+
+        return;
+
+     label2:
+        r4 = $r1;
+
+        goto label1;
+    }
+    private void gHASH(byte[], byte[], int)
+    {
+        org.spongycastle.crypto.modes.GCMBlockCipher r0;
+        byte[] $r1, $r2;
+        int $i0, $i1, i2;
+
+        r0 := @this: org.spongycastle.crypto.modes.GCMBlockCipher;
+
+        $r1 := @parameter0: byte[];
+
+        $r2 := @parameter1: byte[];
+
+        $i0 := @parameter2: int;
+
+        i2 = 0;
+
+     label1:
+        if i2 >= $i0 goto label2;
+
+        $i1 = $i0 - i2;
+
+        $i1 = staticinvoke <java.lang.Math: int min(int,int)>($i1, 16);
+
+        specialinvoke r0.<org.spongycastle.crypto.modes.GCMBlockCipher: void gHASHPartial(byte[],byte[],int,int)>($r1, $r2, i2, $i1);
+
+        i2 = i2 + 16;
+
+        goto label1;
+
+     label2:
+        return;
+    }
+    private void gHASHBlock(byte[], byte[])
+    {
+        org.spongycastle.crypto.modes.GCMBlockCipher r0;
+        byte[] $r1, $r2;
+        org.spongycastle.crypto.modes.gcm.GCMMultiplier $r3;
+
+        r0 := @this: org.spongycastle.crypto.modes.GCMBlockCipher;
+
+        $r1 := @parameter0: byte[];
+
+        $r2 := @parameter1: byte[];
+
+        staticinvoke <org.spongycastle.crypto.modes.gcm.GCMUtil: void xor(byte[],byte[])>($r1, $r2);
+
+        $r3 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: org.spongycastle.crypto.modes.gcm.GCMMultiplier multiplier>;
+
+        interfaceinvoke $r3.<org.spongycastle.crypto.modes.gcm.GCMMultiplier: void multiplyH(byte[])>($r1);
+
+        return;
+    }
+    private void gHASHPartial(byte[], byte[], int, int)
+    {
+        org.spongycastle.crypto.modes.GCMBlockCipher r0;
+        byte[] $r1, $r2;
+        int $i0, $i1;
+        org.spongycastle.crypto.modes.gcm.GCMMultiplier $r3;
+
+        r0 := @this: org.spongycastle.crypto.modes.GCMBlockCipher;
+
+        $r1 := @parameter0: byte[];
+
+        $r2 := @parameter1: byte[];
+
+        $i0 := @parameter2: int;
+
+        $i1 := @parameter3: int;
+
+        staticinvoke <org.spongycastle.crypto.modes.gcm.GCMUtil: void xor(byte[],byte[],int,int)>($r1, $r2, $i0, $i1);
+
+        $r3 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: org.spongycastle.crypto.modes.gcm.GCMMultiplier multiplier>;
+
+        interfaceinvoke $r3.<org.spongycastle.crypto.modes.gcm.GCMMultiplier: void multiplyH(byte[])>($r1);
+
+        return;
+    }
+    private byte[] getNextCounterBlock()
+    {
+        org.spongycastle.crypto.modes.GCMBlockCipher r0;
+        byte b0;
+        byte[] r1, $r2;
+        int i1, $i2;
+        org.spongycastle.crypto.BlockCipher $r3;
+
+        r0 := @this: org.spongycastle.crypto.modes.GCMBlockCipher;
+
+        i1 = 15;
+
+     label1:
+        if i1 < 12 goto label2;
+
+        r1 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: byte[] counter>;
+
+        b0 = r1[i1];
+
+        $i2 = b0 + 1;
+
+        $i2 = $i2 & 255;
+
+        b0 = (byte) $i2;
+
+        r1 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: byte[] counter>;
+
+        r1[i1] = b0;
+
+        if b0 == 0 goto label3;
+
+     label2:
+        r1 = newarray (byte)[16];
+
+        $r3 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: org.spongycastle.crypto.BlockCipher cipher>;
+
+        $r2 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: byte[] counter>;
+
+        interfaceinvoke $r3.<org.spongycastle.crypto.BlockCipher: int processBlock(byte[],int,byte[],int)>($r2, 0, r1, 0);
+
+        return r1;
+
+     label3:
+        i1 = i1 + -1;
+
+        goto label1;
+    }
+    private void initCipher()
+    {
+        org.spongycastle.crypto.modes.GCMBlockCipher r0;
+        long $l0, $l3;
+        byte $b1;
+        byte[] $r1, $r2;
+        int $i2;
+
+        r0 := @this: org.spongycastle.crypto.modes.GCMBlockCipher;
+
+        $l0 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: long atLength>;
+
+        $b1 = $l0 cmp 0L;
+
+        if $b1 <= 0 goto label1;
+
+        $r1 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: byte[] S_at>;
+
+        $r2 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: byte[] S_atPre>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r1, 0, $r2, 0, 16);
+
+        $l0 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: long atLength>;
+
+        r0.<org.spongycastle.crypto.modes.GCMBlockCipher: long atLengthPre> = $l0;
+
+     label1:
+        $i2 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: int atBlockPos>;
+
+        if $i2 <= 0 goto label2;
+
+        $r1 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: byte[] S_atPre>;
+
+        $r2 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: byte[] atBlock>;
+
+        $i2 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: int atBlockPos>;
+
+        specialinvoke r0.<org.spongycastle.crypto.modes.GCMBlockCipher: void gHASHPartial(byte[],byte[],int,int)>($r1, $r2, 0, $i2);
+
+        $l0 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: long atLengthPre>;
+
+        $i2 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: int atBlockPos>;
+
+        $l3 = (long) $i2;
+
+        $l0 = $l0 + $l3;
+
+        r0.<org.spongycastle.crypto.modes.GCMBlockCipher: long atLengthPre> = $l0;
+
+     label2:
+        $l0 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: long atLengthPre>;
+
+        $b1 = $l0 cmp 0L;
+
+        if $b1 <= 0 goto label3;
+
+        $r1 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: byte[] S_atPre>;
+
+        $r2 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: byte[] S>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r1, 0, $r2, 0, 16);
+
+     label3:
+        return;
+    }
+    private void outputBlock(byte[], int)
+    {
+        org.spongycastle.crypto.modes.GCMBlockCipher r0;
+        byte[] $r1, $r3;
+        int $i0, $i1, $i2;
+        org.spongycastle.crypto.OutputLengthException $r2;
+        long $l3;
+        byte $b4;
+        boolean $z0;
+
+        r0 := @this: org.spongycastle.crypto.modes.GCMBlockCipher;
+
+        $r1 := @parameter0: byte[];
+
+        $i0 := @parameter1: int;
+
+        $i1 = lengthof $r1;
+
+        $i2 = $i0 + 16;
+
+        if $i1 >= $i2 goto label1;
+
+        $r2 = new org.spongycastle.crypto.OutputLengthException;
+
+        specialinvoke $r2.<org.spongycastle.crypto.OutputLengthException: void <init>(java.lang.String)>("Output buffer too short");
+
+        throw $r2;
+
+     label1:
+        $l3 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: long totalLength>;
+
+        $b4 = $l3 cmp 0L;
+
+        if $b4 != 0 goto label2;
+
+        specialinvoke r0.<org.spongycastle.crypto.modes.GCMBlockCipher: void initCipher()>();
+
+     label2:
+        $r3 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: byte[] bufBlock>;
+
+        specialinvoke r0.<org.spongycastle.crypto.modes.GCMBlockCipher: void gCTRBlock(byte[],byte[],int)>($r3, $r1, $i0);
+
+        $z0 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: boolean forEncryption>;
+
+        if $z0 == 0 goto label3;
+
+        r0.<org.spongycastle.crypto.modes.GCMBlockCipher: int bufOff> = 0;
+
+        return;
+
+     label3:
+        $r1 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: byte[] bufBlock>;
+
+        $r3 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: byte[] bufBlock>;
+
+        $i0 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: int macSize>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r1, 16, $r3, 0, $i0);
+
+        $i0 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: int macSize>;
+
+        r0.<org.spongycastle.crypto.modes.GCMBlockCipher: int bufOff> = $i0;
+
+        return;
+    }
+    private void reset(boolean)
+    {
+        org.spongycastle.crypto.modes.GCMBlockCipher r0;
+        boolean $z0;
+        byte[] $r1, $r3;
+        org.spongycastle.crypto.BlockCipher $r2;
+        int $i0;
+
+        r0 := @this: org.spongycastle.crypto.modes.GCMBlockCipher;
+
+        $z0 := @parameter0: boolean;
+
+        $r2 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: org.spongycastle.crypto.BlockCipher cipher>;
+
+        interfaceinvoke $r2.<org.spongycastle.crypto.BlockCipher: void reset()>();
+
+        $r1 = newarray (byte)[16];
+
+        r0.<org.spongycastle.crypto.modes.GCMBlockCipher: byte[] S> = $r1;
+
+        $r1 = newarray (byte)[16];
+
+        r0.<org.spongycastle.crypto.modes.GCMBlockCipher: byte[] S_at> = $r1;
+
+        $r1 = newarray (byte)[16];
+
+        r0.<org.spongycastle.crypto.modes.GCMBlockCipher: byte[] S_atPre> = $r1;
+
+        $r1 = newarray (byte)[16];
+
+        r0.<org.spongycastle.crypto.modes.GCMBlockCipher: byte[] atBlock> = $r1;
+
+        r0.<org.spongycastle.crypto.modes.GCMBlockCipher: int atBlockPos> = 0;
+
+        r0.<org.spongycastle.crypto.modes.GCMBlockCipher: long atLength> = 0L;
+
+        r0.<org.spongycastle.crypto.modes.GCMBlockCipher: long atLengthPre> = 0L;
+
+        $r1 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: byte[] J0>;
+
+        $r1 = staticinvoke <org.spongycastle.util.Arrays: byte[] clone(byte[])>($r1);
+
+        r0.<org.spongycastle.crypto.modes.GCMBlockCipher: byte[] counter> = $r1;
+
+        r0.<org.spongycastle.crypto.modes.GCMBlockCipher: int bufOff> = 0;
+
+        r0.<org.spongycastle.crypto.modes.GCMBlockCipher: long totalLength> = 0L;
+
+        $r1 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: byte[] bufBlock>;
+
+        if $r1 == null goto label1;
+
+        $r1 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: byte[] bufBlock>;
+
+        staticinvoke <org.spongycastle.util.Arrays: void fill(byte[],byte)>($r1, 0);
+
+     label1:
+        if $z0 == 0 goto label2;
+
+        r0.<org.spongycastle.crypto.modes.GCMBlockCipher: byte[] macBlock> = null;
+
+     label2:
+        $r1 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: byte[] initialAssociatedText>;
+
+        if $r1 == null goto label3;
+
+        $r1 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: byte[] initialAssociatedText>;
+
+        $r3 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: byte[] initialAssociatedText>;
+
+        $i0 = lengthof $r3;
+
+        virtualinvoke r0.<org.spongycastle.crypto.modes.GCMBlockCipher: void processAADBytes(byte[],int,int)>($r1, 0, $i0);
+
+     label3:
+        return;
+    }
+    public int doFinal(byte[], int) throws java.lang.IllegalStateException, org.spongycastle.crypto.InvalidCipherTextException
+    {
+        org.spongycastle.crypto.modes.GCMBlockCipher r0;
+        byte[] $r1, r2, $r5;
+        int $i0, i3, $i4, $i5, $i6;
+        long l1, $l7;
+        boolean $z0;
+        byte $b2;
+        org.spongycastle.crypto.OutputLengthException $r3;
+        org.spongycastle.crypto.InvalidCipherTextException $r4;
+        org.spongycastle.crypto.modes.gcm.GCMExponentiator $r6;
+        org.spongycastle.crypto.modes.gcm.Tables1kGCMExponentiator $r7;
+        org.spongycastle.crypto.BlockCipher $r8;
+
+        r0 := @this: org.spongycastle.crypto.modes.GCMBlockCipher;
+
+        $r1 := @parameter0: byte[];
+
+        $i0 := @parameter1: int;
+
+        l1 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: long totalLength>;
+
+        $b2 = l1 cmp 0L;
+
+        if $b2 != 0 goto label01;
+
+        specialinvoke r0.<org.spongycastle.crypto.modes.GCMBlockCipher: void initCipher()>();
+
+     label01:
+        i3 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: int bufOff>;
+
+        $z0 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: boolean forEncryption>;
+
+        if $z0 == 0 goto label02;
+
+        $i4 = lengthof $r1;
+
+        $i5 = $i0 + i3;
+
+        $i6 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: int macSize>;
+
+        $i5 = $i5 + $i6;
+
+        if $i4 >= $i5 goto label04;
+
+        $r3 = new org.spongycastle.crypto.OutputLengthException;
+
+        specialinvoke $r3.<org.spongycastle.crypto.OutputLengthException: void <init>(java.lang.String)>("Output buffer too short");
+
+        throw $r3;
+
+     label02:
+        $i4 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: int macSize>;
+
+        if i3 >= $i4 goto label03;
+
+        $r4 = new org.spongycastle.crypto.InvalidCipherTextException;
+
+        specialinvoke $r4.<org.spongycastle.crypto.InvalidCipherTextException: void <init>(java.lang.String)>("data too short");
+
+        throw $r4;
+
+     label03:
+        $i4 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: int macSize>;
+
+        i3 = i3 - $i4;
+
+        $i4 = lengthof $r1;
+
+        $i5 = $i0 + i3;
+
+        if $i4 >= $i5 goto label04;
+
+        $r3 = new org.spongycastle.crypto.OutputLengthException;
+
+        specialinvoke $r3.<org.spongycastle.crypto.OutputLengthException: void <init>(java.lang.String)>("Output buffer too short");
+
+        throw $r3;
+
+     label04:
+        if i3 <= 0 goto label05;
+
+        r2 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: byte[] bufBlock>;
+
+        specialinvoke r0.<org.spongycastle.crypto.modes.GCMBlockCipher: void gCTRPartial(byte[],int,int,byte[],int)>(r2, 0, i3, $r1, $i0);
+
+     label05:
+        l1 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: long atLength>;
+
+        $i4 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: int atBlockPos>;
+
+        $l7 = (long) $i4;
+
+        l1 = l1 + $l7;
+
+        r0.<org.spongycastle.crypto.modes.GCMBlockCipher: long atLength> = l1;
+
+        l1 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: long atLength>;
+
+        $l7 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: long atLengthPre>;
+
+        $b2 = l1 cmp $l7;
+
+        if $b2 <= 0 goto label09;
+
+        $i4 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: int atBlockPos>;
+
+        if $i4 <= 0 goto label06;
+
+        r2 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: byte[] S_at>;
+
+        $r5 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: byte[] atBlock>;
+
+        $i4 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: int atBlockPos>;
+
+        specialinvoke r0.<org.spongycastle.crypto.modes.GCMBlockCipher: void gHASHPartial(byte[],byte[],int,int)>(r2, $r5, 0, $i4);
+
+     label06:
+        l1 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: long atLengthPre>;
+
+        $b2 = l1 cmp 0L;
+
+        if $b2 <= 0 goto label07;
+
+        r2 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: byte[] S_at>;
+
+        $r5 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: byte[] S_atPre>;
+
+        staticinvoke <org.spongycastle.crypto.modes.gcm.GCMUtil: void xor(byte[],byte[])>(r2, $r5);
+
+     label07:
+        l1 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: long totalLength>;
+
+        l1 = l1 * 8L;
+
+        l1 = l1 + 127L;
+
+        l1 = l1 >>> 7;
+
+        r2 = newarray (byte)[16];
+
+        $r6 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: org.spongycastle.crypto.modes.gcm.GCMExponentiator exp>;
+
+        if $r6 != null goto label08;
+
+        $r7 = new org.spongycastle.crypto.modes.gcm.Tables1kGCMExponentiator;
+
+        specialinvoke $r7.<org.spongycastle.crypto.modes.gcm.Tables1kGCMExponentiator: void <init>()>();
+
+        r0.<org.spongycastle.crypto.modes.GCMBlockCipher: org.spongycastle.crypto.modes.gcm.GCMExponentiator exp> = $r7;
+
+        $r6 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: org.spongycastle.crypto.modes.gcm.GCMExponentiator exp>;
+
+        $r5 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: byte[] H>;
+
+        interfaceinvoke $r6.<org.spongycastle.crypto.modes.gcm.GCMExponentiator: void init(byte[])>($r5);
+
+     label08:
+        $r6 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: org.spongycastle.crypto.modes.gcm.GCMExponentiator exp>;
+
+        interfaceinvoke $r6.<org.spongycastle.crypto.modes.gcm.GCMExponentiator: void exponentiateX(long,byte[])>(l1, r2);
+
+        $r5 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: byte[] S_at>;
+
+        staticinvoke <org.spongycastle.crypto.modes.gcm.GCMUtil: void multiply(byte[],byte[])>($r5, r2);
+
+        r2 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: byte[] S>;
+
+        $r5 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: byte[] S_at>;
+
+        staticinvoke <org.spongycastle.crypto.modes.gcm.GCMUtil: void xor(byte[],byte[])>(r2, $r5);
+
+     label09:
+        r2 = newarray (byte)[16];
+
+        l1 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: long atLength>;
+
+        l1 = l1 * 8L;
+
+        staticinvoke <org.spongycastle.util.Pack: void longToBigEndian(long,byte[],int)>(l1, r2, 0);
+
+        l1 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: long totalLength>;
+
+        l1 = l1 * 8L;
+
+        staticinvoke <org.spongycastle.util.Pack: void longToBigEndian(long,byte[],int)>(l1, r2, 8);
+
+        $r5 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: byte[] S>;
+
+        specialinvoke r0.<org.spongycastle.crypto.modes.GCMBlockCipher: void gHASHBlock(byte[],byte[])>($r5, r2);
+
+        r2 = newarray (byte)[16];
+
+        $r8 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: org.spongycastle.crypto.BlockCipher cipher>;
+
+        $r5 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: byte[] J0>;
+
+        interfaceinvoke $r8.<org.spongycastle.crypto.BlockCipher: int processBlock(byte[],int,byte[],int)>($r5, 0, r2, 0);
+
+        $r5 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: byte[] S>;
+
+        staticinvoke <org.spongycastle.crypto.modes.gcm.GCMUtil: void xor(byte[],byte[])>(r2, $r5);
+
+        $i4 = i3;
+
+        $i5 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: int macSize>;
+
+        $r5 = newarray (byte)[$i5];
+
+        r0.<org.spongycastle.crypto.modes.GCMBlockCipher: byte[] macBlock> = $r5;
+
+        $r5 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: byte[] macBlock>;
+
+        $i5 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: int macSize>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r2, 0, $r5, 0, $i5);
+
+        $z0 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: boolean forEncryption>;
+
+        if $z0 == 0 goto label11;
+
+        r2 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: byte[] macBlock>;
+
+        $i4 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: int bufOff>;
+
+        $i0 = $i4 + $i0;
+
+        $i4 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: int macSize>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r2, 0, $r1, $i0, $i4);
+
+        $i0 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: int macSize>;
+
+        $i4 = i3 + $i0;
+
+     label10:
+        specialinvoke r0.<org.spongycastle.crypto.modes.GCMBlockCipher: void reset(boolean)>(0);
+
+        return $i4;
+
+     label11:
+        $i0 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: int macSize>;
+
+        $r1 = newarray (byte)[$i0];
+
+        r2 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: byte[] bufBlock>;
+
+        $i0 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: int macSize>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r2, i3, $r1, 0, $i0);
+
+        r2 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: byte[] macBlock>;
+
+        $z0 = staticinvoke <org.spongycastle.util.Arrays: boolean constantTimeAreEqual(byte[],byte[])>(r2, $r1);
+
+        if $z0 != 0 goto label10;
+
+        $r4 = new org.spongycastle.crypto.InvalidCipherTextException;
+
+        specialinvoke $r4.<org.spongycastle.crypto.InvalidCipherTextException: void <init>(java.lang.String)>("mac check in GCM failed");
+
+        throw $r4;
+    }
+    public java.lang.String getAlgorithmName()
+    {
+        org.spongycastle.crypto.modes.GCMBlockCipher r0;
+        java.lang.StringBuilder $r1;
+        org.spongycastle.crypto.BlockCipher $r2;
+        java.lang.String $r3;
+
+        r0 := @this: org.spongycastle.crypto.modes.GCMBlockCipher;
+
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: org.spongycastle.crypto.BlockCipher cipher>;
+
+        $r3 = interfaceinvoke $r2.<org.spongycastle.crypto.BlockCipher: java.lang.String getAlgorithmName()>();
+
+        $r1 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r1 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("/GCM");
+
+        $r3 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r3;
+    }
+    public byte[] getMac()
+    {
+        org.spongycastle.crypto.modes.GCMBlockCipher r0;
+        byte[] $r1;
+
+        r0 := @this: org.spongycastle.crypto.modes.GCMBlockCipher;
+
+        $r1 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: byte[] macBlock>;
+
+        $r1 = staticinvoke <org.spongycastle.util.Arrays: byte[] clone(byte[])>($r1);
+
+        return $r1;
+    }
+    public int getOutputSize(int)
+    {
+        org.spongycastle.crypto.modes.GCMBlockCipher r0;
+        int $i0, $i1;
+        boolean $z0;
+
+        r0 := @this: org.spongycastle.crypto.modes.GCMBlockCipher;
+
+        $i0 := @parameter0: int;
+
+        $i1 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: int bufOff>;
+
+        $i0 = $i0 + $i1;
+
+        $z0 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: boolean forEncryption>;
+
+        if $z0 == 0 goto label1;
+
+        $i1 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: int macSize>;
+
+        $i0 = $i1 + $i0;
+
+        return $i0;
+
+     label1:
+        $i1 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: int macSize>;
+
+        if $i0 >= $i1 goto label2;
+
+        return 0;
+
+     label2:
+        $i1 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: int macSize>;
+
+        $i0 = $i0 - $i1;
+
+        return $i0;
+    }
+    public org.spongycastle.crypto.BlockCipher getUnderlyingCipher()
+    {
+        org.spongycastle.crypto.modes.GCMBlockCipher r0;
+        org.spongycastle.crypto.BlockCipher r1;
+
+        r0 := @this: org.spongycastle.crypto.modes.GCMBlockCipher;
+
+        r1 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: org.spongycastle.crypto.BlockCipher cipher>;
+
+        return r1;
+    }
+    public int getUpdateOutputSize(int)
+    {
+        org.spongycastle.crypto.modes.GCMBlockCipher r0;
+        int $i0, $i1;
+        boolean $z0;
+
+        r0 := @this: org.spongycastle.crypto.modes.GCMBlockCipher;
+
+        $i0 := @parameter0: int;
+
+        $i1 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: int bufOff>;
+
+        $i0 = $i0 + $i1;
+
+        $z0 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: boolean forEncryption>;
+
+        if $z0 != 0 goto label2;
+
+        $i1 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: int macSize>;
+
+        if $i0 >= $i1 goto label1;
+
+        return 0;
+
+     label1:
+        $i1 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: int macSize>;
+
+        $i0 = $i0 - $i1;
+
+     label2:
+        $i1 = $i0 % 16;
+
+        $i0 = $i0 - $i1;
+
+        return $i0;
+    }
+    public void init(boolean, org.spongycastle.crypto.CipherParameters) throws java.lang.IllegalArgumentException
+    {
+        org.spongycastle.crypto.modes.GCMBlockCipher r0;
+        boolean $z0, $z1;
+        org.spongycastle.crypto.CipherParameters $r1;
+        byte[] r2, $r10, $r12;
+        org.spongycastle.crypto.params.AEADParameters r3;
+        int $i0, $i1;
+        java.lang.IllegalArgumentException $r4;
+        java.lang.StringBuilder $r5;
+        java.lang.String $r6;
+        org.spongycastle.crypto.params.KeyParameter $r7;
+        org.spongycastle.crypto.params.ParametersWithIV r8;
+        org.spongycastle.crypto.BlockCipher $r9;
+        org.spongycastle.crypto.modes.gcm.GCMMultiplier $r11;
+        long $l2;
+
+        r0 := @this: org.spongycastle.crypto.modes.GCMBlockCipher;
+
+        $z0 := @parameter0: boolean;
+
+        $r1 := @parameter1: org.spongycastle.crypto.CipherParameters;
+
+        r0.<org.spongycastle.crypto.modes.GCMBlockCipher: boolean forEncryption> = $z0;
+
+        r0.<org.spongycastle.crypto.modes.GCMBlockCipher: byte[] macBlock> = null;
+
+        $z1 = $r1 instanceof org.spongycastle.crypto.params.AEADParameters;
+
+        if $z1 == 0 goto label06;
+
+        r3 = (org.spongycastle.crypto.params.AEADParameters) $r1;
+
+        r2 = virtualinvoke r3.<org.spongycastle.crypto.params.AEADParameters: byte[] getNonce()>();
+
+        r0.<org.spongycastle.crypto.modes.GCMBlockCipher: byte[] nonce> = r2;
+
+        r2 = virtualinvoke r3.<org.spongycastle.crypto.params.AEADParameters: byte[] getAssociatedText()>();
+
+        r0.<org.spongycastle.crypto.modes.GCMBlockCipher: byte[] initialAssociatedText> = r2;
+
+        $i0 = virtualinvoke r3.<org.spongycastle.crypto.params.AEADParameters: int getMacSize()>();
+
+        if $i0 < 32 goto label01;
+
+        if $i0 > 128 goto label01;
+
+        $i1 = $i0 % 8;
+
+        if $i1 == 0 goto label02;
+
+     label01:
+        $r4 = new java.lang.IllegalArgumentException;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Invalid value for MAC size: ");
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r4.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r6);
+
+        throw $r4;
+
+     label02:
+        $i0 = $i0 / 8;
+
+        r0.<org.spongycastle.crypto.modes.GCMBlockCipher: int macSize> = $i0;
+
+        $r7 = virtualinvoke r3.<org.spongycastle.crypto.params.AEADParameters: org.spongycastle.crypto.params.KeyParameter getKey()>();
+
+     label03:
+        if $z0 == 0 goto label08;
+
+        $i0 = 16;
+
+     label04:
+        r2 = newarray (byte)[$i0];
+
+        r0.<org.spongycastle.crypto.modes.GCMBlockCipher: byte[] bufBlock> = r2;
+
+        r2 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: byte[] nonce>;
+
+        if r2 == null goto label05;
+
+        r2 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: byte[] nonce>;
+
+        $i0 = lengthof r2;
+
+        if $i0 >= 1 goto label09;
+
+     label05:
+        $r4 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r4.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("IV must be at least 1 byte");
+
+        throw $r4;
+
+     label06:
+        $z1 = $r1 instanceof org.spongycastle.crypto.params.ParametersWithIV;
+
+        if $z1 == 0 goto label07;
+
+        r8 = (org.spongycastle.crypto.params.ParametersWithIV) $r1;
+
+        r2 = virtualinvoke r8.<org.spongycastle.crypto.params.ParametersWithIV: byte[] getIV()>();
+
+        r0.<org.spongycastle.crypto.modes.GCMBlockCipher: byte[] nonce> = r2;
+
+        r0.<org.spongycastle.crypto.modes.GCMBlockCipher: byte[] initialAssociatedText> = null;
+
+        r0.<org.spongycastle.crypto.modes.GCMBlockCipher: int macSize> = 16;
+
+        $r1 = virtualinvoke r8.<org.spongycastle.crypto.params.ParametersWithIV: org.spongycastle.crypto.CipherParameters getParameters()>();
+
+        $r7 = (org.spongycastle.crypto.params.KeyParameter) $r1;
+
+        goto label03;
+
+     label07:
+        $r4 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r4.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("invalid parameters passed to GCM");
+
+        throw $r4;
+
+     label08:
+        $i0 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: int macSize>;
+
+        $i0 = $i0 + 16;
+
+        goto label04;
+
+     label09:
+        if $r7 == null goto label12;
+
+        $r9 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: org.spongycastle.crypto.BlockCipher cipher>;
+
+        interfaceinvoke $r9.<org.spongycastle.crypto.BlockCipher: void init(boolean,org.spongycastle.crypto.CipherParameters)>(1, $r7);
+
+        r2 = newarray (byte)[16];
+
+        r0.<org.spongycastle.crypto.modes.GCMBlockCipher: byte[] H> = r2;
+
+        $r9 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: org.spongycastle.crypto.BlockCipher cipher>;
+
+        r2 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: byte[] H>;
+
+        $r10 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: byte[] H>;
+
+        interfaceinvoke $r9.<org.spongycastle.crypto.BlockCipher: int processBlock(byte[],int,byte[],int)>(r2, 0, $r10, 0);
+
+        $r11 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: org.spongycastle.crypto.modes.gcm.GCMMultiplier multiplier>;
+
+        r2 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: byte[] H>;
+
+        interfaceinvoke $r11.<org.spongycastle.crypto.modes.gcm.GCMMultiplier: void init(byte[])>(r2);
+
+        r0.<org.spongycastle.crypto.modes.GCMBlockCipher: org.spongycastle.crypto.modes.gcm.GCMExponentiator exp> = null;
+
+     label10:
+        r2 = newarray (byte)[16];
+
+        r0.<org.spongycastle.crypto.modes.GCMBlockCipher: byte[] J0> = r2;
+
+        r2 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: byte[] nonce>;
+
+        $i0 = lengthof r2;
+
+        if $i0 != 12 goto label13;
+
+        r2 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: byte[] nonce>;
+
+        $r10 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: byte[] J0>;
+
+        $r12 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: byte[] nonce>;
+
+        $i0 = lengthof $r12;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r2, 0, $r10, 0, $i0);
+
+        r2 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: byte[] J0>;
+
+        r2[15] = 1;
+
+     label11:
+        r2 = newarray (byte)[16];
+
+        r0.<org.spongycastle.crypto.modes.GCMBlockCipher: byte[] S> = r2;
+
+        r2 = newarray (byte)[16];
+
+        r0.<org.spongycastle.crypto.modes.GCMBlockCipher: byte[] S_at> = r2;
+
+        r2 = newarray (byte)[16];
+
+        r0.<org.spongycastle.crypto.modes.GCMBlockCipher: byte[] S_atPre> = r2;
+
+        r2 = newarray (byte)[16];
+
+        r0.<org.spongycastle.crypto.modes.GCMBlockCipher: byte[] atBlock> = r2;
+
+        r0.<org.spongycastle.crypto.modes.GCMBlockCipher: int atBlockPos> = 0;
+
+        r0.<org.spongycastle.crypto.modes.GCMBlockCipher: long atLength> = 0L;
+
+        r0.<org.spongycastle.crypto.modes.GCMBlockCipher: long atLengthPre> = 0L;
+
+        r2 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: byte[] J0>;
+
+        r2 = staticinvoke <org.spongycastle.util.Arrays: byte[] clone(byte[])>(r2);
+
+        r0.<org.spongycastle.crypto.modes.GCMBlockCipher: byte[] counter> = r2;
+
+        r0.<org.spongycastle.crypto.modes.GCMBlockCipher: int bufOff> = 0;
+
+        r0.<org.spongycastle.crypto.modes.GCMBlockCipher: long totalLength> = 0L;
+
+        r2 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: byte[] initialAssociatedText>;
+
+        if r2 == null goto label14;
+
+        r2 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: byte[] initialAssociatedText>;
+
+        $r10 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: byte[] initialAssociatedText>;
+
+        $i0 = lengthof $r10;
+
+        virtualinvoke r0.<org.spongycastle.crypto.modes.GCMBlockCipher: void processAADBytes(byte[],int,int)>(r2, 0, $i0);
+
+        return;
+
+     label12:
+        r2 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: byte[] H>;
+
+        if r2 != null goto label10;
+
+        $r4 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r4.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Key must be specified in initial init");
+
+        throw $r4;
+
+     label13:
+        r2 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: byte[] J0>;
+
+        $r10 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: byte[] nonce>;
+
+        $r12 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: byte[] nonce>;
+
+        $i0 = lengthof $r12;
+
+        specialinvoke r0.<org.spongycastle.crypto.modes.GCMBlockCipher: void gHASH(byte[],byte[],int)>(r2, $r10, $i0);
+
+        r2 = newarray (byte)[16];
+
+        $r10 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: byte[] nonce>;
+
+        $i0 = lengthof $r10;
+
+        $l2 = (long) $i0;
+
+        $l2 = $l2 * 8L;
+
+        staticinvoke <org.spongycastle.util.Pack: void longToBigEndian(long,byte[],int)>($l2, r2, 8);
+
+        $r10 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: byte[] J0>;
+
+        specialinvoke r0.<org.spongycastle.crypto.modes.GCMBlockCipher: void gHASHBlock(byte[],byte[])>($r10, r2);
+
+        goto label11;
+
+     label14:
+        return;
+    }
+    public void processAADByte(byte)
+    {
+        org.spongycastle.crypto.modes.GCMBlockCipher r0;
+        byte $b0;
+        byte[] $r1, $r2;
+        int $i1;
+        long $l2;
+
+        r0 := @this: org.spongycastle.crypto.modes.GCMBlockCipher;
+
+        $b0 := @parameter0: byte;
+
+        $r1 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: byte[] atBlock>;
+
+        $i1 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: int atBlockPos>;
+
+        $r1[$i1] = $b0;
+
+        $i1 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: int atBlockPos>;
+
+        $i1 = $i1 + 1;
+
+        r0.<org.spongycastle.crypto.modes.GCMBlockCipher: int atBlockPos> = $i1;
+
+        if $i1 != 16 goto label1;
+
+        $r1 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: byte[] S_at>;
+
+        $r2 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: byte[] atBlock>;
+
+        specialinvoke r0.<org.spongycastle.crypto.modes.GCMBlockCipher: void gHASHBlock(byte[],byte[])>($r1, $r2);
+
+        r0.<org.spongycastle.crypto.modes.GCMBlockCipher: int atBlockPos> = 0;
+
+        $l2 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: long atLength>;
+
+        $l2 = $l2 + 16L;
+
+        r0.<org.spongycastle.crypto.modes.GCMBlockCipher: long atLength> = $l2;
+
+     label1:
+        return;
+    }
+    public void processAADBytes(byte[], int, int)
+    {
+        org.spongycastle.crypto.modes.GCMBlockCipher r0;
+        byte[] $r1, $r2, $r3;
+        int $i0, $i1, i2, $i3, $i4;
+        byte $b5;
+        long $l6;
+
+        r0 := @this: org.spongycastle.crypto.modes.GCMBlockCipher;
+
+        $r1 := @parameter0: byte[];
+
+        $i0 := @parameter1: int;
+
+        $i1 := @parameter2: int;
+
+        i2 = 0;
+
+     label1:
+        if i2 >= $i1 goto label3;
+
+        $r2 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: byte[] atBlock>;
+
+        $i3 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: int atBlockPos>;
+
+        $i4 = $i0 + i2;
+
+        $b5 = $r1[$i4];
+
+        $r2[$i3] = $b5;
+
+        $i3 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: int atBlockPos>;
+
+        $i3 = $i3 + 1;
+
+        r0.<org.spongycastle.crypto.modes.GCMBlockCipher: int atBlockPos> = $i3;
+
+        if $i3 != 16 goto label2;
+
+        $r2 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: byte[] S_at>;
+
+        $r3 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: byte[] atBlock>;
+
+        specialinvoke r0.<org.spongycastle.crypto.modes.GCMBlockCipher: void gHASHBlock(byte[],byte[])>($r2, $r3);
+
+        r0.<org.spongycastle.crypto.modes.GCMBlockCipher: int atBlockPos> = 0;
+
+        $l6 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: long atLength>;
+
+        $l6 = $l6 + 16L;
+
+        r0.<org.spongycastle.crypto.modes.GCMBlockCipher: long atLength> = $l6;
+
+     label2:
+        i2 = i2 + 1;
+
+        goto label1;
+
+     label3:
+        return;
+    }
+    public int processByte(byte, byte[], int) throws org.spongycastle.crypto.DataLengthException
+    {
+        org.spongycastle.crypto.modes.GCMBlockCipher r0;
+        byte $b0;
+        byte[] $r1, $r2;
+        int $i1, $i2, $i3;
+
+        r0 := @this: org.spongycastle.crypto.modes.GCMBlockCipher;
+
+        $b0 := @parameter0: byte;
+
+        $r1 := @parameter1: byte[];
+
+        $i1 := @parameter2: int;
+
+        $r2 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: byte[] bufBlock>;
+
+        $i2 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: int bufOff>;
+
+        $r2[$i2] = $b0;
+
+        $i2 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: int bufOff>;
+
+        $i2 = $i2 + 1;
+
+        r0.<org.spongycastle.crypto.modes.GCMBlockCipher: int bufOff> = $i2;
+
+        $r2 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: byte[] bufBlock>;
+
+        $i3 = lengthof $r2;
+
+        if $i2 != $i3 goto label1;
+
+        specialinvoke r0.<org.spongycastle.crypto.modes.GCMBlockCipher: void outputBlock(byte[],int)>($r1, $i1);
+
+        return 16;
+
+     label1:
+        return 0;
+    }
+    public int processBytes(byte[], int, int, byte[], int) throws org.spongycastle.crypto.DataLengthException
+    {
+        org.spongycastle.crypto.modes.GCMBlockCipher r0;
+        byte[] $r1, $r2, $r4;
+        int $i0, $i1, $i2, $i3, $i4, $i5, $i6;
+        org.spongycastle.crypto.DataLengthException $r3;
+        byte $b7;
+
+        r0 := @this: org.spongycastle.crypto.modes.GCMBlockCipher;
+
+        $r1 := @parameter0: byte[];
+
+        $i0 := @parameter1: int;
+
+        $i1 := @parameter2: int;
+
+        $r2 := @parameter3: byte[];
+
+        $i2 := @parameter4: int;
+
+        $i3 = lengthof $r1;
+
+        $i4 = $i0 + $i1;
+
+        if $i3 >= $i4 goto label1;
+
+        $r3 = new org.spongycastle.crypto.DataLengthException;
+
+        specialinvoke $r3.<org.spongycastle.crypto.DataLengthException: void <init>(java.lang.String)>("Input buffer too short");
+
+        throw $r3;
+
+     label1:
+        $i3 = 0;
+
+        $i4 = 0;
+
+     label2:
+        if $i4 >= $i1 goto label4;
+
+        $r4 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: byte[] bufBlock>;
+
+        $i5 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: int bufOff>;
+
+        $i6 = $i0 + $i4;
+
+        $b7 = $r1[$i6];
+
+        $r4[$i5] = $b7;
+
+        $i5 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: int bufOff>;
+
+        $i5 = $i5 + 1;
+
+        r0.<org.spongycastle.crypto.modes.GCMBlockCipher: int bufOff> = $i5;
+
+        $r4 = r0.<org.spongycastle.crypto.modes.GCMBlockCipher: byte[] bufBlock>;
+
+        $i6 = lengthof $r4;
+
+        if $i5 != $i6 goto label3;
+
+        $i5 = $i2 + $i3;
+
+        specialinvoke r0.<org.spongycastle.crypto.modes.GCMBlockCipher: void outputBlock(byte[],int)>($r2, $i5);
+
+        $i3 = $i3 + 16;
+
+     label3:
+        $i4 = $i4 + 1;
+
+        goto label2;
+
+     label4:
+        return $i3;
+    }
+    public void reset()
+    {
+        org.spongycastle.crypto.modes.GCMBlockCipher r0;
+
+        r0 := @this: org.spongycastle.crypto.modes.GCMBlockCipher;
+
+        specialinvoke r0.<org.spongycastle.crypto.modes.GCMBlockCipher: void reset(boolean)>(1);
+
+        return;
+    }

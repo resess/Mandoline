@@ -1,0 +1,563 @@
+com.fsck.k9.provider.MessageProvider extends android.content.ContentProvider
+public static final java.lang.String AUTHORITY
+public static final android.net.Uri CONTENT_URI
+private static final java.lang.String[] DEFAULT_MESSAGE_PROJECTION
+private com.fsck.k9.helper.MessageHelper mMessageHelper
+private java.util.List mQueryHandlers
+java.util.concurrent.ScheduledExecutorService mScheduledPool
+java.util.concurrent.Semaphore mSemaphore
+private android.content.UriMatcher mUriMatcher
+    static void <clinit>()
+    {
+        android.net.Uri $r0;
+        java.lang.String[] $r1;
+
+        $r0 = staticinvoke <android.net.Uri: android.net.Uri parse(java.lang.String)>("content://com.fsck.k9.messageprovider");
+
+        <com.fsck.k9.provider.MessageProvider: android.net.Uri CONTENT_URI> = $r0;
+
+        $r1 = newarray (java.lang.String)[9];
+
+        $r1[0] = "_id";
+
+        $r1[1] = "date";
+
+        $r1[2] = "sender";
+
+        $r1[3] = "subject";
+
+        $r1[4] = "preview";
+
+        $r1[5] = "account";
+
+        $r1[6] = "uri";
+
+        $r1[7] = "delUri";
+
+        $r1[8] = "senderAddress";
+
+        <com.fsck.k9.provider.MessageProvider: java.lang.String[] DEFAULT_MESSAGE_PROJECTION> = $r1;
+
+        return;
+    }
+    public void <init>()
+    {
+        com.fsck.k9.provider.MessageProvider r0;
+        java.util.concurrent.ScheduledExecutorService $r1;
+        android.content.UriMatcher $r2;
+        java.util.ArrayList $r3;
+        java.util.concurrent.Semaphore $r4;
+
+        r0 := @this: com.fsck.k9.provider.MessageProvider;
+
+        specialinvoke r0.<android.content.ContentProvider: void <init>()>();
+
+        $r2 = new android.content.UriMatcher;
+
+        specialinvoke $r2.<android.content.UriMatcher: void <init>(int)>(-1);
+
+        r0.<com.fsck.k9.provider.MessageProvider: android.content.UriMatcher mUriMatcher> = $r2;
+
+        $r3 = new java.util.ArrayList;
+
+        specialinvoke $r3.<java.util.ArrayList: void <init>()>();
+
+        r0.<com.fsck.k9.provider.MessageProvider: java.util.List mQueryHandlers> = $r3;
+
+        $r4 = new java.util.concurrent.Semaphore;
+
+        specialinvoke $r4.<java.util.concurrent.Semaphore: void <init>(int)>(1);
+
+        r0.<com.fsck.k9.provider.MessageProvider: java.util.concurrent.Semaphore mSemaphore> = $r4;
+
+        $r1 = staticinvoke <java.util.concurrent.Executors: java.util.concurrent.ScheduledExecutorService newScheduledThreadPool(int)>(1);
+
+        r0.<com.fsck.k9.provider.MessageProvider: java.util.concurrent.ScheduledExecutorService mScheduledPool> = $r1;
+
+        return;
+    }
+    static java.lang.String[] access$000()
+    {
+        java.lang.String[] r0;
+
+        r0 = <com.fsck.k9.provider.MessageProvider: java.lang.String[] DEFAULT_MESSAGE_PROJECTION>;
+
+        return r0;
+    }
+    static com.fsck.k9.helper.MessageHelper access$100(com.fsck.k9.provider.MessageProvider)
+    {
+        com.fsck.k9.provider.MessageProvider $r0;
+        com.fsck.k9.helper.MessageHelper r1;
+
+        $r0 := @parameter0: com.fsck.k9.provider.MessageProvider;
+
+        r1 = $r0.<com.fsck.k9.provider.MessageProvider: com.fsck.k9.helper.MessageHelper mMessageHelper>;
+
+        return r1;
+    }
+    public int delete(android.net.Uri, java.lang.String, java.lang.String[])
+    {
+        com.fsck.k9.provider.MessageProvider r0;
+        android.net.Uri $r1;
+        java.lang.String $r2, r9, $r15;
+        java.lang.String[] $r3;
+        com.fsck.k9.activity.MessageReference r4;
+        android.app.Application $r5;
+        boolean $z0;
+        java.lang.StringBuilder $r6;
+        java.util.List $r7;
+        java.lang.Object $r8;
+        int $i0, $i1;
+        com.fsck.k9.Account r10, r14;
+        android.content.Context $r11;
+        com.fsck.k9.Preferences $r12;
+        java.util.Iterator $r13;
+        com.fsck.k9.controller.MessagingController $r16;
+
+        r0 := @this: com.fsck.k9.provider.MessageProvider;
+
+        $r1 := @parameter0: android.net.Uri;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $r3 := @parameter2: java.lang.String[];
+
+        $r5 = <com.fsck.k9.K9: android.app.Application app>;
+
+        if $r5 != null goto label1;
+
+        return 0;
+
+     label1:
+        $z0 = <com.fsck.k9.K9: boolean DEBUG>;
+
+        if $z0 == 0 goto label2;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("MessageProvider/delete: ");
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r1);
+
+        $r2 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int v(java.lang.String,java.lang.String)>("k9", $r2);
+
+     label2:
+        $r7 = virtualinvoke $r1.<android.net.Uri: java.util.List getPathSegments()>();
+
+        $r8 = interfaceinvoke $r7.<java.util.List: java.lang.Object get(int)>(1);
+
+        $r2 = (java.lang.String) $r8;
+
+        $i0 = staticinvoke <java.lang.Integer: int parseInt(java.lang.String)>($r2);
+
+        $r8 = interfaceinvoke $r7.<java.util.List: java.lang.Object get(int)>(2);
+
+        $r2 = (java.lang.String) $r8;
+
+        $r8 = interfaceinvoke $r7.<java.util.List: java.lang.Object get(int)>(3);
+
+        r9 = (java.lang.String) $r8;
+
+        r10 = null;
+
+        $r11 = virtualinvoke r0.<com.fsck.k9.provider.MessageProvider: android.content.Context getContext()>();
+
+        $r12 = staticinvoke <com.fsck.k9.Preferences: com.fsck.k9.Preferences getPreferences(android.content.Context)>($r11);
+
+        $r7 = virtualinvoke $r12.<com.fsck.k9.Preferences: java.util.List getAccounts()>();
+
+        $r13 = interfaceinvoke $r7.<java.util.List: java.util.Iterator iterator()>();
+
+     label3:
+        $z0 = interfaceinvoke $r13.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label4;
+
+        $r8 = interfaceinvoke $r13.<java.util.Iterator: java.lang.Object next()>();
+
+        r14 = (com.fsck.k9.Account) $r8;
+
+        $i1 = virtualinvoke r14.<com.fsck.k9.Account: int getAccountNumber()>();
+
+        if $i1 != $i0 goto label3;
+
+        r10 = r14;
+
+        $r11 = virtualinvoke r0.<com.fsck.k9.provider.MessageProvider: android.content.Context getContext()>();
+
+        $z0 = virtualinvoke r14.<com.fsck.k9.Account: boolean isAvailable(android.content.Context)>($r11);
+
+        if $z0 != 0 goto label3;
+
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String)>("k9", "not deleting messages because account is unavailable at the moment");
+
+        return 0;
+
+     label4:
+        if r10 != null goto label5;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Could not find account with id ");
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r15 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String)>("k9", $r15);
+
+     label5:
+        if r10 == null goto label6;
+
+        r4 = new com.fsck.k9.activity.MessageReference;
+
+        $r15 = virtualinvoke r10.<com.fsck.k9.Account: java.lang.String getUuid()>();
+
+        specialinvoke r4.<com.fsck.k9.activity.MessageReference: void <init>(java.lang.String,java.lang.String,java.lang.String,com.fsck.k9.mail.Flag)>($r15, $r2, r9, null);
+
+        $r11 = virtualinvoke r0.<com.fsck.k9.provider.MessageProvider: android.content.Context getContext()>();
+
+        $r16 = staticinvoke <com.fsck.k9.controller.MessagingController: com.fsck.k9.controller.MessagingController getInstance(android.content.Context)>($r11);
+
+        virtualinvoke $r16.<com.fsck.k9.controller.MessagingController: void deleteMessage(com.fsck.k9.activity.MessageReference,com.fsck.k9.controller.MessagingListener)>(r4, null);
+
+     label6:
+        return 0;
+    }
+    public java.lang.String getType(android.net.Uri)
+    {
+        com.fsck.k9.provider.MessageProvider r0;
+        android.net.Uri $r1;
+        android.app.Application $r2;
+        boolean $z0;
+        java.lang.StringBuilder $r3;
+        java.lang.String $r4;
+
+        r0 := @this: com.fsck.k9.provider.MessageProvider;
+
+        $r1 := @parameter0: android.net.Uri;
+
+        $r2 = <com.fsck.k9.K9: android.app.Application app>;
+
+        if $r2 != null goto label1;
+
+        return null;
+
+     label1:
+        $z0 = <com.fsck.k9.K9: boolean DEBUG>;
+
+        if $z0 == 0 goto label2;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("MessageProvider/getType: ");
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r1);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int v(java.lang.String,java.lang.String)>("k9", $r4);
+
+     label2:
+        return null;
+    }
+    public android.net.Uri insert(android.net.Uri, android.content.ContentValues)
+    {
+        com.fsck.k9.provider.MessageProvider r0;
+        android.net.Uri $r1;
+        android.content.ContentValues $r2;
+        android.app.Application $r3;
+        boolean $z0;
+        java.lang.StringBuilder $r4;
+        java.lang.String $r5;
+
+        r0 := @this: com.fsck.k9.provider.MessageProvider;
+
+        $r1 := @parameter0: android.net.Uri;
+
+        $r2 := @parameter1: android.content.ContentValues;
+
+        $r3 = <com.fsck.k9.K9: android.app.Application app>;
+
+        if $r3 != null goto label1;
+
+        return null;
+
+     label1:
+        $z0 = <com.fsck.k9.K9: boolean DEBUG>;
+
+        if $z0 == 0 goto label2;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("MessageProvider/insert: ");
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r1);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int v(java.lang.String,java.lang.String)>("k9", $r5);
+
+     label2:
+        return null;
+    }
+    public boolean onCreate()
+    {
+        com.fsck.k9.provider.MessageProvider r0;
+        android.content.Context $r1;
+        com.fsck.k9.helper.MessageHelper $r2;
+        com.fsck.k9.provider.MessageProvider$ThrottlingQueryHandler $r3;
+        com.fsck.k9.provider.MessageProvider$AccountsQueryHandler $r4;
+        com.fsck.k9.provider.MessageProvider$MessagesQueryHandler $r5;
+        com.fsck.k9.provider.MessageProvider$UnreadQueryHandler $r6;
+        com.fsck.k9.provider.MessageProvider$1 $r7;
+
+        r0 := @this: com.fsck.k9.provider.MessageProvider;
+
+        $r1 = virtualinvoke r0.<com.fsck.k9.provider.MessageProvider: android.content.Context getContext()>();
+
+        $r2 = staticinvoke <com.fsck.k9.helper.MessageHelper: com.fsck.k9.helper.MessageHelper getInstance(android.content.Context)>($r1);
+
+        r0.<com.fsck.k9.provider.MessageProvider: com.fsck.k9.helper.MessageHelper mMessageHelper> = $r2;
+
+        $r3 = new com.fsck.k9.provider.MessageProvider$ThrottlingQueryHandler;
+
+        $r4 = new com.fsck.k9.provider.MessageProvider$AccountsQueryHandler;
+
+        specialinvoke $r4.<com.fsck.k9.provider.MessageProvider$AccountsQueryHandler: void <init>(com.fsck.k9.provider.MessageProvider)>(r0);
+
+        specialinvoke $r3.<com.fsck.k9.provider.MessageProvider$ThrottlingQueryHandler: void <init>(com.fsck.k9.provider.MessageProvider,com.fsck.k9.provider.MessageProvider$QueryHandler)>(r0, $r4);
+
+        virtualinvoke r0.<com.fsck.k9.provider.MessageProvider: void registerQueryHandler(com.fsck.k9.provider.MessageProvider$QueryHandler)>($r3);
+
+        $r3 = new com.fsck.k9.provider.MessageProvider$ThrottlingQueryHandler;
+
+        $r5 = new com.fsck.k9.provider.MessageProvider$MessagesQueryHandler;
+
+        specialinvoke $r5.<com.fsck.k9.provider.MessageProvider$MessagesQueryHandler: void <init>(com.fsck.k9.provider.MessageProvider)>(r0);
+
+        specialinvoke $r3.<com.fsck.k9.provider.MessageProvider$ThrottlingQueryHandler: void <init>(com.fsck.k9.provider.MessageProvider,com.fsck.k9.provider.MessageProvider$QueryHandler)>(r0, $r5);
+
+        virtualinvoke r0.<com.fsck.k9.provider.MessageProvider: void registerQueryHandler(com.fsck.k9.provider.MessageProvider$QueryHandler)>($r3);
+
+        $r3 = new com.fsck.k9.provider.MessageProvider$ThrottlingQueryHandler;
+
+        $r6 = new com.fsck.k9.provider.MessageProvider$UnreadQueryHandler;
+
+        specialinvoke $r6.<com.fsck.k9.provider.MessageProvider$UnreadQueryHandler: void <init>(com.fsck.k9.provider.MessageProvider)>(r0);
+
+        specialinvoke $r3.<com.fsck.k9.provider.MessageProvider$ThrottlingQueryHandler: void <init>(com.fsck.k9.provider.MessageProvider,com.fsck.k9.provider.MessageProvider$QueryHandler)>(r0, $r6);
+
+        virtualinvoke r0.<com.fsck.k9.provider.MessageProvider: void registerQueryHandler(com.fsck.k9.provider.MessageProvider$QueryHandler)>($r3);
+
+        $r7 = new com.fsck.k9.provider.MessageProvider$1;
+
+        specialinvoke $r7.<com.fsck.k9.provider.MessageProvider$1: void <init>(com.fsck.k9.provider.MessageProvider)>(r0);
+
+        staticinvoke <com.fsck.k9.K9: void registerApplicationAware(com.fsck.k9.K9$ApplicationAware)>($r7);
+
+        return 1;
+    }
+    public android.database.Cursor query(android.net.Uri, java.lang.String[], java.lang.String, java.lang.String[], java.lang.String)
+    {
+        com.fsck.k9.provider.MessageProvider r0;
+        android.net.Uri $r1;
+        java.lang.String[] $r2, $r4;
+        java.lang.String $r3, $r5, $r9;
+        java.lang.Exception r6;
+        android.app.Application $r7;
+        boolean $z0;
+        java.lang.StringBuilder $r8;
+        android.content.UriMatcher $r10;
+        int $i0;
+        java.lang.IllegalStateException $r11;
+        java.util.List $r12;
+        java.lang.Object $r13;
+        com.fsck.k9.provider.MessageProvider$QueryHandler r14;
+        android.database.Cursor $r15;
+
+        r0 := @this: com.fsck.k9.provider.MessageProvider;
+
+        $r1 := @parameter0: android.net.Uri;
+
+        $r2 := @parameter1: java.lang.String[];
+
+        $r3 := @parameter2: java.lang.String;
+
+        $r4 := @parameter3: java.lang.String[];
+
+        $r5 := @parameter4: java.lang.String;
+
+        $r7 = <com.fsck.k9.K9: android.app.Application app>;
+
+        if $r7 != null goto label1;
+
+        return null;
+
+     label1:
+        $z0 = <com.fsck.k9.K9: boolean DEBUG>;
+
+        if $z0 == 0 goto label2;
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("MessageProvider/query: ");
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r1);
+
+        $r9 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int v(java.lang.String,java.lang.String)>("k9", $r9);
+
+     label2:
+        $r10 = r0.<com.fsck.k9.provider.MessageProvider: android.content.UriMatcher mUriMatcher>;
+
+        $i0 = virtualinvoke $r10.<android.content.UriMatcher: int match(android.net.Uri)>($r1);
+
+        if $i0 != -1 goto label3;
+
+        $r11 = new java.lang.IllegalStateException;
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unrecognized URI: ");
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r1);
+
+        $r3 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r11.<java.lang.IllegalStateException: void <init>(java.lang.String)>($r3);
+
+        throw $r11;
+
+     label3:
+        $r12 = r0.<com.fsck.k9.provider.MessageProvider: java.util.List mQueryHandlers>;
+
+        $r13 = interfaceinvoke $r12.<java.util.List: java.lang.Object get(int)>($i0);
+
+        r14 = (com.fsck.k9.provider.MessageProvider$QueryHandler) $r13;
+
+        $r15 = interfaceinvoke r14.<com.fsck.k9.provider.MessageProvider$QueryHandler: android.database.Cursor query(android.net.Uri,java.lang.String[],java.lang.String,java.lang.String[],java.lang.String)>($r1, $r2, $r3, $r4, $r5);
+
+     label4:
+        return $r15;
+
+     label5:
+        r6 := @caughtexception;
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unable to execute query for URI: ");
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r1);
+
+        $r3 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String,java.lang.Throwable)>("k9", $r3, r6);
+
+        return null;
+
+        catch java.lang.Exception from label3 to label4 with label5;
+    }
+    protected void registerQueryHandler(com.fsck.k9.provider.MessageProvider$QueryHandler)
+    {
+        com.fsck.k9.provider.MessageProvider r0;
+        com.fsck.k9.provider.MessageProvider$QueryHandler $r1;
+        java.util.List $r2;
+        boolean $z0;
+        int $i0;
+        android.content.UriMatcher $r3;
+        java.lang.String $r4;
+
+        r0 := @this: com.fsck.k9.provider.MessageProvider;
+
+        $r1 := @parameter0: com.fsck.k9.provider.MessageProvider$QueryHandler;
+
+        $r2 = r0.<com.fsck.k9.provider.MessageProvider: java.util.List mQueryHandlers>;
+
+        $z0 = interfaceinvoke $r2.<java.util.List: boolean contains(java.lang.Object)>($r1);
+
+        if $z0 == 0 goto label1;
+
+        return;
+
+     label1:
+        $r2 = r0.<com.fsck.k9.provider.MessageProvider: java.util.List mQueryHandlers>;
+
+        interfaceinvoke $r2.<java.util.List: boolean add(java.lang.Object)>($r1);
+
+        $r2 = r0.<com.fsck.k9.provider.MessageProvider: java.util.List mQueryHandlers>;
+
+        $i0 = interfaceinvoke $r2.<java.util.List: int indexOf(java.lang.Object)>($r1);
+
+        $r3 = r0.<com.fsck.k9.provider.MessageProvider: android.content.UriMatcher mUriMatcher>;
+
+        $r4 = interfaceinvoke $r1.<com.fsck.k9.provider.MessageProvider$QueryHandler: java.lang.String getPath()>();
+
+        virtualinvoke $r3.<android.content.UriMatcher: void addURI(java.lang.String,java.lang.String,int)>("com.fsck.k9.messageprovider", $r4, $i0);
+
+        return;
+    }
+    public int update(android.net.Uri, android.content.ContentValues, java.lang.String, java.lang.String[])
+    {
+        com.fsck.k9.provider.MessageProvider r0;
+        android.net.Uri $r1;
+        android.content.ContentValues $r2;
+        java.lang.String $r3;
+        java.lang.String[] $r4;
+        android.app.Application $r5;
+        boolean $z0;
+        java.lang.StringBuilder $r6;
+
+        r0 := @this: com.fsck.k9.provider.MessageProvider;
+
+        $r1 := @parameter0: android.net.Uri;
+
+        $r2 := @parameter1: android.content.ContentValues;
+
+        $r3 := @parameter2: java.lang.String;
+
+        $r4 := @parameter3: java.lang.String[];
+
+        $r5 = <com.fsck.k9.K9: android.app.Application app>;
+
+        if $r5 != null goto label1;
+
+        return 0;
+
+     label1:
+        $z0 = <com.fsck.k9.K9: boolean DEBUG>;
+
+        if $z0 == 0 goto label2;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("MessageProvider/update: ");
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r1);
+
+        $r3 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int v(java.lang.String,java.lang.String)>("k9", $r3);
+
+     label2:
+        return 0;
+    }

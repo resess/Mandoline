@@ -1,0 +1,318 @@
+okhttp3.internal.http1.Http1Codec$ChunkedSource extends okhttp3.internal.http1.Http1Codec$AbstractSource
+private static final long NO_CHUNK_YET
+private long bytesRemainingInChunk
+private boolean hasMoreChunks
+final okhttp3.internal.http1.Http1Codec this$0
+private final okhttp3.HttpUrl url
+    void <init>(okhttp3.internal.http1.Http1Codec, okhttp3.HttpUrl)
+    {
+        okhttp3.internal.http1.Http1Codec$ChunkedSource r0;
+        okhttp3.internal.http1.Http1Codec $r1;
+        okhttp3.HttpUrl $r2;
+
+        r0 := @this: okhttp3.internal.http1.Http1Codec$ChunkedSource;
+
+        $r1 := @parameter0: okhttp3.internal.http1.Http1Codec;
+
+        $r2 := @parameter1: okhttp3.HttpUrl;
+
+        r0.<okhttp3.internal.http1.Http1Codec$ChunkedSource: okhttp3.internal.http1.Http1Codec this$0> = $r1;
+
+        specialinvoke r0.<okhttp3.internal.http1.Http1Codec$AbstractSource: void <init>(okhttp3.internal.http1.Http1Codec,okhttp3.internal.http1.Http1Codec$1)>($r1, null);
+
+        r0.<okhttp3.internal.http1.Http1Codec$ChunkedSource: long bytesRemainingInChunk> = -1L;
+
+        r0.<okhttp3.internal.http1.Http1Codec$ChunkedSource: boolean hasMoreChunks> = 1;
+
+        r0.<okhttp3.internal.http1.Http1Codec$ChunkedSource: okhttp3.HttpUrl url> = $r2;
+
+        return;
+    }
+    private void readChunkSize() throws java.io.IOException
+    {
+        okhttp3.internal.http1.Http1Codec$ChunkedSource r0;
+        java.lang.NumberFormatException r1;
+        long $l0;
+        byte $b1;
+        okhttp3.internal.http1.Http1Codec $r2;
+        okio.BufferedSource $r3;
+        java.lang.String $r4;
+        boolean $z0;
+        java.net.ProtocolException $r5;
+        java.lang.StringBuilder $r6;
+        okhttp3.OkHttpClient $r7;
+        okhttp3.CookieJar $r8;
+        okhttp3.HttpUrl $r9;
+        okhttp3.Headers $r10;
+
+        r0 := @this: okhttp3.internal.http1.Http1Codec$ChunkedSource;
+
+        $l0 = r0.<okhttp3.internal.http1.Http1Codec$ChunkedSource: long bytesRemainingInChunk>;
+
+        $b1 = $l0 cmp -1L;
+
+        if $b1 == 0 goto label01;
+
+        $r2 = r0.<okhttp3.internal.http1.Http1Codec$ChunkedSource: okhttp3.internal.http1.Http1Codec this$0>;
+
+        $r3 = $r2.<okhttp3.internal.http1.Http1Codec: okio.BufferedSource source>;
+
+        interfaceinvoke $r3.<okio.BufferedSource: java.lang.String readUtf8LineStrict()>();
+
+     label01:
+        $r2 = r0.<okhttp3.internal.http1.Http1Codec$ChunkedSource: okhttp3.internal.http1.Http1Codec this$0>;
+
+        $r3 = $r2.<okhttp3.internal.http1.Http1Codec: okio.BufferedSource source>;
+
+     label02:
+        $l0 = interfaceinvoke $r3.<okio.BufferedSource: long readHexadecimalUnsignedLong()>();
+
+     label03:
+        r0.<okhttp3.internal.http1.Http1Codec$ChunkedSource: long bytesRemainingInChunk> = $l0;
+
+        $r2 = r0.<okhttp3.internal.http1.Http1Codec$ChunkedSource: okhttp3.internal.http1.Http1Codec this$0>;
+
+        $r3 = $r2.<okhttp3.internal.http1.Http1Codec: okio.BufferedSource source>;
+
+     label04:
+        $r4 = interfaceinvoke $r3.<okio.BufferedSource: java.lang.String readUtf8LineStrict()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.String: java.lang.String trim()>();
+
+     label05:
+        $l0 = r0.<okhttp3.internal.http1.Http1Codec$ChunkedSource: long bytesRemainingInChunk>;
+
+        $b1 = $l0 cmp 0L;
+
+        if $b1 < 0 goto label10;
+
+     label06:
+        $z0 = virtualinvoke $r4.<java.lang.String: boolean isEmpty()>();
+
+     label07:
+        if $z0 != 0 goto label16;
+
+     label08:
+        $z0 = virtualinvoke $r4.<java.lang.String: boolean startsWith(java.lang.String)>(";");
+
+     label09:
+        if $z0 != 0 goto label16;
+
+     label10:
+        $r5 = new java.net.ProtocolException;
+
+        $r6 = new java.lang.StringBuilder;
+
+     label11:
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("expected chunk size and optional extensions but was \"");
+
+     label12:
+        $l0 = r0.<okhttp3.internal.http1.Http1Codec$ChunkedSource: long bytesRemainingInChunk>;
+
+     label13:
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l0);
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\"");
+
+        $r4 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r5.<java.net.ProtocolException: void <init>(java.lang.String)>($r4);
+
+     label14:
+        throw $r5;
+
+     label15:
+        r1 := @caughtexception;
+
+        $r5 = new java.net.ProtocolException;
+
+        $r4 = virtualinvoke r1.<java.lang.NumberFormatException: java.lang.String getMessage()>();
+
+        specialinvoke $r5.<java.net.ProtocolException: void <init>(java.lang.String)>($r4);
+
+        throw $r5;
+
+     label16:
+        $l0 = r0.<okhttp3.internal.http1.Http1Codec$ChunkedSource: long bytesRemainingInChunk>;
+
+        $b1 = $l0 cmp 0L;
+
+        if $b1 != 0 goto label17;
+
+        r0.<okhttp3.internal.http1.Http1Codec$ChunkedSource: boolean hasMoreChunks> = 0;
+
+        $r2 = r0.<okhttp3.internal.http1.Http1Codec$ChunkedSource: okhttp3.internal.http1.Http1Codec this$0>;
+
+        $r7 = $r2.<okhttp3.internal.http1.Http1Codec: okhttp3.OkHttpClient client>;
+
+        $r8 = virtualinvoke $r7.<okhttp3.OkHttpClient: okhttp3.CookieJar cookieJar()>();
+
+        $r9 = r0.<okhttp3.internal.http1.Http1Codec$ChunkedSource: okhttp3.HttpUrl url>;
+
+        $r2 = r0.<okhttp3.internal.http1.Http1Codec$ChunkedSource: okhttp3.internal.http1.Http1Codec this$0>;
+
+        $r10 = virtualinvoke $r2.<okhttp3.internal.http1.Http1Codec: okhttp3.Headers readHeaders()>();
+
+        staticinvoke <okhttp3.internal.http.HttpHeaders: void receiveHeaders(okhttp3.CookieJar,okhttp3.HttpUrl,okhttp3.Headers)>($r8, $r9, $r10);
+
+        virtualinvoke r0.<okhttp3.internal.http1.Http1Codec$ChunkedSource: void endOfInput(boolean)>(1);
+
+     label17:
+        return;
+
+        catch java.lang.NumberFormatException from label02 to label03 with label15;
+        catch java.lang.NumberFormatException from label04 to label05 with label15;
+        catch java.lang.NumberFormatException from label06 to label07 with label15;
+        catch java.lang.NumberFormatException from label08 to label09 with label15;
+        catch java.lang.NumberFormatException from label11 to label12 with label15;
+        catch java.lang.NumberFormatException from label13 to label14 with label15;
+    }
+    public void close() throws java.io.IOException
+    {
+        okhttp3.internal.http1.Http1Codec$ChunkedSource r0;
+        java.util.concurrent.TimeUnit $r1;
+        boolean $z0;
+
+        r0 := @this: okhttp3.internal.http1.Http1Codec$ChunkedSource;
+
+        $z0 = r0.<okhttp3.internal.http1.Http1Codec$ChunkedSource: boolean closed>;
+
+        if $z0 == 0 goto label1;
+
+        return;
+
+     label1:
+        $z0 = r0.<okhttp3.internal.http1.Http1Codec$ChunkedSource: boolean hasMoreChunks>;
+
+        if $z0 == 0 goto label2;
+
+        $r1 = <java.util.concurrent.TimeUnit: java.util.concurrent.TimeUnit MILLISECONDS>;
+
+        $z0 = staticinvoke <okhttp3.internal.Util: boolean discard(okio.Source,int,java.util.concurrent.TimeUnit)>(r0, 100, $r1);
+
+        if $z0 != 0 goto label2;
+
+        virtualinvoke r0.<okhttp3.internal.http1.Http1Codec$ChunkedSource: void endOfInput(boolean)>(0);
+
+     label2:
+        r0.<okhttp3.internal.http1.Http1Codec$ChunkedSource: boolean closed> = 1;
+
+        return;
+    }
+    public long read(okio.Buffer, long) throws java.io.IOException
+    {
+        okhttp3.internal.http1.Http1Codec$ChunkedSource r0;
+        okio.Buffer $r1;
+        long $l0, $l2;
+        byte $b1;
+        java.lang.IllegalArgumentException $r2;
+        java.lang.StringBuilder $r3;
+        java.lang.String $r4;
+        boolean $z0;
+        java.lang.IllegalStateException $r5;
+        okhttp3.internal.http1.Http1Codec $r6;
+        okio.BufferedSource $r7;
+        java.net.ProtocolException $r8;
+
+        r0 := @this: okhttp3.internal.http1.Http1Codec$ChunkedSource;
+
+        $r1 := @parameter0: okio.Buffer;
+
+        $l0 := @parameter1: long;
+
+        $b1 = $l0 cmp 0L;
+
+        if $b1 >= 0 goto label1;
+
+        $r2 = new java.lang.IllegalArgumentException;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("byteCount < 0: ");
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l0);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r2.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r4);
+
+        throw $r2;
+
+     label1:
+        $z0 = r0.<okhttp3.internal.http1.Http1Codec$ChunkedSource: boolean closed>;
+
+        if $z0 == 0 goto label2;
+
+        $r5 = new java.lang.IllegalStateException;
+
+        specialinvoke $r5.<java.lang.IllegalStateException: void <init>(java.lang.String)>("closed");
+
+        throw $r5;
+
+     label2:
+        $z0 = r0.<okhttp3.internal.http1.Http1Codec$ChunkedSource: boolean hasMoreChunks>;
+
+        if $z0 != 0 goto label3;
+
+        return -1L;
+
+     label3:
+        $l2 = r0.<okhttp3.internal.http1.Http1Codec$ChunkedSource: long bytesRemainingInChunk>;
+
+        $b1 = $l2 cmp 0L;
+
+        if $b1 == 0 goto label4;
+
+        $l2 = r0.<okhttp3.internal.http1.Http1Codec$ChunkedSource: long bytesRemainingInChunk>;
+
+        $b1 = $l2 cmp -1L;
+
+        if $b1 != 0 goto label5;
+
+     label4:
+        specialinvoke r0.<okhttp3.internal.http1.Http1Codec$ChunkedSource: void readChunkSize()>();
+
+        $z0 = r0.<okhttp3.internal.http1.Http1Codec$ChunkedSource: boolean hasMoreChunks>;
+
+        if $z0 != 0 goto label5;
+
+        return -1L;
+
+     label5:
+        $r6 = r0.<okhttp3.internal.http1.Http1Codec$ChunkedSource: okhttp3.internal.http1.Http1Codec this$0>;
+
+        $r7 = $r6.<okhttp3.internal.http1.Http1Codec: okio.BufferedSource source>;
+
+        $l2 = r0.<okhttp3.internal.http1.Http1Codec$ChunkedSource: long bytesRemainingInChunk>;
+
+        $l0 = staticinvoke <java.lang.Math: long min(long,long)>($l0, $l2);
+
+        $l0 = interfaceinvoke $r7.<okio.BufferedSource: long read(okio.Buffer,long)>($r1, $l0);
+
+        $b1 = $l0 cmp -1L;
+
+        if $b1 != 0 goto label6;
+
+        virtualinvoke r0.<okhttp3.internal.http1.Http1Codec$ChunkedSource: void endOfInput(boolean)>(0);
+
+        $r8 = new java.net.ProtocolException;
+
+        specialinvoke $r8.<java.net.ProtocolException: void <init>(java.lang.String)>("unexpected end of stream");
+
+        throw $r8;
+
+     label6:
+        $l2 = r0.<okhttp3.internal.http1.Http1Codec$ChunkedSource: long bytesRemainingInChunk>;
+
+        $l2 = $l2 - $l0;
+
+        r0.<okhttp3.internal.http1.Http1Codec$ChunkedSource: long bytesRemainingInChunk> = $l2;
+
+        return $l0;
+    }

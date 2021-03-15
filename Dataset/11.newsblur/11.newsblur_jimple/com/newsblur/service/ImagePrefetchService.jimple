@@ -1,0 +1,454 @@
+com.newsblur.service.ImagePrefetchService extends com.newsblur.service.SubService
+private static volatile boolean Running
+static java.util.Set StoryImageQueue
+static java.util.Set ThumbnailQueue
+com.newsblur.util.FileCache storyImageCache
+com.newsblur.util.FileCache thumbnailCache
+    static void <clinit>()
+    {
+        java.util.HashSet $r0;
+        java.util.Set $r1;
+
+        <com.newsblur.service.ImagePrefetchService: boolean Running> = 0;
+
+        $r0 = new java.util.HashSet;
+
+        specialinvoke $r0.<java.util.HashSet: void <init>()>();
+
+        $r1 = staticinvoke <java.util.Collections: java.util.Set synchronizedSet(java.util.Set)>($r0);
+
+        <com.newsblur.service.ImagePrefetchService: java.util.Set StoryImageQueue> = $r1;
+
+        $r0 = new java.util.HashSet;
+
+        specialinvoke $r0.<java.util.HashSet: void <init>()>();
+
+        $r1 = staticinvoke <java.util.Collections: java.util.Set synchronizedSet(java.util.Set)>($r0);
+
+        <com.newsblur.service.ImagePrefetchService: java.util.Set ThumbnailQueue> = $r1;
+
+        return;
+    }
+    public void <init>(com.newsblur.service.NBSyncService)
+    {
+        com.newsblur.service.ImagePrefetchService r0;
+        com.newsblur.service.NBSyncService $r1;
+        com.newsblur.util.FileCache $r2;
+
+        r0 := @this: com.newsblur.service.ImagePrefetchService;
+
+        $r1 := @parameter0: com.newsblur.service.NBSyncService;
+
+        specialinvoke r0.<com.newsblur.service.SubService: void <init>(com.newsblur.service.NBSyncService)>($r1);
+
+        $r2 = staticinvoke <com.newsblur.util.FileCache: com.newsblur.util.FileCache asStoryImageCache(android.content.Context)>($r1);
+
+        r0.<com.newsblur.service.ImagePrefetchService: com.newsblur.util.FileCache storyImageCache> = $r2;
+
+        $r2 = staticinvoke <com.newsblur.util.FileCache: com.newsblur.util.FileCache asThumbnailCache(android.content.Context)>($r1);
+
+        r0.<com.newsblur.service.ImagePrefetchService: com.newsblur.util.FileCache thumbnailCache> = $r2;
+
+        return;
+    }
+    public static void clear()
+    {
+        java.util.Set $r0;
+
+        $r0 = <com.newsblur.service.ImagePrefetchService: java.util.Set StoryImageQueue>;
+
+        interfaceinvoke $r0.<java.util.Set: void clear()>();
+
+        $r0 = <com.newsblur.service.ImagePrefetchService: java.util.Set ThumbnailQueue>;
+
+        interfaceinvoke $r0.<java.util.Set: void clear()>();
+
+        return;
+    }
+    public static int getPendingCount()
+    {
+        java.util.Set $r0;
+        int $i0, $i1;
+
+        $r0 = <com.newsblur.service.ImagePrefetchService: java.util.Set StoryImageQueue>;
+
+        $i0 = interfaceinvoke $r0.<java.util.Set: int size()>();
+
+        $r0 = <com.newsblur.service.ImagePrefetchService: java.util.Set ThumbnailQueue>;
+
+        $i1 = interfaceinvoke $r0.<java.util.Set: int size()>();
+
+        $i0 = $i0 + $i1;
+
+        return $i0;
+    }
+    public static boolean running()
+    {
+        boolean z0;
+
+        z0 = <com.newsblur.service.ImagePrefetchService: boolean Running>;
+
+        return z0;
+    }
+    public void addThumbnailUrl(java.lang.String)
+    {
+        com.newsblur.service.ImagePrefetchService r0;
+        java.lang.String $r1;
+        java.util.Set $r2;
+
+        r0 := @this: com.newsblur.service.ImagePrefetchService;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = <com.newsblur.service.ImagePrefetchService: java.util.Set ThumbnailQueue>;
+
+        interfaceinvoke $r2.<java.util.Set: boolean add(java.lang.Object)>($r1);
+
+        return;
+    }
+    public void addUrl(java.lang.String)
+    {
+        com.newsblur.service.ImagePrefetchService r0;
+        java.lang.String $r1;
+        java.util.Set $r2;
+
+        r0 := @this: com.newsblur.service.ImagePrefetchService;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = <com.newsblur.service.ImagePrefetchService: java.util.Set StoryImageQueue>;
+
+        interfaceinvoke $r2.<java.util.Set: boolean add(java.lang.Object)>($r1);
+
+        return;
+    }
+    protected void exec()
+    {
+        com.newsblur.service.ImagePrefetchService r0;
+        com.newsblur.service.NBSyncService $r1;
+        boolean $z0;
+        java.util.Set $r2, $r6;
+        int $i0;
+        com.newsblur.database.BlurDatabaseHelper $r3;
+        java.util.HashSet r4, r5;
+        java.util.Iterator $r7;
+        java.lang.Object $r8;
+        java.lang.String r9;
+        com.newsblur.util.FileCache $r10;
+        java.lang.Throwable $r11, $r12;
+
+        r0 := @this: com.newsblur.service.ImagePrefetchService;
+
+        $r1 = r0.<com.newsblur.service.ImagePrefetchService: com.newsblur.service.NBSyncService parent>;
+
+        $z0 = staticinvoke <com.newsblur.util.PrefsUtils: boolean isImagePrefetchEnabled(android.content.Context)>($r1);
+
+        if $z0 != 0 goto label01;
+
+        return;
+
+     label01:
+        $r1 = r0.<com.newsblur.service.ImagePrefetchService: com.newsblur.service.NBSyncService parent>;
+
+        $z0 = staticinvoke <com.newsblur.util.PrefsUtils: boolean isBackgroundNetworkAllowed(android.content.Context)>($r1);
+
+        if $z0 == 0 goto label30;
+
+        virtualinvoke r0.<com.newsblur.service.ImagePrefetchService: void gotWork()>();
+
+     label02:
+        $r2 = <com.newsblur.service.ImagePrefetchService: java.util.Set StoryImageQueue>;
+
+        $i0 = interfaceinvoke $r2.<java.util.Set: int size()>();
+
+        if $i0 <= 0 goto label17;
+
+        $r1 = r0.<com.newsblur.service.ImagePrefetchService: com.newsblur.service.NBSyncService parent>;
+
+        $z0 = staticinvoke <com.newsblur.util.PrefsUtils: boolean isImagePrefetchEnabled(android.content.Context)>($r1);
+
+        if $z0 == 0 goto label30;
+
+        $r1 = r0.<com.newsblur.service.ImagePrefetchService: com.newsblur.service.NBSyncService parent>;
+
+        $z0 = staticinvoke <com.newsblur.util.PrefsUtils: boolean isBackgroundNetworkAllowed(android.content.Context)>($r1);
+
+        if $z0 == 0 goto label30;
+
+        virtualinvoke r0.<com.newsblur.service.ImagePrefetchService: void startExpensiveCycle()>();
+
+        $r1 = r0.<com.newsblur.service.ImagePrefetchService: com.newsblur.service.NBSyncService parent>;
+
+        $r3 = $r1.<com.newsblur.service.NBSyncService: com.newsblur.database.BlurDatabaseHelper dbHelper>;
+
+        $r2 = virtualinvoke $r3.<com.newsblur.database.BlurDatabaseHelper: java.util.Set getAllStoryImages()>();
+
+        r4 = new java.util.HashSet;
+
+        specialinvoke r4.<java.util.HashSet: void <init>()>();
+
+        r5 = new java.util.HashSet;
+
+        specialinvoke r5.<java.util.HashSet: void <init>(int)>(6);
+
+        $r6 = <com.newsblur.service.ImagePrefetchService: java.util.Set StoryImageQueue>;
+
+        $r7 = interfaceinvoke $r6.<java.util.Set: java.util.Iterator iterator()>();
+
+     label03:
+        $z0 = interfaceinvoke $r7.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label04;
+
+        $r8 = interfaceinvoke $r7.<java.util.Iterator: java.lang.Object next()>();
+
+        r9 = (java.lang.String) $r8;
+
+        interfaceinvoke r5.<java.util.Set: boolean add(java.lang.Object)>(r9);
+
+        $i0 = interfaceinvoke r5.<java.util.Set: int size()>();
+
+        if $i0 < 6 goto label03;
+
+     label04:
+        $r7 = interfaceinvoke r5.<java.util.Set: java.util.Iterator iterator()>();
+
+     label05:
+        $z0 = interfaceinvoke $r7.<java.util.Iterator: boolean hasNext()>();
+
+     label06:
+        if $z0 == 0 goto label15;
+
+     label07:
+        $r8 = interfaceinvoke $r7.<java.util.Iterator: java.lang.Object next()>();
+
+        r9 = (java.lang.String) $r8;
+
+        $r1 = r0.<com.newsblur.service.ImagePrefetchService: com.newsblur.service.NBSyncService parent>;
+
+        $z0 = virtualinvoke $r1.<com.newsblur.service.NBSyncService: boolean stopSync()>();
+
+     label08:
+        if $z0 == 0 goto label09;
+
+        $r2 = <com.newsblur.service.ImagePrefetchService: java.util.Set StoryImageQueue>;
+
+        interfaceinvoke $r2.<java.util.Set: boolean removeAll(java.util.Collection)>(r4);
+
+        virtualinvoke r0.<com.newsblur.service.ImagePrefetchService: void gotWork()>();
+
+        return;
+
+     label09:
+        $z0 = interfaceinvoke $r2.<java.util.Set: boolean contains(java.lang.Object)>(r9);
+
+     label10:
+        if $z0 == 0 goto label12;
+
+     label11:
+        $r10 = r0.<com.newsblur.service.ImagePrefetchService: com.newsblur.util.FileCache storyImageCache>;
+
+        virtualinvoke $r10.<com.newsblur.util.FileCache: void cacheFile(java.lang.String)>(r9);
+
+     label12:
+        interfaceinvoke r4.<java.util.Set: boolean add(java.lang.Object)>(r9);
+
+     label13:
+        goto label05;
+
+     label14:
+        $r11 := @caughtexception;
+
+        $r2 = <com.newsblur.service.ImagePrefetchService: java.util.Set StoryImageQueue>;
+
+        interfaceinvoke $r2.<java.util.Set: boolean removeAll(java.util.Collection)>(r4);
+
+        virtualinvoke r0.<com.newsblur.service.ImagePrefetchService: void gotWork()>();
+
+        throw $r11;
+
+     label15:
+        $r2 = <com.newsblur.service.ImagePrefetchService: java.util.Set StoryImageQueue>;
+
+        interfaceinvoke $r2.<java.util.Set: boolean removeAll(java.util.Collection)>(r4);
+
+        virtualinvoke r0.<com.newsblur.service.ImagePrefetchService: void gotWork()>();
+
+        goto label02;
+
+     label16:
+        $r2 = <com.newsblur.service.ImagePrefetchService: java.util.Set ThumbnailQueue>;
+
+        interfaceinvoke $r2.<java.util.Set: boolean removeAll(java.util.Collection)>(r4);
+
+        virtualinvoke r0.<com.newsblur.service.ImagePrefetchService: void gotWork()>();
+
+     label17:
+        $r2 = <com.newsblur.service.ImagePrefetchService: java.util.Set ThumbnailQueue>;
+
+        $i0 = interfaceinvoke $r2.<java.util.Set: int size()>();
+
+        if $i0 <= 0 goto label30;
+
+        $r1 = r0.<com.newsblur.service.ImagePrefetchService: com.newsblur.service.NBSyncService parent>;
+
+        $z0 = staticinvoke <com.newsblur.util.PrefsUtils: boolean isImagePrefetchEnabled(android.content.Context)>($r1);
+
+        if $z0 == 0 goto label30;
+
+        $r1 = r0.<com.newsblur.service.ImagePrefetchService: com.newsblur.service.NBSyncService parent>;
+
+        $z0 = staticinvoke <com.newsblur.util.PrefsUtils: boolean isBackgroundNetworkAllowed(android.content.Context)>($r1);
+
+        if $z0 == 0 goto label30;
+
+        $r1 = r0.<com.newsblur.service.ImagePrefetchService: com.newsblur.service.NBSyncService parent>;
+
+        $z0 = staticinvoke <com.newsblur.util.PrefsUtils: boolean isShowThumbnails(android.content.Context)>($r1);
+
+        if $z0 == 0 goto label30;
+
+        virtualinvoke r0.<com.newsblur.service.ImagePrefetchService: void startExpensiveCycle()>();
+
+        $r1 = r0.<com.newsblur.service.ImagePrefetchService: com.newsblur.service.NBSyncService parent>;
+
+        $r3 = $r1.<com.newsblur.service.NBSyncService: com.newsblur.database.BlurDatabaseHelper dbHelper>;
+
+        $r2 = virtualinvoke $r3.<com.newsblur.database.BlurDatabaseHelper: java.util.Set getAllStoryThumbnails()>();
+
+        r4 = new java.util.HashSet;
+
+        specialinvoke r4.<java.util.HashSet: void <init>()>();
+
+        r5 = new java.util.HashSet;
+
+        specialinvoke r5.<java.util.HashSet: void <init>(int)>(6);
+
+        $r6 = <com.newsblur.service.ImagePrefetchService: java.util.Set ThumbnailQueue>;
+
+        $r7 = interfaceinvoke $r6.<java.util.Set: java.util.Iterator iterator()>();
+
+     label18:
+        $z0 = interfaceinvoke $r7.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label19;
+
+        $r8 = interfaceinvoke $r7.<java.util.Iterator: java.lang.Object next()>();
+
+        r9 = (java.lang.String) $r8;
+
+        interfaceinvoke r5.<java.util.Set: boolean add(java.lang.Object)>(r9);
+
+        $i0 = interfaceinvoke r5.<java.util.Set: int size()>();
+
+        if $i0 < 6 goto label18;
+
+     label19:
+        $r7 = interfaceinvoke r5.<java.util.Set: java.util.Iterator iterator()>();
+
+     label20:
+        $z0 = interfaceinvoke $r7.<java.util.Iterator: boolean hasNext()>();
+
+     label21:
+        if $z0 == 0 goto label16;
+
+     label22:
+        $r8 = interfaceinvoke $r7.<java.util.Iterator: java.lang.Object next()>();
+
+        r9 = (java.lang.String) $r8;
+
+        $r1 = r0.<com.newsblur.service.ImagePrefetchService: com.newsblur.service.NBSyncService parent>;
+
+        $z0 = virtualinvoke $r1.<com.newsblur.service.NBSyncService: boolean stopSync()>();
+
+     label23:
+        if $z0 == 0 goto label24;
+
+        $r2 = <com.newsblur.service.ImagePrefetchService: java.util.Set ThumbnailQueue>;
+
+        interfaceinvoke $r2.<java.util.Set: boolean removeAll(java.util.Collection)>(r4);
+
+        virtualinvoke r0.<com.newsblur.service.ImagePrefetchService: void gotWork()>();
+
+        return;
+
+     label24:
+        $z0 = interfaceinvoke $r2.<java.util.Set: boolean contains(java.lang.Object)>(r9);
+
+     label25:
+        if $z0 == 0 goto label27;
+
+     label26:
+        $r10 = r0.<com.newsblur.service.ImagePrefetchService: com.newsblur.util.FileCache thumbnailCache>;
+
+        virtualinvoke $r10.<com.newsblur.util.FileCache: void cacheFile(java.lang.String)>(r9);
+
+     label27:
+        interfaceinvoke r4.<java.util.Set: boolean add(java.lang.Object)>(r9);
+
+     label28:
+        goto label20;
+
+     label29:
+        $r12 := @caughtexception;
+
+        $r2 = <com.newsblur.service.ImagePrefetchService: java.util.Set ThumbnailQueue>;
+
+        interfaceinvoke $r2.<java.util.Set: boolean removeAll(java.util.Collection)>(r4);
+
+        virtualinvoke r0.<com.newsblur.service.ImagePrefetchService: void gotWork()>();
+
+        throw $r12;
+
+     label30:
+        return;
+
+        catch java.lang.Throwable from label04 to label06 with label14;
+        catch java.lang.Throwable from label07 to label08 with label14;
+        catch java.lang.Throwable from label09 to label10 with label14;
+        catch java.lang.Throwable from label11 to label13 with label14;
+        catch java.lang.Throwable from label19 to label21 with label29;
+        catch java.lang.Throwable from label22 to label23 with label29;
+        catch java.lang.Throwable from label24 to label25 with label29;
+        catch java.lang.Throwable from label26 to label28 with label29;
+    }
+    public boolean haveWork()
+    {
+        com.newsblur.service.ImagePrefetchService r0;
+        int $i0;
+
+        r0 := @this: com.newsblur.service.ImagePrefetchService;
+
+        $i0 = staticinvoke <com.newsblur.service.ImagePrefetchService: int getPendingCount()>();
+
+        if $i0 <= 0 goto label1;
+
+        return 1;
+
+     label1:
+        return 0;
+    }
+    protected boolean isRunning()
+    {
+        com.newsblur.service.ImagePrefetchService r0;
+        boolean z0;
+
+        r0 := @this: com.newsblur.service.ImagePrefetchService;
+
+        z0 = <com.newsblur.service.ImagePrefetchService: boolean Running>;
+
+        return z0;
+    }
+    protected void setRunning(boolean)
+    {
+        com.newsblur.service.ImagePrefetchService r0;
+        boolean $z0;
+
+        r0 := @this: com.newsblur.service.ImagePrefetchService;
+
+        $z0 := @parameter0: boolean;
+
+        <com.newsblur.service.ImagePrefetchService: boolean Running> = $z0;
+
+        return;
+    }

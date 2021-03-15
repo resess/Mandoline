@@ -1,0 +1,117 @@
+org.spongycastle.math.ec.FixedPointCombMultiplier extends org.spongycastle.math.ec.AbstractECMultiplier
+    public void <init>()
+    {
+        org.spongycastle.math.ec.FixedPointCombMultiplier r0;
+
+        r0 := @this: org.spongycastle.math.ec.FixedPointCombMultiplier;
+
+        specialinvoke r0.<org.spongycastle.math.ec.AbstractECMultiplier: void <init>()>();
+
+        return;
+    }
+    protected int getWidthForCombSize(int)
+    {
+        org.spongycastle.math.ec.FixedPointCombMultiplier r0;
+        int $i0;
+
+        r0 := @this: org.spongycastle.math.ec.FixedPointCombMultiplier;
+
+        $i0 := @parameter0: int;
+
+        if $i0 <= 257 goto label1;
+
+        return 6;
+
+     label1:
+        return 5;
+    }
+    protected org.spongycastle.math.ec.ECPoint multiplyPositive(org.spongycastle.math.ec.ECPoint, java.math.BigInteger)
+    {
+        org.spongycastle.math.ec.FixedPointCombMultiplier r0;
+        org.spongycastle.math.ec.ECPoint $r1, $r7;
+        java.math.BigInteger $r2;
+        int i0, i1, i2, i3, i4;
+        org.spongycastle.math.ec.ECCurve $r3;
+        java.lang.IllegalStateException $r4;
+        org.spongycastle.math.ec.FixedPointPreCompInfo $r5;
+        org.spongycastle.math.ec.ECPoint[] $r6;
+        boolean $z0;
+
+        r0 := @this: org.spongycastle.math.ec.FixedPointCombMultiplier;
+
+        $r1 := @parameter0: org.spongycastle.math.ec.ECPoint;
+
+        $r2 := @parameter1: java.math.BigInteger;
+
+        $r3 = virtualinvoke $r1.<org.spongycastle.math.ec.ECPoint: org.spongycastle.math.ec.ECCurve getCurve()>();
+
+        i0 = staticinvoke <org.spongycastle.math.ec.FixedPointUtil: int getCombSize(org.spongycastle.math.ec.ECCurve)>($r3);
+
+        i1 = virtualinvoke $r2.<java.math.BigInteger: int bitLength()>();
+
+        if i1 <= i0 goto label1;
+
+        $r4 = new java.lang.IllegalStateException;
+
+        specialinvoke $r4.<java.lang.IllegalStateException: void <init>(java.lang.String)>("fixed-point comb doesn\'t support scalars larger than the curve order");
+
+        throw $r4;
+
+     label1:
+        i1 = virtualinvoke r0.<org.spongycastle.math.ec.FixedPointCombMultiplier: int getWidthForCombSize(int)>(i0);
+
+        $r5 = staticinvoke <org.spongycastle.math.ec.FixedPointUtil: org.spongycastle.math.ec.FixedPointPreCompInfo precompute(org.spongycastle.math.ec.ECPoint,int)>($r1, i1);
+
+        $r6 = virtualinvoke $r5.<org.spongycastle.math.ec.FixedPointPreCompInfo: org.spongycastle.math.ec.ECPoint[] getPreComp()>();
+
+        i1 = virtualinvoke $r5.<org.spongycastle.math.ec.FixedPointPreCompInfo: int getWidth()>();
+
+        i0 = i0 + i1;
+
+        i0 = i0 + -1;
+
+        i0 = i0 / i1;
+
+        $r1 = virtualinvoke $r3.<org.spongycastle.math.ec.ECCurve: org.spongycastle.math.ec.ECPoint getInfinity()>();
+
+        i1 = i0 * i1;
+
+        i1 = i1 + -1;
+
+        i2 = 0;
+
+     label2:
+        if i2 >= i0 goto label6;
+
+        i3 = 0;
+
+        i4 = i1 - i2;
+
+     label3:
+        if i4 < 0 goto label5;
+
+        i3 = i3 << 1;
+
+        $z0 = virtualinvoke $r2.<java.math.BigInteger: boolean testBit(int)>(i4);
+
+        if $z0 == 0 goto label4;
+
+        i3 = i3 | 1;
+
+     label4:
+        i4 = i4 - i0;
+
+        goto label3;
+
+     label5:
+        $r7 = $r6[i3];
+
+        $r1 = virtualinvoke $r1.<org.spongycastle.math.ec.ECPoint: org.spongycastle.math.ec.ECPoint twicePlus(org.spongycastle.math.ec.ECPoint)>($r7);
+
+        i2 = i2 + 1;
+
+        goto label2;
+
+     label6:
+        return $r1;
+    }

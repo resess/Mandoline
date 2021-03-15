@@ -1,0 +1,982 @@
+org.apache.commons.math3.ode.AbstractFieldIntegrator extends java.lang.Object implements org.apache.commons.math3.ode.FirstOrderFieldIntegrator
+private static final double DEFAULT_FUNCTION_VALUE_ACCURACY
+private static final double DEFAULT_RELATIVE_ACCURACY
+private transient org.apache.commons.math3.ode.FieldExpandableODE equations
+private org.apache.commons.math3.util.IntegerSequence$Incrementor evaluations
+private java.util.Collection eventsStates
+private final org.apache.commons.math3.Field field
+private boolean isLastStep
+private final java.lang.String name
+private boolean resetOccurred
+private boolean statesInitialized
+private java.util.Collection stepHandlers
+private org.apache.commons.math3.RealFieldElement stepSize
+private org.apache.commons.math3.ode.FieldODEStateAndDerivative stepStart
+    protected void <init>(org.apache.commons.math3.Field, java.lang.String)
+    {
+        org.apache.commons.math3.ode.AbstractFieldIntegrator r0;
+        org.apache.commons.math3.Field r1;
+        java.lang.String $r2;
+        java.util.ArrayList $r3;
+        org.apache.commons.math3.util.IntegerSequence$Incrementor $r4;
+
+        r0 := @this: org.apache.commons.math3.ode.AbstractFieldIntegrator;
+
+        r1 := @parameter0: org.apache.commons.math3.Field;
+
+        $r2 := @parameter1: java.lang.String;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<org.apache.commons.math3.ode.AbstractFieldIntegrator: org.apache.commons.math3.Field field> = r1;
+
+        r0.<org.apache.commons.math3.ode.AbstractFieldIntegrator: java.lang.String name> = $r2;
+
+        $r3 = new java.util.ArrayList;
+
+        specialinvoke $r3.<java.util.ArrayList: void <init>()>();
+
+        r0.<org.apache.commons.math3.ode.AbstractFieldIntegrator: java.util.Collection stepHandlers> = $r3;
+
+        r0.<org.apache.commons.math3.ode.AbstractFieldIntegrator: org.apache.commons.math3.ode.FieldODEStateAndDerivative stepStart> = null;
+
+        r0.<org.apache.commons.math3.ode.AbstractFieldIntegrator: org.apache.commons.math3.RealFieldElement stepSize> = null;
+
+        $r3 = new java.util.ArrayList;
+
+        specialinvoke $r3.<java.util.ArrayList: void <init>()>();
+
+        r0.<org.apache.commons.math3.ode.AbstractFieldIntegrator: java.util.Collection eventsStates> = $r3;
+
+        r0.<org.apache.commons.math3.ode.AbstractFieldIntegrator: boolean statesInitialized> = 0;
+
+        $r4 = staticinvoke <org.apache.commons.math3.util.IntegerSequence$Incrementor: org.apache.commons.math3.util.IntegerSequence$Incrementor create()>();
+
+        $r4 = virtualinvoke $r4.<org.apache.commons.math3.util.IntegerSequence$Incrementor: org.apache.commons.math3.util.IntegerSequence$Incrementor withMaximalCount(int)>(2147483647);
+
+        r0.<org.apache.commons.math3.ode.AbstractFieldIntegrator: org.apache.commons.math3.util.IntegerSequence$Incrementor evaluations> = $r4;
+
+        return;
+    }
+    protected org.apache.commons.math3.ode.FieldODEStateAndDerivative acceptStep(org.apache.commons.math3.ode.sampling.AbstractFieldStepInterpolator, org.apache.commons.math3.RealFieldElement) throws org.apache.commons.math3.exception.MaxCountExceededException, org.apache.commons.math3.exception.DimensionMismatchException, org.apache.commons.math3.exception.NoBracketingException
+    {
+        org.apache.commons.math3.ode.AbstractFieldIntegrator r0;
+        org.apache.commons.math3.ode.sampling.AbstractFieldStepInterpolator r1, $r20;
+        org.apache.commons.math3.RealFieldElement r2, $r11;
+        java.util.TreeSet r3;
+        org.apache.commons.math3.ode.FieldODEStateAndDerivative $r4, $r5, $r12;
+        boolean $z0;
+        java.util.Collection $r6;
+        java.util.Iterator $r7;
+        java.lang.Object $r8;
+        org.apache.commons.math3.ode.events.FieldEventState r9, r13;
+        byte b0;
+        org.apache.commons.math3.ode.AbstractFieldIntegrator$1 $r10;
+        org.apache.commons.math3.ode.sampling.FieldStepHandler r14;
+        org.apache.commons.math3.ode.FieldODEState $r15;
+        org.apache.commons.math3.ode.FieldExpandableODE $r16;
+        org.apache.commons.math3.ode.FieldEquationsMapper $r17;
+        org.apache.commons.math3.RealFieldElement[] $r18, $r19;
+        double $d0, $d1;
+
+        r0 := @this: org.apache.commons.math3.ode.AbstractFieldIntegrator;
+
+        r1 := @parameter0: org.apache.commons.math3.ode.sampling.AbstractFieldStepInterpolator;
+
+        r2 := @parameter1: org.apache.commons.math3.RealFieldElement;
+
+        $r4 = virtualinvoke r1.<org.apache.commons.math3.ode.sampling.AbstractFieldStepInterpolator: org.apache.commons.math3.ode.FieldODEStateAndDerivative getGlobalPreviousState()>();
+
+        $r5 = virtualinvoke r1.<org.apache.commons.math3.ode.sampling.AbstractFieldStepInterpolator: org.apache.commons.math3.ode.FieldODEStateAndDerivative getGlobalCurrentState()>();
+
+        $z0 = r0.<org.apache.commons.math3.ode.AbstractFieldIntegrator: boolean statesInitialized>;
+
+        if $z0 != 0 goto label03;
+
+        $r6 = r0.<org.apache.commons.math3.ode.AbstractFieldIntegrator: java.util.Collection eventsStates>;
+
+        $r7 = interfaceinvoke $r6.<java.util.Collection: java.util.Iterator iterator()>();
+
+     label01:
+        $z0 = interfaceinvoke $r7.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label02;
+
+        $r8 = interfaceinvoke $r7.<java.util.Iterator: java.lang.Object next()>();
+
+        r9 = (org.apache.commons.math3.ode.events.FieldEventState) $r8;
+
+        virtualinvoke r9.<org.apache.commons.math3.ode.events.FieldEventState: void reinitializeBegin(org.apache.commons.math3.ode.sampling.FieldStepInterpolator)>(r1);
+
+        goto label01;
+
+     label02:
+        r0.<org.apache.commons.math3.ode.AbstractFieldIntegrator: boolean statesInitialized> = 1;
+
+     label03:
+        $z0 = virtualinvoke r1.<org.apache.commons.math3.ode.sampling.AbstractFieldStepInterpolator: boolean isForward()>();
+
+        if $z0 == 0 goto label06;
+
+        b0 = 1;
+
+     label04:
+        r3 = new java.util.TreeSet;
+
+        $r10 = new org.apache.commons.math3.ode.AbstractFieldIntegrator$1;
+
+        specialinvoke $r10.<org.apache.commons.math3.ode.AbstractFieldIntegrator$1: void <init>(org.apache.commons.math3.ode.AbstractFieldIntegrator,int)>(r0, b0);
+
+        specialinvoke r3.<java.util.TreeSet: void <init>(java.util.Comparator)>($r10);
+
+        $r6 = r0.<org.apache.commons.math3.ode.AbstractFieldIntegrator: java.util.Collection eventsStates>;
+
+        $r7 = interfaceinvoke $r6.<java.util.Collection: java.util.Iterator iterator()>();
+
+     label05:
+        $z0 = interfaceinvoke $r7.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label07;
+
+        $r8 = interfaceinvoke $r7.<java.util.Iterator: java.lang.Object next()>();
+
+        r9 = (org.apache.commons.math3.ode.events.FieldEventState) $r8;
+
+        $z0 = virtualinvoke r9.<org.apache.commons.math3.ode.events.FieldEventState: boolean evaluateStep(org.apache.commons.math3.ode.sampling.FieldStepInterpolator)>(r1);
+
+        if $z0 == 0 goto label05;
+
+        interfaceinvoke r3.<java.util.SortedSet: boolean add(java.lang.Object)>(r9);
+
+        goto label05;
+
+     label06:
+        b0 = -1;
+
+        goto label04;
+
+     label07:
+        $z0 = interfaceinvoke r3.<java.util.SortedSet: boolean isEmpty()>();
+
+        if $z0 != 0 goto label18;
+
+        $r7 = interfaceinvoke r3.<java.util.SortedSet: java.util.Iterator iterator()>();
+
+        $r8 = interfaceinvoke $r7.<java.util.Iterator: java.lang.Object next()>();
+
+        r9 = (org.apache.commons.math3.ode.events.FieldEventState) $r8;
+
+        interfaceinvoke $r7.<java.util.Iterator: void remove()>();
+
+        $r11 = virtualinvoke r9.<org.apache.commons.math3.ode.events.FieldEventState: org.apache.commons.math3.RealFieldElement getEventTime()>();
+
+        $r12 = virtualinvoke r1.<org.apache.commons.math3.ode.sampling.AbstractFieldStepInterpolator: org.apache.commons.math3.ode.FieldODEStateAndDerivative getInterpolatedState(org.apache.commons.math3.RealFieldElement)>($r11);
+
+        r1 = virtualinvoke r1.<org.apache.commons.math3.ode.sampling.AbstractFieldStepInterpolator: org.apache.commons.math3.ode.sampling.AbstractFieldStepInterpolator restrictStep(org.apache.commons.math3.ode.FieldODEStateAndDerivative,org.apache.commons.math3.ode.FieldODEStateAndDerivative)>($r4, $r12);
+
+        $r6 = r0.<org.apache.commons.math3.ode.AbstractFieldIntegrator: java.util.Collection eventsStates>;
+
+        $r7 = interfaceinvoke $r6.<java.util.Collection: java.util.Iterator iterator()>();
+
+     label08:
+        $z0 = interfaceinvoke $r7.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label12;
+
+        $r8 = interfaceinvoke $r7.<java.util.Iterator: java.lang.Object next()>();
+
+        r13 = (org.apache.commons.math3.ode.events.FieldEventState) $r8;
+
+        virtualinvoke r13.<org.apache.commons.math3.ode.events.FieldEventState: void stepAccepted(org.apache.commons.math3.ode.FieldODEStateAndDerivative)>($r12);
+
+        $z0 = r0.<org.apache.commons.math3.ode.AbstractFieldIntegrator: boolean isLastStep>;
+
+        if $z0 != 0 goto label09;
+
+        $z0 = virtualinvoke r13.<org.apache.commons.math3.ode.events.FieldEventState: boolean stop()>();
+
+        if $z0 == 0 goto label11;
+
+     label09:
+        $z0 = 1;
+
+     label10:
+        r0.<org.apache.commons.math3.ode.AbstractFieldIntegrator: boolean isLastStep> = $z0;
+
+        goto label08;
+
+     label11:
+        $z0 = 0;
+
+        goto label10;
+
+     label12:
+        $r6 = r0.<org.apache.commons.math3.ode.AbstractFieldIntegrator: java.util.Collection stepHandlers>;
+
+        $r7 = interfaceinvoke $r6.<java.util.Collection: java.util.Iterator iterator()>();
+
+     label13:
+        $z0 = interfaceinvoke $r7.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label14;
+
+        $r8 = interfaceinvoke $r7.<java.util.Iterator: java.lang.Object next()>();
+
+        r14 = (org.apache.commons.math3.ode.sampling.FieldStepHandler) $r8;
+
+        $z0 = r0.<org.apache.commons.math3.ode.AbstractFieldIntegrator: boolean isLastStep>;
+
+        interfaceinvoke r14.<org.apache.commons.math3.ode.sampling.FieldStepHandler: void handleStep(org.apache.commons.math3.ode.sampling.FieldStepInterpolator,boolean)>(r1, $z0);
+
+        goto label13;
+
+     label14:
+        $z0 = r0.<org.apache.commons.math3.ode.AbstractFieldIntegrator: boolean isLastStep>;
+
+        if $z0 == 0 goto label15;
+
+        return $r12;
+
+     label15:
+        r0.<org.apache.commons.math3.ode.AbstractFieldIntegrator: boolean resetOccurred> = 0;
+
+        $r6 = r0.<org.apache.commons.math3.ode.AbstractFieldIntegrator: java.util.Collection eventsStates>;
+
+        $r7 = interfaceinvoke $r6.<java.util.Collection: java.util.Iterator iterator()>();
+
+     label16:
+        $z0 = interfaceinvoke $r7.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label17;
+
+        $r8 = interfaceinvoke $r7.<java.util.Iterator: java.lang.Object next()>();
+
+        r13 = (org.apache.commons.math3.ode.events.FieldEventState) $r8;
+
+        $r15 = virtualinvoke r13.<org.apache.commons.math3.ode.events.FieldEventState: org.apache.commons.math3.ode.FieldODEState reset(org.apache.commons.math3.ode.FieldODEStateAndDerivative)>($r12);
+
+        if $r15 == null goto label16;
+
+        $r16 = r0.<org.apache.commons.math3.ode.AbstractFieldIntegrator: org.apache.commons.math3.ode.FieldExpandableODE equations>;
+
+        $r17 = virtualinvoke $r16.<org.apache.commons.math3.ode.FieldExpandableODE: org.apache.commons.math3.ode.FieldEquationsMapper getMapper()>();
+
+        $r18 = virtualinvoke $r17.<org.apache.commons.math3.ode.FieldEquationsMapper: org.apache.commons.math3.RealFieldElement[] mapState(org.apache.commons.math3.ode.FieldODEState)>($r15);
+
+        r2 = virtualinvoke $r15.<org.apache.commons.math3.ode.FieldODEState: org.apache.commons.math3.RealFieldElement getTime()>();
+
+        $r19 = virtualinvoke r0.<org.apache.commons.math3.ode.AbstractFieldIntegrator: org.apache.commons.math3.RealFieldElement[] computeDerivatives(org.apache.commons.math3.RealFieldElement,org.apache.commons.math3.RealFieldElement[])>(r2, $r18);
+
+        r0.<org.apache.commons.math3.ode.AbstractFieldIntegrator: boolean resetOccurred> = 1;
+
+        $r16 = r0.<org.apache.commons.math3.ode.AbstractFieldIntegrator: org.apache.commons.math3.ode.FieldExpandableODE equations>;
+
+        $r17 = virtualinvoke $r16.<org.apache.commons.math3.ode.FieldExpandableODE: org.apache.commons.math3.ode.FieldEquationsMapper getMapper()>();
+
+        r2 = virtualinvoke $r15.<org.apache.commons.math3.ode.FieldODEState: org.apache.commons.math3.RealFieldElement getTime()>();
+
+        $r4 = virtualinvoke $r17.<org.apache.commons.math3.ode.FieldEquationsMapper: org.apache.commons.math3.ode.FieldODEStateAndDerivative mapStateAndDerivative(org.apache.commons.math3.RealFieldElement,org.apache.commons.math3.RealFieldElement[],org.apache.commons.math3.RealFieldElement[])>(r2, $r18, $r19);
+
+        return $r4;
+
+     label17:
+        $r4 = $r12;
+
+        $r20 = virtualinvoke r1.<org.apache.commons.math3.ode.sampling.AbstractFieldStepInterpolator: org.apache.commons.math3.ode.sampling.AbstractFieldStepInterpolator restrictStep(org.apache.commons.math3.ode.FieldODEStateAndDerivative,org.apache.commons.math3.ode.FieldODEStateAndDerivative)>($r12, $r5);
+
+        r1 = $r20;
+
+        $z0 = virtualinvoke r9.<org.apache.commons.math3.ode.events.FieldEventState: boolean evaluateStep(org.apache.commons.math3.ode.sampling.FieldStepInterpolator)>($r20);
+
+        if $z0 == 0 goto label07;
+
+        interfaceinvoke r3.<java.util.SortedSet: boolean add(java.lang.Object)>(r9);
+
+        goto label07;
+
+     label18:
+        $r6 = r0.<org.apache.commons.math3.ode.AbstractFieldIntegrator: java.util.Collection eventsStates>;
+
+        $r7 = interfaceinvoke $r6.<java.util.Collection: java.util.Iterator iterator()>();
+
+     label19:
+        $z0 = interfaceinvoke $r7.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label23;
+
+        $r8 = interfaceinvoke $r7.<java.util.Iterator: java.lang.Object next()>();
+
+        r9 = (org.apache.commons.math3.ode.events.FieldEventState) $r8;
+
+        virtualinvoke r9.<org.apache.commons.math3.ode.events.FieldEventState: void stepAccepted(org.apache.commons.math3.ode.FieldODEStateAndDerivative)>($r5);
+
+        $z0 = r0.<org.apache.commons.math3.ode.AbstractFieldIntegrator: boolean isLastStep>;
+
+        if $z0 != 0 goto label20;
+
+        $z0 = virtualinvoke r9.<org.apache.commons.math3.ode.events.FieldEventState: boolean stop()>();
+
+        if $z0 == 0 goto label22;
+
+     label20:
+        $z0 = 1;
+
+     label21:
+        r0.<org.apache.commons.math3.ode.AbstractFieldIntegrator: boolean isLastStep> = $z0;
+
+        goto label19;
+
+     label22:
+        $z0 = 0;
+
+        goto label21;
+
+     label23:
+        $z0 = r0.<org.apache.commons.math3.ode.AbstractFieldIntegrator: boolean isLastStep>;
+
+        if $z0 != 0 goto label24;
+
+        $r11 = virtualinvoke $r5.<org.apache.commons.math3.ode.FieldODEStateAndDerivative: org.apache.commons.math3.RealFieldElement getTime()>();
+
+        $r8 = interfaceinvoke $r11.<org.apache.commons.math3.RealFieldElement: java.lang.Object subtract(java.lang.Object)>(r2);
+
+        $r11 = (org.apache.commons.math3.RealFieldElement) $r8;
+
+        $r8 = interfaceinvoke $r11.<org.apache.commons.math3.RealFieldElement: java.lang.Object abs()>();
+
+        $r11 = (org.apache.commons.math3.RealFieldElement) $r8;
+
+        $d0 = interfaceinvoke $r11.<org.apache.commons.math3.RealFieldElement: double getReal()>();
+
+        $d1 = interfaceinvoke r2.<org.apache.commons.math3.RealFieldElement: double getReal()>();
+
+        $d1 = staticinvoke <org.apache.commons.math3.util.FastMath: double ulp(double)>($d1);
+
+        b0 = $d0 cmpg $d1;
+
+        if b0 > 0 goto label27;
+
+     label24:
+        $z0 = 1;
+
+     label25:
+        r0.<org.apache.commons.math3.ode.AbstractFieldIntegrator: boolean isLastStep> = $z0;
+
+        $r6 = r0.<org.apache.commons.math3.ode.AbstractFieldIntegrator: java.util.Collection stepHandlers>;
+
+        $r7 = interfaceinvoke $r6.<java.util.Collection: java.util.Iterator iterator()>();
+
+     label26:
+        $z0 = interfaceinvoke $r7.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label28;
+
+        $r8 = interfaceinvoke $r7.<java.util.Iterator: java.lang.Object next()>();
+
+        r14 = (org.apache.commons.math3.ode.sampling.FieldStepHandler) $r8;
+
+        $z0 = r0.<org.apache.commons.math3.ode.AbstractFieldIntegrator: boolean isLastStep>;
+
+        interfaceinvoke r14.<org.apache.commons.math3.ode.sampling.FieldStepHandler: void handleStep(org.apache.commons.math3.ode.sampling.FieldStepInterpolator,boolean)>(r1, $z0);
+
+        goto label26;
+
+     label27:
+        $z0 = 0;
+
+        goto label25;
+
+     label28:
+        return $r5;
+    }
+    public void addEventHandler(org.apache.commons.math3.ode.events.FieldEventHandler, double, double, int)
+    {
+        org.apache.commons.math3.ode.AbstractFieldIntegrator r0;
+        org.apache.commons.math3.ode.events.FieldEventHandler r1;
+        double $d0, $d1;
+        int $i0;
+        org.apache.commons.math3.analysis.solvers.FieldBracketingNthOrderBrentSolver $r2;
+        org.apache.commons.math3.Field $r3;
+        java.lang.Object $r4;
+        org.apache.commons.math3.RealFieldElement $r5, $r6, $r7;
+
+        r0 := @this: org.apache.commons.math3.ode.AbstractFieldIntegrator;
+
+        r1 := @parameter0: org.apache.commons.math3.ode.events.FieldEventHandler;
+
+        $d0 := @parameter1: double;
+
+        $d1 := @parameter2: double;
+
+        $i0 := @parameter3: int;
+
+        $r2 = new org.apache.commons.math3.analysis.solvers.FieldBracketingNthOrderBrentSolver;
+
+        $r3 = r0.<org.apache.commons.math3.ode.AbstractFieldIntegrator: org.apache.commons.math3.Field field>;
+
+        $r4 = interfaceinvoke $r3.<org.apache.commons.math3.Field: java.lang.Object getZero()>();
+
+        $r5 = (org.apache.commons.math3.RealFieldElement) $r4;
+
+        $r4 = interfaceinvoke $r5.<org.apache.commons.math3.RealFieldElement: java.lang.Object add(double)>(1.0E-14);
+
+        $r5 = (org.apache.commons.math3.RealFieldElement) $r4;
+
+        $r3 = r0.<org.apache.commons.math3.ode.AbstractFieldIntegrator: org.apache.commons.math3.Field field>;
+
+        $r4 = interfaceinvoke $r3.<org.apache.commons.math3.Field: java.lang.Object getZero()>();
+
+        $r6 = (org.apache.commons.math3.RealFieldElement) $r4;
+
+        $r4 = interfaceinvoke $r6.<org.apache.commons.math3.RealFieldElement: java.lang.Object add(double)>($d1);
+
+        $r6 = (org.apache.commons.math3.RealFieldElement) $r4;
+
+        $r3 = r0.<org.apache.commons.math3.ode.AbstractFieldIntegrator: org.apache.commons.math3.Field field>;
+
+        $r4 = interfaceinvoke $r3.<org.apache.commons.math3.Field: java.lang.Object getZero()>();
+
+        $r7 = (org.apache.commons.math3.RealFieldElement) $r4;
+
+        $r4 = interfaceinvoke $r7.<org.apache.commons.math3.RealFieldElement: java.lang.Object add(double)>(1.0E-15);
+
+        $r7 = (org.apache.commons.math3.RealFieldElement) $r4;
+
+        specialinvoke $r2.<org.apache.commons.math3.analysis.solvers.FieldBracketingNthOrderBrentSolver: void <init>(org.apache.commons.math3.RealFieldElement,org.apache.commons.math3.RealFieldElement,org.apache.commons.math3.RealFieldElement,int)>($r5, $r6, $r7, 5);
+
+        virtualinvoke r0.<org.apache.commons.math3.ode.AbstractFieldIntegrator: void addEventHandler(org.apache.commons.math3.ode.events.FieldEventHandler,double,double,int,org.apache.commons.math3.analysis.solvers.BracketedRealFieldUnivariateSolver)>(r1, $d0, $d1, $i0, $r2);
+
+        return;
+    }
+    public void addEventHandler(org.apache.commons.math3.ode.events.FieldEventHandler, double, double, int, org.apache.commons.math3.analysis.solvers.BracketedRealFieldUnivariateSolver)
+    {
+        org.apache.commons.math3.ode.AbstractFieldIntegrator r0;
+        org.apache.commons.math3.ode.events.FieldEventHandler r1;
+        double $d0, $d1;
+        int $i0;
+        org.apache.commons.math3.analysis.solvers.BracketedRealFieldUnivariateSolver r2;
+        org.apache.commons.math3.ode.events.FieldEventState $r3;
+        java.util.Collection $r4;
+        org.apache.commons.math3.Field $r5;
+        java.lang.Object $r6;
+        org.apache.commons.math3.RealFieldElement $r7;
+
+        r0 := @this: org.apache.commons.math3.ode.AbstractFieldIntegrator;
+
+        r1 := @parameter0: org.apache.commons.math3.ode.events.FieldEventHandler;
+
+        $d0 := @parameter1: double;
+
+        $d1 := @parameter2: double;
+
+        $i0 := @parameter3: int;
+
+        r2 := @parameter4: org.apache.commons.math3.analysis.solvers.BracketedRealFieldUnivariateSolver;
+
+        $r4 = r0.<org.apache.commons.math3.ode.AbstractFieldIntegrator: java.util.Collection eventsStates>;
+
+        $r3 = new org.apache.commons.math3.ode.events.FieldEventState;
+
+        $r5 = r0.<org.apache.commons.math3.ode.AbstractFieldIntegrator: org.apache.commons.math3.Field field>;
+
+        $r6 = interfaceinvoke $r5.<org.apache.commons.math3.Field: java.lang.Object getZero()>();
+
+        $r7 = (org.apache.commons.math3.RealFieldElement) $r6;
+
+        $r6 = interfaceinvoke $r7.<org.apache.commons.math3.RealFieldElement: java.lang.Object add(double)>($d1);
+
+        $r7 = (org.apache.commons.math3.RealFieldElement) $r6;
+
+        specialinvoke $r3.<org.apache.commons.math3.ode.events.FieldEventState: void <init>(org.apache.commons.math3.ode.events.FieldEventHandler,double,org.apache.commons.math3.RealFieldElement,int,org.apache.commons.math3.analysis.solvers.BracketedRealFieldUnivariateSolver)>(r1, $d0, $r7, $i0, r2);
+
+        interfaceinvoke $r4.<java.util.Collection: boolean add(java.lang.Object)>($r3);
+
+        return;
+    }
+    public void addStepHandler(org.apache.commons.math3.ode.sampling.FieldStepHandler)
+    {
+        org.apache.commons.math3.ode.AbstractFieldIntegrator r0;
+        org.apache.commons.math3.ode.sampling.FieldStepHandler r1;
+        java.util.Collection $r2;
+
+        r0 := @this: org.apache.commons.math3.ode.AbstractFieldIntegrator;
+
+        r1 := @parameter0: org.apache.commons.math3.ode.sampling.FieldStepHandler;
+
+        $r2 = r0.<org.apache.commons.math3.ode.AbstractFieldIntegrator: java.util.Collection stepHandlers>;
+
+        interfaceinvoke $r2.<java.util.Collection: boolean add(java.lang.Object)>(r1);
+
+        return;
+    }
+    public void clearEventHandlers()
+    {
+        org.apache.commons.math3.ode.AbstractFieldIntegrator r0;
+        java.util.Collection $r1;
+
+        r0 := @this: org.apache.commons.math3.ode.AbstractFieldIntegrator;
+
+        $r1 = r0.<org.apache.commons.math3.ode.AbstractFieldIntegrator: java.util.Collection eventsStates>;
+
+        interfaceinvoke $r1.<java.util.Collection: void clear()>();
+
+        return;
+    }
+    public void clearStepHandlers()
+    {
+        org.apache.commons.math3.ode.AbstractFieldIntegrator r0;
+        java.util.Collection $r1;
+
+        r0 := @this: org.apache.commons.math3.ode.AbstractFieldIntegrator;
+
+        $r1 = r0.<org.apache.commons.math3.ode.AbstractFieldIntegrator: java.util.Collection stepHandlers>;
+
+        interfaceinvoke $r1.<java.util.Collection: void clear()>();
+
+        return;
+    }
+    public org.apache.commons.math3.RealFieldElement[] computeDerivatives(org.apache.commons.math3.RealFieldElement, org.apache.commons.math3.RealFieldElement[]) throws org.apache.commons.math3.exception.DimensionMismatchException, org.apache.commons.math3.exception.MaxCountExceededException, java.lang.NullPointerException
+    {
+        org.apache.commons.math3.ode.AbstractFieldIntegrator r0;
+        org.apache.commons.math3.RealFieldElement r1;
+        org.apache.commons.math3.RealFieldElement[] r2;
+        org.apache.commons.math3.util.IntegerSequence$Incrementor $r3;
+        org.apache.commons.math3.ode.FieldExpandableODE $r4;
+
+        r0 := @this: org.apache.commons.math3.ode.AbstractFieldIntegrator;
+
+        r1 := @parameter0: org.apache.commons.math3.RealFieldElement;
+
+        r2 := @parameter1: org.apache.commons.math3.RealFieldElement[];
+
+        $r3 = r0.<org.apache.commons.math3.ode.AbstractFieldIntegrator: org.apache.commons.math3.util.IntegerSequence$Incrementor evaluations>;
+
+        virtualinvoke $r3.<org.apache.commons.math3.util.IntegerSequence$Incrementor: void increment()>();
+
+        $r4 = r0.<org.apache.commons.math3.ode.AbstractFieldIntegrator: org.apache.commons.math3.ode.FieldExpandableODE equations>;
+
+        r2 = virtualinvoke $r4.<org.apache.commons.math3.ode.FieldExpandableODE: org.apache.commons.math3.RealFieldElement[] computeDerivatives(org.apache.commons.math3.RealFieldElement,org.apache.commons.math3.RealFieldElement[])>(r1, r2);
+
+        return r2;
+    }
+    public org.apache.commons.math3.RealFieldElement getCurrentSignedStepsize()
+    {
+        org.apache.commons.math3.ode.AbstractFieldIntegrator r0;
+        org.apache.commons.math3.RealFieldElement r1;
+
+        r0 := @this: org.apache.commons.math3.ode.AbstractFieldIntegrator;
+
+        r1 = r0.<org.apache.commons.math3.ode.AbstractFieldIntegrator: org.apache.commons.math3.RealFieldElement stepSize>;
+
+        return r1;
+    }
+    public org.apache.commons.math3.ode.FieldODEStateAndDerivative getCurrentStepStart()
+    {
+        org.apache.commons.math3.ode.AbstractFieldIntegrator r0;
+        org.apache.commons.math3.ode.FieldODEStateAndDerivative r1;
+
+        r0 := @this: org.apache.commons.math3.ode.AbstractFieldIntegrator;
+
+        r1 = r0.<org.apache.commons.math3.ode.AbstractFieldIntegrator: org.apache.commons.math3.ode.FieldODEStateAndDerivative stepStart>;
+
+        return r1;
+    }
+    protected org.apache.commons.math3.ode.FieldExpandableODE getEquations()
+    {
+        org.apache.commons.math3.ode.AbstractFieldIntegrator r0;
+        org.apache.commons.math3.ode.FieldExpandableODE r1;
+
+        r0 := @this: org.apache.commons.math3.ode.AbstractFieldIntegrator;
+
+        r1 = r0.<org.apache.commons.math3.ode.AbstractFieldIntegrator: org.apache.commons.math3.ode.FieldExpandableODE equations>;
+
+        return r1;
+    }
+    public int getEvaluations()
+    {
+        org.apache.commons.math3.ode.AbstractFieldIntegrator r0;
+        int $i0;
+        org.apache.commons.math3.util.IntegerSequence$Incrementor $r1;
+
+        r0 := @this: org.apache.commons.math3.ode.AbstractFieldIntegrator;
+
+        $r1 = r0.<org.apache.commons.math3.ode.AbstractFieldIntegrator: org.apache.commons.math3.util.IntegerSequence$Incrementor evaluations>;
+
+        $i0 = virtualinvoke $r1.<org.apache.commons.math3.util.IntegerSequence$Incrementor: int getCount()>();
+
+        return $i0;
+    }
+    protected org.apache.commons.math3.util.IntegerSequence$Incrementor getEvaluationsCounter()
+    {
+        org.apache.commons.math3.ode.AbstractFieldIntegrator r0;
+        org.apache.commons.math3.util.IntegerSequence$Incrementor r1;
+
+        r0 := @this: org.apache.commons.math3.ode.AbstractFieldIntegrator;
+
+        r1 = r0.<org.apache.commons.math3.ode.AbstractFieldIntegrator: org.apache.commons.math3.util.IntegerSequence$Incrementor evaluations>;
+
+        return r1;
+    }
+    public java.util.Collection getEventHandlers()
+    {
+        org.apache.commons.math3.ode.AbstractFieldIntegrator r0;
+        java.util.ArrayList r1;
+        java.util.Collection $r2;
+        int $i0;
+        java.util.Iterator $r3;
+        boolean $z0;
+        java.lang.Object $r4;
+        org.apache.commons.math3.ode.events.FieldEventState r5;
+        org.apache.commons.math3.ode.events.FieldEventHandler $r6;
+
+        r0 := @this: org.apache.commons.math3.ode.AbstractFieldIntegrator;
+
+        r1 = new java.util.ArrayList;
+
+        $r2 = r0.<org.apache.commons.math3.ode.AbstractFieldIntegrator: java.util.Collection eventsStates>;
+
+        $i0 = interfaceinvoke $r2.<java.util.Collection: int size()>();
+
+        specialinvoke r1.<java.util.ArrayList: void <init>(int)>($i0);
+
+        $r2 = r0.<org.apache.commons.math3.ode.AbstractFieldIntegrator: java.util.Collection eventsStates>;
+
+        $r3 = interfaceinvoke $r2.<java.util.Collection: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r3.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label2;
+
+        $r4 = interfaceinvoke $r3.<java.util.Iterator: java.lang.Object next()>();
+
+        r5 = (org.apache.commons.math3.ode.events.FieldEventState) $r4;
+
+        $r6 = virtualinvoke r5.<org.apache.commons.math3.ode.events.FieldEventState: org.apache.commons.math3.ode.events.FieldEventHandler getEventHandler()>();
+
+        interfaceinvoke r1.<java.util.List: boolean add(java.lang.Object)>($r6);
+
+        goto label1;
+
+     label2:
+        $r2 = staticinvoke <java.util.Collections: java.util.Collection unmodifiableCollection(java.util.Collection)>(r1);
+
+        return $r2;
+    }
+    public org.apache.commons.math3.Field getField()
+    {
+        org.apache.commons.math3.ode.AbstractFieldIntegrator r0;
+        org.apache.commons.math3.Field r1;
+
+        r0 := @this: org.apache.commons.math3.ode.AbstractFieldIntegrator;
+
+        r1 = r0.<org.apache.commons.math3.ode.AbstractFieldIntegrator: org.apache.commons.math3.Field field>;
+
+        return r1;
+    }
+    public int getMaxEvaluations()
+    {
+        org.apache.commons.math3.ode.AbstractFieldIntegrator r0;
+        int $i0;
+        org.apache.commons.math3.util.IntegerSequence$Incrementor $r1;
+
+        r0 := @this: org.apache.commons.math3.ode.AbstractFieldIntegrator;
+
+        $r1 = r0.<org.apache.commons.math3.ode.AbstractFieldIntegrator: org.apache.commons.math3.util.IntegerSequence$Incrementor evaluations>;
+
+        $i0 = virtualinvoke $r1.<org.apache.commons.math3.util.IntegerSequence$Incrementor: int getMaximalCount()>();
+
+        return $i0;
+    }
+    public java.lang.String getName()
+    {
+        org.apache.commons.math3.ode.AbstractFieldIntegrator r0;
+        java.lang.String r1;
+
+        r0 := @this: org.apache.commons.math3.ode.AbstractFieldIntegrator;
+
+        r1 = r0.<org.apache.commons.math3.ode.AbstractFieldIntegrator: java.lang.String name>;
+
+        return r1;
+    }
+    public java.util.Collection getStepHandlers()
+    {
+        org.apache.commons.math3.ode.AbstractFieldIntegrator r0;
+        java.util.Collection $r1;
+
+        r0 := @this: org.apache.commons.math3.ode.AbstractFieldIntegrator;
+
+        $r1 = r0.<org.apache.commons.math3.ode.AbstractFieldIntegrator: java.util.Collection stepHandlers>;
+
+        $r1 = staticinvoke <java.util.Collections: java.util.Collection unmodifiableCollection(java.util.Collection)>($r1);
+
+        return $r1;
+    }
+    protected org.apache.commons.math3.RealFieldElement getStepSize()
+    {
+        org.apache.commons.math3.ode.AbstractFieldIntegrator r0;
+        org.apache.commons.math3.RealFieldElement r1;
+
+        r0 := @this: org.apache.commons.math3.ode.AbstractFieldIntegrator;
+
+        r1 = r0.<org.apache.commons.math3.ode.AbstractFieldIntegrator: org.apache.commons.math3.RealFieldElement stepSize>;
+
+        return r1;
+    }
+    protected org.apache.commons.math3.ode.FieldODEStateAndDerivative getStepStart()
+    {
+        org.apache.commons.math3.ode.AbstractFieldIntegrator r0;
+        org.apache.commons.math3.ode.FieldODEStateAndDerivative r1;
+
+        r0 := @this: org.apache.commons.math3.ode.AbstractFieldIntegrator;
+
+        r1 = r0.<org.apache.commons.math3.ode.AbstractFieldIntegrator: org.apache.commons.math3.ode.FieldODEStateAndDerivative stepStart>;
+
+        return r1;
+    }
+    protected org.apache.commons.math3.ode.FieldODEStateAndDerivative initIntegration(org.apache.commons.math3.ode.FieldExpandableODE, org.apache.commons.math3.RealFieldElement, org.apache.commons.math3.RealFieldElement[], org.apache.commons.math3.RealFieldElement)
+    {
+        org.apache.commons.math3.ode.AbstractFieldIntegrator r0;
+        org.apache.commons.math3.ode.FieldExpandableODE r1;
+        org.apache.commons.math3.RealFieldElement r2, r4;
+        org.apache.commons.math3.RealFieldElement[] r3, $r7;
+        org.apache.commons.math3.ode.FieldODEStateAndDerivative r5;
+        org.apache.commons.math3.util.IntegerSequence$Incrementor $r6;
+        java.util.Collection $r8;
+        java.util.Iterator $r9;
+        boolean $z0;
+        java.lang.Object $r10;
+        org.apache.commons.math3.ode.events.FieldEventState r11;
+        org.apache.commons.math3.ode.events.FieldEventHandler $r12;
+        org.apache.commons.math3.ode.sampling.FieldStepHandler r13;
+
+        r0 := @this: org.apache.commons.math3.ode.AbstractFieldIntegrator;
+
+        r1 := @parameter0: org.apache.commons.math3.ode.FieldExpandableODE;
+
+        r2 := @parameter1: org.apache.commons.math3.RealFieldElement;
+
+        r3 := @parameter2: org.apache.commons.math3.RealFieldElement[];
+
+        r4 := @parameter3: org.apache.commons.math3.RealFieldElement;
+
+        r0.<org.apache.commons.math3.ode.AbstractFieldIntegrator: org.apache.commons.math3.ode.FieldExpandableODE equations> = r1;
+
+        $r6 = r0.<org.apache.commons.math3.ode.AbstractFieldIntegrator: org.apache.commons.math3.util.IntegerSequence$Incrementor evaluations>;
+
+        $r6 = virtualinvoke $r6.<org.apache.commons.math3.util.IntegerSequence$Incrementor: org.apache.commons.math3.util.IntegerSequence$Incrementor withStart(int)>(0);
+
+        r0.<org.apache.commons.math3.ode.AbstractFieldIntegrator: org.apache.commons.math3.util.IntegerSequence$Incrementor evaluations> = $r6;
+
+        virtualinvoke r1.<org.apache.commons.math3.ode.FieldExpandableODE: void init(org.apache.commons.math3.RealFieldElement,org.apache.commons.math3.RealFieldElement[],org.apache.commons.math3.RealFieldElement)>(r2, r3, r4);
+
+        $r7 = virtualinvoke r0.<org.apache.commons.math3.ode.AbstractFieldIntegrator: org.apache.commons.math3.RealFieldElement[] computeDerivatives(org.apache.commons.math3.RealFieldElement,org.apache.commons.math3.RealFieldElement[])>(r2, r3);
+
+        r5 = new org.apache.commons.math3.ode.FieldODEStateAndDerivative;
+
+        specialinvoke r5.<org.apache.commons.math3.ode.FieldODEStateAndDerivative: void <init>(org.apache.commons.math3.RealFieldElement,org.apache.commons.math3.RealFieldElement[],org.apache.commons.math3.RealFieldElement[])>(r2, r3, $r7);
+
+        $r8 = r0.<org.apache.commons.math3.ode.AbstractFieldIntegrator: java.util.Collection eventsStates>;
+
+        $r9 = interfaceinvoke $r8.<java.util.Collection: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r9.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label2;
+
+        $r10 = interfaceinvoke $r9.<java.util.Iterator: java.lang.Object next()>();
+
+        r11 = (org.apache.commons.math3.ode.events.FieldEventState) $r10;
+
+        $r12 = virtualinvoke r11.<org.apache.commons.math3.ode.events.FieldEventState: org.apache.commons.math3.ode.events.FieldEventHandler getEventHandler()>();
+
+        interfaceinvoke $r12.<org.apache.commons.math3.ode.events.FieldEventHandler: void init(org.apache.commons.math3.ode.FieldODEStateAndDerivative,org.apache.commons.math3.RealFieldElement)>(r5, r4);
+
+        goto label1;
+
+     label2:
+        $r8 = r0.<org.apache.commons.math3.ode.AbstractFieldIntegrator: java.util.Collection stepHandlers>;
+
+        $r9 = interfaceinvoke $r8.<java.util.Collection: java.util.Iterator iterator()>();
+
+     label3:
+        $z0 = interfaceinvoke $r9.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label4;
+
+        $r10 = interfaceinvoke $r9.<java.util.Iterator: java.lang.Object next()>();
+
+        r13 = (org.apache.commons.math3.ode.sampling.FieldStepHandler) $r10;
+
+        interfaceinvoke r13.<org.apache.commons.math3.ode.sampling.FieldStepHandler: void init(org.apache.commons.math3.ode.FieldODEStateAndDerivative,org.apache.commons.math3.RealFieldElement)>(r5, r4);
+
+        goto label3;
+
+     label4:
+        virtualinvoke r0.<org.apache.commons.math3.ode.AbstractFieldIntegrator: void setStateInitialized(boolean)>(0);
+
+        return r5;
+    }
+    protected boolean isLastStep()
+    {
+        org.apache.commons.math3.ode.AbstractFieldIntegrator r0;
+        boolean z0;
+
+        r0 := @this: org.apache.commons.math3.ode.AbstractFieldIntegrator;
+
+        z0 = r0.<org.apache.commons.math3.ode.AbstractFieldIntegrator: boolean isLastStep>;
+
+        return z0;
+    }
+    protected boolean resetOccurred()
+    {
+        org.apache.commons.math3.ode.AbstractFieldIntegrator r0;
+        boolean z0;
+
+        r0 := @this: org.apache.commons.math3.ode.AbstractFieldIntegrator;
+
+        z0 = r0.<org.apache.commons.math3.ode.AbstractFieldIntegrator: boolean resetOccurred>;
+
+        return z0;
+    }
+    protected void sanityChecks(org.apache.commons.math3.ode.FieldODEState, org.apache.commons.math3.RealFieldElement) throws org.apache.commons.math3.exception.NumberIsTooSmallException, org.apache.commons.math3.exception.DimensionMismatchException
+    {
+        org.apache.commons.math3.ode.AbstractFieldIntegrator r0;
+        org.apache.commons.math3.ode.FieldODEState r1;
+        org.apache.commons.math3.RealFieldElement r2, $r4;
+        double d0, $d1;
+        org.apache.commons.math3.exception.util.LocalizedFormats $r3;
+        java.lang.Object $r5;
+        byte $b0;
+        org.apache.commons.math3.exception.NumberIsTooSmallException $r6;
+        java.lang.Double $r7, $r8;
+
+        r0 := @this: org.apache.commons.math3.ode.AbstractFieldIntegrator;
+
+        r1 := @parameter0: org.apache.commons.math3.ode.FieldODEState;
+
+        r2 := @parameter1: org.apache.commons.math3.RealFieldElement;
+
+        $r4 = virtualinvoke r1.<org.apache.commons.math3.ode.FieldODEState: org.apache.commons.math3.RealFieldElement getTime()>();
+
+        d0 = interfaceinvoke $r4.<org.apache.commons.math3.RealFieldElement: double getReal()>();
+
+        d0 = staticinvoke <org.apache.commons.math3.util.FastMath: double abs(double)>(d0);
+
+        $d1 = interfaceinvoke r2.<org.apache.commons.math3.RealFieldElement: double getReal()>();
+
+        $d1 = staticinvoke <org.apache.commons.math3.util.FastMath: double abs(double)>($d1);
+
+        d0 = staticinvoke <org.apache.commons.math3.util.FastMath: double max(double,double)>(d0, $d1);
+
+        d0 = staticinvoke <org.apache.commons.math3.util.FastMath: double ulp(double)>(d0);
+
+        d0 = 1000.0 * d0;
+
+        $r4 = virtualinvoke r1.<org.apache.commons.math3.ode.FieldODEState: org.apache.commons.math3.RealFieldElement getTime()>();
+
+        $r5 = interfaceinvoke $r4.<org.apache.commons.math3.RealFieldElement: java.lang.Object subtract(java.lang.Object)>(r2);
+
+        r2 = (org.apache.commons.math3.RealFieldElement) $r5;
+
+        $r5 = interfaceinvoke r2.<org.apache.commons.math3.RealFieldElement: java.lang.Object abs()>();
+
+        r2 = (org.apache.commons.math3.RealFieldElement) $r5;
+
+        $d1 = interfaceinvoke r2.<org.apache.commons.math3.RealFieldElement: double getReal()>();
+
+        $b0 = $d1 cmpg d0;
+
+        if $b0 > 0 goto label1;
+
+        $r6 = new org.apache.commons.math3.exception.NumberIsTooSmallException;
+
+        $r3 = <org.apache.commons.math3.exception.util.LocalizedFormats: org.apache.commons.math3.exception.util.LocalizedFormats TOO_SMALL_INTEGRATION_INTERVAL>;
+
+        $r7 = staticinvoke <java.lang.Double: java.lang.Double valueOf(double)>($d1);
+
+        $r8 = staticinvoke <java.lang.Double: java.lang.Double valueOf(double)>(d0);
+
+        specialinvoke $r6.<org.apache.commons.math3.exception.NumberIsTooSmallException: void <init>(org.apache.commons.math3.exception.util.Localizable,java.lang.Number,java.lang.Number,boolean)>($r3, $r7, $r8, 0);
+
+        throw $r6;
+
+     label1:
+        return;
+    }
+    protected void setIsLastStep(boolean)
+    {
+        org.apache.commons.math3.ode.AbstractFieldIntegrator r0;
+        boolean $z0;
+
+        r0 := @this: org.apache.commons.math3.ode.AbstractFieldIntegrator;
+
+        $z0 := @parameter0: boolean;
+
+        r0.<org.apache.commons.math3.ode.AbstractFieldIntegrator: boolean isLastStep> = $z0;
+
+        return;
+    }
+    public void setMaxEvaluations(int)
+    {
+        org.apache.commons.math3.ode.AbstractFieldIntegrator r0;
+        org.apache.commons.math3.util.IntegerSequence$Incrementor $r1;
+        int $i0;
+
+        r0 := @this: org.apache.commons.math3.ode.AbstractFieldIntegrator;
+
+        $i0 := @parameter0: int;
+
+        $r1 = r0.<org.apache.commons.math3.ode.AbstractFieldIntegrator: org.apache.commons.math3.util.IntegerSequence$Incrementor evaluations>;
+
+        if $i0 >= 0 goto label1;
+
+        $i0 = 2147483647;
+
+     label1:
+        $r1 = virtualinvoke $r1.<org.apache.commons.math3.util.IntegerSequence$Incrementor: org.apache.commons.math3.util.IntegerSequence$Incrementor withMaximalCount(int)>($i0);
+
+        r0.<org.apache.commons.math3.ode.AbstractFieldIntegrator: org.apache.commons.math3.util.IntegerSequence$Incrementor evaluations> = $r1;
+
+        return;
+    }
+    protected void setStateInitialized(boolean)
+    {
+        org.apache.commons.math3.ode.AbstractFieldIntegrator r0;
+        boolean $z0;
+
+        r0 := @this: org.apache.commons.math3.ode.AbstractFieldIntegrator;
+
+        $z0 := @parameter0: boolean;
+
+        r0.<org.apache.commons.math3.ode.AbstractFieldIntegrator: boolean statesInitialized> = $z0;
+
+        return;
+    }
+    protected void setStepSize(org.apache.commons.math3.RealFieldElement)
+    {
+        org.apache.commons.math3.ode.AbstractFieldIntegrator r0;
+        org.apache.commons.math3.RealFieldElement r1;
+
+        r0 := @this: org.apache.commons.math3.ode.AbstractFieldIntegrator;
+
+        r1 := @parameter0: org.apache.commons.math3.RealFieldElement;
+
+        r0.<org.apache.commons.math3.ode.AbstractFieldIntegrator: org.apache.commons.math3.RealFieldElement stepSize> = r1;
+
+        return;
+    }
+    protected void setStepStart(org.apache.commons.math3.ode.FieldODEStateAndDerivative)
+    {
+        org.apache.commons.math3.ode.AbstractFieldIntegrator r0;
+        org.apache.commons.math3.ode.FieldODEStateAndDerivative r1;
+
+        r0 := @this: org.apache.commons.math3.ode.AbstractFieldIntegrator;
+
+        r1 := @parameter0: org.apache.commons.math3.ode.FieldODEStateAndDerivative;
+
+        r0.<org.apache.commons.math3.ode.AbstractFieldIntegrator: org.apache.commons.math3.ode.FieldODEStateAndDerivative stepStart> = r1;
+
+        return;
+    }

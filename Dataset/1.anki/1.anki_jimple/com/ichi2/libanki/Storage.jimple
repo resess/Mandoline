@@ -1,0 +1,1201 @@
+com.ichi2.libanki.Storage extends java.lang.Object
+static final boolean $assertionsDisabled
+java.lang.String mPath
+    static void <clinit>()
+    {
+        boolean $z0;
+        java.lang.Class $r0;
+
+        $r0 = class "Lcom/ichi2/libanki/Storage;";
+
+        $z0 = virtualinvoke $r0.<java.lang.Class: boolean desiredAssertionStatus()>();
+
+        if $z0 != 0 goto label2;
+
+        $z0 = 1;
+
+     label1:
+        <com.ichi2.libanki.Storage: boolean $assertionsDisabled> = $z0;
+
+        return;
+
+     label2:
+        $z0 = 0;
+
+        goto label1;
+    }
+    public void <init>()
+    {
+        com.ichi2.libanki.Storage r0;
+
+        r0 := @this: com.ichi2.libanki.Storage;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+    public static com.ichi2.libanki.Collection Collection(android.content.Context, java.lang.String)
+    {
+        android.content.Context $r0;
+        java.lang.String $r1;
+        com.ichi2.libanki.Collection $r2;
+
+        $r0 := @parameter0: android.content.Context;
+
+        $r1 := @parameter1: java.lang.String;
+
+        $r2 = staticinvoke <com.ichi2.libanki.Storage: com.ichi2.libanki.Collection Collection(android.content.Context,java.lang.String,boolean,boolean)>($r0, $r1, 0, 0);
+
+        return $r2;
+    }
+    public static com.ichi2.libanki.Collection Collection(android.content.Context, java.lang.String, boolean, boolean)
+    {
+        android.content.Context $r0;
+        java.lang.String $r1;
+        boolean $z0, $z1, $z2;
+        com.ichi2.libanki.Collection r2;
+        com.ichi2.libanki.DB r3;
+        java.io.File r4;
+        java.lang.AssertionError $r5;
+        int $i0;
+        java.lang.Exception r6;
+        java.lang.Object[] $r7;
+        com.ichi2.anki.exception.ConfirmModSchemaException r8;
+        java.lang.RuntimeException $r9;
+
+        $r0 := @parameter0: android.content.Context;
+
+        $r1 := @parameter1: java.lang.String;
+
+        $z0 := @parameter2: boolean;
+
+        $z1 := @parameter3: boolean;
+
+        $z2 = <com.ichi2.libanki.Storage: boolean $assertionsDisabled>;
+
+        if $z2 != 0 goto label01;
+
+        $z2 = virtualinvoke $r1.<java.lang.String: boolean endsWith(java.lang.String)>(".anki2");
+
+        if $z2 != 0 goto label01;
+
+        $r5 = new java.lang.AssertionError;
+
+        specialinvoke $r5.<java.lang.AssertionError: void <init>()>();
+
+        throw $r5;
+
+     label01:
+        staticinvoke <com.ichi2.libanki.hooks.Hooks: com.ichi2.libanki.hooks.Hooks getInstance(android.content.Context)>($r0);
+
+        r4 = new java.io.File;
+
+        specialinvoke r4.<java.io.File: void <init>(java.lang.String)>($r1);
+
+        $z2 = virtualinvoke r4.<java.io.File: boolean exists()>();
+
+        if $z2 != 0 goto label10;
+
+        $z2 = 1;
+
+     label02:
+        r3 = new com.ichi2.libanki.DB;
+
+        specialinvoke r3.<com.ichi2.libanki.DB: void <init>(java.lang.String)>($r1);
+
+        if $z2 == 0 goto label11;
+
+     label03:
+        $i0 = staticinvoke <com.ichi2.libanki.Storage: int _createDB(com.ichi2.libanki.DB)>(r3);
+
+     label04:
+        virtualinvoke r3.<com.ichi2.libanki.DB: void execute(java.lang.String)>("PRAGMA temp_store = memory");
+
+     label05:
+        r2 = new com.ichi2.libanki.Collection;
+
+     label06:
+        specialinvoke r2.<com.ichi2.libanki.Collection: void <init>(android.content.Context,com.ichi2.libanki.DB,java.lang.String,boolean,boolean)>($r0, r3, $r1, $z0, $z1);
+
+     label07:
+        if $i0 >= 11 goto label13;
+
+     label08:
+        staticinvoke <com.ichi2.libanki.Storage: void _upgrade(com.ichi2.libanki.Collection,int)>(r2, $i0);
+
+     label09:
+        return r2;
+
+     label10:
+        $z2 = 0;
+
+        goto label02;
+
+     label11:
+        $i0 = staticinvoke <com.ichi2.libanki.Storage: int _upgradeSchema(com.ichi2.libanki.DB)>(r3);
+
+     label12:
+        goto label04;
+
+     label13:
+        if $z2 == 0 goto label20;
+
+     label14:
+        staticinvoke <com.ichi2.libanki.Models: org.json.JSONObject addClozeModel(com.ichi2.libanki.Collection)>(r2);
+
+        staticinvoke <com.ichi2.libanki.Models: org.json.JSONObject addForwardOptionalReverse(com.ichi2.libanki.Collection)>(r2);
+
+        staticinvoke <com.ichi2.libanki.Models: org.json.JSONObject addForwardReverse(com.ichi2.libanki.Collection)>(r2);
+
+        staticinvoke <com.ichi2.libanki.Models: org.json.JSONObject addBasicModel(com.ichi2.libanki.Collection)>(r2);
+
+     label15:
+        virtualinvoke r2.<com.ichi2.libanki.Collection: void save()>();
+
+     label16:
+        return r2;
+
+     label17:
+        r6 := @caughtexception;
+
+        $r7 = newarray (java.lang.Object)[0];
+
+        staticinvoke <timber.log.Timber: void e(java.lang.Throwable,java.lang.String,java.lang.Object[])>(r6, "Error opening collection; closing database", $r7);
+
+        virtualinvoke r3.<com.ichi2.libanki.DB: void close()>();
+
+        throw r6;
+
+     label18:
+        r8 := @caughtexception;
+
+        $r9 = new java.lang.RuntimeException;
+
+     label19:
+        specialinvoke $r9.<java.lang.RuntimeException: void <init>(java.lang.Throwable)>(r8);
+
+        throw $r9;
+
+     label20:
+        return r2;
+
+        catch java.lang.Exception from label03 to label04 with label17;
+        catch java.lang.Exception from label04 to label05 with label17;
+        catch java.lang.Exception from label06 to label07 with label17;
+        catch java.lang.Exception from label08 to label09 with label17;
+        catch java.lang.Exception from label11 to label12 with label17;
+        catch com.ichi2.anki.exception.ConfirmModSchemaException from label14 to label15 with label18;
+        catch java.lang.Exception from label14 to label15 with label17;
+        catch java.lang.Exception from label15 to label16 with label17;
+        catch java.lang.Exception from label19 to label20 with label17;
+    }
+    private static void _addSchema(com.ichi2.libanki.DB)
+    {
+        com.ichi2.libanki.DB $r0;
+
+        $r0 := @parameter0: com.ichi2.libanki.DB;
+
+        staticinvoke <com.ichi2.libanki.Storage: void _addSchema(com.ichi2.libanki.DB,boolean)>($r0, 1);
+
+        return;
+    }
+    private static void _addSchema(com.ichi2.libanki.DB, boolean)
+    {
+        com.ichi2.libanki.DB $r0;
+        boolean $z0;
+        java.lang.StringBuilder $r1;
+        long $l0;
+        java.lang.String $r2;
+
+        $r0 := @parameter0: com.ichi2.libanki.DB;
+
+        $z0 := @parameter1: boolean;
+
+        virtualinvoke $r0.<com.ichi2.libanki.DB: void execute(java.lang.String)>("create table if not exists col ( id              integer primary key, crt             integer not null,mod             integer not null,scm             integer not null,ver             integer not null,dty             integer not null,usn             integer not null,ls              integer not null,conf            text not null,models          text not null,decks           text not null,dconf           text not null,tags            text not null);");
+
+        virtualinvoke $r0.<com.ichi2.libanki.DB: void execute(java.lang.String)>("create table if not exists notes (   id              integer primary key,   /* 0 */  guid            text not null,   /* 1 */ mid             integer not null,   /* 2 */ mod             integer not null,   /* 3 */ usn             integer not null,   /* 4 */ tags            text not null,   /* 5 */ flds            text not null,   /* 6 */ sfld            integer not null,   /* 7 */ csum            integer not null,   /* 8 */ flags           integer not null,   /* 9 */ data            text not null   /* 10 */);");
+
+        virtualinvoke $r0.<com.ichi2.libanki.DB: void execute(java.lang.String)>("create table if not exists cards (   id              integer primary key,   /* 0 */  nid             integer not null,   /* 1 */  did             integer not null,   /* 2 */  ord             integer not null,   /* 3 */  mod             integer not null,   /* 4 */ usn             integer not null,   /* 5 */ type            integer not null,   /* 6 */ queue           integer not null,   /* 7 */    due             integer not null,   /* 8 */   ivl             integer not null,   /* 9 */  factor          integer not null,   /* 10 */ reps            integer not null,   /* 11 */   lapses          integer not null,   /* 12 */   left            integer not null,   /* 13 */   odue            integer not null,   /* 14 */   odid            integer not null,   /* 15 */   flags           integer not null,   /* 16 */   data            text not null   /* 17 */);");
+
+        virtualinvoke $r0.<com.ichi2.libanki.DB: void execute(java.lang.String)>("create table if not exists revlog (   id              integer primary key,   cid             integer not null,   usn             integer not null,   ease            integer not null,   ivl             integer not null,   lastIvl         integer not null,   factor          integer not null,   time            integer not null,   type            integer not null);");
+
+        virtualinvoke $r0.<com.ichi2.libanki.DB: void execute(java.lang.String)>("create table if not exists graves (    usn             integer not null,    oid             integer not null,    type            integer not null)");
+
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r1 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("INSERT OR IGNORE INTO col VALUES(1,0,0,");
+
+        $l0 = staticinvoke <com.ichi2.libanki.Utils: long intNow(int)>(1000);
+
+        $r1 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l0);
+
+        $r1 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(",");
+
+        $r1 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(11);
+
+        $r1 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(",0,0,0,\'\',\'{}\',\'\',\'\',\'{}\')");
+
+        $r2 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r0.<com.ichi2.libanki.DB: void execute(java.lang.String)>($r2);
+
+        if $z0 == 0 goto label1;
+
+        staticinvoke <com.ichi2.libanki.Storage: void _setColVars(com.ichi2.libanki.DB)>($r0);
+
+     label1:
+        return;
+    }
+    private static int _createDB(com.ichi2.libanki.DB)
+    {
+        com.ichi2.libanki.DB $r0;
+
+        $r0 := @parameter0: com.ichi2.libanki.DB;
+
+        virtualinvoke $r0.<com.ichi2.libanki.DB: void execute(java.lang.String)>("PRAGMA page_size = 4096");
+
+        virtualinvoke $r0.<com.ichi2.libanki.DB: void execute(java.lang.String)>("PRAGMA legacy_file_format = 0");
+
+        virtualinvoke $r0.<com.ichi2.libanki.DB: void execute(java.lang.String)>("VACUUM");
+
+        staticinvoke <com.ichi2.libanki.Storage: void _addSchema(com.ichi2.libanki.DB)>($r0);
+
+        staticinvoke <com.ichi2.libanki.Storage: void _updateIndices(com.ichi2.libanki.DB)>($r0);
+
+        virtualinvoke $r0.<com.ichi2.libanki.DB: void execute(java.lang.String)>("ANALYZE");
+
+        return 11;
+    }
+    private static void _setColVars(com.ichi2.libanki.DB)
+    {
+        com.ichi2.libanki.DB $r0;
+        org.json.JSONObject r1, r2, r4;
+        org.json.JSONException r3;
+        android.content.ContentValues r5;
+        long $l0;
+        java.lang.String $r6;
+        java.lang.RuntimeException $r7;
+
+        $r0 := @parameter0: com.ichi2.libanki.DB;
+
+        r2 = new org.json.JSONObject;
+
+     label01:
+        specialinvoke r2.<org.json.JSONObject: void <init>(java.lang.String)>("{\'newToday\': [0, 0],\'revToday\': [0, 0],\'lrnToday\': [0, 0],\'timeToday\': [0, 0],\'conf\': 1,\'usn\': 0,\'desc\': \"\",\'dyn\': 0,\'collapsed\': False,\'extendNew\': 10,\'extendRev\': 50}");
+
+        virtualinvoke r2.<org.json.JSONObject: org.json.JSONObject put(java.lang.String,int)>("id", 1);
+
+        virtualinvoke r2.<org.json.JSONObject: org.json.JSONObject put(java.lang.String,java.lang.Object)>("name", "Default");
+
+        virtualinvoke r2.<org.json.JSONObject: org.json.JSONObject put(java.lang.String,int)>("conf", 1);
+
+        $l0 = staticinvoke <com.ichi2.libanki.Utils: long intNow()>();
+
+        virtualinvoke r2.<org.json.JSONObject: org.json.JSONObject put(java.lang.String,long)>("mod", $l0);
+
+     label02:
+        r4 = new org.json.JSONObject;
+
+     label03:
+        specialinvoke r4.<org.json.JSONObject: void <init>(java.lang.String)>("{\'name\': \"Default\",\'new\': {\'delays\': [1, 10],\'ints\': [1, 4, 7],\'initialFactor\': 2500,\'separate\': True,\'order\': 1,\'perDay\': 20,\'bury\': True},\'lapse\': {\'delays\': [10],\'mult\': 0,\'minInt\': 1,\'leechFails\': 8,\'leechAction\': 0},\'rev\': {\'perDay\': 100,\'ease4\': 1.3,\'fuzz\': 0.05,\'minSpace\': 1,\'ivlFct\': 1,\'maxIvl\': 36500,\'bury\': True},\'maxTaken\': 60,\'timer\': 0,\'autoplay\': True,\'replayq\': True,\'mod\': 0,\'usn\': 0}");
+
+        virtualinvoke r4.<org.json.JSONObject: org.json.JSONObject put(java.lang.String,int)>("id", 1);
+
+     label04:
+        r1 = new org.json.JSONObject;
+
+     label05:
+        specialinvoke r1.<org.json.JSONObject: void <init>()>();
+
+        virtualinvoke r1.<org.json.JSONObject: org.json.JSONObject put(java.lang.String,java.lang.Object)>("1", r2);
+
+     label06:
+        r2 = new org.json.JSONObject;
+
+     label07:
+        specialinvoke r2.<org.json.JSONObject: void <init>()>();
+
+        virtualinvoke r2.<org.json.JSONObject: org.json.JSONObject put(java.lang.String,java.lang.Object)>("1", r4);
+
+     label08:
+        r5 = new android.content.ContentValues;
+
+     label09:
+        specialinvoke r5.<android.content.ContentValues: void <init>()>();
+
+        virtualinvoke r5.<android.content.ContentValues: void put(java.lang.String,java.lang.String)>("conf", "{\'activeDecks\': [1], \'curDeck\': 1, \'newSpread\': 0, \'collapseTime\': 1200, \'timeLim\': 0, \'estTimes\': True, \'dueCounts\': True, \'curModel\': null, \'nextPos\': 1, \'sortType\': \"noteFld\", \'sortBackwards\': False, \'addToCur\': True }");
+
+        $r6 = staticinvoke <com.ichi2.libanki.Utils: java.lang.String jsonToString(org.json.JSONObject)>(r1);
+
+        virtualinvoke r5.<android.content.ContentValues: void put(java.lang.String,java.lang.String)>("decks", $r6);
+
+        $r6 = staticinvoke <com.ichi2.libanki.Utils: java.lang.String jsonToString(org.json.JSONObject)>(r2);
+
+        virtualinvoke r5.<android.content.ContentValues: void put(java.lang.String,java.lang.String)>("dconf", $r6);
+
+        virtualinvoke $r0.<com.ichi2.libanki.DB: int update(java.lang.String,android.content.ContentValues)>("col", r5);
+
+     label10:
+        return;
+
+     label11:
+        r3 := @caughtexception;
+
+        $r7 = new java.lang.RuntimeException;
+
+        specialinvoke $r7.<java.lang.RuntimeException: void <init>(java.lang.Throwable)>(r3);
+
+        throw $r7;
+
+        catch org.json.JSONException from label01 to label02 with label11;
+        catch org.json.JSONException from label03 to label04 with label11;
+        catch org.json.JSONException from label05 to label06 with label11;
+        catch org.json.JSONException from label07 to label08 with label11;
+        catch org.json.JSONException from label09 to label10 with label11;
+    }
+    private static void _updateIndices(com.ichi2.libanki.DB)
+    {
+        com.ichi2.libanki.DB $r0;
+
+        $r0 := @parameter0: com.ichi2.libanki.DB;
+
+        virtualinvoke $r0.<com.ichi2.libanki.DB: void execute(java.lang.String)>("create index if not exists ix_notes_usn on notes (usn);");
+
+        virtualinvoke $r0.<com.ichi2.libanki.DB: void execute(java.lang.String)>("create index if not exists ix_cards_usn on cards (usn);");
+
+        virtualinvoke $r0.<com.ichi2.libanki.DB: void execute(java.lang.String)>("create index if not exists ix_revlog_usn on revlog (usn);");
+
+        virtualinvoke $r0.<com.ichi2.libanki.DB: void execute(java.lang.String)>("create index if not exists ix_cards_nid on cards (nid);");
+
+        virtualinvoke $r0.<com.ichi2.libanki.DB: void execute(java.lang.String)>("create index if not exists ix_cards_sched on cards (did, queue, due);");
+
+        virtualinvoke $r0.<com.ichi2.libanki.DB: void execute(java.lang.String)>("create index if not exists ix_revlog_cid on revlog (cid);");
+
+        virtualinvoke $r0.<com.ichi2.libanki.DB: void execute(java.lang.String)>("create index if not exists ix_notes_csum on notes (csum);)");
+
+        return;
+    }
+    private static void _upgrade(com.ichi2.libanki.Collection, int)
+    {
+        com.ichi2.libanki.Collection $r0;
+        int $i0, i1, $i2;
+        java.util.ArrayList r1, $r10;
+        org.json.JSONArray r2, $r21;
+        com.ichi2.libanki.Decks $r3;
+        java.util.Iterator $r4;
+        boolean $z0;
+        java.lang.Object $r5;
+        org.json.JSONObject r6, $r11;
+        org.json.JSONException r7;
+        java.lang.RuntimeException $r8;
+        com.ichi2.libanki.Models $r9;
+        java.lang.String $r12, $r17;
+        com.ichi2.anki.exception.ConfirmModSchemaException r13;
+        com.ichi2.libanki.DB $r14;
+        java.lang.StringBuilder $r15, $r16;
+        java.lang.Object[] $r18;
+        java.lang.Integer $r19;
+        java.util.List $r20;
+        double $d0;
+
+        $r0 := @parameter0: com.ichi2.libanki.Collection;
+
+        $i0 := @parameter1: int;
+
+        if $i0 >= 3 goto label009;
+
+     label001:
+        $r3 = virtualinvoke $r0.<com.ichi2.libanki.Collection: com.ichi2.libanki.Decks getDecks()>();
+
+        r1 = virtualinvoke $r3.<com.ichi2.libanki.Decks: java.util.ArrayList all()>();
+
+        $r4 = virtualinvoke r1.<java.util.ArrayList: java.util.Iterator iterator()>();
+
+     label002:
+        $z0 = interfaceinvoke $r4.<java.util.Iterator: boolean hasNext()>();
+
+     label003:
+        if $z0 == 0 goto label009;
+
+     label004:
+        $r5 = interfaceinvoke $r4.<java.util.Iterator: java.lang.Object next()>();
+
+     label005:
+        r6 = (org.json.JSONObject) $r5;
+
+     label006:
+        virtualinvoke r6.<org.json.JSONObject: org.json.JSONObject put(java.lang.String,int)>("dyn", 0);
+
+        virtualinvoke r6.<org.json.JSONObject: org.json.JSONObject put(java.lang.String,boolean)>("collapsed", 0);
+
+        $r3 = virtualinvoke $r0.<com.ichi2.libanki.Collection: com.ichi2.libanki.Decks getDecks()>();
+
+        virtualinvoke $r3.<com.ichi2.libanki.Decks: void save(org.json.JSONObject)>(r6);
+
+     label007:
+        goto label002;
+
+     label008:
+        r7 := @caughtexception;
+
+        $r8 = new java.lang.RuntimeException;
+
+        specialinvoke $r8.<java.lang.RuntimeException: void <init>(java.lang.Throwable)>(r7);
+
+        throw $r8;
+
+     label009:
+        if $i0 >= 4 goto label034;
+
+     label010:
+        virtualinvoke $r0.<com.ichi2.libanki.Collection: void modSchemaNoCheck()>();
+
+     label011:
+        r1 = new java.util.ArrayList;
+
+     label012:
+        specialinvoke r1.<java.util.ArrayList: void <init>()>();
+
+        $r9 = virtualinvoke $r0.<com.ichi2.libanki.Collection: com.ichi2.libanki.Models getModels()>();
+
+        $r10 = virtualinvoke $r9.<com.ichi2.libanki.Models: java.util.ArrayList all()>();
+
+        $r4 = virtualinvoke $r10.<java.util.ArrayList: java.util.Iterator iterator()>();
+
+     label013:
+        $z0 = interfaceinvoke $r4.<java.util.Iterator: boolean hasNext()>();
+
+     label014:
+        if $z0 == 0 goto label023;
+
+     label015:
+        $r5 = interfaceinvoke $r4.<java.util.Iterator: java.lang.Object next()>();
+
+     label016:
+        r6 = (org.json.JSONObject) $r5;
+
+     label017:
+        r2 = virtualinvoke r6.<org.json.JSONObject: org.json.JSONArray getJSONArray(java.lang.String)>("tmpls");
+
+        $r11 = virtualinvoke r2.<org.json.JSONArray: org.json.JSONObject getJSONObject(int)>(0);
+
+        $r12 = virtualinvoke $r11.<org.json.JSONObject: java.lang.String getString(java.lang.String)>("qfmt");
+
+        $z0 = virtualinvoke $r12.<java.lang.String: boolean contains(java.lang.CharSequence)>("{{cloze:");
+
+     label018:
+        if $z0 != 0 goto label021;
+
+     label019:
+        virtualinvoke r6.<org.json.JSONObject: org.json.JSONObject put(java.lang.String,int)>("type", 0);
+
+     label020:
+        goto label013;
+
+     label021:
+        virtualinvoke r1.<java.util.ArrayList: boolean add(java.lang.Object)>(r6);
+
+     label022:
+        goto label013;
+
+     label023:
+        $r4 = virtualinvoke r1.<java.util.ArrayList: java.util.Iterator iterator()>();
+
+     label024:
+        $z0 = interfaceinvoke $r4.<java.util.Iterator: boolean hasNext()>();
+
+     label025:
+        if $z0 == 0 goto label033;
+
+     label026:
+        $r5 = interfaceinvoke $r4.<java.util.Iterator: java.lang.Object next()>();
+
+     label027:
+        r6 = (org.json.JSONObject) $r5;
+
+     label028:
+        staticinvoke <com.ichi2.libanki.Storage: void _upgradeClozeModel(com.ichi2.libanki.Collection,org.json.JSONObject)>($r0, r6);
+
+     label029:
+        goto label024;
+
+     label030:
+        r13 := @caughtexception;
+
+        $r8 = new java.lang.RuntimeException;
+
+     label031:
+        specialinvoke $r8.<java.lang.RuntimeException: void <init>(java.lang.Throwable)>(r13);
+
+     label032:
+        throw $r8;
+
+     label033:
+        $r14 = virtualinvoke $r0.<com.ichi2.libanki.Collection: com.ichi2.libanki.DB getDb()>();
+
+        virtualinvoke $r14.<com.ichi2.libanki.DB: void execute(java.lang.String)>("UPDATE col SET ver = 4");
+
+     label034:
+        if $i0 >= 5 goto label036;
+
+     label035:
+        $r14 = virtualinvoke $r0.<com.ichi2.libanki.Collection: com.ichi2.libanki.DB getDb()>();
+
+        virtualinvoke $r14.<com.ichi2.libanki.DB: void execute(java.lang.String)>("UPDATE cards SET odue = 0 WHERE queue = 2");
+
+        $r14 = virtualinvoke $r0.<com.ichi2.libanki.Collection: com.ichi2.libanki.DB getDb()>();
+
+        virtualinvoke $r14.<com.ichi2.libanki.DB: void execute(java.lang.String)>("UPDATE col SET ver = 5");
+
+     label036:
+        if $i0 >= 6 goto label057;
+
+     label037:
+        virtualinvoke $r0.<com.ichi2.libanki.Collection: void modSchemaNoCheck()>();
+
+        $r9 = virtualinvoke $r0.<com.ichi2.libanki.Collection: com.ichi2.libanki.Models getModels()>();
+
+        r1 = virtualinvoke $r9.<com.ichi2.libanki.Models: java.util.ArrayList all()>();
+
+        $r4 = virtualinvoke r1.<java.util.ArrayList: java.util.Iterator iterator()>();
+
+     label038:
+        $z0 = interfaceinvoke $r4.<java.util.Iterator: boolean hasNext()>();
+
+     label039:
+        if $z0 == 0 goto label056;
+
+     label040:
+        $r5 = interfaceinvoke $r4.<java.util.Iterator: java.lang.Object next()>();
+
+     label041:
+        r6 = (org.json.JSONObject) $r5;
+
+        $r11 = new org.json.JSONObject;
+
+     label042:
+        specialinvoke $r11.<org.json.JSONObject: void <init>(java.lang.String)>("{\'sortf\': 0, \'did\': 1, \'latexPre\': \"\\\\documentclass[12pt]{article}\\n\\\\special{papersize=3in,5in}\\n\\\\usepackage[utf8]{inputenc}\\n\\\\usepackage{amssymb,amsmath}\\n\\\\pagestyle{empty}\\n\\\\setlength{\\\\parindent}{0in}\\n\\\\begin{document}\\n\", \'latexPost\': \"\\\\end{document}\", \'mod\': 0, \'usn\': 0, \'vers\': [], \'type\': 0, \'css\': \".card {\\n font-family: arial;\\n font-size: 20px;\\n text-align: center;\\n color: black;\\n background-color: white;\\n}\"}");
+
+        $r12 = virtualinvoke $r11.<org.json.JSONObject: java.lang.String getString(java.lang.String)>("css");
+
+        virtualinvoke r6.<org.json.JSONObject: org.json.JSONObject put(java.lang.String,java.lang.Object)>("css", $r12);
+
+        r2 = virtualinvoke r6.<org.json.JSONObject: org.json.JSONArray getJSONArray(java.lang.String)>("tmpls");
+
+     label043:
+        i1 = 0;
+
+     label044:
+        $i2 = virtualinvoke r2.<org.json.JSONArray: int length()>();
+
+     label045:
+        if i1 >= $i2 goto label054;
+
+     label046:
+        $r11 = virtualinvoke r2.<org.json.JSONArray: org.json.JSONObject getJSONObject(int)>(i1);
+
+        $z0 = virtualinvoke $r11.<org.json.JSONObject: boolean has(java.lang.String)>("css");
+
+     label047:
+        if $z0 != 0 goto label049;
+
+     label048:
+        i1 = i1 + 1;
+
+        goto label044;
+
+     label049:
+        $r15 = new java.lang.StringBuilder;
+
+     label050:
+        specialinvoke $r15.<java.lang.StringBuilder: void <init>()>();
+
+        $r12 = virtualinvoke r6.<org.json.JSONObject: java.lang.String getString(java.lang.String)>("css");
+
+        $r15 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r12);
+
+        $r15 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\n");
+
+        $r12 = virtualinvoke $r11.<org.json.JSONObject: java.lang.String getString(java.lang.String)>("css");
+
+     label051:
+        $r16 = new java.lang.StringBuilder;
+
+     label052:
+        specialinvoke $r16.<java.lang.StringBuilder: void <init>()>();
+
+        $r16 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".card");
+
+        $i2 = virtualinvoke $r11.<org.json.JSONObject: int getInt(java.lang.String)>("ord");
+
+        $r16 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i2);
+
+        $r16 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(1);
+
+        $r17 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r12 = virtualinvoke $r12.<java.lang.String: java.lang.String replace(java.lang.CharSequence,java.lang.CharSequence)>(".card ", $r17);
+
+        $r15 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r12);
+
+        $r12 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r6.<org.json.JSONObject: org.json.JSONObject put(java.lang.String,java.lang.Object)>("css", $r12);
+
+        virtualinvoke $r11.<org.json.JSONObject: java.lang.Object remove(java.lang.String)>("css");
+
+     label053:
+        goto label048;
+
+     label054:
+        $r9 = virtualinvoke $r0.<com.ichi2.libanki.Collection: com.ichi2.libanki.Models getModels()>();
+
+        virtualinvoke $r9.<com.ichi2.libanki.Models: void save(org.json.JSONObject)>(r6);
+
+     label055:
+        goto label038;
+
+     label056:
+        $r14 = virtualinvoke $r0.<com.ichi2.libanki.Collection: com.ichi2.libanki.DB getDb()>();
+
+        virtualinvoke $r14.<com.ichi2.libanki.DB: void execute(java.lang.String)>("UPDATE col SET ver = 6");
+
+     label057:
+        if $i0 >= 7 goto label059;
+
+     label058:
+        virtualinvoke $r0.<com.ichi2.libanki.Collection: void modSchemaNoCheck()>();
+
+        $r14 = virtualinvoke $r0.<com.ichi2.libanki.Collection: com.ichi2.libanki.DB getDb()>();
+
+        virtualinvoke $r14.<com.ichi2.libanki.DB: void execute(java.lang.String)>("UPDATE cards SET odue = 0 WHERE (type = 1 OR queue = 2) AND NOT odid");
+
+        $r14 = virtualinvoke $r0.<com.ichi2.libanki.Collection: com.ichi2.libanki.DB getDb()>();
+
+        virtualinvoke $r14.<com.ichi2.libanki.DB: void execute(java.lang.String)>("UPDATE col SET ver = 7");
+
+     label059:
+        if $i0 >= 8 goto label061;
+
+     label060:
+        virtualinvoke $r0.<com.ichi2.libanki.Collection: void modSchemaNoCheck()>();
+
+        $r14 = virtualinvoke $r0.<com.ichi2.libanki.Collection: com.ichi2.libanki.DB getDb()>();
+
+        virtualinvoke $r14.<com.ichi2.libanki.DB: void execute(java.lang.String)>("UPDATE cards SET due = due / 1000 WHERE due > 4294967296");
+
+        $r14 = virtualinvoke $r0.<com.ichi2.libanki.Collection: com.ichi2.libanki.DB getDb()>();
+
+        virtualinvoke $r14.<com.ichi2.libanki.DB: void execute(java.lang.String)>("UPDATE col SET ver = 8");
+
+     label061:
+        if $i0 >= 9 goto label063;
+
+     label062:
+        $r14 = virtualinvoke $r0.<com.ichi2.libanki.Collection: com.ichi2.libanki.DB getDb()>();
+
+        virtualinvoke $r14.<com.ichi2.libanki.DB: void execute(java.lang.String)>("UPDATE col SET ver = 9");
+
+     label063:
+        if $i0 >= 10 goto label065;
+
+     label064:
+        $r14 = virtualinvoke $r0.<com.ichi2.libanki.Collection: com.ichi2.libanki.DB getDb()>();
+
+        virtualinvoke $r14.<com.ichi2.libanki.DB: void execute(java.lang.String)>("UPDATE cards SET left = left + left * 1000 WHERE queue = 1");
+
+        $r14 = virtualinvoke $r0.<com.ichi2.libanki.Collection: com.ichi2.libanki.DB getDb()>();
+
+        virtualinvoke $r14.<com.ichi2.libanki.DB: void execute(java.lang.String)>("UPDATE col SET ver = 10");
+
+     label065:
+        if $i0 >= 11 goto label115;
+
+     label066:
+        virtualinvoke $r0.<com.ichi2.libanki.Collection: void modSchemaNoCheck()>();
+
+        $r3 = virtualinvoke $r0.<com.ichi2.libanki.Collection: com.ichi2.libanki.Decks getDecks()>();
+
+        r1 = virtualinvoke $r3.<com.ichi2.libanki.Decks: java.util.ArrayList all()>();
+
+        $r4 = virtualinvoke r1.<java.util.ArrayList: java.util.Iterator iterator()>();
+
+     label067:
+        $z0 = interfaceinvoke $r4.<java.util.Iterator: boolean hasNext()>();
+
+     label068:
+        if $z0 == 0 goto label091;
+
+     label069:
+        $r5 = interfaceinvoke $r4.<java.util.Iterator: java.lang.Object next()>();
+
+     label070:
+        r6 = (org.json.JSONObject) $r5;
+
+     label071:
+        $i0 = virtualinvoke r6.<org.json.JSONObject: int getInt(java.lang.String)>("dyn");
+
+     label072:
+        if $i0 == 0 goto label087;
+
+     label073:
+        i1 = virtualinvoke r6.<org.json.JSONObject: int getInt(java.lang.String)>("order");
+
+     label074:
+        $i0 = i1;
+
+        if i1 < 5 goto label075;
+
+        $i0 = i1 + -1;
+
+     label075:
+        r2 = new org.json.JSONArray;
+
+        $r18 = newarray (java.lang.Object)[3];
+
+     label076:
+        $r12 = virtualinvoke r6.<org.json.JSONObject: java.lang.String getString(java.lang.String)>("search");
+
+     label077:
+        $r18[0] = $r12;
+
+     label078:
+        i1 = virtualinvoke r6.<org.json.JSONObject: int getInt(java.lang.String)>("limit");
+
+        $r19 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(i1);
+
+     label079:
+        $r18[1] = $r19;
+
+     label080:
+        $r19 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+     label081:
+        $r18[2] = $r19;
+
+     label082:
+        $r20 = staticinvoke <java.util.Arrays: java.util.List asList(java.lang.Object[])>($r18);
+
+        specialinvoke r2.<org.json.JSONArray: void <init>(java.util.Collection)>($r20);
+
+     label083:
+        $r21 = new org.json.JSONArray;
+
+     label084:
+        specialinvoke $r21.<org.json.JSONArray: void <init>()>();
+
+        virtualinvoke r6.<org.json.JSONObject: org.json.JSONObject put(java.lang.String,java.lang.Object)>("terms", $r21);
+
+        $r21 = virtualinvoke r6.<org.json.JSONObject: org.json.JSONArray getJSONArray(java.lang.String)>("terms");
+
+        virtualinvoke $r21.<org.json.JSONArray: org.json.JSONArray put(int,java.lang.Object)>(0, r2);
+
+        virtualinvoke r6.<org.json.JSONObject: java.lang.Object remove(java.lang.String)>("search");
+
+        virtualinvoke r6.<org.json.JSONObject: java.lang.Object remove(java.lang.String)>("limit");
+
+        virtualinvoke r6.<org.json.JSONObject: java.lang.Object remove(java.lang.String)>("order");
+
+        virtualinvoke r6.<org.json.JSONObject: org.json.JSONObject put(java.lang.String,boolean)>("resched", 1);
+
+        virtualinvoke r6.<org.json.JSONObject: org.json.JSONObject put(java.lang.String,boolean)>("return", 1);
+
+     label085:
+        $r3 = virtualinvoke $r0.<com.ichi2.libanki.Collection: com.ichi2.libanki.Decks getDecks()>();
+
+        virtualinvoke $r3.<com.ichi2.libanki.Decks: void save(org.json.JSONObject)>(r6);
+
+     label086:
+        goto label067;
+
+     label087:
+        $z0 = virtualinvoke r6.<org.json.JSONObject: boolean has(java.lang.String)>("extendNew");
+
+     label088:
+        if $z0 != 0 goto label085;
+
+     label089:
+        virtualinvoke r6.<org.json.JSONObject: org.json.JSONObject put(java.lang.String,int)>("extendNew", 10);
+
+        virtualinvoke r6.<org.json.JSONObject: org.json.JSONObject put(java.lang.String,int)>("extendRev", 50);
+
+     label090:
+        goto label085;
+
+     label091:
+        $r3 = virtualinvoke $r0.<com.ichi2.libanki.Collection: com.ichi2.libanki.Decks getDecks()>();
+
+        r1 = virtualinvoke $r3.<com.ichi2.libanki.Decks: java.util.ArrayList allConf()>();
+
+        $r4 = virtualinvoke r1.<java.util.ArrayList: java.util.Iterator iterator()>();
+
+     label092:
+        $z0 = interfaceinvoke $r4.<java.util.Iterator: boolean hasNext()>();
+
+     label093:
+        if $z0 == 0 goto label101;
+
+     label094:
+        $r5 = interfaceinvoke $r4.<java.util.Iterator: java.lang.Object next()>();
+
+     label095:
+        r6 = (org.json.JSONObject) $r5;
+
+     label096:
+        $r11 = virtualinvoke r6.<org.json.JSONObject: org.json.JSONObject getJSONObject(java.lang.String)>("rev");
+
+        $d0 = virtualinvoke $r11.<org.json.JSONObject: double optDouble(java.lang.String,double)>("ivlFct", 1.0);
+
+        virtualinvoke $r11.<org.json.JSONObject: org.json.JSONObject put(java.lang.String,double)>("ivlFct", $d0);
+
+        $z0 = virtualinvoke $r11.<org.json.JSONObject: boolean has(java.lang.String)>("ivlfct");
+
+     label097:
+        if $z0 == 0 goto label099;
+
+     label098:
+        virtualinvoke $r11.<org.json.JSONObject: java.lang.Object remove(java.lang.String)>("ivlfct");
+
+     label099:
+        virtualinvoke $r11.<org.json.JSONObject: org.json.JSONObject put(java.lang.String,int)>("maxIvl", 36500);
+
+        $r3 = virtualinvoke $r0.<com.ichi2.libanki.Collection: com.ichi2.libanki.Decks getDecks()>();
+
+        virtualinvoke $r3.<com.ichi2.libanki.Decks: void save(org.json.JSONObject)>(r6);
+
+     label100:
+        goto label092;
+
+     label101:
+        $r9 = virtualinvoke $r0.<com.ichi2.libanki.Collection: com.ichi2.libanki.Models getModels()>();
+
+        r1 = virtualinvoke $r9.<com.ichi2.libanki.Models: java.util.ArrayList all()>();
+
+        $r4 = virtualinvoke r1.<java.util.ArrayList: java.util.Iterator iterator()>();
+
+     label102:
+        $z0 = interfaceinvoke $r4.<java.util.Iterator: boolean hasNext()>();
+
+     label103:
+        if $z0 == 0 goto label114;
+
+     label104:
+        $r5 = interfaceinvoke $r4.<java.util.Iterator: java.lang.Object next()>();
+
+     label105:
+        r6 = (org.json.JSONObject) $r5;
+
+     label106:
+        r2 = virtualinvoke r6.<org.json.JSONObject: org.json.JSONArray getJSONArray(java.lang.String)>("tmpls");
+
+     label107:
+        $i0 = 0;
+
+     label108:
+        i1 = virtualinvoke r2.<org.json.JSONArray: int length()>();
+
+     label109:
+        if $i0 >= i1 goto label112;
+
+     label110:
+        $r11 = virtualinvoke r2.<org.json.JSONArray: org.json.JSONObject getJSONObject(int)>($i0);
+
+        virtualinvoke $r11.<org.json.JSONObject: org.json.JSONObject put(java.lang.String,java.lang.Object)>("bqfmt", "");
+
+        virtualinvoke $r11.<org.json.JSONObject: org.json.JSONObject put(java.lang.String,java.lang.Object)>("bafmt", "");
+
+     label111:
+        $i0 = $i0 + 1;
+
+        goto label108;
+
+     label112:
+        $r9 = virtualinvoke $r0.<com.ichi2.libanki.Collection: com.ichi2.libanki.Models getModels()>();
+
+        virtualinvoke $r9.<com.ichi2.libanki.Models: void save(org.json.JSONObject)>(r6);
+
+     label113:
+        goto label102;
+
+     label114:
+        $r14 = virtualinvoke $r0.<com.ichi2.libanki.Collection: com.ichi2.libanki.DB getDb()>();
+
+        virtualinvoke $r14.<com.ichi2.libanki.DB: void execute(java.lang.String)>("update col set ver = 11");
+
+     label115:
+        return;
+
+        catch org.json.JSONException from label001 to label003 with label008;
+        catch org.json.JSONException from label004 to label005 with label008;
+        catch org.json.JSONException from label006 to label007 with label008;
+        catch org.json.JSONException from label010 to label011 with label008;
+        catch org.json.JSONException from label012 to label014 with label008;
+        catch org.json.JSONException from label015 to label016 with label008;
+        catch org.json.JSONException from label017 to label018 with label008;
+        catch org.json.JSONException from label019 to label020 with label008;
+        catch org.json.JSONException from label021 to label022 with label008;
+        catch org.json.JSONException from label023 to label025 with label008;
+        catch org.json.JSONException from label026 to label027 with label008;
+        catch com.ichi2.anki.exception.ConfirmModSchemaException from label028 to label029 with label030;
+        catch org.json.JSONException from label028 to label029 with label008;
+        catch org.json.JSONException from label031 to label032 with label008;
+        catch org.json.JSONException from label033 to label034 with label008;
+        catch org.json.JSONException from label035 to label036 with label008;
+        catch org.json.JSONException from label037 to label039 with label008;
+        catch org.json.JSONException from label040 to label041 with label008;
+        catch org.json.JSONException from label042 to label043 with label008;
+        catch org.json.JSONException from label044 to label045 with label008;
+        catch org.json.JSONException from label046 to label047 with label008;
+        catch org.json.JSONException from label050 to label051 with label008;
+        catch org.json.JSONException from label052 to label053 with label008;
+        catch org.json.JSONException from label054 to label055 with label008;
+        catch org.json.JSONException from label056 to label057 with label008;
+        catch org.json.JSONException from label058 to label059 with label008;
+        catch org.json.JSONException from label060 to label061 with label008;
+        catch org.json.JSONException from label062 to label063 with label008;
+        catch org.json.JSONException from label064 to label065 with label008;
+        catch org.json.JSONException from label066 to label068 with label008;
+        catch org.json.JSONException from label069 to label070 with label008;
+        catch org.json.JSONException from label071 to label072 with label008;
+        catch org.json.JSONException from label073 to label074 with label008;
+        catch org.json.JSONException from label076 to label077 with label008;
+        catch org.json.JSONException from label078 to label079 with label008;
+        catch org.json.JSONException from label080 to label081 with label008;
+        catch org.json.JSONException from label082 to label083 with label008;
+        catch org.json.JSONException from label084 to label086 with label008;
+        catch org.json.JSONException from label087 to label088 with label008;
+        catch org.json.JSONException from label089 to label090 with label008;
+        catch org.json.JSONException from label091 to label093 with label008;
+        catch org.json.JSONException from label094 to label095 with label008;
+        catch org.json.JSONException from label096 to label097 with label008;
+        catch org.json.JSONException from label098 to label100 with label008;
+        catch org.json.JSONException from label101 to label103 with label008;
+        catch org.json.JSONException from label104 to label105 with label008;
+        catch org.json.JSONException from label106 to label107 with label008;
+        catch org.json.JSONException from label108 to label109 with label008;
+        catch org.json.JSONException from label110 to label111 with label008;
+        catch org.json.JSONException from label112 to label113 with label008;
+        catch org.json.JSONException from label114 to label115 with label008;
+    }
+    private static void _upgradeClozeModel(com.ichi2.libanki.Collection, org.json.JSONObject) throws com.ichi2.anki.exception.ConfirmModSchemaException
+    {
+        com.ichi2.libanki.Collection $r0;
+        org.json.JSONObject $r1, $r6;
+        org.json.JSONException r2;
+        org.json.JSONArray r3, $r9;
+        java.util.ArrayList r4;
+        java.lang.String r5, $r8;
+        java.lang.String[] $r7;
+        int $i0, $i1;
+        boolean $z0;
+        java.util.Iterator $r10;
+        java.lang.Object $r11;
+        com.ichi2.libanki.Models $r12;
+        java.lang.RuntimeException $r13;
+
+        $r0 := @parameter0: com.ichi2.libanki.Collection;
+
+        $r1 := @parameter1: org.json.JSONObject;
+
+     label01:
+        virtualinvoke $r1.<org.json.JSONObject: org.json.JSONObject put(java.lang.String,int)>("type", 1);
+
+        r3 = virtualinvoke $r1.<org.json.JSONObject: org.json.JSONArray getJSONArray(java.lang.String)>("tmpls");
+
+        $r6 = virtualinvoke r3.<org.json.JSONArray: org.json.JSONObject getJSONObject(int)>(0);
+
+     label02:
+        $r7 = newarray (java.lang.String)[2];
+
+        $r7[0] = "qfmt";
+
+        $r7[1] = "afmt";
+
+        $i0 = lengthof $r7;
+
+        $i1 = 0;
+
+     label03:
+        if $i1 >= $i0 goto label06;
+
+        r5 = $r7[$i1];
+
+     label04:
+        $r8 = virtualinvoke $r6.<org.json.JSONObject: java.lang.String getString(java.lang.String)>(r5);
+
+        $r8 = virtualinvoke $r8.<java.lang.String: java.lang.String replaceAll(java.lang.String,java.lang.String)>("\\{\\{cloze:1:(.+?)\\}\\}", "{{cloze:$1}}");
+
+        virtualinvoke $r6.<org.json.JSONObject: org.json.JSONObject put(java.lang.String,java.lang.Object)>(r5, $r8);
+
+     label05:
+        $i1 = $i1 + 1;
+
+        goto label03;
+
+     label06:
+        virtualinvoke $r6.<org.json.JSONObject: org.json.JSONObject put(java.lang.String,java.lang.Object)>("name", "Cloze");
+
+        $r9 = virtualinvoke $r1.<org.json.JSONObject: org.json.JSONArray getJSONArray(java.lang.String)>("tmpls");
+
+     label07:
+        r4 = new java.util.ArrayList;
+
+     label08:
+        specialinvoke r4.<java.util.ArrayList: void <init>()>();
+
+     label09:
+        $i0 = 1;
+
+     label10:
+        $i1 = virtualinvoke $r9.<org.json.JSONArray: int length()>();
+
+     label11:
+        if $i0 >= $i1 goto label16;
+
+     label12:
+        $r6 = virtualinvoke $r9.<org.json.JSONArray: org.json.JSONObject getJSONObject(int)>($i0);
+
+        r5 = virtualinvoke $r6.<org.json.JSONObject: java.lang.String getString(java.lang.String)>("afmt");
+
+        $z0 = virtualinvoke r5.<java.lang.String: boolean contains(java.lang.CharSequence)>("{{cloze:");
+
+     label13:
+        if $z0 != 0 goto label15;
+
+     label14:
+        virtualinvoke r4.<java.util.ArrayList: boolean add(java.lang.Object)>($r6);
+
+     label15:
+        $i0 = $i0 + 1;
+
+        goto label10;
+
+     label16:
+        $r10 = virtualinvoke r4.<java.util.ArrayList: java.util.Iterator iterator()>();
+
+     label17:
+        $z0 = interfaceinvoke $r10.<java.util.Iterator: boolean hasNext()>();
+
+     label18:
+        if $z0 == 0 goto label24;
+
+     label19:
+        $r11 = interfaceinvoke $r10.<java.util.Iterator: java.lang.Object next()>();
+
+     label20:
+        $r6 = (org.json.JSONObject) $r11;
+
+     label21:
+        $r12 = virtualinvoke $r0.<com.ichi2.libanki.Collection: com.ichi2.libanki.Models getModels()>();
+
+        virtualinvoke $r12.<com.ichi2.libanki.Models: boolean remTemplate(org.json.JSONObject,org.json.JSONObject)>($r1, $r6);
+
+     label22:
+        goto label17;
+
+     label23:
+        r2 := @caughtexception;
+
+        $r13 = new java.lang.RuntimeException;
+
+        specialinvoke $r13.<java.lang.RuntimeException: void <init>(java.lang.Throwable)>(r2);
+
+        throw $r13;
+
+     label24:
+        r3 = new org.json.JSONArray;
+
+     label25:
+        specialinvoke r3.<org.json.JSONArray: void <init>()>();
+
+        $r11 = virtualinvoke $r9.<org.json.JSONArray: java.lang.Object get(int)>(0);
+
+        virtualinvoke r3.<org.json.JSONArray: org.json.JSONArray put(java.lang.Object)>($r11);
+
+        virtualinvoke $r1.<org.json.JSONObject: org.json.JSONObject put(java.lang.String,java.lang.Object)>("tmpls", r3);
+
+        $r12 = virtualinvoke $r0.<com.ichi2.libanki.Collection: com.ichi2.libanki.Models getModels()>();
+
+        virtualinvoke $r12.<com.ichi2.libanki.Models: void _updateTemplOrds(org.json.JSONObject)>($r1);
+
+        $r12 = virtualinvoke $r0.<com.ichi2.libanki.Collection: com.ichi2.libanki.Models getModels()>();
+
+        virtualinvoke $r12.<com.ichi2.libanki.Models: void save(org.json.JSONObject)>($r1);
+
+     label26:
+        return;
+
+        catch org.json.JSONException from label01 to label02 with label23;
+        catch org.json.JSONException from label04 to label05 with label23;
+        catch org.json.JSONException from label06 to label07 with label23;
+        catch org.json.JSONException from label08 to label09 with label23;
+        catch org.json.JSONException from label10 to label11 with label23;
+        catch org.json.JSONException from label12 to label13 with label23;
+        catch org.json.JSONException from label14 to label15 with label23;
+        catch org.json.JSONException from label16 to label18 with label23;
+        catch org.json.JSONException from label19 to label20 with label23;
+        catch org.json.JSONException from label21 to label22 with label23;
+        catch org.json.JSONException from label25 to label26 with label23;
+    }
+    private static int _upgradeSchema(com.ichi2.libanki.DB)
+    {
+        com.ichi2.libanki.DB $r0;
+        int $i0, $i1;
+
+        $r0 := @parameter0: com.ichi2.libanki.DB;
+
+        $i0 = virtualinvoke $r0.<com.ichi2.libanki.DB: int queryScalar(java.lang.String)>("SELECT ver FROM col");
+
+        if $i0 != 11 goto label1;
+
+        return $i0;
+
+     label1:
+        $i1 = virtualinvoke $r0.<com.ichi2.libanki.DB: int queryScalar(java.lang.String)>("SELECT ver FROM col");
+
+        if $i1 != 1 goto label2;
+
+        virtualinvoke $r0.<com.ichi2.libanki.DB: void execute(java.lang.String)>("ALTER TABLE cards RENAME TO cards2");
+
+        staticinvoke <com.ichi2.libanki.Storage: void _addSchema(com.ichi2.libanki.DB,boolean)>($r0, 0);
+
+        virtualinvoke $r0.<com.ichi2.libanki.DB: void execute(java.lang.String)>("insert into cards select id, nid, did, ord, mod, usn, type, queue, due, ivl, factor, reps, lapses, left, edue, 0, flags, data from cards2");
+
+        virtualinvoke $r0.<com.ichi2.libanki.DB: void execute(java.lang.String)>("DROP TABLE cards2");
+
+        virtualinvoke $r0.<com.ichi2.libanki.DB: void execute(java.lang.String)>("UPDATE col SET ver = 2");
+
+        staticinvoke <com.ichi2.libanki.Storage: void _updateIndices(com.ichi2.libanki.DB)>($r0);
+
+     label2:
+        $i1 = virtualinvoke $r0.<com.ichi2.libanki.DB: int queryScalar(java.lang.String)>("SELECT ver FROM col");
+
+        if $i1 != 2 goto label3;
+
+        virtualinvoke $r0.<com.ichi2.libanki.DB: void execute(java.lang.String)>("ALTER TABLE notes RENAME TO notes2");
+
+        staticinvoke <com.ichi2.libanki.Storage: void _addSchema(com.ichi2.libanki.DB,boolean)>($r0, 0);
+
+        virtualinvoke $r0.<com.ichi2.libanki.DB: void execute(java.lang.String)>("insert into notes select id, guid, mid, mod, usn, tags, flds, sfld, csum, flags, data from notes2");
+
+        virtualinvoke $r0.<com.ichi2.libanki.DB: void execute(java.lang.String)>("DROP TABLE notes2");
+
+        virtualinvoke $r0.<com.ichi2.libanki.DB: void execute(java.lang.String)>("UPDATE col SET ver = 3");
+
+        staticinvoke <com.ichi2.libanki.Storage: void _updateIndices(com.ichi2.libanki.DB)>($r0);
+
+     label3:
+        return $i0;
+    }
+    public static void addIndices(com.ichi2.libanki.DB)
+    {
+        com.ichi2.libanki.DB $r0;
+
+        $r0 := @parameter0: com.ichi2.libanki.DB;
+
+        staticinvoke <com.ichi2.libanki.Storage: void _updateIndices(com.ichi2.libanki.DB)>($r0);
+
+        return;
+    }

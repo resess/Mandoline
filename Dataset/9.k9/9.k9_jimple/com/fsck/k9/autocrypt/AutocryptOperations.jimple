@@ -1,0 +1,155 @@
+com.fsck.k9.autocrypt.AutocryptOperations extends java.lang.Object
+private final com.fsck.k9.autocrypt.AutocryptHeaderParser autocryptHeaderParser
+    private void <init>(com.fsck.k9.autocrypt.AutocryptHeaderParser)
+    {
+        com.fsck.k9.autocrypt.AutocryptOperations r0;
+        com.fsck.k9.autocrypt.AutocryptHeaderParser $r1;
+
+        r0 := @this: com.fsck.k9.autocrypt.AutocryptOperations;
+
+        $r1 := @parameter0: com.fsck.k9.autocrypt.AutocryptHeaderParser;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<com.fsck.k9.autocrypt.AutocryptOperations: com.fsck.k9.autocrypt.AutocryptHeaderParser autocryptHeaderParser> = $r1;
+
+        return;
+    }
+    public static com.fsck.k9.autocrypt.AutocryptOperations getInstance()
+    {
+        com.fsck.k9.autocrypt.AutocryptOperations $r0;
+        com.fsck.k9.autocrypt.AutocryptHeaderParser $r1;
+
+        $r1 = staticinvoke <com.fsck.k9.autocrypt.AutocryptHeaderParser: com.fsck.k9.autocrypt.AutocryptHeaderParser getInstance()>();
+
+        $r0 = new com.fsck.k9.autocrypt.AutocryptOperations;
+
+        specialinvoke $r0.<com.fsck.k9.autocrypt.AutocryptOperations: void <init>(com.fsck.k9.autocrypt.AutocryptHeaderParser)>($r1);
+
+        return $r0;
+    }
+    public void addAutocryptHeaderToMessage(com.fsck.k9.mail.Message, byte[], java.lang.String, boolean)
+    {
+        com.fsck.k9.autocrypt.AutocryptOperations r0;
+        com.fsck.k9.mail.Message $r1;
+        byte[] $r2;
+        java.lang.String $r3;
+        boolean $z0;
+        com.fsck.k9.autocrypt.AutocryptHeader r4;
+        java.util.Map $r5;
+
+        r0 := @this: com.fsck.k9.autocrypt.AutocryptOperations;
+
+        $r1 := @parameter0: com.fsck.k9.mail.Message;
+
+        $r2 := @parameter1: byte[];
+
+        $r3 := @parameter2: java.lang.String;
+
+        $z0 := @parameter3: boolean;
+
+        r4 = new com.fsck.k9.autocrypt.AutocryptHeader;
+
+        $r5 = staticinvoke <java.util.Collections: java.util.Map emptyMap()>();
+
+        specialinvoke r4.<com.fsck.k9.autocrypt.AutocryptHeader: void <init>(java.util.Map,java.lang.String,byte[],boolean)>($r5, $r3, $r2, $z0);
+
+        $r3 = virtualinvoke r4.<com.fsck.k9.autocrypt.AutocryptHeader: java.lang.String toRawHeaderString()>();
+
+        virtualinvoke $r1.<com.fsck.k9.mail.Message: void addRawHeader(java.lang.String,java.lang.String)>("Autocrypt", $r3);
+
+        return;
+    }
+    public boolean addAutocryptPeerUpdateToIntentIfPresent(com.fsck.k9.mail.Message, android.content.Intent)
+    {
+        com.fsck.k9.autocrypt.AutocryptOperations r0;
+        com.fsck.k9.mail.Message $r1;
+        android.content.Intent $r2;
+        com.fsck.k9.autocrypt.AutocryptHeaderParser $r3;
+        com.fsck.k9.autocrypt.AutocryptHeader $r4;
+        com.fsck.k9.mail.Address[] $r5;
+        com.fsck.k9.mail.Address $r6;
+        java.lang.String $r7, $r8;
+        boolean $z0;
+        java.util.Date $r9, $r10;
+        byte[] $r11;
+        org.openintents.openpgp.AutocryptPeerUpdate $r12;
+
+        r0 := @this: com.fsck.k9.autocrypt.AutocryptOperations;
+
+        $r1 := @parameter0: com.fsck.k9.mail.Message;
+
+        $r2 := @parameter1: android.content.Intent;
+
+        $r3 = r0.<com.fsck.k9.autocrypt.AutocryptOperations: com.fsck.k9.autocrypt.AutocryptHeaderParser autocryptHeaderParser>;
+
+        $r4 = virtualinvoke $r3.<com.fsck.k9.autocrypt.AutocryptHeaderParser: com.fsck.k9.autocrypt.AutocryptHeader getValidAutocryptHeader(com.fsck.k9.mail.Message)>($r1);
+
+        if $r4 != null goto label1;
+
+        return 0;
+
+     label1:
+        $r5 = virtualinvoke $r1.<com.fsck.k9.mail.Message: com.fsck.k9.mail.Address[] getFrom()>();
+
+        $r6 = $r5[0];
+
+        $r7 = virtualinvoke $r6.<com.fsck.k9.mail.Address: java.lang.String getAddress()>();
+
+        $r8 = $r4.<com.fsck.k9.autocrypt.AutocryptHeader: java.lang.String addr>;
+
+        $z0 = virtualinvoke $r8.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>($r7);
+
+        if $z0 == 0 goto label4;
+
+        $r9 = virtualinvoke $r1.<com.fsck.k9.mail.Message: java.util.Date getSentDate()>();
+
+        $r10 = virtualinvoke $r1.<com.fsck.k9.mail.Message: java.util.Date getInternalDate()>();
+
+        $z0 = virtualinvoke $r9.<java.util.Date: boolean before(java.util.Date)>($r10);
+
+        if $z0 == 0 goto label3;
+
+     label2:
+        $r11 = $r4.<com.fsck.k9.autocrypt.AutocryptHeader: byte[] keyData>;
+
+        $z0 = $r4.<com.fsck.k9.autocrypt.AutocryptHeader: boolean isPreferEncryptMutual>;
+
+        $r12 = staticinvoke <org.openintents.openpgp.AutocryptPeerUpdate: org.openintents.openpgp.AutocryptPeerUpdate create(byte[],java.util.Date,boolean)>($r11, $r9, $z0);
+
+        virtualinvoke $r2.<android.content.Intent: android.content.Intent putExtra(java.lang.String,java.lang.String)>("autocrypt_peer_id", $r7);
+
+        virtualinvoke $r2.<android.content.Intent: android.content.Intent putExtra(java.lang.String,android.os.Parcelable)>("autocrypt_peer_update", $r12);
+
+        return 1;
+
+     label3:
+        $r9 = $r10;
+
+        goto label2;
+
+     label4:
+        return 0;
+    }
+    public boolean hasAutocryptHeader(com.fsck.k9.mail.Message)
+    {
+        com.fsck.k9.autocrypt.AutocryptOperations r0;
+        com.fsck.k9.mail.Message $r1;
+        java.lang.String[] $r2;
+        int $i0;
+
+        r0 := @this: com.fsck.k9.autocrypt.AutocryptOperations;
+
+        $r1 := @parameter0: com.fsck.k9.mail.Message;
+
+        $r2 = virtualinvoke $r1.<com.fsck.k9.mail.Message: java.lang.String[] getHeader(java.lang.String)>("Autocrypt");
+
+        $i0 = lengthof $r2;
+
+        if $i0 <= 0 goto label1;
+
+        return 1;
+
+     label1:
+        return 0;
+    }

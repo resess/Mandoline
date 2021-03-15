@@ -1,0 +1,352 @@
+org.spongycastle.jcajce.io.CipherInputStream extends java.io.FilterInputStream
+private byte[] buf
+private int bufOff
+private final javax.crypto.Cipher cipher
+private boolean finalized
+private final byte[] inputBuffer
+private int maxBuf
+    public void <init>(java.io.InputStream, javax.crypto.Cipher)
+    {
+        org.spongycastle.jcajce.io.CipherInputStream r0;
+        java.io.InputStream $r1;
+        javax.crypto.Cipher $r2;
+        byte[] $r3;
+
+        r0 := @this: org.spongycastle.jcajce.io.CipherInputStream;
+
+        $r1 := @parameter0: java.io.InputStream;
+
+        $r2 := @parameter1: javax.crypto.Cipher;
+
+        specialinvoke r0.<java.io.FilterInputStream: void <init>(java.io.InputStream)>($r1);
+
+        $r3 = newarray (byte)[512];
+
+        r0.<org.spongycastle.jcajce.io.CipherInputStream: byte[] inputBuffer> = $r3;
+
+        r0.<org.spongycastle.jcajce.io.CipherInputStream: boolean finalized> = 0;
+
+        r0.<org.spongycastle.jcajce.io.CipherInputStream: javax.crypto.Cipher cipher> = $r2;
+
+        return;
+    }
+    private byte[] finaliseCipher() throws org.spongycastle.crypto.io.InvalidCipherTextIOException
+    {
+        org.spongycastle.jcajce.io.CipherInputStream r0;
+        java.security.GeneralSecurityException r1;
+        byte[] $r2;
+        javax.crypto.Cipher $r3;
+        org.spongycastle.crypto.io.InvalidCipherTextIOException $r4;
+
+        r0 := @this: org.spongycastle.jcajce.io.CipherInputStream;
+
+        r0.<org.spongycastle.jcajce.io.CipherInputStream: boolean finalized> = 1;
+
+        $r3 = r0.<org.spongycastle.jcajce.io.CipherInputStream: javax.crypto.Cipher cipher>;
+
+     label1:
+        $r2 = virtualinvoke $r3.<javax.crypto.Cipher: byte[] doFinal()>();
+
+     label2:
+        return $r2;
+
+     label3:
+        r1 := @caughtexception;
+
+        $r4 = new org.spongycastle.crypto.io.InvalidCipherTextIOException;
+
+        specialinvoke $r4.<org.spongycastle.crypto.io.InvalidCipherTextIOException: void <init>(java.lang.String,java.lang.Throwable)>("Error finalising cipher", r1);
+
+        throw $r4;
+
+        catch java.security.GeneralSecurityException from label1 to label2 with label3;
+    }
+    private int nextChunk() throws java.io.IOException
+    {
+        org.spongycastle.jcajce.io.CipherInputStream r0;
+        boolean $z0;
+        int $i0;
+        java.io.InputStream $r1;
+        byte[] $r2;
+        javax.crypto.Cipher $r3;
+
+        r0 := @this: org.spongycastle.jcajce.io.CipherInputStream;
+
+        $z0 = r0.<org.spongycastle.jcajce.io.CipherInputStream: boolean finalized>;
+
+        if $z0 == 0 goto label1;
+
+        return -1;
+
+     label1:
+        r0.<org.spongycastle.jcajce.io.CipherInputStream: int bufOff> = 0;
+
+        r0.<org.spongycastle.jcajce.io.CipherInputStream: int maxBuf> = 0;
+
+     label2:
+        $i0 = r0.<org.spongycastle.jcajce.io.CipherInputStream: int maxBuf>;
+
+        if $i0 != 0 goto label4;
+
+        $r1 = r0.<org.spongycastle.jcajce.io.CipherInputStream: java.io.InputStream in>;
+
+        $r2 = r0.<org.spongycastle.jcajce.io.CipherInputStream: byte[] inputBuffer>;
+
+        $i0 = virtualinvoke $r1.<java.io.InputStream: int read(byte[])>($r2);
+
+        if $i0 != -1 goto label3;
+
+        $r2 = specialinvoke r0.<org.spongycastle.jcajce.io.CipherInputStream: byte[] finaliseCipher()>();
+
+        r0.<org.spongycastle.jcajce.io.CipherInputStream: byte[] buf> = $r2;
+
+        $r2 = r0.<org.spongycastle.jcajce.io.CipherInputStream: byte[] buf>;
+
+        if $r2 == null goto label5;
+
+        $r2 = r0.<org.spongycastle.jcajce.io.CipherInputStream: byte[] buf>;
+
+        $i0 = lengthof $r2;
+
+        if $i0 == 0 goto label5;
+
+        $r2 = r0.<org.spongycastle.jcajce.io.CipherInputStream: byte[] buf>;
+
+        $i0 = lengthof $r2;
+
+        r0.<org.spongycastle.jcajce.io.CipherInputStream: int maxBuf> = $i0;
+
+        $i0 = r0.<org.spongycastle.jcajce.io.CipherInputStream: int maxBuf>;
+
+        return $i0;
+
+     label3:
+        $r3 = r0.<org.spongycastle.jcajce.io.CipherInputStream: javax.crypto.Cipher cipher>;
+
+        $r2 = r0.<org.spongycastle.jcajce.io.CipherInputStream: byte[] inputBuffer>;
+
+        $r2 = virtualinvoke $r3.<javax.crypto.Cipher: byte[] update(byte[],int,int)>($r2, 0, $i0);
+
+        r0.<org.spongycastle.jcajce.io.CipherInputStream: byte[] buf> = $r2;
+
+        $r2 = r0.<org.spongycastle.jcajce.io.CipherInputStream: byte[] buf>;
+
+        if $r2 == null goto label2;
+
+        $r2 = r0.<org.spongycastle.jcajce.io.CipherInputStream: byte[] buf>;
+
+        $i0 = lengthof $r2;
+
+        r0.<org.spongycastle.jcajce.io.CipherInputStream: int maxBuf> = $i0;
+
+        goto label2;
+
+     label4:
+        $i0 = r0.<org.spongycastle.jcajce.io.CipherInputStream: int maxBuf>;
+
+        return $i0;
+
+     label5:
+        return -1;
+    }
+    public int available() throws java.io.IOException
+    {
+        org.spongycastle.jcajce.io.CipherInputStream r0;
+        int $i0, $i1;
+
+        r0 := @this: org.spongycastle.jcajce.io.CipherInputStream;
+
+        $i1 = r0.<org.spongycastle.jcajce.io.CipherInputStream: int maxBuf>;
+
+        $i0 = r0.<org.spongycastle.jcajce.io.CipherInputStream: int bufOff>;
+
+        $i0 = $i1 - $i0;
+
+        return $i0;
+    }
+    public void close() throws java.io.IOException
+    {
+        org.spongycastle.jcajce.io.CipherInputStream r0;
+        boolean $z0;
+        java.io.InputStream $r1;
+        java.lang.Throwable $r2;
+
+        r0 := @this: org.spongycastle.jcajce.io.CipherInputStream;
+
+     label1:
+        $r1 = r0.<org.spongycastle.jcajce.io.CipherInputStream: java.io.InputStream in>;
+
+        virtualinvoke $r1.<java.io.InputStream: void close()>();
+
+     label2:
+        $z0 = r0.<org.spongycastle.jcajce.io.CipherInputStream: boolean finalized>;
+
+        if $z0 != 0 goto label3;
+
+        specialinvoke r0.<org.spongycastle.jcajce.io.CipherInputStream: byte[] finaliseCipher()>();
+
+     label3:
+        r0.<org.spongycastle.jcajce.io.CipherInputStream: int bufOff> = 0;
+
+        r0.<org.spongycastle.jcajce.io.CipherInputStream: int maxBuf> = 0;
+
+        return;
+
+     label4:
+        $r2 := @caughtexception;
+
+        $z0 = r0.<org.spongycastle.jcajce.io.CipherInputStream: boolean finalized>;
+
+        if $z0 != 0 goto label5;
+
+        specialinvoke r0.<org.spongycastle.jcajce.io.CipherInputStream: byte[] finaliseCipher()>();
+
+     label5:
+        throw $r2;
+
+        catch java.lang.Throwable from label1 to label2 with label4;
+    }
+    public void mark(int)
+    {
+        org.spongycastle.jcajce.io.CipherInputStream r0;
+        int $i0;
+
+        r0 := @this: org.spongycastle.jcajce.io.CipherInputStream;
+
+        $i0 := @parameter0: int;
+
+        return;
+    }
+    public boolean markSupported()
+    {
+        org.spongycastle.jcajce.io.CipherInputStream r0;
+
+        r0 := @this: org.spongycastle.jcajce.io.CipherInputStream;
+
+        return 0;
+    }
+    public int read() throws java.io.IOException
+    {
+        org.spongycastle.jcajce.io.CipherInputStream r0;
+        int $i0, $i1;
+        byte[] $r1;
+        byte $b2;
+
+        r0 := @this: org.spongycastle.jcajce.io.CipherInputStream;
+
+        $i0 = r0.<org.spongycastle.jcajce.io.CipherInputStream: int bufOff>;
+
+        $i1 = r0.<org.spongycastle.jcajce.io.CipherInputStream: int maxBuf>;
+
+        if $i0 < $i1 goto label1;
+
+        $i0 = specialinvoke r0.<org.spongycastle.jcajce.io.CipherInputStream: int nextChunk()>();
+
+        if $i0 >= 0 goto label1;
+
+        return -1;
+
+     label1:
+        $r1 = r0.<org.spongycastle.jcajce.io.CipherInputStream: byte[] buf>;
+
+        $i1 = r0.<org.spongycastle.jcajce.io.CipherInputStream: int bufOff>;
+
+        $i0 = $i1 + 1;
+
+        r0.<org.spongycastle.jcajce.io.CipherInputStream: int bufOff> = $i0;
+
+        $b2 = $r1[$i1];
+
+        $i0 = $b2 & 255;
+
+        return $i0;
+    }
+    public int read(byte[], int, int) throws java.io.IOException
+    {
+        org.spongycastle.jcajce.io.CipherInputStream r0;
+        byte[] $r1, $r2;
+        int $i0, $i1, $i2, $i3;
+
+        r0 := @this: org.spongycastle.jcajce.io.CipherInputStream;
+
+        $r1 := @parameter0: byte[];
+
+        $i0 := @parameter1: int;
+
+        $i1 := @parameter2: int;
+
+        $i2 = r0.<org.spongycastle.jcajce.io.CipherInputStream: int bufOff>;
+
+        $i3 = r0.<org.spongycastle.jcajce.io.CipherInputStream: int maxBuf>;
+
+        if $i2 < $i3 goto label1;
+
+        $i2 = specialinvoke r0.<org.spongycastle.jcajce.io.CipherInputStream: int nextChunk()>();
+
+        if $i2 >= 0 goto label1;
+
+        return -1;
+
+     label1:
+        $i2 = virtualinvoke r0.<org.spongycastle.jcajce.io.CipherInputStream: int available()>();
+
+        $i1 = staticinvoke <java.lang.Math: int min(int,int)>($i1, $i2);
+
+        $r2 = r0.<org.spongycastle.jcajce.io.CipherInputStream: byte[] buf>;
+
+        $i2 = r0.<org.spongycastle.jcajce.io.CipherInputStream: int bufOff>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r2, $i2, $r1, $i0, $i1);
+
+        $i0 = r0.<org.spongycastle.jcajce.io.CipherInputStream: int bufOff>;
+
+        $i0 = $i0 + $i1;
+
+        r0.<org.spongycastle.jcajce.io.CipherInputStream: int bufOff> = $i0;
+
+        return $i1;
+    }
+    public void reset() throws java.io.IOException
+    {
+        org.spongycastle.jcajce.io.CipherInputStream r0;
+
+        r0 := @this: org.spongycastle.jcajce.io.CipherInputStream;
+
+        return;
+    }
+    public long skip(long) throws java.io.IOException
+    {
+        org.spongycastle.jcajce.io.CipherInputStream r0;
+        long $l0, $l3;
+        int i1, $i4;
+        byte $b2;
+
+        r0 := @this: org.spongycastle.jcajce.io.CipherInputStream;
+
+        $l0 := @parameter0: long;
+
+        $b2 = $l0 cmp 0L;
+
+        if $b2 > 0 goto label1;
+
+        return 0L;
+
+     label1:
+        i1 = virtualinvoke r0.<org.spongycastle.jcajce.io.CipherInputStream: int available()>();
+
+        $l3 = (long) i1;
+
+        $l0 = staticinvoke <java.lang.Math: long min(long,long)>($l0, $l3);
+
+        i1 = (int) $l0;
+
+        $i4 = r0.<org.spongycastle.jcajce.io.CipherInputStream: int bufOff>;
+
+        $i4 = $i4 + i1;
+
+        r0.<org.spongycastle.jcajce.io.CipherInputStream: int bufOff> = $i4;
+
+        $l0 = (long) i1;
+
+        return $l0;
+    }

@@ -1,0 +1,448 @@
+com.newsblur.activity.SearchForFeeds extends com.newsblur.activity.NbActivity implements android.app.LoaderManager$LoaderCallbacks android.widget.AdapterView$OnItemClickListener com.newsblur.fragment.AddFeedFragment$AddFeedProgressListener
+private static final java.util.Set SUPPORTED_URL_PROTOCOLS
+private com.newsblur.activity.FeedSearchResultAdapter adapter
+private android.widget.ListView resultsList
+private android.content.Loader searchLoader
+    static void <clinit>()
+    {
+        java.util.HashSet $r0;
+        java.util.Set $r1;
+
+        $r0 = new java.util.HashSet;
+
+        specialinvoke $r0.<java.util.HashSet: void <init>()>();
+
+        <com.newsblur.activity.SearchForFeeds: java.util.Set SUPPORTED_URL_PROTOCOLS> = $r0;
+
+        $r1 = <com.newsblur.activity.SearchForFeeds: java.util.Set SUPPORTED_URL_PROTOCOLS>;
+
+        interfaceinvoke $r1.<java.util.Set: boolean add(java.lang.Object)>("http");
+
+        $r1 = <com.newsblur.activity.SearchForFeeds: java.util.Set SUPPORTED_URL_PROTOCOLS>;
+
+        interfaceinvoke $r1.<java.util.Set: boolean add(java.lang.Object)>("https");
+
+        return;
+    }
+    public void <init>()
+    {
+        com.newsblur.activity.SearchForFeeds r0;
+
+        r0 := @this: com.newsblur.activity.SearchForFeeds;
+
+        specialinvoke r0.<com.newsblur.activity.NbActivity: void <init>()>();
+
+        return;
+    }
+    private void handleIntent(android.content.Intent)
+    {
+        com.newsblur.activity.SearchForFeeds r0;
+        android.content.Intent $r1;
+        android.os.Bundle r2;
+        java.lang.String $r3, $r4;
+        boolean $z0;
+        android.app.LoaderManager $r5;
+        android.content.Loader $r6;
+
+        r0 := @this: com.newsblur.activity.SearchForFeeds;
+
+        $r1 := @parameter0: android.content.Intent;
+
+        $r3 = "android.intent.action.SEARCH";
+
+        $r4 = virtualinvoke $r1.<android.content.Intent: java.lang.String getAction()>();
+
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>($r4);
+
+        if $z0 == 0 goto label2;
+
+        $r3 = virtualinvoke $r1.<android.content.Intent: java.lang.String getStringExtra(java.lang.String)>("query");
+
+        $z0 = specialinvoke r0.<com.newsblur.activity.SearchForFeeds: boolean tryAddByURL(java.lang.String)>($r3);
+
+        if $z0 == 0 goto label1;
+
+        return;
+
+     label1:
+        r2 = new android.os.Bundle;
+
+        specialinvoke r2.<android.os.Bundle: void <init>()>();
+
+        virtualinvoke r2.<android.os.Bundle: void putString(java.lang.String,java.lang.String)>("searchTerm", $r3);
+
+        $r5 = virtualinvoke r0.<com.newsblur.activity.SearchForFeeds: android.app.LoaderManager getLoaderManager()>();
+
+        $r6 = virtualinvoke $r5.<android.app.LoaderManager: android.content.Loader restartLoader(int,android.os.Bundle,android.app.LoaderManager$LoaderCallbacks)>(0, r2, r0);
+
+        r0.<com.newsblur.activity.SearchForFeeds: android.content.Loader searchLoader> = $r6;
+
+        $r6 = r0.<com.newsblur.activity.SearchForFeeds: android.content.Loader searchLoader>;
+
+        virtualinvoke $r6.<android.content.Loader: void forceLoad()>();
+
+     label2:
+        return;
+    }
+    private boolean tryAddByURL(java.lang.String)
+    {
+        com.newsblur.activity.SearchForFeeds r0;
+        java.lang.String $r1, $r5;
+        java.net.URL r2, r3;
+        java.util.Set $r4;
+        boolean $z0;
+        com.newsblur.fragment.AddFeedFragment $r6;
+        android.app.FragmentManager $r7;
+        java.net.MalformedURLException $r8;
+
+        r0 := @this: com.newsblur.activity.SearchForFeeds;
+
+        $r1 := @parameter0: java.lang.String;
+
+        r3 = null;
+
+        r2 = new java.net.URL;
+
+     label1:
+        specialinvoke r2.<java.net.URL: void <init>(java.lang.String)>($r1);
+
+     label2:
+        r3 = r2;
+
+     label3:
+        if r3 != null goto label4;
+
+        return 0;
+
+     label4:
+        $r4 = <com.newsblur.activity.SearchForFeeds: java.util.Set SUPPORTED_URL_PROTOCOLS>;
+
+        $r5 = virtualinvoke r3.<java.net.URL: java.lang.String getProtocol()>();
+
+        $z0 = interfaceinvoke $r4.<java.util.Set: boolean contains(java.lang.Object)>($r5);
+
+        if $z0 == 0 goto label6;
+
+        $r5 = virtualinvoke r3.<java.net.URL: java.lang.String getHost()>();
+
+        if $r5 == null goto label6;
+
+        $r5 = virtualinvoke r3.<java.net.URL: java.lang.String getHost()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.String: java.lang.String trim()>();
+
+        $z0 = virtualinvoke $r5.<java.lang.String: boolean isEmpty()>();
+
+        if $z0 != 0 goto label6;
+
+        $r6 = staticinvoke <com.newsblur.fragment.AddFeedFragment: com.newsblur.fragment.AddFeedFragment newInstance(java.lang.String,java.lang.String)>($r1, $r1);
+
+        $r7 = virtualinvoke r0.<com.newsblur.activity.SearchForFeeds: android.app.FragmentManager getFragmentManager()>();
+
+        virtualinvoke $r6.<android.app.DialogFragment: void show(android.app.FragmentManager,java.lang.String)>($r7, "dialog");
+
+        return 1;
+
+     label5:
+        $r8 := @caughtexception;
+
+        goto label3;
+
+     label6:
+        return 0;
+
+        catch java.net.MalformedURLException from label1 to label2 with label5;
+    }
+    public void addFeedStarted()
+    {
+        com.newsblur.activity.SearchForFeeds r0;
+        com.newsblur.activity.SearchForFeeds$1 $r1;
+
+        r0 := @this: com.newsblur.activity.SearchForFeeds;
+
+        $r1 = new com.newsblur.activity.SearchForFeeds$1;
+
+        specialinvoke $r1.<com.newsblur.activity.SearchForFeeds$1: void <init>(com.newsblur.activity.SearchForFeeds)>(r0);
+
+        virtualinvoke r0.<com.newsblur.activity.SearchForFeeds: void runOnUiThread(java.lang.Runnable)>($r1);
+
+        return;
+    }
+    protected void onCreate(android.os.Bundle)
+    {
+        com.newsblur.activity.SearchForFeeds r0;
+        android.os.Bundle $r1;
+        android.app.ActionBar $r2;
+        android.view.View $r3;
+        android.widget.TextView r4;
+        android.widget.ListView $r5;
+        android.app.LoaderManager $r6;
+        android.content.Loader $r7;
+
+        r0 := @this: com.newsblur.activity.SearchForFeeds;
+
+        $r1 := @parameter0: android.os.Bundle;
+
+        specialinvoke r0.<com.newsblur.activity.NbActivity: void onCreate(android.os.Bundle)>($r1);
+
+        $r2 = virtualinvoke r0.<com.newsblur.activity.SearchForFeeds: android.app.ActionBar getActionBar()>();
+
+        virtualinvoke $r2.<android.app.ActionBar: void setDisplayHomeAsUpEnabled(boolean)>(1);
+
+        virtualinvoke r0.<com.newsblur.activity.SearchForFeeds: void setTitle(int)>(2131230967);
+
+        virtualinvoke r0.<com.newsblur.activity.SearchForFeeds: void setContentView(int)>(2130903043);
+
+        $r3 = virtualinvoke r0.<com.newsblur.activity.SearchForFeeds: android.view.View findViewById(int)>(2131427334);
+
+        r4 = (android.widget.TextView) $r3;
+
+        $r3 = virtualinvoke r0.<com.newsblur.activity.SearchForFeeds: android.view.View findViewById(int)>(2131427335);
+
+        $r5 = (android.widget.ListView) $r3;
+
+        r0.<com.newsblur.activity.SearchForFeeds: android.widget.ListView resultsList> = $r5;
+
+        $r5 = r0.<com.newsblur.activity.SearchForFeeds: android.widget.ListView resultsList>;
+
+        virtualinvoke $r5.<android.widget.ListView: void setEmptyView(android.view.View)>(r4);
+
+        $r5 = r0.<com.newsblur.activity.SearchForFeeds: android.widget.ListView resultsList>;
+
+        virtualinvoke $r5.<android.widget.ListView: void setOnItemClickListener(android.widget.AdapterView$OnItemClickListener)>(r0);
+
+        $r5 = r0.<com.newsblur.activity.SearchForFeeds: android.widget.ListView resultsList>;
+
+        virtualinvoke $r5.<android.widget.ListView: void setItemsCanFocus(boolean)>(0);
+
+        $r6 = virtualinvoke r0.<com.newsblur.activity.SearchForFeeds: android.app.LoaderManager getLoaderManager()>();
+
+        $r1 = new android.os.Bundle;
+
+        specialinvoke $r1.<android.os.Bundle: void <init>()>();
+
+        $r7 = virtualinvoke $r6.<android.app.LoaderManager: android.content.Loader initLoader(int,android.os.Bundle,android.app.LoaderManager$LoaderCallbacks)>(0, $r1, r0);
+
+        r0.<com.newsblur.activity.SearchForFeeds: android.content.Loader searchLoader> = $r7;
+
+        virtualinvoke r0.<com.newsblur.activity.SearchForFeeds: boolean onSearchRequested()>();
+
+        return;
+    }
+    public android.content.Loader onCreateLoader(int, android.os.Bundle)
+    {
+        com.newsblur.activity.SearchForFeeds r0;
+        int $i0;
+        android.os.Bundle $r1;
+        java.lang.String $r2;
+        com.newsblur.network.SearchAsyncTaskLoader $r3;
+
+        r0 := @this: com.newsblur.activity.SearchForFeeds;
+
+        $i0 := @parameter0: int;
+
+        $r1 := @parameter1: android.os.Bundle;
+
+        $r2 = virtualinvoke $r1.<android.os.Bundle: java.lang.String getString(java.lang.String)>("searchTerm");
+
+        $r3 = new com.newsblur.network.SearchAsyncTaskLoader;
+
+        specialinvoke $r3.<com.newsblur.network.SearchAsyncTaskLoader: void <init>(android.content.Context,java.lang.String)>(r0, $r2);
+
+        return $r3;
+    }
+    public boolean onCreateOptionsMenu(android.view.Menu)
+    {
+        com.newsblur.activity.SearchForFeeds r0;
+        android.view.Menu $r1;
+        android.view.MenuInflater $r2;
+
+        r0 := @this: com.newsblur.activity.SearchForFeeds;
+
+        $r1 := @parameter0: android.view.Menu;
+
+        specialinvoke r0.<com.newsblur.activity.NbActivity: boolean onCreateOptionsMenu(android.view.Menu)>($r1);
+
+        $r2 = virtualinvoke r0.<com.newsblur.activity.SearchForFeeds: android.view.MenuInflater getMenuInflater()>();
+
+        virtualinvoke $r2.<android.view.MenuInflater: void inflate(int,android.view.Menu)>(2131361804, $r1);
+
+        return 1;
+    }
+    public void onItemClick(android.widget.AdapterView, android.view.View, int, long)
+    {
+        com.newsblur.activity.SearchForFeeds r0;
+        android.widget.AdapterView r1;
+        android.view.View $r2;
+        int $i0;
+        long $l1;
+        com.newsblur.activity.FeedSearchResultAdapter $r3;
+        java.lang.Object $r4;
+        com.newsblur.domain.FeedResult r5;
+        java.lang.String $r6, $r7;
+        com.newsblur.fragment.AddFeedFragment $r8;
+        android.app.FragmentManager $r9;
+
+        r0 := @this: com.newsblur.activity.SearchForFeeds;
+
+        r1 := @parameter0: android.widget.AdapterView;
+
+        $r2 := @parameter1: android.view.View;
+
+        $i0 := @parameter2: int;
+
+        $l1 := @parameter3: long;
+
+        $r3 = r0.<com.newsblur.activity.SearchForFeeds: com.newsblur.activity.FeedSearchResultAdapter adapter>;
+
+        $r4 = virtualinvoke $r3.<com.newsblur.activity.FeedSearchResultAdapter: java.lang.Object getItem(int)>($i0);
+
+        r5 = (com.newsblur.domain.FeedResult) $r4;
+
+        $r6 = r5.<com.newsblur.domain.FeedResult: java.lang.String url>;
+
+        $r7 = r5.<com.newsblur.domain.FeedResult: java.lang.String label>;
+
+        $r8 = staticinvoke <com.newsblur.fragment.AddFeedFragment: com.newsblur.fragment.AddFeedFragment newInstance(java.lang.String,java.lang.String)>($r6, $r7);
+
+        $r9 = virtualinvoke r0.<com.newsblur.activity.SearchForFeeds: android.app.FragmentManager getFragmentManager()>();
+
+        virtualinvoke $r8.<android.app.DialogFragment: void show(android.app.FragmentManager,java.lang.String)>($r9, "dialog");
+
+        return;
+    }
+    public void onLoadFinished(android.content.Loader, com.newsblur.network.SearchLoaderResponse)
+    {
+        com.newsblur.activity.SearchForFeeds r0;
+        android.content.Loader r1;
+        com.newsblur.network.SearchLoaderResponse $r2;
+        boolean $z0;
+        com.newsblur.activity.FeedSearchResultAdapter $r3;
+        java.util.ArrayList $r4;
+        android.widget.ListView $r5;
+        java.lang.String $r6;
+        android.widget.Toast $r7;
+
+        r0 := @this: com.newsblur.activity.SearchForFeeds;
+
+        r1 := @parameter0: android.content.Loader;
+
+        $r2 := @parameter1: com.newsblur.network.SearchLoaderResponse;
+
+        $z0 = virtualinvoke $r2.<com.newsblur.network.SearchLoaderResponse: boolean hasError()>();
+
+        if $z0 != 0 goto label1;
+
+        $r3 = new com.newsblur.activity.FeedSearchResultAdapter;
+
+        $r4 = virtualinvoke $r2.<com.newsblur.network.SearchLoaderResponse: java.util.ArrayList getResults()>();
+
+        specialinvoke $r3.<com.newsblur.activity.FeedSearchResultAdapter: void <init>(android.content.Context,int,int,java.util.List)>(r0, 0, 0, $r4);
+
+        r0.<com.newsblur.activity.SearchForFeeds: com.newsblur.activity.FeedSearchResultAdapter adapter> = $r3;
+
+        $r5 = r0.<com.newsblur.activity.SearchForFeeds: android.widget.ListView resultsList>;
+
+        $r3 = r0.<com.newsblur.activity.SearchForFeeds: com.newsblur.activity.FeedSearchResultAdapter adapter>;
+
+        virtualinvoke $r5.<android.widget.ListView: void setAdapter(android.widget.ListAdapter)>($r3);
+
+        return;
+
+     label1:
+        $r6 = virtualinvoke $r2.<com.newsblur.network.SearchLoaderResponse: java.lang.String getErrorMessage()>();
+
+        if $r6 != null goto label3;
+
+        $r6 = "Error";
+
+     label2:
+        $r7 = staticinvoke <android.widget.Toast: android.widget.Toast makeText(android.content.Context,java.lang.CharSequence,int)>(r0, $r6, 0);
+
+        virtualinvoke $r7.<android.widget.Toast: void show()>();
+
+        return;
+
+     label3:
+        $r6 = virtualinvoke $r2.<com.newsblur.network.SearchLoaderResponse: java.lang.String getErrorMessage()>();
+
+        goto label2;
+    }
+    public volatile void onLoadFinished(android.content.Loader, java.lang.Object)
+    {
+        com.newsblur.activity.SearchForFeeds r0;
+        android.content.Loader $r1;
+        java.lang.Object $r2;
+        com.newsblur.network.SearchLoaderResponse $r3;
+
+        r0 := @this: com.newsblur.activity.SearchForFeeds;
+
+        $r1 := @parameter0: android.content.Loader;
+
+        $r2 := @parameter1: java.lang.Object;
+
+        $r3 = (com.newsblur.network.SearchLoaderResponse) $r2;
+
+        virtualinvoke r0.<com.newsblur.activity.SearchForFeeds: void onLoadFinished(android.content.Loader,com.newsblur.network.SearchLoaderResponse)>($r1, $r3);
+
+        return;
+    }
+    public void onLoaderReset(android.content.Loader)
+    {
+        com.newsblur.activity.SearchForFeeds r0;
+        android.content.Loader r1;
+
+        r0 := @this: com.newsblur.activity.SearchForFeeds;
+
+        r1 := @parameter0: android.content.Loader;
+
+        return;
+    }
+    protected void onNewIntent(android.content.Intent)
+    {
+        com.newsblur.activity.SearchForFeeds r0;
+        android.content.Intent $r1;
+
+        r0 := @this: com.newsblur.activity.SearchForFeeds;
+
+        $r1 := @parameter0: android.content.Intent;
+
+        virtualinvoke r0.<com.newsblur.activity.SearchForFeeds: void setIntent(android.content.Intent)>($r1);
+
+        specialinvoke r0.<com.newsblur.activity.SearchForFeeds: void handleIntent(android.content.Intent)>($r1);
+
+        return;
+    }
+    public boolean onOptionsItemSelected(android.view.MenuItem)
+    {
+        com.newsblur.activity.SearchForFeeds r0;
+        android.view.MenuItem $r1;
+        int $i0;
+        boolean $z0;
+
+        r0 := @this: com.newsblur.activity.SearchForFeeds;
+
+        $r1 := @parameter0: android.view.MenuItem;
+
+        $i0 = interfaceinvoke $r1.<android.view.MenuItem: int getItemId()>();
+
+        if $i0 != 2131427586 goto label1;
+
+        virtualinvoke r0.<com.newsblur.activity.SearchForFeeds: boolean onSearchRequested()>();
+
+        return 1;
+
+     label1:
+        $i0 = interfaceinvoke $r1.<android.view.MenuItem: int getItemId()>();
+
+        if $i0 != 16908332 goto label2;
+
+        virtualinvoke r0.<com.newsblur.activity.SearchForFeeds: void finish()>();
+
+        return 1;
+
+     label2:
+        $z0 = specialinvoke r0.<com.newsblur.activity.NbActivity: boolean onOptionsItemSelected(android.view.MenuItem)>($r1);
+
+        return $z0;
+    }

@@ -1,0 +1,848 @@
+org.spongycastle.crypto.tls.RecordStream extends java.lang.Object
+private static int DEFAULT_PLAINTEXT_LIMIT
+private java.io.ByteArrayOutputStream buffer
+private int ciphertextLimit
+private int compressedLimit
+private org.spongycastle.crypto.tls.TlsProtocol handler
+private org.spongycastle.crypto.tls.TlsHandshakeHash handshakeHash
+private java.io.InputStream input
+private java.io.OutputStream output
+private org.spongycastle.crypto.tls.TlsCipher pendingCipher
+private org.spongycastle.crypto.tls.TlsCompression pendingCompression
+private int plaintextLimit
+private org.spongycastle.crypto.tls.TlsCipher readCipher
+private org.spongycastle.crypto.tls.TlsCompression readCompression
+private long readSeqNo
+private org.spongycastle.crypto.tls.ProtocolVersion readVersion
+private boolean restrictReadVersion
+private org.spongycastle.crypto.tls.TlsCipher writeCipher
+private org.spongycastle.crypto.tls.TlsCompression writeCompression
+private long writeSeqNo
+private org.spongycastle.crypto.tls.ProtocolVersion writeVersion
+    static void <clinit>()
+    {
+        <org.spongycastle.crypto.tls.RecordStream: int DEFAULT_PLAINTEXT_LIMIT> = 16384;
+
+        return;
+    }
+    void <init>(org.spongycastle.crypto.tls.TlsProtocol, java.io.InputStream, java.io.OutputStream)
+    {
+        org.spongycastle.crypto.tls.RecordStream r0;
+        org.spongycastle.crypto.tls.TlsProtocol $r1;
+        java.io.InputStream $r2;
+        java.io.OutputStream $r3;
+        java.io.ByteArrayOutputStream $r4;
+        org.spongycastle.crypto.tls.TlsNullCompression $r5;
+        org.spongycastle.crypto.tls.TlsCompression $r6;
+
+        r0 := @this: org.spongycastle.crypto.tls.RecordStream;
+
+        $r1 := @parameter0: org.spongycastle.crypto.tls.TlsProtocol;
+
+        $r2 := @parameter1: java.io.InputStream;
+
+        $r3 := @parameter2: java.io.OutputStream;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<org.spongycastle.crypto.tls.RecordStream: org.spongycastle.crypto.tls.TlsCompression pendingCompression> = null;
+
+        r0.<org.spongycastle.crypto.tls.RecordStream: org.spongycastle.crypto.tls.TlsCompression readCompression> = null;
+
+        r0.<org.spongycastle.crypto.tls.RecordStream: org.spongycastle.crypto.tls.TlsCompression writeCompression> = null;
+
+        r0.<org.spongycastle.crypto.tls.RecordStream: org.spongycastle.crypto.tls.TlsCipher pendingCipher> = null;
+
+        r0.<org.spongycastle.crypto.tls.RecordStream: org.spongycastle.crypto.tls.TlsCipher readCipher> = null;
+
+        r0.<org.spongycastle.crypto.tls.RecordStream: org.spongycastle.crypto.tls.TlsCipher writeCipher> = null;
+
+        r0.<org.spongycastle.crypto.tls.RecordStream: long readSeqNo> = 0L;
+
+        r0.<org.spongycastle.crypto.tls.RecordStream: long writeSeqNo> = 0L;
+
+        $r4 = new java.io.ByteArrayOutputStream;
+
+        specialinvoke $r4.<java.io.ByteArrayOutputStream: void <init>()>();
+
+        r0.<org.spongycastle.crypto.tls.RecordStream: java.io.ByteArrayOutputStream buffer> = $r4;
+
+        r0.<org.spongycastle.crypto.tls.RecordStream: org.spongycastle.crypto.tls.TlsHandshakeHash handshakeHash> = null;
+
+        r0.<org.spongycastle.crypto.tls.RecordStream: org.spongycastle.crypto.tls.ProtocolVersion readVersion> = null;
+
+        r0.<org.spongycastle.crypto.tls.RecordStream: org.spongycastle.crypto.tls.ProtocolVersion writeVersion> = null;
+
+        r0.<org.spongycastle.crypto.tls.RecordStream: boolean restrictReadVersion> = 1;
+
+        r0.<org.spongycastle.crypto.tls.RecordStream: org.spongycastle.crypto.tls.TlsProtocol handler> = $r1;
+
+        r0.<org.spongycastle.crypto.tls.RecordStream: java.io.InputStream input> = $r2;
+
+        r0.<org.spongycastle.crypto.tls.RecordStream: java.io.OutputStream output> = $r3;
+
+        $r5 = new org.spongycastle.crypto.tls.TlsNullCompression;
+
+        specialinvoke $r5.<org.spongycastle.crypto.tls.TlsNullCompression: void <init>()>();
+
+        r0.<org.spongycastle.crypto.tls.RecordStream: org.spongycastle.crypto.tls.TlsCompression readCompression> = $r5;
+
+        $r6 = r0.<org.spongycastle.crypto.tls.RecordStream: org.spongycastle.crypto.tls.TlsCompression readCompression>;
+
+        r0.<org.spongycastle.crypto.tls.RecordStream: org.spongycastle.crypto.tls.TlsCompression writeCompression> = $r6;
+
+        return;
+    }
+    private static void checkLength(int, int, short) throws java.io.IOException
+    {
+        int $i0, $i1;
+        short $s2;
+        org.spongycastle.crypto.tls.TlsFatalAlert $r0;
+
+        $i0 := @parameter0: int;
+
+        $i1 := @parameter1: int;
+
+        $s2 := @parameter2: short;
+
+        if $i0 <= $i1 goto label1;
+
+        $r0 = new org.spongycastle.crypto.tls.TlsFatalAlert;
+
+        specialinvoke $r0.<org.spongycastle.crypto.tls.TlsFatalAlert: void <init>(short)>($s2);
+
+        throw $r0;
+
+     label1:
+        return;
+    }
+    private static void checkType(short, short) throws java.io.IOException
+    {
+        short $s0, $s1;
+        org.spongycastle.crypto.tls.TlsFatalAlert $r0;
+
+        $s0 := @parameter0: short;
+
+        $s1 := @parameter1: short;
+
+        lookupswitch($s0)
+        {
+            case 20: goto label2;
+            case 21: goto label2;
+            case 22: goto label2;
+            case 23: goto label2;
+            case 24: goto label2;
+            default: goto label1;
+        };
+
+     label1:
+        $r0 = new org.spongycastle.crypto.tls.TlsFatalAlert;
+
+        specialinvoke $r0.<org.spongycastle.crypto.tls.TlsFatalAlert: void <init>(short)>($s1);
+
+        throw $r0;
+
+     label2:
+        return;
+    }
+    private byte[] getBufferContents()
+    {
+        org.spongycastle.crypto.tls.RecordStream r0;
+        byte[] $r1;
+        java.io.ByteArrayOutputStream $r2;
+
+        r0 := @this: org.spongycastle.crypto.tls.RecordStream;
+
+        $r2 = r0.<org.spongycastle.crypto.tls.RecordStream: java.io.ByteArrayOutputStream buffer>;
+
+        $r1 = virtualinvoke $r2.<java.io.ByteArrayOutputStream: byte[] toByteArray()>();
+
+        $r2 = r0.<org.spongycastle.crypto.tls.RecordStream: java.io.ByteArrayOutputStream buffer>;
+
+        virtualinvoke $r2.<java.io.ByteArrayOutputStream: void reset()>();
+
+        return $r1;
+    }
+    byte[] decodeAndVerify(short, java.io.InputStream, int) throws java.io.IOException
+    {
+        org.spongycastle.crypto.tls.RecordStream r0;
+        short $s0;
+        java.io.InputStream $r1;
+        int $i1, $i2;
+        byte[] $r2, r4;
+        org.spongycastle.crypto.tls.TlsCipher $r3;
+        long $l3, $l4;
+        org.spongycastle.crypto.tls.TlsCompression $r5;
+        java.io.ByteArrayOutputStream $r6;
+        java.io.OutputStream $r7;
+        org.spongycastle.crypto.tls.TlsFatalAlert $r8;
+
+        r0 := @this: org.spongycastle.crypto.tls.RecordStream;
+
+        $s0 := @parameter0: short;
+
+        $r1 := @parameter1: java.io.InputStream;
+
+        $i1 := @parameter2: int;
+
+        $i2 = r0.<org.spongycastle.crypto.tls.RecordStream: int ciphertextLimit>;
+
+        staticinvoke <org.spongycastle.crypto.tls.RecordStream: void checkLength(int,int,short)>($i1, $i2, 22);
+
+        $r2 = staticinvoke <org.spongycastle.crypto.tls.TlsUtils: byte[] readFully(int,java.io.InputStream)>($i1, $r1);
+
+        $r3 = r0.<org.spongycastle.crypto.tls.RecordStream: org.spongycastle.crypto.tls.TlsCipher readCipher>;
+
+        $l3 = r0.<org.spongycastle.crypto.tls.RecordStream: long readSeqNo>;
+
+        $l4 = 1L + $l3;
+
+        r0.<org.spongycastle.crypto.tls.RecordStream: long readSeqNo> = $l4;
+
+        $i1 = lengthof $r2;
+
+        $r2 = interfaceinvoke $r3.<org.spongycastle.crypto.tls.TlsCipher: byte[] decodeCiphertext(long,short,byte[],int,int)>($l3, $s0, $r2, 0, $i1);
+
+        r4 = $r2;
+
+        $i1 = lengthof $r2;
+
+        $i2 = r0.<org.spongycastle.crypto.tls.RecordStream: int compressedLimit>;
+
+        staticinvoke <org.spongycastle.crypto.tls.RecordStream: void checkLength(int,int,short)>($i1, $i2, 22);
+
+        $r5 = r0.<org.spongycastle.crypto.tls.RecordStream: org.spongycastle.crypto.tls.TlsCompression readCompression>;
+
+        $r6 = r0.<org.spongycastle.crypto.tls.RecordStream: java.io.ByteArrayOutputStream buffer>;
+
+        $r7 = interfaceinvoke $r5.<org.spongycastle.crypto.tls.TlsCompression: java.io.OutputStream decompress(java.io.OutputStream)>($r6);
+
+        $r6 = r0.<org.spongycastle.crypto.tls.RecordStream: java.io.ByteArrayOutputStream buffer>;
+
+        if $r7 == $r6 goto label1;
+
+        $i1 = lengthof $r2;
+
+        virtualinvoke $r7.<java.io.OutputStream: void write(byte[],int,int)>($r2, 0, $i1);
+
+        virtualinvoke $r7.<java.io.OutputStream: void flush()>();
+
+        r4 = specialinvoke r0.<org.spongycastle.crypto.tls.RecordStream: byte[] getBufferContents()>();
+
+     label1:
+        $i1 = lengthof r4;
+
+        $i2 = r0.<org.spongycastle.crypto.tls.RecordStream: int plaintextLimit>;
+
+        staticinvoke <org.spongycastle.crypto.tls.RecordStream: void checkLength(int,int,short)>($i1, $i2, 30);
+
+        $i1 = lengthof r4;
+
+        if $i1 >= 1 goto label2;
+
+        if $s0 == 23 goto label2;
+
+        $r8 = new org.spongycastle.crypto.tls.TlsFatalAlert;
+
+        specialinvoke $r8.<org.spongycastle.crypto.tls.TlsFatalAlert: void <init>(short)>(47);
+
+        throw $r8;
+
+     label2:
+        return r4;
+    }
+    void finaliseHandshake() throws java.io.IOException
+    {
+        org.spongycastle.crypto.tls.RecordStream r0;
+        org.spongycastle.crypto.tls.TlsCompression $r1, $r2;
+        org.spongycastle.crypto.tls.TlsCipher $r3, $r4;
+        org.spongycastle.crypto.tls.TlsFatalAlert $r5;
+
+        r0 := @this: org.spongycastle.crypto.tls.RecordStream;
+
+        $r1 = r0.<org.spongycastle.crypto.tls.RecordStream: org.spongycastle.crypto.tls.TlsCompression readCompression>;
+
+        $r2 = r0.<org.spongycastle.crypto.tls.RecordStream: org.spongycastle.crypto.tls.TlsCompression pendingCompression>;
+
+        if $r1 != $r2 goto label1;
+
+        $r1 = r0.<org.spongycastle.crypto.tls.RecordStream: org.spongycastle.crypto.tls.TlsCompression writeCompression>;
+
+        $r2 = r0.<org.spongycastle.crypto.tls.RecordStream: org.spongycastle.crypto.tls.TlsCompression pendingCompression>;
+
+        if $r1 != $r2 goto label1;
+
+        $r3 = r0.<org.spongycastle.crypto.tls.RecordStream: org.spongycastle.crypto.tls.TlsCipher readCipher>;
+
+        $r4 = r0.<org.spongycastle.crypto.tls.RecordStream: org.spongycastle.crypto.tls.TlsCipher pendingCipher>;
+
+        if $r3 != $r4 goto label1;
+
+        $r3 = r0.<org.spongycastle.crypto.tls.RecordStream: org.spongycastle.crypto.tls.TlsCipher writeCipher>;
+
+        $r4 = r0.<org.spongycastle.crypto.tls.RecordStream: org.spongycastle.crypto.tls.TlsCipher pendingCipher>;
+
+        if $r3 == $r4 goto label2;
+
+     label1:
+        $r5 = new org.spongycastle.crypto.tls.TlsFatalAlert;
+
+        specialinvoke $r5.<org.spongycastle.crypto.tls.TlsFatalAlert: void <init>(short)>(40);
+
+        throw $r5;
+
+     label2:
+        r0.<org.spongycastle.crypto.tls.RecordStream: org.spongycastle.crypto.tls.TlsCompression pendingCompression> = null;
+
+        r0.<org.spongycastle.crypto.tls.RecordStream: org.spongycastle.crypto.tls.TlsCipher pendingCipher> = null;
+
+        return;
+    }
+    void flush() throws java.io.IOException
+    {
+        org.spongycastle.crypto.tls.RecordStream r0;
+        java.io.OutputStream $r1;
+
+        r0 := @this: org.spongycastle.crypto.tls.RecordStream;
+
+        $r1 = r0.<org.spongycastle.crypto.tls.RecordStream: java.io.OutputStream output>;
+
+        virtualinvoke $r1.<java.io.OutputStream: void flush()>();
+
+        return;
+    }
+    org.spongycastle.crypto.tls.TlsHandshakeHash getHandshakeHash()
+    {
+        org.spongycastle.crypto.tls.RecordStream r0;
+        org.spongycastle.crypto.tls.TlsHandshakeHash r1;
+
+        r0 := @this: org.spongycastle.crypto.tls.RecordStream;
+
+        r1 = r0.<org.spongycastle.crypto.tls.RecordStream: org.spongycastle.crypto.tls.TlsHandshakeHash handshakeHash>;
+
+        return r1;
+    }
+    int getPlaintextLimit()
+    {
+        org.spongycastle.crypto.tls.RecordStream r0;
+        int i0;
+
+        r0 := @this: org.spongycastle.crypto.tls.RecordStream;
+
+        i0 = r0.<org.spongycastle.crypto.tls.RecordStream: int plaintextLimit>;
+
+        return i0;
+    }
+    org.spongycastle.crypto.tls.ProtocolVersion getReadVersion()
+    {
+        org.spongycastle.crypto.tls.RecordStream r0;
+        org.spongycastle.crypto.tls.ProtocolVersion r1;
+
+        r0 := @this: org.spongycastle.crypto.tls.RecordStream;
+
+        r1 = r0.<org.spongycastle.crypto.tls.RecordStream: org.spongycastle.crypto.tls.ProtocolVersion readVersion>;
+
+        return r1;
+    }
+    void init(org.spongycastle.crypto.tls.TlsContext)
+    {
+        org.spongycastle.crypto.tls.RecordStream r0;
+        org.spongycastle.crypto.tls.TlsContext $r1;
+        org.spongycastle.crypto.tls.TlsNullCipher $r2;
+        org.spongycastle.crypto.tls.TlsCipher $r3;
+        org.spongycastle.crypto.tls.DeferredHash $r4;
+        org.spongycastle.crypto.tls.TlsHandshakeHash $r5;
+        int $i0;
+
+        r0 := @this: org.spongycastle.crypto.tls.RecordStream;
+
+        $r1 := @parameter0: org.spongycastle.crypto.tls.TlsContext;
+
+        $r2 = new org.spongycastle.crypto.tls.TlsNullCipher;
+
+        specialinvoke $r2.<org.spongycastle.crypto.tls.TlsNullCipher: void <init>(org.spongycastle.crypto.tls.TlsContext)>($r1);
+
+        r0.<org.spongycastle.crypto.tls.RecordStream: org.spongycastle.crypto.tls.TlsCipher readCipher> = $r2;
+
+        $r3 = r0.<org.spongycastle.crypto.tls.RecordStream: org.spongycastle.crypto.tls.TlsCipher readCipher>;
+
+        r0.<org.spongycastle.crypto.tls.RecordStream: org.spongycastle.crypto.tls.TlsCipher writeCipher> = $r3;
+
+        $r4 = new org.spongycastle.crypto.tls.DeferredHash;
+
+        specialinvoke $r4.<org.spongycastle.crypto.tls.DeferredHash: void <init>()>();
+
+        r0.<org.spongycastle.crypto.tls.RecordStream: org.spongycastle.crypto.tls.TlsHandshakeHash handshakeHash> = $r4;
+
+        $r5 = r0.<org.spongycastle.crypto.tls.RecordStream: org.spongycastle.crypto.tls.TlsHandshakeHash handshakeHash>;
+
+        interfaceinvoke $r5.<org.spongycastle.crypto.tls.TlsHandshakeHash: void init(org.spongycastle.crypto.tls.TlsContext)>($r1);
+
+        $i0 = <org.spongycastle.crypto.tls.RecordStream: int DEFAULT_PLAINTEXT_LIMIT>;
+
+        virtualinvoke r0.<org.spongycastle.crypto.tls.RecordStream: void setPlaintextLimit(int)>($i0);
+
+        return;
+    }
+    void notifyHelloComplete()
+    {
+        org.spongycastle.crypto.tls.RecordStream r0;
+        org.spongycastle.crypto.tls.TlsHandshakeHash $r1;
+
+        r0 := @this: org.spongycastle.crypto.tls.RecordStream;
+
+        $r1 = r0.<org.spongycastle.crypto.tls.RecordStream: org.spongycastle.crypto.tls.TlsHandshakeHash handshakeHash>;
+
+        $r1 = interfaceinvoke $r1.<org.spongycastle.crypto.tls.TlsHandshakeHash: org.spongycastle.crypto.tls.TlsHandshakeHash notifyPRFDetermined()>();
+
+        r0.<org.spongycastle.crypto.tls.RecordStream: org.spongycastle.crypto.tls.TlsHandshakeHash handshakeHash> = $r1;
+
+        return;
+    }
+    org.spongycastle.crypto.tls.TlsHandshakeHash prepareToFinish()
+    {
+        org.spongycastle.crypto.tls.RecordStream r0;
+        org.spongycastle.crypto.tls.TlsHandshakeHash $r1, r2;
+
+        r0 := @this: org.spongycastle.crypto.tls.RecordStream;
+
+        r2 = r0.<org.spongycastle.crypto.tls.RecordStream: org.spongycastle.crypto.tls.TlsHandshakeHash handshakeHash>;
+
+        $r1 = r0.<org.spongycastle.crypto.tls.RecordStream: org.spongycastle.crypto.tls.TlsHandshakeHash handshakeHash>;
+
+        $r1 = interfaceinvoke $r1.<org.spongycastle.crypto.tls.TlsHandshakeHash: org.spongycastle.crypto.tls.TlsHandshakeHash stopTracking()>();
+
+        r0.<org.spongycastle.crypto.tls.RecordStream: org.spongycastle.crypto.tls.TlsHandshakeHash handshakeHash> = $r1;
+
+        return r2;
+    }
+    boolean readRecord() throws java.io.IOException
+    {
+        org.spongycastle.crypto.tls.RecordStream r0;
+        java.io.InputStream $r1;
+        byte[] $r2;
+        short $s0;
+        boolean $z0;
+        int $i1;
+        org.spongycastle.crypto.tls.TlsFatalAlert $r3;
+        org.spongycastle.crypto.tls.ProtocolVersion $r4, $r5;
+        org.spongycastle.crypto.tls.TlsProtocol $r6;
+
+        r0 := @this: org.spongycastle.crypto.tls.RecordStream;
+
+        $r1 = r0.<org.spongycastle.crypto.tls.RecordStream: java.io.InputStream input>;
+
+        $r2 = staticinvoke <org.spongycastle.crypto.tls.TlsUtils: byte[] readAllOrNothing(int,java.io.InputStream)>(5, $r1);
+
+        if $r2 != null goto label1;
+
+        return 0;
+
+     label1:
+        $s0 = staticinvoke <org.spongycastle.crypto.tls.TlsUtils: short readUint8(byte[],int)>($r2, 0);
+
+        staticinvoke <org.spongycastle.crypto.tls.RecordStream: void checkType(short,short)>($s0, 10);
+
+        $z0 = r0.<org.spongycastle.crypto.tls.RecordStream: boolean restrictReadVersion>;
+
+        if $z0 != 0 goto label2;
+
+        $i1 = staticinvoke <org.spongycastle.crypto.tls.TlsUtils: int readVersionRaw(byte[],int)>($r2, 1);
+
+        $i1 = $i1 & -256;
+
+        if $i1 == 768 goto label3;
+
+        $r3 = new org.spongycastle.crypto.tls.TlsFatalAlert;
+
+        specialinvoke $r3.<org.spongycastle.crypto.tls.TlsFatalAlert: void <init>(short)>(47);
+
+        throw $r3;
+
+     label2:
+        $r4 = staticinvoke <org.spongycastle.crypto.tls.TlsUtils: org.spongycastle.crypto.tls.ProtocolVersion readVersion(byte[],int)>($r2, 1);
+
+        $r5 = r0.<org.spongycastle.crypto.tls.RecordStream: org.spongycastle.crypto.tls.ProtocolVersion readVersion>;
+
+        if $r5 != null goto label4;
+
+        r0.<org.spongycastle.crypto.tls.RecordStream: org.spongycastle.crypto.tls.ProtocolVersion readVersion> = $r4;
+
+     label3:
+        $i1 = staticinvoke <org.spongycastle.crypto.tls.TlsUtils: int readUint16(byte[],int)>($r2, 3);
+
+        $r1 = r0.<org.spongycastle.crypto.tls.RecordStream: java.io.InputStream input>;
+
+        $r2 = virtualinvoke r0.<org.spongycastle.crypto.tls.RecordStream: byte[] decodeAndVerify(short,java.io.InputStream,int)>($s0, $r1, $i1);
+
+        $r6 = r0.<org.spongycastle.crypto.tls.RecordStream: org.spongycastle.crypto.tls.TlsProtocol handler>;
+
+        $i1 = lengthof $r2;
+
+        virtualinvoke $r6.<org.spongycastle.crypto.tls.TlsProtocol: void processRecord(short,byte[],int,int)>($s0, $r2, 0, $i1);
+
+        return 1;
+
+     label4:
+        $r5 = r0.<org.spongycastle.crypto.tls.RecordStream: org.spongycastle.crypto.tls.ProtocolVersion readVersion>;
+
+        $z0 = virtualinvoke $r4.<org.spongycastle.crypto.tls.ProtocolVersion: boolean equals(org.spongycastle.crypto.tls.ProtocolVersion)>($r5);
+
+        if $z0 != 0 goto label3;
+
+        $r3 = new org.spongycastle.crypto.tls.TlsFatalAlert;
+
+        specialinvoke $r3.<org.spongycastle.crypto.tls.TlsFatalAlert: void <init>(short)>(47);
+
+        throw $r3;
+    }
+    void receivedReadCipherSpec() throws java.io.IOException
+    {
+        org.spongycastle.crypto.tls.RecordStream r0;
+        org.spongycastle.crypto.tls.TlsCompression $r1;
+        org.spongycastle.crypto.tls.TlsCipher $r2;
+        org.spongycastle.crypto.tls.TlsFatalAlert $r3;
+
+        r0 := @this: org.spongycastle.crypto.tls.RecordStream;
+
+        $r1 = r0.<org.spongycastle.crypto.tls.RecordStream: org.spongycastle.crypto.tls.TlsCompression pendingCompression>;
+
+        if $r1 == null goto label1;
+
+        $r2 = r0.<org.spongycastle.crypto.tls.RecordStream: org.spongycastle.crypto.tls.TlsCipher pendingCipher>;
+
+        if $r2 != null goto label2;
+
+     label1:
+        $r3 = new org.spongycastle.crypto.tls.TlsFatalAlert;
+
+        specialinvoke $r3.<org.spongycastle.crypto.tls.TlsFatalAlert: void <init>(short)>(40);
+
+        throw $r3;
+
+     label2:
+        $r1 = r0.<org.spongycastle.crypto.tls.RecordStream: org.spongycastle.crypto.tls.TlsCompression pendingCompression>;
+
+        r0.<org.spongycastle.crypto.tls.RecordStream: org.spongycastle.crypto.tls.TlsCompression readCompression> = $r1;
+
+        $r2 = r0.<org.spongycastle.crypto.tls.RecordStream: org.spongycastle.crypto.tls.TlsCipher pendingCipher>;
+
+        r0.<org.spongycastle.crypto.tls.RecordStream: org.spongycastle.crypto.tls.TlsCipher readCipher> = $r2;
+
+        r0.<org.spongycastle.crypto.tls.RecordStream: long readSeqNo> = 0L;
+
+        return;
+    }
+    void safeClose()
+    {
+        org.spongycastle.crypto.tls.RecordStream r0;
+        java.io.InputStream $r1;
+        java.io.OutputStream $r2;
+        java.io.IOException $r3, $r4;
+
+        r0 := @this: org.spongycastle.crypto.tls.RecordStream;
+
+        $r1 = r0.<org.spongycastle.crypto.tls.RecordStream: java.io.InputStream input>;
+
+     label1:
+        virtualinvoke $r1.<java.io.InputStream: void close()>();
+
+     label2:
+        $r2 = r0.<org.spongycastle.crypto.tls.RecordStream: java.io.OutputStream output>;
+
+     label3:
+        virtualinvoke $r2.<java.io.OutputStream: void close()>();
+
+     label4:
+        return;
+
+     label5:
+        $r3 := @caughtexception;
+
+        return;
+
+     label6:
+        $r4 := @caughtexception;
+
+        goto label2;
+
+        catch java.io.IOException from label1 to label2 with label6;
+        catch java.io.IOException from label3 to label4 with label5;
+    }
+    void sentWriteCipherSpec() throws java.io.IOException
+    {
+        org.spongycastle.crypto.tls.RecordStream r0;
+        org.spongycastle.crypto.tls.TlsCompression $r1;
+        org.spongycastle.crypto.tls.TlsCipher $r2;
+        org.spongycastle.crypto.tls.TlsFatalAlert $r3;
+
+        r0 := @this: org.spongycastle.crypto.tls.RecordStream;
+
+        $r1 = r0.<org.spongycastle.crypto.tls.RecordStream: org.spongycastle.crypto.tls.TlsCompression pendingCompression>;
+
+        if $r1 == null goto label1;
+
+        $r2 = r0.<org.spongycastle.crypto.tls.RecordStream: org.spongycastle.crypto.tls.TlsCipher pendingCipher>;
+
+        if $r2 != null goto label2;
+
+     label1:
+        $r3 = new org.spongycastle.crypto.tls.TlsFatalAlert;
+
+        specialinvoke $r3.<org.spongycastle.crypto.tls.TlsFatalAlert: void <init>(short)>(40);
+
+        throw $r3;
+
+     label2:
+        $r1 = r0.<org.spongycastle.crypto.tls.RecordStream: org.spongycastle.crypto.tls.TlsCompression pendingCompression>;
+
+        r0.<org.spongycastle.crypto.tls.RecordStream: org.spongycastle.crypto.tls.TlsCompression writeCompression> = $r1;
+
+        $r2 = r0.<org.spongycastle.crypto.tls.RecordStream: org.spongycastle.crypto.tls.TlsCipher pendingCipher>;
+
+        r0.<org.spongycastle.crypto.tls.RecordStream: org.spongycastle.crypto.tls.TlsCipher writeCipher> = $r2;
+
+        r0.<org.spongycastle.crypto.tls.RecordStream: long writeSeqNo> = 0L;
+
+        return;
+    }
+    void setPendingConnectionState(org.spongycastle.crypto.tls.TlsCompression, org.spongycastle.crypto.tls.TlsCipher)
+    {
+        org.spongycastle.crypto.tls.RecordStream r0;
+        org.spongycastle.crypto.tls.TlsCompression $r1;
+        org.spongycastle.crypto.tls.TlsCipher $r2;
+
+        r0 := @this: org.spongycastle.crypto.tls.RecordStream;
+
+        $r1 := @parameter0: org.spongycastle.crypto.tls.TlsCompression;
+
+        $r2 := @parameter1: org.spongycastle.crypto.tls.TlsCipher;
+
+        r0.<org.spongycastle.crypto.tls.RecordStream: org.spongycastle.crypto.tls.TlsCompression pendingCompression> = $r1;
+
+        r0.<org.spongycastle.crypto.tls.RecordStream: org.spongycastle.crypto.tls.TlsCipher pendingCipher> = $r2;
+
+        return;
+    }
+    void setPlaintextLimit(int)
+    {
+        org.spongycastle.crypto.tls.RecordStream r0;
+        int $i0;
+
+        r0 := @this: org.spongycastle.crypto.tls.RecordStream;
+
+        $i0 := @parameter0: int;
+
+        r0.<org.spongycastle.crypto.tls.RecordStream: int plaintextLimit> = $i0;
+
+        $i0 = r0.<org.spongycastle.crypto.tls.RecordStream: int plaintextLimit>;
+
+        $i0 = $i0 + 1024;
+
+        r0.<org.spongycastle.crypto.tls.RecordStream: int compressedLimit> = $i0;
+
+        $i0 = r0.<org.spongycastle.crypto.tls.RecordStream: int compressedLimit>;
+
+        $i0 = $i0 + 1024;
+
+        r0.<org.spongycastle.crypto.tls.RecordStream: int ciphertextLimit> = $i0;
+
+        return;
+    }
+    void setReadVersion(org.spongycastle.crypto.tls.ProtocolVersion)
+    {
+        org.spongycastle.crypto.tls.RecordStream r0;
+        org.spongycastle.crypto.tls.ProtocolVersion $r1;
+
+        r0 := @this: org.spongycastle.crypto.tls.RecordStream;
+
+        $r1 := @parameter0: org.spongycastle.crypto.tls.ProtocolVersion;
+
+        r0.<org.spongycastle.crypto.tls.RecordStream: org.spongycastle.crypto.tls.ProtocolVersion readVersion> = $r1;
+
+        return;
+    }
+    void setRestrictReadVersion(boolean)
+    {
+        org.spongycastle.crypto.tls.RecordStream r0;
+        boolean $z0;
+
+        r0 := @this: org.spongycastle.crypto.tls.RecordStream;
+
+        $z0 := @parameter0: boolean;
+
+        r0.<org.spongycastle.crypto.tls.RecordStream: boolean restrictReadVersion> = $z0;
+
+        return;
+    }
+    void setWriteVersion(org.spongycastle.crypto.tls.ProtocolVersion)
+    {
+        org.spongycastle.crypto.tls.RecordStream r0;
+        org.spongycastle.crypto.tls.ProtocolVersion $r1;
+
+        r0 := @this: org.spongycastle.crypto.tls.RecordStream;
+
+        $r1 := @parameter0: org.spongycastle.crypto.tls.ProtocolVersion;
+
+        r0.<org.spongycastle.crypto.tls.RecordStream: org.spongycastle.crypto.tls.ProtocolVersion writeVersion> = $r1;
+
+        return;
+    }
+    void updateHandshakeData(byte[], int, int)
+    {
+        org.spongycastle.crypto.tls.RecordStream r0;
+        byte[] $r1;
+        int $i0, $i1;
+        org.spongycastle.crypto.tls.TlsHandshakeHash $r2;
+
+        r0 := @this: org.spongycastle.crypto.tls.RecordStream;
+
+        $r1 := @parameter0: byte[];
+
+        $i0 := @parameter1: int;
+
+        $i1 := @parameter2: int;
+
+        $r2 = r0.<org.spongycastle.crypto.tls.RecordStream: org.spongycastle.crypto.tls.TlsHandshakeHash handshakeHash>;
+
+        interfaceinvoke $r2.<org.spongycastle.crypto.tls.TlsHandshakeHash: void update(byte[],int,int)>($r1, $i0, $i1);
+
+        return;
+    }
+    void writeRecord(short, byte[], int, int) throws java.io.IOException
+    {
+        org.spongycastle.crypto.tls.RecordStream r0;
+        short $s0;
+        byte[] $r1, r8;
+        int $i1, $i2, $i3;
+        org.spongycastle.crypto.tls.ProtocolVersion $r2;
+        org.spongycastle.crypto.tls.TlsFatalAlert $r3;
+        org.spongycastle.crypto.tls.TlsCompression $r4;
+        java.io.ByteArrayOutputStream $r5;
+        java.io.OutputStream $r6;
+        org.spongycastle.crypto.tls.TlsCipher $r7;
+        long $l4, $l5;
+
+        r0 := @this: org.spongycastle.crypto.tls.RecordStream;
+
+        $s0 := @parameter0: short;
+
+        $r1 := @parameter1: byte[];
+
+        $i1 := @parameter2: int;
+
+        $i2 := @parameter3: int;
+
+        $r2 = r0.<org.spongycastle.crypto.tls.RecordStream: org.spongycastle.crypto.tls.ProtocolVersion writeVersion>;
+
+        if $r2 != null goto label1;
+
+        return;
+
+     label1:
+        staticinvoke <org.spongycastle.crypto.tls.RecordStream: void checkType(short,short)>($s0, 80);
+
+        $i3 = r0.<org.spongycastle.crypto.tls.RecordStream: int plaintextLimit>;
+
+        staticinvoke <org.spongycastle.crypto.tls.RecordStream: void checkLength(int,int,short)>($i2, $i3, 80);
+
+        if $i2 >= 1 goto label2;
+
+        if $s0 == 23 goto label2;
+
+        $r3 = new org.spongycastle.crypto.tls.TlsFatalAlert;
+
+        specialinvoke $r3.<org.spongycastle.crypto.tls.TlsFatalAlert: void <init>(short)>(80);
+
+        throw $r3;
+
+     label2:
+        if $s0 != 22 goto label3;
+
+        virtualinvoke r0.<org.spongycastle.crypto.tls.RecordStream: void updateHandshakeData(byte[],int,int)>($r1, $i1, $i2);
+
+     label3:
+        $r4 = r0.<org.spongycastle.crypto.tls.RecordStream: org.spongycastle.crypto.tls.TlsCompression writeCompression>;
+
+        $r5 = r0.<org.spongycastle.crypto.tls.RecordStream: java.io.ByteArrayOutputStream buffer>;
+
+        $r6 = interfaceinvoke $r4.<org.spongycastle.crypto.tls.TlsCompression: java.io.OutputStream compress(java.io.OutputStream)>($r5);
+
+        $r5 = r0.<org.spongycastle.crypto.tls.RecordStream: java.io.ByteArrayOutputStream buffer>;
+
+        if $r6 != $r5 goto label5;
+
+        $r7 = r0.<org.spongycastle.crypto.tls.RecordStream: org.spongycastle.crypto.tls.TlsCipher writeCipher>;
+
+        $l4 = r0.<org.spongycastle.crypto.tls.RecordStream: long writeSeqNo>;
+
+        $l5 = 1L + $l4;
+
+        r0.<org.spongycastle.crypto.tls.RecordStream: long writeSeqNo> = $l5;
+
+        r8 = interfaceinvoke $r7.<org.spongycastle.crypto.tls.TlsCipher: byte[] encodePlaintext(long,short,byte[],int,int)>($l4, $s0, $r1, $i1, $i2);
+
+     label4:
+        $i1 = lengthof r8;
+
+        $i2 = r0.<org.spongycastle.crypto.tls.RecordStream: int ciphertextLimit>;
+
+        staticinvoke <org.spongycastle.crypto.tls.RecordStream: void checkLength(int,int,short)>($i1, $i2, 80);
+
+        $i1 = lengthof r8;
+
+        $i1 = $i1 + 5;
+
+        $r1 = newarray (byte)[$i1];
+
+        staticinvoke <org.spongycastle.crypto.tls.TlsUtils: void writeUint8(short,byte[],int)>($s0, $r1, 0);
+
+        $r2 = r0.<org.spongycastle.crypto.tls.RecordStream: org.spongycastle.crypto.tls.ProtocolVersion writeVersion>;
+
+        staticinvoke <org.spongycastle.crypto.tls.TlsUtils: void writeVersion(org.spongycastle.crypto.tls.ProtocolVersion,byte[],int)>($r2, $r1, 1);
+
+        $i1 = lengthof r8;
+
+        staticinvoke <org.spongycastle.crypto.tls.TlsUtils: void writeUint16(int,byte[],int)>($i1, $r1, 3);
+
+        $i1 = lengthof r8;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r8, 0, $r1, 5, $i1);
+
+        $r6 = r0.<org.spongycastle.crypto.tls.RecordStream: java.io.OutputStream output>;
+
+        virtualinvoke $r6.<java.io.OutputStream: void write(byte[])>($r1);
+
+        $r6 = r0.<org.spongycastle.crypto.tls.RecordStream: java.io.OutputStream output>;
+
+        virtualinvoke $r6.<java.io.OutputStream: void flush()>();
+
+        return;
+
+     label5:
+        virtualinvoke $r6.<java.io.OutputStream: void write(byte[],int,int)>($r1, $i1, $i2);
+
+        virtualinvoke $r6.<java.io.OutputStream: void flush()>();
+
+        $r1 = specialinvoke r0.<org.spongycastle.crypto.tls.RecordStream: byte[] getBufferContents()>();
+
+        $i1 = lengthof $r1;
+
+        $i2 = $i2 + 1024;
+
+        staticinvoke <org.spongycastle.crypto.tls.RecordStream: void checkLength(int,int,short)>($i1, $i2, 80);
+
+        $r7 = r0.<org.spongycastle.crypto.tls.RecordStream: org.spongycastle.crypto.tls.TlsCipher writeCipher>;
+
+        $l4 = r0.<org.spongycastle.crypto.tls.RecordStream: long writeSeqNo>;
+
+        $l5 = 1L + $l4;
+
+        r0.<org.spongycastle.crypto.tls.RecordStream: long writeSeqNo> = $l5;
+
+        $i1 = lengthof $r1;
+
+        r8 = interfaceinvoke $r7.<org.spongycastle.crypto.tls.TlsCipher: byte[] encodePlaintext(long,short,byte[],int,int)>($l4, $s0, $r1, 0, $i1);
+
+        goto label4;
+    }

@@ -1,0 +1,186 @@
+com.ichi2.anki.services.ReminderService extends android.app.IntentService
+public static final java.lang.String EXTRA_DECK_ID
+    public void <init>()
+    {
+        com.ichi2.anki.services.ReminderService r0;
+
+        r0 := @this: com.ichi2.anki.services.ReminderService;
+
+        specialinvoke r0.<android.app.IntentService: void <init>(java.lang.String)>("ReminderService");
+
+        return;
+    }
+    protected void onHandleIntent(android.content.Intent)
+    {
+        com.ichi2.anki.services.ReminderService r0;
+        android.content.Intent $r1;
+        int i0, $i4;
+        long $l1, $l2;
+        com.ichi2.anki.CollectionHelper $r2;
+        com.ichi2.libanki.Collection $r3;
+        com.ichi2.libanki.Decks $r4;
+        org.json.JSONObject $r5;
+        java.lang.Object $r6;
+        android.app.AlarmManager r7;
+        android.app.PendingIntent $r8;
+        com.ichi2.libanki.Sched$DeckDueTreeNode r9, r13;
+        com.ichi2.libanki.Sched $r10;
+        java.util.List $r11;
+        java.util.Iterator $r12;
+        boolean $z0;
+        byte $b3;
+        android.support.v4.app.NotificationManagerCompat $r14;
+        android.support.v4.app.NotificationCompat$Builder $r15;
+        java.lang.String $r16;
+        android.content.res.Resources $r17;
+        java.lang.Object[] $r18;
+        java.lang.Integer $r19;
+        android.app.Notification $r20;
+
+        r0 := @this: com.ichi2.anki.services.ReminderService;
+
+        $r1 := @parameter0: android.content.Intent;
+
+        $l1 = virtualinvoke $r1.<android.content.Intent: long getLongExtra(java.lang.String,long)>("EXTRA_DECK_ID", 0L);
+
+        $r2 = staticinvoke <com.ichi2.anki.CollectionHelper: com.ichi2.anki.CollectionHelper getInstance()>();
+
+        $r3 = virtualinvoke $r2.<com.ichi2.anki.CollectionHelper: com.ichi2.libanki.Collection getCol(android.content.Context)>(r0);
+
+        $r4 = virtualinvoke $r3.<com.ichi2.libanki.Collection: com.ichi2.libanki.Decks getDecks()>();
+
+        $r5 = virtualinvoke $r4.<com.ichi2.libanki.Decks: org.json.JSONObject get(long,boolean)>($l1, 0);
+
+        if $r5 != null goto label1;
+
+        $r6 = virtualinvoke r0.<com.ichi2.anki.services.ReminderService: java.lang.Object getSystemService(java.lang.String)>("alarm");
+
+        r7 = (android.app.AlarmManager) $r6;
+
+        i0 = (int) $l1;
+
+        $r1 = new android.content.Intent;
+
+        specialinvoke $r1.<android.content.Intent: void <init>(android.content.Context,java.lang.Class)>(r0, class "Lcom/ichi2/anki/receiver/ReminderReceiver;");
+
+        $r1 = virtualinvoke $r1.<android.content.Intent: android.content.Intent putExtra(java.lang.String,long)>("EXTRA_DECK_ID", $l1);
+
+        $r8 = staticinvoke <android.app.PendingIntent: android.app.PendingIntent getBroadcast(android.content.Context,int,android.content.Intent,int)>(r0, i0, $r1, 0);
+
+        virtualinvoke r7.<android.app.AlarmManager: void cancel(android.app.PendingIntent)>($r8);
+
+     label1:
+        r9 = null;
+
+        $r2 = staticinvoke <com.ichi2.anki.CollectionHelper: com.ichi2.anki.CollectionHelper getInstance()>();
+
+        $r3 = virtualinvoke $r2.<com.ichi2.anki.CollectionHelper: com.ichi2.libanki.Collection getCol(android.content.Context)>(r0);
+
+        $r10 = virtualinvoke $r3.<com.ichi2.libanki.Collection: com.ichi2.libanki.Sched getSched()>();
+
+        $r11 = virtualinvoke $r10.<com.ichi2.libanki.Sched: java.util.List deckDueTree()>();
+
+        $r12 = interfaceinvoke $r11.<java.util.List: java.util.Iterator iterator()>();
+
+     label2:
+        $z0 = interfaceinvoke $r12.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label3;
+
+        $r6 = interfaceinvoke $r12.<java.util.Iterator: java.lang.Object next()>();
+
+        r13 = (com.ichi2.libanki.Sched$DeckDueTreeNode) $r6;
+
+        $l2 = r13.<com.ichi2.libanki.Sched$DeckDueTreeNode: long did>;
+
+        $b3 = $l2 cmp $l1;
+
+        if $b3 != 0 goto label2;
+
+        r9 = r13;
+
+     label3:
+        if r9 != null goto label4;
+
+        return;
+
+     label4:
+        i0 = r9.<com.ichi2.libanki.Sched$DeckDueTreeNode: int revCount>;
+
+        $i4 = r9.<com.ichi2.libanki.Sched$DeckDueTreeNode: int lrnCount>;
+
+        i0 = i0 + $i4;
+
+        $i4 = r9.<com.ichi2.libanki.Sched$DeckDueTreeNode: int newCount>;
+
+        i0 = i0 + $i4;
+
+        if i0 <= 0 goto label5;
+
+        $r14 = staticinvoke <android.support.v4.app.NotificationManagerCompat: android.support.v4.app.NotificationManagerCompat 'from'(android.content.Context)>(r0);
+
+        $z0 = virtualinvoke $r14.<android.support.v4.app.NotificationManagerCompat: boolean areNotificationsEnabled()>();
+
+        if $z0 == 0 goto label5;
+
+        $r15 = new android.support.v4.app.NotificationCompat$Builder;
+
+        specialinvoke $r15.<android.support.v4.app.NotificationCompat$Builder: void <init>(android.content.Context)>(r0);
+
+        $r16 = virtualinvoke r0.<com.ichi2.anki.services.ReminderService: java.lang.String getString(int)>(2131231247);
+
+        $r15 = virtualinvoke $r15.<android.support.v4.app.NotificationCompat$Builder: android.support.v4.app.NotificationCompat$Builder setContentTitle(java.lang.CharSequence)>($r16);
+
+        $r17 = virtualinvoke r0.<com.ichi2.anki.services.ReminderService: android.content.res.Resources getResources()>();
+
+        $i4 = r9.<com.ichi2.libanki.Sched$DeckDueTreeNode: int newCount>;
+
+        $r18 = newarray (java.lang.Object)[2];
+
+        $r2 = staticinvoke <com.ichi2.anki.CollectionHelper: com.ichi2.anki.CollectionHelper getInstance()>();
+
+        $r3 = virtualinvoke $r2.<com.ichi2.anki.CollectionHelper: com.ichi2.libanki.Collection getCol(android.content.Context)>(r0);
+
+        $r4 = virtualinvoke $r3.<com.ichi2.libanki.Collection: com.ichi2.libanki.Decks getDecks()>();
+
+        $r16 = virtualinvoke $r4.<com.ichi2.libanki.Decks: java.lang.String name(long)>($l1);
+
+        $r18[0] = $r16;
+
+        $r19 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(i0);
+
+        $r18[1] = $r19;
+
+        $r16 = virtualinvoke $r17.<android.content.res.Resources: java.lang.String getQuantityString(int,int,java.lang.Object[])>(2131361801, $i4, $r18);
+
+        $r15 = virtualinvoke $r15.<android.support.v4.app.NotificationCompat$Builder: android.support.v4.app.NotificationCompat$Builder setContentText(java.lang.CharSequence)>($r16);
+
+        $r15 = virtualinvoke $r15.<android.support.v4.app.NotificationCompat$Builder: android.support.v4.app.NotificationCompat$Builder setSmallIcon(int)>(2130837682);
+
+        i0 = staticinvoke <android.support.v4.content.ContextCompat: int getColor(android.content.Context,int)>(r0, 2131689555);
+
+        $r15 = virtualinvoke $r15.<android.support.v4.app.NotificationCompat$Builder: android.support.v4.app.NotificationCompat$Builder setColor(int)>(i0);
+
+        i0 = (int) $l1;
+
+        $r1 = new android.content.Intent;
+
+        specialinvoke $r1.<android.content.Intent: void <init>(android.content.Context,java.lang.Class)>(r0, class "Lcom/ichi2/anki/IntentHandler;");
+
+        $r1 = virtualinvoke $r1.<android.content.Intent: android.content.Intent putExtra(java.lang.String,long)>("EXTRA_DECK_ID", $l1);
+
+        $r8 = staticinvoke <android.app.PendingIntent: android.app.PendingIntent getActivity(android.content.Context,int,android.content.Intent,int)>(r0, i0, $r1, 134217728);
+
+        $r15 = virtualinvoke $r15.<android.support.v4.app.NotificationCompat$Builder: android.support.v4.app.NotificationCompat$Builder setContentIntent(android.app.PendingIntent)>($r8);
+
+        $r15 = virtualinvoke $r15.<android.support.v4.app.NotificationCompat$Builder: android.support.v4.app.NotificationCompat$Builder setAutoCancel(boolean)>(1);
+
+        $r20 = virtualinvoke $r15.<android.support.v4.app.NotificationCompat$Builder: android.app.Notification build()>();
+
+        i0 = (int) $l1;
+
+        virtualinvoke $r14.<android.support.v4.app.NotificationManagerCompat: void notify(int,android.app.Notification)>(i0, $r20);
+
+     label5:
+        return;
+    }

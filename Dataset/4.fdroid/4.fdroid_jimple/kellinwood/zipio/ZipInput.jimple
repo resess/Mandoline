@@ -1,0 +1,583 @@
+kellinwood.zipio.ZipInput extends java.lang.Object
+static kellinwood.logging.LoggerInterface log
+kellinwood.zipio.CentralEnd centralEnd
+long fileLength
+java.io.RandomAccessFile in
+public java.lang.String inputFilename
+int scanIterations
+java.util.Map zioEntries
+    public void <init>(java.lang.String) throws java.io.IOException
+    {
+        kellinwood.zipio.ZipInput r0;
+        java.lang.String $r1;
+        java.io.File $r2;
+        long $l0;
+        java.util.LinkedHashMap $r3;
+        java.io.RandomAccessFile $r4;
+
+        r0 := @this: kellinwood.zipio.ZipInput;
+
+        $r1 := @parameter0: java.lang.String;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<kellinwood.zipio.ZipInput: java.io.RandomAccessFile in> = null;
+
+        r0.<kellinwood.zipio.ZipInput: int scanIterations> = 0;
+
+        $r3 = new java.util.LinkedHashMap;
+
+        specialinvoke $r3.<java.util.LinkedHashMap: void <init>()>();
+
+        r0.<kellinwood.zipio.ZipInput: java.util.Map zioEntries> = $r3;
+
+        r0.<kellinwood.zipio.ZipInput: java.lang.String inputFilename> = $r1;
+
+        $r4 = new java.io.RandomAccessFile;
+
+        $r2 = new java.io.File;
+
+        $r1 = r0.<kellinwood.zipio.ZipInput: java.lang.String inputFilename>;
+
+        specialinvoke $r2.<java.io.File: void <init>(java.lang.String)>($r1);
+
+        specialinvoke $r4.<java.io.RandomAccessFile: void <init>(java.io.File,java.lang.String)>($r2, "r");
+
+        r0.<kellinwood.zipio.ZipInput: java.io.RandomAccessFile in> = $r4;
+
+        $r4 = r0.<kellinwood.zipio.ZipInput: java.io.RandomAccessFile in>;
+
+        $l0 = virtualinvoke $r4.<java.io.RandomAccessFile: long length()>();
+
+        r0.<kellinwood.zipio.ZipInput: long fileLength> = $l0;
+
+        return;
+    }
+    private void doRead()
+    {
+        kellinwood.zipio.ZipInput r0;
+        java.lang.Throwable r1;
+        long $l0;
+        java.io.RandomAccessFile $r2;
+        kellinwood.zipio.CentralEnd $r3;
+        kellinwood.logging.LoggerInterface $r4;
+        boolean $z0;
+        java.lang.Object[] $r5;
+        int $i1;
+        java.lang.Integer $r6;
+        java.lang.String $r7;
+        short $s2;
+        java.lang.Short $r8;
+        kellinwood.zipio.ZioEntry $r9;
+        java.util.Map $r10;
+
+        r0 := @this: kellinwood.zipio.ZipInput;
+
+     label01:
+        $l0 = virtualinvoke r0.<kellinwood.zipio.ZipInput: long scanForEOCDR(int)>(256);
+
+        $r2 = r0.<kellinwood.zipio.ZipInput: java.io.RandomAccessFile in>;
+
+        virtualinvoke $r2.<java.io.RandomAccessFile: void seek(long)>($l0);
+
+        $r3 = staticinvoke <kellinwood.zipio.CentralEnd: kellinwood.zipio.CentralEnd read(kellinwood.zipio.ZipInput)>(r0);
+
+        r0.<kellinwood.zipio.ZipInput: kellinwood.zipio.CentralEnd centralEnd> = $r3;
+
+        $r4 = staticinvoke <kellinwood.zipio.ZipInput: kellinwood.logging.LoggerInterface getLogger()>();
+
+        $z0 = interfaceinvoke $r4.<kellinwood.logging.LoggerInterface: boolean isDebugEnabled()>();
+
+     label02:
+        if $z0 == 0 goto label04;
+
+     label03:
+        $r4 = staticinvoke <kellinwood.zipio.ZipInput: kellinwood.logging.LoggerInterface getLogger()>();
+
+        $r5 = newarray (java.lang.Object)[1];
+
+        $i1 = r0.<kellinwood.zipio.ZipInput: int scanIterations>;
+
+        $r6 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i1);
+
+        $r5[0] = $r6;
+
+        $r7 = staticinvoke <java.lang.String: java.lang.String format(java.lang.String,java.lang.Object[])>("EOCD found in %d iterations", $r5);
+
+        interfaceinvoke $r4.<kellinwood.logging.LoggerInterface: void debug(java.lang.String)>($r7);
+
+        $r4 = staticinvoke <kellinwood.zipio.ZipInput: kellinwood.logging.LoggerInterface getLogger()>();
+
+        $r5 = newarray (java.lang.Object)[4];
+
+        $r3 = r0.<kellinwood.zipio.ZipInput: kellinwood.zipio.CentralEnd centralEnd>;
+
+        $s2 = $r3.<kellinwood.zipio.CentralEnd: short totalCentralEntries>;
+
+        $r8 = staticinvoke <java.lang.Short: java.lang.Short valueOf(short)>($s2);
+
+        $r5[0] = $r8;
+
+        $r3 = r0.<kellinwood.zipio.ZipInput: kellinwood.zipio.CentralEnd centralEnd>;
+
+        $i1 = $r3.<kellinwood.zipio.CentralEnd: int centralDirectorySize>;
+
+        $r6 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i1);
+
+        $r5[1] = $r6;
+
+        $r3 = r0.<kellinwood.zipio.ZipInput: kellinwood.zipio.CentralEnd centralEnd>;
+
+        $i1 = $r3.<kellinwood.zipio.CentralEnd: int centralStartOffset>;
+
+        $r6 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i1);
+
+        $r5[2] = $r6;
+
+        $r3 = r0.<kellinwood.zipio.ZipInput: kellinwood.zipio.CentralEnd centralEnd>;
+
+        $i1 = $r3.<kellinwood.zipio.CentralEnd: int centralStartOffset>;
+
+        $r6 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i1);
+
+        $r5[3] = $r6;
+
+        $r7 = staticinvoke <java.lang.String: java.lang.String format(java.lang.String,java.lang.Object[])>("Directory entries=%d, size=%d, offset=%d/0x%08x", $r5);
+
+        interfaceinvoke $r4.<kellinwood.logging.LoggerInterface: void debug(java.lang.String)>($r7);
+
+        $r4 = staticinvoke <kellinwood.zipio.ZipInput: kellinwood.logging.LoggerInterface getLogger()>();
+
+        staticinvoke <kellinwood.zipio.ZipListingHelper: void listHeader(kellinwood.logging.LoggerInterface)>($r4);
+
+     label04:
+        $r2 = r0.<kellinwood.zipio.ZipInput: java.io.RandomAccessFile in>;
+
+        $r3 = r0.<kellinwood.zipio.ZipInput: kellinwood.zipio.CentralEnd centralEnd>;
+
+        $i1 = $r3.<kellinwood.zipio.CentralEnd: int centralStartOffset>;
+
+     label05:
+        $l0 = (long) $i1;
+
+     label06:
+        virtualinvoke $r2.<java.io.RandomAccessFile: void seek(long)>($l0);
+
+     label07:
+        $i1 = 0;
+
+     label08:
+        $r3 = r0.<kellinwood.zipio.ZipInput: kellinwood.zipio.CentralEnd centralEnd>;
+
+        $s2 = $r3.<kellinwood.zipio.CentralEnd: short totalCentralEntries>;
+
+     label09:
+        if $i1 >= $s2 goto label15;
+
+     label10:
+        $r9 = staticinvoke <kellinwood.zipio.ZioEntry: kellinwood.zipio.ZioEntry read(kellinwood.zipio.ZipInput)>(r0);
+
+        $r10 = r0.<kellinwood.zipio.ZipInput: java.util.Map zioEntries>;
+
+        $r7 = virtualinvoke $r9.<kellinwood.zipio.ZioEntry: java.lang.String getName()>();
+
+        interfaceinvoke $r10.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r7, $r9);
+
+     label11:
+        if $z0 == 0 goto label13;
+
+     label12:
+        $r4 = staticinvoke <kellinwood.zipio.ZipInput: kellinwood.logging.LoggerInterface getLogger()>();
+
+        staticinvoke <kellinwood.zipio.ZipListingHelper: void listEntry(kellinwood.logging.LoggerInterface,kellinwood.zipio.ZioEntry)>($r4, $r9);
+
+     label13:
+        $i1 = $i1 + 1;
+
+        goto label08;
+
+     label14:
+        r1 := @caughtexception;
+
+        virtualinvoke r1.<java.lang.Throwable: void printStackTrace()>();
+
+     label15:
+        return;
+
+        catch java.lang.Throwable from label01 to label02 with label14;
+        catch java.lang.Throwable from label03 to label05 with label14;
+        catch java.lang.Throwable from label06 to label07 with label14;
+        catch java.lang.Throwable from label08 to label09 with label14;
+        catch java.lang.Throwable from label10 to label11 with label14;
+        catch java.lang.Throwable from label12 to label13 with label14;
+    }
+    private static kellinwood.logging.LoggerInterface getLogger()
+    {
+        kellinwood.logging.LoggerInterface $r0;
+        java.lang.Class $r1;
+        java.lang.String $r2;
+
+        $r0 = <kellinwood.zipio.ZipInput: kellinwood.logging.LoggerInterface log>;
+
+        if $r0 != null goto label1;
+
+        $r1 = class "Lkellinwood/zipio/ZipInput;";
+
+        $r2 = virtualinvoke $r1.<java.lang.Class: java.lang.String getName()>();
+
+        $r0 = staticinvoke <kellinwood.logging.LoggerManager: kellinwood.logging.LoggerInterface getLogger(java.lang.String)>($r2);
+
+        <kellinwood.zipio.ZipInput: kellinwood.logging.LoggerInterface log> = $r0;
+
+     label1:
+        $r0 = <kellinwood.zipio.ZipInput: kellinwood.logging.LoggerInterface log>;
+
+        return $r0;
+    }
+    public static kellinwood.zipio.ZipInput read(java.lang.String) throws java.io.IOException
+    {
+        java.lang.String $r0;
+        kellinwood.zipio.ZipInput r1;
+
+        $r0 := @parameter0: java.lang.String;
+
+        r1 = new kellinwood.zipio.ZipInput;
+
+        specialinvoke r1.<kellinwood.zipio.ZipInput: void <init>(java.lang.String)>($r0);
+
+        specialinvoke r1.<kellinwood.zipio.ZipInput: void doRead()>();
+
+        return r1;
+    }
+    public void close()
+    {
+        kellinwood.zipio.ZipInput r0;
+        java.io.RandomAccessFile $r1;
+        java.lang.Throwable $r2;
+
+        r0 := @this: kellinwood.zipio.ZipInput;
+
+        $r1 = r0.<kellinwood.zipio.ZipInput: java.io.RandomAccessFile in>;
+
+        if $r1 == null goto label4;
+
+     label1:
+        $r1 = r0.<kellinwood.zipio.ZipInput: java.io.RandomAccessFile in>;
+
+        virtualinvoke $r1.<java.io.RandomAccessFile: void close()>();
+
+     label2:
+        return;
+
+     label3:
+        $r2 := @caughtexception;
+
+     label4:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+    public java.util.Map getEntries()
+    {
+        kellinwood.zipio.ZipInput r0;
+        java.util.Map r1;
+
+        r0 := @this: kellinwood.zipio.ZipInput;
+
+        r1 = r0.<kellinwood.zipio.ZipInput: java.util.Map zioEntries>;
+
+        return r1;
+    }
+    public long getFilePointer() throws java.io.IOException
+    {
+        kellinwood.zipio.ZipInput r0;
+        long $l0;
+        java.io.RandomAccessFile $r1;
+
+        r0 := @this: kellinwood.zipio.ZipInput;
+
+        $r1 = r0.<kellinwood.zipio.ZipInput: java.io.RandomAccessFile in>;
+
+        $l0 = virtualinvoke $r1.<java.io.RandomAccessFile: long getFilePointer()>();
+
+        return $l0;
+    }
+    public byte[] readBytes(int) throws java.io.IOException
+    {
+        kellinwood.zipio.ZipInput r0;
+        int $i0, i2;
+        byte[] r1;
+        byte $b1;
+        java.io.RandomAccessFile $r2;
+
+        r0 := @this: kellinwood.zipio.ZipInput;
+
+        $i0 := @parameter0: int;
+
+        r1 = newarray (byte)[$i0];
+
+        i2 = 0;
+
+     label1:
+        if i2 >= $i0 goto label2;
+
+        $r2 = r0.<kellinwood.zipio.ZipInput: java.io.RandomAccessFile in>;
+
+        $b1 = virtualinvoke $r2.<java.io.RandomAccessFile: byte readByte()>();
+
+        r1[i2] = $b1;
+
+        i2 = i2 + 1;
+
+        goto label1;
+
+     label2:
+        return r1;
+    }
+    public int readInt() throws java.io.IOException
+    {
+        kellinwood.zipio.ZipInput r0;
+        int $i0, $i1, i2, i3;
+        java.io.RandomAccessFile $r1;
+
+        r0 := @this: kellinwood.zipio.ZipInput;
+
+        i2 = 0;
+
+        i3 = 0;
+
+     label1:
+        if i3 >= 4 goto label2;
+
+        $r1 = r0.<kellinwood.zipio.ZipInput: java.io.RandomAccessFile in>;
+
+        $i1 = virtualinvoke $r1.<java.io.RandomAccessFile: int readUnsignedByte()>();
+
+        $i0 = i3 * 8;
+
+        $i0 = $i1 << $i0;
+
+        i2 = i2 | $i0;
+
+        i3 = i3 + 1;
+
+        goto label1;
+
+     label2:
+        return i2;
+    }
+    public short readShort() throws java.io.IOException
+    {
+        kellinwood.zipio.ZipInput r0;
+        int $i0, $i1, i3;
+        short s2;
+        java.io.RandomAccessFile $r1;
+
+        r0 := @this: kellinwood.zipio.ZipInput;
+
+        s2 = 0;
+
+        i3 = 0;
+
+     label1:
+        if i3 >= 2 goto label2;
+
+        $r1 = r0.<kellinwood.zipio.ZipInput: java.io.RandomAccessFile in>;
+
+        $i1 = virtualinvoke $r1.<java.io.RandomAccessFile: int readUnsignedByte()>();
+
+        $i0 = i3 * 8;
+
+        $i0 = $i1 << $i0;
+
+        $i0 = $i0 | s2;
+
+        s2 = (short) $i0;
+
+        i3 = i3 + 1;
+
+        goto label1;
+
+     label2:
+        return s2;
+    }
+    public java.lang.String readString(int) throws java.io.IOException
+    {
+        kellinwood.zipio.ZipInput r0;
+        int $i0, i2;
+        byte[] r1;
+        byte $b1;
+        java.io.RandomAccessFile $r2;
+        java.lang.String $r3;
+
+        r0 := @this: kellinwood.zipio.ZipInput;
+
+        $i0 := @parameter0: int;
+
+        r1 = newarray (byte)[$i0];
+
+        i2 = 0;
+
+     label1:
+        if i2 >= $i0 goto label2;
+
+        $r2 = r0.<kellinwood.zipio.ZipInput: java.io.RandomAccessFile in>;
+
+        $b1 = virtualinvoke $r2.<java.io.RandomAccessFile: byte readByte()>();
+
+        r1[i2] = $b1;
+
+        i2 = i2 + 1;
+
+        goto label1;
+
+     label2:
+        $r3 = new java.lang.String;
+
+        specialinvoke $r3.<java.lang.String: void <init>(byte[])>(r1);
+
+        return $r3;
+    }
+    public long scanForEOCDR(int) throws java.io.IOException
+    {
+        kellinwood.zipio.ZipInput r0;
+        int $i0, i1, i5, $i6;
+        byte[] r1;
+        long $l2, $l3;
+        byte $b4;
+        java.lang.IllegalStateException $r2;
+        java.lang.StringBuilder $r3;
+        java.lang.String $r4;
+        java.io.RandomAccessFile $r5;
+
+        r0 := @this: kellinwood.zipio.ZipInput;
+
+        $i0 := @parameter0: int;
+
+        $l2 = (long) $i0;
+
+        $l3 = r0.<kellinwood.zipio.ZipInput: long fileLength>;
+
+        $b4 = $l2 cmp $l3;
+
+        if $b4 > 0 goto label1;
+
+        if $i0 <= 65536 goto label2;
+
+     label1:
+        $r2 = new java.lang.IllegalStateException;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("End of central directory not found in ");
+
+        $r4 = r0.<kellinwood.zipio.ZipInput: java.lang.String inputFilename>;
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r2.<java.lang.IllegalStateException: void <init>(java.lang.String)>($r4);
+
+        throw $r2;
+
+     label2:
+        $l2 = r0.<kellinwood.zipio.ZipInput: long fileLength>;
+
+        $l3 = (long) $i0;
+
+        $l2 = staticinvoke <java.lang.Math: long min(long,long)>($l2, $l3);
+
+        i1 = (int) $l2;
+
+        r1 = newarray (byte)[i1];
+
+        $r5 = r0.<kellinwood.zipio.ZipInput: java.io.RandomAccessFile in>;
+
+        $l2 = r0.<kellinwood.zipio.ZipInput: long fileLength>;
+
+        $l3 = (long) i1;
+
+        $l2 = $l2 - $l3;
+
+        virtualinvoke $r5.<java.io.RandomAccessFile: void seek(long)>($l2);
+
+        $r5 = r0.<kellinwood.zipio.ZipInput: java.io.RandomAccessFile in>;
+
+        virtualinvoke $r5.<java.io.RandomAccessFile: void readFully(byte[])>(r1);
+
+        i5 = i1 + -22;
+
+     label3:
+        if i5 < 0 goto label5;
+
+        $i6 = r0.<kellinwood.zipio.ZipInput: int scanIterations>;
+
+        $i6 = $i6 + 1;
+
+        r0.<kellinwood.zipio.ZipInput: int scanIterations> = $i6;
+
+        $b4 = r1[i5];
+
+        if $b4 != 80 goto label4;
+
+        $i6 = i5 + 1;
+
+        $b4 = r1[$i6];
+
+        if $b4 != 75 goto label4;
+
+        $i6 = i5 + 2;
+
+        $b4 = r1[$i6];
+
+        if $b4 != 5 goto label4;
+
+        $i6 = i5 + 3;
+
+        $b4 = r1[$i6];
+
+        if $b4 != 6 goto label4;
+
+        $l2 = r0.<kellinwood.zipio.ZipInput: long fileLength>;
+
+        $l3 = (long) i1;
+
+        $l2 = $l2 - $l3;
+
+        $l3 = (long) i5;
+
+        $l2 = $l2 + $l3;
+
+        return $l2;
+
+     label4:
+        i5 = i5 + -1;
+
+        goto label3;
+
+     label5:
+        $i0 = $i0 * 2;
+
+        $l2 = virtualinvoke r0.<kellinwood.zipio.ZipInput: long scanForEOCDR(int)>($i0);
+
+        return $l2;
+    }
+    public void seek(long) throws java.io.IOException
+    {
+        kellinwood.zipio.ZipInput r0;
+        long $l0;
+        java.io.RandomAccessFile $r1;
+
+        r0 := @this: kellinwood.zipio.ZipInput;
+
+        $l0 := @parameter0: long;
+
+        $r1 = r0.<kellinwood.zipio.ZipInput: java.io.RandomAccessFile in>;
+
+        virtualinvoke $r1.<java.io.RandomAccessFile: void seek(long)>($l0);
+
+        return;
+    }

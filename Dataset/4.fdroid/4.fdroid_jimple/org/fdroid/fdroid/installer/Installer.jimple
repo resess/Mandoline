@@ -1,0 +1,370 @@
+org.fdroid.fdroid.installer.Installer extends java.lang.Object
+private static final java.lang.String TAG
+protected final org.fdroid.fdroid.installer.Installer$InstallerCallback mCallback
+protected final android.content.Context mContext
+protected final android.content.pm.PackageManager mPm
+    public void <init>(android.content.Context, android.content.pm.PackageManager, org.fdroid.fdroid.installer.Installer$InstallerCallback) throws org.fdroid.fdroid.installer.Installer$AndroidNotCompatibleException
+    {
+        org.fdroid.fdroid.installer.Installer r0;
+        android.content.Context $r1;
+        android.content.pm.PackageManager $r2;
+        org.fdroid.fdroid.installer.Installer$InstallerCallback $r3;
+
+        r0 := @this: org.fdroid.fdroid.installer.Installer;
+
+        $r1 := @parameter0: android.content.Context;
+
+        $r2 := @parameter1: android.content.pm.PackageManager;
+
+        $r3 := @parameter2: org.fdroid.fdroid.installer.Installer$InstallerCallback;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<org.fdroid.fdroid.installer.Installer: android.content.Context mContext> = $r1;
+
+        r0.<org.fdroid.fdroid.installer.Installer: android.content.pm.PackageManager mPm> = $r2;
+
+        r0.<org.fdroid.fdroid.installer.Installer: org.fdroid.fdroid.installer.Installer$InstallerCallback mCallback> = $r3;
+
+        return;
+    }
+    public static org.fdroid.fdroid.installer.Installer getActivityInstaller(android.app.Activity, android.content.pm.PackageManager, org.fdroid.fdroid.installer.Installer$InstallerCallback)
+    {
+        android.app.Activity $r0;
+        android.content.pm.PackageManager $r1;
+        org.fdroid.fdroid.installer.Installer$InstallerCallback $r2;
+        org.fdroid.fdroid.Preferences $r3;
+        boolean $z0;
+        int $i0;
+        org.fdroid.fdroid.installer.PrivilegedInstaller $r4;
+        org.fdroid.fdroid.installer.Installer$AndroidNotCompatibleException r5, r7, r9;
+        org.fdroid.fdroid.installer.DefaultSdk14Installer $r6;
+        org.fdroid.fdroid.installer.DefaultInstaller $r8;
+
+        $r0 := @parameter0: android.app.Activity;
+
+        $r1 := @parameter1: android.content.pm.PackageManager;
+
+        $r2 := @parameter2: org.fdroid.fdroid.installer.Installer$InstallerCallback;
+
+        $r3 = staticinvoke <org.fdroid.fdroid.Preferences: org.fdroid.fdroid.Preferences get()>();
+
+        $z0 = virtualinvoke $r3.<org.fdroid.fdroid.Preferences: boolean isPrivilegedInstallerEnabled()>();
+
+        if $z0 == 0 goto label04;
+
+        $i0 = staticinvoke <org.fdroid.fdroid.installer.PrivilegedInstaller: int isExtensionInstalledCorrectly(android.content.Context)>($r0);
+
+        if $i0 != 1 goto label11;
+
+        staticinvoke <org.fdroid.fdroid.Utils: void debugLog(java.lang.String,java.lang.String)>("Installer", "system permissions -> SystemInstaller");
+
+        $r4 = new org.fdroid.fdroid.installer.PrivilegedInstaller;
+
+     label01:
+        specialinvoke $r4.<org.fdroid.fdroid.installer.PrivilegedInstaller: void <init>(android.app.Activity,android.content.pm.PackageManager,org.fdroid.fdroid.installer.Installer$InstallerCallback)>($r0, $r1, $r2);
+
+     label02:
+        return $r4;
+
+     label03:
+        r5 := @caughtexception;
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String,java.lang.Throwable)>("Installer", "Android not compatible with SystemInstaller!", r5);
+
+     label04:
+        $i0 = <android.os.Build$VERSION: int SDK_INT>;
+
+        if $i0 < 14 goto label12;
+
+     label05:
+        staticinvoke <org.fdroid.fdroid.Utils: void debugLog(java.lang.String,java.lang.String)>("Installer", "try default installer for Android >= 4");
+
+     label06:
+        $r6 = new org.fdroid.fdroid.installer.DefaultSdk14Installer;
+
+     label07:
+        specialinvoke $r6.<org.fdroid.fdroid.installer.DefaultSdk14Installer: void <init>(android.app.Activity,android.content.pm.PackageManager,org.fdroid.fdroid.installer.Installer$InstallerCallback)>($r0, $r1, $r2);
+
+     label08:
+        return $r6;
+
+     label09:
+        r7 := @caughtexception;
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String,java.lang.Throwable)>("Installer", "Android not compatible with DefaultInstallerSdk14!", r7);
+
+     label10:
+        return null;
+
+     label11:
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String)>("Installer", "SystemInstaller is enabled in prefs, but system-perms are not granted!");
+
+        goto label04;
+
+     label12:
+        staticinvoke <org.fdroid.fdroid.Utils: void debugLog(java.lang.String,java.lang.String)>("Installer", "try default installer for Android < 4");
+
+     label13:
+        $r8 = new org.fdroid.fdroid.installer.DefaultInstaller;
+
+     label14:
+        specialinvoke $r8.<org.fdroid.fdroid.installer.DefaultInstaller: void <init>(android.app.Activity,android.content.pm.PackageManager,org.fdroid.fdroid.installer.Installer$InstallerCallback)>($r0, $r1, $r2);
+
+     label15:
+        return $r8;
+
+     label16:
+        r9 := @caughtexception;
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String,java.lang.Throwable)>("Installer", "Android not compatible with DefaultInstaller!", r9);
+
+        goto label10;
+
+        catch org.fdroid.fdroid.installer.Installer$AndroidNotCompatibleException from label01 to label02 with label03;
+        catch org.fdroid.fdroid.installer.Installer$AndroidNotCompatibleException from label05 to label06 with label09;
+        catch org.fdroid.fdroid.installer.Installer$AndroidNotCompatibleException from label07 to label08 with label09;
+        catch org.fdroid.fdroid.installer.Installer$AndroidNotCompatibleException from label12 to label13 with label16;
+        catch org.fdroid.fdroid.installer.Installer$AndroidNotCompatibleException from label14 to label15 with label16;
+    }
+    public static org.fdroid.fdroid.installer.Installer getActivityInstaller(android.app.Activity, org.fdroid.fdroid.installer.Installer$InstallerCallback)
+    {
+        android.app.Activity $r0;
+        org.fdroid.fdroid.installer.Installer$InstallerCallback $r1;
+        android.content.pm.PackageManager $r2;
+        org.fdroid.fdroid.installer.Installer $r3;
+
+        $r0 := @parameter0: android.app.Activity;
+
+        $r1 := @parameter1: org.fdroid.fdroid.installer.Installer$InstallerCallback;
+
+        $r2 = virtualinvoke $r0.<android.app.Activity: android.content.pm.PackageManager getPackageManager()>();
+
+        $r3 = staticinvoke <org.fdroid.fdroid.installer.Installer: org.fdroid.fdroid.installer.Installer getActivityInstaller(android.app.Activity,android.content.pm.PackageManager,org.fdroid.fdroid.installer.Installer$InstallerCallback)>($r0, $r2, $r1);
+
+        return $r3;
+    }
+    public void deletePackage(java.lang.String) throws org.fdroid.fdroid.installer.Installer$AndroidNotCompatibleException
+    {
+        org.fdroid.fdroid.installer.Installer r0;
+        java.lang.String $r1;
+        android.content.Intent r2;
+        android.content.pm.PackageManager $r3;
+        boolean $z0;
+        android.content.Context r4;
+        android.app.Activity r5;
+        android.content.pm.PackageManager$NameNotFoundException r6;
+        java.lang.StringBuilder $r7;
+        java.lang.ClassCastException r8;
+
+        r0 := @this: org.fdroid.fdroid.installer.Installer;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r3 = r0.<org.fdroid.fdroid.installer.Installer: android.content.pm.PackageManager mPm>;
+
+     label1:
+        virtualinvoke $r3.<android.content.pm.PackageManager: android.content.pm.PackageInfo getPackageInfo(java.lang.String,int)>($r1, 0);
+
+     label2:
+        if $r1 == null goto label7;
+
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean equals(java.lang.Object)>("org.fdroid.fdroid.privileged");
+
+        if $z0 == 0 goto label7;
+
+        r4 = r0.<org.fdroid.fdroid.installer.Installer: android.content.Context mContext>;
+
+     label3:
+        r5 = (android.app.Activity) r4;
+
+     label4:
+        r2 = new android.content.Intent;
+
+        specialinvoke r2.<android.content.Intent: void <init>(android.content.Context,java.lang.Class)>(r5, class "Lorg/fdroid/fdroid/privileged/install/InstallExtensionDialogActivity;");
+
+        virtualinvoke r2.<android.content.Intent: android.content.Intent setAction(java.lang.String)>("uninstall");
+
+        virtualinvoke r5.<android.app.Activity: void startActivity(android.content.Intent)>(r2);
+
+        return;
+
+     label5:
+        r6 := @caughtexception;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Couldn\'t find package ");
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" to delete.");
+
+        $r1 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String)>("Installer", $r1);
+
+        return;
+
+     label6:
+        r8 := @caughtexception;
+
+        staticinvoke <org.fdroid.fdroid.Utils: void debugLog(java.lang.String,java.lang.String)>("Installer", "F-Droid Privileged can only be uninstalled using an activity!");
+
+        return;
+
+     label7:
+        virtualinvoke r0.<org.fdroid.fdroid.installer.Installer: void deletePackageInternal(java.lang.String)>($r1);
+
+        return;
+
+        catch android.content.pm.PackageManager$NameNotFoundException from label1 to label2 with label5;
+        catch java.lang.ClassCastException from label3 to label4 with label6;
+    }
+protected abstract void deletePackageInternal(java.lang.String) throws org.fdroid.fdroid.installer.Installer$AndroidNotCompatibleException { 
+// no body
+} 
+public abstract boolean handleOnActivityResult(int, int, android.content.Intent) { 
+// no body
+} 
+    public void installPackage(java.io.File, java.lang.String) throws org.fdroid.fdroid.installer.Installer$AndroidNotCompatibleException
+    {
+        org.fdroid.fdroid.installer.Installer r0;
+        java.io.File $r1;
+        java.lang.String $r2;
+        java.lang.ClassCastException r3;
+        android.content.Intent r4;
+        boolean $z0;
+        java.lang.StringBuilder $r5;
+        android.content.Context r6;
+        android.app.Activity r7;
+
+        r0 := @this: org.fdroid.fdroid.installer.Installer;
+
+        $r1 := @parameter0: java.io.File;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $z0 = virtualinvoke $r1.<java.io.File: boolean exists()>();
+
+        if $z0 != 0 goto label1;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Couldn\'t find file ");
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r1);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" to install.");
+
+        $r2 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String)>("Installer", $r2);
+
+        return;
+
+     label1:
+        if $r2 == null goto label5;
+
+        $z0 = virtualinvoke $r2.<java.lang.String: boolean equals(java.lang.Object)>("org.fdroid.fdroid.privileged");
+
+        if $z0 == 0 goto label5;
+
+        r6 = r0.<org.fdroid.fdroid.installer.Installer: android.content.Context mContext>;
+
+     label2:
+        r7 = (android.app.Activity) r6;
+
+     label3:
+        r4 = new android.content.Intent;
+
+        specialinvoke r4.<android.content.Intent: void <init>(android.content.Context,java.lang.Class)>(r7, class "Lorg/fdroid/fdroid/privileged/install/InstallExtensionDialogActivity;");
+
+        virtualinvoke r4.<android.content.Intent: android.content.Intent setAction(java.lang.String)>("install");
+
+        $r2 = virtualinvoke $r1.<java.io.File: java.lang.String getAbsolutePath()>();
+
+        virtualinvoke r4.<android.content.Intent: android.content.Intent putExtra(java.lang.String,java.lang.String)>("apk_file", $r2);
+
+        virtualinvoke r7.<android.app.Activity: void startActivity(android.content.Intent)>(r4);
+
+        return;
+
+     label4:
+        r3 := @caughtexception;
+
+        staticinvoke <org.fdroid.fdroid.Utils: void debugLog(java.lang.String,java.lang.String)>("Installer", "F-Droid Privileged can only be updated using an activity!");
+
+        return;
+
+     label5:
+        virtualinvoke r0.<org.fdroid.fdroid.installer.Installer: void installPackageInternal(java.io.File)>($r1);
+
+        return;
+
+        catch java.lang.ClassCastException from label2 to label3 with label4;
+    }
+    public void installPackage(java.util.List) throws org.fdroid.fdroid.installer.Installer$AndroidNotCompatibleException
+    {
+        org.fdroid.fdroid.installer.Installer r0;
+        java.util.List r1;
+        java.util.Iterator $r2;
+        boolean $z0;
+        java.lang.Object $r3;
+        java.io.File r4;
+        java.lang.StringBuilder $r5;
+        java.lang.String $r6;
+
+        r0 := @this: org.fdroid.fdroid.installer.Installer;
+
+        r1 := @parameter0: java.util.List;
+
+        $r2 = interfaceinvoke r1.<java.util.List: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r2.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label2;
+
+        $r3 = interfaceinvoke $r2.<java.util.Iterator: java.lang.Object next()>();
+
+        r4 = (java.io.File) $r3;
+
+        $z0 = virtualinvoke r4.<java.io.File: boolean exists()>();
+
+        if $z0 != 0 goto label1;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Couldn\'t find file ");
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r4);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" to install.");
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String)>("Installer", $r6);
+
+        return;
+
+     label2:
+        virtualinvoke r0.<org.fdroid.fdroid.installer.Installer: void installPackageInternal(java.util.List)>(r1);
+
+        return;
+    }
+protected abstract void installPackageInternal(java.io.File) throws org.fdroid.fdroid.installer.Installer$AndroidNotCompatibleException { 
+// no body
+} 
+protected abstract void installPackageInternal(java.util.List) throws org.fdroid.fdroid.installer.Installer$AndroidNotCompatibleException { 
+// no body
+} 
+public abstract boolean supportsUnattendedOperations() { 
+// no body
+} 

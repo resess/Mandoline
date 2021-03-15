@@ -1,0 +1,3522 @@
+com.squareup.moshi.BufferedSourceJsonReader extends com.squareup.moshi.JsonReader
+private static final okio.ByteString DOUBLE_QUOTE_OR_SLASH
+private static final okio.ByteString LINEFEED_OR_CARRIAGE_RETURN
+private static final long MIN_INCOMPLETE_INTEGER
+private static final int NUMBER_CHAR_DECIMAL
+private static final int NUMBER_CHAR_DIGIT
+private static final int NUMBER_CHAR_EXP_DIGIT
+private static final int NUMBER_CHAR_EXP_E
+private static final int NUMBER_CHAR_EXP_SIGN
+private static final int NUMBER_CHAR_FRACTION_DIGIT
+private static final int NUMBER_CHAR_NONE
+private static final int NUMBER_CHAR_SIGN
+private static final int PEEKED_BEGIN_ARRAY
+private static final int PEEKED_BEGIN_OBJECT
+private static final int PEEKED_BUFFERED
+private static final int PEEKED_DOUBLE_QUOTED
+private static final int PEEKED_DOUBLE_QUOTED_NAME
+private static final int PEEKED_END_ARRAY
+private static final int PEEKED_END_OBJECT
+private static final int PEEKED_EOF
+private static final int PEEKED_FALSE
+private static final int PEEKED_LONG
+private static final int PEEKED_NONE
+private static final int PEEKED_NULL
+private static final int PEEKED_NUMBER
+private static final int PEEKED_SINGLE_QUOTED
+private static final int PEEKED_SINGLE_QUOTED_NAME
+private static final int PEEKED_TRUE
+private static final int PEEKED_UNQUOTED
+private static final int PEEKED_UNQUOTED_NAME
+private static final okio.ByteString SINGLE_QUOTE_OR_SLASH
+private static final okio.ByteString UNQUOTED_STRING_TERMINALS
+private final okio.Buffer buffer
+private boolean failOnUnknown
+private boolean lenient
+private int[] pathIndices
+private java.lang.String[] pathNames
+private int peeked
+private long peekedLong
+private int peekedNumberLength
+private java.lang.String peekedString
+private final okio.BufferedSource source
+private int[] stack
+private int stackSize
+    static void <clinit>()
+    {
+        okio.ByteString $r0;
+
+        $r0 = staticinvoke <okio.ByteString: okio.ByteString encodeUtf8(java.lang.String)>("\'\\");
+
+        <com.squareup.moshi.BufferedSourceJsonReader: okio.ByteString SINGLE_QUOTE_OR_SLASH> = $r0;
+
+        $r0 = staticinvoke <okio.ByteString: okio.ByteString encodeUtf8(java.lang.String)>("\"\\");
+
+        <com.squareup.moshi.BufferedSourceJsonReader: okio.ByteString DOUBLE_QUOTE_OR_SLASH> = $r0;
+
+        $r0 = staticinvoke <okio.ByteString: okio.ByteString encodeUtf8(java.lang.String)>("{}[]:, \n\t\r\f/\\;#=");
+
+        <com.squareup.moshi.BufferedSourceJsonReader: okio.ByteString UNQUOTED_STRING_TERMINALS> = $r0;
+
+        $r0 = staticinvoke <okio.ByteString: okio.ByteString encodeUtf8(java.lang.String)>("\n\r");
+
+        <com.squareup.moshi.BufferedSourceJsonReader: okio.ByteString LINEFEED_OR_CARRIAGE_RETURN> = $r0;
+
+        return;
+    }
+    void <init>(okio.BufferedSource)
+    {
+        com.squareup.moshi.BufferedSourceJsonReader r0;
+        okio.BufferedSource $r1;
+        okio.Buffer $r2;
+        int[] $r3;
+        int $i0, $i1;
+        java.lang.String[] $r4;
+        java.lang.NullPointerException $r5;
+
+        r0 := @this: com.squareup.moshi.BufferedSourceJsonReader;
+
+        $r1 := @parameter0: okio.BufferedSource;
+
+        specialinvoke r0.<com.squareup.moshi.JsonReader: void <init>()>();
+
+        r0.<com.squareup.moshi.BufferedSourceJsonReader: boolean lenient> = 0;
+
+        r0.<com.squareup.moshi.BufferedSourceJsonReader: boolean failOnUnknown> = 0;
+
+        r0.<com.squareup.moshi.BufferedSourceJsonReader: int peeked> = 0;
+
+        $r3 = newarray (int)[32];
+
+        r0.<com.squareup.moshi.BufferedSourceJsonReader: int[] stack> = $r3;
+
+        r0.<com.squareup.moshi.BufferedSourceJsonReader: int stackSize> = 0;
+
+        $r3 = r0.<com.squareup.moshi.BufferedSourceJsonReader: int[] stack>;
+
+        $i0 = r0.<com.squareup.moshi.BufferedSourceJsonReader: int stackSize>;
+
+        $i1 = $i0 + 1;
+
+        r0.<com.squareup.moshi.BufferedSourceJsonReader: int stackSize> = $i1;
+
+        $r3[$i0] = 6;
+
+        $r4 = newarray (java.lang.String)[32];
+
+        r0.<com.squareup.moshi.BufferedSourceJsonReader: java.lang.String[] pathNames> = $r4;
+
+        $r3 = newarray (int)[32];
+
+        r0.<com.squareup.moshi.BufferedSourceJsonReader: int[] pathIndices> = $r3;
+
+        if $r1 != null goto label1;
+
+        $r5 = new java.lang.NullPointerException;
+
+        specialinvoke $r5.<java.lang.NullPointerException: void <init>(java.lang.String)>("source == null");
+
+        throw $r5;
+
+     label1:
+        r0.<com.squareup.moshi.BufferedSourceJsonReader: okio.BufferedSource source> = $r1;
+
+        $r2 = interfaceinvoke $r1.<okio.BufferedSource: okio.Buffer buffer()>();
+
+        r0.<com.squareup.moshi.BufferedSourceJsonReader: okio.Buffer buffer> = $r2;
+
+        return;
+    }
+    private void checkLenient() throws java.io.IOException
+    {
+        com.squareup.moshi.BufferedSourceJsonReader r0;
+        java.io.IOException $r1;
+        boolean $z0;
+
+        r0 := @this: com.squareup.moshi.BufferedSourceJsonReader;
+
+        $z0 = r0.<com.squareup.moshi.BufferedSourceJsonReader: boolean lenient>;
+
+        if $z0 != 0 goto label1;
+
+        $r1 = specialinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: java.io.IOException syntaxError(java.lang.String)>("Use JsonReader.setLenient(true) to accept malformed JSON");
+
+        throw $r1;
+
+     label1:
+        return;
+    }
+    private int doPeek() throws java.io.IOException
+    {
+        com.squareup.moshi.BufferedSourceJsonReader r0;
+        int i0, $i1;
+        int[] $r1;
+        okio.Buffer $r2;
+        java.io.IOException $r3;
+        char $c2;
+        boolean $z0;
+        okio.BufferedSource $r4;
+        byte $b3;
+        java.lang.IllegalStateException $r5;
+
+        r0 := @this: com.squareup.moshi.BufferedSourceJsonReader;
+
+        $r1 = r0.<com.squareup.moshi.BufferedSourceJsonReader: int[] stack>;
+
+        i0 = r0.<com.squareup.moshi.BufferedSourceJsonReader: int stackSize>;
+
+        i0 = i0 + -1;
+
+        i0 = $r1[i0];
+
+        if i0 != 1 goto label03;
+
+        $r1 = r0.<com.squareup.moshi.BufferedSourceJsonReader: int[] stack>;
+
+        $i1 = r0.<com.squareup.moshi.BufferedSourceJsonReader: int stackSize>;
+
+        $i1 = $i1 + -1;
+
+        $r1[$i1] = 2;
+
+     label01:
+        $i1 = specialinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: int nextNonWhitespace(boolean)>(1);
+
+        lookupswitch($i1)
+        {
+            case 34: goto label31;
+            case 39: goto label30;
+            case 44: goto label27;
+            case 59: goto label27;
+            case 91: goto label32;
+            case 93: goto label26;
+            case 123: goto label33;
+            default: goto label02;
+        };
+
+     label02:
+        i0 = specialinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: int peekKeyword()>();
+
+        if i0 == 0 goto label34;
+
+        return i0;
+
+     label03:
+        if i0 != 2 goto label07;
+
+        $i1 = specialinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: int nextNonWhitespace(boolean)>(1);
+
+        $r2 = r0.<com.squareup.moshi.BufferedSourceJsonReader: okio.Buffer buffer>;
+
+        virtualinvoke $r2.<okio.Buffer: byte readByte()>();
+
+        lookupswitch($i1)
+        {
+            case 44: goto label01;
+            case 59: goto label06;
+            case 93: goto label05;
+            default: goto label04;
+        };
+
+     label04:
+        $r3 = specialinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: java.io.IOException syntaxError(java.lang.String)>("Unterminated array");
+
+        throw $r3;
+
+     label05:
+        r0.<com.squareup.moshi.BufferedSourceJsonReader: int peeked> = 4;
+
+        return 4;
+
+     label06:
+        specialinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: void checkLenient()>();
+
+        goto label01;
+
+     label07:
+        if i0 == 3 goto label08;
+
+        if i0 != 5 goto label19;
+
+     label08:
+        $r1 = r0.<com.squareup.moshi.BufferedSourceJsonReader: int[] stack>;
+
+        $i1 = r0.<com.squareup.moshi.BufferedSourceJsonReader: int stackSize>;
+
+        $i1 = $i1 + -1;
+
+        $r1[$i1] = 4;
+
+        if i0 != 5 goto label12;
+
+        $i1 = specialinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: int nextNonWhitespace(boolean)>(1);
+
+        $r2 = r0.<com.squareup.moshi.BufferedSourceJsonReader: okio.Buffer buffer>;
+
+        virtualinvoke $r2.<okio.Buffer: byte readByte()>();
+
+        lookupswitch($i1)
+        {
+            case 44: goto label12;
+            case 59: goto label11;
+            case 125: goto label10;
+            default: goto label09;
+        };
+
+     label09:
+        $r3 = specialinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: java.io.IOException syntaxError(java.lang.String)>("Unterminated object");
+
+        throw $r3;
+
+     label10:
+        r0.<com.squareup.moshi.BufferedSourceJsonReader: int peeked> = 2;
+
+        return 2;
+
+     label11:
+        specialinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: void checkLenient()>();
+
+     label12:
+        $i1 = specialinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: int nextNonWhitespace(boolean)>(1);
+
+        lookupswitch($i1)
+        {
+            case 34: goto label14;
+            case 39: goto label15;
+            case 125: goto label16;
+            default: goto label13;
+        };
+
+     label13:
+        specialinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: void checkLenient()>();
+
+        $c2 = (char) $i1;
+
+        $z0 = specialinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: boolean isLiteral(int)>($c2);
+
+        if $z0 == 0 goto label18;
+
+        r0.<com.squareup.moshi.BufferedSourceJsonReader: int peeked> = 14;
+
+        return 14;
+
+     label14:
+        $r2 = r0.<com.squareup.moshi.BufferedSourceJsonReader: okio.Buffer buffer>;
+
+        virtualinvoke $r2.<okio.Buffer: byte readByte()>();
+
+        r0.<com.squareup.moshi.BufferedSourceJsonReader: int peeked> = 13;
+
+        return 13;
+
+     label15:
+        $r2 = r0.<com.squareup.moshi.BufferedSourceJsonReader: okio.Buffer buffer>;
+
+        virtualinvoke $r2.<okio.Buffer: byte readByte()>();
+
+        specialinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: void checkLenient()>();
+
+        r0.<com.squareup.moshi.BufferedSourceJsonReader: int peeked> = 12;
+
+        return 12;
+
+     label16:
+        if i0 == 5 goto label17;
+
+        $r2 = r0.<com.squareup.moshi.BufferedSourceJsonReader: okio.Buffer buffer>;
+
+        virtualinvoke $r2.<okio.Buffer: byte readByte()>();
+
+        r0.<com.squareup.moshi.BufferedSourceJsonReader: int peeked> = 2;
+
+        return 2;
+
+     label17:
+        $r3 = specialinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: java.io.IOException syntaxError(java.lang.String)>("Expected name");
+
+        throw $r3;
+
+     label18:
+        $r3 = specialinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: java.io.IOException syntaxError(java.lang.String)>("Expected name");
+
+        throw $r3;
+
+     label19:
+        if i0 != 4 goto label22;
+
+        $r1 = r0.<com.squareup.moshi.BufferedSourceJsonReader: int[] stack>;
+
+        $i1 = r0.<com.squareup.moshi.BufferedSourceJsonReader: int stackSize>;
+
+        $i1 = $i1 + -1;
+
+        $r1[$i1] = 5;
+
+        $i1 = specialinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: int nextNonWhitespace(boolean)>(1);
+
+        $r2 = r0.<com.squareup.moshi.BufferedSourceJsonReader: okio.Buffer buffer>;
+
+        virtualinvoke $r2.<okio.Buffer: byte readByte()>();
+
+        lookupswitch($i1)
+        {
+            case 58: goto label01;
+            case 59: goto label20;
+            case 60: goto label20;
+            case 61: goto label21;
+            default: goto label20;
+        };
+
+     label20:
+        $r3 = specialinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: java.io.IOException syntaxError(java.lang.String)>("Expected \':\'");
+
+        throw $r3;
+
+     label21:
+        specialinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: void checkLenient()>();
+
+        $r4 = r0.<com.squareup.moshi.BufferedSourceJsonReader: okio.BufferedSource source>;
+
+        $z0 = interfaceinvoke $r4.<okio.BufferedSource: boolean request(long)>(1L);
+
+        if $z0 == 0 goto label01;
+
+        $r2 = r0.<com.squareup.moshi.BufferedSourceJsonReader: okio.Buffer buffer>;
+
+        $b3 = virtualinvoke $r2.<okio.Buffer: byte getByte(long)>(0L);
+
+        if $b3 != 62 goto label01;
+
+        $r2 = r0.<com.squareup.moshi.BufferedSourceJsonReader: okio.Buffer buffer>;
+
+        virtualinvoke $r2.<okio.Buffer: byte readByte()>();
+
+        goto label01;
+
+     label22:
+        if i0 != 6 goto label23;
+
+        $r1 = r0.<com.squareup.moshi.BufferedSourceJsonReader: int[] stack>;
+
+        $i1 = r0.<com.squareup.moshi.BufferedSourceJsonReader: int stackSize>;
+
+        $i1 = $i1 + -1;
+
+        $r1[$i1] = 7;
+
+        goto label01;
+
+     label23:
+        if i0 != 7 goto label25;
+
+        $i1 = specialinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: int nextNonWhitespace(boolean)>(0);
+
+        if $i1 != -1 goto label24;
+
+        r0.<com.squareup.moshi.BufferedSourceJsonReader: int peeked> = 17;
+
+        return 17;
+
+     label24:
+        specialinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: void checkLenient()>();
+
+        goto label01;
+
+     label25:
+        if i0 != 8 goto label01;
+
+        $r5 = new java.lang.IllegalStateException;
+
+        specialinvoke $r5.<java.lang.IllegalStateException: void <init>(java.lang.String)>("JsonReader is closed");
+
+        throw $r5;
+
+     label26:
+        if i0 != 1 goto label27;
+
+        $r2 = r0.<com.squareup.moshi.BufferedSourceJsonReader: okio.Buffer buffer>;
+
+        virtualinvoke $r2.<okio.Buffer: byte readByte()>();
+
+        r0.<com.squareup.moshi.BufferedSourceJsonReader: int peeked> = 4;
+
+        return 4;
+
+     label27:
+        if i0 == 1 goto label28;
+
+        if i0 != 2 goto label29;
+
+     label28:
+        specialinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: void checkLenient()>();
+
+        r0.<com.squareup.moshi.BufferedSourceJsonReader: int peeked> = 7;
+
+        return 7;
+
+     label29:
+        $r3 = specialinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: java.io.IOException syntaxError(java.lang.String)>("Unexpected value");
+
+        throw $r3;
+
+     label30:
+        specialinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: void checkLenient()>();
+
+        $r2 = r0.<com.squareup.moshi.BufferedSourceJsonReader: okio.Buffer buffer>;
+
+        virtualinvoke $r2.<okio.Buffer: byte readByte()>();
+
+        r0.<com.squareup.moshi.BufferedSourceJsonReader: int peeked> = 8;
+
+        return 8;
+
+     label31:
+        $r2 = r0.<com.squareup.moshi.BufferedSourceJsonReader: okio.Buffer buffer>;
+
+        virtualinvoke $r2.<okio.Buffer: byte readByte()>();
+
+        r0.<com.squareup.moshi.BufferedSourceJsonReader: int peeked> = 9;
+
+        return 9;
+
+     label32:
+        $r2 = r0.<com.squareup.moshi.BufferedSourceJsonReader: okio.Buffer buffer>;
+
+        virtualinvoke $r2.<okio.Buffer: byte readByte()>();
+
+        r0.<com.squareup.moshi.BufferedSourceJsonReader: int peeked> = 3;
+
+        return 3;
+
+     label33:
+        $r2 = r0.<com.squareup.moshi.BufferedSourceJsonReader: okio.Buffer buffer>;
+
+        virtualinvoke $r2.<okio.Buffer: byte readByte()>();
+
+        r0.<com.squareup.moshi.BufferedSourceJsonReader: int peeked> = 1;
+
+        return 1;
+
+     label34:
+        i0 = specialinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: int peekNumber()>();
+
+        if i0 != 0 goto label36;
+
+        $r2 = r0.<com.squareup.moshi.BufferedSourceJsonReader: okio.Buffer buffer>;
+
+        $b3 = virtualinvoke $r2.<okio.Buffer: byte getByte(long)>(0L);
+
+        $z0 = specialinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: boolean isLiteral(int)>($b3);
+
+        if $z0 != 0 goto label35;
+
+        $r3 = specialinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: java.io.IOException syntaxError(java.lang.String)>("Expected value");
+
+        throw $r3;
+
+     label35:
+        specialinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: void checkLenient()>();
+
+        r0.<com.squareup.moshi.BufferedSourceJsonReader: int peeked> = 10;
+
+        return 10;
+
+     label36:
+        return i0;
+    }
+    private boolean isLiteral(int) throws java.io.IOException
+    {
+        com.squareup.moshi.BufferedSourceJsonReader r0;
+        int $i0;
+
+        r0 := @this: com.squareup.moshi.BufferedSourceJsonReader;
+
+        $i0 := @parameter0: int;
+
+        lookupswitch($i0)
+        {
+            case 9: goto label3;
+            case 10: goto label3;
+            case 12: goto label3;
+            case 13: goto label3;
+            case 32: goto label3;
+            case 35: goto label2;
+            case 44: goto label3;
+            case 47: goto label2;
+            case 58: goto label3;
+            case 59: goto label2;
+            case 61: goto label2;
+            case 91: goto label3;
+            case 92: goto label2;
+            case 93: goto label3;
+            case 123: goto label3;
+            case 125: goto label3;
+            default: goto label1;
+        };
+
+     label1:
+        return 1;
+
+     label2:
+        specialinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: void checkLenient()>();
+
+     label3:
+        return 0;
+    }
+    private int nextNonWhitespace(boolean) throws java.io.IOException
+    {
+        com.squareup.moshi.BufferedSourceJsonReader r0;
+        boolean $z0, $z1;
+        int i0, i1;
+        okio.BufferedSource $r1;
+        long $l2;
+        okio.Buffer $r2;
+        byte $b3, $b4;
+        java.io.IOException $r3;
+        java.io.EOFException $r4;
+
+        r0 := @this: com.squareup.moshi.BufferedSourceJsonReader;
+
+        $z0 := @parameter0: boolean;
+
+        i1 = 0;
+
+     label01:
+        $r1 = r0.<com.squareup.moshi.BufferedSourceJsonReader: okio.BufferedSource source>;
+
+        i0 = i1 + 1;
+
+        $l2 = (long) i0;
+
+        $z1 = interfaceinvoke $r1.<okio.BufferedSource: boolean request(long)>($l2);
+
+        if $z1 == 0 goto label10;
+
+        $r2 = r0.<com.squareup.moshi.BufferedSourceJsonReader: okio.Buffer buffer>;
+
+        i0 = i1 + 1;
+
+        $l2 = (long) i1;
+
+        $b3 = virtualinvoke $r2.<okio.Buffer: byte getByte(long)>($l2);
+
+        if $b3 == 10 goto label12;
+
+        if $b3 == 32 goto label12;
+
+        if $b3 == 13 goto label12;
+
+        if $b3 != 9 goto label02;
+
+        i1 = i0;
+
+        goto label01;
+
+     label02:
+        $r2 = r0.<com.squareup.moshi.BufferedSourceJsonReader: okio.Buffer buffer>;
+
+        i1 = i0 + -1;
+
+        $l2 = (long) i1;
+
+        virtualinvoke $r2.<okio.Buffer: void skip(long)>($l2);
+
+        if $b3 != 47 goto label08;
+
+        $r1 = r0.<com.squareup.moshi.BufferedSourceJsonReader: okio.BufferedSource source>;
+
+        $z1 = interfaceinvoke $r1.<okio.BufferedSource: boolean request(long)>(2L);
+
+        if $z1 != 0 goto label03;
+
+        return $b3;
+
+     label03:
+        specialinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: void checkLenient()>();
+
+        $r2 = r0.<com.squareup.moshi.BufferedSourceJsonReader: okio.Buffer buffer>;
+
+        $b4 = virtualinvoke $r2.<okio.Buffer: byte getByte(long)>(1L);
+
+        lookupswitch($b4)
+        {
+            case 42: goto label05;
+            case 47: goto label07;
+            default: goto label04;
+        };
+
+     label04:
+        return $b3;
+
+     label05:
+        $r2 = r0.<com.squareup.moshi.BufferedSourceJsonReader: okio.Buffer buffer>;
+
+        virtualinvoke $r2.<okio.Buffer: byte readByte()>();
+
+        $r2 = r0.<com.squareup.moshi.BufferedSourceJsonReader: okio.Buffer buffer>;
+
+        virtualinvoke $r2.<okio.Buffer: byte readByte()>();
+
+        $z1 = specialinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: boolean skipTo(java.lang.String)>("*/");
+
+        if $z1 != 0 goto label06;
+
+        $r3 = specialinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: java.io.IOException syntaxError(java.lang.String)>("Unterminated comment");
+
+        throw $r3;
+
+     label06:
+        $r2 = r0.<com.squareup.moshi.BufferedSourceJsonReader: okio.Buffer buffer>;
+
+        virtualinvoke $r2.<okio.Buffer: byte readByte()>();
+
+        $r2 = r0.<com.squareup.moshi.BufferedSourceJsonReader: okio.Buffer buffer>;
+
+        virtualinvoke $r2.<okio.Buffer: byte readByte()>();
+
+        i1 = 0;
+
+        goto label01;
+
+     label07:
+        $r2 = r0.<com.squareup.moshi.BufferedSourceJsonReader: okio.Buffer buffer>;
+
+        virtualinvoke $r2.<okio.Buffer: byte readByte()>();
+
+        $r2 = r0.<com.squareup.moshi.BufferedSourceJsonReader: okio.Buffer buffer>;
+
+        virtualinvoke $r2.<okio.Buffer: byte readByte()>();
+
+        specialinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: void skipToEndOfLine()>();
+
+        i1 = 0;
+
+        goto label01;
+
+     label08:
+        if $b3 != 35 goto label09;
+
+        specialinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: void checkLenient()>();
+
+        specialinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: void skipToEndOfLine()>();
+
+        i1 = 0;
+
+        goto label01;
+
+     label09:
+        return $b3;
+
+     label10:
+        if $z0 == 0 goto label11;
+
+        $r4 = new java.io.EOFException;
+
+        specialinvoke $r4.<java.io.EOFException: void <init>(java.lang.String)>("End of input");
+
+        throw $r4;
+
+     label11:
+        return -1;
+
+     label12:
+        i1 = i0;
+
+        goto label01;
+    }
+    private java.lang.String nextQuotedValue(okio.ByteString) throws java.io.IOException
+    {
+        com.squareup.moshi.BufferedSourceJsonReader r0;
+        okio.ByteString $r1;
+        java.lang.StringBuilder r2;
+        okio.BufferedSource $r3;
+        long $l0;
+        byte $b1;
+        java.io.IOException $r4;
+        okio.Buffer $r5;
+        java.lang.String $r6;
+        char $c2;
+
+        r0 := @this: com.squareup.moshi.BufferedSourceJsonReader;
+
+        $r1 := @parameter0: okio.ByteString;
+
+        r2 = null;
+
+     label1:
+        $r3 = r0.<com.squareup.moshi.BufferedSourceJsonReader: okio.BufferedSource source>;
+
+        $l0 = interfaceinvoke $r3.<okio.BufferedSource: long indexOfElement(okio.ByteString)>($r1);
+
+        $b1 = $l0 cmp -1L;
+
+        if $b1 != 0 goto label2;
+
+        $r4 = specialinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: java.io.IOException syntaxError(java.lang.String)>("Unterminated string");
+
+        throw $r4;
+
+     label2:
+        $r5 = r0.<com.squareup.moshi.BufferedSourceJsonReader: okio.Buffer buffer>;
+
+        $b1 = virtualinvoke $r5.<okio.Buffer: byte getByte(long)>($l0);
+
+        if $b1 != 92 goto label4;
+
+        if r2 != null goto label3;
+
+        r2 = new java.lang.StringBuilder;
+
+        specialinvoke r2.<java.lang.StringBuilder: void <init>()>();
+
+     label3:
+        $r5 = r0.<com.squareup.moshi.BufferedSourceJsonReader: okio.Buffer buffer>;
+
+        $r6 = virtualinvoke $r5.<okio.Buffer: java.lang.String readUtf8(long)>($l0);
+
+        virtualinvoke r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r5 = r0.<com.squareup.moshi.BufferedSourceJsonReader: okio.Buffer buffer>;
+
+        virtualinvoke $r5.<okio.Buffer: byte readByte()>();
+
+        $c2 = specialinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: char readEscapeCharacter()>();
+
+        virtualinvoke r2.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>($c2);
+
+        goto label1;
+
+     label4:
+        if r2 != null goto label5;
+
+        $r5 = r0.<com.squareup.moshi.BufferedSourceJsonReader: okio.Buffer buffer>;
+
+        $r6 = virtualinvoke $r5.<okio.Buffer: java.lang.String readUtf8(long)>($l0);
+
+        $r5 = r0.<com.squareup.moshi.BufferedSourceJsonReader: okio.Buffer buffer>;
+
+        virtualinvoke $r5.<okio.Buffer: byte readByte()>();
+
+        return $r6;
+
+     label5:
+        $r5 = r0.<com.squareup.moshi.BufferedSourceJsonReader: okio.Buffer buffer>;
+
+        $r6 = virtualinvoke $r5.<okio.Buffer: java.lang.String readUtf8(long)>($l0);
+
+        virtualinvoke r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r5 = r0.<com.squareup.moshi.BufferedSourceJsonReader: okio.Buffer buffer>;
+
+        virtualinvoke $r5.<okio.Buffer: byte readByte()>();
+
+        $r6 = virtualinvoke r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r6;
+    }
+    private java.lang.String nextUnquotedValue() throws java.io.IOException
+    {
+        com.squareup.moshi.BufferedSourceJsonReader r0;
+        okio.ByteString $r1;
+        okio.BufferedSource $r2;
+        long $l0;
+        byte $b1;
+        okio.Buffer $r3;
+        java.lang.String $r4;
+
+        r0 := @this: com.squareup.moshi.BufferedSourceJsonReader;
+
+        $r2 = r0.<com.squareup.moshi.BufferedSourceJsonReader: okio.BufferedSource source>;
+
+        $r1 = <com.squareup.moshi.BufferedSourceJsonReader: okio.ByteString UNQUOTED_STRING_TERMINALS>;
+
+        $l0 = interfaceinvoke $r2.<okio.BufferedSource: long indexOfElement(okio.ByteString)>($r1);
+
+        $b1 = $l0 cmp -1L;
+
+        if $b1 == 0 goto label1;
+
+        $r3 = r0.<com.squareup.moshi.BufferedSourceJsonReader: okio.Buffer buffer>;
+
+        $r4 = virtualinvoke $r3.<okio.Buffer: java.lang.String readUtf8(long)>($l0);
+
+        return $r4;
+
+     label1:
+        $r3 = r0.<com.squareup.moshi.BufferedSourceJsonReader: okio.Buffer buffer>;
+
+        $r4 = virtualinvoke $r3.<okio.Buffer: java.lang.String readUtf8()>();
+
+        return $r4;
+    }
+    private int peekKeyword() throws java.io.IOException
+    {
+        com.squareup.moshi.BufferedSourceJsonReader r0;
+        okio.Buffer $r1;
+        byte $b0, $b5;
+        java.lang.String r2, r3;
+        int $i1, i2, $i3;
+        okio.BufferedSource $r4;
+        long $l4;
+        boolean $z0;
+        char $c6;
+
+        r0 := @this: com.squareup.moshi.BufferedSourceJsonReader;
+
+        $r1 = r0.<com.squareup.moshi.BufferedSourceJsonReader: okio.Buffer buffer>;
+
+        $b0 = virtualinvoke $r1.<okio.Buffer: byte getByte(long)>(0L);
+
+        if $b0 == 116 goto label01;
+
+        if $b0 != 84 goto label04;
+
+     label01:
+        r2 = "true";
+
+        r3 = "TRUE";
+
+        $b0 = 5;
+
+     label02:
+        $i1 = virtualinvoke r2.<java.lang.String: int length()>();
+
+        i2 = 1;
+
+     label03:
+        if i2 >= $i1 goto label11;
+
+        $r4 = r0.<com.squareup.moshi.BufferedSourceJsonReader: okio.BufferedSource source>;
+
+        $i3 = i2 + 1;
+
+        $l4 = (long) $i3;
+
+        $z0 = interfaceinvoke $r4.<okio.BufferedSource: boolean request(long)>($l4);
+
+        if $z0 != 0 goto label09;
+
+        return 0;
+
+     label04:
+        if $b0 == 102 goto label05;
+
+        if $b0 != 70 goto label06;
+
+     label05:
+        r2 = "false";
+
+        r3 = "FALSE";
+
+        $b0 = 6;
+
+        goto label02;
+
+     label06:
+        if $b0 == 110 goto label07;
+
+        if $b0 != 78 goto label08;
+
+     label07:
+        r2 = "null";
+
+        r3 = "NULL";
+
+        $b0 = 7;
+
+        goto label02;
+
+     label08:
+        return 0;
+
+     label09:
+        $r1 = r0.<com.squareup.moshi.BufferedSourceJsonReader: okio.Buffer buffer>;
+
+        $l4 = (long) i2;
+
+        $b5 = virtualinvoke $r1.<okio.Buffer: byte getByte(long)>($l4);
+
+        $c6 = virtualinvoke r2.<java.lang.String: char charAt(int)>(i2);
+
+        if $b5 == $c6 goto label10;
+
+        $c6 = virtualinvoke r3.<java.lang.String: char charAt(int)>(i2);
+
+        if $b5 == $c6 goto label10;
+
+        return 0;
+
+     label10:
+        i2 = i2 + 1;
+
+        goto label03;
+
+     label11:
+        $r4 = r0.<com.squareup.moshi.BufferedSourceJsonReader: okio.BufferedSource source>;
+
+        i2 = $i1 + 1;
+
+        $l4 = (long) i2;
+
+        $z0 = interfaceinvoke $r4.<okio.BufferedSource: boolean request(long)>($l4);
+
+        if $z0 == 0 goto label12;
+
+        $r1 = r0.<com.squareup.moshi.BufferedSourceJsonReader: okio.Buffer buffer>;
+
+        $l4 = (long) $i1;
+
+        $b5 = virtualinvoke $r1.<okio.Buffer: byte getByte(long)>($l4);
+
+        $z0 = specialinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: boolean isLiteral(int)>($b5);
+
+        if $z0 == 0 goto label12;
+
+        return 0;
+
+     label12:
+        $r1 = r0.<com.squareup.moshi.BufferedSourceJsonReader: okio.Buffer buffer>;
+
+        $l4 = (long) $i1;
+
+        virtualinvoke $r1.<okio.Buffer: void skip(long)>($l4);
+
+        r0.<com.squareup.moshi.BufferedSourceJsonReader: int peeked> = $b0;
+
+        return $b0;
+    }
+    private int peekNumber() throws java.io.IOException
+    {
+        com.squareup.moshi.BufferedSourceJsonReader r0;
+        long l0, l1, $l8;
+        boolean z0, $z1;
+        int i2, i4, $i5;
+        byte b3, $b6, $b7;
+        okio.BufferedSource $r1;
+        okio.Buffer $r2;
+
+        r0 := @this: com.squareup.moshi.BufferedSourceJsonReader;
+
+        l1 = 0L;
+
+        z0 = 0;
+
+        i2 = 1;
+
+        b3 = 0;
+
+        i4 = 0;
+
+     label01:
+        $r1 = r0.<com.squareup.moshi.BufferedSourceJsonReader: okio.BufferedSource source>;
+
+        $i5 = i4 + 1;
+
+        l0 = (long) $i5;
+
+        $z1 = interfaceinvoke $r1.<okio.BufferedSource: boolean request(long)>(l0);
+
+        if $z1 != 0 goto label05;
+
+     label02:
+        if b3 != 2 goto label30;
+
+        if i2 == 0 goto label30;
+
+        $b6 = l1 cmp -9223372036854775808L;
+
+        if $b6 != 0 goto label03;
+
+        if z0 == 0 goto label30;
+
+     label03:
+        if z0 == 0 goto label29;
+
+     label04:
+        r0.<com.squareup.moshi.BufferedSourceJsonReader: long peekedLong> = l1;
+
+        $r2 = r0.<com.squareup.moshi.BufferedSourceJsonReader: okio.Buffer buffer>;
+
+        l1 = (long) i4;
+
+        virtualinvoke $r2.<okio.Buffer: void skip(long)>(l1);
+
+        r0.<com.squareup.moshi.BufferedSourceJsonReader: int peeked> = 15;
+
+        return 15;
+
+     label05:
+        $r2 = r0.<com.squareup.moshi.BufferedSourceJsonReader: okio.Buffer buffer>;
+
+        l0 = (long) i4;
+
+        $b6 = virtualinvoke $r2.<okio.Buffer: byte getByte(long)>(l0);
+
+        lookupswitch($b6)
+        {
+            case 43: goto label12;
+            case 45: goto label08;
+            case 46: goto label17;
+            case 69: goto label14;
+            case 101: goto label14;
+            default: goto label06;
+        };
+
+     label06:
+        if $b6 < 48 goto label07;
+
+        if $b6 <= 57 goto label19;
+
+     label07:
+        $z1 = specialinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: boolean isLiteral(int)>($b6);
+
+        if $z1 == 0 goto label02;
+
+        return 0;
+
+     label08:
+        if b3 != 0 goto label10;
+
+        z0 = 1;
+
+        b3 = 1;
+
+     label09:
+        i4 = i4 + 1;
+
+        goto label01;
+
+     label10:
+        if b3 != 5 goto label11;
+
+        b3 = 6;
+
+        goto label09;
+
+     label11:
+        return 0;
+
+     label12:
+        if b3 != 5 goto label13;
+
+        b3 = 6;
+
+        goto label09;
+
+     label13:
+        return 0;
+
+     label14:
+        if b3 == 2 goto label15;
+
+        if b3 != 4 goto label16;
+
+     label15:
+        b3 = 5;
+
+        goto label09;
+
+     label16:
+        return 0;
+
+     label17:
+        if b3 != 2 goto label18;
+
+        b3 = 3;
+
+        goto label09;
+
+     label18:
+        return 0;
+
+     label19:
+        if b3 == 1 goto label20;
+
+        if b3 != 0 goto label21;
+
+     label20:
+        $i5 = $b6 + -48;
+
+        $i5 = neg $i5;
+
+        l1 = (long) $i5;
+
+        b3 = 2;
+
+        goto label09;
+
+     label21:
+        if b3 != 2 goto label26;
+
+        $b7 = l1 cmp 0L;
+
+        if $b7 != 0 goto label22;
+
+        return 0;
+
+     label22:
+        $l8 = 10L * l1;
+
+        $i5 = $b6 + -48;
+
+        l0 = (long) $i5;
+
+        l0 = $l8 - l0;
+
+        $b6 = l1 cmp -922337203685477580L;
+
+        if $b6 > 0 goto label23;
+
+        $b6 = l1 cmp -922337203685477580L;
+
+        if $b6 != 0 goto label25;
+
+        $b6 = l0 cmp l1;
+
+        if $b6 >= 0 goto label25;
+
+     label23:
+        $b6 = 1;
+
+     label24:
+        i2 = i2 & $b6;
+
+        l1 = l0;
+
+        goto label09;
+
+     label25:
+        $b6 = 0;
+
+        goto label24;
+
+     label26:
+        if b3 != 3 goto label27;
+
+        b3 = 4;
+
+        goto label09;
+
+     label27:
+        if b3 == 5 goto label28;
+
+        if b3 != 6 goto label09;
+
+     label28:
+        b3 = 7;
+
+        goto label09;
+
+     label29:
+        l1 = neg l1;
+
+        goto label04;
+
+     label30:
+        if b3 == 2 goto label31;
+
+        if b3 == 4 goto label31;
+
+        if b3 != 7 goto label32;
+
+     label31:
+        r0.<com.squareup.moshi.BufferedSourceJsonReader: int peekedNumberLength> = i4;
+
+        r0.<com.squareup.moshi.BufferedSourceJsonReader: int peeked> = 16;
+
+        return 16;
+
+     label32:
+        return 0;
+    }
+    private void push(int)
+    {
+        com.squareup.moshi.BufferedSourceJsonReader r0;
+        int $i0, $i1, $i2;
+        int[] r1, r3, $r4;
+        java.lang.String[] r2, $r5;
+
+        r0 := @this: com.squareup.moshi.BufferedSourceJsonReader;
+
+        $i0 := @parameter0: int;
+
+        $i1 = r0.<com.squareup.moshi.BufferedSourceJsonReader: int stackSize>;
+
+        r1 = r0.<com.squareup.moshi.BufferedSourceJsonReader: int[] stack>;
+
+        $i2 = lengthof r1;
+
+        if $i1 != $i2 goto label1;
+
+        $i1 = r0.<com.squareup.moshi.BufferedSourceJsonReader: int stackSize>;
+
+        $i1 = $i1 * 2;
+
+        r3 = newarray (int)[$i1];
+
+        $i1 = r0.<com.squareup.moshi.BufferedSourceJsonReader: int stackSize>;
+
+        $i1 = $i1 * 2;
+
+        r1 = newarray (int)[$i1];
+
+        $i1 = r0.<com.squareup.moshi.BufferedSourceJsonReader: int stackSize>;
+
+        $i1 = $i1 * 2;
+
+        r2 = newarray (java.lang.String)[$i1];
+
+        $r4 = r0.<com.squareup.moshi.BufferedSourceJsonReader: int[] stack>;
+
+        $i1 = r0.<com.squareup.moshi.BufferedSourceJsonReader: int stackSize>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r4, 0, r3, 0, $i1);
+
+        $r4 = r0.<com.squareup.moshi.BufferedSourceJsonReader: int[] pathIndices>;
+
+        $i1 = r0.<com.squareup.moshi.BufferedSourceJsonReader: int stackSize>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r4, 0, r1, 0, $i1);
+
+        $r5 = r0.<com.squareup.moshi.BufferedSourceJsonReader: java.lang.String[] pathNames>;
+
+        $i1 = r0.<com.squareup.moshi.BufferedSourceJsonReader: int stackSize>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r5, 0, r2, 0, $i1);
+
+        r0.<com.squareup.moshi.BufferedSourceJsonReader: int[] stack> = r3;
+
+        r0.<com.squareup.moshi.BufferedSourceJsonReader: int[] pathIndices> = r1;
+
+        r0.<com.squareup.moshi.BufferedSourceJsonReader: java.lang.String[] pathNames> = r2;
+
+     label1:
+        r1 = r0.<com.squareup.moshi.BufferedSourceJsonReader: int[] stack>;
+
+        $i1 = r0.<com.squareup.moshi.BufferedSourceJsonReader: int stackSize>;
+
+        $i2 = $i1 + 1;
+
+        r0.<com.squareup.moshi.BufferedSourceJsonReader: int stackSize> = $i2;
+
+        r1[$i1] = $i0;
+
+        return;
+    }
+    private char readEscapeCharacter() throws java.io.IOException
+    {
+        com.squareup.moshi.BufferedSourceJsonReader r0;
+        okio.BufferedSource $r1;
+        boolean $z0;
+        java.io.IOException $r2;
+        okio.Buffer $r3;
+        byte $b1;
+        char c2;
+        java.io.EOFException $r4;
+        java.lang.StringBuilder $r5;
+        java.lang.String $r6;
+        int i3, $i5;
+        long $l4;
+
+        r0 := @this: com.squareup.moshi.BufferedSourceJsonReader;
+
+        $r1 = r0.<com.squareup.moshi.BufferedSourceJsonReader: okio.BufferedSource source>;
+
+        $z0 = interfaceinvoke $r1.<okio.BufferedSource: boolean request(long)>(1L);
+
+        if $z0 != 0 goto label01;
+
+        $r2 = specialinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: java.io.IOException syntaxError(java.lang.String)>("Unterminated escape sequence");
+
+        throw $r2;
+
+     label01:
+        $r3 = r0.<com.squareup.moshi.BufferedSourceJsonReader: okio.Buffer buffer>;
+
+        $b1 = virtualinvoke $r3.<okio.Buffer: byte readByte()>();
+
+        lookupswitch($b1)
+        {
+            case 98: goto label12;
+            case 102: goto label15;
+            case 110: goto label13;
+            case 114: goto label14;
+            case 116: goto label11;
+            case 117: goto label03;
+            default: goto label02;
+        };
+
+     label02:
+        c2 = (char) $b1;
+
+        return c2;
+
+     label03:
+        $r1 = r0.<com.squareup.moshi.BufferedSourceJsonReader: okio.BufferedSource source>;
+
+        $z0 = interfaceinvoke $r1.<okio.BufferedSource: boolean request(long)>(4L);
+
+        if $z0 != 0 goto label04;
+
+        $r4 = new java.io.EOFException;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unterminated escape sequence at path ");
+
+        $r6 = virtualinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: java.lang.String getPath()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r4.<java.io.EOFException: void <init>(java.lang.String)>($r6);
+
+        throw $r4;
+
+     label04:
+        c2 = 0;
+
+        i3 = 0;
+
+     label05:
+        if i3 >= 4 goto label10;
+
+        $r3 = r0.<com.squareup.moshi.BufferedSourceJsonReader: okio.Buffer buffer>;
+
+        $l4 = (long) i3;
+
+        $b1 = virtualinvoke $r3.<okio.Buffer: byte getByte(long)>($l4);
+
+        $i5 = c2 << 4;
+
+        c2 = (char) $i5;
+
+        if $b1 < 48 goto label07;
+
+        if $b1 > 57 goto label07;
+
+        $i5 = $b1 + -48;
+
+        $i5 = $i5 + c2;
+
+        c2 = (char) $i5;
+
+     label06:
+        i3 = i3 + 1;
+
+        goto label05;
+
+     label07:
+        if $b1 < 97 goto label08;
+
+        if $b1 > 102 goto label08;
+
+        $i5 = $b1 + -97;
+
+        $i5 = $i5 + 10;
+
+        $i5 = $i5 + c2;
+
+        c2 = (char) $i5;
+
+        goto label06;
+
+     label08:
+        if $b1 < 65 goto label09;
+
+        if $b1 > 70 goto label09;
+
+        $i5 = $b1 + -65;
+
+        $i5 = $i5 + 10;
+
+        $i5 = $i5 + c2;
+
+        c2 = (char) $i5;
+
+        goto label06;
+
+     label09:
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\\u");
+
+        $r3 = r0.<com.squareup.moshi.BufferedSourceJsonReader: okio.Buffer buffer>;
+
+        $r6 = virtualinvoke $r3.<okio.Buffer: java.lang.String readUtf8(long)>(4L);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r2 = specialinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: java.io.IOException syntaxError(java.lang.String)>($r6);
+
+        throw $r2;
+
+     label10:
+        $r3 = r0.<com.squareup.moshi.BufferedSourceJsonReader: okio.Buffer buffer>;
+
+        virtualinvoke $r3.<okio.Buffer: void skip(long)>(4L);
+
+        return c2;
+
+     label11:
+        return 9;
+
+     label12:
+        return 8;
+
+     label13:
+        return 10;
+
+     label14:
+        return 13;
+
+     label15:
+        return 12;
+    }
+    private void skipQuotedValue(okio.ByteString) throws java.io.IOException
+    {
+        com.squareup.moshi.BufferedSourceJsonReader r0;
+        okio.ByteString $r1;
+        okio.BufferedSource $r2;
+        long $l0;
+        byte $b1;
+        java.io.IOException $r3;
+        okio.Buffer $r4;
+
+        r0 := @this: com.squareup.moshi.BufferedSourceJsonReader;
+
+        $r1 := @parameter0: okio.ByteString;
+
+     label1:
+        $r2 = r0.<com.squareup.moshi.BufferedSourceJsonReader: okio.BufferedSource source>;
+
+        $l0 = interfaceinvoke $r2.<okio.BufferedSource: long indexOfElement(okio.ByteString)>($r1);
+
+        $b1 = $l0 cmp -1L;
+
+        if $b1 != 0 goto label2;
+
+        $r3 = specialinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: java.io.IOException syntaxError(java.lang.String)>("Unterminated string");
+
+        throw $r3;
+
+     label2:
+        $r4 = r0.<com.squareup.moshi.BufferedSourceJsonReader: okio.Buffer buffer>;
+
+        $b1 = virtualinvoke $r4.<okio.Buffer: byte getByte(long)>($l0);
+
+        if $b1 != 92 goto label3;
+
+        $r4 = r0.<com.squareup.moshi.BufferedSourceJsonReader: okio.Buffer buffer>;
+
+        $l0 = $l0 + 1L;
+
+        virtualinvoke $r4.<okio.Buffer: void skip(long)>($l0);
+
+        specialinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: char readEscapeCharacter()>();
+
+        goto label1;
+
+     label3:
+        $r4 = r0.<com.squareup.moshi.BufferedSourceJsonReader: okio.Buffer buffer>;
+
+        $l0 = $l0 + 1L;
+
+        virtualinvoke $r4.<okio.Buffer: void skip(long)>($l0);
+
+        return;
+    }
+    private boolean skipTo(java.lang.String) throws java.io.IOException
+    {
+        com.squareup.moshi.BufferedSourceJsonReader r0;
+        java.lang.String $r1;
+        okio.BufferedSource $r2;
+        int $i0, $i2;
+        long $l1;
+        boolean $z0;
+        okio.Buffer $r3;
+        byte $b3;
+        char $c4;
+
+        r0 := @this: com.squareup.moshi.BufferedSourceJsonReader;
+
+        $r1 := @parameter0: java.lang.String;
+
+     label1:
+        $r2 = r0.<com.squareup.moshi.BufferedSourceJsonReader: okio.BufferedSource source>;
+
+        $i0 = virtualinvoke $r1.<java.lang.String: int length()>();
+
+        $l1 = (long) $i0;
+
+        $z0 = interfaceinvoke $r2.<okio.BufferedSource: boolean request(long)>($l1);
+
+        if $z0 == 0 goto label5;
+
+        $i0 = 0;
+
+     label2:
+        $i2 = virtualinvoke $r1.<java.lang.String: int length()>();
+
+        if $i0 >= $i2 goto label4;
+
+        $r3 = r0.<com.squareup.moshi.BufferedSourceJsonReader: okio.Buffer buffer>;
+
+        $l1 = (long) $i0;
+
+        $b3 = virtualinvoke $r3.<okio.Buffer: byte getByte(long)>($l1);
+
+        $c4 = virtualinvoke $r1.<java.lang.String: char charAt(int)>($i0);
+
+        if $b3 == $c4 goto label3;
+
+        $r3 = r0.<com.squareup.moshi.BufferedSourceJsonReader: okio.Buffer buffer>;
+
+        virtualinvoke $r3.<okio.Buffer: byte readByte()>();
+
+        goto label1;
+
+     label3:
+        $i0 = $i0 + 1;
+
+        goto label2;
+
+     label4:
+        return 1;
+
+     label5:
+        return 0;
+    }
+    private void skipToEndOfLine() throws java.io.IOException
+    {
+        com.squareup.moshi.BufferedSourceJsonReader r0;
+        okio.ByteString $r1;
+        okio.Buffer $r2, $r4;
+        okio.BufferedSource $r3;
+        long $l0;
+        byte $b1;
+
+        r0 := @this: com.squareup.moshi.BufferedSourceJsonReader;
+
+        $r3 = r0.<com.squareup.moshi.BufferedSourceJsonReader: okio.BufferedSource source>;
+
+        $r1 = <com.squareup.moshi.BufferedSourceJsonReader: okio.ByteString LINEFEED_OR_CARRIAGE_RETURN>;
+
+        $l0 = interfaceinvoke $r3.<okio.BufferedSource: long indexOfElement(okio.ByteString)>($r1);
+
+        $r2 = r0.<com.squareup.moshi.BufferedSourceJsonReader: okio.Buffer buffer>;
+
+        $b1 = $l0 cmp -1L;
+
+        if $b1 == 0 goto label2;
+
+        $l0 = 1L + $l0;
+
+     label1:
+        virtualinvoke $r2.<okio.Buffer: void skip(long)>($l0);
+
+        return;
+
+     label2:
+        $r4 = r0.<com.squareup.moshi.BufferedSourceJsonReader: okio.Buffer buffer>;
+
+        $l0 = virtualinvoke $r4.<okio.Buffer: long size()>();
+
+        goto label1;
+    }
+    private void skipUnquotedValue() throws java.io.IOException
+    {
+        com.squareup.moshi.BufferedSourceJsonReader r0;
+        okio.BufferedSource $r1;
+        okio.ByteString $r2;
+        long $l0, l1;
+        okio.Buffer $r3, $r4;
+        byte $b2;
+
+        r0 := @this: com.squareup.moshi.BufferedSourceJsonReader;
+
+        $r1 = r0.<com.squareup.moshi.BufferedSourceJsonReader: okio.BufferedSource source>;
+
+        $r2 = <com.squareup.moshi.BufferedSourceJsonReader: okio.ByteString UNQUOTED_STRING_TERMINALS>;
+
+        $l0 = interfaceinvoke $r1.<okio.BufferedSource: long indexOfElement(okio.ByteString)>($r2);
+
+        l1 = $l0;
+
+        $r3 = r0.<com.squareup.moshi.BufferedSourceJsonReader: okio.Buffer buffer>;
+
+        $b2 = $l0 cmp -1L;
+
+        if $b2 == 0 goto label2;
+
+     label1:
+        virtualinvoke $r3.<okio.Buffer: void skip(long)>(l1);
+
+        return;
+
+     label2:
+        $r4 = r0.<com.squareup.moshi.BufferedSourceJsonReader: okio.Buffer buffer>;
+
+        l1 = virtualinvoke $r4.<okio.Buffer: long size()>();
+
+        goto label1;
+    }
+    private java.io.IOException syntaxError(java.lang.String) throws java.io.IOException
+    {
+        com.squareup.moshi.BufferedSourceJsonReader r0;
+        java.lang.String $r1;
+        java.io.IOException $r2;
+        java.lang.StringBuilder $r3;
+
+        r0 := @this: com.squareup.moshi.BufferedSourceJsonReader;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = new java.io.IOException;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" at path ");
+
+        $r1 = virtualinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: java.lang.String getPath()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r1 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r2.<java.io.IOException: void <init>(java.lang.String)>($r1);
+
+        throw $r2;
+    }
+    public void beginArray() throws java.io.IOException
+    {
+        com.squareup.moshi.BufferedSourceJsonReader r0;
+        int i0;
+        int[] $r1;
+        com.squareup.moshi.JsonDataException $r2;
+        java.lang.StringBuilder $r3;
+        com.squareup.moshi.JsonReader$Token $r4;
+        java.lang.String $r5;
+
+        r0 := @this: com.squareup.moshi.BufferedSourceJsonReader;
+
+        i0 = r0.<com.squareup.moshi.BufferedSourceJsonReader: int peeked>;
+
+        if i0 != 0 goto label1;
+
+        i0 = specialinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: int doPeek()>();
+
+     label1:
+        if i0 != 3 goto label2;
+
+        specialinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: void push(int)>(1);
+
+        $r1 = r0.<com.squareup.moshi.BufferedSourceJsonReader: int[] pathIndices>;
+
+        i0 = r0.<com.squareup.moshi.BufferedSourceJsonReader: int stackSize>;
+
+        i0 = i0 + -1;
+
+        $r1[i0] = 0;
+
+        r0.<com.squareup.moshi.BufferedSourceJsonReader: int peeked> = 0;
+
+        return;
+
+     label2:
+        $r2 = new com.squareup.moshi.JsonDataException;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Expected BEGIN_ARRAY but was ");
+
+        $r4 = virtualinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: com.squareup.moshi.JsonReader$Token peek()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r4);
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" at path ");
+
+        $r5 = virtualinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: java.lang.String getPath()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r5 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r2.<com.squareup.moshi.JsonDataException: void <init>(java.lang.String)>($r5);
+
+        throw $r2;
+    }
+    public void beginObject() throws java.io.IOException
+    {
+        com.squareup.moshi.BufferedSourceJsonReader r0;
+        int i0;
+        com.squareup.moshi.JsonDataException $r1;
+        java.lang.StringBuilder $r2;
+        com.squareup.moshi.JsonReader$Token $r3;
+        java.lang.String $r4;
+
+        r0 := @this: com.squareup.moshi.BufferedSourceJsonReader;
+
+        i0 = r0.<com.squareup.moshi.BufferedSourceJsonReader: int peeked>;
+
+        if i0 != 0 goto label1;
+
+        i0 = specialinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: int doPeek()>();
+
+     label1:
+        if i0 != 1 goto label2;
+
+        specialinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: void push(int)>(3);
+
+        r0.<com.squareup.moshi.BufferedSourceJsonReader: int peeked> = 0;
+
+        return;
+
+     label2:
+        $r1 = new com.squareup.moshi.JsonDataException;
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Expected BEGIN_OBJECT but was ");
+
+        $r3 = virtualinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: com.squareup.moshi.JsonReader$Token peek()>();
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r3);
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" at path ");
+
+        $r4 = virtualinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: java.lang.String getPath()>();
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r4 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r1.<com.squareup.moshi.JsonDataException: void <init>(java.lang.String)>($r4);
+
+        throw $r1;
+    }
+    public void close() throws java.io.IOException
+    {
+        com.squareup.moshi.BufferedSourceJsonReader r0;
+        int[] $r1;
+        okio.Buffer $r2;
+        okio.BufferedSource $r3;
+
+        r0 := @this: com.squareup.moshi.BufferedSourceJsonReader;
+
+        r0.<com.squareup.moshi.BufferedSourceJsonReader: int peeked> = 0;
+
+        $r1 = r0.<com.squareup.moshi.BufferedSourceJsonReader: int[] stack>;
+
+        $r1[0] = 8;
+
+        r0.<com.squareup.moshi.BufferedSourceJsonReader: int stackSize> = 1;
+
+        $r2 = r0.<com.squareup.moshi.BufferedSourceJsonReader: okio.Buffer buffer>;
+
+        virtualinvoke $r2.<okio.Buffer: void clear()>();
+
+        $r3 = r0.<com.squareup.moshi.BufferedSourceJsonReader: okio.BufferedSource source>;
+
+        interfaceinvoke $r3.<okio.BufferedSource: void close()>();
+
+        return;
+    }
+    public void endArray() throws java.io.IOException
+    {
+        com.squareup.moshi.BufferedSourceJsonReader r0;
+        int i0, $i1;
+        int[] $r1;
+        com.squareup.moshi.JsonDataException $r2;
+        java.lang.StringBuilder $r3;
+        com.squareup.moshi.JsonReader$Token $r4;
+        java.lang.String $r5;
+
+        r0 := @this: com.squareup.moshi.BufferedSourceJsonReader;
+
+        i0 = r0.<com.squareup.moshi.BufferedSourceJsonReader: int peeked>;
+
+        if i0 != 0 goto label1;
+
+        i0 = specialinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: int doPeek()>();
+
+     label1:
+        if i0 != 4 goto label2;
+
+        i0 = r0.<com.squareup.moshi.BufferedSourceJsonReader: int stackSize>;
+
+        i0 = i0 + -1;
+
+        r0.<com.squareup.moshi.BufferedSourceJsonReader: int stackSize> = i0;
+
+        $r1 = r0.<com.squareup.moshi.BufferedSourceJsonReader: int[] pathIndices>;
+
+        i0 = r0.<com.squareup.moshi.BufferedSourceJsonReader: int stackSize>;
+
+        i0 = i0 + -1;
+
+        $i1 = $r1[i0];
+
+        $i1 = $i1 + 1;
+
+        $r1[i0] = $i1;
+
+        r0.<com.squareup.moshi.BufferedSourceJsonReader: int peeked> = 0;
+
+        return;
+
+     label2:
+        $r2 = new com.squareup.moshi.JsonDataException;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Expected END_ARRAY but was ");
+
+        $r4 = virtualinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: com.squareup.moshi.JsonReader$Token peek()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r4);
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" at path ");
+
+        $r5 = virtualinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: java.lang.String getPath()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r5 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r2.<com.squareup.moshi.JsonDataException: void <init>(java.lang.String)>($r5);
+
+        throw $r2;
+    }
+    public void endObject() throws java.io.IOException
+    {
+        com.squareup.moshi.BufferedSourceJsonReader r0;
+        int i0, $i1;
+        java.lang.String[] $r1;
+        int[] $r2;
+        com.squareup.moshi.JsonDataException $r3;
+        java.lang.StringBuilder $r4;
+        com.squareup.moshi.JsonReader$Token $r5;
+        java.lang.String $r6;
+
+        r0 := @this: com.squareup.moshi.BufferedSourceJsonReader;
+
+        i0 = r0.<com.squareup.moshi.BufferedSourceJsonReader: int peeked>;
+
+        if i0 != 0 goto label1;
+
+        i0 = specialinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: int doPeek()>();
+
+     label1:
+        if i0 != 2 goto label2;
+
+        i0 = r0.<com.squareup.moshi.BufferedSourceJsonReader: int stackSize>;
+
+        i0 = i0 + -1;
+
+        r0.<com.squareup.moshi.BufferedSourceJsonReader: int stackSize> = i0;
+
+        $r1 = r0.<com.squareup.moshi.BufferedSourceJsonReader: java.lang.String[] pathNames>;
+
+        i0 = r0.<com.squareup.moshi.BufferedSourceJsonReader: int stackSize>;
+
+        $r1[i0] = null;
+
+        $r2 = r0.<com.squareup.moshi.BufferedSourceJsonReader: int[] pathIndices>;
+
+        i0 = r0.<com.squareup.moshi.BufferedSourceJsonReader: int stackSize>;
+
+        i0 = i0 + -1;
+
+        $i1 = $r2[i0];
+
+        $i1 = $i1 + 1;
+
+        $r2[i0] = $i1;
+
+        r0.<com.squareup.moshi.BufferedSourceJsonReader: int peeked> = 0;
+
+        return;
+
+     label2:
+        $r3 = new com.squareup.moshi.JsonDataException;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Expected END_OBJECT but was ");
+
+        $r5 = virtualinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: com.squareup.moshi.JsonReader$Token peek()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r5);
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" at path ");
+
+        $r6 = virtualinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: java.lang.String getPath()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r6 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r3.<com.squareup.moshi.JsonDataException: void <init>(java.lang.String)>($r6);
+
+        throw $r3;
+    }
+    public boolean failOnUnknown()
+    {
+        com.squareup.moshi.BufferedSourceJsonReader r0;
+        boolean z0;
+
+        r0 := @this: com.squareup.moshi.BufferedSourceJsonReader;
+
+        z0 = r0.<com.squareup.moshi.BufferedSourceJsonReader: boolean failOnUnknown>;
+
+        return z0;
+    }
+    public java.lang.String getPath()
+    {
+        com.squareup.moshi.BufferedSourceJsonReader r0;
+        int[] $r1, $r3;
+        java.lang.String[] $r2;
+        java.lang.String $r4;
+        int $i0;
+
+        r0 := @this: com.squareup.moshi.BufferedSourceJsonReader;
+
+        $i0 = r0.<com.squareup.moshi.BufferedSourceJsonReader: int stackSize>;
+
+        $r1 = r0.<com.squareup.moshi.BufferedSourceJsonReader: int[] stack>;
+
+        $r2 = r0.<com.squareup.moshi.BufferedSourceJsonReader: java.lang.String[] pathNames>;
+
+        $r3 = r0.<com.squareup.moshi.BufferedSourceJsonReader: int[] pathIndices>;
+
+        $r4 = staticinvoke <com.squareup.moshi.JsonScope: java.lang.String getPath(int,int[],java.lang.String[],int[])>($i0, $r1, $r2, $r3);
+
+        return $r4;
+    }
+    public boolean hasNext() throws java.io.IOException
+    {
+        com.squareup.moshi.BufferedSourceJsonReader r0;
+        int $i0;
+
+        r0 := @this: com.squareup.moshi.BufferedSourceJsonReader;
+
+        $i0 = r0.<com.squareup.moshi.BufferedSourceJsonReader: int peeked>;
+
+        if $i0 != 0 goto label1;
+
+        $i0 = specialinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: int doPeek()>();
+
+     label1:
+        if $i0 == 2 goto label2;
+
+        if $i0 == 4 goto label2;
+
+        return 1;
+
+     label2:
+        return 0;
+    }
+    public boolean isLenient()
+    {
+        com.squareup.moshi.BufferedSourceJsonReader r0;
+        boolean z0;
+
+        r0 := @this: com.squareup.moshi.BufferedSourceJsonReader;
+
+        z0 = r0.<com.squareup.moshi.BufferedSourceJsonReader: boolean lenient>;
+
+        return z0;
+    }
+    public boolean nextBoolean() throws java.io.IOException
+    {
+        com.squareup.moshi.BufferedSourceJsonReader r0;
+        int i0, $i1;
+        int[] $r1;
+        com.squareup.moshi.JsonDataException $r2;
+        java.lang.StringBuilder $r3;
+        com.squareup.moshi.JsonReader$Token $r4;
+        java.lang.String $r5;
+
+        r0 := @this: com.squareup.moshi.BufferedSourceJsonReader;
+
+        i0 = r0.<com.squareup.moshi.BufferedSourceJsonReader: int peeked>;
+
+        if i0 != 0 goto label1;
+
+        i0 = specialinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: int doPeek()>();
+
+     label1:
+        if i0 != 5 goto label2;
+
+        r0.<com.squareup.moshi.BufferedSourceJsonReader: int peeked> = 0;
+
+        $r1 = r0.<com.squareup.moshi.BufferedSourceJsonReader: int[] pathIndices>;
+
+        i0 = r0.<com.squareup.moshi.BufferedSourceJsonReader: int stackSize>;
+
+        i0 = i0 + -1;
+
+        $i1 = $r1[i0];
+
+        $i1 = $i1 + 1;
+
+        $r1[i0] = $i1;
+
+        return 1;
+
+     label2:
+        if i0 != 6 goto label3;
+
+        r0.<com.squareup.moshi.BufferedSourceJsonReader: int peeked> = 0;
+
+        $r1 = r0.<com.squareup.moshi.BufferedSourceJsonReader: int[] pathIndices>;
+
+        i0 = r0.<com.squareup.moshi.BufferedSourceJsonReader: int stackSize>;
+
+        i0 = i0 + -1;
+
+        $i1 = $r1[i0];
+
+        $i1 = $i1 + 1;
+
+        $r1[i0] = $i1;
+
+        return 0;
+
+     label3:
+        $r2 = new com.squareup.moshi.JsonDataException;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Expected a boolean but was ");
+
+        $r4 = virtualinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: com.squareup.moshi.JsonReader$Token peek()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r4);
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" at path ");
+
+        $r5 = virtualinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: java.lang.String getPath()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r5 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r2.<com.squareup.moshi.JsonDataException: void <init>(java.lang.String)>($r5);
+
+        throw $r2;
+    }
+    public double nextDouble() throws java.io.IOException
+    {
+        com.squareup.moshi.BufferedSourceJsonReader r0;
+        java.lang.NumberFormatException r1;
+        int i0, $i1;
+        int[] $r2;
+        long $l2;
+        double d0;
+        okio.Buffer $r3;
+        java.lang.String $r4;
+        boolean $z0;
+        java.io.IOException $r5;
+        java.lang.StringBuilder $r6;
+        okio.ByteString $r7;
+        com.squareup.moshi.JsonDataException $r8;
+        com.squareup.moshi.JsonReader$Token $r9;
+
+        r0 := @this: com.squareup.moshi.BufferedSourceJsonReader;
+
+        i0 = r0.<com.squareup.moshi.BufferedSourceJsonReader: int peeked>;
+
+        if i0 != 0 goto label01;
+
+        i0 = specialinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: int doPeek()>();
+
+     label01:
+        if i0 != 15 goto label02;
+
+        r0.<com.squareup.moshi.BufferedSourceJsonReader: int peeked> = 0;
+
+        $r2 = r0.<com.squareup.moshi.BufferedSourceJsonReader: int[] pathIndices>;
+
+        i0 = r0.<com.squareup.moshi.BufferedSourceJsonReader: int stackSize>;
+
+        i0 = i0 + -1;
+
+        $i1 = $r2[i0];
+
+        $i1 = $i1 + 1;
+
+        $r2[i0] = $i1;
+
+        $l2 = r0.<com.squareup.moshi.BufferedSourceJsonReader: long peekedLong>;
+
+        d0 = (double) $l2;
+
+        return d0;
+
+     label02:
+        if i0 != 16 goto label07;
+
+        $r3 = r0.<com.squareup.moshi.BufferedSourceJsonReader: okio.Buffer buffer>;
+
+        i0 = r0.<com.squareup.moshi.BufferedSourceJsonReader: int peekedNumberLength>;
+
+        $l2 = (long) i0;
+
+        $r4 = virtualinvoke $r3.<okio.Buffer: java.lang.String readUtf8(long)>($l2);
+
+        r0.<com.squareup.moshi.BufferedSourceJsonReader: java.lang.String peekedString> = $r4;
+
+     label03:
+        r0.<com.squareup.moshi.BufferedSourceJsonReader: int peeked> = 11;
+
+        $r4 = r0.<com.squareup.moshi.BufferedSourceJsonReader: java.lang.String peekedString>;
+
+     label04:
+        d0 = staticinvoke <java.lang.Double: double parseDouble(java.lang.String)>($r4);
+
+     label05:
+        $z0 = r0.<com.squareup.moshi.BufferedSourceJsonReader: boolean lenient>;
+
+        if $z0 != 0 goto label12;
+
+        $z0 = staticinvoke <java.lang.Double: boolean isNaN(double)>(d0);
+
+        if $z0 != 0 goto label06;
+
+        $z0 = staticinvoke <java.lang.Double: boolean isInfinite(double)>(d0);
+
+        if $z0 == 0 goto label12;
+
+     label06:
+        $r5 = new java.io.IOException;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("JSON forbids NaN and infinities: ");
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(double)>(d0);
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" at path ");
+
+        $r4 = virtualinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: java.lang.String getPath()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r4 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r5.<java.io.IOException: void <init>(java.lang.String)>($r4);
+
+        throw $r5;
+
+     label07:
+        if i0 != 9 goto label08;
+
+        $r7 = <com.squareup.moshi.BufferedSourceJsonReader: okio.ByteString DOUBLE_QUOTE_OR_SLASH>;
+
+        $r4 = specialinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: java.lang.String nextQuotedValue(okio.ByteString)>($r7);
+
+        r0.<com.squareup.moshi.BufferedSourceJsonReader: java.lang.String peekedString> = $r4;
+
+        goto label03;
+
+     label08:
+        if i0 != 8 goto label09;
+
+        $r7 = <com.squareup.moshi.BufferedSourceJsonReader: okio.ByteString SINGLE_QUOTE_OR_SLASH>;
+
+        $r4 = specialinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: java.lang.String nextQuotedValue(okio.ByteString)>($r7);
+
+        r0.<com.squareup.moshi.BufferedSourceJsonReader: java.lang.String peekedString> = $r4;
+
+        goto label03;
+
+     label09:
+        if i0 != 10 goto label10;
+
+        $r4 = specialinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: java.lang.String nextUnquotedValue()>();
+
+        r0.<com.squareup.moshi.BufferedSourceJsonReader: java.lang.String peekedString> = $r4;
+
+        goto label03;
+
+     label10:
+        if i0 == 11 goto label03;
+
+        $r8 = new com.squareup.moshi.JsonDataException;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Expected a double but was ");
+
+        $r9 = virtualinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: com.squareup.moshi.JsonReader$Token peek()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r9);
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" at path ");
+
+        $r4 = virtualinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: java.lang.String getPath()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r4 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r8.<com.squareup.moshi.JsonDataException: void <init>(java.lang.String)>($r4);
+
+        throw $r8;
+
+     label11:
+        r1 := @caughtexception;
+
+        $r8 = new com.squareup.moshi.JsonDataException;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Expected a double but was ");
+
+        $r4 = r0.<com.squareup.moshi.BufferedSourceJsonReader: java.lang.String peekedString>;
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" at path ");
+
+        $r4 = virtualinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: java.lang.String getPath()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r4 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r8.<com.squareup.moshi.JsonDataException: void <init>(java.lang.String)>($r4);
+
+        throw $r8;
+
+     label12:
+        r0.<com.squareup.moshi.BufferedSourceJsonReader: java.lang.String peekedString> = null;
+
+        r0.<com.squareup.moshi.BufferedSourceJsonReader: int peeked> = 0;
+
+        $r2 = r0.<com.squareup.moshi.BufferedSourceJsonReader: int[] pathIndices>;
+
+        i0 = r0.<com.squareup.moshi.BufferedSourceJsonReader: int stackSize>;
+
+        i0 = i0 + -1;
+
+        $i1 = $r2[i0];
+
+        $i1 = $i1 + 1;
+
+        $r2[i0] = $i1;
+
+        return d0;
+
+        catch java.lang.NumberFormatException from label04 to label05 with label11;
+    }
+    public int nextInt() throws java.io.IOException
+    {
+        com.squareup.moshi.BufferedSourceJsonReader r0;
+        java.lang.NumberFormatException r1, $r9;
+        int i0, $i4, $i5;
+        long $l1, $l2;
+        byte $b3;
+        com.squareup.moshi.JsonDataException $r2;
+        java.lang.StringBuilder $r3;
+        java.lang.String $r4;
+        int[] $r5;
+        okio.Buffer $r6;
+        double $d0, $d1;
+        okio.ByteString $r7;
+        com.squareup.moshi.JsonReader$Token $r8;
+
+        r0 := @this: com.squareup.moshi.BufferedSourceJsonReader;
+
+        i0 = r0.<com.squareup.moshi.BufferedSourceJsonReader: int peeked>;
+
+        if i0 != 0 goto label01;
+
+        i0 = specialinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: int doPeek()>();
+
+     label01:
+        if i0 != 15 goto label03;
+
+        $l1 = r0.<com.squareup.moshi.BufferedSourceJsonReader: long peekedLong>;
+
+        i0 = (int) $l1;
+
+        $l1 = r0.<com.squareup.moshi.BufferedSourceJsonReader: long peekedLong>;
+
+        $l2 = (long) i0;
+
+        $b3 = $l1 cmp $l2;
+
+        if $b3 == 0 goto label02;
+
+        $r2 = new com.squareup.moshi.JsonDataException;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Expected an int but was ");
+
+        $l1 = r0.<com.squareup.moshi.BufferedSourceJsonReader: long peekedLong>;
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l1);
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" at path ");
+
+        $r4 = virtualinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: java.lang.String getPath()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r2.<com.squareup.moshi.JsonDataException: void <init>(java.lang.String)>($r4);
+
+        throw $r2;
+
+     label02:
+        r0.<com.squareup.moshi.BufferedSourceJsonReader: int peeked> = 0;
+
+        $r5 = r0.<com.squareup.moshi.BufferedSourceJsonReader: int[] pathIndices>;
+
+        $i4 = r0.<com.squareup.moshi.BufferedSourceJsonReader: int stackSize>;
+
+        $i4 = $i4 + -1;
+
+        $i5 = $r5[$i4];
+
+        $i5 = $i5 + 1;
+
+        $r5[$i4] = $i5;
+
+        return i0;
+
+     label03:
+        if i0 != 16 goto label07;
+
+        $r6 = r0.<com.squareup.moshi.BufferedSourceJsonReader: okio.Buffer buffer>;
+
+        i0 = r0.<com.squareup.moshi.BufferedSourceJsonReader: int peekedNumberLength>;
+
+        $l1 = (long) i0;
+
+        $r4 = virtualinvoke $r6.<okio.Buffer: java.lang.String readUtf8(long)>($l1);
+
+        r0.<com.squareup.moshi.BufferedSourceJsonReader: java.lang.String peekedString> = $r4;
+
+     label04:
+        r0.<com.squareup.moshi.BufferedSourceJsonReader: int peeked> = 11;
+
+        $r4 = r0.<com.squareup.moshi.BufferedSourceJsonReader: java.lang.String peekedString>;
+
+     label05:
+        $d0 = staticinvoke <java.lang.Double: double parseDouble(java.lang.String)>($r4);
+
+     label06:
+        i0 = (int) $d0;
+
+        $d1 = (double) i0;
+
+        $b3 = $d1 cmpl $d0;
+
+        if $b3 == 0 goto label15;
+
+        $r2 = new com.squareup.moshi.JsonDataException;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Expected an int but was ");
+
+        $r4 = r0.<com.squareup.moshi.BufferedSourceJsonReader: java.lang.String peekedString>;
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" at path ");
+
+        $r4 = virtualinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: java.lang.String getPath()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r2.<com.squareup.moshi.JsonDataException: void <init>(java.lang.String)>($r4);
+
+        throw $r2;
+
+     label07:
+        if i0 == 9 goto label08;
+
+        if i0 != 8 goto label13;
+
+     label08:
+        if i0 != 9 goto label12;
+
+        $r7 = <com.squareup.moshi.BufferedSourceJsonReader: okio.ByteString DOUBLE_QUOTE_OR_SLASH>;
+
+        $r4 = specialinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: java.lang.String nextQuotedValue(okio.ByteString)>($r7);
+
+     label09:
+        r0.<com.squareup.moshi.BufferedSourceJsonReader: java.lang.String peekedString> = $r4;
+
+        $r4 = r0.<com.squareup.moshi.BufferedSourceJsonReader: java.lang.String peekedString>;
+
+     label10:
+        i0 = staticinvoke <java.lang.Integer: int parseInt(java.lang.String)>($r4);
+
+     label11:
+        r0.<com.squareup.moshi.BufferedSourceJsonReader: int peeked> = 0;
+
+        $r5 = r0.<com.squareup.moshi.BufferedSourceJsonReader: int[] pathIndices>;
+
+        $i4 = r0.<com.squareup.moshi.BufferedSourceJsonReader: int stackSize>;
+
+        $i4 = $i4 + -1;
+
+        $i5 = $r5[$i4];
+
+        $i5 = $i5 + 1;
+
+        $r5[$i4] = $i5;
+
+        return i0;
+
+     label12:
+        $r7 = <com.squareup.moshi.BufferedSourceJsonReader: okio.ByteString SINGLE_QUOTE_OR_SLASH>;
+
+        $r4 = specialinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: java.lang.String nextQuotedValue(okio.ByteString)>($r7);
+
+        goto label09;
+
+     label13:
+        if i0 == 11 goto label04;
+
+        $r2 = new com.squareup.moshi.JsonDataException;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Expected an int but was ");
+
+        $r8 = virtualinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: com.squareup.moshi.JsonReader$Token peek()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r8);
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" at path ");
+
+        $r4 = virtualinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: java.lang.String getPath()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r2.<com.squareup.moshi.JsonDataException: void <init>(java.lang.String)>($r4);
+
+        throw $r2;
+
+     label14:
+        r1 := @caughtexception;
+
+        $r2 = new com.squareup.moshi.JsonDataException;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Expected an int but was ");
+
+        $r4 = r0.<com.squareup.moshi.BufferedSourceJsonReader: java.lang.String peekedString>;
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" at path ");
+
+        $r4 = virtualinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: java.lang.String getPath()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r2.<com.squareup.moshi.JsonDataException: void <init>(java.lang.String)>($r4);
+
+        throw $r2;
+
+     label15:
+        r0.<com.squareup.moshi.BufferedSourceJsonReader: java.lang.String peekedString> = null;
+
+        r0.<com.squareup.moshi.BufferedSourceJsonReader: int peeked> = 0;
+
+        $r5 = r0.<com.squareup.moshi.BufferedSourceJsonReader: int[] pathIndices>;
+
+        $i4 = r0.<com.squareup.moshi.BufferedSourceJsonReader: int stackSize>;
+
+        $i4 = $i4 + -1;
+
+        $i5 = $r5[$i4];
+
+        $i5 = $i5 + 1;
+
+        $r5[$i4] = $i5;
+
+        return i0;
+
+     label16:
+        $r9 := @caughtexception;
+
+        goto label04;
+
+        catch java.lang.NumberFormatException from label05 to label06 with label14;
+        catch java.lang.NumberFormatException from label10 to label11 with label16;
+    }
+    public long nextLong() throws java.io.IOException
+    {
+        com.squareup.moshi.BufferedSourceJsonReader r0;
+        java.lang.NumberFormatException r1, $r8;
+        int i0, $i1;
+        int[] $r2;
+        okio.Buffer $r3;
+        long $l2;
+        java.lang.String $r4;
+        double $d0, $d1;
+        byte $b3;
+        com.squareup.moshi.JsonDataException $r5;
+        java.lang.StringBuilder $r6;
+        okio.ByteString $r7;
+        com.squareup.moshi.JsonReader$Token $r9;
+
+        r0 := @this: com.squareup.moshi.BufferedSourceJsonReader;
+
+        i0 = r0.<com.squareup.moshi.BufferedSourceJsonReader: int peeked>;
+
+        if i0 != 0 goto label01;
+
+        i0 = specialinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: int doPeek()>();
+
+     label01:
+        if i0 != 15 goto label02;
+
+        r0.<com.squareup.moshi.BufferedSourceJsonReader: int peeked> = 0;
+
+        $r2 = r0.<com.squareup.moshi.BufferedSourceJsonReader: int[] pathIndices>;
+
+        i0 = r0.<com.squareup.moshi.BufferedSourceJsonReader: int stackSize>;
+
+        i0 = i0 + -1;
+
+        $i1 = $r2[i0];
+
+        $i1 = $i1 + 1;
+
+        $r2[i0] = $i1;
+
+        $l2 = r0.<com.squareup.moshi.BufferedSourceJsonReader: long peekedLong>;
+
+        return $l2;
+
+     label02:
+        if i0 != 16 goto label06;
+
+        $r3 = r0.<com.squareup.moshi.BufferedSourceJsonReader: okio.Buffer buffer>;
+
+        i0 = r0.<com.squareup.moshi.BufferedSourceJsonReader: int peekedNumberLength>;
+
+        $l2 = (long) i0;
+
+        $r4 = virtualinvoke $r3.<okio.Buffer: java.lang.String readUtf8(long)>($l2);
+
+        r0.<com.squareup.moshi.BufferedSourceJsonReader: java.lang.String peekedString> = $r4;
+
+     label03:
+        r0.<com.squareup.moshi.BufferedSourceJsonReader: int peeked> = 11;
+
+        $r4 = r0.<com.squareup.moshi.BufferedSourceJsonReader: java.lang.String peekedString>;
+
+     label04:
+        $d0 = staticinvoke <java.lang.Double: double parseDouble(java.lang.String)>($r4);
+
+     label05:
+        $l2 = (long) $d0;
+
+        $d1 = (double) $l2;
+
+        $b3 = $d1 cmpl $d0;
+
+        if $b3 == 0 goto label15;
+
+        $r5 = new com.squareup.moshi.JsonDataException;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Expected a long but was ");
+
+        $r4 = r0.<com.squareup.moshi.BufferedSourceJsonReader: java.lang.String peekedString>;
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" at path ");
+
+        $r4 = virtualinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: java.lang.String getPath()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r4 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r5.<com.squareup.moshi.JsonDataException: void <init>(java.lang.String)>($r4);
+
+        throw $r5;
+
+     label06:
+        if i0 == 9 goto label07;
+
+        if i0 != 8 goto label13;
+
+     label07:
+        if i0 != 9 goto label12;
+
+        $r7 = <com.squareup.moshi.BufferedSourceJsonReader: okio.ByteString DOUBLE_QUOTE_OR_SLASH>;
+
+        $r4 = specialinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: java.lang.String nextQuotedValue(okio.ByteString)>($r7);
+
+     label08:
+        r0.<com.squareup.moshi.BufferedSourceJsonReader: java.lang.String peekedString> = $r4;
+
+        $r4 = r0.<com.squareup.moshi.BufferedSourceJsonReader: java.lang.String peekedString>;
+
+     label09:
+        $l2 = staticinvoke <java.lang.Long: long parseLong(java.lang.String)>($r4);
+
+     label10:
+        r0.<com.squareup.moshi.BufferedSourceJsonReader: int peeked> = 0;
+
+        $r2 = r0.<com.squareup.moshi.BufferedSourceJsonReader: int[] pathIndices>;
+
+        i0 = r0.<com.squareup.moshi.BufferedSourceJsonReader: int stackSize>;
+
+        i0 = i0 + -1;
+
+        $i1 = $r2[i0];
+
+        $i1 = $i1 + 1;
+
+        $r2[i0] = $i1;
+
+        return $l2;
+
+     label11:
+        $r8 := @caughtexception;
+
+        goto label03;
+
+     label12:
+        $r7 = <com.squareup.moshi.BufferedSourceJsonReader: okio.ByteString SINGLE_QUOTE_OR_SLASH>;
+
+        $r4 = specialinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: java.lang.String nextQuotedValue(okio.ByteString)>($r7);
+
+        goto label08;
+
+     label13:
+        if i0 == 11 goto label03;
+
+        $r5 = new com.squareup.moshi.JsonDataException;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Expected a long but was ");
+
+        $r9 = virtualinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: com.squareup.moshi.JsonReader$Token peek()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r9);
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" at path ");
+
+        $r4 = virtualinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: java.lang.String getPath()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r4 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r5.<com.squareup.moshi.JsonDataException: void <init>(java.lang.String)>($r4);
+
+        throw $r5;
+
+     label14:
+        r1 := @caughtexception;
+
+        $r5 = new com.squareup.moshi.JsonDataException;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Expected a long but was ");
+
+        $r4 = r0.<com.squareup.moshi.BufferedSourceJsonReader: java.lang.String peekedString>;
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" at path ");
+
+        $r4 = virtualinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: java.lang.String getPath()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r4 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r5.<com.squareup.moshi.JsonDataException: void <init>(java.lang.String)>($r4);
+
+        throw $r5;
+
+     label15:
+        r0.<com.squareup.moshi.BufferedSourceJsonReader: java.lang.String peekedString> = null;
+
+        r0.<com.squareup.moshi.BufferedSourceJsonReader: int peeked> = 0;
+
+        $r2 = r0.<com.squareup.moshi.BufferedSourceJsonReader: int[] pathIndices>;
+
+        i0 = r0.<com.squareup.moshi.BufferedSourceJsonReader: int stackSize>;
+
+        i0 = i0 + -1;
+
+        $i1 = $r2[i0];
+
+        $i1 = $i1 + 1;
+
+        $r2[i0] = $i1;
+
+        return $l2;
+
+        catch java.lang.NumberFormatException from label04 to label05 with label14;
+        catch java.lang.NumberFormatException from label09 to label10 with label11;
+    }
+    public java.lang.String nextName() throws java.io.IOException
+    {
+        com.squareup.moshi.BufferedSourceJsonReader r0;
+        int i0;
+        java.lang.String $r1;
+        java.lang.String[] $r2;
+        okio.ByteString $r3;
+        com.squareup.moshi.JsonDataException $r4;
+        java.lang.StringBuilder $r5;
+        com.squareup.moshi.JsonReader$Token $r6;
+
+        r0 := @this: com.squareup.moshi.BufferedSourceJsonReader;
+
+        i0 = r0.<com.squareup.moshi.BufferedSourceJsonReader: int peeked>;
+
+        if i0 != 0 goto label1;
+
+        i0 = specialinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: int doPeek()>();
+
+     label1:
+        if i0 != 14 goto label3;
+
+        $r1 = specialinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: java.lang.String nextUnquotedValue()>();
+
+     label2:
+        r0.<com.squareup.moshi.BufferedSourceJsonReader: int peeked> = 0;
+
+        $r2 = r0.<com.squareup.moshi.BufferedSourceJsonReader: java.lang.String[] pathNames>;
+
+        i0 = r0.<com.squareup.moshi.BufferedSourceJsonReader: int stackSize>;
+
+        i0 = i0 + -1;
+
+        $r2[i0] = $r1;
+
+        return $r1;
+
+     label3:
+        if i0 != 13 goto label4;
+
+        $r3 = <com.squareup.moshi.BufferedSourceJsonReader: okio.ByteString DOUBLE_QUOTE_OR_SLASH>;
+
+        $r1 = specialinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: java.lang.String nextQuotedValue(okio.ByteString)>($r3);
+
+        goto label2;
+
+     label4:
+        if i0 != 12 goto label5;
+
+        $r3 = <com.squareup.moshi.BufferedSourceJsonReader: okio.ByteString SINGLE_QUOTE_OR_SLASH>;
+
+        $r1 = specialinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: java.lang.String nextQuotedValue(okio.ByteString)>($r3);
+
+        goto label2;
+
+     label5:
+        $r4 = new com.squareup.moshi.JsonDataException;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Expected a name but was ");
+
+        $r6 = virtualinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: com.squareup.moshi.JsonReader$Token peek()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r6);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" at path ");
+
+        $r1 = virtualinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: java.lang.String getPath()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r1 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r4.<com.squareup.moshi.JsonDataException: void <init>(java.lang.String)>($r1);
+
+        throw $r4;
+    }
+    public java.lang.Object nextNull() throws java.io.IOException
+    {
+        com.squareup.moshi.BufferedSourceJsonReader r0;
+        int i0, $i1;
+        int[] $r1;
+        com.squareup.moshi.JsonDataException $r2;
+        java.lang.StringBuilder $r3;
+        com.squareup.moshi.JsonReader$Token $r4;
+        java.lang.String $r5;
+
+        r0 := @this: com.squareup.moshi.BufferedSourceJsonReader;
+
+        i0 = r0.<com.squareup.moshi.BufferedSourceJsonReader: int peeked>;
+
+        if i0 != 0 goto label1;
+
+        i0 = specialinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: int doPeek()>();
+
+     label1:
+        if i0 != 7 goto label2;
+
+        r0.<com.squareup.moshi.BufferedSourceJsonReader: int peeked> = 0;
+
+        $r1 = r0.<com.squareup.moshi.BufferedSourceJsonReader: int[] pathIndices>;
+
+        i0 = r0.<com.squareup.moshi.BufferedSourceJsonReader: int stackSize>;
+
+        i0 = i0 + -1;
+
+        $i1 = $r1[i0];
+
+        $i1 = $i1 + 1;
+
+        $r1[i0] = $i1;
+
+        return null;
+
+     label2:
+        $r2 = new com.squareup.moshi.JsonDataException;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Expected null but was ");
+
+        $r4 = virtualinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: com.squareup.moshi.JsonReader$Token peek()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r4);
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" at path ");
+
+        $r5 = virtualinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: java.lang.String getPath()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r5 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r2.<com.squareup.moshi.JsonDataException: void <init>(java.lang.String)>($r5);
+
+        throw $r2;
+    }
+    public java.lang.String nextString() throws java.io.IOException
+    {
+        com.squareup.moshi.BufferedSourceJsonReader r0;
+        int i0, $i1;
+        java.lang.String $r1;
+        int[] $r2;
+        okio.ByteString $r3;
+        long $l2;
+        okio.Buffer $r4;
+        com.squareup.moshi.JsonDataException $r5;
+        java.lang.StringBuilder $r6;
+        com.squareup.moshi.JsonReader$Token $r7;
+
+        r0 := @this: com.squareup.moshi.BufferedSourceJsonReader;
+
+        i0 = r0.<com.squareup.moshi.BufferedSourceJsonReader: int peeked>;
+
+        if i0 != 0 goto label1;
+
+        i0 = specialinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: int doPeek()>();
+
+     label1:
+        if i0 != 10 goto label3;
+
+        $r1 = specialinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: java.lang.String nextUnquotedValue()>();
+
+     label2:
+        r0.<com.squareup.moshi.BufferedSourceJsonReader: int peeked> = 0;
+
+        $r2 = r0.<com.squareup.moshi.BufferedSourceJsonReader: int[] pathIndices>;
+
+        i0 = r0.<com.squareup.moshi.BufferedSourceJsonReader: int stackSize>;
+
+        i0 = i0 + -1;
+
+        $i1 = $r2[i0];
+
+        $i1 = $i1 + 1;
+
+        $r2[i0] = $i1;
+
+        return $r1;
+
+     label3:
+        if i0 != 9 goto label4;
+
+        $r3 = <com.squareup.moshi.BufferedSourceJsonReader: okio.ByteString DOUBLE_QUOTE_OR_SLASH>;
+
+        $r1 = specialinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: java.lang.String nextQuotedValue(okio.ByteString)>($r3);
+
+        goto label2;
+
+     label4:
+        if i0 != 8 goto label5;
+
+        $r3 = <com.squareup.moshi.BufferedSourceJsonReader: okio.ByteString SINGLE_QUOTE_OR_SLASH>;
+
+        $r1 = specialinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: java.lang.String nextQuotedValue(okio.ByteString)>($r3);
+
+        goto label2;
+
+     label5:
+        if i0 != 11 goto label6;
+
+        $r1 = r0.<com.squareup.moshi.BufferedSourceJsonReader: java.lang.String peekedString>;
+
+        r0.<com.squareup.moshi.BufferedSourceJsonReader: java.lang.String peekedString> = null;
+
+        goto label2;
+
+     label6:
+        if i0 != 15 goto label7;
+
+        $l2 = r0.<com.squareup.moshi.BufferedSourceJsonReader: long peekedLong>;
+
+        $r1 = staticinvoke <java.lang.Long: java.lang.String toString(long)>($l2);
+
+        goto label2;
+
+     label7:
+        if i0 != 16 goto label8;
+
+        $r4 = r0.<com.squareup.moshi.BufferedSourceJsonReader: okio.Buffer buffer>;
+
+        i0 = r0.<com.squareup.moshi.BufferedSourceJsonReader: int peekedNumberLength>;
+
+        $l2 = (long) i0;
+
+        $r1 = virtualinvoke $r4.<okio.Buffer: java.lang.String readUtf8(long)>($l2);
+
+        goto label2;
+
+     label8:
+        $r5 = new com.squareup.moshi.JsonDataException;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Expected a string but was ");
+
+        $r7 = virtualinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: com.squareup.moshi.JsonReader$Token peek()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r7);
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" at path ");
+
+        $r1 = virtualinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: java.lang.String getPath()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r1 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r5.<com.squareup.moshi.JsonDataException: void <init>(java.lang.String)>($r1);
+
+        throw $r5;
+    }
+    public com.squareup.moshi.JsonReader$Token peek() throws java.io.IOException
+    {
+        com.squareup.moshi.BufferedSourceJsonReader r0;
+        int $i0;
+        java.lang.AssertionError $r1;
+        com.squareup.moshi.JsonReader$Token r2;
+
+        r0 := @this: com.squareup.moshi.BufferedSourceJsonReader;
+
+        $i0 = r0.<com.squareup.moshi.BufferedSourceJsonReader: int peeked>;
+
+        if $i0 != 0 goto label01;
+
+        $i0 = specialinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: int doPeek()>();
+
+     label01:
+        lookupswitch($i0)
+        {
+            case 1: goto label03;
+            case 2: goto label04;
+            case 3: goto label05;
+            case 4: goto label06;
+            case 5: goto label08;
+            case 6: goto label08;
+            case 7: goto label09;
+            case 8: goto label10;
+            case 9: goto label10;
+            case 10: goto label10;
+            case 11: goto label10;
+            case 12: goto label07;
+            case 13: goto label07;
+            case 14: goto label07;
+            case 15: goto label11;
+            case 16: goto label11;
+            case 17: goto label12;
+            default: goto label02;
+        };
+
+     label02:
+        $r1 = new java.lang.AssertionError;
+
+        specialinvoke $r1.<java.lang.AssertionError: void <init>()>();
+
+        throw $r1;
+
+     label03:
+        r2 = <com.squareup.moshi.JsonReader$Token: com.squareup.moshi.JsonReader$Token BEGIN_OBJECT>;
+
+        return r2;
+
+     label04:
+        r2 = <com.squareup.moshi.JsonReader$Token: com.squareup.moshi.JsonReader$Token END_OBJECT>;
+
+        return r2;
+
+     label05:
+        r2 = <com.squareup.moshi.JsonReader$Token: com.squareup.moshi.JsonReader$Token BEGIN_ARRAY>;
+
+        return r2;
+
+     label06:
+        r2 = <com.squareup.moshi.JsonReader$Token: com.squareup.moshi.JsonReader$Token END_ARRAY>;
+
+        return r2;
+
+     label07:
+        r2 = <com.squareup.moshi.JsonReader$Token: com.squareup.moshi.JsonReader$Token NAME>;
+
+        return r2;
+
+     label08:
+        r2 = <com.squareup.moshi.JsonReader$Token: com.squareup.moshi.JsonReader$Token BOOLEAN>;
+
+        return r2;
+
+     label09:
+        r2 = <com.squareup.moshi.JsonReader$Token: com.squareup.moshi.JsonReader$Token NULL>;
+
+        return r2;
+
+     label10:
+        r2 = <com.squareup.moshi.JsonReader$Token: com.squareup.moshi.JsonReader$Token STRING>;
+
+        return r2;
+
+     label11:
+        r2 = <com.squareup.moshi.JsonReader$Token: com.squareup.moshi.JsonReader$Token NUMBER>;
+
+        return r2;
+
+     label12:
+        r2 = <com.squareup.moshi.JsonReader$Token: com.squareup.moshi.JsonReader$Token END_DOCUMENT>;
+
+        return r2;
+    }
+    void promoteNameToValue() throws java.io.IOException
+    {
+        com.squareup.moshi.BufferedSourceJsonReader r0;
+        boolean $z0;
+        java.lang.String $r1;
+
+        r0 := @this: com.squareup.moshi.BufferedSourceJsonReader;
+
+        $z0 = virtualinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: boolean hasNext()>();
+
+        if $z0 == 0 goto label1;
+
+        $r1 = virtualinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: java.lang.String nextName()>();
+
+        r0.<com.squareup.moshi.BufferedSourceJsonReader: java.lang.String peekedString> = $r1;
+
+        r0.<com.squareup.moshi.BufferedSourceJsonReader: int peeked> = 11;
+
+     label1:
+        return;
+    }
+    int selectName(com.squareup.moshi.JsonReader$Options) throws java.io.IOException
+    {
+        com.squareup.moshi.BufferedSourceJsonReader r0;
+        com.squareup.moshi.JsonReader$Options $r1;
+        int i0, $i1;
+        okio.BufferedSource $r2;
+        okio.Options $r3;
+        java.lang.String[] $r4, $r5;
+        java.lang.String $r6;
+
+        r0 := @this: com.squareup.moshi.BufferedSourceJsonReader;
+
+        $r1 := @parameter0: com.squareup.moshi.JsonReader$Options;
+
+        i0 = r0.<com.squareup.moshi.BufferedSourceJsonReader: int peeked>;
+
+        if i0 != 0 goto label1;
+
+        i0 = specialinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: int doPeek()>();
+
+     label1:
+        if i0 == 13 goto label2;
+
+        return -1;
+
+     label2:
+        $r2 = r0.<com.squareup.moshi.BufferedSourceJsonReader: okio.BufferedSource source>;
+
+        $r3 = $r1.<com.squareup.moshi.JsonReader$Options: okio.Options doubleQuoteSuffix>;
+
+        i0 = interfaceinvoke $r2.<okio.BufferedSource: int select(okio.Options)>($r3);
+
+        if i0 == -1 goto label3;
+
+        r0.<com.squareup.moshi.BufferedSourceJsonReader: int peeked> = 0;
+
+        $r4 = r0.<com.squareup.moshi.BufferedSourceJsonReader: java.lang.String[] pathNames>;
+
+        $i1 = r0.<com.squareup.moshi.BufferedSourceJsonReader: int stackSize>;
+
+        $i1 = $i1 + -1;
+
+        $r5 = $r1.<com.squareup.moshi.JsonReader$Options: java.lang.String[] strings>;
+
+        $r6 = $r5[i0];
+
+        $r4[$i1] = $r6;
+
+     label3:
+        return i0;
+    }
+    int selectString(com.squareup.moshi.JsonReader$Options) throws java.io.IOException
+    {
+        com.squareup.moshi.BufferedSourceJsonReader r0;
+        com.squareup.moshi.JsonReader$Options $r1;
+        int i0, $i1, $i2;
+        okio.BufferedSource $r2;
+        okio.Options $r3;
+        int[] $r4;
+
+        r0 := @this: com.squareup.moshi.BufferedSourceJsonReader;
+
+        $r1 := @parameter0: com.squareup.moshi.JsonReader$Options;
+
+        i0 = r0.<com.squareup.moshi.BufferedSourceJsonReader: int peeked>;
+
+        if i0 != 0 goto label1;
+
+        i0 = specialinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: int doPeek()>();
+
+     label1:
+        if i0 == 9 goto label2;
+
+        return -1;
+
+     label2:
+        $r2 = r0.<com.squareup.moshi.BufferedSourceJsonReader: okio.BufferedSource source>;
+
+        $r3 = $r1.<com.squareup.moshi.JsonReader$Options: okio.Options doubleQuoteSuffix>;
+
+        i0 = interfaceinvoke $r2.<okio.BufferedSource: int select(okio.Options)>($r3);
+
+        if i0 == -1 goto label3;
+
+        r0.<com.squareup.moshi.BufferedSourceJsonReader: int peeked> = 0;
+
+        $r4 = r0.<com.squareup.moshi.BufferedSourceJsonReader: int[] pathIndices>;
+
+        $i1 = r0.<com.squareup.moshi.BufferedSourceJsonReader: int stackSize>;
+
+        $i1 = $i1 + -1;
+
+        $i2 = $r4[$i1];
+
+        $i2 = $i2 + 1;
+
+        $r4[$i1] = $i2;
+
+     label3:
+        return i0;
+    }
+    public void setFailOnUnknown(boolean)
+    {
+        com.squareup.moshi.BufferedSourceJsonReader r0;
+        boolean $z0;
+
+        r0 := @this: com.squareup.moshi.BufferedSourceJsonReader;
+
+        $z0 := @parameter0: boolean;
+
+        r0.<com.squareup.moshi.BufferedSourceJsonReader: boolean failOnUnknown> = $z0;
+
+        return;
+    }
+    public void setLenient(boolean)
+    {
+        com.squareup.moshi.BufferedSourceJsonReader r0;
+        boolean $z0;
+
+        r0 := @this: com.squareup.moshi.BufferedSourceJsonReader;
+
+        $z0 := @parameter0: boolean;
+
+        r0.<com.squareup.moshi.BufferedSourceJsonReader: boolean lenient> = $z0;
+
+        return;
+    }
+    public void skipValue() throws java.io.IOException
+    {
+        com.squareup.moshi.BufferedSourceJsonReader r0;
+        boolean $z0;
+        com.squareup.moshi.JsonDataException $r1;
+        java.lang.StringBuilder $r2;
+        com.squareup.moshi.JsonReader$Token $r3;
+        java.lang.String $r4;
+        int i0, i1;
+        int[] $r5;
+        java.lang.String[] $r6;
+        okio.ByteString $r7;
+        okio.Buffer $r8;
+        long $l2;
+
+        r0 := @this: com.squareup.moshi.BufferedSourceJsonReader;
+
+        $z0 = r0.<com.squareup.moshi.BufferedSourceJsonReader: boolean failOnUnknown>;
+
+        if $z0 == 0 goto label01;
+
+        $r1 = new com.squareup.moshi.JsonDataException;
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Cannot skip unexpected ");
+
+        $r3 = virtualinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: com.squareup.moshi.JsonReader$Token peek()>();
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r3);
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" at ");
+
+        $r4 = virtualinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: java.lang.String getPath()>();
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r4 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r1.<com.squareup.moshi.JsonDataException: void <init>(java.lang.String)>($r4);
+
+        throw $r1;
+
+     label01:
+        i0 = 0;
+
+     label02:
+        i1 = r0.<com.squareup.moshi.BufferedSourceJsonReader: int peeked>;
+
+        if i1 != 0 goto label03;
+
+        i1 = specialinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: int doPeek()>();
+
+     label03:
+        if i1 != 3 goto label05;
+
+        specialinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: void push(int)>(1);
+
+        i0 = i0 + 1;
+
+     label04:
+        r0.<com.squareup.moshi.BufferedSourceJsonReader: int peeked> = 0;
+
+        if i0 != 0 goto label02;
+
+        $r5 = r0.<com.squareup.moshi.BufferedSourceJsonReader: int[] pathIndices>;
+
+        i0 = r0.<com.squareup.moshi.BufferedSourceJsonReader: int stackSize>;
+
+        i0 = i0 + -1;
+
+        i1 = $r5[i0];
+
+        i1 = i1 + 1;
+
+        $r5[i0] = i1;
+
+        $r6 = r0.<com.squareup.moshi.BufferedSourceJsonReader: java.lang.String[] pathNames>;
+
+        i0 = r0.<com.squareup.moshi.BufferedSourceJsonReader: int stackSize>;
+
+        i0 = i0 + -1;
+
+        $r6[i0] = "null";
+
+        return;
+
+     label05:
+        if i1 != 1 goto label06;
+
+        specialinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: void push(int)>(3);
+
+        i0 = i0 + 1;
+
+        goto label04;
+
+     label06:
+        if i1 != 4 goto label07;
+
+        i1 = r0.<com.squareup.moshi.BufferedSourceJsonReader: int stackSize>;
+
+        i1 = i1 + -1;
+
+        r0.<com.squareup.moshi.BufferedSourceJsonReader: int stackSize> = i1;
+
+        i0 = i0 + -1;
+
+        goto label04;
+
+     label07:
+        if i1 != 2 goto label08;
+
+        i1 = r0.<com.squareup.moshi.BufferedSourceJsonReader: int stackSize>;
+
+        i1 = i1 + -1;
+
+        r0.<com.squareup.moshi.BufferedSourceJsonReader: int stackSize> = i1;
+
+        i0 = i0 + -1;
+
+        goto label04;
+
+     label08:
+        if i1 == 14 goto label09;
+
+        if i1 != 10 goto label10;
+
+     label09:
+        specialinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: void skipUnquotedValue()>();
+
+        goto label04;
+
+     label10:
+        if i1 == 9 goto label11;
+
+        if i1 != 13 goto label12;
+
+     label11:
+        $r7 = <com.squareup.moshi.BufferedSourceJsonReader: okio.ByteString DOUBLE_QUOTE_OR_SLASH>;
+
+        specialinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: void skipQuotedValue(okio.ByteString)>($r7);
+
+        goto label04;
+
+     label12:
+        if i1 == 8 goto label13;
+
+        if i1 != 12 goto label14;
+
+     label13:
+        $r7 = <com.squareup.moshi.BufferedSourceJsonReader: okio.ByteString SINGLE_QUOTE_OR_SLASH>;
+
+        specialinvoke r0.<com.squareup.moshi.BufferedSourceJsonReader: void skipQuotedValue(okio.ByteString)>($r7);
+
+        goto label04;
+
+     label14:
+        if i1 != 16 goto label04;
+
+        $r8 = r0.<com.squareup.moshi.BufferedSourceJsonReader: okio.Buffer buffer>;
+
+        i1 = r0.<com.squareup.moshi.BufferedSourceJsonReader: int peekedNumberLength>;
+
+        $l2 = (long) i1;
+
+        virtualinvoke $r8.<okio.Buffer: void skip(long)>($l2);
+
+        goto label04;
+    }
+    public java.lang.String toString()
+    {
+        com.squareup.moshi.BufferedSourceJsonReader r0;
+        java.lang.StringBuilder $r1;
+        okio.BufferedSource $r2;
+        java.lang.String $r3;
+
+        r0 := @this: com.squareup.moshi.BufferedSourceJsonReader;
+
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r1 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("JsonReader(");
+
+        $r2 = r0.<com.squareup.moshi.BufferedSourceJsonReader: okio.BufferedSource source>;
+
+        $r1 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r2);
+
+        $r1 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(")");
+
+        $r3 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r3;
+    }

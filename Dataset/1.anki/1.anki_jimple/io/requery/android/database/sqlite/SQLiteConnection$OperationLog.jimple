@@ -1,0 +1,612 @@
+io.requery.android.database.sqlite.SQLiteConnection$OperationLog extends java.lang.Object
+private static final int COOKIE_GENERATION_SHIFT
+private static final int COOKIE_INDEX_MASK
+private static final int MAX_RECENT_OPERATIONS
+private int mGeneration
+private int mIndex
+private final io.requery.android.database.sqlite.SQLiteConnection$Operation[] mOperations
+    private void <init>()
+    {
+        io.requery.android.database.sqlite.SQLiteConnection$OperationLog r0;
+        io.requery.android.database.sqlite.SQLiteConnection$Operation[] $r1;
+
+        r0 := @this: io.requery.android.database.sqlite.SQLiteConnection$OperationLog;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r1 = newarray (io.requery.android.database.sqlite.SQLiteConnection$Operation)[20];
+
+        r0.<io.requery.android.database.sqlite.SQLiteConnection$OperationLog: io.requery.android.database.sqlite.SQLiteConnection$Operation[] mOperations> = $r1;
+
+        return;
+    }
+    void <init>(io.requery.android.database.sqlite.SQLiteConnection$1)
+    {
+        io.requery.android.database.sqlite.SQLiteConnection$OperationLog r0;
+        io.requery.android.database.sqlite.SQLiteConnection$1 $r1;
+
+        r0 := @this: io.requery.android.database.sqlite.SQLiteConnection$OperationLog;
+
+        $r1 := @parameter0: io.requery.android.database.sqlite.SQLiteConnection$1;
+
+        specialinvoke r0.<io.requery.android.database.sqlite.SQLiteConnection$OperationLog: void <init>()>();
+
+        return;
+    }
+    private boolean endOperationDeferLogLocked(int)
+    {
+        io.requery.android.database.sqlite.SQLiteConnection$OperationLog r0;
+        int $i0;
+        io.requery.android.database.sqlite.SQLiteConnection$Operation $r1;
+        long $l1;
+
+        r0 := @this: io.requery.android.database.sqlite.SQLiteConnection$OperationLog;
+
+        $i0 := @parameter0: int;
+
+        $r1 = specialinvoke r0.<io.requery.android.database.sqlite.SQLiteConnection$OperationLog: io.requery.android.database.sqlite.SQLiteConnection$Operation getOperationLocked(int)>($i0);
+
+        if $r1 == null goto label1;
+
+        $l1 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        $r1.<io.requery.android.database.sqlite.SQLiteConnection$Operation: long mEndTime> = $l1;
+
+        $r1.<io.requery.android.database.sqlite.SQLiteConnection$Operation: boolean mFinished> = 1;
+
+     label1:
+        return 0;
+    }
+    private io.requery.android.database.sqlite.SQLiteConnection$Operation getOperationLocked(int)
+    {
+        io.requery.android.database.sqlite.SQLiteConnection$OperationLog r0;
+        int $i0, i1;
+        io.requery.android.database.sqlite.SQLiteConnection$Operation[] $r1;
+        io.requery.android.database.sqlite.SQLiteConnection$Operation r2;
+
+        r0 := @this: io.requery.android.database.sqlite.SQLiteConnection$OperationLog;
+
+        $i0 := @parameter0: int;
+
+        i1 = $i0 & 255;
+
+        $r1 = r0.<io.requery.android.database.sqlite.SQLiteConnection$OperationLog: io.requery.android.database.sqlite.SQLiteConnection$Operation[] mOperations>;
+
+        r2 = $r1[i1];
+
+        i1 = r2.<io.requery.android.database.sqlite.SQLiteConnection$Operation: int mCookie>;
+
+        if i1 != $i0 goto label1;
+
+        return r2;
+
+     label1:
+        return null;
+    }
+    private void logOperationLocked(int, java.lang.String)
+    {
+        io.requery.android.database.sqlite.SQLiteConnection$OperationLog r0;
+        int $i0;
+        java.lang.String $r1;
+        java.lang.StringBuilder r2, $r4;
+        io.requery.android.database.sqlite.SQLiteConnection$Operation $r3;
+
+        r0 := @this: io.requery.android.database.sqlite.SQLiteConnection$OperationLog;
+
+        $i0 := @parameter0: int;
+
+        $r1 := @parameter1: java.lang.String;
+
+        $r3 = specialinvoke r0.<io.requery.android.database.sqlite.SQLiteConnection$OperationLog: io.requery.android.database.sqlite.SQLiteConnection$Operation getOperationLocked(int)>($i0);
+
+        if $r3 != null goto label1;
+
+        return;
+
+     label1:
+        r2 = new java.lang.StringBuilder;
+
+        specialinvoke r2.<java.lang.StringBuilder: void <init>()>();
+
+        virtualinvoke $r3.<io.requery.android.database.sqlite.SQLiteConnection$Operation: void describe(java.lang.StringBuilder,boolean)>(r2, 0);
+
+        if $r1 == null goto label2;
+
+        $r4 = virtualinvoke r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", ");
+
+        virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+     label2:
+        $r1 = virtualinvoke r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("SQLiteConnection", $r1);
+
+        return;
+    }
+    private int newOperationCookieLocked(int)
+    {
+        io.requery.android.database.sqlite.SQLiteConnection$OperationLog r0;
+        int $i0, i1, $i2;
+
+        r0 := @this: io.requery.android.database.sqlite.SQLiteConnection$OperationLog;
+
+        $i0 := @parameter0: int;
+
+        i1 = r0.<io.requery.android.database.sqlite.SQLiteConnection$OperationLog: int mGeneration>;
+
+        $i2 = i1 + 1;
+
+        r0.<io.requery.android.database.sqlite.SQLiteConnection$OperationLog: int mGeneration> = $i2;
+
+        i1 = i1 << 8;
+
+        $i0 = i1 | $i0;
+
+        return $i0;
+    }
+    public int beginOperation(java.lang.String, java.lang.String, java.lang.Object[])
+    {
+        io.requery.android.database.sqlite.SQLiteConnection$OperationLog r0;
+        java.lang.String $r1, $r2;
+        java.lang.Object[] $r3;
+        java.lang.Object r4;
+        int i0, $i1, $i3;
+        io.requery.android.database.sqlite.SQLiteConnection$Operation[] $r5, $r6;
+        io.requery.android.database.sqlite.SQLiteConnection$Operation r7;
+        long $l2;
+        java.util.ArrayList $r8;
+        boolean $z0;
+        byte[] $r9;
+        java.lang.Throwable $r10;
+
+        r0 := @this: io.requery.android.database.sqlite.SQLiteConnection$OperationLog;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $r3 := @parameter2: java.lang.Object[];
+
+        $i1 = 0;
+
+        $r5 = r0.<io.requery.android.database.sqlite.SQLiteConnection$OperationLog: io.requery.android.database.sqlite.SQLiteConnection$Operation[] mOperations>;
+
+        entermonitor $r5;
+
+     label01:
+        i0 = r0.<io.requery.android.database.sqlite.SQLiteConnection$OperationLog: int mIndex>;
+
+        i0 = i0 + 1;
+
+        i0 = i0 % 20;
+
+        $r6 = r0.<io.requery.android.database.sqlite.SQLiteConnection$OperationLog: io.requery.android.database.sqlite.SQLiteConnection$Operation[] mOperations>;
+
+        r7 = $r6[i0];
+
+        if r7 != null goto label06;
+
+        r7 = new io.requery.android.database.sqlite.SQLiteConnection$Operation;
+
+        specialinvoke r7.<io.requery.android.database.sqlite.SQLiteConnection$Operation: void <init>(io.requery.android.database.sqlite.SQLiteConnection$1)>(null);
+
+        $r6 = r0.<io.requery.android.database.sqlite.SQLiteConnection$OperationLog: io.requery.android.database.sqlite.SQLiteConnection$Operation[] mOperations>;
+
+        $r6[i0] = r7;
+
+     label02:
+        $l2 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        r7.<io.requery.android.database.sqlite.SQLiteConnection$Operation: long mStartTime> = $l2;
+
+        r7.<io.requery.android.database.sqlite.SQLiteConnection$Operation: java.lang.String mKind> = $r1;
+
+        r7.<io.requery.android.database.sqlite.SQLiteConnection$Operation: java.lang.String mSql> = $r2;
+
+        if $r3 == null goto label11;
+
+        $r8 = r7.<io.requery.android.database.sqlite.SQLiteConnection$Operation: java.util.ArrayList mBindArgs>;
+
+        if $r8 != null goto label09;
+
+        $r8 = new java.util.ArrayList;
+
+        specialinvoke $r8.<java.util.ArrayList: void <init>()>();
+
+        r7.<io.requery.android.database.sqlite.SQLiteConnection$Operation: java.util.ArrayList mBindArgs> = $r8;
+
+     label03:
+        $i3 = lengthof $r3;
+
+     label04:
+        if $i1 >= $i3 goto label11;
+
+        r4 = $r3[$i1];
+
+        if r4 == null goto label10;
+
+        $z0 = r4 instanceof byte[];
+
+        if $z0 == 0 goto label10;
+
+        $r8 = r7.<io.requery.android.database.sqlite.SQLiteConnection$Operation: java.util.ArrayList mBindArgs>;
+
+        $r9 = staticinvoke <io.requery.android.database.sqlite.SQLiteConnection: byte[] access$500()>();
+
+        virtualinvoke $r8.<java.util.ArrayList: boolean add(java.lang.Object)>($r9);
+
+     label05:
+        $i1 = $i1 + 1;
+
+        goto label04;
+
+     label06:
+        r7.<io.requery.android.database.sqlite.SQLiteConnection$Operation: boolean mFinished> = 0;
+
+        r7.<io.requery.android.database.sqlite.SQLiteConnection$Operation: java.lang.Exception mException> = null;
+
+        $r8 = r7.<io.requery.android.database.sqlite.SQLiteConnection$Operation: java.util.ArrayList mBindArgs>;
+
+        if $r8 == null goto label02;
+
+        $r8 = r7.<io.requery.android.database.sqlite.SQLiteConnection$Operation: java.util.ArrayList mBindArgs>;
+
+        virtualinvoke $r8.<java.util.ArrayList: void clear()>();
+
+        goto label02;
+
+     label07:
+        $r10 := @caughtexception;
+
+        exitmonitor $r5;
+
+     label08:
+        throw $r10;
+
+     label09:
+        $r8 = r7.<io.requery.android.database.sqlite.SQLiteConnection$Operation: java.util.ArrayList mBindArgs>;
+
+        virtualinvoke $r8.<java.util.ArrayList: void clear()>();
+
+        goto label03;
+
+     label10:
+        $r8 = r7.<io.requery.android.database.sqlite.SQLiteConnection$Operation: java.util.ArrayList mBindArgs>;
+
+        virtualinvoke $r8.<java.util.ArrayList: boolean add(java.lang.Object)>(r4);
+
+        goto label05;
+
+     label11:
+        $i1 = specialinvoke r0.<io.requery.android.database.sqlite.SQLiteConnection$OperationLog: int newOperationCookieLocked(int)>(i0);
+
+        r7.<io.requery.android.database.sqlite.SQLiteConnection$Operation: int mCookie> = $i1;
+
+        r0.<io.requery.android.database.sqlite.SQLiteConnection$OperationLog: int mIndex> = i0;
+
+        $i1 = r7.<io.requery.android.database.sqlite.SQLiteConnection$Operation: int mCookie>;
+
+        exitmonitor $r5;
+
+     label12:
+        return $i1;
+
+        catch java.lang.Throwable from label01 to label08 with label07;
+        catch java.lang.Throwable from label09 to label12 with label07;
+    }
+    public java.lang.String describeCurrentOperation()
+    {
+        io.requery.android.database.sqlite.SQLiteConnection$OperationLog r0;
+        java.lang.StringBuilder r1;
+        io.requery.android.database.sqlite.SQLiteConnection$Operation r2;
+        io.requery.android.database.sqlite.SQLiteConnection$Operation[] $r3, $r5;
+        int $i0;
+        java.lang.String $r4;
+        boolean $z0;
+        java.lang.Throwable $r6;
+
+        r0 := @this: io.requery.android.database.sqlite.SQLiteConnection$OperationLog;
+
+        $r3 = r0.<io.requery.android.database.sqlite.SQLiteConnection$OperationLog: io.requery.android.database.sqlite.SQLiteConnection$Operation[] mOperations>;
+
+        entermonitor $r3;
+
+     label1:
+        $r5 = r0.<io.requery.android.database.sqlite.SQLiteConnection$OperationLog: io.requery.android.database.sqlite.SQLiteConnection$Operation[] mOperations>;
+
+        $i0 = r0.<io.requery.android.database.sqlite.SQLiteConnection$OperationLog: int mIndex>;
+
+        r2 = $r5[$i0];
+
+        if r2 == null goto label3;
+
+        $z0 = r2.<io.requery.android.database.sqlite.SQLiteConnection$Operation: boolean mFinished>;
+
+        if $z0 != 0 goto label3;
+
+        r1 = new java.lang.StringBuilder;
+
+        specialinvoke r1.<java.lang.StringBuilder: void <init>()>();
+
+        virtualinvoke r2.<io.requery.android.database.sqlite.SQLiteConnection$Operation: void describe(java.lang.StringBuilder,boolean)>(r1, 0);
+
+        $r4 = virtualinvoke r1.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        exitmonitor $r3;
+
+     label2:
+        return $r4;
+
+     label3:
+        exitmonitor $r3;
+
+     label4:
+        return null;
+
+     label5:
+        $r6 := @caughtexception;
+
+        exitmonitor $r3;
+
+     label6:
+        throw $r6;
+
+        catch java.lang.Throwable from label1 to label2 with label5;
+        catch java.lang.Throwable from label3 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+    public void dump(android.util.Printer, boolean)
+    {
+        io.requery.android.database.sqlite.SQLiteConnection$OperationLog r0;
+        android.util.Printer $r1;
+        boolean $z0;
+        java.lang.StringBuilder r2, $r6;
+        io.requery.android.database.sqlite.SQLiteConnection$Operation[] $r3, $r4;
+        int i0, i1;
+        io.requery.android.database.sqlite.SQLiteConnection$Operation r5;
+        java.lang.String $r7;
+        java.lang.Throwable $r8;
+
+        r0 := @this: io.requery.android.database.sqlite.SQLiteConnection$OperationLog;
+
+        $r1 := @parameter0: android.util.Printer;
+
+        $z0 := @parameter1: boolean;
+
+        $r3 = r0.<io.requery.android.database.sqlite.SQLiteConnection$OperationLog: io.requery.android.database.sqlite.SQLiteConnection$Operation[] mOperations>;
+
+        entermonitor $r3;
+
+     label1:
+        interfaceinvoke $r1.<android.util.Printer: void println(java.lang.String)>("  Most recently executed operations:");
+
+        i0 = r0.<io.requery.android.database.sqlite.SQLiteConnection$OperationLog: int mIndex>;
+
+        $r4 = r0.<io.requery.android.database.sqlite.SQLiteConnection$OperationLog: io.requery.android.database.sqlite.SQLiteConnection$Operation[] mOperations>;
+
+        r5 = $r4[i0];
+
+        if r5 == null goto label7;
+
+        i1 = 0;
+
+     label2:
+        r2 = new java.lang.StringBuilder;
+
+        specialinvoke r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("    ");
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i1);
+
+        virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(": [");
+
+        $r7 = staticinvoke <io.requery.android.database.sqlite.SQLiteConnection$Operation: java.lang.String access$600(io.requery.android.database.sqlite.SQLiteConnection$Operation)>(r5);
+
+        virtualinvoke r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r7);
+
+        virtualinvoke r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("] ");
+
+        virtualinvoke r5.<io.requery.android.database.sqlite.SQLiteConnection$Operation: void describe(java.lang.StringBuilder,boolean)>(r2, $z0);
+
+        $r7 = virtualinvoke r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        interfaceinvoke $r1.<android.util.Printer: void println(java.lang.String)>($r7);
+
+        if i0 <= 0 goto label6;
+
+        i0 = i0 + -1;
+
+     label3:
+        i1 = i1 + 1;
+
+        $r4 = r0.<io.requery.android.database.sqlite.SQLiteConnection$OperationLog: io.requery.android.database.sqlite.SQLiteConnection$Operation[] mOperations>;
+
+        r5 = $r4[i0];
+
+        if r5 == null goto label4;
+
+        if i1 < 20 goto label2;
+
+     label4:
+        exitmonitor $r3;
+
+     label5:
+        return;
+
+     label6:
+        i0 = 19;
+
+        goto label3;
+
+     label7:
+        interfaceinvoke $r1.<android.util.Printer: void println(java.lang.String)>("    <none>");
+
+        goto label4;
+
+     label8:
+        $r8 := @caughtexception;
+
+        exitmonitor $r3;
+
+     label9:
+        throw $r8;
+
+        catch java.lang.Throwable from label1 to label5 with label8;
+        catch java.lang.Throwable from label6 to label9 with label8;
+    }
+    public void endOperation(int)
+    {
+        io.requery.android.database.sqlite.SQLiteConnection$OperationLog r0;
+        int $i0;
+        io.requery.android.database.sqlite.SQLiteConnection$Operation[] $r1;
+        boolean $z0;
+        java.lang.Throwable $r2;
+
+        r0 := @this: io.requery.android.database.sqlite.SQLiteConnection$OperationLog;
+
+        $i0 := @parameter0: int;
+
+        $r1 = r0.<io.requery.android.database.sqlite.SQLiteConnection$OperationLog: io.requery.android.database.sqlite.SQLiteConnection$Operation[] mOperations>;
+
+        entermonitor $r1;
+
+     label1:
+        $z0 = specialinvoke r0.<io.requery.android.database.sqlite.SQLiteConnection$OperationLog: boolean endOperationDeferLogLocked(int)>($i0);
+
+        if $z0 == 0 goto label2;
+
+        specialinvoke r0.<io.requery.android.database.sqlite.SQLiteConnection$OperationLog: void logOperationLocked(int,java.lang.String)>($i0, null);
+
+     label2:
+        exitmonitor $r1;
+
+     label3:
+        return;
+
+     label4:
+        $r2 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label5:
+        throw $r2;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+    public boolean endOperationDeferLog(int)
+    {
+        io.requery.android.database.sqlite.SQLiteConnection$OperationLog r0;
+        int $i0;
+        io.requery.android.database.sqlite.SQLiteConnection$Operation[] $r1;
+        boolean $z0;
+        java.lang.Throwable $r2;
+
+        r0 := @this: io.requery.android.database.sqlite.SQLiteConnection$OperationLog;
+
+        $i0 := @parameter0: int;
+
+        $r1 = r0.<io.requery.android.database.sqlite.SQLiteConnection$OperationLog: io.requery.android.database.sqlite.SQLiteConnection$Operation[] mOperations>;
+
+        entermonitor $r1;
+
+     label1:
+        $z0 = specialinvoke r0.<io.requery.android.database.sqlite.SQLiteConnection$OperationLog: boolean endOperationDeferLogLocked(int)>($i0);
+
+        exitmonitor $r1;
+
+     label2:
+        return $z0;
+
+     label3:
+        $r2 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label4:
+        throw $r2;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+    public void failOperation(int, java.lang.Exception)
+    {
+        io.requery.android.database.sqlite.SQLiteConnection$OperationLog r0;
+        int $i0;
+        java.lang.Exception $r1;
+        java.lang.Throwable $r2;
+        io.requery.android.database.sqlite.SQLiteConnection$Operation[] $r3;
+        io.requery.android.database.sqlite.SQLiteConnection$Operation $r4;
+
+        r0 := @this: io.requery.android.database.sqlite.SQLiteConnection$OperationLog;
+
+        $i0 := @parameter0: int;
+
+        $r1 := @parameter1: java.lang.Exception;
+
+        $r3 = r0.<io.requery.android.database.sqlite.SQLiteConnection$OperationLog: io.requery.android.database.sqlite.SQLiteConnection$Operation[] mOperations>;
+
+        entermonitor $r3;
+
+     label1:
+        $r4 = specialinvoke r0.<io.requery.android.database.sqlite.SQLiteConnection$OperationLog: io.requery.android.database.sqlite.SQLiteConnection$Operation getOperationLocked(int)>($i0);
+
+        if $r4 == null goto label2;
+
+        $r4.<io.requery.android.database.sqlite.SQLiteConnection$Operation: java.lang.Exception mException> = $r1;
+
+     label2:
+        exitmonitor $r3;
+
+     label3:
+        return;
+
+     label4:
+        $r2 := @caughtexception;
+
+        exitmonitor $r3;
+
+     label5:
+        throw $r2;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+    public void logOperation(int, java.lang.String)
+    {
+        io.requery.android.database.sqlite.SQLiteConnection$OperationLog r0;
+        int $i0;
+        java.lang.String $r1;
+        java.lang.Throwable $r2;
+        io.requery.android.database.sqlite.SQLiteConnection$Operation[] $r3;
+
+        r0 := @this: io.requery.android.database.sqlite.SQLiteConnection$OperationLog;
+
+        $i0 := @parameter0: int;
+
+        $r1 := @parameter1: java.lang.String;
+
+        $r3 = r0.<io.requery.android.database.sqlite.SQLiteConnection$OperationLog: io.requery.android.database.sqlite.SQLiteConnection$Operation[] mOperations>;
+
+        entermonitor $r3;
+
+     label1:
+        specialinvoke r0.<io.requery.android.database.sqlite.SQLiteConnection$OperationLog: void logOperationLocked(int,java.lang.String)>($i0, $r1);
+
+        exitmonitor $r3;
+
+     label2:
+        return;
+
+     label3:
+        $r2 := @caughtexception;
+
+        exitmonitor $r3;
+
+     label4:
+        throw $r2;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }

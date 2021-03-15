@@ -1,0 +1,951 @@
+org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer extends org.apache.commons.math3.ml.clustering.Clusterer
+private static final double DEFAULT_EPSILON
+private java.util.List clusters
+private final double epsilon
+private final double fuzziness
+private final int k
+private final int maxIterations
+private double[][] membershipMatrix
+private java.util.List points
+private final org.apache.commons.math3.random.RandomGenerator random
+    public void <init>(int, double) throws org.apache.commons.math3.exception.NumberIsTooSmallException
+    {
+        org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer r0;
+        int $i0;
+        double $d0;
+        org.apache.commons.math3.ml.distance.EuclideanDistance $r1;
+
+        r0 := @this: org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer;
+
+        $i0 := @parameter0: int;
+
+        $d0 := @parameter1: double;
+
+        $r1 = new org.apache.commons.math3.ml.distance.EuclideanDistance;
+
+        specialinvoke $r1.<org.apache.commons.math3.ml.distance.EuclideanDistance: void <init>()>();
+
+        specialinvoke r0.<org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer: void <init>(int,double,int,org.apache.commons.math3.ml.distance.DistanceMeasure)>($i0, $d0, -1, $r1);
+
+        return;
+    }
+    public void <init>(int, double, int, org.apache.commons.math3.ml.distance.DistanceMeasure) throws org.apache.commons.math3.exception.NumberIsTooSmallException
+    {
+        org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer r0;
+        int $i0, $i1;
+        double $d0;
+        org.apache.commons.math3.ml.distance.DistanceMeasure $r1;
+        org.apache.commons.math3.random.JDKRandomGenerator $r2;
+
+        r0 := @this: org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer;
+
+        $i0 := @parameter0: int;
+
+        $d0 := @parameter1: double;
+
+        $i1 := @parameter2: int;
+
+        $r1 := @parameter3: org.apache.commons.math3.ml.distance.DistanceMeasure;
+
+        $r2 = new org.apache.commons.math3.random.JDKRandomGenerator;
+
+        specialinvoke $r2.<org.apache.commons.math3.random.JDKRandomGenerator: void <init>()>();
+
+        specialinvoke r0.<org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer: void <init>(int,double,int,org.apache.commons.math3.ml.distance.DistanceMeasure,double,org.apache.commons.math3.random.RandomGenerator)>($i0, $d0, $i1, $r1, 0.001, $r2);
+
+        return;
+    }
+    public void <init>(int, double, int, org.apache.commons.math3.ml.distance.DistanceMeasure, double, org.apache.commons.math3.random.RandomGenerator) throws org.apache.commons.math3.exception.NumberIsTooSmallException
+    {
+        org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer r0;
+        int $i0, $i1;
+        double $d0, $d1;
+        org.apache.commons.math3.ml.distance.DistanceMeasure $r1;
+        org.apache.commons.math3.random.RandomGenerator $r2;
+        byte $b2;
+        org.apache.commons.math3.exception.NumberIsTooSmallException $r3;
+        java.lang.Double $r4, $r5;
+
+        r0 := @this: org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer;
+
+        $i0 := @parameter0: int;
+
+        $d0 := @parameter1: double;
+
+        $i1 := @parameter2: int;
+
+        $r1 := @parameter3: org.apache.commons.math3.ml.distance.DistanceMeasure;
+
+        $d1 := @parameter4: double;
+
+        $r2 := @parameter5: org.apache.commons.math3.random.RandomGenerator;
+
+        specialinvoke r0.<org.apache.commons.math3.ml.clustering.Clusterer: void <init>(org.apache.commons.math3.ml.distance.DistanceMeasure)>($r1);
+
+        $b2 = $d0 cmpg 1.0;
+
+        if $b2 > 0 goto label1;
+
+        $r3 = new org.apache.commons.math3.exception.NumberIsTooSmallException;
+
+        $r4 = staticinvoke <java.lang.Double: java.lang.Double valueOf(double)>($d0);
+
+        $r5 = staticinvoke <java.lang.Double: java.lang.Double valueOf(double)>(1.0);
+
+        specialinvoke $r3.<org.apache.commons.math3.exception.NumberIsTooSmallException: void <init>(java.lang.Number,java.lang.Number,boolean)>($r4, $r5, 0);
+
+        throw $r3;
+
+     label1:
+        r0.<org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer: int k> = $i0;
+
+        r0.<org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer: double fuzziness> = $d0;
+
+        r0.<org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer: int maxIterations> = $i1;
+
+        r0.<org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer: double epsilon> = $d1;
+
+        r0.<org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer: org.apache.commons.math3.random.RandomGenerator random> = $r2;
+
+        r0.<org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer: double[][] membershipMatrix> = null;
+
+        r0.<org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer: java.util.List points> = null;
+
+        r0.<org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer: java.util.List clusters> = null;
+
+        return;
+    }
+    private double calculateMaxMembershipChange(double[][])
+    {
+        org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer r0;
+        double[][] $r1, $r3;
+        double d0, $d1, $d2;
+        int i0, $i1, $i2;
+        java.util.List $r2;
+        double[] $r4;
+
+        r0 := @this: org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer;
+
+        $r1 := @parameter0: double[][];
+
+        d0 = 0.0;
+
+        i0 = 0;
+
+     label1:
+        $r2 = r0.<org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer: java.util.List points>;
+
+        $i1 = interfaceinvoke $r2.<java.util.List: int size()>();
+
+        if i0 >= $i1 goto label4;
+
+        $i1 = 0;
+
+     label2:
+        $r2 = r0.<org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer: java.util.List clusters>;
+
+        $i2 = interfaceinvoke $r2.<java.util.List: int size()>();
+
+        if $i1 >= $i2 goto label3;
+
+        $r3 = r0.<org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer: double[][] membershipMatrix>;
+
+        $r4 = $r3[i0];
+
+        $d1 = $r4[$i1];
+
+        $r4 = $r1[i0];
+
+        $d2 = $r4[$i1];
+
+        $d1 = $d1 - $d2;
+
+        $d1 = staticinvoke <org.apache.commons.math3.util.FastMath: double abs(double)>($d1);
+
+        d0 = staticinvoke <org.apache.commons.math3.util.FastMath: double max(double,double)>($d1, d0);
+
+        $i1 = $i1 + 1;
+
+        goto label2;
+
+     label3:
+        i0 = i0 + 1;
+
+        goto label1;
+
+     label4:
+        return d0;
+    }
+    private void initializeMembershipMatrix()
+    {
+        org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer r0;
+        int i0, $i1, $i2;
+        java.util.List $r1;
+        double[][] $r2, $r5;
+        double[] $r3;
+        org.apache.commons.math3.random.RandomGenerator $r4;
+        double $d0;
+
+        r0 := @this: org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer;
+
+        i0 = 0;
+
+     label1:
+        $r1 = r0.<org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer: java.util.List points>;
+
+        $i1 = interfaceinvoke $r1.<java.util.List: int size()>();
+
+        if i0 >= $i1 goto label4;
+
+        $i1 = 0;
+
+     label2:
+        $i2 = r0.<org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer: int k>;
+
+        if $i1 >= $i2 goto label3;
+
+        $r2 = r0.<org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer: double[][] membershipMatrix>;
+
+        $r3 = $r2[i0];
+
+        $r4 = r0.<org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer: org.apache.commons.math3.random.RandomGenerator random>;
+
+        $d0 = interfaceinvoke $r4.<org.apache.commons.math3.random.RandomGenerator: double nextDouble()>();
+
+        $r3[$i1] = $d0;
+
+        $i1 = $i1 + 1;
+
+        goto label2;
+
+     label3:
+        $r2 = r0.<org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer: double[][] membershipMatrix>;
+
+        $r5 = r0.<org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer: double[][] membershipMatrix>;
+
+        $r3 = $r5[i0];
+
+        $r3 = staticinvoke <org.apache.commons.math3.util.MathArrays: double[] normalizeArray(double[],double)>($r3, 1.0);
+
+        $r2[i0] = $r3;
+
+        i0 = i0 + 1;
+
+        goto label1;
+
+     label4:
+        return;
+    }
+    private void saveMembershipMatrix(double[][])
+    {
+        org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer r0;
+        double[][] $r1, $r4;
+        double[] $r2, $r5;
+        int i0, $i1;
+        java.util.List $r3;
+
+        r0 := @this: org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer;
+
+        $r1 := @parameter0: double[][];
+
+        i0 = 0;
+
+     label1:
+        $r3 = r0.<org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer: java.util.List points>;
+
+        $i1 = interfaceinvoke $r3.<java.util.List: int size()>();
+
+        if i0 >= $i1 goto label2;
+
+        $r4 = r0.<org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer: double[][] membershipMatrix>;
+
+        $r5 = $r4[i0];
+
+        $r2 = $r1[i0];
+
+        $r3 = r0.<org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer: java.util.List clusters>;
+
+        $i1 = interfaceinvoke $r3.<java.util.List: int size()>();
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r5, 0, $r2, 0, $i1);
+
+        i0 = i0 + 1;
+
+        goto label1;
+
+     label2:
+        return;
+    }
+    private void updateClusterCenters()
+    {
+        org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer r0;
+        double[] r1, $r10;
+        java.util.ArrayList r2;
+        int i0, $i1, $i2, $i3;
+        java.util.List $r3;
+        java.util.Iterator $r4, $r8;
+        boolean $z0;
+        java.lang.Object $r5;
+        org.apache.commons.math3.ml.clustering.CentroidCluster r6;
+        org.apache.commons.math3.ml.clustering.Clusterable $r7;
+        double d0, $d1, $d2, $d3;
+        double[][] $r9;
+        org.apache.commons.math3.ml.clustering.DoublePoint $r11;
+
+        r0 := @this: org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer;
+
+        i0 = 0;
+
+        r2 = new java.util.ArrayList;
+
+        $i1 = r0.<org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer: int k>;
+
+        specialinvoke r2.<java.util.ArrayList: void <init>(int)>($i1);
+
+        $r3 = r0.<org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer: java.util.List clusters>;
+
+        $r4 = interfaceinvoke $r3.<java.util.List: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r4.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label6;
+
+        $r5 = interfaceinvoke $r4.<java.util.Iterator: java.lang.Object next()>();
+
+        r6 = (org.apache.commons.math3.ml.clustering.CentroidCluster) $r5;
+
+        $r7 = virtualinvoke r6.<org.apache.commons.math3.ml.clustering.CentroidCluster: org.apache.commons.math3.ml.clustering.Clusterable getCenter()>();
+
+        $i1 = 0;
+
+        r1 = interfaceinvoke $r7.<org.apache.commons.math3.ml.clustering.Clusterable: double[] getPoint()>();
+
+        $i2 = lengthof r1;
+
+        r1 = newarray (double)[$i2];
+
+        d0 = 0.0;
+
+        $r3 = r0.<org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer: java.util.List points>;
+
+        $r8 = interfaceinvoke $r3.<java.util.List: java.util.Iterator iterator()>();
+
+     label2:
+        $z0 = interfaceinvoke $r8.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label5;
+
+        $r5 = interfaceinvoke $r8.<java.util.Iterator: java.lang.Object next()>();
+
+        $r7 = (org.apache.commons.math3.ml.clustering.Clusterable) $r5;
+
+        $r9 = r0.<org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer: double[][] membershipMatrix>;
+
+        $r10 = $r9[$i1];
+
+        $d1 = $r10[i0];
+
+        $d2 = r0.<org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer: double fuzziness>;
+
+        $d1 = staticinvoke <org.apache.commons.math3.util.FastMath: double pow(double,double)>($d1, $d2);
+
+        $r10 = interfaceinvoke $r7.<org.apache.commons.math3.ml.clustering.Clusterable: double[] getPoint()>();
+
+        $i2 = 0;
+
+     label3:
+        $i3 = lengthof r1;
+
+        if $i2 >= $i3 goto label4;
+
+        $d2 = r1[$i2];
+
+        $d3 = $r10[$i2];
+
+        $d3 = $d3 * $d1;
+
+        $d2 = $d2 + $d3;
+
+        r1[$i2] = $d2;
+
+        $i2 = $i2 + 1;
+
+        goto label3;
+
+     label4:
+        d0 = d0 + $d1;
+
+        $i1 = $i1 + 1;
+
+        goto label2;
+
+     label5:
+        d0 = 1.0 / d0;
+
+        staticinvoke <org.apache.commons.math3.util.MathArrays: void scaleInPlace(double,double[])>(d0, r1);
+
+        r6 = new org.apache.commons.math3.ml.clustering.CentroidCluster;
+
+        $r11 = new org.apache.commons.math3.ml.clustering.DoublePoint;
+
+        specialinvoke $r11.<org.apache.commons.math3.ml.clustering.DoublePoint: void <init>(double[])>(r1);
+
+        specialinvoke r6.<org.apache.commons.math3.ml.clustering.CentroidCluster: void <init>(org.apache.commons.math3.ml.clustering.Clusterable)>($r11);
+
+        interfaceinvoke r2.<java.util.List: boolean add(java.lang.Object)>(r6);
+
+        i0 = i0 + 1;
+
+        goto label1;
+
+     label6:
+        $r3 = r0.<org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer: java.util.List clusters>;
+
+        interfaceinvoke $r3.<java.util.List: void clear()>();
+
+        r0.<org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer: java.util.List clusters> = r2;
+
+        return;
+    }
+    private void updateMembershipMatrix()
+    {
+        org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer r0;
+        int i0, $i1, i2, $i3;
+        java.util.List $r1;
+        java.lang.Object $r2;
+        org.apache.commons.math3.ml.clustering.Clusterable r3, $r5;
+        double d0, d1, $d2, $d3, $d4;
+        org.apache.commons.math3.ml.clustering.CentroidCluster $r4;
+        byte $b4;
+        java.util.Iterator $r6;
+        boolean $z0;
+        double[][] $r7;
+        double[] $r8;
+
+        r0 := @this: org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer;
+
+        i0 = 0;
+
+     label01:
+        $r1 = r0.<org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer: java.util.List points>;
+
+        $i1 = interfaceinvoke $r1.<java.util.List: int size()>();
+
+        if i0 >= $i1 goto label11;
+
+        $r1 = r0.<org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer: java.util.List points>;
+
+        $r2 = interfaceinvoke $r1.<java.util.List: java.lang.Object get(int)>(i0);
+
+        r3 = (org.apache.commons.math3.ml.clustering.Clusterable) $r2;
+
+        d0 = 4.9E-324;
+
+        $i1 = -1;
+
+        i2 = 0;
+
+     label02:
+        $r1 = r0.<org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer: java.util.List clusters>;
+
+        $i3 = interfaceinvoke $r1.<java.util.List: int size()>();
+
+        if i2 >= $i3 goto label10;
+
+        d1 = 0.0;
+
+        $r1 = r0.<org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer: java.util.List clusters>;
+
+        $r2 = interfaceinvoke $r1.<java.util.List: java.lang.Object get(int)>(i2);
+
+        $r4 = (org.apache.commons.math3.ml.clustering.CentroidCluster) $r2;
+
+        $r5 = virtualinvoke $r4.<org.apache.commons.math3.ml.clustering.CentroidCluster: org.apache.commons.math3.ml.clustering.Clusterable getCenter()>();
+
+        $d2 = virtualinvoke r0.<org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer: double distance(org.apache.commons.math3.ml.clustering.Clusterable,org.apache.commons.math3.ml.clustering.Clusterable)>(r3, $r5);
+
+        $d2 = staticinvoke <org.apache.commons.math3.util.FastMath: double abs(double)>($d2);
+
+        $b4 = $d2 cmpl 0.0;
+
+        if $b4 == 0 goto label04;
+
+        $r1 = r0.<org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer: java.util.List clusters>;
+
+        $r6 = interfaceinvoke $r1.<java.util.List: java.util.Iterator iterator()>();
+
+     label03:
+        $z0 = interfaceinvoke $r6.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label04;
+
+        $r2 = interfaceinvoke $r6.<java.util.Iterator: java.lang.Object next()>();
+
+        $r4 = (org.apache.commons.math3.ml.clustering.CentroidCluster) $r2;
+
+        $r5 = virtualinvoke $r4.<org.apache.commons.math3.ml.clustering.CentroidCluster: org.apache.commons.math3.ml.clustering.Clusterable getCenter()>();
+
+        $d3 = virtualinvoke r0.<org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer: double distance(org.apache.commons.math3.ml.clustering.Clusterable,org.apache.commons.math3.ml.clustering.Clusterable)>(r3, $r5);
+
+        $d3 = staticinvoke <org.apache.commons.math3.util.FastMath: double abs(double)>($d3);
+
+        $b4 = $d3 cmpl 0.0;
+
+        if $b4 != 0 goto label07;
+
+        d1 = #Infinity;
+
+     label04:
+        $b4 = d1 cmpl 0.0;
+
+        if $b4 != 0 goto label08;
+
+        d1 = 1.0;
+
+     label05:
+        $r7 = r0.<org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer: double[][] membershipMatrix>;
+
+        $r8 = $r7[i0];
+
+        $r8[i2] = d1;
+
+        $r7 = r0.<org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer: double[][] membershipMatrix>;
+
+        $r8 = $r7[i0];
+
+        d1 = $r8[i2];
+
+        $b4 = d1 cmpl d0;
+
+        if $b4 <= 0 goto label06;
+
+        $r7 = r0.<org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer: double[][] membershipMatrix>;
+
+        $r8 = $r7[i0];
+
+        d0 = $r8[i2];
+
+        $i1 = i2;
+
+     label06:
+        i2 = i2 + 1;
+
+        goto label02;
+
+     label07:
+        $d3 = $d2 / $d3;
+
+        $d4 = r0.<org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer: double fuzziness>;
+
+        $d4 = $d4 - 1.0;
+
+        $d4 = 2.0 / $d4;
+
+        $d3 = staticinvoke <org.apache.commons.math3.util.FastMath: double pow(double,double)>($d3, $d4);
+
+        d1 = d1 + $d3;
+
+        goto label03;
+
+     label08:
+        $b4 = d1 cmpl #Infinity;
+
+        if $b4 != 0 goto label09;
+
+        d1 = 0.0;
+
+        goto label05;
+
+     label09:
+        d1 = 1.0 / d1;
+
+        goto label05;
+
+     label10:
+        $r1 = r0.<org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer: java.util.List clusters>;
+
+        $r2 = interfaceinvoke $r1.<java.util.List: java.lang.Object get(int)>($i1);
+
+        $r4 = (org.apache.commons.math3.ml.clustering.CentroidCluster) $r2;
+
+        virtualinvoke $r4.<org.apache.commons.math3.ml.clustering.CentroidCluster: void addPoint(org.apache.commons.math3.ml.clustering.Clusterable)>(r3);
+
+        i0 = i0 + 1;
+
+        goto label01;
+
+     label11:
+        return;
+    }
+    public java.util.List cluster(java.util.Collection) throws org.apache.commons.math3.exception.MathIllegalArgumentException
+    {
+        org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer r0;
+        java.util.Collection r1;
+        int i0, $i1, $i2;
+        org.apache.commons.math3.exception.NumberIsTooSmallException $r2;
+        java.lang.Integer $r3, $r4;
+        java.util.ArrayList $r5;
+        java.util.List $r6;
+        int[] $r7;
+        java.lang.Class $r8;
+        java.lang.Object $r9;
+        double[][] $r10;
+        org.apache.commons.math3.ml.clustering.Clusterable $r11;
+        double[] $r12;
+        org.apache.commons.math3.ml.clustering.CentroidCluster $r13;
+        org.apache.commons.math3.ml.clustering.DoublePoint $r14;
+        double $d0, $d1;
+        byte $b3;
+
+        r0 := @this: org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer;
+
+        r1 := @parameter0: java.util.Collection;
+
+        staticinvoke <org.apache.commons.math3.util.MathUtils: void checkNotNull(java.lang.Object)>(r1);
+
+        i0 = interfaceinvoke r1.<java.util.Collection: int size()>();
+
+        $i1 = r0.<org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer: int k>;
+
+        if i0 >= $i1 goto label1;
+
+        $r2 = new org.apache.commons.math3.exception.NumberIsTooSmallException;
+
+        $r3 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(i0);
+
+        i0 = r0.<org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer: int k>;
+
+        $r4 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(i0);
+
+        specialinvoke $r2.<org.apache.commons.math3.exception.NumberIsTooSmallException: void <init>(java.lang.Number,java.lang.Number,boolean)>($r3, $r4, 0);
+
+        throw $r2;
+
+     label1:
+        $r5 = new java.util.ArrayList;
+
+        specialinvoke $r5.<java.util.ArrayList: void <init>(java.util.Collection)>(r1);
+
+        $r6 = staticinvoke <java.util.Collections: java.util.List unmodifiableList(java.util.List)>($r5);
+
+        r0.<org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer: java.util.List points> = $r6;
+
+        $r5 = new java.util.ArrayList;
+
+        specialinvoke $r5.<java.util.ArrayList: void <init>()>();
+
+        r0.<org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer: java.util.List clusters> = $r5;
+
+        $i1 = r0.<org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer: int k>;
+
+        $r7 = newarray (int)[2];
+
+        $r7[0] = i0;
+
+        $r7[1] = $i1;
+
+        $r8 = <java.lang.Double: java.lang.Class TYPE>;
+
+        $r9 = staticinvoke <java.lang.reflect.Array: java.lang.Object newInstance(java.lang.Class,int[])>($r8, $r7);
+
+        $r10 = (double[][]) $r9;
+
+        r0.<org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer: double[][] membershipMatrix> = $r10;
+
+        $i1 = r0.<org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer: int k>;
+
+        $r7 = newarray (int)[2];
+
+        $r7[0] = i0;
+
+        $r7[1] = $i1;
+
+        $r8 = <java.lang.Double: java.lang.Class TYPE>;
+
+        $r9 = staticinvoke <java.lang.reflect.Array: java.lang.Object newInstance(java.lang.Class,int[])>($r8, $r7);
+
+        $r10 = (double[][]) $r9;
+
+        if i0 != 0 goto label2;
+
+        $r6 = r0.<org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer: java.util.List clusters>;
+
+        return $r6;
+
+     label2:
+        specialinvoke r0.<org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer: void initializeMembershipMatrix()>();
+
+        $r6 = r0.<org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer: java.util.List points>;
+
+        $r9 = interfaceinvoke $r6.<java.util.List: java.lang.Object get(int)>(0);
+
+        $r11 = (org.apache.commons.math3.ml.clustering.Clusterable) $r9;
+
+        $r12 = interfaceinvoke $r11.<org.apache.commons.math3.ml.clustering.Clusterable: double[] getPoint()>();
+
+        i0 = lengthof $r12;
+
+        $i1 = 0;
+
+     label3:
+        $i2 = r0.<org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer: int k>;
+
+        if $i1 >= $i2 goto label4;
+
+        $r6 = r0.<org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer: java.util.List clusters>;
+
+        $r13 = new org.apache.commons.math3.ml.clustering.CentroidCluster;
+
+        $r14 = new org.apache.commons.math3.ml.clustering.DoublePoint;
+
+        $r12 = newarray (double)[i0];
+
+        specialinvoke $r14.<org.apache.commons.math3.ml.clustering.DoublePoint: void <init>(double[])>($r12);
+
+        specialinvoke $r13.<org.apache.commons.math3.ml.clustering.CentroidCluster: void <init>(org.apache.commons.math3.ml.clustering.Clusterable)>($r14);
+
+        interfaceinvoke $r6.<java.util.List: boolean add(java.lang.Object)>($r13);
+
+        $i1 = $i1 + 1;
+
+        goto label3;
+
+     label4:
+        i0 = 0;
+
+        $i1 = r0.<org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer: int maxIterations>;
+
+        if $i1 >= 0 goto label7;
+
+        $i1 = 2147483647;
+
+     label5:
+        specialinvoke r0.<org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer: void saveMembershipMatrix(double[][])>($r10);
+
+        specialinvoke r0.<org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer: void updateClusterCenters()>();
+
+        specialinvoke r0.<org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer: void updateMembershipMatrix()>();
+
+        $d0 = specialinvoke r0.<org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer: double calculateMaxMembershipChange(double[][])>($r10);
+
+        $d1 = r0.<org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer: double epsilon>;
+
+        $b3 = $d0 cmpl $d1;
+
+        if $b3 <= 0 goto label6;
+
+        i0 = i0 + 1;
+
+        if i0 < $i1 goto label5;
+
+     label6:
+        $r6 = r0.<org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer: java.util.List clusters>;
+
+        return $r6;
+
+     label7:
+        $i1 = r0.<org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer: int maxIterations>;
+
+        goto label5;
+    }
+    public java.util.List getClusters()
+    {
+        org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer r0;
+        java.util.List r1;
+
+        r0 := @this: org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer;
+
+        r1 = r0.<org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer: java.util.List clusters>;
+
+        return r1;
+    }
+    public java.util.List getDataPoints()
+    {
+        org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer r0;
+        java.util.List r1;
+
+        r0 := @this: org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer;
+
+        r1 = r0.<org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer: java.util.List points>;
+
+        return r1;
+    }
+    public double getEpsilon()
+    {
+        org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer r0;
+        double d0;
+
+        r0 := @this: org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer;
+
+        d0 = r0.<org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer: double epsilon>;
+
+        return d0;
+    }
+    public double getFuzziness()
+    {
+        org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer r0;
+        double d0;
+
+        r0 := @this: org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer;
+
+        d0 = r0.<org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer: double fuzziness>;
+
+        return d0;
+    }
+    public int getK()
+    {
+        org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer r0;
+        int i0;
+
+        r0 := @this: org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer;
+
+        i0 = r0.<org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer: int k>;
+
+        return i0;
+    }
+    public int getMaxIterations()
+    {
+        org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer r0;
+        int i0;
+
+        r0 := @this: org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer;
+
+        i0 = r0.<org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer: int maxIterations>;
+
+        return i0;
+    }
+    public org.apache.commons.math3.linear.RealMatrix getMembershipMatrix()
+    {
+        org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer r0;
+        org.apache.commons.math3.linear.RealMatrix $r1;
+        double[][] $r2;
+        org.apache.commons.math3.exception.MathIllegalStateException $r3;
+
+        r0 := @this: org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer;
+
+        $r2 = r0.<org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer: double[][] membershipMatrix>;
+
+        if $r2 != null goto label1;
+
+        $r3 = new org.apache.commons.math3.exception.MathIllegalStateException;
+
+        specialinvoke $r3.<org.apache.commons.math3.exception.MathIllegalStateException: void <init>()>();
+
+        throw $r3;
+
+     label1:
+        $r2 = r0.<org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer: double[][] membershipMatrix>;
+
+        $r1 = staticinvoke <org.apache.commons.math3.linear.MatrixUtils: org.apache.commons.math3.linear.RealMatrix createRealMatrix(double[][])>($r2);
+
+        return $r1;
+    }
+    public double getObjectiveFunctionValue()
+    {
+        org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer r0;
+        java.util.List $r1;
+        org.apache.commons.math3.exception.MathIllegalStateException $r2;
+        int i0, i1;
+        double d0, $d1, $d2, $d3;
+        java.util.Iterator $r3, $r6;
+        boolean $z0;
+        java.lang.Object $r4;
+        org.apache.commons.math3.ml.clustering.Clusterable r5, $r8;
+        org.apache.commons.math3.ml.clustering.CentroidCluster r7;
+        double[][] $r9;
+        double[] $r10;
+
+        r0 := @this: org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer;
+
+        $r1 = r0.<org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer: java.util.List points>;
+
+        if $r1 == null goto label1;
+
+        $r1 = r0.<org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer: java.util.List clusters>;
+
+        if $r1 != null goto label2;
+
+     label1:
+        $r2 = new org.apache.commons.math3.exception.MathIllegalStateException;
+
+        specialinvoke $r2.<org.apache.commons.math3.exception.MathIllegalStateException: void <init>()>();
+
+        throw $r2;
+
+     label2:
+        i0 = 0;
+
+        d0 = 0.0;
+
+        $r1 = r0.<org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer: java.util.List points>;
+
+        $r3 = interfaceinvoke $r1.<java.util.List: java.util.Iterator iterator()>();
+
+     label3:
+        $z0 = interfaceinvoke $r3.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label6;
+
+        $r4 = interfaceinvoke $r3.<java.util.Iterator: java.lang.Object next()>();
+
+        r5 = (org.apache.commons.math3.ml.clustering.Clusterable) $r4;
+
+        i1 = 0;
+
+        $r1 = r0.<org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer: java.util.List clusters>;
+
+        $r6 = interfaceinvoke $r1.<java.util.List: java.util.Iterator iterator()>();
+
+     label4:
+        $z0 = interfaceinvoke $r6.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label5;
+
+        $r4 = interfaceinvoke $r6.<java.util.Iterator: java.lang.Object next()>();
+
+        r7 = (org.apache.commons.math3.ml.clustering.CentroidCluster) $r4;
+
+        $r8 = virtualinvoke r7.<org.apache.commons.math3.ml.clustering.CentroidCluster: org.apache.commons.math3.ml.clustering.Clusterable getCenter()>();
+
+        $d1 = virtualinvoke r0.<org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer: double distance(org.apache.commons.math3.ml.clustering.Clusterable,org.apache.commons.math3.ml.clustering.Clusterable)>(r5, $r8);
+
+        $d1 = $d1 * $d1;
+
+        $r9 = r0.<org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer: double[][] membershipMatrix>;
+
+        $r10 = $r9[i0];
+
+        $d2 = $r10[i1];
+
+        $d3 = r0.<org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer: double fuzziness>;
+
+        $d2 = staticinvoke <org.apache.commons.math3.util.FastMath: double pow(double,double)>($d2, $d3);
+
+        $d1 = $d1 * $d2;
+
+        d0 = d0 + $d1;
+
+        i1 = i1 + 1;
+
+        goto label4;
+
+     label5:
+        i0 = i0 + 1;
+
+        goto label3;
+
+     label6:
+        return d0;
+    }
+    public org.apache.commons.math3.random.RandomGenerator getRandomGenerator()
+    {
+        org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer r0;
+        org.apache.commons.math3.random.RandomGenerator r1;
+
+        r0 := @this: org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer;
+
+        r1 = r0.<org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer: org.apache.commons.math3.random.RandomGenerator random>;
+
+        return r1;
+    }

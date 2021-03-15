@@ -1,0 +1,768 @@
+org.fdroid.fdroid.net.bluetooth.BluetoothServer$ClientConnection extends java.lang.Thread
+private final android.bluetooth.BluetoothSocket socket
+private final java.io.File webRoot
+    void <init>(android.bluetooth.BluetoothSocket, java.io.File)
+    {
+        org.fdroid.fdroid.net.bluetooth.BluetoothServer$ClientConnection r0;
+        android.bluetooth.BluetoothSocket $r1;
+        java.io.File $r2;
+
+        r0 := @this: org.fdroid.fdroid.net.bluetooth.BluetoothServer$ClientConnection;
+
+        $r1 := @parameter0: android.bluetooth.BluetoothSocket;
+
+        $r2 := @parameter1: java.io.File;
+
+        specialinvoke r0.<java.lang.Thread: void <init>()>();
+
+        r0.<org.fdroid.fdroid.net.bluetooth.BluetoothServer$ClientConnection: android.bluetooth.BluetoothSocket socket> = $r1;
+
+        r0.<org.fdroid.fdroid.net.bluetooth.BluetoothServer$ClientConnection: java.io.File webRoot> = $r2;
+
+        return;
+    }
+    private org.fdroid.fdroid.net.bluetooth.httpish.Response createResponse(fi.iki.elonen.NanoHTTPD$Response$Status, java.lang.String, java.io.InputStream)
+    {
+        org.fdroid.fdroid.net.bluetooth.BluetoothServer$ClientConnection r0;
+        fi.iki.elonen.NanoHTTPD$Response$Status $r1;
+        java.lang.String $r2;
+        java.io.InputStream $r3;
+        org.fdroid.fdroid.net.bluetooth.httpish.Response $r4;
+        int $i0;
+
+        r0 := @this: org.fdroid.fdroid.net.bluetooth.BluetoothServer$ClientConnection;
+
+        $r1 := @parameter0: fi.iki.elonen.NanoHTTPD$Response$Status;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $r3 := @parameter2: java.io.InputStream;
+
+        $r4 = new org.fdroid.fdroid.net.bluetooth.httpish.Response;
+
+        $i0 = virtualinvoke $r1.<fi.iki.elonen.NanoHTTPD$Response$Status: int getRequestStatus()>();
+
+        specialinvoke $r4.<org.fdroid.fdroid.net.bluetooth.httpish.Response: void <init>(int,java.lang.String,java.io.InputStream)>($i0, $r2, $r3);
+
+        return $r4;
+    }
+    private org.fdroid.fdroid.net.bluetooth.httpish.Response createResponse(fi.iki.elonen.NanoHTTPD$Response$Status, java.lang.String, java.lang.String)
+    {
+        org.fdroid.fdroid.net.bluetooth.BluetoothServer$ClientConnection r0;
+        fi.iki.elonen.NanoHTTPD$Response$Status $r1;
+        java.lang.String $r2, $r3;
+        org.fdroid.fdroid.net.bluetooth.httpish.Response $r4;
+        int $i0;
+
+        r0 := @this: org.fdroid.fdroid.net.bluetooth.BluetoothServer$ClientConnection;
+
+        $r1 := @parameter0: fi.iki.elonen.NanoHTTPD$Response$Status;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $r3 := @parameter2: java.lang.String;
+
+        $r4 = new org.fdroid.fdroid.net.bluetooth.httpish.Response;
+
+        $i0 = virtualinvoke $r1.<fi.iki.elonen.NanoHTTPD$Response$Status: int getRequestStatus()>();
+
+        specialinvoke $r4.<org.fdroid.fdroid.net.bluetooth.httpish.Response: void <init>(int,java.lang.String,java.lang.String)>($i0, $r2, $r3);
+
+        return $r4;
+    }
+    private java.lang.String findIndexFileInDirectory(java.io.File)
+    {
+        org.fdroid.fdroid.net.bluetooth.BluetoothServer$ClientConnection r0;
+        java.io.File $r1, r2;
+        boolean $z0;
+
+        r0 := @this: org.fdroid.fdroid.net.bluetooth.BluetoothServer$ClientConnection;
+
+        $r1 := @parameter0: java.io.File;
+
+        r2 = new java.io.File;
+
+        specialinvoke r2.<java.io.File: void <init>(java.io.File,java.lang.String)>($r1, "index.html");
+
+        $z0 = virtualinvoke r2.<java.io.File: boolean exists()>();
+
+        if $z0 == 0 goto label1;
+
+        return "index.html";
+
+     label1:
+        return null;
+    }
+    public static java.lang.String getMimeTypeForFile(java.lang.String)
+    {
+        java.lang.String $r0;
+        android.webkit.MimeTypeMap $r1;
+
+        $r0 := @parameter0: java.lang.String;
+
+        $r0 = staticinvoke <android.webkit.MimeTypeMap: java.lang.String getFileExtensionFromUrl(java.lang.String)>($r0);
+
+        if $r0 == null goto label1;
+
+        $r1 = staticinvoke <android.webkit.MimeTypeMap: android.webkit.MimeTypeMap getSingleton()>();
+
+        $r0 = virtualinvoke $r1.<android.webkit.MimeTypeMap: java.lang.String getMimeTypeFromExtension(java.lang.String)>($r0);
+
+        return $r0;
+
+     label1:
+        return null;
+    }
+    private org.fdroid.fdroid.net.bluetooth.httpish.Response handleRequest(org.fdroid.fdroid.net.bluetooth.httpish.Request) throws java.io.IOException
+    {
+        org.fdroid.fdroid.net.bluetooth.BluetoothServer$ClientConnection r0;
+        org.fdroid.fdroid.net.bluetooth.httpish.Request $r1;
+        java.util.HashMap r2;
+        org.fdroid.fdroid.net.bluetooth.httpish.Response$Builder r3, r5;
+        int i0, i1;
+        java.lang.String $r4;
+        boolean $z0;
+        org.fdroid.fdroid.net.bluetooth.httpish.Response $r6;
+        java.lang.StringBuilder $r7;
+        java.io.InputStream $r8;
+        java.lang.Exception r9;
+
+        r0 := @this: org.fdroid.fdroid.net.bluetooth.BluetoothServer$ClientConnection;
+
+        $r1 := @parameter0: org.fdroid.fdroid.net.bluetooth.httpish.Request;
+
+        staticinvoke <org.fdroid.fdroid.Utils: void debugLog(java.lang.String,java.lang.String)>("BluetoothServer", "Received Bluetooth request from client, will process it now.");
+
+        r3 = null;
+
+        i0 = 404;
+
+        i1 = -1;
+
+     label01:
+        $r4 = virtualinvoke $r1.<org.fdroid.fdroid.net.bluetooth.httpish.Request: java.lang.String getMethod()>();
+
+        $z0 = virtualinvoke $r4.<java.lang.String: boolean equals(java.lang.Object)>("HEAD");
+
+     label02:
+        if $z0 == 0 goto label07;
+
+        r5 = new org.fdroid.fdroid.net.bluetooth.httpish.Response$Builder;
+
+     label03:
+        specialinvoke r5.<org.fdroid.fdroid.net.bluetooth.httpish.Response$Builder: void <init>()>();
+
+     label04:
+        r3 = r5;
+
+     label05:
+        r5 = virtualinvoke r3.<org.fdroid.fdroid.net.bluetooth.httpish.Response$Builder: org.fdroid.fdroid.net.bluetooth.httpish.Response$Builder setStatusCode(int)>(i0);
+
+        r5 = virtualinvoke r5.<org.fdroid.fdroid.net.bluetooth.httpish.Response$Builder: org.fdroid.fdroid.net.bluetooth.httpish.Response$Builder setFileSize(int)>(i1);
+
+        $r6 = virtualinvoke r5.<org.fdroid.fdroid.net.bluetooth.httpish.Response$Builder: org.fdroid.fdroid.net.bluetooth.httpish.Response build()>();
+
+     label06:
+        return $r6;
+
+     label07:
+        r2 = new java.util.HashMap;
+
+     label08:
+        specialinvoke r2.<java.util.HashMap: void <init>()>();
+
+     label09:
+        $r7 = new java.lang.StringBuilder;
+
+     label10:
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("/");
+
+        $r4 = virtualinvoke $r1.<org.fdroid.fdroid.net.bluetooth.httpish.Request: java.lang.String getPath()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r4 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r6 = specialinvoke r0.<org.fdroid.fdroid.net.bluetooth.BluetoothServer$ClientConnection: org.fdroid.fdroid.net.bluetooth.httpish.Response respond(java.util.Map,java.lang.String)>(r2, $r4);
+
+     label11:
+        r5 = new org.fdroid.fdroid.net.bluetooth.httpish.Response$Builder;
+
+     label12:
+        $r8 = virtualinvoke $r6.<org.fdroid.fdroid.net.bluetooth.httpish.Response: java.io.InputStream toContentStream()>();
+
+        specialinvoke r5.<org.fdroid.fdroid.net.bluetooth.httpish.Response$Builder: void <init>(java.io.InputStream)>($r8);
+
+     label13:
+        i0 = virtualinvoke $r6.<org.fdroid.fdroid.net.bluetooth.httpish.Response: int getStatusCode()>();
+
+     label14:
+        i1 = virtualinvoke $r6.<org.fdroid.fdroid.net.bluetooth.httpish.Response: int getFileSize()>();
+
+     label15:
+        r3 = r5;
+
+        goto label05;
+
+     label16:
+        r9 := @caughtexception;
+
+     label17:
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String,java.lang.Throwable)>("BluetoothServer", "error processing request; sending 500 response", r9);
+
+        if r3 != null goto label18;
+
+        r3 = new org.fdroid.fdroid.net.bluetooth.httpish.Response$Builder;
+
+        specialinvoke r3.<org.fdroid.fdroid.net.bluetooth.httpish.Response$Builder: void <init>()>();
+
+     label18:
+        r3 = virtualinvoke r3.<org.fdroid.fdroid.net.bluetooth.httpish.Response$Builder: org.fdroid.fdroid.net.bluetooth.httpish.Response$Builder setStatusCode(int)>(500);
+
+        r3 = virtualinvoke r3.<org.fdroid.fdroid.net.bluetooth.httpish.Response$Builder: org.fdroid.fdroid.net.bluetooth.httpish.Response$Builder setFileSize(int)>(0);
+
+        $r6 = virtualinvoke r3.<org.fdroid.fdroid.net.bluetooth.httpish.Response$Builder: org.fdroid.fdroid.net.bluetooth.httpish.Response build()>();
+
+        return $r6;
+
+     label19:
+        r9 := @caughtexception;
+
+        r3 = r5;
+
+        goto label17;
+
+        catch java.lang.Exception from label01 to label02 with label16;
+        catch java.lang.Exception from label03 to label04 with label16;
+        catch java.lang.Exception from label05 to label06 with label16;
+        catch java.lang.Exception from label08 to label09 with label16;
+        catch java.lang.Exception from label10 to label11 with label16;
+        catch java.lang.Exception from label12 to label13 with label16;
+        catch java.lang.Exception from label13 to label14 with label19;
+        catch java.lang.Exception from label14 to label15 with label19;
+    }
+    private org.fdroid.fdroid.net.bluetooth.httpish.Response respond(java.util.Map, java.lang.String)
+    {
+        org.fdroid.fdroid.net.bluetooth.BluetoothServer$ClientConnection r0;
+        java.util.Map r1;
+        java.io.File r2, $r7;
+        java.lang.String $r3, $r4;
+        char $c0;
+        int $i1;
+        boolean $z0;
+        fi.iki.elonen.NanoHTTPD$Response$Status $r5;
+        org.fdroid.fdroid.net.bluetooth.httpish.Response $r6, r9;
+        java.lang.StringBuilder $r8;
+
+        r0 := @this: org.fdroid.fdroid.net.bluetooth.BluetoothServer$ClientConnection;
+
+        r1 := @parameter0: java.util.Map;
+
+        $r3 := @parameter1: java.lang.String;
+
+        $r3 = virtualinvoke $r3.<java.lang.String: java.lang.String trim()>();
+
+        $c0 = <java.io.File: char separatorChar>;
+
+        $r4 = virtualinvoke $r3.<java.lang.String: java.lang.String replace(char,char)>($c0, 47);
+
+        $r3 = $r4;
+
+        $i1 = virtualinvoke $r4.<java.lang.String: int indexOf(int)>(63);
+
+        if $i1 < 0 goto label1;
+
+        $i1 = virtualinvoke $r4.<java.lang.String: int indexOf(int)>(63);
+
+        $r3 = virtualinvoke $r4.<java.lang.String: java.lang.String substring(int,int)>(0, $i1);
+
+     label1:
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean contains(java.lang.CharSequence)>("../");
+
+        if $z0 == 0 goto label2;
+
+        $r5 = <fi.iki.elonen.NanoHTTPD$Response$Status: fi.iki.elonen.NanoHTTPD$Response$Status FORBIDDEN>;
+
+        $r6 = specialinvoke r0.<org.fdroid.fdroid.net.bluetooth.BluetoothServer$ClientConnection: org.fdroid.fdroid.net.bluetooth.httpish.Response createResponse(fi.iki.elonen.NanoHTTPD$Response$Status,java.lang.String,java.lang.String)>($r5, "text/plain", "FORBIDDEN: Won\'t serve ../ for security reasons.");
+
+        return $r6;
+
+     label2:
+        r2 = new java.io.File;
+
+        $r7 = r0.<org.fdroid.fdroid.net.bluetooth.BluetoothServer$ClientConnection: java.io.File webRoot>;
+
+        specialinvoke r2.<java.io.File: void <init>(java.io.File,java.lang.String)>($r7, $r3);
+
+        $z0 = virtualinvoke r2.<java.io.File: boolean exists()>();
+
+        if $z0 != 0 goto label3;
+
+        $r5 = <fi.iki.elonen.NanoHTTPD$Response$Status: fi.iki.elonen.NanoHTTPD$Response$Status NOT_FOUND>;
+
+        $r6 = specialinvoke r0.<org.fdroid.fdroid.net.bluetooth.BluetoothServer$ClientConnection: org.fdroid.fdroid.net.bluetooth.httpish.Response createResponse(fi.iki.elonen.NanoHTTPD$Response$Status,java.lang.String,java.lang.String)>($r5, "text/plain", "Error 404, file not found.");
+
+        return $r6;
+
+     label3:
+        $z0 = virtualinvoke r2.<java.io.File: boolean isDirectory()>();
+
+        if $z0 == 0 goto label4;
+
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean endsWith(java.lang.String)>("/");
+
+        if $z0 != 0 goto label4;
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("/");
+
+        $r3 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r5 = <fi.iki.elonen.NanoHTTPD$Response$Status: fi.iki.elonen.NanoHTTPD$Response$Status REDIRECT>;
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("<html><body>Redirected: <a href=\"");
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\">");
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("</a></body></html>");
+
+        $r4 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r6 = specialinvoke r0.<org.fdroid.fdroid.net.bluetooth.BluetoothServer$ClientConnection: org.fdroid.fdroid.net.bluetooth.httpish.Response createResponse(fi.iki.elonen.NanoHTTPD$Response$Status,java.lang.String,java.lang.String)>($r5, "text/html", $r4);
+
+        virtualinvoke $r6.<org.fdroid.fdroid.net.bluetooth.httpish.Response: void addHeader(java.lang.String,java.lang.String)>("Location", $r3);
+
+        return $r6;
+
+     label4:
+        $z0 = virtualinvoke r2.<java.io.File: boolean isDirectory()>();
+
+        if $z0 == 0 goto label7;
+
+        $r4 = specialinvoke r0.<org.fdroid.fdroid.net.bluetooth.BluetoothServer$ClientConnection: java.lang.String findIndexFileInDirectory(java.io.File)>(r2);
+
+        if $r4 != null goto label6;
+
+        $z0 = virtualinvoke r2.<java.io.File: boolean canRead()>();
+
+        if $z0 == 0 goto label5;
+
+        $r5 = <fi.iki.elonen.NanoHTTPD$Response$Status: fi.iki.elonen.NanoHTTPD$Response$Status NOT_FOUND>;
+
+        $r6 = specialinvoke r0.<org.fdroid.fdroid.net.bluetooth.BluetoothServer$ClientConnection: org.fdroid.fdroid.net.bluetooth.httpish.Response createResponse(fi.iki.elonen.NanoHTTPD$Response$Status,java.lang.String,java.lang.String)>($r5, "text/html", "");
+
+        return $r6;
+
+     label5:
+        $r5 = <fi.iki.elonen.NanoHTTPD$Response$Status: fi.iki.elonen.NanoHTTPD$Response$Status FORBIDDEN>;
+
+        $r6 = specialinvoke r0.<org.fdroid.fdroid.net.bluetooth.BluetoothServer$ClientConnection: org.fdroid.fdroid.net.bluetooth.httpish.Response createResponse(fi.iki.elonen.NanoHTTPD$Response$Status,java.lang.String,java.lang.String)>($r5, "text/plain", "FORBIDDEN: No directory listing.");
+
+        return $r6;
+
+     label6:
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r3 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r6 = specialinvoke r0.<org.fdroid.fdroid.net.bluetooth.BluetoothServer$ClientConnection: org.fdroid.fdroid.net.bluetooth.httpish.Response respond(java.util.Map,java.lang.String)>(r1, $r3);
+
+        return $r6;
+
+     label7:
+        $r4 = staticinvoke <org.fdroid.fdroid.net.bluetooth.BluetoothServer$ClientConnection: java.lang.String getMimeTypeForFile(java.lang.String)>($r3);
+
+        $r6 = virtualinvoke r0.<org.fdroid.fdroid.net.bluetooth.BluetoothServer$ClientConnection: org.fdroid.fdroid.net.bluetooth.httpish.Response serveFile(java.lang.String,java.util.Map,java.io.File,java.lang.String)>($r3, r1, r2, $r4);
+
+        r9 = $r6;
+
+        if $r6 == null goto label9;
+
+     label8:
+        return r9;
+
+     label9:
+        $r5 = <fi.iki.elonen.NanoHTTPD$Response$Status: fi.iki.elonen.NanoHTTPD$Response$Status NOT_FOUND>;
+
+        r9 = specialinvoke r0.<org.fdroid.fdroid.net.bluetooth.BluetoothServer$ClientConnection: org.fdroid.fdroid.net.bluetooth.httpish.Response createResponse(fi.iki.elonen.NanoHTTPD$Response$Status,java.lang.String,java.lang.String)>($r5, "text/plain", "Error 404, file not found.");
+
+        goto label8;
+    }
+    public void run()
+    {
+        org.fdroid.fdroid.net.bluetooth.BluetoothServer$ClientConnection r0;
+        org.fdroid.fdroid.net.bluetooth.BluetoothConnection r1;
+        android.bluetooth.BluetoothSocket $r2;
+        org.fdroid.fdroid.net.bluetooth.httpish.Request $r3;
+        org.fdroid.fdroid.net.bluetooth.httpish.Response $r4;
+        boolean $z0;
+        java.io.IOException r5, r6;
+
+        r0 := @this: org.fdroid.fdroid.net.bluetooth.BluetoothServer$ClientConnection;
+
+        staticinvoke <org.fdroid.fdroid.Utils: void debugLog(java.lang.String,java.lang.String)>("BluetoothServer", "Listening for incoming Bluetooth requests from client");
+
+        r1 = new org.fdroid.fdroid.net.bluetooth.BluetoothConnection;
+
+        $r2 = r0.<org.fdroid.fdroid.net.bluetooth.BluetoothServer$ClientConnection: android.bluetooth.BluetoothSocket socket>;
+
+     label1:
+        specialinvoke r1.<org.fdroid.fdroid.net.bluetooth.BluetoothConnection: void <init>(android.bluetooth.BluetoothSocket)>($r2);
+
+        virtualinvoke r1.<org.fdroid.fdroid.net.bluetooth.BluetoothConnection: void open()>();
+
+     label2:
+        staticinvoke <org.fdroid.fdroid.Utils: void debugLog(java.lang.String,java.lang.String)>("BluetoothServer", "Listening for new Bluetooth request from client.");
+
+        $r3 = staticinvoke <org.fdroid.fdroid.net.bluetooth.httpish.Request: org.fdroid.fdroid.net.bluetooth.httpish.Request listenForRequest(org.fdroid.fdroid.net.bluetooth.BluetoothConnection)>(r1);
+
+        $r4 = specialinvoke r0.<org.fdroid.fdroid.net.bluetooth.BluetoothServer$ClientConnection: org.fdroid.fdroid.net.bluetooth.httpish.Response handleRequest(org.fdroid.fdroid.net.bluetooth.httpish.Request)>($r3);
+
+        virtualinvoke $r4.<org.fdroid.fdroid.net.bluetooth.httpish.Response: void send(org.fdroid.fdroid.net.bluetooth.BluetoothConnection)>(r1);
+
+     label3:
+        $z0 = virtualinvoke r0.<org.fdroid.fdroid.net.bluetooth.BluetoothServer$ClientConnection: boolean isInterrupted()>();
+
+        if $z0 == 0 goto label2;
+
+     label4:
+        virtualinvoke r1.<org.fdroid.fdroid.net.bluetooth.BluetoothConnection: void closeQuietly()>();
+
+        return;
+
+     label5:
+        r5 := @caughtexception;
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String,java.lang.Throwable)>("BluetoothServer", "Error listening for incoming connections over bluetooth", r5);
+
+        return;
+
+     label6:
+        r6 := @caughtexception;
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String,java.lang.Throwable)>("BluetoothServer", "Error receiving incoming connection over bluetooth", r6);
+
+        goto label4;
+
+        catch java.io.IOException from label1 to label2 with label5;
+        catch java.io.IOException from label2 to label3 with label6;
+    }
+    org.fdroid.fdroid.net.bluetooth.httpish.Response serveFile(java.lang.String, java.util.Map, java.io.File, java.lang.String)
+    {
+        org.fdroid.fdroid.net.bluetooth.BluetoothServer$ClientConnection r0;
+        java.lang.String $r1, $r4, r9, $r10, $r11;
+        java.util.Map r2;
+        java.io.File $r3;
+        org.fdroid.fdroid.net.bluetooth.BluetoothServer$ClientConnection$1 r5;
+        java.io.IOException r6;
+        java.lang.StringBuilder $r7;
+        long $l0, l2, $l3, $l5;
+        int $i1;
+        java.lang.Object $r8;
+        boolean $z0;
+        byte $b4;
+        fi.iki.elonen.NanoHTTPD$Response$Status $r12;
+        org.fdroid.fdroid.net.bluetooth.httpish.Response $r13;
+        java.io.FileInputStream $r14;
+        java.lang.NumberFormatException $r15;
+
+        r0 := @this: org.fdroid.fdroid.net.bluetooth.BluetoothServer$ClientConnection;
+
+        $r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.util.Map;
+
+        $r3 := @parameter2: java.io.File;
+
+        $r4 := @parameter3: java.lang.String;
+
+        $r7 = new java.lang.StringBuilder;
+
+     label01:
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r1 = virtualinvoke $r3.<java.io.File: java.lang.String getAbsolutePath()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $l0 = virtualinvoke $r3.<java.io.File: long lastModified()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l0);
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("");
+
+        $l0 = virtualinvoke $r3.<java.io.File: long length()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l0);
+
+        $r1 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $i1 = virtualinvoke $r1.<java.lang.String: int hashCode()>();
+
+        $r1 = staticinvoke <java.lang.Integer: java.lang.String toHexString(int)>($i1);
+
+     label02:
+        $l0 = 0L;
+
+        l2 = -1L;
+
+     label03:
+        $r8 = interfaceinvoke r2.<java.util.Map: java.lang.Object get(java.lang.Object)>("range");
+
+     label04:
+        r9 = (java.lang.String) $r8;
+
+        if r9 == null goto label15;
+
+     label05:
+        $z0 = virtualinvoke r9.<java.lang.String: boolean startsWith(java.lang.String)>("bytes=");
+
+     label06:
+        if $z0 == 0 goto label15;
+
+        $r10 = "bytes=";
+
+     label07:
+        $i1 = virtualinvoke $r10.<java.lang.String: int length()>();
+
+        $r10 = virtualinvoke r9.<java.lang.String: java.lang.String substring(int)>($i1);
+
+     label08:
+        r9 = $r10;
+
+     label09:
+        $i1 = virtualinvoke $r10.<java.lang.String: int indexOf(int)>(45);
+
+     label10:
+        if $i1 <= 0 goto label15;
+
+     label11:
+        $r11 = virtualinvoke $r10.<java.lang.String: java.lang.String substring(int,int)>(0, $i1);
+
+        $l3 = staticinvoke <java.lang.Long: long parseLong(java.lang.String)>($r11);
+
+     label12:
+        $l0 = $l3;
+
+        $i1 = $i1 + 1;
+
+     label13:
+        $r10 = virtualinvoke $r10.<java.lang.String: java.lang.String substring(int)>($i1);
+
+        $l3 = staticinvoke <java.lang.Long: long parseLong(java.lang.String)>($r10);
+
+     label14:
+        l2 = $l3;
+
+     label15:
+        $l3 = virtualinvoke $r3.<java.io.File: long length()>();
+
+     label16:
+        if r9 == null goto label33;
+
+        $b4 = $l0 cmp 0L;
+
+        if $b4 < 0 goto label33;
+
+        $b4 = $l0 cmp $l3;
+
+        if $b4 < 0 goto label21;
+
+        $r12 = <fi.iki.elonen.NanoHTTPD$Response$Status: fi.iki.elonen.NanoHTTPD$Response$Status RANGE_NOT_SATISFIABLE>;
+
+     label17:
+        $r13 = specialinvoke r0.<org.fdroid.fdroid.net.bluetooth.BluetoothServer$ClientConnection: org.fdroid.fdroid.net.bluetooth.httpish.Response createResponse(fi.iki.elonen.NanoHTTPD$Response$Status,java.lang.String,java.lang.String)>($r12, "text/plain", "");
+
+     label18:
+        $r7 = new java.lang.StringBuilder;
+
+     label19:
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("bytes 0-0/");
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l3);
+
+        $r4 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r13.<org.fdroid.fdroid.net.bluetooth.httpish.Response: void addHeader(java.lang.String,java.lang.String)>("Content-Range", $r4);
+
+        virtualinvoke $r13.<org.fdroid.fdroid.net.bluetooth.httpish.Response: void addHeader(java.lang.String,java.lang.String)>("ETag", $r1);
+
+     label20:
+        return $r13;
+
+     label21:
+        $b4 = l2 cmp 0L;
+
+        if $b4 >= 0 goto label22;
+
+        l2 = $l3 - 1L;
+
+     label22:
+        $l5 = l2 - $l0;
+
+        $l5 = $l5 + 1L;
+
+        $b4 = $l5 cmp 0L;
+
+        if $b4 >= 0 goto label23;
+
+        $l5 = 0L;
+
+     label23:
+        r5 = new org.fdroid.fdroid.net.bluetooth.BluetoothServer$ClientConnection$1;
+
+     label24:
+        specialinvoke r5.<org.fdroid.fdroid.net.bluetooth.BluetoothServer$ClientConnection$1: void <init>(org.fdroid.fdroid.net.bluetooth.BluetoothServer$ClientConnection,java.io.File,long)>(r0, $r3, $l5);
+
+        virtualinvoke r5.<java.io.FileInputStream: long skip(long)>($l0);
+
+     label25:
+        $r12 = <fi.iki.elonen.NanoHTTPD$Response$Status: fi.iki.elonen.NanoHTTPD$Response$Status PARTIAL_CONTENT>;
+
+     label26:
+        $r13 = specialinvoke r0.<org.fdroid.fdroid.net.bluetooth.BluetoothServer$ClientConnection: org.fdroid.fdroid.net.bluetooth.httpish.Response createResponse(fi.iki.elonen.NanoHTTPD$Response$Status,java.lang.String,java.io.InputStream)>($r12, $r4, r5);
+
+     label27:
+        $r7 = new java.lang.StringBuilder;
+
+     label28:
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("");
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l5);
+
+        $r4 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r13.<org.fdroid.fdroid.net.bluetooth.httpish.Response: void addHeader(java.lang.String,java.lang.String)>("Content-Length", $r4);
+
+     label29:
+        $r7 = new java.lang.StringBuilder;
+
+     label30:
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("bytes ");
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l0);
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("-");
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>(l2);
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("/");
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l3);
+
+        $r4 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r13.<org.fdroid.fdroid.net.bluetooth.httpish.Response: void addHeader(java.lang.String,java.lang.String)>("Content-Range", $r4);
+
+        virtualinvoke $r13.<org.fdroid.fdroid.net.bluetooth.httpish.Response: void addHeader(java.lang.String,java.lang.String)>("ETag", $r1);
+
+     label31:
+        return $r13;
+
+     label32:
+        r6 := @caughtexception;
+
+        $r12 = <fi.iki.elonen.NanoHTTPD$Response$Status: fi.iki.elonen.NanoHTTPD$Response$Status FORBIDDEN>;
+
+        $r13 = specialinvoke r0.<org.fdroid.fdroid.net.bluetooth.BluetoothServer$ClientConnection: org.fdroid.fdroid.net.bluetooth.httpish.Response createResponse(fi.iki.elonen.NanoHTTPD$Response$Status,java.lang.String,java.lang.String)>($r12, "text/plain", "FORBIDDEN: Reading file failed.");
+
+        return $r13;
+
+     label33:
+        $r8 = interfaceinvoke r2.<java.util.Map: java.lang.Object get(java.lang.Object)>("if-none-match");
+
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean equals(java.lang.Object)>($r8);
+
+     label34:
+        if $z0 == 0 goto label37;
+
+        $r12 = <fi.iki.elonen.NanoHTTPD$Response$Status: fi.iki.elonen.NanoHTTPD$Response$Status NOT_MODIFIED>;
+
+     label35:
+        $r13 = specialinvoke r0.<org.fdroid.fdroid.net.bluetooth.BluetoothServer$ClientConnection: org.fdroid.fdroid.net.bluetooth.httpish.Response createResponse(fi.iki.elonen.NanoHTTPD$Response$Status,java.lang.String,java.lang.String)>($r12, $r4, "");
+
+     label36:
+        return $r13;
+
+     label37:
+        $r12 = <fi.iki.elonen.NanoHTTPD$Response$Status: fi.iki.elonen.NanoHTTPD$Response$Status OK>;
+
+        $r14 = new java.io.FileInputStream;
+
+     label38:
+        specialinvoke $r14.<java.io.FileInputStream: void <init>(java.io.File)>($r3);
+
+        $r13 = specialinvoke r0.<org.fdroid.fdroid.net.bluetooth.BluetoothServer$ClientConnection: org.fdroid.fdroid.net.bluetooth.httpish.Response createResponse(fi.iki.elonen.NanoHTTPD$Response$Status,java.lang.String,java.io.InputStream)>($r12, $r4, $r14);
+
+     label39:
+        $r7 = new java.lang.StringBuilder;
+
+     label40:
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("");
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l3);
+
+        $r4 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r13.<org.fdroid.fdroid.net.bluetooth.httpish.Response: void addHeader(java.lang.String,java.lang.String)>("Content-Length", $r4);
+
+        virtualinvoke $r13.<org.fdroid.fdroid.net.bluetooth.httpish.Response: void addHeader(java.lang.String,java.lang.String)>("ETag", $r1);
+
+     label41:
+        return $r13;
+
+     label42:
+        $r15 := @caughtexception;
+
+        goto label15;
+
+        catch java.io.IOException from label01 to label02 with label32;
+        catch java.io.IOException from label03 to label04 with label32;
+        catch java.io.IOException from label05 to label06 with label32;
+        catch java.io.IOException from label07 to label08 with label32;
+        catch java.io.IOException from label09 to label10 with label32;
+        catch java.lang.NumberFormatException from label11 to label12 with label42;
+        catch java.lang.NumberFormatException from label13 to label14 with label42;
+        catch java.io.IOException from label11 to label12 with label32;
+        catch java.io.IOException from label13 to label14 with label32;
+        catch java.io.IOException from label15 to label16 with label32;
+        catch java.io.IOException from label17 to label18 with label32;
+        catch java.io.IOException from label19 to label20 with label32;
+        catch java.io.IOException from label24 to label25 with label32;
+        catch java.io.IOException from label26 to label27 with label32;
+        catch java.io.IOException from label28 to label29 with label32;
+        catch java.io.IOException from label30 to label31 with label32;
+        catch java.io.IOException from label33 to label34 with label32;
+        catch java.io.IOException from label35 to label36 with label32;
+        catch java.io.IOException from label38 to label39 with label32;
+        catch java.io.IOException from label40 to label41 with label32;
+    }

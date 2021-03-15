@@ -1,0 +1,4286 @@
+com.newsblur.service.NBSyncService extends android.app.Service
+private static volatile boolean ActionsRunning
+private static volatile boolean DoFeedsFolders
+private static volatile boolean DoUnreads
+private static java.util.Set ExhaustedFeeds
+private static volatile boolean FFSyncRunning
+private static java.util.Map FeedPagesSeen
+private static java.util.Map FeedStoriesSeen
+private static volatile boolean FlushRecounts
+private static java.util.List FollowupActions
+private static volatile boolean HaltNow
+private static volatile boolean HousekeepingRunning
+private static com.newsblur.util.FeedSet LastFeedSet
+public static volatile boolean OfflineNow
+private static final java.lang.Object PENDING_FEED_MUTEX
+private static com.newsblur.util.FeedSet PendingFeed
+private static java.lang.Integer PendingFeedTarget
+private static com.newsblur.util.FeedSet PreppedFeedSet
+private static java.util.Set RecountCandidates
+private static volatile boolean RecountsRunning
+private static com.newsblur.util.FeedSet ResetFeed
+private static volatile boolean StorySyncRunning
+private static final java.lang.Object WAKELOCK_MUTEX
+public static volatile int authFails
+private static volatile boolean isMemoryLow
+public static volatile java.lang.Boolean isPremium
+public static volatile java.lang.Boolean isStaff
+private static long lastAPIFailure
+private static int lastActionCount
+private static long lastFFConnMillis
+private static long lastFFParseMillis
+private static long lastFFReadMillis
+private static long lastFFWriteMillis
+private static long lastFeedCount
+com.newsblur.network.APIManager apiManager
+com.newsblur.service.CleanupService cleanupService
+com.newsblur.database.BlurDatabaseHelper dbHelper
+java.util.Set disabledFeedIds
+com.newsblur.util.FileCache iconCache
+com.newsblur.service.ImagePrefetchService imagePrefetchService
+private int lastStartIdCompleted
+com.newsblur.service.OriginalTextService originalTextService
+java.util.Set orphanFeedIds
+private java.util.concurrent.ExecutorService primaryExecutor
+com.newsblur.service.UnreadsService unreadsService
+android.os.PowerManager$WakeLock wl
+private long workaroundGloblaSharedStoryTimestamp
+private long workaroundReadStoryTimestamp
+    static void <clinit>()
+    {
+        java.lang.Integer $r0;
+        java.lang.Object $r1;
+        java.util.HashSet $r2;
+        java.util.HashMap $r3;
+        java.util.ArrayList $r4;
+
+        $r1 = new java.lang.Object;
+
+        specialinvoke $r1.<java.lang.Object: void <init>()>();
+
+        <com.newsblur.service.NBSyncService: java.lang.Object WAKELOCK_MUTEX> = $r1;
+
+        $r1 = new java.lang.Object;
+
+        specialinvoke $r1.<java.lang.Object: void <init>()>();
+
+        <com.newsblur.service.NBSyncService: java.lang.Object PENDING_FEED_MUTEX> = $r1;
+
+        <com.newsblur.service.NBSyncService: boolean ActionsRunning> = 0;
+
+        <com.newsblur.service.NBSyncService: boolean FFSyncRunning> = 0;
+
+        <com.newsblur.service.NBSyncService: boolean StorySyncRunning> = 0;
+
+        <com.newsblur.service.NBSyncService: boolean HousekeepingRunning> = 0;
+
+        <com.newsblur.service.NBSyncService: boolean RecountsRunning> = 0;
+
+        <com.newsblur.service.NBSyncService: boolean DoFeedsFolders> = 0;
+
+        <com.newsblur.service.NBSyncService: boolean DoUnreads> = 0;
+
+        <com.newsblur.service.NBSyncService: boolean HaltNow> = 0;
+
+        <com.newsblur.service.NBSyncService: boolean OfflineNow> = 0;
+
+        <com.newsblur.service.NBSyncService: int authFails> = 0;
+
+        <com.newsblur.service.NBSyncService: java.lang.Boolean isPremium> = null;
+
+        <com.newsblur.service.NBSyncService: java.lang.Boolean isStaff> = null;
+
+        <com.newsblur.service.NBSyncService: boolean isMemoryLow> = 0;
+
+        <com.newsblur.service.NBSyncService: long lastFeedCount> = 0L;
+
+        <com.newsblur.service.NBSyncService: long lastFFConnMillis> = 0L;
+
+        <com.newsblur.service.NBSyncService: long lastFFReadMillis> = 0L;
+
+        <com.newsblur.service.NBSyncService: long lastFFParseMillis> = 0L;
+
+        <com.newsblur.service.NBSyncService: long lastFFWriteMillis> = 0L;
+
+        $r0 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(0);
+
+        <com.newsblur.service.NBSyncService: java.lang.Integer PendingFeedTarget> = $r0;
+
+        $r2 = new java.util.HashSet;
+
+        specialinvoke $r2.<java.util.HashSet: void <init>()>();
+
+        <com.newsblur.service.NBSyncService: java.util.Set ExhaustedFeeds> = $r2;
+
+        $r3 = new java.util.HashMap;
+
+        specialinvoke $r3.<java.util.HashMap: void <init>()>();
+
+        <com.newsblur.service.NBSyncService: java.util.Map FeedPagesSeen> = $r3;
+
+        $r3 = new java.util.HashMap;
+
+        specialinvoke $r3.<java.util.HashMap: void <init>()>();
+
+        <com.newsblur.service.NBSyncService: java.util.Map FeedStoriesSeen> = $r3;
+
+        $r4 = new java.util.ArrayList;
+
+        specialinvoke $r4.<java.util.ArrayList: void <init>()>();
+
+        <com.newsblur.service.NBSyncService: java.util.List FollowupActions> = $r4;
+
+        $r2 = new java.util.HashSet;
+
+        specialinvoke $r2.<java.util.HashSet: void <init>()>();
+
+        <com.newsblur.service.NBSyncService: java.util.Set RecountCandidates> = $r2;
+
+        <com.newsblur.service.NBSyncService: boolean FlushRecounts> = 0;
+
+        <com.newsblur.service.NBSyncService: long lastAPIFailure> = 0L;
+
+        <com.newsblur.service.NBSyncService: int lastActionCount> = 0;
+
+        return;
+    }
+    public void <init>()
+    {
+        com.newsblur.service.NBSyncService r0;
+
+        r0 := @this: com.newsblur.service.NBSyncService;
+
+        specialinvoke r0.<android.app.Service: void <init>()>();
+
+        r0.<com.newsblur.service.NBSyncService: android.os.PowerManager$WakeLock wl> = null;
+
+        r0.<com.newsblur.service.NBSyncService: int lastStartIdCompleted> = -1;
+
+        return;
+    }
+    static void access$000(com.newsblur.service.NBSyncService, int)
+    {
+        com.newsblur.service.NBSyncService $r0;
+        int $i0;
+
+        $r0 := @parameter0: com.newsblur.service.NBSyncService;
+
+        $i0 := @parameter1: int;
+
+        specialinvoke $r0.<com.newsblur.service.NBSyncService: void doSync(int)>($i0);
+
+        return;
+    }
+    public static void addRecountCandidates(com.newsblur.util.FeedSet)
+    {
+        com.newsblur.util.FeedSet $r0;
+        java.util.Set $r1;
+        int $i0;
+
+        $r0 := @parameter0: com.newsblur.util.FeedSet;
+
+        if $r0 != null goto label1;
+
+        return;
+
+     label1:
+        $r1 = virtualinvoke $r0.<com.newsblur.util.FeedSet: java.util.Set getFlatFeedIds()>();
+
+        $i0 = interfaceinvoke $r1.<java.util.Set: int size()>();
+
+        if $i0 < 1 goto label2;
+
+        $r1 = <com.newsblur.service.NBSyncService: java.util.Set RecountCandidates>;
+
+        interfaceinvoke $r1.<java.util.Set: boolean add(java.lang.Object)>($r0);
+
+     label2:
+        return;
+    }
+    public static void addRecountCandidates(java.util.Set)
+    {
+        java.util.Set r0;
+        java.util.Iterator $r1;
+        boolean $z0;
+        java.lang.Object $r2;
+        com.newsblur.util.FeedSet r3;
+
+        r0 := @parameter0: java.util.Set;
+
+        $r1 = interfaceinvoke r0.<java.util.Set: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r1.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label2;
+
+        $r2 = interfaceinvoke $r1.<java.util.Iterator: java.lang.Object next()>();
+
+        r3 = (com.newsblur.util.FeedSet) $r2;
+
+        staticinvoke <com.newsblur.service.NBSyncService: void addRecountCandidates(com.newsblur.util.FeedSet)>(r3);
+
+        goto label1;
+
+     label2:
+        return;
+    }
+    private boolean backoffBackgroundCalls()
+    {
+        com.newsblur.service.NBSyncService r0;
+        int $i0;
+        long $l1, $l2;
+        byte $b3;
+        java.lang.Class $r1;
+        java.lang.String $r2;
+
+        r0 := @this: com.newsblur.service.NBSyncService;
+
+        $i0 = staticinvoke <com.newsblur.activity.NbActivity: int getActiveActivityCount()>();
+
+        if $i0 <= 0 goto label1;
+
+        return 0;
+
+     label1:
+        $l1 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        $l2 = <com.newsblur.service.NBSyncService: long lastAPIFailure>;
+
+        $l2 = $l2 + 300000L;
+
+        $b3 = $l1 cmp $l2;
+
+        if $b3 > 0 goto label2;
+
+        $r1 = virtualinvoke r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r2 = virtualinvoke $r1.<java.lang.Class: java.lang.String getName()>();
+
+        staticinvoke <com.newsblur.util.Log: void i(java.lang.String,java.lang.String)>($r2, "abandoning background sync due to recent API failures.");
+
+        return 1;
+
+     label2:
+        return 0;
+    }
+    private void checkRecounts()
+    {
+        com.newsblur.service.NBSyncService r0;
+        java.util.HashSet r1, r2;
+        boolean $z0;
+        java.util.Set $r3;
+        int $i0, $i1;
+        java.util.Iterator $r4;
+        java.lang.Object $r5;
+        com.newsblur.util.FeedSet r6;
+        com.newsblur.database.BlurDatabaseHelper $r7;
+        com.newsblur.util.StateFilter $r8;
+        java.lang.Throwable $r9;
+        java.lang.Class $r10;
+        java.lang.String $r11, $r13;
+        java.lang.StringBuilder $r12;
+        com.newsblur.network.APIManager $r14;
+        com.newsblur.network.domain.UnreadCountResponse $r15;
+        java.util.Map $r16;
+        java.util.Map$Entry r17;
+        com.newsblur.network.domain.UnreadCountResponse$UnreadMD $r18;
+        android.content.ContentValues $r19;
+        java.lang.Integer $r20;
+
+        r0 := @this: com.newsblur.service.NBSyncService;
+
+        $z0 = <com.newsblur.service.NBSyncService: boolean FlushRecounts>;
+
+        if $z0 != 0 goto label01;
+
+        return;
+
+     label01:
+        $r3 = <com.newsblur.service.NBSyncService: java.util.Set RecountCandidates>;
+
+        $i0 = interfaceinvoke $r3.<java.util.Set: int size()>();
+
+     label02:
+        if $i0 >= 1 goto label04;
+
+        $z0 = <com.newsblur.service.NBSyncService: boolean RecountsRunning>;
+
+        if $z0 == 0 goto label03;
+
+        <com.newsblur.service.NBSyncService: boolean RecountsRunning> = 0;
+
+        staticinvoke <com.newsblur.activity.NbActivity: void updateAllActivities(int)>(34);
+
+     label03:
+        <com.newsblur.service.NBSyncService: boolean FlushRecounts> = 0;
+
+        return;
+
+     label04:
+        <com.newsblur.service.NBSyncService: boolean RecountsRunning> = 1;
+
+        staticinvoke <com.newsblur.activity.NbActivity: void updateAllActivities(int)>(32);
+
+        r2 = new java.util.HashSet;
+
+        specialinvoke r2.<java.util.HashSet: void <init>()>();
+
+        $r3 = <com.newsblur.service.NBSyncService: java.util.Set RecountCandidates>;
+
+        $r4 = interfaceinvoke $r3.<java.util.Set: java.util.Iterator iterator()>();
+
+     label05:
+        $z0 = interfaceinvoke $r4.<java.util.Iterator: boolean hasNext()>();
+
+     label06:
+        if $z0 == 0 goto label16;
+
+     label07:
+        $r5 = interfaceinvoke $r4.<java.util.Iterator: java.lang.Object next()>();
+
+        r6 = (com.newsblur.util.FeedSet) $r5;
+
+        $r7 = r0.<com.newsblur.service.NBSyncService: com.newsblur.database.BlurDatabaseHelper dbHelper>;
+
+        $r8 = <com.newsblur.util.StateFilter: com.newsblur.util.StateFilter SOME>;
+
+        $i0 = virtualinvoke $r7.<com.newsblur.database.BlurDatabaseHelper: int getUnreadCount(com.newsblur.util.FeedSet,com.newsblur.util.StateFilter)>(r6, $r8);
+
+        $r7 = r0.<com.newsblur.service.NBSyncService: com.newsblur.database.BlurDatabaseHelper dbHelper>;
+
+        $r8 = <com.newsblur.util.StateFilter: com.newsblur.util.StateFilter SOME>;
+
+        $i1 = virtualinvoke $r7.<com.newsblur.database.BlurDatabaseHelper: int getLocalUnreadCount(com.newsblur.util.FeedSet,com.newsblur.util.StateFilter)>(r6, $r8);
+
+     label08:
+        if $i0 == $i1 goto label10;
+
+     label09:
+        interfaceinvoke r2.<java.util.Set: boolean add(java.lang.Object)>(r6);
+
+     label10:
+        $r7 = r0.<com.newsblur.service.NBSyncService: com.newsblur.database.BlurDatabaseHelper dbHelper>;
+
+        $z0 = virtualinvoke $r7.<com.newsblur.database.BlurDatabaseHelper: boolean isFeedSetFetchPending(com.newsblur.util.FeedSet)>(r6);
+
+     label11:
+        if $z0 == 0 goto label05;
+
+     label12:
+        interfaceinvoke r2.<java.util.Set: boolean add(java.lang.Object)>(r6);
+
+     label13:
+        goto label05;
+
+     label14:
+        $r9 := @caughtexception;
+
+        $z0 = <com.newsblur.service.NBSyncService: boolean RecountsRunning>;
+
+        if $z0 == 0 goto label15;
+
+        <com.newsblur.service.NBSyncService: boolean RecountsRunning> = 0;
+
+        staticinvoke <com.newsblur.activity.NbActivity: void updateAllActivities(int)>(34);
+
+     label15:
+        <com.newsblur.service.NBSyncService: boolean FlushRecounts> = 0;
+
+        throw $r9;
+
+     label16:
+        $i0 = interfaceinvoke r2.<java.util.Set: int size()>();
+
+     label17:
+        if $i0 >= 1 goto label21;
+
+     label18:
+        $r3 = <com.newsblur.service.NBSyncService: java.util.Set RecountCandidates>;
+
+        interfaceinvoke $r3.<java.util.Set: void clear()>();
+
+     label19:
+        $z0 = <com.newsblur.service.NBSyncService: boolean RecountsRunning>;
+
+        if $z0 == 0 goto label20;
+
+        <com.newsblur.service.NBSyncService: boolean RecountsRunning> = 0;
+
+        staticinvoke <com.newsblur.activity.NbActivity: void updateAllActivities(int)>(34);
+
+     label20:
+        <com.newsblur.service.NBSyncService: boolean FlushRecounts> = 0;
+
+        return;
+
+     label21:
+        $r10 = virtualinvoke r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r11 = virtualinvoke $r10.<java.lang.Class: java.lang.String getName()>();
+
+        $r12 = new java.lang.StringBuilder;
+
+        specialinvoke $r12.<java.lang.StringBuilder: void <init>()>();
+
+        $r12 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("recounting dirty feed sets: ");
+
+        $i0 = interfaceinvoke r2.<java.util.Set: int size()>();
+
+        $r12 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r13 = virtualinvoke $r12.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.newsblur.util.Log: void i(java.lang.String,java.lang.String)>($r11, $r13);
+
+        $z0 = staticinvoke <com.newsblur.util.NetworkUtils: boolean isOnline(android.content.Context)>(r0);
+
+     label22:
+        if $z0 != 0 goto label28;
+
+     label23:
+        $r3 = <com.newsblur.service.NBSyncService: java.util.Set RecountCandidates>;
+
+        $r4 = interfaceinvoke $r3.<java.util.Set: java.util.Iterator iterator()>();
+
+     label24:
+        $z0 = interfaceinvoke $r4.<java.util.Iterator: boolean hasNext()>();
+
+     label25:
+        if $z0 == 0 goto label65;
+
+     label26:
+        $r5 = interfaceinvoke $r4.<java.util.Iterator: java.lang.Object next()>();
+
+        r6 = (com.newsblur.util.FeedSet) $r5;
+
+        $r7 = r0.<com.newsblur.service.NBSyncService: com.newsblur.database.BlurDatabaseHelper dbHelper>;
+
+        virtualinvoke $r7.<com.newsblur.database.BlurDatabaseHelper: void updateLocalFeedCounts(com.newsblur.util.FeedSet)>(r6);
+
+     label27:
+        goto label24;
+
+     label28:
+        $z0 = virtualinvoke r0.<com.newsblur.service.NBSyncService: boolean stopSync()>();
+
+     label29:
+        if $z0 == 0 goto label31;
+
+        $z0 = <com.newsblur.service.NBSyncService: boolean RecountsRunning>;
+
+        if $z0 == 0 goto label30;
+
+        <com.newsblur.service.NBSyncService: boolean RecountsRunning> = 0;
+
+        staticinvoke <com.newsblur.activity.NbActivity: void updateAllActivities(int)>(34);
+
+     label30:
+        <com.newsblur.service.NBSyncService: boolean FlushRecounts> = 0;
+
+        return;
+
+     label31:
+        $r7 = r0.<com.newsblur.service.NBSyncService: com.newsblur.database.BlurDatabaseHelper dbHelper>;
+
+        $i0 = virtualinvoke $r7.<com.newsblur.database.BlurDatabaseHelper: int getUntriedActionCount()>();
+
+     label32:
+        if $i0 <= 0 goto label34;
+
+        $z0 = <com.newsblur.service.NBSyncService: boolean RecountsRunning>;
+
+        if $z0 == 0 goto label33;
+
+        <com.newsblur.service.NBSyncService: boolean RecountsRunning> = 0;
+
+        staticinvoke <com.newsblur.activity.NbActivity: void updateAllActivities(int)>(34);
+
+     label33:
+        <com.newsblur.service.NBSyncService: boolean FlushRecounts> = 0;
+
+        return;
+
+     label34:
+        r1 = new java.util.HashSet;
+
+        specialinvoke r1.<java.util.HashSet: void <init>()>();
+
+        $r3 = <com.newsblur.service.NBSyncService: java.util.Set RecountCandidates>;
+
+        $r4 = interfaceinvoke $r3.<java.util.Set: java.util.Iterator iterator()>();
+
+     label35:
+        $z0 = interfaceinvoke $r4.<java.util.Iterator: boolean hasNext()>();
+
+     label36:
+        if $z0 == 0 goto label39;
+
+     label37:
+        $r5 = interfaceinvoke $r4.<java.util.Iterator: java.lang.Object next()>();
+
+        r6 = (com.newsblur.util.FeedSet) $r5;
+
+        $r3 = virtualinvoke r6.<com.newsblur.util.FeedSet: java.util.Set getFlatFeedIds()>();
+
+        interfaceinvoke r1.<java.util.Set: boolean addAll(java.util.Collection)>($r3);
+
+     label38:
+        goto label35;
+
+     label39:
+        $r14 = r0.<com.newsblur.service.NBSyncService: com.newsblur.network.APIManager apiManager>;
+
+        $r15 = virtualinvoke $r14.<com.newsblur.network.APIManager: com.newsblur.network.domain.UnreadCountResponse getFeedUnreadCounts(java.util.Set)>(r1);
+
+     label40:
+        if $r15 == null goto label43;
+
+     label41:
+        $z0 = virtualinvoke $r15.<com.newsblur.network.domain.UnreadCountResponse: boolean isError()>();
+
+     label42:
+        if $z0 == 0 goto label46;
+
+     label43:
+        $r10 = virtualinvoke r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r11 = virtualinvoke $r10.<java.lang.Class: java.lang.String getName()>();
+
+        staticinvoke <com.newsblur.util.Log: void w(java.lang.String,java.lang.String)>($r11, "Bad response to feed_unread_count");
+
+     label44:
+        $z0 = <com.newsblur.service.NBSyncService: boolean RecountsRunning>;
+
+        if $z0 == 0 goto label45;
+
+        <com.newsblur.service.NBSyncService: boolean RecountsRunning> = 0;
+
+        staticinvoke <com.newsblur.activity.NbActivity: void updateAllActivities(int)>(34);
+
+     label45:
+        <com.newsblur.service.NBSyncService: boolean FlushRecounts> = 0;
+
+        return;
+
+     label46:
+        $r16 = $r15.<com.newsblur.network.domain.UnreadCountResponse: java.util.Map feeds>;
+
+     label47:
+        if $r16 == null goto label53;
+
+     label48:
+        $r16 = $r15.<com.newsblur.network.domain.UnreadCountResponse: java.util.Map feeds>;
+
+        $r3 = interfaceinvoke $r16.<java.util.Map: java.util.Set entrySet()>();
+
+        $r4 = interfaceinvoke $r3.<java.util.Set: java.util.Iterator iterator()>();
+
+     label49:
+        $z0 = interfaceinvoke $r4.<java.util.Iterator: boolean hasNext()>();
+
+     label50:
+        if $z0 == 0 goto label53;
+
+     label51:
+        $r5 = interfaceinvoke $r4.<java.util.Iterator: java.lang.Object next()>();
+
+        r17 = (java.util.Map$Entry) $r5;
+
+        $r7 = r0.<com.newsblur.service.NBSyncService: com.newsblur.database.BlurDatabaseHelper dbHelper>;
+
+        $r5 = interfaceinvoke r17.<java.util.Map$Entry: java.lang.Object getKey()>();
+
+        $r11 = (java.lang.String) $r5;
+
+        $r5 = interfaceinvoke r17.<java.util.Map$Entry: java.lang.Object getValue()>();
+
+        $r18 = (com.newsblur.network.domain.UnreadCountResponse$UnreadMD) $r5;
+
+        $r19 = virtualinvoke $r18.<com.newsblur.network.domain.UnreadCountResponse$UnreadMD: android.content.ContentValues getValues()>();
+
+        virtualinvoke $r7.<com.newsblur.database.BlurDatabaseHelper: void updateFeedCounts(java.lang.String,android.content.ContentValues)>($r11, $r19);
+
+     label52:
+        goto label49;
+
+     label53:
+        $r16 = $r15.<com.newsblur.network.domain.UnreadCountResponse: java.util.Map socialFeeds>;
+
+     label54:
+        if $r16 == null goto label60;
+
+     label55:
+        $r16 = $r15.<com.newsblur.network.domain.UnreadCountResponse: java.util.Map socialFeeds>;
+
+        $r3 = interfaceinvoke $r16.<java.util.Map: java.util.Set entrySet()>();
+
+        $r4 = interfaceinvoke $r3.<java.util.Set: java.util.Iterator iterator()>();
+
+     label56:
+        $z0 = interfaceinvoke $r4.<java.util.Iterator: boolean hasNext()>();
+
+     label57:
+        if $z0 == 0 goto label60;
+
+     label58:
+        $r5 = interfaceinvoke $r4.<java.util.Iterator: java.lang.Object next()>();
+
+        r17 = (java.util.Map$Entry) $r5;
+
+        $r5 = interfaceinvoke r17.<java.util.Map$Entry: java.lang.Object getKey()>();
+
+        $r11 = (java.lang.String) $r5;
+
+        $r11 = virtualinvoke $r11.<java.lang.String: java.lang.String replaceAll(java.lang.String,java.lang.String)>("social:", "");
+
+        $r7 = r0.<com.newsblur.service.NBSyncService: com.newsblur.database.BlurDatabaseHelper dbHelper>;
+
+        $r5 = interfaceinvoke r17.<java.util.Map$Entry: java.lang.Object getValue()>();
+
+        $r18 = (com.newsblur.network.domain.UnreadCountResponse$UnreadMD) $r5;
+
+        $r19 = virtualinvoke $r18.<com.newsblur.network.domain.UnreadCountResponse$UnreadMD: android.content.ContentValues getValuesSocial()>();
+
+        virtualinvoke $r7.<com.newsblur.database.BlurDatabaseHelper: void updateSocialFeedCounts(java.lang.String,android.content.ContentValues)>($r11, $r19);
+
+     label59:
+        goto label56;
+
+     label60:
+        $r3 = <com.newsblur.service.NBSyncService: java.util.Set RecountCandidates>;
+
+        interfaceinvoke $r3.<java.util.Set: void clear()>();
+
+        $r4 = interfaceinvoke r2.<java.util.Set: java.util.Iterator iterator()>();
+
+     label61:
+        $z0 = interfaceinvoke $r4.<java.util.Iterator: boolean hasNext()>();
+
+     label62:
+        if $z0 == 0 goto label65;
+
+     label63:
+        $r5 = interfaceinvoke $r4.<java.util.Iterator: java.lang.Object next()>();
+
+        r6 = (com.newsblur.util.FeedSet) $r5;
+
+        $r16 = <com.newsblur.service.NBSyncService: java.util.Map FeedPagesSeen>;
+
+        $r20 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(0);
+
+        interfaceinvoke $r16.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>(r6, $r20);
+
+        $r16 = <com.newsblur.service.NBSyncService: java.util.Map FeedStoriesSeen>;
+
+        $r20 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(0);
+
+        interfaceinvoke $r16.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>(r6, $r20);
+
+     label64:
+        goto label61;
+
+     label65:
+        $z0 = <com.newsblur.service.NBSyncService: boolean RecountsRunning>;
+
+        if $z0 == 0 goto label66;
+
+        <com.newsblur.service.NBSyncService: boolean RecountsRunning> = 0;
+
+        staticinvoke <com.newsblur.activity.NbActivity: void updateAllActivities(int)>(34);
+
+     label66:
+        <com.newsblur.service.NBSyncService: boolean FlushRecounts> = 0;
+
+        return;
+
+        catch java.lang.Throwable from label01 to label02 with label14;
+        catch java.lang.Throwable from label04 to label06 with label14;
+        catch java.lang.Throwable from label07 to label08 with label14;
+        catch java.lang.Throwable from label09 to label11 with label14;
+        catch java.lang.Throwable from label12 to label13 with label14;
+        catch java.lang.Throwable from label16 to label17 with label14;
+        catch java.lang.Throwable from label18 to label19 with label14;
+        catch java.lang.Throwable from label21 to label22 with label14;
+        catch java.lang.Throwable from label23 to label25 with label14;
+        catch java.lang.Throwable from label26 to label27 with label14;
+        catch java.lang.Throwable from label28 to label29 with label14;
+        catch java.lang.Throwable from label31 to label32 with label14;
+        catch java.lang.Throwable from label34 to label36 with label14;
+        catch java.lang.Throwable from label37 to label38 with label14;
+        catch java.lang.Throwable from label39 to label40 with label14;
+        catch java.lang.Throwable from label41 to label42 with label14;
+        catch java.lang.Throwable from label43 to label44 with label14;
+        catch java.lang.Throwable from label46 to label47 with label14;
+        catch java.lang.Throwable from label48 to label50 with label14;
+        catch java.lang.Throwable from label51 to label52 with label14;
+        catch java.lang.Throwable from label53 to label54 with label14;
+        catch java.lang.Throwable from label55 to label57 with label14;
+        catch java.lang.Throwable from label58 to label59 with label14;
+        catch java.lang.Throwable from label60 to label62 with label14;
+        catch java.lang.Throwable from label63 to label64 with label14;
+    }
+    public static void clearState()
+    {
+        java.util.List $r0;
+        java.util.Set $r1;
+        java.util.Map $r2;
+
+        staticinvoke <com.newsblur.service.NBSyncService: void resetReadingSession()>();
+
+        $r0 = <com.newsblur.service.NBSyncService: java.util.List FollowupActions>;
+
+        interfaceinvoke $r0.<java.util.List: void clear()>();
+
+        $r1 = <com.newsblur.service.NBSyncService: java.util.Set RecountCandidates>;
+
+        interfaceinvoke $r1.<java.util.Set: void clear()>();
+
+        $r1 = <com.newsblur.service.NBSyncService: java.util.Set ExhaustedFeeds>;
+
+        interfaceinvoke $r1.<java.util.Set: void clear()>();
+
+        $r2 = <com.newsblur.service.NBSyncService: java.util.Map FeedPagesSeen>;
+
+        interfaceinvoke $r2.<java.util.Map: void clear()>();
+
+        $r2 = <com.newsblur.service.NBSyncService: java.util.Map FeedStoriesSeen>;
+
+        interfaceinvoke $r2.<java.util.Map: void clear()>();
+
+        staticinvoke <com.newsblur.service.OriginalTextService: void clear()>();
+
+        staticinvoke <com.newsblur.service.UnreadsService: void clear()>();
+
+        staticinvoke <com.newsblur.service.ImagePrefetchService: void clear()>();
+
+        return;
+    }
+    private void doSync(int)
+    {
+        com.newsblur.service.NBSyncService r0;
+        int $i0, $i1;
+        java.lang.Exception r1;
+        boolean $z0;
+        java.lang.Thread $r2;
+        java.lang.Class $r3;
+        java.lang.String $r4;
+        java.lang.Throwable $r5, $r9;
+        com.newsblur.service.OriginalTextService $r6;
+        com.newsblur.service.UnreadsService $r7;
+        com.newsblur.service.ImagePrefetchService $r8;
+
+        r0 := @this: com.newsblur.service.NBSyncService;
+
+        $i0 := @parameter0: int;
+
+        entermonitor r0;
+
+     label01:
+        $z0 = <com.newsblur.service.NBSyncService: boolean HaltNow>;
+
+     label02:
+        if $z0 == 0 goto label05;
+
+     label03:
+        virtualinvoke r0.<com.newsblur.service.NBSyncService: void decrementRunningChild(int)>($i0);
+
+     label04:
+        exitmonitor r0;
+
+        return;
+
+     label05:
+        virtualinvoke r0.<com.newsblur.service.NBSyncService: void incrementRunningChild()>();
+
+        specialinvoke r0.<com.newsblur.service.NBSyncService: void finishConstruction()>();
+
+        $i1 = staticinvoke <com.newsblur.activity.NbActivity: int getActiveActivityCount()>();
+
+     label06:
+        if $i1 >= 1 goto label23;
+
+     label07:
+        staticinvoke <android.os.Process: void setThreadPriority(int)>(10);
+
+     label08:
+        $r2 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        $r3 = virtualinvoke r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r4 = virtualinvoke $r3.<java.lang.Class: java.lang.String getName()>();
+
+        virtualinvoke $r2.<java.lang.Thread: void setName(java.lang.String)>($r4);
+
+     label09:
+        $z0 = <com.newsblur.service.NBSyncService: boolean OfflineNow>;
+
+        if $z0 == 0 goto label13;
+
+     label10:
+        $z0 = staticinvoke <com.newsblur.util.NetworkUtils: boolean isOnline(android.content.Context)>(r0);
+
+     label11:
+        if $z0 == 0 goto label29;
+
+        <com.newsblur.service.NBSyncService: boolean OfflineNow> = 0;
+
+     label12:
+        staticinvoke <com.newsblur.activity.NbActivity: void updateAllActivities(int)>(32);
+
+     label13:
+        specialinvoke r0.<com.newsblur.service.NBSyncService: void housekeeping()>();
+
+        $i1 = staticinvoke <com.newsblur.activity.NbActivity: int getActiveActivityCount()>();
+
+     label14:
+        if $i1 > 0 goto label32;
+
+     label15:
+        $z0 = staticinvoke <com.newsblur.util.PrefsUtils: boolean isEnableNotifications(android.content.Context)>(r0);
+
+     label16:
+        if $z0 != 0 goto label32;
+
+     label17:
+        $z0 = staticinvoke <com.newsblur.util.PrefsUtils: boolean isBackgroundNetworkAllowed(android.content.Context)>(r0);
+
+     label18:
+        if $z0 != 0 goto label32;
+
+     label19:
+        $r3 = virtualinvoke r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r4 = virtualinvoke $r3.<java.lang.Class: java.lang.String getName()>();
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>($r4, "Abandoning sync: app not active and network type not appropriate for background sync.");
+
+     label20:
+        virtualinvoke r0.<com.newsblur.service.NBSyncService: void decrementRunningChild(int)>($i0);
+
+     label21:
+        goto label04;
+
+     label22:
+        $r5 := @caughtexception;
+
+        exitmonitor r0;
+
+        throw $r5;
+
+     label23:
+        staticinvoke <android.os.Process: void setThreadPriority(int)>(1);
+
+     label24:
+        goto label08;
+
+     label25:
+        r1 := @caughtexception;
+
+     label26:
+        $r3 = virtualinvoke r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r4 = virtualinvoke $r3.<java.lang.Class: java.lang.String getName()>();
+
+        staticinvoke <com.newsblur.util.Log: void e(java.lang.String,java.lang.String,java.lang.Throwable)>($r4, "Sync error.", r1);
+
+     label27:
+        virtualinvoke r0.<com.newsblur.service.NBSyncService: void decrementRunningChild(int)>($i0);
+
+     label28:
+        goto label04;
+
+     label29:
+        $r3 = virtualinvoke r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r4 = virtualinvoke $r3.<java.lang.Class: java.lang.String getName()>();
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>($r4, "Abandoning sync: network still offline");
+
+     label30:
+        virtualinvoke r0.<com.newsblur.service.NBSyncService: void decrementRunningChild(int)>($i0);
+
+     label31:
+        goto label04;
+
+     label32:
+        staticinvoke <com.newsblur.activity.NbActivity: void updateAllActivities(int)>(1);
+
+        $r6 = r0.<com.newsblur.service.NBSyncService: com.newsblur.service.OriginalTextService originalTextService>;
+
+        virtualinvoke $r6.<com.newsblur.service.OriginalTextService: void start(int)>($i0);
+
+        specialinvoke r0.<com.newsblur.service.NBSyncService: void syncActions()>();
+
+        specialinvoke r0.<com.newsblur.service.NBSyncService: void syncPendingFeedStories(int)>($i0);
+
+        specialinvoke r0.<com.newsblur.service.NBSyncService: void syncMetadata(int)>($i0);
+
+        $r7 = r0.<com.newsblur.service.NBSyncService: com.newsblur.service.UnreadsService unreadsService>;
+
+        virtualinvoke $r7.<com.newsblur.service.UnreadsService: void start(int)>($i0);
+
+        $r8 = r0.<com.newsblur.service.NBSyncService: com.newsblur.service.ImagePrefetchService imagePrefetchService>;
+
+        virtualinvoke $r8.<com.newsblur.service.ImagePrefetchService: void start(int)>($i0);
+
+        specialinvoke r0.<com.newsblur.service.NBSyncService: void finishActions()>();
+
+        specialinvoke r0.<com.newsblur.service.NBSyncService: void checkRecounts()>();
+
+        virtualinvoke r0.<com.newsblur.service.NBSyncService: void pushNotifications()>();
+
+     label33:
+        virtualinvoke r0.<com.newsblur.service.NBSyncService: void decrementRunningChild(int)>($i0);
+
+        goto label04;
+
+     label34:
+        $r9 := @caughtexception;
+
+        virtualinvoke r0.<com.newsblur.service.NBSyncService: void decrementRunningChild(int)>($i0);
+
+        throw $r9;
+
+     label35:
+        nop;
+
+        catch java.lang.Throwable from label01 to label02 with label34;
+        catch java.lang.Throwable from label03 to label04 with label22;
+        catch java.lang.Exception from label05 to label06 with label25;
+        catch java.lang.Exception from label07 to label09 with label25;
+        catch java.lang.Exception from label10 to label11 with label25;
+        catch java.lang.Exception from label12 to label14 with label25;
+        catch java.lang.Exception from label15 to label16 with label25;
+        catch java.lang.Exception from label17 to label18 with label25;
+        catch java.lang.Exception from label19 to label20 with label25;
+        catch java.lang.Throwable from label05 to label20 with label34;
+        catch java.lang.Throwable from label20 to label21 with label22;
+        catch java.lang.Exception from label23 to label24 with label25;
+        catch java.lang.Throwable from label23 to label24 with label34;
+        catch java.lang.Throwable from label26 to label27 with label34;
+        catch java.lang.Throwable from label27 to label28 with label22;
+        catch java.lang.Exception from label29 to label30 with label25;
+        catch java.lang.Throwable from label29 to label30 with label34;
+        catch java.lang.Throwable from label30 to label31 with label22;
+        catch java.lang.Exception from label32 to label33 with label25;
+        catch java.lang.Throwable from label32 to label33 with label34;
+        catch java.lang.Throwable from label33 to label35 with label22;
+    }
+    private void finishActions()
+    {
+        com.newsblur.service.NBSyncService r0;
+        boolean $z0;
+        java.util.List $r1;
+        int $i0, $i1;
+        java.util.Iterator $r2;
+        java.lang.Object $r3;
+        com.newsblur.util.ReadingAction r4;
+        com.newsblur.database.BlurDatabaseHelper $r5;
+        com.newsblur.util.FeedSet $r6;
+        java.lang.Throwable $r7;
+
+        r0 := @this: com.newsblur.service.NBSyncService;
+
+        $z0 = <com.newsblur.service.NBSyncService: boolean HaltNow>;
+
+        if $z0 == 0 goto label01;
+
+        return;
+
+     label01:
+        $r1 = <com.newsblur.service.NBSyncService: java.util.List FollowupActions>;
+
+        $i0 = interfaceinvoke $r1.<java.util.List: int size()>();
+
+        if $i0 < 1 goto label10;
+
+        $i0 = 0;
+
+        $r1 = <com.newsblur.service.NBSyncService: java.util.List FollowupActions>;
+
+        $r2 = interfaceinvoke $r1.<java.util.List: java.util.Iterator iterator()>();
+
+     label02:
+        $z0 = interfaceinvoke $r2.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label03;
+
+        $r3 = interfaceinvoke $r2.<java.util.Iterator: java.lang.Object next()>();
+
+        r4 = (com.newsblur.util.ReadingAction) $r3;
+
+        $r5 = r0.<com.newsblur.service.NBSyncService: com.newsblur.database.BlurDatabaseHelper dbHelper>;
+
+        $i1 = virtualinvoke r4.<com.newsblur.util.ReadingAction: int doLocal(com.newsblur.database.BlurDatabaseHelper,boolean)>($r5, 1);
+
+        $i0 = $i0 | $i1;
+
+        goto label02;
+
+     label03:
+        staticinvoke <com.newsblur.activity.NbActivity: void updateAllActivities(int)>($i0);
+
+        $r3 = <com.newsblur.service.NBSyncService: java.lang.Object PENDING_FEED_MUTEX>;
+
+        entermonitor $r3;
+
+     label04:
+        $r6 = <com.newsblur.service.NBSyncService: com.newsblur.util.FeedSet PendingFeed>;
+
+        if $r6 == null goto label08;
+
+        exitmonitor $r3;
+
+     label05:
+        return;
+
+     label06:
+        $r7 := @caughtexception;
+
+        exitmonitor $r3;
+
+     label07:
+        throw $r7;
+
+     label08:
+        exitmonitor $r3;
+
+     label09:
+        $z0 = staticinvoke <com.newsblur.service.UnreadsService: boolean isDoMetadata()>();
+
+        if $z0 != 0 goto label10;
+
+        $r1 = <com.newsblur.service.NBSyncService: java.util.List FollowupActions>;
+
+        interfaceinvoke $r1.<java.util.List: void clear()>();
+
+     label10:
+        return;
+
+        catch java.lang.Throwable from label04 to label05 with label06;
+        catch java.lang.Throwable from label06 to label07 with label06;
+        catch java.lang.Throwable from label08 to label09 with label06;
+    }
+    private void finishConstruction()
+    {
+        com.newsblur.service.NBSyncService r0;
+        com.newsblur.util.FileCache $r1;
+        com.newsblur.network.APIManager $r2;
+        com.newsblur.database.BlurDatabaseHelper $r3;
+        com.newsblur.service.CleanupService $r4;
+        com.newsblur.service.OriginalTextService $r5;
+        com.newsblur.service.UnreadsService $r6;
+        com.newsblur.service.ImagePrefetchService $r7;
+
+        r0 := @this: com.newsblur.service.NBSyncService;
+
+        $r2 = r0.<com.newsblur.service.NBSyncService: com.newsblur.network.APIManager apiManager>;
+
+        if $r2 != null goto label1;
+
+        $r2 = new com.newsblur.network.APIManager;
+
+        specialinvoke $r2.<com.newsblur.network.APIManager: void <init>(android.content.Context)>(r0);
+
+        r0.<com.newsblur.service.NBSyncService: com.newsblur.network.APIManager apiManager> = $r2;
+
+        $r3 = new com.newsblur.database.BlurDatabaseHelper;
+
+        specialinvoke $r3.<com.newsblur.database.BlurDatabaseHelper: void <init>(android.content.Context)>(r0);
+
+        r0.<com.newsblur.service.NBSyncService: com.newsblur.database.BlurDatabaseHelper dbHelper> = $r3;
+
+        $r1 = staticinvoke <com.newsblur.util.FileCache: com.newsblur.util.FileCache asIconCache(android.content.Context)>(r0);
+
+        r0.<com.newsblur.service.NBSyncService: com.newsblur.util.FileCache iconCache> = $r1;
+
+        $r4 = new com.newsblur.service.CleanupService;
+
+        specialinvoke $r4.<com.newsblur.service.CleanupService: void <init>(com.newsblur.service.NBSyncService)>(r0);
+
+        r0.<com.newsblur.service.NBSyncService: com.newsblur.service.CleanupService cleanupService> = $r4;
+
+        $r5 = new com.newsblur.service.OriginalTextService;
+
+        specialinvoke $r5.<com.newsblur.service.OriginalTextService: void <init>(com.newsblur.service.NBSyncService)>(r0);
+
+        r0.<com.newsblur.service.NBSyncService: com.newsblur.service.OriginalTextService originalTextService> = $r5;
+
+        $r6 = new com.newsblur.service.UnreadsService;
+
+        specialinvoke $r6.<com.newsblur.service.UnreadsService: void <init>(com.newsblur.service.NBSyncService)>(r0);
+
+        r0.<com.newsblur.service.NBSyncService: com.newsblur.service.UnreadsService unreadsService> = $r6;
+
+        $r7 = new com.newsblur.service.ImagePrefetchService;
+
+        specialinvoke $r7.<com.newsblur.service.ImagePrefetchService: void <init>(com.newsblur.service.NBSyncService)>(r0);
+
+        r0.<com.newsblur.service.NBSyncService: com.newsblur.service.ImagePrefetchService imagePrefetchService> = $r7;
+
+        staticinvoke <com.newsblur.util.Log: void offerContext(android.content.Context)>(r0);
+
+     label1:
+        return;
+    }
+    public static void flushRecounts()
+    {
+        <com.newsblur.service.NBSyncService: boolean FlushRecounts> = 1;
+
+        return;
+    }
+    public static void forceFeedsFolders()
+    {
+        <com.newsblur.service.NBSyncService: boolean DoFeedsFolders> = 1;
+
+        return;
+    }
+    public static java.lang.String getPendingInfo()
+    {
+        java.lang.StringBuilder r0, $r1;
+        int $i0;
+        java.util.List $r2;
+        java.lang.String $r3;
+
+        r0 = new java.lang.StringBuilder;
+
+        specialinvoke r0.<java.lang.StringBuilder: void <init>()>();
+
+        $r1 = virtualinvoke r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" pre:");
+
+        $i0 = <com.newsblur.service.NBSyncService: int lastActionCount>;
+
+        virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r1 = virtualinvoke r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" post:");
+
+        $r2 = <com.newsblur.service.NBSyncService: java.util.List FollowupActions>;
+
+        $i0 = interfaceinvoke $r2.<java.util.List: int size()>();
+
+        virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r3 = virtualinvoke r0.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r3;
+    }
+    public static java.lang.String getSpeedInfo()
+    {
+        java.lang.StringBuilder r0, $r1;
+        long $l0;
+        java.lang.String $r2;
+
+        r0 = new java.lang.StringBuilder;
+
+        specialinvoke r0.<java.lang.StringBuilder: void <init>()>();
+
+        $l0 = <com.newsblur.service.NBSyncService: long lastFeedCount>;
+
+        $r1 = virtualinvoke r0.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l0);
+
+        virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" feeds in ");
+
+        $r1 = virtualinvoke r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" conn:");
+
+        $l0 = <com.newsblur.service.NBSyncService: long lastFFConnMillis>;
+
+        virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l0);
+
+        $r1 = virtualinvoke r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" read:");
+
+        $l0 = <com.newsblur.service.NBSyncService: long lastFFReadMillis>;
+
+        virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l0);
+
+        $r1 = virtualinvoke r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" parse:");
+
+        $l0 = <com.newsblur.service.NBSyncService: long lastFFParseMillis>;
+
+        virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l0);
+
+        $r1 = virtualinvoke r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" store:");
+
+        $l0 = <com.newsblur.service.NBSyncService: long lastFFWriteMillis>;
+
+        virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l0);
+
+        $r2 = virtualinvoke r0.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r2;
+    }
+    public static java.lang.String getSyncStatusMessage(android.content.Context, boolean)
+    {
+        android.content.Context $r0;
+        boolean $z0, $z1;
+        android.content.res.Resources $r1;
+        java.lang.String $r2, $r5;
+        java.lang.Object[] $r3;
+        int $i0;
+        java.lang.Integer $r4;
+
+        $r0 := @parameter0: android.content.Context;
+
+        $z0 := @parameter1: boolean;
+
+        $z1 = <com.newsblur.service.NBSyncService: boolean OfflineNow>;
+
+        if $z1 == 0 goto label01;
+
+        $r1 = virtualinvoke $r0.<android.content.Context: android.content.res.Resources getResources()>();
+
+        $r2 = virtualinvoke $r1.<android.content.res.Resources: java.lang.String getString(int)>(2131230958);
+
+        return $r2;
+
+     label01:
+        $z1 = <com.newsblur.service.NBSyncService: boolean HousekeepingRunning>;
+
+        if $z1 == 0 goto label02;
+
+        $r1 = virtualinvoke $r0.<android.content.Context: android.content.res.Resources getResources()>();
+
+        $r2 = virtualinvoke $r1.<android.content.res.Resources: java.lang.String getString(int)>(2131230956);
+
+        return $r2;
+
+     label02:
+        $z1 = <com.newsblur.service.NBSyncService: boolean FFSyncRunning>;
+
+        if $z1 == 0 goto label03;
+
+        $r1 = virtualinvoke $r0.<android.content.Context: android.content.res.Resources getResources()>();
+
+        $r2 = virtualinvoke $r1.<android.content.res.Resources: java.lang.String getString(int)>(2131230955);
+
+        return $r2;
+
+     label03:
+        $z1 = staticinvoke <com.newsblur.service.CleanupService: boolean running()>();
+
+        if $z1 == 0 goto label04;
+
+        $r1 = virtualinvoke $r0.<android.content.Context: android.content.res.Resources getResources()>();
+
+        $r2 = virtualinvoke $r1.<android.content.res.Resources: java.lang.String getString(int)>(2131230954);
+
+        return $r2;
+
+     label04:
+        if $z0 != 0 goto label10;
+
+        $z0 = <com.newsblur.service.NBSyncService: boolean ActionsRunning>;
+
+        if $z0 == 0 goto label05;
+
+        $r1 = virtualinvoke $r0.<android.content.Context: android.content.res.Resources getResources()>();
+
+        $r2 = virtualinvoke $r1.<android.content.res.Resources: java.lang.String getString(int)>(2131230953);
+
+        $r3 = newarray (java.lang.Object)[1];
+
+        $i0 = <com.newsblur.service.NBSyncService: int lastActionCount>;
+
+        $r4 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        $r3[0] = $r4;
+
+        $r2 = staticinvoke <java.lang.String: java.lang.String format(java.lang.String,java.lang.Object[])>($r2, $r3);
+
+        return $r2;
+
+     label05:
+        $z0 = <com.newsblur.service.NBSyncService: boolean RecountsRunning>;
+
+        if $z0 == 0 goto label06;
+
+        $r1 = virtualinvoke $r0.<android.content.Context: android.content.res.Resources getResources()>();
+
+        $r2 = virtualinvoke $r1.<android.content.res.Resources: java.lang.String getString(int)>(2131230959);
+
+        return $r2;
+
+     label06:
+        $z0 = <com.newsblur.service.NBSyncService: boolean StorySyncRunning>;
+
+        if $z0 == 0 goto label07;
+
+        $r1 = virtualinvoke $r0.<android.content.Context: android.content.res.Resources getResources()>();
+
+        $r2 = virtualinvoke $r1.<android.content.res.Resources: java.lang.String getString(int)>(2131230960);
+
+        return $r2;
+
+     label07:
+        $z0 = staticinvoke <com.newsblur.service.UnreadsService: boolean running()>();
+
+        if $z0 == 0 goto label08;
+
+        $r1 = virtualinvoke $r0.<android.content.Context: android.content.res.Resources getResources()>();
+
+        $r2 = virtualinvoke $r1.<android.content.res.Resources: java.lang.String getString(int)>(2131230962);
+
+        $r3 = newarray (java.lang.Object)[1];
+
+        $r5 = staticinvoke <com.newsblur.service.UnreadsService: java.lang.String getPendingCount()>();
+
+        $r3[0] = $r5;
+
+        $r2 = staticinvoke <java.lang.String: java.lang.String format(java.lang.String,java.lang.Object[])>($r2, $r3);
+
+        return $r2;
+
+     label08:
+        $z0 = staticinvoke <com.newsblur.service.OriginalTextService: boolean running()>();
+
+        if $z0 == 0 goto label09;
+
+        $r1 = virtualinvoke $r0.<android.content.Context: android.content.res.Resources getResources()>();
+
+        $r2 = virtualinvoke $r1.<android.content.res.Resources: java.lang.String getString(int)>(2131230961);
+
+        $r3 = newarray (java.lang.Object)[1];
+
+        $i0 = staticinvoke <com.newsblur.service.OriginalTextService: int getPendingCount()>();
+
+        $r4 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        $r3[0] = $r4;
+
+        $r2 = staticinvoke <java.lang.String: java.lang.String format(java.lang.String,java.lang.Object[])>($r2, $r3);
+
+        return $r2;
+
+     label09:
+        $z0 = staticinvoke <com.newsblur.service.ImagePrefetchService: boolean running()>();
+
+        if $z0 == 0 goto label10;
+
+        $r1 = virtualinvoke $r0.<android.content.Context: android.content.res.Resources getResources()>();
+
+        $r2 = virtualinvoke $r1.<android.content.res.Resources: java.lang.String getString(int)>(2131230957);
+
+        $r3 = newarray (java.lang.Object)[1];
+
+        $i0 = staticinvoke <com.newsblur.service.ImagePrefetchService: int getPendingCount()>();
+
+        $r4 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        $r3[0] = $r4;
+
+        $r2 = staticinvoke <java.lang.String: java.lang.String format(java.lang.String,java.lang.Object[])>($r2, $r3);
+
+        return $r2;
+
+     label10:
+        return null;
+    }
+    private void housekeeping()
+    {
+        com.newsblur.service.NBSyncService r0;
+        boolean $z0, $z1;
+        int $i0;
+        com.newsblur.database.BlurDatabaseHelper $r1;
+        java.lang.Class $r2;
+        java.lang.String $r3;
+        java.lang.Throwable $r4;
+
+        r0 := @this: com.newsblur.service.NBSyncService;
+
+     label01:
+        $z0 = staticinvoke <com.newsblur.util.PrefsUtils: boolean checkForUpgrade(android.content.Context)>(r0);
+
+     label02:
+        if $z0 == 0 goto label07;
+
+     label03:
+        <com.newsblur.service.NBSyncService: boolean HousekeepingRunning> = 1;
+
+        staticinvoke <com.newsblur.activity.NbActivity: void updateAllActivities(int)>(160);
+
+        $i0 = staticinvoke <com.newsblur.activity.NbActivity: int getActiveActivityCount()>();
+
+     label04:
+        if $i0 >= 1 goto label06;
+
+     label05:
+        $r1 = r0.<com.newsblur.service.NBSyncService: com.newsblur.database.BlurDatabaseHelper dbHelper>;
+
+        virtualinvoke $r1.<com.newsblur.database.BlurDatabaseHelper: void dropAndRecreateTables()>();
+
+     label06:
+        staticinvoke <com.newsblur.util.FileCache: void cleanUpOldCache1(android.content.Context)>(r0);
+
+        staticinvoke <com.newsblur.util.FileCache: void cleanUpOldCache2(android.content.Context)>(r0);
+
+        staticinvoke <com.newsblur.util.PrefsUtils: void updateVersion(android.content.Context)>(r0);
+
+     label07:
+        $z1 = staticinvoke <com.newsblur.util.PrefsUtils: boolean isTimeToVacuum(android.content.Context)>(r0);
+
+     label08:
+        $i0 = staticinvoke <com.newsblur.activity.NbActivity: int getActiveActivityCount()>();
+
+     label09:
+        if $i0 <= 0 goto label10;
+
+        $z1 = 0;
+
+     label10:
+        if $z0 != 0 goto label11;
+
+        if $z1 == 0 goto label12;
+
+     label11:
+        <com.newsblur.service.NBSyncService: boolean HousekeepingRunning> = 1;
+
+        staticinvoke <com.newsblur.activity.NbActivity: void updateAllActivities(int)>(32);
+
+        $r2 = virtualinvoke r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r3 = virtualinvoke $r2.<java.lang.Class: java.lang.String getName()>();
+
+        staticinvoke <com.newsblur.util.Log: void i(java.lang.String,java.lang.String)>($r3, "rebuilding DB . . .");
+
+        $r1 = r0.<com.newsblur.service.NBSyncService: com.newsblur.database.BlurDatabaseHelper dbHelper>;
+
+        virtualinvoke $r1.<com.newsblur.database.BlurDatabaseHelper: void vacuum()>();
+
+        $r2 = virtualinvoke r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r3 = virtualinvoke $r2.<java.lang.Class: java.lang.String getName()>();
+
+        staticinvoke <com.newsblur.util.Log: void i(java.lang.String,java.lang.String)>($r3, ". . . . done rebuilding DB");
+
+        staticinvoke <com.newsblur.util.PrefsUtils: void updateLastVacuumTime(android.content.Context)>(r0);
+
+     label12:
+        $z0 = <com.newsblur.service.NBSyncService: boolean HousekeepingRunning>;
+
+        if $z0 == 0 goto label15;
+
+        <com.newsblur.service.NBSyncService: boolean HousekeepingRunning> = 0;
+
+        staticinvoke <com.newsblur.activity.NbActivity: void updateAllActivities(int)>(2);
+
+        return;
+
+     label13:
+        $r4 := @caughtexception;
+
+        $z0 = <com.newsblur.service.NBSyncService: boolean HousekeepingRunning>;
+
+        if $z0 == 0 goto label14;
+
+        <com.newsblur.service.NBSyncService: boolean HousekeepingRunning> = 0;
+
+        staticinvoke <com.newsblur.activity.NbActivity: void updateAllActivities(int)>(2);
+
+     label14:
+        throw $r4;
+
+     label15:
+        return;
+
+        catch java.lang.Throwable from label01 to label02 with label13;
+        catch java.lang.Throwable from label03 to label04 with label13;
+        catch java.lang.Throwable from label05 to label08 with label13;
+        catch java.lang.Throwable from label08 to label09 with label13;
+        catch java.lang.Throwable from label11 to label12 with label13;
+    }
+    private void insertStories(com.newsblur.network.domain.StoriesResponse, com.newsblur.util.FeedSet)
+    {
+        com.newsblur.service.NBSyncService r0;
+        com.newsblur.network.domain.StoriesResponse $r1;
+        com.newsblur.util.FeedSet $r2;
+        com.newsblur.domain.Story$Intelligence $r3;
+        int $i0, $i1, $i2, $i4;
+        boolean $z0;
+        com.newsblur.domain.Story[] $r4;
+        com.newsblur.domain.Story r5;
+        long $l3;
+        java.lang.String $r6, $r10;
+        com.newsblur.database.BlurDatabaseHelper $r7;
+        java.lang.Class $r8;
+        java.lang.StringBuilder $r9;
+
+        r0 := @this: com.newsblur.service.NBSyncService;
+
+        $r1 := @parameter0: com.newsblur.network.domain.StoriesResponse;
+
+        $r2 := @parameter1: com.newsblur.util.FeedSet;
+
+        $i0 = 0;
+
+        $z0 = virtualinvoke $r2.<com.newsblur.util.FeedSet: boolean isAllRead()>();
+
+        if $z0 == 0 goto label02;
+
+        $r4 = $r1.<com.newsblur.network.domain.StoriesResponse: com.newsblur.domain.Story[] stories>;
+
+        $i1 = lengthof $r4;
+
+        $i2 = 0;
+
+     label01:
+        if $i2 >= $i1 goto label02;
+
+        r5 = $r4[$i2];
+
+        $l3 = r0.<com.newsblur.service.NBSyncService: long workaroundReadStoryTimestamp>;
+
+        $l3 = $l3 - 1L;
+
+        r0.<com.newsblur.service.NBSyncService: long workaroundReadStoryTimestamp> = $l3;
+
+        $l3 = r0.<com.newsblur.service.NBSyncService: long workaroundReadStoryTimestamp>;
+
+        r5.<com.newsblur.domain.Story: long lastReadTimestamp> = $l3;
+
+        $i2 = $i2 + 1;
+
+        goto label01;
+
+     label02:
+        $z0 = virtualinvoke $r2.<com.newsblur.util.FeedSet: boolean isGlobalShared()>();
+
+        if $z0 == 0 goto label04;
+
+        $r4 = $r1.<com.newsblur.network.domain.StoriesResponse: com.newsblur.domain.Story[] stories>;
+
+        $i1 = lengthof $r4;
+
+        $i2 = 0;
+
+     label03:
+        if $i2 >= $i1 goto label04;
+
+        r5 = $r4[$i2];
+
+        $l3 = r0.<com.newsblur.service.NBSyncService: long workaroundGloblaSharedStoryTimestamp>;
+
+        $l3 = $l3 - 1L;
+
+        r0.<com.newsblur.service.NBSyncService: long workaroundGloblaSharedStoryTimestamp> = $l3;
+
+        $l3 = r0.<com.newsblur.service.NBSyncService: long workaroundGloblaSharedStoryTimestamp>;
+
+        r5.<com.newsblur.domain.Story: long sharedTimestamp> = $l3;
+
+        $i2 = $i2 + 1;
+
+        goto label03;
+
+     label04:
+        $z0 = virtualinvoke $r2.<com.newsblur.util.FeedSet: boolean isAllSaved()>();
+
+        if $z0 != 0 goto label05;
+
+        $z0 = virtualinvoke $r2.<com.newsblur.util.FeedSet: boolean isAllRead()>();
+
+        if $z0 == 0 goto label07;
+
+     label05:
+        $r4 = $r1.<com.newsblur.network.domain.StoriesResponse: com.newsblur.domain.Story[] stories>;
+
+        $i1 = lengthof $r4;
+
+        $i2 = 0;
+
+     label06:
+        if $i2 >= $i1 goto label07;
+
+        r5 = $r4[$i2];
+
+        $r3 = r5.<com.newsblur.domain.Story: com.newsblur.domain.Story$Intelligence intelligence>;
+
+        $i4 = $r3.<com.newsblur.domain.Story$Intelligence: int intelligenceFeed>;
+
+        $i4 = $i4 + -1;
+
+        $r3.<com.newsblur.domain.Story$Intelligence: int intelligenceFeed> = $i4;
+
+        $i2 = $i2 + 1;
+
+        goto label06;
+
+     label07:
+        $r6 = virtualinvoke $r2.<com.newsblur.util.FeedSet: java.lang.String getSingleSavedTag()>();
+
+        if $r6 == null goto label08;
+
+        $r7 = r0.<com.newsblur.service.NBSyncService: com.newsblur.database.BlurDatabaseHelper dbHelper>;
+
+        $r4 = $r1.<com.newsblur.network.domain.StoriesResponse: com.newsblur.domain.Story[] stories>;
+
+        virtualinvoke $r7.<com.newsblur.database.BlurDatabaseHelper: void fixMissingStoryFeeds(com.newsblur.domain.Story[])>($r4);
+
+     label08:
+        $r6 = virtualinvoke $r2.<com.newsblur.util.FeedSet: java.lang.String getSearchQuery()>();
+
+        if $r6 == null goto label10;
+
+        $r4 = $r1.<com.newsblur.network.domain.StoriesResponse: com.newsblur.domain.Story[] stories>;
+
+        $i1 = lengthof $r4;
+
+     label09:
+        if $i0 >= $i1 goto label10;
+
+        r5 = $r4[$i0];
+
+        $r6 = virtualinvoke $r2.<com.newsblur.util.FeedSet: java.lang.String getSearchQuery()>();
+
+        r5.<com.newsblur.domain.Story: java.lang.String searchHit> = $r6;
+
+        $i0 = $i0 + 1;
+
+        goto label09;
+
+     label10:
+        $r8 = class "Lcom/newsblur/service/NBSyncService;";
+
+        $r6 = virtualinvoke $r8.<java.lang.Class: java.lang.String getName()>();
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("got stories from main fetch loop: ");
+
+        $r4 = $r1.<com.newsblur.network.domain.StoriesResponse: com.newsblur.domain.Story[] stories>;
+
+        $i0 = lengthof $r4;
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.newsblur.util.Log: void d(java.lang.String,java.lang.String)>($r6, $r10);
+
+        $r7 = r0.<com.newsblur.service.NBSyncService: com.newsblur.database.BlurDatabaseHelper dbHelper>;
+
+        virtualinvoke $r7.<com.newsblur.database.BlurDatabaseHelper: void insertStories(com.newsblur.network.domain.StoriesResponse,boolean)>($r1, 1);
+
+        return;
+    }
+    public static boolean isFeedCountSyncRunning()
+    {
+        boolean $z0;
+
+        $z0 = <com.newsblur.service.NBSyncService: boolean HousekeepingRunning>;
+
+        if $z0 != 0 goto label1;
+
+        $z0 = <com.newsblur.service.NBSyncService: boolean RecountsRunning>;
+
+        if $z0 != 0 goto label1;
+
+        $z0 = <com.newsblur.service.NBSyncService: boolean FFSyncRunning>;
+
+        if $z0 == 0 goto label2;
+
+     label1:
+        return 1;
+
+     label2:
+        return 0;
+    }
+    public static boolean isFeedFolderSyncRunning()
+    {
+        boolean $z0;
+
+        $z0 = <com.newsblur.service.NBSyncService: boolean HousekeepingRunning>;
+
+        if $z0 != 0 goto label1;
+
+        $z0 = <com.newsblur.service.NBSyncService: boolean ActionsRunning>;
+
+        if $z0 != 0 goto label1;
+
+        $z0 = <com.newsblur.service.NBSyncService: boolean RecountsRunning>;
+
+        if $z0 != 0 goto label1;
+
+        $z0 = <com.newsblur.service.NBSyncService: boolean FFSyncRunning>;
+
+        if $z0 != 0 goto label1;
+
+        $z0 = staticinvoke <com.newsblur.service.CleanupService: boolean running()>();
+
+        if $z0 != 0 goto label1;
+
+        $z0 = staticinvoke <com.newsblur.service.UnreadsService: boolean running()>();
+
+        if $z0 != 0 goto label1;
+
+        $z0 = <com.newsblur.service.NBSyncService: boolean StorySyncRunning>;
+
+        if $z0 != 0 goto label1;
+
+        $z0 = staticinvoke <com.newsblur.service.OriginalTextService: boolean running()>();
+
+        if $z0 != 0 goto label1;
+
+        $z0 = staticinvoke <com.newsblur.service.ImagePrefetchService: boolean running()>();
+
+        if $z0 == 0 goto label2;
+
+     label1:
+        return 1;
+
+     label2:
+        return 0;
+    }
+    public static boolean isFeedSetExhausted(com.newsblur.util.FeedSet)
+    {
+        com.newsblur.util.FeedSet $r0;
+        boolean $z0;
+        java.util.Set $r1;
+
+        $r0 := @parameter0: com.newsblur.util.FeedSet;
+
+        $r1 = <com.newsblur.service.NBSyncService: java.util.Set ExhaustedFeeds>;
+
+        $z0 = interfaceinvoke $r1.<java.util.Set: boolean contains(java.lang.Object)>($r0);
+
+        return $z0;
+    }
+    public static boolean isFeedSetReady(com.newsblur.util.FeedSet)
+    {
+        com.newsblur.util.FeedSet $r0, $r1;
+        boolean $z0;
+
+        $r0 := @parameter0: com.newsblur.util.FeedSet;
+
+        $r1 = <com.newsblur.service.NBSyncService: com.newsblur.util.FeedSet PreppedFeedSet>;
+
+        $z0 = virtualinvoke $r0.<com.newsblur.util.FeedSet: boolean equals(java.lang.Object)>($r1);
+
+        return $z0;
+    }
+    public static boolean isFeedSetStoriesFresh(com.newsblur.util.FeedSet)
+    {
+        com.newsblur.util.FeedSet $r0;
+        boolean $z0;
+        java.util.Map $r1;
+        java.lang.Object $r2;
+        java.lang.Integer r3;
+        int $i0;
+
+        $r0 := @parameter0: com.newsblur.util.FeedSet;
+
+        $z0 = staticinvoke <com.newsblur.service.NBSyncService: boolean isFeedSetReady(com.newsblur.util.FeedSet)>($r0);
+
+        if $z0 != 0 goto label1;
+
+        return 0;
+
+     label1:
+        $r1 = <com.newsblur.service.NBSyncService: java.util.Map FeedStoriesSeen>;
+
+        $r2 = interfaceinvoke $r1.<java.util.Map: java.lang.Object get(java.lang.Object)>($r0);
+
+        r3 = (java.lang.Integer) $r2;
+
+        if r3 == null goto label2;
+
+        $i0 = virtualinvoke r3.<java.lang.Integer: int intValue()>();
+
+        if $i0 < 1 goto label2;
+
+        return 1;
+
+     label2:
+        return 0;
+    }
+    public static boolean isFeedSetSyncing(com.newsblur.util.FeedSet, android.content.Context)
+    {
+        com.newsblur.util.FeedSet $r0, $r2;
+        android.content.Context $r1;
+        boolean $z0;
+
+        $r0 := @parameter0: com.newsblur.util.FeedSet;
+
+        $r1 := @parameter1: android.content.Context;
+
+        $r2 = <com.newsblur.service.NBSyncService: com.newsblur.util.FeedSet PendingFeed>;
+
+        $z0 = virtualinvoke $r0.<com.newsblur.util.FeedSet: boolean equals(java.lang.Object)>($r2);
+
+        if $z0 == 0 goto label1;
+
+        $z0 = staticinvoke <com.newsblur.service.NBSyncService: boolean stopSync(android.content.Context)>($r1);
+
+        if $z0 != 0 goto label1;
+
+        return 1;
+
+     label1:
+        return 0;
+    }
+    public static boolean isHousekeepingRunning()
+    {
+        boolean z0;
+
+        z0 = <com.newsblur.service.NBSyncService: boolean HousekeepingRunning>;
+
+        return z0;
+    }
+    public static boolean isMemoryLow()
+    {
+        boolean z0;
+
+        z0 = <com.newsblur.service.NBSyncService: boolean isMemoryLow>;
+
+        return z0;
+    }
+    private boolean isStoryResponseGood(com.newsblur.network.domain.StoriesResponse)
+    {
+        com.newsblur.service.NBSyncService r0;
+        com.newsblur.network.domain.StoriesResponse $r1;
+        java.lang.Class $r2;
+        java.lang.String $r3;
+        com.newsblur.domain.Story[] $r4;
+
+        r0 := @this: com.newsblur.service.NBSyncService;
+
+        $r1 := @parameter0: com.newsblur.network.domain.StoriesResponse;
+
+        if $r1 != null goto label1;
+
+        $r2 = virtualinvoke r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r3 = virtualinvoke $r2.<java.lang.Class: java.lang.String getName()>();
+
+        staticinvoke <com.newsblur.util.Log: void e(java.lang.String,java.lang.String)>($r3, "Null response received while loading stories.");
+
+        return 0;
+
+     label1:
+        $r4 = $r1.<com.newsblur.network.domain.StoriesResponse: com.newsblur.domain.Story[] stories>;
+
+        if $r4 != null goto label2;
+
+        $r2 = virtualinvoke r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r3 = virtualinvoke $r2.<java.lang.Class: java.lang.String getName()>();
+
+        staticinvoke <com.newsblur.util.Log: void e(java.lang.String,java.lang.String)>($r3, "Null stories member received while loading stories.");
+
+        return 0;
+
+     label2:
+        return 1;
+    }
+    private void noteHardAPIFailure()
+    {
+        com.newsblur.service.NBSyncService r0;
+        java.lang.Class $r1;
+        java.lang.String $r2;
+        long $l0;
+
+        r0 := @this: com.newsblur.service.NBSyncService;
+
+        $r1 = virtualinvoke r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r2 = virtualinvoke $r1.<java.lang.Class: java.lang.String getName()>();
+
+        staticinvoke <com.newsblur.util.Log: void w(java.lang.String,java.lang.String)>($r2, "hard API failure");
+
+        $l0 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        <com.newsblur.service.NBSyncService: long lastAPIFailure> = $l0;
+
+        return;
+    }
+    public static void prepareReadingSession(com.newsblur.database.BlurDatabaseHelper, com.newsblur.util.FeedSet)
+    {
+        com.newsblur.database.BlurDatabaseHelper $r0;
+        com.newsblur.util.FeedSet $r1, $r3;
+        java.lang.Object $r2;
+        boolean $z0;
+        java.lang.Class $r4;
+        java.lang.String $r5;
+        java.lang.Throwable $r6;
+
+        $r0 := @parameter0: com.newsblur.database.BlurDatabaseHelper;
+
+        $r1 := @parameter1: com.newsblur.util.FeedSet;
+
+        $r2 = <com.newsblur.service.NBSyncService: java.lang.Object PENDING_FEED_MUTEX>;
+
+        entermonitor $r2;
+
+     label1:
+        $r3 = <com.newsblur.service.NBSyncService: com.newsblur.util.FeedSet PreppedFeedSet>;
+
+        $z0 = virtualinvoke $r1.<com.newsblur.util.FeedSet: boolean equals(java.lang.Object)>($r3);
+
+        if $z0 != 0 goto label2;
+
+        $r4 = class "Lcom/newsblur/service/NBSyncService;";
+
+        $r5 = virtualinvoke $r4.<java.lang.Class: java.lang.String getName()>();
+
+        staticinvoke <com.newsblur.util.Log: void d(java.lang.String,java.lang.String)>($r5, "preparing new reading session");
+
+        virtualinvoke $r0.<com.newsblur.database.BlurDatabaseHelper: void clearStorySession()>();
+
+        virtualinvoke $r0.<com.newsblur.database.BlurDatabaseHelper: void prepareReadingSession(com.newsblur.util.FeedSet)>($r1);
+
+        <com.newsblur.service.NBSyncService: com.newsblur.util.FeedSet PreppedFeedSet> = $r1;
+
+        staticinvoke <com.newsblur.activity.NbActivity: void updateAllActivities(int)>(36);
+
+     label2:
+        exitmonitor $r2;
+
+     label3:
+        return;
+
+     label4:
+        $r6 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label5:
+        throw $r6;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+    public static boolean requestMoreForFeed(com.newsblur.util.FeedSet, int, java.lang.Integer)
+    {
+        com.newsblur.util.FeedSet $r0, $r4;
+        int $i0, $i1, $i2;
+        java.lang.Integer $r1, $r7, r10;
+        java.lang.Object $r2, $r9;
+        java.util.Set $r3;
+        boolean $z0;
+        java.lang.Class $r5;
+        java.lang.String $r6;
+        java.util.Map $r8;
+        java.lang.Throwable $r11;
+
+        $r0 := @parameter0: com.newsblur.util.FeedSet;
+
+        $i0 := @parameter1: int;
+
+        $r1 := @parameter2: java.lang.Integer;
+
+        $r2 = <com.newsblur.service.NBSyncService: java.lang.Object PENDING_FEED_MUTEX>;
+
+        entermonitor $r2;
+
+     label01:
+        $r3 = <com.newsblur.service.NBSyncService: java.util.Set ExhaustedFeeds>;
+
+        $z0 = interfaceinvoke $r3.<java.util.Set: boolean contains(java.lang.Object)>($r0);
+
+        if $z0 == 0 goto label03;
+
+        $r4 = <com.newsblur.service.NBSyncService: com.newsblur.util.FeedSet LastFeedSet>;
+
+        $z0 = virtualinvoke $r0.<com.newsblur.util.FeedSet: boolean equals(java.lang.Object)>($r4);
+
+        if $z0 == 0 goto label03;
+
+        if $r1 == null goto label03;
+
+        $r5 = class "Lcom/newsblur/service/NBSyncService;";
+
+        $r6 = virtualinvoke $r5.<java.lang.Class: java.lang.String getName()>();
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>($r6, "rejecting request for feedset that is exhaused");
+
+        exitmonitor $r2;
+
+     label02:
+        return 0;
+
+     label03:
+        $r7 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(0);
+
+        $r4 = <com.newsblur.service.NBSyncService: com.newsblur.util.FeedSet PendingFeed>;
+
+        $z0 = virtualinvoke $r0.<com.newsblur.util.FeedSet: boolean equals(java.lang.Object)>($r4);
+
+        if $z0 == 0 goto label04;
+
+        $r7 = <com.newsblur.service.NBSyncService: java.lang.Integer PendingFeedTarget>;
+
+     label04:
+        $r8 = <com.newsblur.service.NBSyncService: java.util.Map FeedStoriesSeen>;
+
+        $r9 = interfaceinvoke $r8.<java.util.Map: java.lang.Object get(java.lang.Object)>($r0);
+
+        r10 = (java.lang.Integer) $r9;
+
+        if r10 != null goto label05;
+
+        r10 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(0);
+
+     label05:
+        if $r1 == null goto label06;
+
+        $i1 = virtualinvoke $r1.<java.lang.Integer: int intValue()>();
+
+        $i2 = virtualinvoke r10.<java.lang.Integer: int intValue()>();
+
+        if $i1 >= $i2 goto label06;
+
+        r10 = $r1;
+
+        $r8 = <com.newsblur.service.NBSyncService: java.util.Map FeedStoriesSeen>;
+
+        interfaceinvoke $r8.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r0, $r1);
+
+        $r7 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(0);
+
+     label06:
+        <com.newsblur.service.NBSyncService: com.newsblur.util.FeedSet PendingFeed> = $r0;
+
+        $r1 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        <com.newsblur.service.NBSyncService: java.lang.Integer PendingFeedTarget> = $r1;
+
+        $r4 = <com.newsblur.service.NBSyncService: com.newsblur.util.FeedSet LastFeedSet>;
+
+        $z0 = virtualinvoke $r0.<com.newsblur.util.FeedSet: boolean equals(java.lang.Object)>($r4);
+
+        if $z0 != 0 goto label08;
+
+        exitmonitor $r2;
+
+     label07:
+        return 1;
+
+     label08:
+        $i1 = virtualinvoke r10.<java.lang.Integer: int intValue()>();
+
+        if $i0 > $i1 goto label12;
+
+        exitmonitor $r2;
+
+     label09:
+        return 0;
+
+     label10:
+        $r11 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label11:
+        throw $r11;
+
+     label12:
+        $i1 = virtualinvoke $r7.<java.lang.Integer: int intValue()>();
+
+        if $i0 > $i1 goto label14;
+
+        exitmonitor $r2;
+
+     label13:
+        return 0;
+
+     label14:
+        exitmonitor $r2;
+
+     label15:
+        return 1;
+
+        catch java.lang.Throwable from label01 to label02 with label10;
+        catch java.lang.Throwable from label03 to label07 with label10;
+        catch java.lang.Throwable from label08 to label09 with label10;
+        catch java.lang.Throwable from label10 to label11 with label10;
+        catch java.lang.Throwable from label12 to label13 with label10;
+        catch java.lang.Throwable from label14 to label15 with label10;
+    }
+    public static void resetFetchState(com.newsblur.util.FeedSet)
+    {
+        com.newsblur.util.FeedSet $r0;
+        java.lang.String $r1;
+        java.lang.Class $r2;
+
+        $r0 := @parameter0: com.newsblur.util.FeedSet;
+
+        $r2 = class "Lcom/newsblur/service/NBSyncService;";
+
+        $r1 = virtualinvoke $r2.<java.lang.Class: java.lang.String getName()>();
+
+        staticinvoke <com.newsblur.util.Log: void d(java.lang.String,java.lang.String)>($r1, "requesting feed fetch state reset");
+
+        <com.newsblur.service.NBSyncService: com.newsblur.util.FeedSet ResetFeed> = $r0;
+
+        return;
+    }
+    public static void resetReadingSession()
+    {
+        java.lang.String $r0;
+        java.lang.Class $r1;
+        java.lang.Object $r2;
+        java.lang.Throwable $r3;
+
+        $r1 = class "Lcom/newsblur/service/NBSyncService;";
+
+        $r0 = virtualinvoke $r1.<java.lang.Class: java.lang.String getName()>();
+
+        staticinvoke <com.newsblur.util.Log: void d(java.lang.String,java.lang.String)>($r0, "requesting reading session reset");
+
+        $r2 = <com.newsblur.service.NBSyncService: java.lang.Object PENDING_FEED_MUTEX>;
+
+        entermonitor $r2;
+
+     label1:
+        <com.newsblur.service.NBSyncService: com.newsblur.util.FeedSet PendingFeed> = null;
+
+        <com.newsblur.service.NBSyncService: com.newsblur.util.FeedSet PreppedFeedSet> = null;
+
+        exitmonitor $r2;
+
+     label2:
+        return;
+
+     label3:
+        $r3 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label4:
+        throw $r3;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+    public static void resumeFromInterrupt()
+    {
+        <com.newsblur.service.NBSyncService: boolean HaltNow> = 0;
+
+        return;
+    }
+    public static void softInterrupt()
+    {
+        java.lang.String $r0;
+        java.lang.Class $r1;
+
+        $r1 = class "Lcom/newsblur/service/NBSyncService;";
+
+        $r0 = virtualinvoke $r1.<java.lang.Class: java.lang.String getName()>();
+
+        staticinvoke <com.newsblur.util.Log: void i(java.lang.String,java.lang.String)>($r0, "soft stop");
+
+        <com.newsblur.service.NBSyncService: boolean HaltNow> = 1;
+
+        return;
+    }
+    static boolean stopSync(android.content.Context)
+    {
+        android.content.Context $r0;
+        boolean $z0;
+        java.lang.Class $r1;
+        java.lang.String $r2;
+
+        $r0 := @parameter0: android.content.Context;
+
+        $z0 = <com.newsblur.service.NBSyncService: boolean HaltNow>;
+
+        if $z0 == 0 goto label1;
+
+        $r1 = class "Lcom/newsblur/service/NBSyncService;";
+
+        $r2 = virtualinvoke $r1.<java.lang.Class: java.lang.String getName()>();
+
+        staticinvoke <com.newsblur.util.Log: void i(java.lang.String,java.lang.String)>($r2, "stopping sync, soft interrupt set.");
+
+        return 1;
+
+     label1:
+        if $r0 != null goto label2;
+
+        return 0;
+
+     label2:
+        $z0 = staticinvoke <com.newsblur.util.NetworkUtils: boolean isOnline(android.content.Context)>($r0);
+
+        if $z0 != 0 goto label3;
+
+        <com.newsblur.service.NBSyncService: boolean OfflineNow> = 1;
+
+        return 1;
+
+     label3:
+        return 0;
+    }
+    private void syncActions()
+    {
+        com.newsblur.service.NBSyncService r0;
+        java.lang.IllegalArgumentException r1;
+        boolean $z0;
+        android.database.Cursor r2, $r4;
+        com.newsblur.database.BlurDatabaseHelper $r3;
+        int $i0;
+        java.lang.String $r5, $r9, $r12;
+        com.newsblur.util.ReadingAction $r6;
+        com.newsblur.util.FeedSet $r7;
+        java.lang.Class $r8;
+        java.lang.StringBuilder $r10;
+        android.content.ContentValues $r11;
+        com.newsblur.network.APIManager $r13;
+        com.newsblur.network.domain.NewsBlurResponse $r14;
+        java.lang.Throwable $r15;
+        java.util.List $r16;
+
+        r0 := @this: com.newsblur.service.NBSyncService;
+
+        $z0 = virtualinvoke r0.<com.newsblur.service.NBSyncService: boolean stopSync()>();
+
+        if $z0 == 0 goto label01;
+
+        return;
+
+     label01:
+        $z0 = specialinvoke r0.<com.newsblur.service.NBSyncService: boolean backoffBackgroundCalls()>();
+
+        if $z0 != 0 goto label39;
+
+        r2 = null;
+
+     label02:
+        $r3 = r0.<com.newsblur.service.NBSyncService: com.newsblur.database.BlurDatabaseHelper dbHelper>;
+
+        $r4 = virtualinvoke $r3.<com.newsblur.database.BlurDatabaseHelper: android.database.Cursor getActions()>();
+
+     label03:
+        r2 = $r4;
+
+     label04:
+        $i0 = interfaceinvoke $r4.<android.database.Cursor: int getCount()>();
+
+        <com.newsblur.service.NBSyncService: int lastActionCount> = $i0;
+
+        $i0 = <com.newsblur.service.NBSyncService: int lastActionCount>;
+
+     label05:
+        if $i0 >= 1 goto label06;
+
+        staticinvoke <com.newsblur.database.BlurDatabaseHelper: void closeQuietly(android.database.Cursor)>($r4);
+
+        <com.newsblur.service.NBSyncService: boolean ActionsRunning> = 0;
+
+        staticinvoke <com.newsblur.activity.NbActivity: void updateAllActivities(int)>(32);
+
+        return;
+
+     label06:
+        <com.newsblur.service.NBSyncService: boolean ActionsRunning> = 1;
+
+     label07:
+        $z0 = interfaceinvoke $r4.<android.database.Cursor: boolean moveToNext()>();
+
+     label08:
+        if $z0 == 0 goto label38;
+
+     label09:
+        staticinvoke <com.newsblur.activity.NbActivity: void updateAllActivities(int)>(32);
+
+        $i0 = interfaceinvoke $r4.<android.database.Cursor: int getColumnIndexOrThrow(java.lang.String)>("_id");
+
+        $r5 = interfaceinvoke $r4.<android.database.Cursor: java.lang.String getString(int)>($i0);
+
+     label10:
+        $r6 = staticinvoke <com.newsblur.util.ReadingAction: com.newsblur.util.ReadingAction fromCursor(android.database.Cursor)>($r4);
+
+     label11:
+        $i0 = virtualinvoke $r6.<com.newsblur.util.ReadingAction: int getTried()>();
+
+     label12:
+        if $i0 <= 0 goto label15;
+
+     label13:
+        $r7 = <com.newsblur.service.NBSyncService: com.newsblur.util.FeedSet PendingFeed>;
+
+     label14:
+        if $r7 != null goto label07;
+
+     label15:
+        $r8 = virtualinvoke r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r9 = virtualinvoke $r8.<java.lang.Class: java.lang.String getName()>();
+
+        $r10 = new java.lang.StringBuilder;
+
+        specialinvoke $r10.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("attempting action: ");
+
+        $r11 = virtualinvoke $r6.<com.newsblur.util.ReadingAction: android.content.ContentValues toContentValues()>();
+
+        $r12 = virtualinvoke $r11.<android.content.ContentValues: java.lang.String toString()>();
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r12);
+
+        $r12 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.newsblur.util.Log: void d(java.lang.String,java.lang.String)>($r9, $r12);
+
+        $r13 = r0.<com.newsblur.service.NBSyncService: com.newsblur.network.APIManager apiManager>;
+
+        $r3 = r0.<com.newsblur.service.NBSyncService: com.newsblur.database.BlurDatabaseHelper dbHelper>;
+
+        $r14 = virtualinvoke $r6.<com.newsblur.util.ReadingAction: com.newsblur.network.domain.NewsBlurResponse doRemote(com.newsblur.network.APIManager,com.newsblur.database.BlurDatabaseHelper)>($r13, $r3);
+
+     label16:
+        if $r14 != null goto label26;
+
+     label17:
+        $r8 = virtualinvoke r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r9 = virtualinvoke $r8.<java.lang.Class: java.lang.String getName()>();
+
+        staticinvoke <com.newsblur.util.Log: void e(java.lang.String,java.lang.String)>($r9, "Discarding reading action with client-side error.");
+
+        $r3 = r0.<com.newsblur.service.NBSyncService: com.newsblur.database.BlurDatabaseHelper dbHelper>;
+
+        virtualinvoke $r3.<com.newsblur.database.BlurDatabaseHelper: void clearAction(java.lang.String)>($r5);
+
+     label18:
+        $i0 = <com.newsblur.service.NBSyncService: int lastActionCount>;
+
+     label19:
+        $i0 = $i0 + -1;
+
+     label20:
+        <com.newsblur.service.NBSyncService: int lastActionCount> = $i0;
+
+     label21:
+        goto label07;
+
+     label22:
+        $r15 := @caughtexception;
+
+        staticinvoke <com.newsblur.database.BlurDatabaseHelper: void closeQuietly(android.database.Cursor)>(r2);
+
+        <com.newsblur.service.NBSyncService: boolean ActionsRunning> = 0;
+
+        staticinvoke <com.newsblur.activity.NbActivity: void updateAllActivities(int)>(32);
+
+        throw $r15;
+
+     label23:
+        r1 := @caughtexception;
+
+     label24:
+        $r8 = virtualinvoke r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r9 = virtualinvoke $r8.<java.lang.Class: java.lang.String getName()>();
+
+        staticinvoke <com.newsblur.util.Log: void e(java.lang.String,java.lang.String,java.lang.Throwable)>($r9, "error unfreezing ReadingAction", r1);
+
+        $r3 = r0.<com.newsblur.service.NBSyncService: com.newsblur.database.BlurDatabaseHelper dbHelper>;
+
+        virtualinvoke $r3.<com.newsblur.database.BlurDatabaseHelper: void clearAction(java.lang.String)>($r5);
+
+     label25:
+        goto label07;
+
+     label26:
+        $z0 = $r14.<com.newsblur.network.domain.NewsBlurResponse: boolean isProtocolError>;
+
+     label27:
+        if $z0 == 0 goto label30;
+
+     label28:
+        $r8 = virtualinvoke r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r9 = virtualinvoke $r8.<java.lang.Class: java.lang.String getName()>();
+
+        staticinvoke <com.newsblur.util.Log: void i(java.lang.String,java.lang.String)>($r9, "Holding reading action with server-side or network error.");
+
+        $r3 = r0.<com.newsblur.service.NBSyncService: com.newsblur.database.BlurDatabaseHelper dbHelper>;
+
+        virtualinvoke $r3.<com.newsblur.database.BlurDatabaseHelper: void incrementActionTried(java.lang.String)>($r5);
+
+        specialinvoke r0.<com.newsblur.service.NBSyncService: void noteHardAPIFailure()>();
+
+     label29:
+        goto label07;
+
+     label30:
+        $z0 = virtualinvoke $r14.<com.newsblur.network.domain.NewsBlurResponse: boolean isError()>();
+
+     label31:
+        if $z0 == 0 goto label36;
+
+     label32:
+        $r8 = virtualinvoke r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r9 = virtualinvoke $r8.<java.lang.Class: java.lang.String getName()>();
+
+        staticinvoke <com.newsblur.util.Log: void i(java.lang.String,java.lang.String)>($r9, "Discarding reading action with fatal message.");
+
+        $r3 = r0.<com.newsblur.service.NBSyncService: com.newsblur.database.BlurDatabaseHelper dbHelper>;
+
+        virtualinvoke $r3.<com.newsblur.database.BlurDatabaseHelper: void clearAction(java.lang.String)>($r5);
+
+        $r5 = virtualinvoke $r14.<com.newsblur.network.domain.NewsBlurResponse: java.lang.String getErrorMessage(java.lang.String)>(null);
+
+     label33:
+        if $r5 == null goto label18;
+
+     label34:
+        staticinvoke <com.newsblur.activity.NbActivity: void toastError(java.lang.String)>($r5);
+
+     label35:
+        goto label18;
+
+     label36:
+        $r3 = r0.<com.newsblur.service.NBSyncService: com.newsblur.database.BlurDatabaseHelper dbHelper>;
+
+        virtualinvoke $r3.<com.newsblur.database.BlurDatabaseHelper: void clearAction(java.lang.String)>($r5);
+
+        $r16 = <com.newsblur.service.NBSyncService: java.util.List FollowupActions>;
+
+        interfaceinvoke $r16.<java.util.List: boolean add(java.lang.Object)>($r6);
+
+     label37:
+        goto label18;
+
+     label38:
+        staticinvoke <com.newsblur.database.BlurDatabaseHelper: void closeQuietly(android.database.Cursor)>($r4);
+
+        <com.newsblur.service.NBSyncService: boolean ActionsRunning> = 0;
+
+        staticinvoke <com.newsblur.activity.NbActivity: void updateAllActivities(int)>(32);
+
+     label39:
+        return;
+
+        catch java.lang.Throwable from label02 to label03 with label22;
+        catch java.lang.Throwable from label04 to label05 with label22;
+        catch java.lang.Throwable from label06 to label08 with label22;
+        catch java.lang.Throwable from label09 to label10 with label22;
+        catch java.lang.IllegalArgumentException from label10 to label11 with label23;
+        catch java.lang.Throwable from label10 to label11 with label22;
+        catch java.lang.Throwable from label11 to label12 with label22;
+        catch java.lang.Throwable from label13 to label14 with label22;
+        catch java.lang.Throwable from label15 to label16 with label22;
+        catch java.lang.Throwable from label17 to label19 with label22;
+        catch java.lang.Throwable from label20 to label21 with label22;
+        catch java.lang.Throwable from label24 to label25 with label22;
+        catch java.lang.Throwable from label26 to label27 with label22;
+        catch java.lang.Throwable from label28 to label29 with label22;
+        catch java.lang.Throwable from label30 to label31 with label22;
+        catch java.lang.Throwable from label32 to label33 with label22;
+        catch java.lang.Throwable from label34 to label35 with label22;
+        catch java.lang.Throwable from label36 to label37 with label22;
+    }
+    private void syncMetadata(int)
+    {
+        com.newsblur.service.NBSyncService r0;
+        int $i0, $i1;
+        java.util.HashSet r1, r2, $r13;
+        java.util.ArrayList r3, r4, r5, r6;
+        com.newsblur.domain.StarredCount r7;
+        boolean $z0;
+        com.newsblur.database.BlurDatabaseHelper $r8;
+        java.lang.Class $r9;
+        java.lang.String $r10, $r12, $r26;
+        java.lang.StringBuilder $r11;
+        com.newsblur.network.APIManager $r14;
+        com.newsblur.network.domain.FeedFolderResponse $r15;
+        java.util.Set $r16;
+        java.util.Map $r17;
+        long $l2, $l3;
+        java.lang.Boolean $r18;
+        java.util.Iterator $r19;
+        java.lang.Object $r20;
+        com.newsblur.domain.Folder r21;
+        java.util.List $r22;
+        java.lang.Throwable $r23;
+        com.newsblur.domain.Feed r24;
+        android.content.ContentValues $r25;
+        com.newsblur.domain.SocialFeed r27;
+        com.newsblur.service.UnreadsService $r28;
+        com.newsblur.service.CleanupService $r29;
+
+        r0 := @this: com.newsblur.service.NBSyncService;
+
+        $i0 := @parameter0: int;
+
+        $z0 = virtualinvoke r0.<com.newsblur.service.NBSyncService: boolean stopSync()>();
+
+        if $z0 == 0 goto label01;
+
+        return;
+
+     label01:
+        $z0 = specialinvoke r0.<com.newsblur.service.NBSyncService: boolean backoffBackgroundCalls()>();
+
+        if $z0 != 0 goto label67;
+
+        $r8 = r0.<com.newsblur.service.NBSyncService: com.newsblur.database.BlurDatabaseHelper dbHelper>;
+
+        $i1 = virtualinvoke $r8.<com.newsblur.database.BlurDatabaseHelper: int getUntriedActionCount()>();
+
+        if $i1 <= 0 goto label02;
+
+        $r9 = virtualinvoke r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r10 = virtualinvoke $r9.<java.lang.Class: java.lang.String getName()>();
+
+        $r11 = new java.lang.StringBuilder;
+
+        specialinvoke $r11.<java.lang.StringBuilder: void <init>()>();
+
+        $r11 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i1);
+
+        $r11 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" outstanding actions, yielding metadata sync");
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.newsblur.util.Log: void i(java.lang.String,java.lang.String)>($r10, $r12);
+
+        return;
+
+     label02:
+        $z0 = <com.newsblur.service.NBSyncService: boolean DoFeedsFolders>;
+
+        if $z0 != 0 goto label03;
+
+        $z0 = staticinvoke <com.newsblur.util.PrefsUtils: boolean isTimeToAutoSync(android.content.Context)>(r0);
+
+        if $z0 == 0 goto label67;
+
+     label03:
+        staticinvoke <com.newsblur.util.PrefsUtils: void updateLastSyncTime(android.content.Context)>(r0);
+
+        <com.newsblur.service.NBSyncService: boolean DoFeedsFolders> = 0;
+
+        $r9 = virtualinvoke r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r10 = virtualinvoke $r9.<java.lang.Class: java.lang.String getName()>();
+
+        staticinvoke <com.newsblur.util.Log: void i(java.lang.String,java.lang.String)>($r10, "ready to sync feed list");
+
+        <com.newsblur.service.NBSyncService: boolean FFSyncRunning> = 1;
+
+        staticinvoke <com.newsblur.activity.NbActivity: void updateAllActivities(int)>(32);
+
+        r2 = new java.util.HashSet;
+
+        specialinvoke r2.<java.util.HashSet: void <init>()>();
+
+        r1 = new java.util.HashSet;
+
+        specialinvoke r1.<java.util.HashSet: void <init>()>();
+
+        $r13 = new java.util.HashSet;
+
+        specialinvoke $r13.<java.util.HashSet: void <init>()>();
+
+        r0.<com.newsblur.service.NBSyncService: java.util.Set orphanFeedIds> = $r13;
+
+        $r13 = new java.util.HashSet;
+
+        specialinvoke $r13.<java.util.HashSet: void <init>()>();
+
+        r0.<com.newsblur.service.NBSyncService: java.util.Set disabledFeedIds> = $r13;
+
+     label04:
+        $r14 = r0.<com.newsblur.service.NBSyncService: com.newsblur.network.APIManager apiManager>;
+
+        $r15 = virtualinvoke $r14.<com.newsblur.network.APIManager: com.newsblur.network.domain.FeedFolderResponse getFolderFeedMapping(boolean)>(1);
+
+     label05:
+        if $r15 != null goto label08;
+
+     label06:
+        specialinvoke r0.<com.newsblur.service.NBSyncService: void noteHardAPIFailure()>();
+
+     label07:
+        <com.newsblur.service.NBSyncService: boolean FFSyncRunning> = 0;
+
+        staticinvoke <com.newsblur.activity.NbActivity: void updateAllActivities(int)>(34);
+
+        return;
+
+     label08:
+        $z0 = $r15.<com.newsblur.network.domain.FeedFolderResponse: boolean isAuthenticated>;
+
+     label09:
+        if $z0 != 0 goto label17;
+
+     label10:
+        $i0 = <com.newsblur.service.NBSyncService: int authFails>;
+
+     label11:
+        $i0 = $i0 + 1;
+
+     label12:
+        <com.newsblur.service.NBSyncService: int authFails> = $i0;
+
+        $r9 = virtualinvoke r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r10 = virtualinvoke $r9.<java.lang.Class: java.lang.String getName()>();
+
+        staticinvoke <com.newsblur.util.Log: void w(java.lang.String,java.lang.String)>($r10, "Server ignored or rejected auth cookie.");
+
+        $i0 = <com.newsblur.service.NBSyncService: int authFails>;
+
+     label13:
+        if $i0 < 3 goto label15;
+
+     label14:
+        $r9 = virtualinvoke r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r10 = virtualinvoke $r9.<java.lang.Class: java.lang.String getName()>();
+
+        staticinvoke <com.newsblur.util.Log: void w(java.lang.String,java.lang.String)>($r10, "too many auth fails, resetting cookie");
+
+        staticinvoke <com.newsblur.util.PrefsUtils: void logout(android.content.Context)>(r0);
+
+     label15:
+        <com.newsblur.service.NBSyncService: boolean DoFeedsFolders> = 1;
+
+     label16:
+        <com.newsblur.service.NBSyncService: boolean FFSyncRunning> = 0;
+
+        staticinvoke <com.newsblur.activity.NbActivity: void updateAllActivities(int)>(34);
+
+        return;
+
+     label17:
+        <com.newsblur.service.NBSyncService: int authFails> = 0;
+
+        $z0 = <com.newsblur.service.NBSyncService: boolean HaltNow>;
+
+     label18:
+        if $z0 == 0 goto label19;
+
+        <com.newsblur.service.NBSyncService: boolean FFSyncRunning> = 0;
+
+        staticinvoke <com.newsblur.activity.NbActivity: void updateAllActivities(int)>(34);
+
+        return;
+
+     label19:
+        $r16 = <com.newsblur.service.NBSyncService: java.util.Set ExhaustedFeeds>;
+
+        interfaceinvoke $r16.<java.util.Set: void clear()>();
+
+        $r17 = <com.newsblur.service.NBSyncService: java.util.Map FeedPagesSeen>;
+
+        interfaceinvoke $r17.<java.util.Map: void clear()>();
+
+        $r17 = <com.newsblur.service.NBSyncService: java.util.Map FeedStoriesSeen>;
+
+        interfaceinvoke $r17.<java.util.Map: void clear()>();
+
+        staticinvoke <com.newsblur.service.UnreadsService: void clear()>();
+
+        $r16 = <com.newsblur.service.NBSyncService: java.util.Set RecountCandidates>;
+
+        interfaceinvoke $r16.<java.util.Set: void clear()>();
+
+        $l2 = $r15.<com.newsblur.network.domain.FeedFolderResponse: long connTime>;
+
+        <com.newsblur.service.NBSyncService: long lastFFConnMillis> = $l2;
+
+        $l2 = $r15.<com.newsblur.network.domain.FeedFolderResponse: long readTime>;
+
+        <com.newsblur.service.NBSyncService: long lastFFReadMillis> = $l2;
+
+        $l2 = $r15.<com.newsblur.network.domain.FeedFolderResponse: long parseTime>;
+
+        <com.newsblur.service.NBSyncService: long lastFFParseMillis> = $l2;
+
+        $l2 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        $z0 = $r15.<com.newsblur.network.domain.FeedFolderResponse: boolean isPremium>;
+
+        $r18 = staticinvoke <java.lang.Boolean: java.lang.Boolean valueOf(boolean)>($z0);
+
+        <com.newsblur.service.NBSyncService: java.lang.Boolean isPremium> = $r18;
+
+        $z0 = $r15.<com.newsblur.network.domain.FeedFolderResponse: boolean isStaff>;
+
+        $r18 = staticinvoke <java.lang.Boolean: java.lang.Boolean valueOf(boolean)>($z0);
+
+        <com.newsblur.service.NBSyncService: java.lang.Boolean isStaff> = $r18;
+
+        $r16 = $r15.<com.newsblur.network.domain.FeedFolderResponse: java.util.Set folders>;
+
+        $r19 = interfaceinvoke $r16.<java.util.Set: java.util.Iterator iterator()>();
+
+     label20:
+        $z0 = interfaceinvoke $r19.<java.util.Iterator: boolean hasNext()>();
+
+     label21:
+        if $z0 == 0 goto label25;
+
+     label22:
+        $r20 = interfaceinvoke $r19.<java.util.Iterator: java.lang.Object next()>();
+
+        r21 = (com.newsblur.domain.Folder) $r20;
+
+        $r22 = r21.<com.newsblur.domain.Folder: java.util.List feedIds>;
+
+        interfaceinvoke r2.<java.util.Set: boolean addAll(java.util.Collection)>($r22);
+
+     label23:
+        goto label20;
+
+     label24:
+        $r23 := @caughtexception;
+
+        <com.newsblur.service.NBSyncService: boolean FFSyncRunning> = 0;
+
+        staticinvoke <com.newsblur.activity.NbActivity: void updateAllActivities(int)>(34);
+
+        throw $r23;
+
+     label25:
+        r3 = new java.util.ArrayList;
+
+        specialinvoke r3.<java.util.ArrayList: void <init>()>();
+
+        $r16 = $r15.<com.newsblur.network.domain.FeedFolderResponse: java.util.Set feeds>;
+
+        $r19 = interfaceinvoke $r16.<java.util.Set: java.util.Iterator iterator()>();
+
+     label26:
+        $z0 = interfaceinvoke $r19.<java.util.Iterator: boolean hasNext()>();
+
+     label27:
+        if $z0 == 0 goto label37;
+
+     label28:
+        $r20 = interfaceinvoke $r19.<java.util.Iterator: java.lang.Object next()>();
+
+        r24 = (com.newsblur.domain.Feed) $r20;
+
+        $r10 = r24.<com.newsblur.domain.Feed: java.lang.String feedId>;
+
+        interfaceinvoke r1.<java.util.Set: boolean add(java.lang.Object)>($r10);
+
+        $r10 = r24.<com.newsblur.domain.Feed: java.lang.String feedId>;
+
+        $z0 = interfaceinvoke r2.<java.util.Set: boolean contains(java.lang.Object)>($r10);
+
+     label29:
+        if $z0 != 0 goto label32;
+
+     label30:
+        $r9 = virtualinvoke r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r10 = virtualinvoke $r9.<java.lang.Class: java.lang.String getName()>();
+
+        $r11 = new java.lang.StringBuilder;
+
+        specialinvoke $r11.<java.lang.StringBuilder: void <init>()>();
+
+        $r11 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Found and ignoring orphan feed (in feeds but not folders): ");
+
+        $r12 = r24.<com.newsblur.domain.Feed: java.lang.String feedId>;
+
+        $r11 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r12);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String)>($r10, $r12);
+
+        $r16 = r0.<com.newsblur.service.NBSyncService: java.util.Set orphanFeedIds>;
+
+        $r10 = r24.<com.newsblur.domain.Feed: java.lang.String feedId>;
+
+        interfaceinvoke $r16.<java.util.Set: boolean add(java.lang.Object)>($r10);
+
+     label31:
+        goto label26;
+
+     label32:
+        $z0 = r24.<com.newsblur.domain.Feed: boolean active>;
+
+     label33:
+        if $z0 != 0 goto label35;
+
+     label34:
+        $r16 = r0.<com.newsblur.service.NBSyncService: java.util.Set disabledFeedIds>;
+
+        $r10 = r24.<com.newsblur.domain.Feed: java.lang.String feedId>;
+
+        interfaceinvoke $r16.<java.util.Set: boolean add(java.lang.Object)>($r10);
+
+     label35:
+        $r25 = virtualinvoke r24.<com.newsblur.domain.Feed: android.content.ContentValues getValues()>();
+
+        interfaceinvoke r3.<java.util.List: boolean add(java.lang.Object)>($r25);
+
+     label36:
+        goto label26;
+
+     label37:
+        r24 = staticinvoke <com.newsblur.domain.Feed: com.newsblur.domain.Feed getZeroFeed()>();
+
+        $r25 = virtualinvoke r24.<com.newsblur.domain.Feed: android.content.ContentValues getValues()>();
+
+        interfaceinvoke r3.<java.util.List: boolean add(java.lang.Object)>($r25);
+
+        $r19 = interfaceinvoke r2.<java.util.Set: java.util.Iterator iterator()>();
+
+     label38:
+        $z0 = interfaceinvoke $r19.<java.util.Iterator: boolean hasNext()>();
+
+     label39:
+        if $z0 == 0 goto label44;
+
+     label40:
+        $r20 = interfaceinvoke $r19.<java.util.Iterator: java.lang.Object next()>();
+
+        $r10 = (java.lang.String) $r20;
+
+        $z0 = interfaceinvoke r1.<java.util.Set: boolean contains(java.lang.Object)>($r10);
+
+     label41:
+        if $z0 != 0 goto label38;
+
+     label42:
+        $r9 = virtualinvoke r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r12 = virtualinvoke $r9.<java.lang.Class: java.lang.String getName()>();
+
+        $r11 = new java.lang.StringBuilder;
+
+        specialinvoke $r11.<java.lang.StringBuilder: void <init>()>();
+
+        $r11 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Found and ignoring orphan feed (in folders but not feeds): ");
+
+        $r11 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r10);
+
+        $r26 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String)>($r12, $r26);
+
+        $r16 = r0.<com.newsblur.service.NBSyncService: java.util.Set orphanFeedIds>;
+
+        interfaceinvoke $r16.<java.util.Set: boolean add(java.lang.Object)>($r10);
+
+     label43:
+        goto label38;
+
+     label44:
+        r4 = new java.util.ArrayList;
+
+        specialinvoke r4.<java.util.ArrayList: void <init>()>();
+
+        r1 = new java.util.HashSet;
+
+        $r16 = $r15.<com.newsblur.network.domain.FeedFolderResponse: java.util.Set folders>;
+
+        $i1 = interfaceinvoke $r16.<java.util.Set: int size()>();
+
+        specialinvoke r1.<java.util.HashSet: void <init>(int)>($i1);
+
+        $r16 = $r15.<com.newsblur.network.domain.FeedFolderResponse: java.util.Set folders>;
+
+        $r19 = interfaceinvoke $r16.<java.util.Set: java.util.Iterator iterator()>();
+
+     label45:
+        $z0 = interfaceinvoke $r19.<java.util.Iterator: boolean hasNext()>();
+
+     label46:
+        if $z0 == 0 goto label51;
+
+     label47:
+        $r20 = interfaceinvoke $r19.<java.util.Iterator: java.lang.Object next()>();
+
+        r21 = (com.newsblur.domain.Folder) $r20;
+
+        $r10 = r21.<com.newsblur.domain.Folder: java.lang.String name>;
+
+        $z0 = interfaceinvoke r1.<java.util.Set: boolean contains(java.lang.Object)>($r10);
+
+     label48:
+        if $z0 != 0 goto label45;
+
+     label49:
+        $r10 = r21.<com.newsblur.domain.Folder: java.lang.String name>;
+
+        interfaceinvoke r1.<java.util.Set: boolean add(java.lang.Object)>($r10);
+
+        $r16 = r0.<com.newsblur.service.NBSyncService: java.util.Set orphanFeedIds>;
+
+        virtualinvoke r21.<com.newsblur.domain.Folder: void removeOrphanFeedIds(java.util.Collection)>($r16);
+
+        $r25 = virtualinvoke r21.<com.newsblur.domain.Folder: android.content.ContentValues getValues()>();
+
+        interfaceinvoke r4.<java.util.List: boolean add(java.lang.Object)>($r25);
+
+     label50:
+        goto label45;
+
+     label51:
+        r5 = new java.util.ArrayList;
+
+        specialinvoke r5.<java.util.ArrayList: void <init>()>();
+
+        $r16 = $r15.<com.newsblur.network.domain.FeedFolderResponse: java.util.Set socialFeeds>;
+
+        $r19 = interfaceinvoke $r16.<java.util.Set: java.util.Iterator iterator()>();
+
+     label52:
+        $z0 = interfaceinvoke $r19.<java.util.Iterator: boolean hasNext()>();
+
+     label53:
+        if $z0 == 0 goto label56;
+
+     label54:
+        $r20 = interfaceinvoke $r19.<java.util.Iterator: java.lang.Object next()>();
+
+        r27 = (com.newsblur.domain.SocialFeed) $r20;
+
+        $r25 = virtualinvoke r27.<com.newsblur.domain.SocialFeed: android.content.ContentValues getValues()>();
+
+        interfaceinvoke r5.<java.util.List: boolean add(java.lang.Object)>($r25);
+
+     label55:
+        goto label52;
+
+     label56:
+        r6 = new java.util.ArrayList;
+
+        specialinvoke r6.<java.util.ArrayList: void <init>()>();
+
+        $r16 = $r15.<com.newsblur.network.domain.FeedFolderResponse: java.util.Set starredCounts>;
+
+        $r19 = interfaceinvoke $r16.<java.util.Set: java.util.Iterator iterator()>();
+
+     label57:
+        $z0 = interfaceinvoke $r19.<java.util.Iterator: boolean hasNext()>();
+
+     label58:
+        if $z0 == 0 goto label61;
+
+     label59:
+        $r20 = interfaceinvoke $r19.<java.util.Iterator: java.lang.Object next()>();
+
+        r7 = (com.newsblur.domain.StarredCount) $r20;
+
+        $r25 = virtualinvoke r7.<com.newsblur.domain.StarredCount: android.content.ContentValues getValues()>();
+
+        interfaceinvoke r6.<java.util.List: boolean add(java.lang.Object)>($r25);
+
+     label60:
+        goto label57;
+
+     label61:
+        r7 = new com.newsblur.domain.StarredCount;
+
+        specialinvoke r7.<com.newsblur.domain.StarredCount: void <init>()>();
+
+        $i1 = $r15.<com.newsblur.network.domain.FeedFolderResponse: int starredCount>;
+
+        r7.<com.newsblur.domain.StarredCount: int count> = $i1;
+
+        r7.<com.newsblur.domain.StarredCount: java.lang.String tag> = "___TOTAL_STARRED";
+
+        $r25 = virtualinvoke r7.<com.newsblur.domain.StarredCount: android.content.ContentValues getValues()>();
+
+        interfaceinvoke r6.<java.util.List: boolean add(java.lang.Object)>($r25);
+
+        $r8 = r0.<com.newsblur.service.NBSyncService: com.newsblur.database.BlurDatabaseHelper dbHelper>;
+
+        virtualinvoke $r8.<com.newsblur.database.BlurDatabaseHelper: void setFeedsFolders(java.util.List,java.util.List,java.util.List,java.util.List)>(r4, r3, r5, r6);
+
+        $l3 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+     label62:
+        $l2 = $l3 - $l2;
+
+     label63:
+        <com.newsblur.service.NBSyncService: long lastFFWriteMillis> = $l2;
+
+        $i1 = interfaceinvoke r3.<java.util.List: int size()>();
+
+     label64:
+        $l2 = (long) $i1;
+
+     label65:
+        <com.newsblur.service.NBSyncService: long lastFeedCount> = $l2;
+
+        $r9 = virtualinvoke r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r10 = virtualinvoke $r9.<java.lang.Class: java.lang.String getName()>();
+
+        $r11 = new java.lang.StringBuilder;
+
+        specialinvoke $r11.<java.lang.StringBuilder: void <init>()>();
+
+        $r11 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("got feed list: ");
+
+        $r12 = staticinvoke <com.newsblur.service.NBSyncService: java.lang.String getSpeedInfo()>();
+
+        $r11 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r12);
+
+        $r12 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.newsblur.util.Log: void i(java.lang.String,java.lang.String)>($r10, $r12);
+
+        staticinvoke <com.newsblur.service.UnreadsService: void doMetadata()>();
+
+        $r28 = r0.<com.newsblur.service.NBSyncService: com.newsblur.service.UnreadsService unreadsService>;
+
+        virtualinvoke $r28.<com.newsblur.service.UnreadsService: void start(int)>($i0);
+
+        $r29 = r0.<com.newsblur.service.NBSyncService: com.newsblur.service.CleanupService cleanupService>;
+
+        virtualinvoke $r29.<com.newsblur.service.CleanupService: void start(int)>($i0);
+
+     label66:
+        <com.newsblur.service.NBSyncService: boolean FFSyncRunning> = 0;
+
+        staticinvoke <com.newsblur.activity.NbActivity: void updateAllActivities(int)>(34);
+
+     label67:
+        return;
+
+        catch java.lang.Throwable from label04 to label05 with label24;
+        catch java.lang.Throwable from label06 to label07 with label24;
+        catch java.lang.Throwable from label08 to label09 with label24;
+        catch java.lang.Throwable from label10 to label11 with label24;
+        catch java.lang.Throwable from label12 to label13 with label24;
+        catch java.lang.Throwable from label14 to label16 with label24;
+        catch java.lang.Throwable from label17 to label18 with label24;
+        catch java.lang.Throwable from label19 to label21 with label24;
+        catch java.lang.Throwable from label22 to label23 with label24;
+        catch java.lang.Throwable from label25 to label27 with label24;
+        catch java.lang.Throwable from label28 to label29 with label24;
+        catch java.lang.Throwable from label30 to label31 with label24;
+        catch java.lang.Throwable from label32 to label33 with label24;
+        catch java.lang.Throwable from label34 to label36 with label24;
+        catch java.lang.Throwable from label37 to label39 with label24;
+        catch java.lang.Throwable from label40 to label41 with label24;
+        catch java.lang.Throwable from label42 to label43 with label24;
+        catch java.lang.Throwable from label44 to label46 with label24;
+        catch java.lang.Throwable from label47 to label48 with label24;
+        catch java.lang.Throwable from label49 to label50 with label24;
+        catch java.lang.Throwable from label51 to label53 with label24;
+        catch java.lang.Throwable from label54 to label55 with label24;
+        catch java.lang.Throwable from label56 to label58 with label24;
+        catch java.lang.Throwable from label59 to label60 with label24;
+        catch java.lang.Throwable from label61 to label62 with label24;
+        catch java.lang.Throwable from label63 to label64 with label24;
+        catch java.lang.Throwable from label65 to label66 with label24;
+    }
+    private void syncPendingFeedStories(int)
+    {
+        com.newsblur.service.NBSyncService r0;
+        int $i0, $i2, $i3, $i4;
+        com.newsblur.util.FeedSet r1, $r3;
+        java.lang.Object $r2;
+        boolean $z0;
+        java.lang.Throwable $r4, $r12, $r17, $r18, $r19, $r22, $r23, $r25, $r26, $r27, $r28, $r29;
+        com.newsblur.database.BlurDatabaseHelper $r5;
+        java.util.Set $r6;
+        java.util.Map $r7;
+        java.lang.Class $r8;
+        java.lang.String $r9, $r11;
+        java.lang.StringBuilder $r10;
+        java.lang.Integer $r13;
+        java.util.Date $r14;
+        long $l1;
+        com.newsblur.util.StoryOrder $r15;
+        com.newsblur.util.ReadFilter $r16;
+        com.newsblur.network.APIManager $r20;
+        com.newsblur.network.domain.StoriesResponse $r21;
+        com.newsblur.domain.Story[] $r24;
+
+        r0 := @this: com.newsblur.service.NBSyncService;
+
+        $i0 := @parameter0: int;
+
+        r1 = <com.newsblur.service.NBSyncService: com.newsblur.util.FeedSet PendingFeed>;
+
+        if r1 != null goto label05;
+
+        <com.newsblur.service.NBSyncService: boolean StorySyncRunning> = 0;
+
+        staticinvoke <com.newsblur.activity.NbActivity: void updateAllActivities(int)>(32);
+
+        $r2 = <com.newsblur.service.NBSyncService: java.lang.Object PENDING_FEED_MUTEX>;
+
+        entermonitor $r2;
+
+        goto label01;
+
+     label01:
+        exitmonitor $r2;
+
+     label02:
+        return;
+
+     label03:
+        $r4 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label04:
+        throw $r4;
+
+     label05:
+        $r5 = r0.<com.newsblur.service.NBSyncService: com.newsblur.database.BlurDatabaseHelper dbHelper>;
+
+        staticinvoke <com.newsblur.service.NBSyncService: void prepareReadingSession(com.newsblur.database.BlurDatabaseHelper,com.newsblur.util.FeedSet)>($r5, r1);
+
+        $r3 = <com.newsblur.service.NBSyncService: com.newsblur.util.FeedSet ResetFeed>;
+
+     label06:
+        if $r3 == null goto label08;
+
+     label07:
+        $r6 = <com.newsblur.service.NBSyncService: java.util.Set ExhaustedFeeds>;
+
+        $r3 = <com.newsblur.service.NBSyncService: com.newsblur.util.FeedSet ResetFeed>;
+
+        interfaceinvoke $r6.<java.util.Set: boolean remove(java.lang.Object)>($r3);
+
+        $r7 = <com.newsblur.service.NBSyncService: java.util.Map FeedStoriesSeen>;
+
+        $r3 = <com.newsblur.service.NBSyncService: com.newsblur.util.FeedSet ResetFeed>;
+
+        interfaceinvoke $r7.<java.util.Map: java.lang.Object remove(java.lang.Object)>($r3);
+
+        $r7 = <com.newsblur.service.NBSyncService: java.util.Map FeedPagesSeen>;
+
+        $r3 = <com.newsblur.service.NBSyncService: com.newsblur.util.FeedSet ResetFeed>;
+
+        interfaceinvoke $r7.<java.util.Map: java.lang.Object remove(java.lang.Object)>($r3);
+
+        <com.newsblur.service.NBSyncService: com.newsblur.util.FeedSet ResetFeed> = null;
+
+     label08:
+        <com.newsblur.service.NBSyncService: com.newsblur.util.FeedSet LastFeedSet> = r1;
+
+        $r6 = <com.newsblur.service.NBSyncService: java.util.Set ExhaustedFeeds>;
+
+        $z0 = interfaceinvoke $r6.<java.util.Set: boolean contains(java.lang.Object)>(r1);
+
+     label09:
+        if $z0 == 0 goto label17;
+
+     label10:
+        $r8 = virtualinvoke r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r9 = virtualinvoke $r8.<java.lang.Class: java.lang.String getName()>();
+
+        $r10 = new java.lang.StringBuilder;
+
+        specialinvoke $r10.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("No more stories for feed set: ");
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r1);
+
+        $r11 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.newsblur.util.Log: void i(java.lang.String,java.lang.String)>($r9, $r11);
+
+     label11:
+        <com.newsblur.service.NBSyncService: boolean StorySyncRunning> = 0;
+
+        staticinvoke <com.newsblur.activity.NbActivity: void updateAllActivities(int)>(32);
+
+        $r2 = <com.newsblur.service.NBSyncService: java.lang.Object PENDING_FEED_MUTEX>;
+
+        entermonitor $r2;
+
+     label12:
+        $r3 = <com.newsblur.service.NBSyncService: com.newsblur.util.FeedSet PendingFeed>;
+
+        $z0 = virtualinvoke r1.<com.newsblur.util.FeedSet: boolean equals(java.lang.Object)>($r3);
+
+        if $z0 == 0 goto label13;
+
+        <com.newsblur.service.NBSyncService: com.newsblur.util.FeedSet PendingFeed> = null;
+
+     label13:
+        exitmonitor $r2;
+
+     label14:
+        return;
+
+     label15:
+        $r12 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label16:
+        throw $r12;
+
+     label17:
+        $r7 = <com.newsblur.service.NBSyncService: java.util.Map FeedPagesSeen>;
+
+        $z0 = interfaceinvoke $r7.<java.util.Map: boolean containsKey(java.lang.Object)>(r1);
+
+     label18:
+        if $z0 != 0 goto label20;
+
+     label19:
+        $r7 = <com.newsblur.service.NBSyncService: java.util.Map FeedPagesSeen>;
+
+        $r13 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(0);
+
+        interfaceinvoke $r7.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>(r1, $r13);
+
+        $r7 = <com.newsblur.service.NBSyncService: java.util.Map FeedStoriesSeen>;
+
+        $r13 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(0);
+
+        interfaceinvoke $r7.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>(r1, $r13);
+
+        $r14 = new java.util.Date;
+
+        specialinvoke $r14.<java.util.Date: void <init>()>();
+
+        $l1 = virtualinvoke $r14.<java.util.Date: long getTime()>();
+
+        r0.<com.newsblur.service.NBSyncService: long workaroundReadStoryTimestamp> = $l1;
+
+        $r14 = new java.util.Date;
+
+        specialinvoke $r14.<java.util.Date: void <init>()>();
+
+        $l1 = virtualinvoke $r14.<java.util.Date: long getTime()>();
+
+        r0.<com.newsblur.service.NBSyncService: long workaroundGloblaSharedStoryTimestamp> = $l1;
+
+     label20:
+        $r7 = <com.newsblur.service.NBSyncService: java.util.Map FeedPagesSeen>;
+
+        $r2 = interfaceinvoke $r7.<java.util.Map: java.lang.Object get(java.lang.Object)>(r1);
+
+        $r13 = (java.lang.Integer) $r2;
+
+        $i2 = virtualinvoke $r13.<java.lang.Integer: int intValue()>();
+
+     label21:
+        $r7 = <com.newsblur.service.NBSyncService: java.util.Map FeedStoriesSeen>;
+
+        $r2 = interfaceinvoke $r7.<java.util.Map: java.lang.Object get(java.lang.Object)>(r1);
+
+        $r13 = (java.lang.Integer) $r2;
+
+        $i3 = virtualinvoke $r13.<java.lang.Integer: int intValue()>();
+
+     label22:
+        $r15 = staticinvoke <com.newsblur.util.PrefsUtils: com.newsblur.util.StoryOrder getStoryOrder(android.content.Context,com.newsblur.util.FeedSet)>(r0, r1);
+
+        $r16 = staticinvoke <com.newsblur.util.PrefsUtils: com.newsblur.util.ReadFilter getReadFilter(android.content.Context,com.newsblur.util.FeedSet)>(r0, r1);
+
+        <com.newsblur.service.NBSyncService: boolean StorySyncRunning> = 1;
+
+        staticinvoke <com.newsblur.activity.NbActivity: void updateAllActivities(int)>(32);
+
+     label23:
+        $r13 = <com.newsblur.service.NBSyncService: java.lang.Integer PendingFeedTarget>;
+
+        $i4 = virtualinvoke $r13.<java.lang.Integer: int intValue()>();
+
+     label24:
+        if $i3 >= $i4 goto label73;
+
+     label25:
+        $z0 = virtualinvoke r0.<com.newsblur.service.NBSyncService: boolean stopSync()>();
+
+     label26:
+        if $z0 == 0 goto label31;
+
+        <com.newsblur.service.NBSyncService: boolean StorySyncRunning> = 0;
+
+        staticinvoke <com.newsblur.activity.NbActivity: void updateAllActivities(int)>(32);
+
+        $r2 = <com.newsblur.service.NBSyncService: java.lang.Object PENDING_FEED_MUTEX>;
+
+        entermonitor $r2;
+
+        goto label27;
+
+     label27:
+        exitmonitor $r2;
+
+     label28:
+        return;
+
+     label29:
+        $r17 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label30:
+        throw $r17;
+
+     label31:
+        $z0 = <com.newsblur.service.NBSyncService: boolean FlushRecounts>;
+
+     label32:
+        if $z0 == 0 goto label37;
+
+        <com.newsblur.service.NBSyncService: boolean StorySyncRunning> = 0;
+
+        staticinvoke <com.newsblur.activity.NbActivity: void updateAllActivities(int)>(32);
+
+        $r2 = <com.newsblur.service.NBSyncService: java.lang.Object PENDING_FEED_MUTEX>;
+
+        entermonitor $r2;
+
+        goto label33;
+
+     label33:
+        exitmonitor $r2;
+
+     label34:
+        return;
+
+     label35:
+        $r18 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label36:
+        throw $r18;
+
+     label37:
+        $r3 = <com.newsblur.service.NBSyncService: com.newsblur.util.FeedSet PendingFeed>;
+
+        $z0 = virtualinvoke r1.<com.newsblur.util.FeedSet: boolean equals(java.lang.Object)>($r3);
+
+     label38:
+        if $z0 != 0 goto label43;
+
+        <com.newsblur.service.NBSyncService: boolean StorySyncRunning> = 0;
+
+        staticinvoke <com.newsblur.activity.NbActivity: void updateAllActivities(int)>(32);
+
+        $r2 = <com.newsblur.service.NBSyncService: java.lang.Object PENDING_FEED_MUTEX>;
+
+        entermonitor $r2;
+
+        goto label39;
+
+     label39:
+        exitmonitor $r2;
+
+     label40:
+        return;
+
+     label41:
+        $r19 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label42:
+        throw $r19;
+
+     label43:
+        $i2 = $i2 + 1;
+
+     label44:
+        $r20 = r0.<com.newsblur.service.NBSyncService: com.newsblur.network.APIManager apiManager>;
+
+        $r21 = virtualinvoke $r20.<com.newsblur.network.APIManager: com.newsblur.network.domain.StoriesResponse getStories(com.newsblur.util.FeedSet,int,com.newsblur.util.StoryOrder,com.newsblur.util.ReadFilter)>(r1, $i2, $r15, $r16);
+
+        $z0 = specialinvoke r0.<com.newsblur.service.NBSyncService: boolean isStoryResponseGood(com.newsblur.network.domain.StoriesResponse)>($r21);
+
+     label45:
+        if $z0 != 0 goto label50;
+
+        <com.newsblur.service.NBSyncService: boolean StorySyncRunning> = 0;
+
+        staticinvoke <com.newsblur.activity.NbActivity: void updateAllActivities(int)>(32);
+
+        $r2 = <com.newsblur.service.NBSyncService: java.lang.Object PENDING_FEED_MUTEX>;
+
+        entermonitor $r2;
+
+        goto label46;
+
+     label46:
+        exitmonitor $r2;
+
+     label47:
+        return;
+
+     label48:
+        $r22 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label49:
+        throw $r22;
+
+     label50:
+        $r3 = <com.newsblur.service.NBSyncService: com.newsblur.util.FeedSet PendingFeed>;
+
+        $z0 = virtualinvoke r1.<com.newsblur.util.FeedSet: boolean equals(java.lang.Object)>($r3);
+
+     label51:
+        if $z0 != 0 goto label56;
+
+        <com.newsblur.service.NBSyncService: boolean StorySyncRunning> = 0;
+
+        staticinvoke <com.newsblur.activity.NbActivity: void updateAllActivities(int)>(32);
+
+        $r2 = <com.newsblur.service.NBSyncService: java.lang.Object PENDING_FEED_MUTEX>;
+
+        entermonitor $r2;
+
+        goto label52;
+
+     label52:
+        exitmonitor $r2;
+
+     label53:
+        return;
+
+     label54:
+        $r23 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label55:
+        throw $r23;
+
+     label56:
+        specialinvoke r0.<com.newsblur.service.NBSyncService: void insertStories(com.newsblur.network.domain.StoriesResponse,com.newsblur.util.FeedSet)>($r21, r1);
+
+        specialinvoke r0.<com.newsblur.service.NBSyncService: void finishActions()>();
+
+        staticinvoke <com.newsblur.activity.NbActivity: void updateAllActivities(int)>(36);
+
+        virtualinvoke r0.<com.newsblur.service.NBSyncService: void prefetchOriginalText(com.newsblur.network.domain.StoriesResponse,int)>($r21, $i0);
+
+        $r7 = <com.newsblur.service.NBSyncService: java.util.Map FeedPagesSeen>;
+
+        $r13 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i2);
+
+        interfaceinvoke $r7.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>(r1, $r13);
+
+        $r24 = $r21.<com.newsblur.network.domain.StoriesResponse: com.newsblur.domain.Story[] stories>;
+
+        $i4 = lengthof $r24;
+
+     label57:
+        $i3 = $i3 + $i4;
+
+     label58:
+        $r7 = <com.newsblur.service.NBSyncService: java.util.Map FeedStoriesSeen>;
+
+        $r13 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i3);
+
+        interfaceinvoke $r7.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>(r1, $r13);
+
+        $r24 = $r21.<com.newsblur.network.domain.StoriesResponse: com.newsblur.domain.Story[] stories>;
+
+        $i4 = lengthof $r24;
+
+     label59:
+        if $i4 != 0 goto label67;
+
+     label60:
+        $r6 = <com.newsblur.service.NBSyncService: java.util.Set ExhaustedFeeds>;
+
+        interfaceinvoke $r6.<java.util.Set: boolean add(java.lang.Object)>(r1);
+
+     label61:
+        <com.newsblur.service.NBSyncService: boolean StorySyncRunning> = 0;
+
+        staticinvoke <com.newsblur.activity.NbActivity: void updateAllActivities(int)>(32);
+
+        $r2 = <com.newsblur.service.NBSyncService: java.lang.Object PENDING_FEED_MUTEX>;
+
+        entermonitor $r2;
+
+     label62:
+        $r3 = <com.newsblur.service.NBSyncService: com.newsblur.util.FeedSet PendingFeed>;
+
+        $z0 = virtualinvoke r1.<com.newsblur.util.FeedSet: boolean equals(java.lang.Object)>($r3);
+
+        if $z0 == 0 goto label63;
+
+        <com.newsblur.service.NBSyncService: com.newsblur.util.FeedSet PendingFeed> = null;
+
+     label63:
+        exitmonitor $r2;
+
+     label64:
+        return;
+
+     label65:
+        $r25 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label66:
+        throw $r25;
+
+     label67:
+        $r5 = r0.<com.newsblur.service.NBSyncService: com.newsblur.database.BlurDatabaseHelper dbHelper>;
+
+        $i4 = virtualinvoke $r5.<com.newsblur.database.BlurDatabaseHelper: int getUntriedActionCount()>();
+
+     label68:
+        if $i4 <= 0 goto label23;
+
+        <com.newsblur.service.NBSyncService: boolean StorySyncRunning> = 0;
+
+        staticinvoke <com.newsblur.activity.NbActivity: void updateAllActivities(int)>(32);
+
+        $r2 = <com.newsblur.service.NBSyncService: java.lang.Object PENDING_FEED_MUTEX>;
+
+        entermonitor $r2;
+
+        goto label69;
+
+     label69:
+        exitmonitor $r2;
+
+     label70:
+        return;
+
+     label71:
+        $r26 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label72:
+        throw $r26;
+
+     label73:
+        <com.newsblur.service.NBSyncService: boolean StorySyncRunning> = 0;
+
+        staticinvoke <com.newsblur.activity.NbActivity: void updateAllActivities(int)>(32);
+
+        $r2 = <com.newsblur.service.NBSyncService: java.lang.Object PENDING_FEED_MUTEX>;
+
+        entermonitor $r2;
+
+     label74:
+        $r3 = <com.newsblur.service.NBSyncService: com.newsblur.util.FeedSet PendingFeed>;
+
+        $z0 = virtualinvoke r1.<com.newsblur.util.FeedSet: boolean equals(java.lang.Object)>($r3);
+
+        if $z0 == 0 goto label75;
+
+        <com.newsblur.service.NBSyncService: com.newsblur.util.FeedSet PendingFeed> = null;
+
+     label75:
+        exitmonitor $r2;
+
+     label76:
+        return;
+
+     label77:
+        $r27 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label78:
+        throw $r27;
+
+     label79:
+        $r28 := @caughtexception;
+
+        <com.newsblur.service.NBSyncService: boolean StorySyncRunning> = 0;
+
+        staticinvoke <com.newsblur.activity.NbActivity: void updateAllActivities(int)>(32);
+
+        $r2 = <com.newsblur.service.NBSyncService: java.lang.Object PENDING_FEED_MUTEX>;
+
+        entermonitor $r2;
+
+        goto label80;
+
+     label80:
+        exitmonitor $r2;
+
+     label81:
+        throw $r28;
+
+     label82:
+        $r29 := @caughtexception;
+
+     label83:
+        exitmonitor $r2;
+
+     label84:
+        throw $r29;
+
+        catch java.lang.Throwable from label01 to label02 with label03;
+        catch java.lang.Throwable from label03 to label04 with label03;
+        catch java.lang.Throwable from label05 to label06 with label79;
+        catch java.lang.Throwable from label07 to label09 with label79;
+        catch java.lang.Throwable from label10 to label11 with label79;
+        catch java.lang.Throwable from label12 to label14 with label15;
+        catch java.lang.Throwable from label15 to label16 with label15;
+        catch java.lang.Throwable from label17 to label18 with label79;
+        catch java.lang.Throwable from label19 to label21 with label79;
+        catch java.lang.Throwable from label21 to label22 with label79;
+        catch java.lang.Throwable from label22 to label24 with label79;
+        catch java.lang.Throwable from label25 to label26 with label79;
+        catch java.lang.Throwable from label27 to label28 with label29;
+        catch java.lang.Throwable from label29 to label30 with label29;
+        catch java.lang.Throwable from label31 to label32 with label79;
+        catch java.lang.Throwable from label33 to label34 with label35;
+        catch java.lang.Throwable from label35 to label36 with label35;
+        catch java.lang.Throwable from label37 to label38 with label79;
+        catch java.lang.Throwable from label39 to label40 with label41;
+        catch java.lang.Throwable from label41 to label42 with label41;
+        catch java.lang.Throwable from label44 to label45 with label79;
+        catch java.lang.Throwable from label46 to label47 with label48;
+        catch java.lang.Throwable from label48 to label49 with label48;
+        catch java.lang.Throwable from label50 to label51 with label79;
+        catch java.lang.Throwable from label52 to label53 with label54;
+        catch java.lang.Throwable from label54 to label55 with label54;
+        catch java.lang.Throwable from label56 to label57 with label79;
+        catch java.lang.Throwable from label58 to label59 with label79;
+        catch java.lang.Throwable from label60 to label61 with label79;
+        catch java.lang.Throwable from label62 to label64 with label65;
+        catch java.lang.Throwable from label65 to label66 with label65;
+        catch java.lang.Throwable from label67 to label68 with label79;
+        catch java.lang.Throwable from label69 to label70 with label71;
+        catch java.lang.Throwable from label71 to label72 with label71;
+        catch java.lang.Throwable from label74 to label76 with label77;
+        catch java.lang.Throwable from label77 to label78 with label77;
+        catch java.lang.Throwable from label80 to label81 with label82;
+        catch java.lang.Throwable from label83 to label84 with label82;
+    }
+    void decrementRunningChild(int)
+    {
+        com.newsblur.service.NBSyncService r0;
+        int $i0, $i1;
+        java.lang.Object $r1;
+        android.os.PowerManager$WakeLock $r2;
+        boolean $z0;
+        java.lang.Throwable $r3;
+
+        r0 := @this: com.newsblur.service.NBSyncService;
+
+        $i0 := @parameter0: int;
+
+        $r1 = <com.newsblur.service.NBSyncService: java.lang.Object WAKELOCK_MUTEX>;
+
+        entermonitor $r1;
+
+     label1:
+        $r2 = r0.<com.newsblur.service.NBSyncService: android.os.PowerManager$WakeLock wl>;
+
+        if $r2 != null goto label3;
+
+        exitmonitor $r1;
+
+     label2:
+        return;
+
+     label3:
+        $r2 = r0.<com.newsblur.service.NBSyncService: android.os.PowerManager$WakeLock wl>;
+
+        $z0 = virtualinvoke $r2.<android.os.PowerManager$WakeLock: boolean isHeld()>();
+
+        if $z0 == 0 goto label4;
+
+        $r2 = r0.<com.newsblur.service.NBSyncService: android.os.PowerManager$WakeLock wl>;
+
+        virtualinvoke $r2.<android.os.PowerManager$WakeLock: void release()>();
+
+     label4:
+        $r2 = r0.<com.newsblur.service.NBSyncService: android.os.PowerManager$WakeLock wl>;
+
+        $z0 = virtualinvoke $r2.<android.os.PowerManager$WakeLock: boolean isHeld()>();
+
+        if $z0 != 0 goto label6;
+
+        $i1 = staticinvoke <com.newsblur.activity.NbActivity: int getActiveActivityCount()>();
+
+        if $i1 >= 1 goto label5;
+
+        virtualinvoke r0.<com.newsblur.service.NBSyncService: void stopSelf(int)>($i0);
+
+     label5:
+        r0.<com.newsblur.service.NBSyncService: int lastStartIdCompleted> = $i0;
+
+     label6:
+        exitmonitor $r1;
+
+     label7:
+        return;
+
+     label8:
+        $r3 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label9:
+        throw $r3;
+
+        catch java.lang.Throwable from label1 to label2 with label8;
+        catch java.lang.Throwable from label3 to label7 with label8;
+        catch java.lang.Throwable from label8 to label9 with label8;
+    }
+    void incrementRunningChild()
+    {
+        com.newsblur.service.NBSyncService r0;
+        java.lang.Object $r1;
+        android.os.PowerManager$WakeLock $r2;
+        java.lang.Throwable $r3;
+
+        r0 := @this: com.newsblur.service.NBSyncService;
+
+        $r1 = <com.newsblur.service.NBSyncService: java.lang.Object WAKELOCK_MUTEX>;
+
+        entermonitor $r1;
+
+     label1:
+        $r2 = r0.<com.newsblur.service.NBSyncService: android.os.PowerManager$WakeLock wl>;
+
+        virtualinvoke $r2.<android.os.PowerManager$WakeLock: void acquire()>();
+
+        exitmonitor $r1;
+
+     label2:
+        return;
+
+     label3:
+        $r3 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label4:
+        throw $r3;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+    void insertStories(com.newsblur.network.domain.StoriesResponse)
+    {
+        com.newsblur.service.NBSyncService r0;
+        com.newsblur.network.domain.StoriesResponse $r1;
+        java.lang.Class $r2;
+        java.lang.String $r3, $r6;
+        java.lang.StringBuilder $r4;
+        com.newsblur.domain.Story[] $r5;
+        int $i0;
+        com.newsblur.database.BlurDatabaseHelper $r7;
+
+        r0 := @this: com.newsblur.service.NBSyncService;
+
+        $r1 := @parameter0: com.newsblur.network.domain.StoriesResponse;
+
+        $r2 = class "Lcom/newsblur/service/NBSyncService;";
+
+        $r3 = virtualinvoke $r2.<java.lang.Class: java.lang.String getName()>();
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("got stories from sub sync: ");
+
+        $r5 = $r1.<com.newsblur.network.domain.StoriesResponse: com.newsblur.domain.Story[] stories>;
+
+        $i0 = lengthof $r5;
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r6 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.newsblur.util.Log: void d(java.lang.String,java.lang.String)>($r3, $r6);
+
+        $r7 = r0.<com.newsblur.service.NBSyncService: com.newsblur.database.BlurDatabaseHelper dbHelper>;
+
+        virtualinvoke $r7.<com.newsblur.database.BlurDatabaseHelper: void insertStories(com.newsblur.network.domain.StoriesResponse,boolean)>($r1, 0);
+
+        return;
+    }
+    public android.os.IBinder onBind(android.content.Intent)
+    {
+        com.newsblur.service.NBSyncService r0;
+        android.content.Intent $r1;
+
+        r0 := @this: com.newsblur.service.NBSyncService;
+
+        $r1 := @parameter0: android.content.Intent;
+
+        return null;
+    }
+    public void onCreate()
+    {
+        com.newsblur.service.NBSyncService r0;
+        android.content.Context $r1;
+        java.lang.Object $r2;
+        android.os.PowerManager r3;
+        java.lang.Class $r4;
+        java.lang.String $r5;
+        android.os.PowerManager$WakeLock $r6;
+        java.util.concurrent.ExecutorService $r7;
+
+        r0 := @this: com.newsblur.service.NBSyncService;
+
+        specialinvoke r0.<android.app.Service: void onCreate()>();
+
+        <com.newsblur.service.NBSyncService: boolean HaltNow> = 0;
+
+        $r1 = virtualinvoke r0.<com.newsblur.service.NBSyncService: android.content.Context getApplicationContext()>();
+
+        $r2 = virtualinvoke $r1.<android.content.Context: java.lang.Object getSystemService(java.lang.String)>("power");
+
+        r3 = (android.os.PowerManager) $r2;
+
+        $r4 = virtualinvoke r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r5 = virtualinvoke $r4.<java.lang.Class: java.lang.String getSimpleName()>();
+
+        $r6 = virtualinvoke r3.<android.os.PowerManager: android.os.PowerManager$WakeLock newWakeLock(int,java.lang.String)>(1, $r5);
+
+        r0.<com.newsblur.service.NBSyncService: android.os.PowerManager$WakeLock wl> = $r6;
+
+        $r6 = r0.<com.newsblur.service.NBSyncService: android.os.PowerManager$WakeLock wl>;
+
+        virtualinvoke $r6.<android.os.PowerManager$WakeLock: void setReferenceCounted(boolean)>(1);
+
+        $r7 = staticinvoke <java.util.concurrent.Executors: java.util.concurrent.ExecutorService newFixedThreadPool(int)>(1);
+
+        r0.<com.newsblur.service.NBSyncService: java.util.concurrent.ExecutorService primaryExecutor> = $r7;
+
+        return;
+    }
+    public void onDestroy()
+    {
+        com.newsblur.service.NBSyncService r0;
+        java.lang.InterruptedException r1;
+        java.lang.Exception r2;
+        com.newsblur.service.CleanupService $r3;
+        com.newsblur.service.UnreadsService $r4;
+        com.newsblur.service.OriginalTextService $r5;
+        com.newsblur.service.ImagePrefetchService $r6;
+        java.util.concurrent.ExecutorService $r7;
+        java.util.concurrent.TimeUnit $r8;
+        com.newsblur.database.BlurDatabaseHelper $r9;
+        java.lang.Thread $r10;
+        java.lang.Class $r11;
+        java.lang.String $r12;
+
+        r0 := @this: com.newsblur.service.NBSyncService;
+
+        <com.newsblur.service.NBSyncService: boolean HaltNow> = 1;
+
+     label01:
+        $r3 = r0.<com.newsblur.service.NBSyncService: com.newsblur.service.CleanupService cleanupService>;
+
+     label02:
+        if $r3 == null goto label04;
+
+     label03:
+        $r3 = r0.<com.newsblur.service.NBSyncService: com.newsblur.service.CleanupService cleanupService>;
+
+        virtualinvoke $r3.<com.newsblur.service.CleanupService: void shutdown()>();
+
+     label04:
+        $r4 = r0.<com.newsblur.service.NBSyncService: com.newsblur.service.UnreadsService unreadsService>;
+
+     label05:
+        if $r4 == null goto label07;
+
+     label06:
+        $r4 = r0.<com.newsblur.service.NBSyncService: com.newsblur.service.UnreadsService unreadsService>;
+
+        virtualinvoke $r4.<com.newsblur.service.UnreadsService: void shutdown()>();
+
+     label07:
+        $r5 = r0.<com.newsblur.service.NBSyncService: com.newsblur.service.OriginalTextService originalTextService>;
+
+     label08:
+        if $r5 == null goto label10;
+
+     label09:
+        $r5 = r0.<com.newsblur.service.NBSyncService: com.newsblur.service.OriginalTextService originalTextService>;
+
+        virtualinvoke $r5.<com.newsblur.service.OriginalTextService: void shutdown()>();
+
+     label10:
+        $r6 = r0.<com.newsblur.service.NBSyncService: com.newsblur.service.ImagePrefetchService imagePrefetchService>;
+
+     label11:
+        if $r6 == null goto label13;
+
+     label12:
+        $r6 = r0.<com.newsblur.service.NBSyncService: com.newsblur.service.ImagePrefetchService imagePrefetchService>;
+
+        virtualinvoke $r6.<com.newsblur.service.ImagePrefetchService: void shutdown()>();
+
+     label13:
+        $r7 = r0.<com.newsblur.service.NBSyncService: java.util.concurrent.ExecutorService primaryExecutor>;
+
+     label14:
+        if $r7 == null goto label19;
+
+     label15:
+        $r7 = r0.<com.newsblur.service.NBSyncService: java.util.concurrent.ExecutorService primaryExecutor>;
+
+        interfaceinvoke $r7.<java.util.concurrent.ExecutorService: void shutdown()>();
+
+     label16:
+        $r7 = r0.<com.newsblur.service.NBSyncService: java.util.concurrent.ExecutorService primaryExecutor>;
+
+     label17:
+        $r8 = <java.util.concurrent.TimeUnit: java.util.concurrent.TimeUnit SECONDS>;
+
+     label18:
+        interfaceinvoke $r7.<java.util.concurrent.ExecutorService: boolean awaitTermination(long,java.util.concurrent.TimeUnit)>(60L, $r8);
+
+     label19:
+        $r9 = r0.<com.newsblur.service.NBSyncService: com.newsblur.database.BlurDatabaseHelper dbHelper>;
+
+     label20:
+        if $r9 == null goto label22;
+
+     label21:
+        $r9 = r0.<com.newsblur.service.NBSyncService: com.newsblur.database.BlurDatabaseHelper dbHelper>;
+
+        virtualinvoke $r9.<com.newsblur.database.BlurDatabaseHelper: void close()>();
+
+     label22:
+        specialinvoke r0.<android.app.Service: void onDestroy()>();
+
+     label23:
+        return;
+
+     label24:
+        r1 := @caughtexception;
+
+     label25:
+        $r7 = r0.<com.newsblur.service.NBSyncService: java.util.concurrent.ExecutorService primaryExecutor>;
+
+        interfaceinvoke $r7.<java.util.concurrent.ExecutorService: java.util.List shutdownNow()>();
+
+        $r10 = staticinvoke <java.lang.Thread: java.lang.Thread currentThread()>();
+
+        virtualinvoke $r10.<java.lang.Thread: void interrupt()>();
+
+     label26:
+        goto label19;
+
+     label27:
+        r2 := @caughtexception;
+
+        $r11 = virtualinvoke r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r12 = virtualinvoke $r11.<java.lang.Class: java.lang.String getName()>();
+
+        staticinvoke <com.newsblur.util.Log: void e(java.lang.String,java.lang.String,java.lang.Throwable)>($r12, "unclean shutdown", r2);
+
+        return;
+
+        catch java.lang.Exception from label01 to label02 with label27;
+        catch java.lang.Exception from label03 to label05 with label27;
+        catch java.lang.Exception from label06 to label08 with label27;
+        catch java.lang.Exception from label09 to label11 with label27;
+        catch java.lang.Exception from label12 to label14 with label27;
+        catch java.lang.Exception from label15 to label16 with label27;
+        catch java.lang.InterruptedException from label18 to label19 with label24;
+        catch java.lang.Exception from label16 to label17 with label27;
+        catch java.lang.Exception from label18 to label19 with label27;
+        catch java.lang.Exception from label19 to label20 with label27;
+        catch java.lang.Exception from label21 to label23 with label27;
+        catch java.lang.Exception from label25 to label26 with label27;
+    }
+    public int onStartCommand(android.content.Intent, int, int)
+    {
+        com.newsblur.service.NBSyncService r0;
+        android.content.Intent $r1;
+        int $i0, $i1;
+        com.newsblur.service.NBSyncService$1 r2;
+        boolean $z0;
+        java.util.concurrent.ExecutorService $r3;
+        java.lang.Class $r4;
+        java.lang.String $r5;
+
+        r0 := @this: com.newsblur.service.NBSyncService;
+
+        $r1 := @parameter0: android.content.Intent;
+
+        $i0 := @parameter1: int;
+
+        $i1 := @parameter2: int;
+
+        $i0 = staticinvoke <com.newsblur.activity.NbActivity: int getActiveActivityCount()>();
+
+        if $i0 > 0 goto label1;
+
+        $z0 = staticinvoke <com.newsblur.util.PrefsUtils: boolean isBackgroundNeeded(android.content.Context)>(r0);
+
+        if $z0 == 0 goto label3;
+
+     label1:
+        r2 = new com.newsblur.service.NBSyncService$1;
+
+        specialinvoke r2.<com.newsblur.service.NBSyncService$1: void <init>(com.newsblur.service.NBSyncService,int)>(r0, $i1);
+
+        $r3 = r0.<com.newsblur.service.NBSyncService: java.util.concurrent.ExecutorService primaryExecutor>;
+
+        interfaceinvoke $r3.<java.util.concurrent.ExecutorService: void execute(java.lang.Runnable)>(r2);
+
+     label2:
+        return 2;
+
+     label3:
+        $r4 = virtualinvoke r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r5 = virtualinvoke $r4.<java.lang.Class: java.lang.String getName()>();
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>($r5, "Skipping sync: app not active and background sync not enabled.");
+
+        virtualinvoke r0.<com.newsblur.service.NBSyncService: void stopSelf(int)>($i1);
+
+        goto label2;
+    }
+    public void onTrimMemory(int)
+    {
+        com.newsblur.service.NBSyncService r0;
+        int $i0;
+
+        r0 := @this: com.newsblur.service.NBSyncService;
+
+        $i0 := @parameter0: int;
+
+        if $i0 <= 20 goto label1;
+
+        <com.newsblur.service.NBSyncService: boolean isMemoryLow> = 1;
+
+     label1:
+        $i0 = r0.<com.newsblur.service.NBSyncService: int lastStartIdCompleted>;
+
+        if $i0 == -1 goto label2;
+
+        $i0 = staticinvoke <com.newsblur.activity.NbActivity: int getActiveActivityCount()>();
+
+        if $i0 >= 1 goto label2;
+
+        $i0 = r0.<com.newsblur.service.NBSyncService: int lastStartIdCompleted>;
+
+        virtualinvoke r0.<com.newsblur.service.NBSyncService: void stopSelf(int)>($i0);
+
+     label2:
+        return;
+    }
+    void prefetchImages(com.newsblur.network.domain.StoriesResponse, int)
+    {
+        com.newsblur.service.NBSyncService r0;
+        com.newsblur.network.domain.StoriesResponse $r1;
+        int $i0, $i1, $i2, $i3, $i4;
+        com.newsblur.domain.Story r2;
+        java.lang.String r3;
+        com.newsblur.domain.Story[] $r4;
+        com.newsblur.service.ImagePrefetchService $r5;
+        boolean $z0;
+        java.lang.String[] $r6;
+
+        r0 := @this: com.newsblur.service.NBSyncService;
+
+        $r1 := @parameter0: com.newsblur.network.domain.StoriesResponse;
+
+        $i0 := @parameter1: int;
+
+        $r4 = $r1.<com.newsblur.network.domain.StoriesResponse: com.newsblur.domain.Story[] stories>;
+
+        $i1 = lengthof $r4;
+
+        $i3 = 0;
+
+     label1:
+        if $i3 >= $i1 goto label6;
+
+        r2 = $r4[$i3];
+
+        $z0 = r2.<com.newsblur.domain.Story: boolean read>;
+
+        if $z0 == 0 goto label3;
+
+     label2:
+        $i3 = $i3 + 1;
+
+        goto label1;
+
+     label3:
+        $r6 = r2.<com.newsblur.domain.Story: java.lang.String[] imageUrls>;
+
+        if $r6 == null goto label5;
+
+        $r6 = r2.<com.newsblur.domain.Story: java.lang.String[] imageUrls>;
+
+        $i2 = lengthof $r6;
+
+        $i4 = 0;
+
+     label4:
+        if $i4 >= $i2 goto label5;
+
+        r3 = $r6[$i4];
+
+        $r5 = r0.<com.newsblur.service.NBSyncService: com.newsblur.service.ImagePrefetchService imagePrefetchService>;
+
+        virtualinvoke $r5.<com.newsblur.service.ImagePrefetchService: void addUrl(java.lang.String)>(r3);
+
+        $i4 = $i4 + 1;
+
+        goto label4;
+
+     label5:
+        r3 = r2.<com.newsblur.domain.Story: java.lang.String thumbnailUrl>;
+
+        if r3 == null goto label2;
+
+        $r5 = r0.<com.newsblur.service.NBSyncService: com.newsblur.service.ImagePrefetchService imagePrefetchService>;
+
+        r3 = r2.<com.newsblur.domain.Story: java.lang.String thumbnailUrl>;
+
+        virtualinvoke $r5.<com.newsblur.service.ImagePrefetchService: void addThumbnailUrl(java.lang.String)>(r3);
+
+        goto label2;
+
+     label6:
+        $r5 = r0.<com.newsblur.service.NBSyncService: com.newsblur.service.ImagePrefetchService imagePrefetchService>;
+
+        virtualinvoke $r5.<com.newsblur.service.ImagePrefetchService: void startConditional(int)>($i0);
+
+        return;
+    }
+    void prefetchOriginalText(com.newsblur.network.domain.StoriesResponse, int)
+    {
+        com.newsblur.service.NBSyncService r0;
+        com.newsblur.network.domain.StoriesResponse $r1;
+        int $i0, $i1, $i2;
+        com.newsblur.domain.Story r2;
+        com.newsblur.domain.Story[] $r3;
+        java.lang.String $r4;
+        boolean $z0;
+        com.newsblur.util.DefaultFeedView $r5, $r6;
+        com.newsblur.database.BlurDatabaseHelper $r7;
+        com.newsblur.service.OriginalTextService $r8;
+
+        r0 := @this: com.newsblur.service.NBSyncService;
+
+        $r1 := @parameter0: com.newsblur.network.domain.StoriesResponse;
+
+        $i0 := @parameter1: int;
+
+        $r3 = $r1.<com.newsblur.network.domain.StoriesResponse: com.newsblur.domain.Story[] stories>;
+
+        $i1 = lengthof $r3;
+
+        $i2 = 0;
+
+     label1:
+        if $i2 >= $i1 goto label4;
+
+        r2 = $r3[$i2];
+
+        $z0 = r2.<com.newsblur.domain.Story: boolean read>;
+
+        if $z0 == 0 goto label3;
+
+     label2:
+        $i2 = $i2 + 1;
+
+        goto label1;
+
+     label3:
+        $r4 = r2.<com.newsblur.domain.Story: java.lang.String feedId>;
+
+        $r5 = staticinvoke <com.newsblur.util.PrefsUtils: com.newsblur.util.DefaultFeedView getDefaultViewModeForFeed(android.content.Context,java.lang.String)>(r0, $r4);
+
+        $r6 = <com.newsblur.util.DefaultFeedView: com.newsblur.util.DefaultFeedView TEXT>;
+
+        if $r5 != $r6 goto label2;
+
+        $r7 = r0.<com.newsblur.service.NBSyncService: com.newsblur.database.BlurDatabaseHelper dbHelper>;
+
+        $r4 = r2.<com.newsblur.domain.Story: java.lang.String storyHash>;
+
+        $r4 = virtualinvoke $r7.<com.newsblur.database.BlurDatabaseHelper: java.lang.String getStoryText(java.lang.String)>($r4);
+
+        if $r4 != null goto label2;
+
+        $r4 = r2.<com.newsblur.domain.Story: java.lang.String storyHash>;
+
+        staticinvoke <com.newsblur.service.OriginalTextService: void addHash(java.lang.String)>($r4);
+
+        goto label2;
+
+     label4:
+        $r8 = r0.<com.newsblur.service.NBSyncService: com.newsblur.service.OriginalTextService originalTextService>;
+
+        virtualinvoke $r8.<com.newsblur.service.OriginalTextService: void startConditional(int)>($i0);
+
+        return;
+    }
+    void pushNotifications()
+    {
+        com.newsblur.service.NBSyncService r0;
+        boolean $z0;
+        java.util.List $r1;
+        int $i0;
+        com.newsblur.util.FeedSet $r2;
+        com.newsblur.database.BlurDatabaseHelper $r3;
+        android.database.Cursor $r4, $r5;
+        com.newsblur.util.FileCache $r6;
+
+        r0 := @this: com.newsblur.service.NBSyncService;
+
+        $z0 = staticinvoke <com.newsblur.util.PrefsUtils: boolean isEnableNotifications(android.content.Context)>(r0);
+
+        if $z0 != 0 goto label1;
+
+        return;
+
+     label1:
+        $r1 = <com.newsblur.service.UnreadsService: java.util.List StoryHashQueue>;
+
+        $i0 = interfaceinvoke $r1.<java.util.List: int size()>();
+
+        if $i0 > 0 goto label2;
+
+        $r2 = <com.newsblur.service.NBSyncService: com.newsblur.util.FeedSet PendingFeed>;
+
+        if $r2 != null goto label2;
+
+        $r3 = r0.<com.newsblur.service.NBSyncService: com.newsblur.database.BlurDatabaseHelper dbHelper>;
+
+        $r4 = virtualinvoke $r3.<com.newsblur.database.BlurDatabaseHelper: android.database.Cursor getNotifyFocusStoriesCursor()>();
+
+        $r3 = r0.<com.newsblur.service.NBSyncService: com.newsblur.database.BlurDatabaseHelper dbHelper>;
+
+        $r5 = virtualinvoke $r3.<com.newsblur.database.BlurDatabaseHelper: android.database.Cursor getNotifyUnreadStoriesCursor()>();
+
+        $r6 = r0.<com.newsblur.service.NBSyncService: com.newsblur.util.FileCache iconCache>;
+
+        staticinvoke <com.newsblur.util.NotificationUtils: void notifyStories(android.database.Cursor,android.database.Cursor,android.content.Context,com.newsblur.util.FileCache)>($r4, $r5, r0, $r6);
+
+        staticinvoke <com.newsblur.database.BlurDatabaseHelper: void closeQuietly(android.database.Cursor)>($r4);
+
+        staticinvoke <com.newsblur.database.BlurDatabaseHelper: void closeQuietly(android.database.Cursor)>($r5);
+
+     label2:
+        return;
+    }
+    boolean stopSync()
+    {
+        com.newsblur.service.NBSyncService r0;
+        boolean $z0;
+
+        r0 := @this: com.newsblur.service.NBSyncService;
+
+        $z0 = staticinvoke <com.newsblur.service.NBSyncService: boolean stopSync(android.content.Context)>(r0);
+
+        return $z0;
+    }

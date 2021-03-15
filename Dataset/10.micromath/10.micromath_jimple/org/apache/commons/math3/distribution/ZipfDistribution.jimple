@@ -1,0 +1,426 @@
+org.apache.commons.math3.distribution.ZipfDistribution extends org.apache.commons.math3.distribution.AbstractIntegerDistribution
+private static final long serialVersionUID
+private final double exponent
+private final int numberOfElements
+private double numericalMean
+private boolean numericalMeanIsCalculated
+private double numericalVariance
+private boolean numericalVarianceIsCalculated
+private transient org.apache.commons.math3.distribution.ZipfDistribution$ZipfRejectionInversionSampler sampler
+    public void <init>(int, double)
+    {
+        org.apache.commons.math3.distribution.ZipfDistribution r0;
+        int $i0;
+        double $d0;
+        org.apache.commons.math3.random.Well19937c $r1;
+
+        r0 := @this: org.apache.commons.math3.distribution.ZipfDistribution;
+
+        $i0 := @parameter0: int;
+
+        $d0 := @parameter1: double;
+
+        $r1 = new org.apache.commons.math3.random.Well19937c;
+
+        specialinvoke $r1.<org.apache.commons.math3.random.Well19937c: void <init>()>();
+
+        specialinvoke r0.<org.apache.commons.math3.distribution.ZipfDistribution: void <init>(org.apache.commons.math3.random.RandomGenerator,int,double)>($r1, $i0, $d0);
+
+        return;
+    }
+    public void <init>(org.apache.commons.math3.random.RandomGenerator, int, double) throws org.apache.commons.math3.exception.NotStrictlyPositiveException
+    {
+        org.apache.commons.math3.distribution.ZipfDistribution r0;
+        org.apache.commons.math3.random.RandomGenerator $r1;
+        int $i0;
+        double $d0;
+        org.apache.commons.math3.exception.NotStrictlyPositiveException $r2;
+        org.apache.commons.math3.exception.util.LocalizedFormats $r3;
+        java.lang.Integer $r4;
+        byte $b1;
+        java.lang.Double $r5;
+
+        r0 := @this: org.apache.commons.math3.distribution.ZipfDistribution;
+
+        $r1 := @parameter0: org.apache.commons.math3.random.RandomGenerator;
+
+        $i0 := @parameter1: int;
+
+        $d0 := @parameter2: double;
+
+        specialinvoke r0.<org.apache.commons.math3.distribution.AbstractIntegerDistribution: void <init>(org.apache.commons.math3.random.RandomGenerator)>($r1);
+
+        r0.<org.apache.commons.math3.distribution.ZipfDistribution: double numericalMean> = #NaN;
+
+        r0.<org.apache.commons.math3.distribution.ZipfDistribution: boolean numericalMeanIsCalculated> = 0;
+
+        r0.<org.apache.commons.math3.distribution.ZipfDistribution: double numericalVariance> = #NaN;
+
+        r0.<org.apache.commons.math3.distribution.ZipfDistribution: boolean numericalVarianceIsCalculated> = 0;
+
+        if $i0 > 0 goto label1;
+
+        $r2 = new org.apache.commons.math3.exception.NotStrictlyPositiveException;
+
+        $r3 = <org.apache.commons.math3.exception.util.LocalizedFormats: org.apache.commons.math3.exception.util.LocalizedFormats DIMENSION>;
+
+        $r4 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        specialinvoke $r2.<org.apache.commons.math3.exception.NotStrictlyPositiveException: void <init>(org.apache.commons.math3.exception.util.Localizable,java.lang.Number)>($r3, $r4);
+
+        throw $r2;
+
+     label1:
+        $b1 = $d0 cmpg 0.0;
+
+        if $b1 > 0 goto label2;
+
+        $r2 = new org.apache.commons.math3.exception.NotStrictlyPositiveException;
+
+        $r3 = <org.apache.commons.math3.exception.util.LocalizedFormats: org.apache.commons.math3.exception.util.LocalizedFormats EXPONENT>;
+
+        $r5 = staticinvoke <java.lang.Double: java.lang.Double valueOf(double)>($d0);
+
+        specialinvoke $r2.<org.apache.commons.math3.exception.NotStrictlyPositiveException: void <init>(org.apache.commons.math3.exception.util.Localizable,java.lang.Number)>($r3, $r5);
+
+        throw $r2;
+
+     label2:
+        r0.<org.apache.commons.math3.distribution.ZipfDistribution: int numberOfElements> = $i0;
+
+        r0.<org.apache.commons.math3.distribution.ZipfDistribution: double exponent> = $d0;
+
+        return;
+    }
+    private double generalizedHarmonic(int, double)
+    {
+        org.apache.commons.math3.distribution.ZipfDistribution r0;
+        int $i0;
+        double $d0, $d1, d2;
+
+        r0 := @this: org.apache.commons.math3.distribution.ZipfDistribution;
+
+        $i0 := @parameter0: int;
+
+        $d0 := @parameter1: double;
+
+        d2 = 0.0;
+
+     label1:
+        if $i0 <= 0 goto label2;
+
+        $d1 = (double) $i0;
+
+        $d1 = staticinvoke <org.apache.commons.math3.util.FastMath: double pow(double,double)>($d1, $d0);
+
+        $d1 = 1.0 / $d1;
+
+        d2 = d2 + $d1;
+
+        $i0 = $i0 + -1;
+
+        goto label1;
+
+     label2:
+        return d2;
+    }
+    protected double calculateNumericalMean()
+    {
+        org.apache.commons.math3.distribution.ZipfDistribution r0;
+        int $i0;
+        double $d0, $d1;
+
+        r0 := @this: org.apache.commons.math3.distribution.ZipfDistribution;
+
+        $i0 = virtualinvoke r0.<org.apache.commons.math3.distribution.ZipfDistribution: int getNumberOfElements()>();
+
+        $d0 = virtualinvoke r0.<org.apache.commons.math3.distribution.ZipfDistribution: double getExponent()>();
+
+        $d1 = $d0 - 1.0;
+
+        $d1 = specialinvoke r0.<org.apache.commons.math3.distribution.ZipfDistribution: double generalizedHarmonic(int,double)>($i0, $d1);
+
+        $d0 = specialinvoke r0.<org.apache.commons.math3.distribution.ZipfDistribution: double generalizedHarmonic(int,double)>($i0, $d0);
+
+        $d0 = $d1 / $d0;
+
+        return $d0;
+    }
+    protected double calculateNumericalVariance()
+    {
+        org.apache.commons.math3.distribution.ZipfDistribution r0;
+        double $d0, $d1, $d2, $d3;
+        int $i0;
+
+        r0 := @this: org.apache.commons.math3.distribution.ZipfDistribution;
+
+        $i0 = virtualinvoke r0.<org.apache.commons.math3.distribution.ZipfDistribution: int getNumberOfElements()>();
+
+        $d1 = virtualinvoke r0.<org.apache.commons.math3.distribution.ZipfDistribution: double getExponent()>();
+
+        $d2 = $d1 - 2.0;
+
+        $d2 = specialinvoke r0.<org.apache.commons.math3.distribution.ZipfDistribution: double generalizedHarmonic(int,double)>($i0, $d2);
+
+        $d0 = $d1 - 1.0;
+
+        $d0 = specialinvoke r0.<org.apache.commons.math3.distribution.ZipfDistribution: double generalizedHarmonic(int,double)>($i0, $d0);
+
+        $d3 = specialinvoke r0.<org.apache.commons.math3.distribution.ZipfDistribution: double generalizedHarmonic(int,double)>($i0, $d1);
+
+        $d1 = $d2 / $d3;
+
+        $d2 = $d0 * $d0;
+
+        $d0 = $d3 * $d3;
+
+        $d2 = $d2 / $d0;
+
+        $d1 = $d1 - $d2;
+
+        return $d1;
+    }
+    public double cumulativeProbability(int)
+    {
+        org.apache.commons.math3.distribution.ZipfDistribution r0;
+        int $i0, $i1;
+        double $d0, $d1;
+
+        r0 := @this: org.apache.commons.math3.distribution.ZipfDistribution;
+
+        $i0 := @parameter0: int;
+
+        if $i0 > 0 goto label1;
+
+        return 0.0;
+
+     label1:
+        $i1 = r0.<org.apache.commons.math3.distribution.ZipfDistribution: int numberOfElements>;
+
+        if $i0 < $i1 goto label2;
+
+        return 1.0;
+
+     label2:
+        $d1 = r0.<org.apache.commons.math3.distribution.ZipfDistribution: double exponent>;
+
+        $d1 = specialinvoke r0.<org.apache.commons.math3.distribution.ZipfDistribution: double generalizedHarmonic(int,double)>($i0, $d1);
+
+        $i0 = r0.<org.apache.commons.math3.distribution.ZipfDistribution: int numberOfElements>;
+
+        $d0 = r0.<org.apache.commons.math3.distribution.ZipfDistribution: double exponent>;
+
+        $d0 = specialinvoke r0.<org.apache.commons.math3.distribution.ZipfDistribution: double generalizedHarmonic(int,double)>($i0, $d0);
+
+        $d1 = $d1 / $d0;
+
+        return $d1;
+    }
+    public double getExponent()
+    {
+        org.apache.commons.math3.distribution.ZipfDistribution r0;
+        double d0;
+
+        r0 := @this: org.apache.commons.math3.distribution.ZipfDistribution;
+
+        d0 = r0.<org.apache.commons.math3.distribution.ZipfDistribution: double exponent>;
+
+        return d0;
+    }
+    public int getNumberOfElements()
+    {
+        org.apache.commons.math3.distribution.ZipfDistribution r0;
+        int i0;
+
+        r0 := @this: org.apache.commons.math3.distribution.ZipfDistribution;
+
+        i0 = r0.<org.apache.commons.math3.distribution.ZipfDistribution: int numberOfElements>;
+
+        return i0;
+    }
+    public double getNumericalMean()
+    {
+        org.apache.commons.math3.distribution.ZipfDistribution r0;
+        double $d0;
+        boolean $z0;
+
+        r0 := @this: org.apache.commons.math3.distribution.ZipfDistribution;
+
+        $z0 = r0.<org.apache.commons.math3.distribution.ZipfDistribution: boolean numericalMeanIsCalculated>;
+
+        if $z0 != 0 goto label1;
+
+        $d0 = virtualinvoke r0.<org.apache.commons.math3.distribution.ZipfDistribution: double calculateNumericalMean()>();
+
+        r0.<org.apache.commons.math3.distribution.ZipfDistribution: double numericalMean> = $d0;
+
+        r0.<org.apache.commons.math3.distribution.ZipfDistribution: boolean numericalMeanIsCalculated> = 1;
+
+     label1:
+        $d0 = r0.<org.apache.commons.math3.distribution.ZipfDistribution: double numericalMean>;
+
+        return $d0;
+    }
+    public double getNumericalVariance()
+    {
+        org.apache.commons.math3.distribution.ZipfDistribution r0;
+        double $d0;
+        boolean $z0;
+
+        r0 := @this: org.apache.commons.math3.distribution.ZipfDistribution;
+
+        $z0 = r0.<org.apache.commons.math3.distribution.ZipfDistribution: boolean numericalVarianceIsCalculated>;
+
+        if $z0 != 0 goto label1;
+
+        $d0 = virtualinvoke r0.<org.apache.commons.math3.distribution.ZipfDistribution: double calculateNumericalVariance()>();
+
+        r0.<org.apache.commons.math3.distribution.ZipfDistribution: double numericalVariance> = $d0;
+
+        r0.<org.apache.commons.math3.distribution.ZipfDistribution: boolean numericalVarianceIsCalculated> = 1;
+
+     label1:
+        $d0 = r0.<org.apache.commons.math3.distribution.ZipfDistribution: double numericalVariance>;
+
+        return $d0;
+    }
+    public int getSupportLowerBound()
+    {
+        org.apache.commons.math3.distribution.ZipfDistribution r0;
+
+        r0 := @this: org.apache.commons.math3.distribution.ZipfDistribution;
+
+        return 1;
+    }
+    public int getSupportUpperBound()
+    {
+        org.apache.commons.math3.distribution.ZipfDistribution r0;
+        int $i0;
+
+        r0 := @this: org.apache.commons.math3.distribution.ZipfDistribution;
+
+        $i0 = virtualinvoke r0.<org.apache.commons.math3.distribution.ZipfDistribution: int getNumberOfElements()>();
+
+        return $i0;
+    }
+    public boolean isSupportConnected()
+    {
+        org.apache.commons.math3.distribution.ZipfDistribution r0;
+
+        r0 := @this: org.apache.commons.math3.distribution.ZipfDistribution;
+
+        return 1;
+    }
+    public double logProbability(int)
+    {
+        org.apache.commons.math3.distribution.ZipfDistribution r0;
+        int $i0, $i1;
+        double $d0, $d1;
+
+        r0 := @this: org.apache.commons.math3.distribution.ZipfDistribution;
+
+        $i0 := @parameter0: int;
+
+        if $i0 <= 0 goto label1;
+
+        $i1 = r0.<org.apache.commons.math3.distribution.ZipfDistribution: int numberOfElements>;
+
+        if $i0 <= $i1 goto label2;
+
+     label1:
+        return #-Infinity;
+
+     label2:
+        $d1 = (double) $i0;
+
+        $d1 = staticinvoke <org.apache.commons.math3.util.FastMath: double log(double)>($d1);
+
+        $d1 = neg $d1;
+
+        $d0 = r0.<org.apache.commons.math3.distribution.ZipfDistribution: double exponent>;
+
+        $d1 = $d1 * $d0;
+
+        $i0 = r0.<org.apache.commons.math3.distribution.ZipfDistribution: int numberOfElements>;
+
+        $d0 = r0.<org.apache.commons.math3.distribution.ZipfDistribution: double exponent>;
+
+        $d0 = specialinvoke r0.<org.apache.commons.math3.distribution.ZipfDistribution: double generalizedHarmonic(int,double)>($i0, $d0);
+
+        $d0 = staticinvoke <org.apache.commons.math3.util.FastMath: double log(double)>($d0);
+
+        $d1 = $d1 - $d0;
+
+        return $d1;
+    }
+    public double probability(int)
+    {
+        org.apache.commons.math3.distribution.ZipfDistribution r0;
+        int $i0, $i1;
+        double $d0, $d1;
+
+        r0 := @this: org.apache.commons.math3.distribution.ZipfDistribution;
+
+        $i0 := @parameter0: int;
+
+        if $i0 <= 0 goto label1;
+
+        $i1 = r0.<org.apache.commons.math3.distribution.ZipfDistribution: int numberOfElements>;
+
+        if $i0 <= $i1 goto label2;
+
+     label1:
+        return 0.0;
+
+     label2:
+        $d0 = (double) $i0;
+
+        $d1 = r0.<org.apache.commons.math3.distribution.ZipfDistribution: double exponent>;
+
+        $d0 = staticinvoke <org.apache.commons.math3.util.FastMath: double pow(double,double)>($d0, $d1);
+
+        $d0 = 1.0 / $d0;
+
+        $i0 = r0.<org.apache.commons.math3.distribution.ZipfDistribution: int numberOfElements>;
+
+        $d1 = r0.<org.apache.commons.math3.distribution.ZipfDistribution: double exponent>;
+
+        $d1 = specialinvoke r0.<org.apache.commons.math3.distribution.ZipfDistribution: double generalizedHarmonic(int,double)>($i0, $d1);
+
+        $d0 = $d0 / $d1;
+
+        return $d0;
+    }
+    public int sample()
+    {
+        org.apache.commons.math3.distribution.ZipfDistribution r0;
+        double $d0;
+        int $i0;
+        org.apache.commons.math3.distribution.ZipfDistribution$ZipfRejectionInversionSampler $r1;
+        org.apache.commons.math3.random.RandomGenerator $r2;
+
+        r0 := @this: org.apache.commons.math3.distribution.ZipfDistribution;
+
+        $r1 = r0.<org.apache.commons.math3.distribution.ZipfDistribution: org.apache.commons.math3.distribution.ZipfDistribution$ZipfRejectionInversionSampler sampler>;
+
+        if $r1 != null goto label1;
+
+        $r1 = new org.apache.commons.math3.distribution.ZipfDistribution$ZipfRejectionInversionSampler;
+
+        $i0 = r0.<org.apache.commons.math3.distribution.ZipfDistribution: int numberOfElements>;
+
+        $d0 = r0.<org.apache.commons.math3.distribution.ZipfDistribution: double exponent>;
+
+        specialinvoke $r1.<org.apache.commons.math3.distribution.ZipfDistribution$ZipfRejectionInversionSampler: void <init>(int,double)>($i0, $d0);
+
+        r0.<org.apache.commons.math3.distribution.ZipfDistribution: org.apache.commons.math3.distribution.ZipfDistribution$ZipfRejectionInversionSampler sampler> = $r1;
+
+     label1:
+        $r1 = r0.<org.apache.commons.math3.distribution.ZipfDistribution: org.apache.commons.math3.distribution.ZipfDistribution$ZipfRejectionInversionSampler sampler>;
+
+        $r2 = r0.<org.apache.commons.math3.distribution.ZipfDistribution: org.apache.commons.math3.random.RandomGenerator random>;
+
+        $i0 = virtualinvoke $r1.<org.apache.commons.math3.distribution.ZipfDistribution$ZipfRejectionInversionSampler: int sample(org.apache.commons.math3.random.RandomGenerator)>($r2);
+
+        return $i0;
+    }

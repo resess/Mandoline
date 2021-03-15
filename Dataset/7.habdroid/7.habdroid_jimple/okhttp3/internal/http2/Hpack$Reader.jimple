@@ -1,0 +1,897 @@
+okhttp3.internal.http2.Hpack$Reader extends java.lang.Object
+okhttp3.internal.http2.Header[] dynamicTable
+int dynamicTableByteCount
+int headerCount
+private final java.util.List headerList
+private final int headerTableSizeSetting
+private int maxDynamicTableByteCount
+int nextHeaderIndex
+private final okio.BufferedSource source
+    void <init>(int, int, okio.Source)
+    {
+        okhttp3.internal.http2.Hpack$Reader r0;
+        int $i0, $i1, $i2;
+        okio.Source $r1;
+        okio.BufferedSource $r2;
+        java.util.ArrayList $r3;
+        okhttp3.internal.http2.Header[] $r4;
+
+        r0 := @this: okhttp3.internal.http2.Hpack$Reader;
+
+        $i0 := @parameter0: int;
+
+        $i1 := @parameter1: int;
+
+        $r1 := @parameter2: okio.Source;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r3 = new java.util.ArrayList;
+
+        specialinvoke $r3.<java.util.ArrayList: void <init>()>();
+
+        r0.<okhttp3.internal.http2.Hpack$Reader: java.util.List headerList> = $r3;
+
+        $r4 = newarray (okhttp3.internal.http2.Header)[8];
+
+        r0.<okhttp3.internal.http2.Hpack$Reader: okhttp3.internal.http2.Header[] dynamicTable> = $r4;
+
+        $r4 = r0.<okhttp3.internal.http2.Hpack$Reader: okhttp3.internal.http2.Header[] dynamicTable>;
+
+        $i2 = lengthof $r4;
+
+        $i2 = $i2 + -1;
+
+        r0.<okhttp3.internal.http2.Hpack$Reader: int nextHeaderIndex> = $i2;
+
+        r0.<okhttp3.internal.http2.Hpack$Reader: int headerCount> = 0;
+
+        r0.<okhttp3.internal.http2.Hpack$Reader: int dynamicTableByteCount> = 0;
+
+        r0.<okhttp3.internal.http2.Hpack$Reader: int headerTableSizeSetting> = $i0;
+
+        r0.<okhttp3.internal.http2.Hpack$Reader: int maxDynamicTableByteCount> = $i1;
+
+        $r2 = staticinvoke <okio.Okio: okio.BufferedSource buffer(okio.Source)>($r1);
+
+        r0.<okhttp3.internal.http2.Hpack$Reader: okio.BufferedSource source> = $r2;
+
+        return;
+    }
+    void <init>(int, okio.Source)
+    {
+        okhttp3.internal.http2.Hpack$Reader r0;
+        int $i0;
+        okio.Source $r1;
+
+        r0 := @this: okhttp3.internal.http2.Hpack$Reader;
+
+        $i0 := @parameter0: int;
+
+        $r1 := @parameter1: okio.Source;
+
+        specialinvoke r0.<okhttp3.internal.http2.Hpack$Reader: void <init>(int,int,okio.Source)>($i0, $i0, $r1);
+
+        return;
+    }
+    private void adjustDynamicTableByteCount()
+    {
+        okhttp3.internal.http2.Hpack$Reader r0;
+        int $i0, $i1;
+
+        r0 := @this: okhttp3.internal.http2.Hpack$Reader;
+
+        $i0 = r0.<okhttp3.internal.http2.Hpack$Reader: int maxDynamicTableByteCount>;
+
+        $i1 = r0.<okhttp3.internal.http2.Hpack$Reader: int dynamicTableByteCount>;
+
+        if $i0 >= $i1 goto label2;
+
+        $i0 = r0.<okhttp3.internal.http2.Hpack$Reader: int maxDynamicTableByteCount>;
+
+        if $i0 != 0 goto label1;
+
+        specialinvoke r0.<okhttp3.internal.http2.Hpack$Reader: void clearDynamicTable()>();
+
+        return;
+
+     label1:
+        $i0 = r0.<okhttp3.internal.http2.Hpack$Reader: int dynamicTableByteCount>;
+
+        $i1 = r0.<okhttp3.internal.http2.Hpack$Reader: int maxDynamicTableByteCount>;
+
+        $i0 = $i0 - $i1;
+
+        specialinvoke r0.<okhttp3.internal.http2.Hpack$Reader: int evictToRecoverBytes(int)>($i0);
+
+     label2:
+        return;
+    }
+    private void clearDynamicTable()
+    {
+        okhttp3.internal.http2.Hpack$Reader r0;
+        okhttp3.internal.http2.Header[] $r1;
+        int $i0;
+
+        r0 := @this: okhttp3.internal.http2.Hpack$Reader;
+
+        $r1 = r0.<okhttp3.internal.http2.Hpack$Reader: okhttp3.internal.http2.Header[] dynamicTable>;
+
+        staticinvoke <java.util.Arrays: void fill(java.lang.Object[],java.lang.Object)>($r1, null);
+
+        $r1 = r0.<okhttp3.internal.http2.Hpack$Reader: okhttp3.internal.http2.Header[] dynamicTable>;
+
+        $i0 = lengthof $r1;
+
+        $i0 = $i0 + -1;
+
+        r0.<okhttp3.internal.http2.Hpack$Reader: int nextHeaderIndex> = $i0;
+
+        r0.<okhttp3.internal.http2.Hpack$Reader: int headerCount> = 0;
+
+        r0.<okhttp3.internal.http2.Hpack$Reader: int dynamicTableByteCount> = 0;
+
+        return;
+    }
+    private int dynamicTableIndex(int)
+    {
+        okhttp3.internal.http2.Hpack$Reader r0;
+        int $i0, $i1;
+
+        r0 := @this: okhttp3.internal.http2.Hpack$Reader;
+
+        $i0 := @parameter0: int;
+
+        $i1 = r0.<okhttp3.internal.http2.Hpack$Reader: int nextHeaderIndex>;
+
+        $i1 = $i1 + 1;
+
+        $i0 = $i1 + $i0;
+
+        return $i0;
+    }
+    private int evictToRecoverBytes(int)
+    {
+        okhttp3.internal.http2.Hpack$Reader r0;
+        okhttp3.internal.http2.Header[] $r1, $r3;
+        int $i0, $i1, i2, $i3, $i4;
+        okhttp3.internal.http2.Header $r2;
+
+        r0 := @this: okhttp3.internal.http2.Hpack$Reader;
+
+        $i1 := @parameter0: int;
+
+        i2 = 0;
+
+        if $i1 <= 0 goto label3;
+
+        $r1 = r0.<okhttp3.internal.http2.Hpack$Reader: okhttp3.internal.http2.Header[] dynamicTable>;
+
+        $i0 = lengthof $r1;
+
+        $i0 = $i0 + -1;
+
+     label1:
+        $i3 = r0.<okhttp3.internal.http2.Hpack$Reader: int nextHeaderIndex>;
+
+        if $i0 < $i3 goto label2;
+
+        if $i1 <= 0 goto label2;
+
+        $r1 = r0.<okhttp3.internal.http2.Hpack$Reader: okhttp3.internal.http2.Header[] dynamicTable>;
+
+        $r2 = $r1[$i0];
+
+        $i3 = $r2.<okhttp3.internal.http2.Header: int hpackSize>;
+
+        $i1 = $i1 - $i3;
+
+        $i3 = r0.<okhttp3.internal.http2.Hpack$Reader: int dynamicTableByteCount>;
+
+        $r1 = r0.<okhttp3.internal.http2.Hpack$Reader: okhttp3.internal.http2.Header[] dynamicTable>;
+
+        $r2 = $r1[$i0];
+
+        $i4 = $r2.<okhttp3.internal.http2.Header: int hpackSize>;
+
+        $i3 = $i3 - $i4;
+
+        r0.<okhttp3.internal.http2.Hpack$Reader: int dynamicTableByteCount> = $i3;
+
+        $i3 = r0.<okhttp3.internal.http2.Hpack$Reader: int headerCount>;
+
+        $i3 = $i3 + -1;
+
+        r0.<okhttp3.internal.http2.Hpack$Reader: int headerCount> = $i3;
+
+        i2 = i2 + 1;
+
+        $i0 = $i0 + -1;
+
+        goto label1;
+
+     label2:
+        $r3 = r0.<okhttp3.internal.http2.Hpack$Reader: okhttp3.internal.http2.Header[] dynamicTable>;
+
+        $i1 = r0.<okhttp3.internal.http2.Hpack$Reader: int nextHeaderIndex>;
+
+        $i1 = $i1 + 1;
+
+        $r1 = r0.<okhttp3.internal.http2.Hpack$Reader: okhttp3.internal.http2.Header[] dynamicTable>;
+
+        $i0 = r0.<okhttp3.internal.http2.Hpack$Reader: int nextHeaderIndex>;
+
+        $i0 = $i0 + 1;
+
+        $i3 = $i0 + i2;
+
+        $i0 = r0.<okhttp3.internal.http2.Hpack$Reader: int headerCount>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r3, $i1, $r1, $i3, $i0);
+
+        $i1 = r0.<okhttp3.internal.http2.Hpack$Reader: int nextHeaderIndex>;
+
+        $i1 = $i1 + i2;
+
+        r0.<okhttp3.internal.http2.Hpack$Reader: int nextHeaderIndex> = $i1;
+
+        return i2;
+
+     label3:
+        return 0;
+    }
+    private okio.ByteString getName(int)
+    {
+        okhttp3.internal.http2.Hpack$Reader r0;
+        int $i0, $i1;
+        boolean $z0;
+        okhttp3.internal.http2.Header[] $r1, $r3;
+        okhttp3.internal.http2.Header $r2;
+        okio.ByteString r4;
+
+        r0 := @this: okhttp3.internal.http2.Hpack$Reader;
+
+        $i0 := @parameter0: int;
+
+        $z0 = specialinvoke r0.<okhttp3.internal.http2.Hpack$Reader: boolean isStaticHeader(int)>($i0);
+
+        if $z0 == 0 goto label1;
+
+        $r1 = <okhttp3.internal.http2.Hpack: okhttp3.internal.http2.Header[] STATIC_HEADER_TABLE>;
+
+        $r2 = $r1[$i0];
+
+        r4 = $r2.<okhttp3.internal.http2.Header: okio.ByteString name>;
+
+        return r4;
+
+     label1:
+        $r1 = r0.<okhttp3.internal.http2.Hpack$Reader: okhttp3.internal.http2.Header[] dynamicTable>;
+
+        $r3 = <okhttp3.internal.http2.Hpack: okhttp3.internal.http2.Header[] STATIC_HEADER_TABLE>;
+
+        $i1 = lengthof $r3;
+
+        $i0 = $i0 - $i1;
+
+        $i0 = specialinvoke r0.<okhttp3.internal.http2.Hpack$Reader: int dynamicTableIndex(int)>($i0);
+
+        $r2 = $r1[$i0];
+
+        r4 = $r2.<okhttp3.internal.http2.Header: okio.ByteString name>;
+
+        return r4;
+    }
+    private void insertIntoDynamicTable(int, okhttp3.internal.http2.Header)
+    {
+        okhttp3.internal.http2.Hpack$Reader r0;
+        okhttp3.internal.http2.Header $r1, $r4;
+        int i0, i1, i2, $i3;
+        okhttp3.internal.http2.Header[] r2, $r5, $r6;
+        java.util.List $r3;
+
+        r0 := @this: okhttp3.internal.http2.Hpack$Reader;
+
+        i1 := @parameter0: int;
+
+        $r1 := @parameter1: okhttp3.internal.http2.Header;
+
+        $r3 = r0.<okhttp3.internal.http2.Hpack$Reader: java.util.List headerList>;
+
+        interfaceinvoke $r3.<java.util.List: boolean add(java.lang.Object)>($r1);
+
+        i2 = $r1.<okhttp3.internal.http2.Header: int hpackSize>;
+
+        if i1 == -1 goto label1;
+
+        r2 = r0.<okhttp3.internal.http2.Hpack$Reader: okhttp3.internal.http2.Header[] dynamicTable>;
+
+        i0 = specialinvoke r0.<okhttp3.internal.http2.Hpack$Reader: int dynamicTableIndex(int)>(i1);
+
+        $r4 = r2[i0];
+
+        i0 = $r4.<okhttp3.internal.http2.Header: int hpackSize>;
+
+        i2 = i2 - i0;
+
+     label1:
+        i0 = r0.<okhttp3.internal.http2.Hpack$Reader: int maxDynamicTableByteCount>;
+
+        if i2 <= i0 goto label2;
+
+        specialinvoke r0.<okhttp3.internal.http2.Hpack$Reader: void clearDynamicTable()>();
+
+        return;
+
+     label2:
+        i0 = r0.<okhttp3.internal.http2.Hpack$Reader: int dynamicTableByteCount>;
+
+        i0 = i0 + i2;
+
+        $i3 = r0.<okhttp3.internal.http2.Hpack$Reader: int maxDynamicTableByteCount>;
+
+        i0 = i0 - $i3;
+
+        i0 = specialinvoke r0.<okhttp3.internal.http2.Hpack$Reader: int evictToRecoverBytes(int)>(i0);
+
+        if i1 != -1 goto label5;
+
+        i1 = r0.<okhttp3.internal.http2.Hpack$Reader: int headerCount>;
+
+        i1 = i1 + 1;
+
+        r2 = r0.<okhttp3.internal.http2.Hpack$Reader: okhttp3.internal.http2.Header[] dynamicTable>;
+
+        i0 = lengthof r2;
+
+        if i1 <= i0 goto label3;
+
+        r2 = r0.<okhttp3.internal.http2.Hpack$Reader: okhttp3.internal.http2.Header[] dynamicTable>;
+
+        i1 = lengthof r2;
+
+        i1 = i1 * 2;
+
+        r2 = newarray (okhttp3.internal.http2.Header)[i1];
+
+        $r5 = r0.<okhttp3.internal.http2.Hpack$Reader: okhttp3.internal.http2.Header[] dynamicTable>;
+
+        $r6 = r0.<okhttp3.internal.http2.Hpack$Reader: okhttp3.internal.http2.Header[] dynamicTable>;
+
+        i1 = lengthof $r6;
+
+        $r6 = r0.<okhttp3.internal.http2.Hpack$Reader: okhttp3.internal.http2.Header[] dynamicTable>;
+
+        i0 = lengthof $r6;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r5, 0, r2, i1, i0);
+
+        $r5 = r0.<okhttp3.internal.http2.Hpack$Reader: okhttp3.internal.http2.Header[] dynamicTable>;
+
+        i1 = lengthof $r5;
+
+        i1 = i1 + -1;
+
+        r0.<okhttp3.internal.http2.Hpack$Reader: int nextHeaderIndex> = i1;
+
+        r0.<okhttp3.internal.http2.Hpack$Reader: okhttp3.internal.http2.Header[] dynamicTable> = r2;
+
+     label3:
+        i1 = r0.<okhttp3.internal.http2.Hpack$Reader: int nextHeaderIndex>;
+
+        i0 = i1 + -1;
+
+        r0.<okhttp3.internal.http2.Hpack$Reader: int nextHeaderIndex> = i0;
+
+        r2 = r0.<okhttp3.internal.http2.Hpack$Reader: okhttp3.internal.http2.Header[] dynamicTable>;
+
+        r2[i1] = $r1;
+
+        i1 = r0.<okhttp3.internal.http2.Hpack$Reader: int headerCount>;
+
+        i1 = i1 + 1;
+
+        r0.<okhttp3.internal.http2.Hpack$Reader: int headerCount> = i1;
+
+     label4:
+        i1 = r0.<okhttp3.internal.http2.Hpack$Reader: int dynamicTableByteCount>;
+
+        i1 = i1 + i2;
+
+        r0.<okhttp3.internal.http2.Hpack$Reader: int dynamicTableByteCount> = i1;
+
+        return;
+
+     label5:
+        $i3 = specialinvoke r0.<okhttp3.internal.http2.Hpack$Reader: int dynamicTableIndex(int)>(i1);
+
+        i0 = $i3 + i0;
+
+        i1 = i1 + i0;
+
+        r2 = r0.<okhttp3.internal.http2.Hpack$Reader: okhttp3.internal.http2.Header[] dynamicTable>;
+
+        r2[i1] = $r1;
+
+        goto label4;
+    }
+    private boolean isStaticHeader(int)
+    {
+        okhttp3.internal.http2.Hpack$Reader r0;
+        int $i0, $i1;
+        okhttp3.internal.http2.Header[] $r1;
+
+        r0 := @this: okhttp3.internal.http2.Hpack$Reader;
+
+        $i0 := @parameter0: int;
+
+        if $i0 < 0 goto label1;
+
+        $r1 = <okhttp3.internal.http2.Hpack: okhttp3.internal.http2.Header[] STATIC_HEADER_TABLE>;
+
+        $i1 = lengthof $r1;
+
+        $i1 = $i1 + -1;
+
+        if $i0 > $i1 goto label1;
+
+        return 1;
+
+     label1:
+        return 0;
+    }
+    private int readByte() throws java.io.IOException
+    {
+        okhttp3.internal.http2.Hpack$Reader r0;
+        byte $b0;
+        okio.BufferedSource $r1;
+        int $i1;
+
+        r0 := @this: okhttp3.internal.http2.Hpack$Reader;
+
+        $r1 = r0.<okhttp3.internal.http2.Hpack$Reader: okio.BufferedSource source>;
+
+        $b0 = interfaceinvoke $r1.<okio.BufferedSource: byte readByte()>();
+
+        $i1 = $b0 & 255;
+
+        return $i1;
+    }
+    private void readIndexedHeader(int) throws java.io.IOException
+    {
+        okhttp3.internal.http2.Hpack$Reader r0;
+        int $i0, $i1, $i2;
+        okhttp3.internal.http2.Header r1;
+        boolean $z0;
+        okhttp3.internal.http2.Header[] $r2;
+        java.util.List $r3;
+        java.io.IOException $r4;
+        java.lang.StringBuilder $r5;
+        java.lang.String $r6;
+
+        r0 := @this: okhttp3.internal.http2.Hpack$Reader;
+
+        $i0 := @parameter0: int;
+
+        $z0 = specialinvoke r0.<okhttp3.internal.http2.Hpack$Reader: boolean isStaticHeader(int)>($i0);
+
+        if $z0 == 0 goto label1;
+
+        $r2 = <okhttp3.internal.http2.Hpack: okhttp3.internal.http2.Header[] STATIC_HEADER_TABLE>;
+
+        r1 = $r2[$i0];
+
+        $r3 = r0.<okhttp3.internal.http2.Hpack$Reader: java.util.List headerList>;
+
+        interfaceinvoke $r3.<java.util.List: boolean add(java.lang.Object)>(r1);
+
+        return;
+
+     label1:
+        $r2 = <okhttp3.internal.http2.Hpack: okhttp3.internal.http2.Header[] STATIC_HEADER_TABLE>;
+
+        $i1 = lengthof $r2;
+
+        $i1 = $i0 - $i1;
+
+        $i1 = specialinvoke r0.<okhttp3.internal.http2.Hpack$Reader: int dynamicTableIndex(int)>($i1);
+
+        if $i1 < 0 goto label2;
+
+        $r2 = r0.<okhttp3.internal.http2.Hpack$Reader: okhttp3.internal.http2.Header[] dynamicTable>;
+
+        $i2 = lengthof $r2;
+
+        $i2 = $i2 + -1;
+
+        if $i1 <= $i2 goto label3;
+
+     label2:
+        $r4 = new java.io.IOException;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Header index too large ");
+
+        $i0 = $i0 + 1;
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r4.<java.io.IOException: void <init>(java.lang.String)>($r6);
+
+        throw $r4;
+
+     label3:
+        $r3 = r0.<okhttp3.internal.http2.Hpack$Reader: java.util.List headerList>;
+
+        $r2 = r0.<okhttp3.internal.http2.Hpack$Reader: okhttp3.internal.http2.Header[] dynamicTable>;
+
+        r1 = $r2[$i1];
+
+        interfaceinvoke $r3.<java.util.List: boolean add(java.lang.Object)>(r1);
+
+        return;
+    }
+    private void readLiteralHeaderWithIncrementalIndexingIndexedName(int) throws java.io.IOException
+    {
+        okhttp3.internal.http2.Hpack$Reader r0;
+        int $i0;
+        okhttp3.internal.http2.Header $r1;
+        okio.ByteString $r2, $r3;
+
+        r0 := @this: okhttp3.internal.http2.Hpack$Reader;
+
+        $i0 := @parameter0: int;
+
+        $r2 = specialinvoke r0.<okhttp3.internal.http2.Hpack$Reader: okio.ByteString getName(int)>($i0);
+
+        $r3 = virtualinvoke r0.<okhttp3.internal.http2.Hpack$Reader: okio.ByteString readByteString()>();
+
+        $r1 = new okhttp3.internal.http2.Header;
+
+        specialinvoke $r1.<okhttp3.internal.http2.Header: void <init>(okio.ByteString,okio.ByteString)>($r2, $r3);
+
+        specialinvoke r0.<okhttp3.internal.http2.Hpack$Reader: void insertIntoDynamicTable(int,okhttp3.internal.http2.Header)>(-1, $r1);
+
+        return;
+    }
+    private void readLiteralHeaderWithIncrementalIndexingNewName() throws java.io.IOException
+    {
+        okhttp3.internal.http2.Hpack$Reader r0;
+        okhttp3.internal.http2.Header $r1;
+        okio.ByteString $r2, $r3;
+
+        r0 := @this: okhttp3.internal.http2.Hpack$Reader;
+
+        $r2 = virtualinvoke r0.<okhttp3.internal.http2.Hpack$Reader: okio.ByteString readByteString()>();
+
+        $r2 = staticinvoke <okhttp3.internal.http2.Hpack: okio.ByteString checkLowercase(okio.ByteString)>($r2);
+
+        $r3 = virtualinvoke r0.<okhttp3.internal.http2.Hpack$Reader: okio.ByteString readByteString()>();
+
+        $r1 = new okhttp3.internal.http2.Header;
+
+        specialinvoke $r1.<okhttp3.internal.http2.Header: void <init>(okio.ByteString,okio.ByteString)>($r2, $r3);
+
+        specialinvoke r0.<okhttp3.internal.http2.Hpack$Reader: void insertIntoDynamicTable(int,okhttp3.internal.http2.Header)>(-1, $r1);
+
+        return;
+    }
+    private void readLiteralHeaderWithoutIndexingIndexedName(int) throws java.io.IOException
+    {
+        okhttp3.internal.http2.Hpack$Reader r0;
+        int $i0;
+        java.util.List $r1;
+        okhttp3.internal.http2.Header $r2;
+        okio.ByteString $r3, $r4;
+
+        r0 := @this: okhttp3.internal.http2.Hpack$Reader;
+
+        $i0 := @parameter0: int;
+
+        $r3 = specialinvoke r0.<okhttp3.internal.http2.Hpack$Reader: okio.ByteString getName(int)>($i0);
+
+        $r4 = virtualinvoke r0.<okhttp3.internal.http2.Hpack$Reader: okio.ByteString readByteString()>();
+
+        $r1 = r0.<okhttp3.internal.http2.Hpack$Reader: java.util.List headerList>;
+
+        $r2 = new okhttp3.internal.http2.Header;
+
+        specialinvoke $r2.<okhttp3.internal.http2.Header: void <init>(okio.ByteString,okio.ByteString)>($r3, $r4);
+
+        interfaceinvoke $r1.<java.util.List: boolean add(java.lang.Object)>($r2);
+
+        return;
+    }
+    private void readLiteralHeaderWithoutIndexingNewName() throws java.io.IOException
+    {
+        okhttp3.internal.http2.Hpack$Reader r0;
+        okhttp3.internal.http2.Header $r1;
+        okio.ByteString $r2, $r3;
+        java.util.List $r4;
+
+        r0 := @this: okhttp3.internal.http2.Hpack$Reader;
+
+        $r2 = virtualinvoke r0.<okhttp3.internal.http2.Hpack$Reader: okio.ByteString readByteString()>();
+
+        $r2 = staticinvoke <okhttp3.internal.http2.Hpack: okio.ByteString checkLowercase(okio.ByteString)>($r2);
+
+        $r3 = virtualinvoke r0.<okhttp3.internal.http2.Hpack$Reader: okio.ByteString readByteString()>();
+
+        $r4 = r0.<okhttp3.internal.http2.Hpack$Reader: java.util.List headerList>;
+
+        $r1 = new okhttp3.internal.http2.Header;
+
+        specialinvoke $r1.<okhttp3.internal.http2.Header: void <init>(okio.ByteString,okio.ByteString)>($r2, $r3);
+
+        interfaceinvoke $r4.<java.util.List: boolean add(java.lang.Object)>($r1);
+
+        return;
+    }
+    public java.util.List getAndResetHeaderList()
+    {
+        okhttp3.internal.http2.Hpack$Reader r0;
+        java.util.ArrayList r1;
+        java.util.List $r2;
+
+        r0 := @this: okhttp3.internal.http2.Hpack$Reader;
+
+        r1 = new java.util.ArrayList;
+
+        $r2 = r0.<okhttp3.internal.http2.Hpack$Reader: java.util.List headerList>;
+
+        specialinvoke r1.<java.util.ArrayList: void <init>(java.util.Collection)>($r2);
+
+        $r2 = r0.<okhttp3.internal.http2.Hpack$Reader: java.util.List headerList>;
+
+        interfaceinvoke $r2.<java.util.List: void clear()>();
+
+        return r1;
+    }
+    int maxDynamicTableByteCount()
+    {
+        okhttp3.internal.http2.Hpack$Reader r0;
+        int i0;
+
+        r0 := @this: okhttp3.internal.http2.Hpack$Reader;
+
+        i0 = r0.<okhttp3.internal.http2.Hpack$Reader: int maxDynamicTableByteCount>;
+
+        return i0;
+    }
+    okio.ByteString readByteString() throws java.io.IOException
+    {
+        okhttp3.internal.http2.Hpack$Reader r0;
+        long $l0;
+        int $i1, $i2;
+        boolean z0;
+        okhttp3.internal.http2.Huffman $r1;
+        okio.BufferedSource $r2;
+        byte[] $r3;
+        okio.ByteString $r4;
+
+        r0 := @this: okhttp3.internal.http2.Hpack$Reader;
+
+        $i1 = specialinvoke r0.<okhttp3.internal.http2.Hpack$Reader: int readByte()>();
+
+        $i2 = $i1 & 128;
+
+        if $i2 != 128 goto label2;
+
+        z0 = 1;
+
+     label1:
+        $i1 = virtualinvoke r0.<okhttp3.internal.http2.Hpack$Reader: int readInt(int,int)>($i1, 127);
+
+        if z0 == 0 goto label3;
+
+        $r1 = staticinvoke <okhttp3.internal.http2.Huffman: okhttp3.internal.http2.Huffman get()>();
+
+        $r2 = r0.<okhttp3.internal.http2.Hpack$Reader: okio.BufferedSource source>;
+
+        $l0 = (long) $i1;
+
+        $r3 = interfaceinvoke $r2.<okio.BufferedSource: byte[] readByteArray(long)>($l0);
+
+        $r3 = virtualinvoke $r1.<okhttp3.internal.http2.Huffman: byte[] decode(byte[])>($r3);
+
+        $r4 = staticinvoke <okio.ByteString: okio.ByteString of(byte[])>($r3);
+
+        return $r4;
+
+     label2:
+        z0 = 0;
+
+        goto label1;
+
+     label3:
+        $r2 = r0.<okhttp3.internal.http2.Hpack$Reader: okio.BufferedSource source>;
+
+        $l0 = (long) $i1;
+
+        $r4 = interfaceinvoke $r2.<okio.BufferedSource: okio.ByteString readByteString(long)>($l0);
+
+        return $r4;
+    }
+    void readHeaders() throws java.io.IOException
+    {
+        okhttp3.internal.http2.Hpack$Reader r0;
+        int i0, $i2;
+        okio.BufferedSource $r1;
+        boolean $z0;
+        byte $b1;
+        java.io.IOException $r2;
+        java.lang.StringBuilder $r3;
+        java.lang.String $r4;
+
+        r0 := @this: okhttp3.internal.http2.Hpack$Reader;
+
+     label01:
+        $r1 = r0.<okhttp3.internal.http2.Hpack$Reader: okio.BufferedSource source>;
+
+        $z0 = interfaceinvoke $r1.<okio.BufferedSource: boolean exhausted()>();
+
+        if $z0 != 0 goto label11;
+
+        $r1 = r0.<okhttp3.internal.http2.Hpack$Reader: okio.BufferedSource source>;
+
+        $b1 = interfaceinvoke $r1.<okio.BufferedSource: byte readByte()>();
+
+        i0 = $b1 & 255;
+
+        if i0 != 128 goto label02;
+
+        $r2 = new java.io.IOException;
+
+        specialinvoke $r2.<java.io.IOException: void <init>(java.lang.String)>("index == 0");
+
+        throw $r2;
+
+     label02:
+        $i2 = i0 & 128;
+
+        if $i2 != 128 goto label03;
+
+        i0 = virtualinvoke r0.<okhttp3.internal.http2.Hpack$Reader: int readInt(int,int)>(i0, 127);
+
+        i0 = i0 + -1;
+
+        specialinvoke r0.<okhttp3.internal.http2.Hpack$Reader: void readIndexedHeader(int)>(i0);
+
+        goto label01;
+
+     label03:
+        if i0 != 64 goto label04;
+
+        specialinvoke r0.<okhttp3.internal.http2.Hpack$Reader: void readLiteralHeaderWithIncrementalIndexingNewName()>();
+
+        goto label01;
+
+     label04:
+        $i2 = i0 & 64;
+
+        if $i2 != 64 goto label05;
+
+        i0 = virtualinvoke r0.<okhttp3.internal.http2.Hpack$Reader: int readInt(int,int)>(i0, 63);
+
+        i0 = i0 + -1;
+
+        specialinvoke r0.<okhttp3.internal.http2.Hpack$Reader: void readLiteralHeaderWithIncrementalIndexingIndexedName(int)>(i0);
+
+        goto label01;
+
+     label05:
+        $i2 = i0 & 32;
+
+        if $i2 != 32 goto label08;
+
+        i0 = virtualinvoke r0.<okhttp3.internal.http2.Hpack$Reader: int readInt(int,int)>(i0, 31);
+
+        r0.<okhttp3.internal.http2.Hpack$Reader: int maxDynamicTableByteCount> = i0;
+
+        i0 = r0.<okhttp3.internal.http2.Hpack$Reader: int maxDynamicTableByteCount>;
+
+        if i0 < 0 goto label06;
+
+        i0 = r0.<okhttp3.internal.http2.Hpack$Reader: int maxDynamicTableByteCount>;
+
+        $i2 = r0.<okhttp3.internal.http2.Hpack$Reader: int headerTableSizeSetting>;
+
+        if i0 <= $i2 goto label07;
+
+     label06:
+        $r2 = new java.io.IOException;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Invalid dynamic table size update ");
+
+        i0 = r0.<okhttp3.internal.http2.Hpack$Reader: int maxDynamicTableByteCount>;
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(i0);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r2.<java.io.IOException: void <init>(java.lang.String)>($r4);
+
+        throw $r2;
+
+     label07:
+        specialinvoke r0.<okhttp3.internal.http2.Hpack$Reader: void adjustDynamicTableByteCount()>();
+
+        goto label01;
+
+     label08:
+        if i0 == 16 goto label09;
+
+        if i0 != 0 goto label10;
+
+     label09:
+        specialinvoke r0.<okhttp3.internal.http2.Hpack$Reader: void readLiteralHeaderWithoutIndexingNewName()>();
+
+        goto label01;
+
+     label10:
+        i0 = virtualinvoke r0.<okhttp3.internal.http2.Hpack$Reader: int readInt(int,int)>(i0, 15);
+
+        i0 = i0 + -1;
+
+        specialinvoke r0.<okhttp3.internal.http2.Hpack$Reader: void readLiteralHeaderWithoutIndexingIndexedName(int)>(i0);
+
+        goto label01;
+
+     label11:
+        return;
+    }
+    int readInt(int, int) throws java.io.IOException
+    {
+        okhttp3.internal.http2.Hpack$Reader r0;
+        int $i0, $i1, $i2, $i3;
+
+        r0 := @this: okhttp3.internal.http2.Hpack$Reader;
+
+        $i0 := @parameter0: int;
+
+        $i1 := @parameter1: int;
+
+        $i0 = $i0 & $i1;
+
+        if $i0 >= $i1 goto label1;
+
+        return $i0;
+
+     label1:
+        $i0 = $i1;
+
+        $i1 = 0;
+
+     label2:
+        $i2 = specialinvoke r0.<okhttp3.internal.http2.Hpack$Reader: int readByte()>();
+
+        $i3 = $i2 & 128;
+
+        if $i3 == 0 goto label3;
+
+        $i2 = $i2 & 127;
+
+        $i2 = $i2 << $i1;
+
+        $i0 = $i0 + $i2;
+
+        $i1 = $i1 + 7;
+
+        goto label2;
+
+     label3:
+        $i1 = $i2 << $i1;
+
+        $i0 = $i0 + $i1;
+
+        return $i0;
+    }

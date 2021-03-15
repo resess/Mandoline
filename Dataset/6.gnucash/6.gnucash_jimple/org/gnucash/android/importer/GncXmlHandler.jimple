@@ -1,0 +1,3952 @@
+org.gnucash.android.importer.GncXmlHandler extends org.xml.sax.helpers.DefaultHandler
+public static final java.lang.String ACCOUNT_COLOR_HEX_REGEX
+private static final java.lang.String LOG_TAG
+private static final java.lang.String NO_CURRENCY_CODE
+org.gnucash.android.model.Account mAccount
+java.util.List mAccountList
+java.util.HashMap mAccountMap
+org.gnucash.android.db.adapter.AccountsDbAdapter mAccountsDbAdapter
+java.util.List mAutoBalanceSplits
+private org.gnucash.android.model.Book mBook
+org.gnucash.android.model.Budget mBudget
+org.gnucash.android.model.BudgetAmount mBudgetAmount
+java.lang.String mBudgetAmountAccountUID
+java.util.List mBudgetList
+private org.gnucash.android.db.adapter.BudgetsDbAdapter mBudgetsDbAdapter
+private org.gnucash.android.db.adapter.CommoditiesDbAdapter mCommoditiesDbAdapter
+java.lang.StringBuilder mContent
+private java.util.Map mCurrencyCount
+boolean mISO4217Currency
+java.lang.String mIgnoreElement
+boolean mIgnoreScheduledAction
+boolean mIgnoreTemplateTransaction
+boolean mInBudgetSlot
+boolean mInColorSlot
+boolean mInCreditNumericSlot
+boolean mInDebitNumericSlot
+boolean mInDefaultTransferAccount
+boolean mInExported
+boolean mInFavoriteSlot
+boolean mInPlaceHolderSlot
+boolean mInSplitAccountSlot
+boolean mInTemplates
+boolean mIsDateEntered
+boolean mIsDatePosted
+boolean mIsLastRun
+boolean mIsNote
+boolean mIsRecurrenceStart
+boolean mIsScheduledEnd
+boolean mIsScheduledStart
+boolean mNegativeQuantity
+org.gnucash.android.model.Price mPrice
+boolean mPriceCommodity
+boolean mPriceCurrency
+java.util.List mPriceList
+private org.gnucash.android.db.adapter.PricesDbAdapter mPricesDbAdapter
+java.math.BigDecimal mQuantity
+org.gnucash.android.model.Recurrence mRecurrence
+int mRecurrenceMultiplier
+private long mRecurrencePeriod
+org.gnucash.android.model.Account mRootAccount
+org.gnucash.android.model.ScheduledAction mScheduledAction
+private org.gnucash.android.db.adapter.ScheduledActionDbAdapter mScheduledActionsDbAdapter
+java.util.List mScheduledActionsList
+java.lang.String mSlotTagAttribute
+org.gnucash.android.model.Split mSplit
+java.util.List mTemplatAccountList
+java.util.Map mTemplateAccountToTransactionMap
+java.util.List mTemplateTransactions
+org.gnucash.android.model.Transaction mTransaction
+java.util.List mTransactionList
+private org.gnucash.android.db.adapter.TransactionsDbAdapter mTransactionsDbAdapter
+java.math.BigDecimal mValue
+private android.database.sqlite.SQLiteDatabase mainDb
+    public void <init>()
+    {
+        org.gnucash.android.importer.GncXmlHandler r0;
+
+        r0 := @this: org.gnucash.android.importer.GncXmlHandler;
+
+        specialinvoke r0.<org.xml.sax.helpers.DefaultHandler: void <init>()>();
+
+        r0.<org.gnucash.android.importer.GncXmlHandler: java.lang.String mIgnoreElement> = null;
+
+        r0.<org.gnucash.android.importer.GncXmlHandler: boolean mInColorSlot> = 0;
+
+        r0.<org.gnucash.android.importer.GncXmlHandler: boolean mInPlaceHolderSlot> = 0;
+
+        r0.<org.gnucash.android.importer.GncXmlHandler: boolean mInFavoriteSlot> = 0;
+
+        r0.<org.gnucash.android.importer.GncXmlHandler: boolean mISO4217Currency> = 0;
+
+        r0.<org.gnucash.android.importer.GncXmlHandler: boolean mIsDatePosted> = 0;
+
+        r0.<org.gnucash.android.importer.GncXmlHandler: boolean mIsDateEntered> = 0;
+
+        r0.<org.gnucash.android.importer.GncXmlHandler: boolean mIsNote> = 0;
+
+        r0.<org.gnucash.android.importer.GncXmlHandler: boolean mInDefaultTransferAccount> = 0;
+
+        r0.<org.gnucash.android.importer.GncXmlHandler: boolean mInExported> = 0;
+
+        r0.<org.gnucash.android.importer.GncXmlHandler: boolean mInTemplates> = 0;
+
+        r0.<org.gnucash.android.importer.GncXmlHandler: boolean mInSplitAccountSlot> = 0;
+
+        r0.<org.gnucash.android.importer.GncXmlHandler: boolean mInCreditNumericSlot> = 0;
+
+        r0.<org.gnucash.android.importer.GncXmlHandler: boolean mInDebitNumericSlot> = 0;
+
+        r0.<org.gnucash.android.importer.GncXmlHandler: boolean mIsScheduledStart> = 0;
+
+        r0.<org.gnucash.android.importer.GncXmlHandler: boolean mIsScheduledEnd> = 0;
+
+        r0.<org.gnucash.android.importer.GncXmlHandler: boolean mIsLastRun> = 0;
+
+        r0.<org.gnucash.android.importer.GncXmlHandler: boolean mIsRecurrenceStart> = 0;
+
+        r0.<org.gnucash.android.importer.GncXmlHandler: boolean mInBudgetSlot> = 0;
+
+        r0.<org.gnucash.android.importer.GncXmlHandler: java.lang.String mSlotTagAttribute> = null;
+
+        r0.<org.gnucash.android.importer.GncXmlHandler: java.lang.String mBudgetAmountAccountUID> = null;
+
+        r0.<org.gnucash.android.importer.GncXmlHandler: int mRecurrenceMultiplier> = 1;
+
+        r0.<org.gnucash.android.importer.GncXmlHandler: boolean mIgnoreTemplateTransaction> = 1;
+
+        r0.<org.gnucash.android.importer.GncXmlHandler: boolean mIgnoreScheduledAction> = 0;
+
+        r0.<org.gnucash.android.importer.GncXmlHandler: long mRecurrencePeriod> = 0L;
+
+        specialinvoke r0.<org.gnucash.android.importer.GncXmlHandler: void init()>();
+
+        return;
+    }
+    private int generateMissedScheduledTransactions(org.gnucash.android.model.ScheduledAction)
+    {
+        org.gnucash.android.importer.GncXmlHandler r0;
+        org.gnucash.android.model.ScheduledAction $r1;
+        org.gnucash.android.model.Transaction r2, r9;
+        org.gnucash.android.model.ScheduledAction$ActionType $r3, $r4;
+        boolean $z0;
+        long $l0, $l2, $l5;
+        byte $b1;
+        int $i3, $i4;
+        java.lang.String $r5, $r10;
+        java.util.List $r6, $r11;
+        java.util.Iterator $r7;
+        java.lang.Object $r8;
+
+        r0 := @this: org.gnucash.android.importer.GncXmlHandler;
+
+        $r1 := @parameter0: org.gnucash.android.model.ScheduledAction;
+
+        $r3 = virtualinvoke $r1.<org.gnucash.android.model.ScheduledAction: org.gnucash.android.model.ScheduledAction$ActionType getActionType()>();
+
+        $r4 = <org.gnucash.android.model.ScheduledAction$ActionType: org.gnucash.android.model.ScheduledAction$ActionType TRANSACTION>;
+
+        if $r3 != $r4 goto label2;
+
+        $z0 = virtualinvoke $r1.<org.gnucash.android.model.ScheduledAction: boolean isEnabled()>();
+
+        if $z0 == 0 goto label2;
+
+        $z0 = virtualinvoke $r1.<org.gnucash.android.model.ScheduledAction: boolean shouldAutoCreate()>();
+
+        if $z0 == 0 goto label2;
+
+        $l0 = virtualinvoke $r1.<org.gnucash.android.model.ScheduledAction: long getEndTime()>();
+
+        $b1 = $l0 cmp 0L;
+
+        if $b1 <= 0 goto label1;
+
+        $l0 = virtualinvoke $r1.<org.gnucash.android.model.ScheduledAction: long getEndTime()>();
+
+        $l2 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        $b1 = $l0 cmp $l2;
+
+        if $b1 > 0 goto label2;
+
+     label1:
+        $i3 = virtualinvoke $r1.<org.gnucash.android.model.ScheduledAction: int getTotalPlannedExecutionCount()>();
+
+        if $i3 <= 0 goto label3;
+
+        $i3 = virtualinvoke $r1.<org.gnucash.android.model.ScheduledAction: int getExecutionCount()>();
+
+        $i4 = virtualinvoke $r1.<org.gnucash.android.model.ScheduledAction: int getTotalPlannedExecutionCount()>();
+
+        if $i3 < $i4 goto label3;
+
+     label2:
+        return 0;
+
+     label3:
+        $l0 = virtualinvoke $r1.<org.gnucash.android.model.ScheduledAction: long getStartTime()>();
+
+        $l2 = virtualinvoke $r1.<org.gnucash.android.model.ScheduledAction: long getLastRunTime()>();
+
+        $b1 = $l2 cmp 0L;
+
+        if $b1 <= 0 goto label4;
+
+        $l0 = virtualinvoke $r1.<org.gnucash.android.model.ScheduledAction: long getLastRunTime()>();
+
+     label4:
+        $i3 = 0;
+
+        $l2 = virtualinvoke $r1.<org.gnucash.android.model.ScheduledAction: long getPeriod()>();
+
+        $r5 = virtualinvoke $r1.<org.gnucash.android.model.ScheduledAction: java.lang.String getActionUID()>();
+
+     label5:
+        $l0 = $l0 + $l2;
+
+        $l5 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        $b1 = $l0 cmp $l5;
+
+        if $b1 > 0 goto label7;
+
+        $r6 = r0.<org.gnucash.android.importer.GncXmlHandler: java.util.List mTemplateTransactions>;
+
+        $r7 = interfaceinvoke $r6.<java.util.List: java.util.Iterator iterator()>();
+
+     label6:
+        $z0 = interfaceinvoke $r7.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label5;
+
+        $r8 = interfaceinvoke $r7.<java.util.Iterator: java.lang.Object next()>();
+
+        r9 = (org.gnucash.android.model.Transaction) $r8;
+
+        $r10 = virtualinvoke r9.<org.gnucash.android.model.Transaction: java.lang.String getUID()>();
+
+        $z0 = virtualinvoke $r10.<java.lang.String: boolean equals(java.lang.Object)>($r5);
+
+        if $z0 == 0 goto label6;
+
+        r2 = new org.gnucash.android.model.Transaction;
+
+        specialinvoke r2.<org.gnucash.android.model.Transaction: void <init>(org.gnucash.android.model.Transaction,boolean)>(r9, 1);
+
+        virtualinvoke r2.<org.gnucash.android.model.Transaction: void setTime(long)>($l0);
+
+        $r10 = virtualinvoke $r1.<org.gnucash.android.model.ScheduledAction: java.lang.String getUID()>();
+
+        virtualinvoke r2.<org.gnucash.android.model.Transaction: void setScheduledActionUID(java.lang.String)>($r10);
+
+        $r6 = r0.<org.gnucash.android.importer.GncXmlHandler: java.util.List mTransactionList>;
+
+        interfaceinvoke $r6.<java.util.List: boolean add(java.lang.Object)>(r2);
+
+        $r10 = virtualinvoke r2.<org.gnucash.android.model.Transaction: java.lang.String getCurrencyCode()>();
+
+        $r6 = virtualinvoke r2.<org.gnucash.android.model.Transaction: java.util.List getSplits(java.lang.String)>($r10);
+
+        $r11 = r0.<org.gnucash.android.importer.GncXmlHandler: java.util.List mAutoBalanceSplits>;
+
+        interfaceinvoke $r11.<java.util.List: boolean addAll(java.util.Collection)>($r6);
+
+        $i4 = virtualinvoke $r1.<org.gnucash.android.model.ScheduledAction: int getExecutionCount()>();
+
+        $i4 = $i4 + 1;
+
+        virtualinvoke $r1.<org.gnucash.android.model.ScheduledAction: void setExecutionCount(int)>($i4);
+
+        $i3 = $i3 + 1;
+
+        goto label5;
+
+     label7:
+        virtualinvoke $r1.<org.gnucash.android.model.ScheduledAction: void setLastRun(long)>($l0);
+
+        return $i3;
+    }
+    private org.gnucash.android.model.Commodity getCommodityForAccount(java.lang.String)
+    {
+        org.gnucash.android.importer.GncXmlHandler r0;
+        java.lang.String $r1;
+        java.lang.Exception r2;
+        java.util.HashMap $r3;
+        java.lang.Object $r4;
+        org.gnucash.android.model.Account $r5;
+        org.gnucash.android.model.Commodity $r6;
+
+        r0 := @this: org.gnucash.android.importer.GncXmlHandler;
+
+        $r1 := @parameter0: java.lang.String;
+
+     label1:
+        $r3 = r0.<org.gnucash.android.importer.GncXmlHandler: java.util.HashMap mAccountMap>;
+
+        $r4 = virtualinvoke $r3.<java.util.HashMap: java.lang.Object get(java.lang.Object)>($r1);
+
+        $r5 = (org.gnucash.android.model.Account) $r4;
+
+        $r6 = virtualinvoke $r5.<org.gnucash.android.model.Account: org.gnucash.android.model.Commodity getCommodity()>();
+
+     label2:
+        return $r6;
+
+     label3:
+        r2 := @caughtexception;
+
+        staticinvoke <com.crashlytics.android.Crashlytics: void logException(java.lang.Throwable)>(r2);
+
+        $r6 = <org.gnucash.android.model.Commodity: org.gnucash.android.model.Commodity DEFAULT_COMMODITY>;
+
+        return $r6;
+
+        catch java.lang.Exception from label1 to label2 with label3;
+    }
+    private void handleEndOfTemplateNumericSlot(java.lang.String, org.gnucash.android.model.TransactionType)
+    {
+        org.gnucash.android.importer.GncXmlHandler r0;
+        java.lang.String $r1, $r6;
+        org.gnucash.android.model.TransactionType $r2, $r8;
+        org.gnucash.android.model.Money r3;
+        java.math.BigDecimal $r4;
+        org.gnucash.android.model.Split $r5;
+        org.gnucash.android.model.Commodity $r7;
+        java.lang.NumberFormatException $r9;
+        java.lang.Exception r10;
+        java.lang.StringBuilder $r11;
+        java.lang.Throwable $r12;
+        java.text.ParseException $r13;
+
+        r0 := @this: org.gnucash.android.importer.GncXmlHandler;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: org.gnucash.android.model.TransactionType;
+
+     label01:
+        $r4 = staticinvoke <org.gnucash.android.export.xml.GncXmlHelper: java.math.BigDecimal parseSplitAmount(java.lang.String)>($r1);
+
+     label02:
+        r3 = new org.gnucash.android.model.Money;
+
+        $r5 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Split mSplit>;
+
+     label03:
+        $r6 = virtualinvoke $r5.<org.gnucash.android.model.Split: java.lang.String getAccountUID()>();
+
+        $r7 = specialinvoke r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Commodity getCommodityForAccount(java.lang.String)>($r6);
+
+        specialinvoke r3.<org.gnucash.android.model.Money: void <init>(java.math.BigDecimal,org.gnucash.android.model.Commodity)>($r4, $r7);
+
+     label04:
+        $r5 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Split mSplit>;
+
+     label05:
+        r3 = virtualinvoke r3.<org.gnucash.android.model.Money: org.gnucash.android.model.Money abs()>();
+
+        virtualinvoke $r5.<org.gnucash.android.model.Split: void setValue(org.gnucash.android.model.Money)>(r3);
+
+     label06:
+        $r5 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Split mSplit>;
+
+     label07:
+        virtualinvoke $r5.<org.gnucash.android.model.Split: void setType(org.gnucash.android.model.TransactionType)>($r2);
+
+     label08:
+        r0.<org.gnucash.android.importer.GncXmlHandler: boolean mIgnoreTemplateTransaction> = 0;
+
+     label09:
+        $r8 = <org.gnucash.android.model.TransactionType: org.gnucash.android.model.TransactionType CREDIT>;
+
+        if $r2 != $r8 goto label10;
+
+        r0.<org.gnucash.android.importer.GncXmlHandler: boolean mInCreditNumericSlot> = 0;
+
+        return;
+
+     label10:
+        r0.<org.gnucash.android.importer.GncXmlHandler: boolean mInDebitNumericSlot> = 0;
+
+        return;
+
+     label11:
+        $r9 := @caughtexception;
+
+        r10 = $r9;
+
+     label12:
+        $r11 = new java.lang.StringBuilder;
+
+        specialinvoke $r11.<java.lang.StringBuilder: void <init>()>();
+
+        $r11 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Error parsing template credit split amount ");
+
+        $r11 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r1 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r11 = new java.lang.StringBuilder;
+
+        specialinvoke $r11.<java.lang.StringBuilder: void <init>()>();
+
+        $r11 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r11 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\n");
+
+        $r6 = virtualinvoke r10.<java.lang.Exception: java.lang.String getMessage()>();
+
+        $r11 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r6 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String)>("GnuCashAccountImporter", $r6);
+
+        staticinvoke <com.crashlytics.android.Crashlytics: void log(java.lang.String)>($r1);
+
+        staticinvoke <com.crashlytics.android.Crashlytics: void logException(java.lang.Throwable)>(r10);
+
+     label13:
+        $r8 = <org.gnucash.android.model.TransactionType: org.gnucash.android.model.TransactionType CREDIT>;
+
+        if $r2 != $r8 goto label14;
+
+        r0.<org.gnucash.android.importer.GncXmlHandler: boolean mInCreditNumericSlot> = 0;
+
+        return;
+
+     label14:
+        r0.<org.gnucash.android.importer.GncXmlHandler: boolean mInDebitNumericSlot> = 0;
+
+        return;
+
+     label15:
+        $r12 := @caughtexception;
+
+        $r8 = <org.gnucash.android.model.TransactionType: org.gnucash.android.model.TransactionType CREDIT>;
+
+        if $r2 != $r8 goto label17;
+
+        r0.<org.gnucash.android.importer.GncXmlHandler: boolean mInCreditNumericSlot> = 0;
+
+     label16:
+        throw $r12;
+
+     label17:
+        r0.<org.gnucash.android.importer.GncXmlHandler: boolean mInDebitNumericSlot> = 0;
+
+        goto label16;
+
+     label18:
+        $r13 := @caughtexception;
+
+        r10 = $r13;
+
+        goto label12;
+
+        catch java.lang.NumberFormatException from label01 to label02 with label11;
+        catch java.lang.NumberFormatException from label03 to label04 with label11;
+        catch java.lang.NumberFormatException from label05 to label06 with label11;
+        catch java.lang.NumberFormatException from label07 to label08 with label11;
+        catch java.text.ParseException from label01 to label02 with label18;
+        catch java.text.ParseException from label03 to label04 with label18;
+        catch java.text.ParseException from label05 to label06 with label18;
+        catch java.text.ParseException from label07 to label08 with label18;
+        catch java.lang.Throwable from label01 to label09 with label15;
+        catch java.lang.Throwable from label12 to label13 with label15;
+    }
+    private void init()
+    {
+        org.gnucash.android.importer.GncXmlHandler r0;
+        org.gnucash.android.db.DatabaseHelper r1;
+        org.gnucash.android.db.adapter.RecurrenceDbAdapter r2;
+        org.gnucash.android.model.Book $r3;
+        android.content.Context $r4;
+        java.lang.String $r5;
+        android.database.sqlite.SQLiteDatabase $r6, $r9;
+        org.gnucash.android.db.adapter.TransactionsDbAdapter $r7;
+        org.gnucash.android.db.adapter.SplitsDbAdapter $r8;
+        org.gnucash.android.db.adapter.AccountsDbAdapter $r10;
+        org.gnucash.android.db.adapter.ScheduledActionDbAdapter $r11;
+        org.gnucash.android.db.adapter.CommoditiesDbAdapter $r12;
+        org.gnucash.android.db.adapter.PricesDbAdapter $r13;
+        org.gnucash.android.db.adapter.BudgetsDbAdapter $r14;
+        org.gnucash.android.db.adapter.BudgetAmountsDbAdapter $r15;
+        java.lang.StringBuilder $r16;
+        java.util.ArrayList $r17;
+        java.util.HashMap $r18;
+
+        r0 := @this: org.gnucash.android.importer.GncXmlHandler;
+
+        $r3 = new org.gnucash.android.model.Book;
+
+        specialinvoke $r3.<org.gnucash.android.model.Book: void <init>()>();
+
+        r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Book mBook> = $r3;
+
+        r1 = new org.gnucash.android.db.DatabaseHelper;
+
+        $r4 = staticinvoke <org.gnucash.android.app.GnuCashApplication: android.content.Context getAppContext()>();
+
+        $r3 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Book mBook>;
+
+        $r5 = virtualinvoke $r3.<org.gnucash.android.model.Book: java.lang.String getUID()>();
+
+        specialinvoke r1.<org.gnucash.android.db.DatabaseHelper: void <init>(android.content.Context,java.lang.String)>($r4, $r5);
+
+        $r6 = virtualinvoke r1.<org.gnucash.android.db.DatabaseHelper: android.database.sqlite.SQLiteDatabase getWritableDatabase()>();
+
+        r0.<org.gnucash.android.importer.GncXmlHandler: android.database.sqlite.SQLiteDatabase mainDb> = $r6;
+
+        $r7 = new org.gnucash.android.db.adapter.TransactionsDbAdapter;
+
+        $r6 = r0.<org.gnucash.android.importer.GncXmlHandler: android.database.sqlite.SQLiteDatabase mainDb>;
+
+        $r8 = new org.gnucash.android.db.adapter.SplitsDbAdapter;
+
+        $r9 = r0.<org.gnucash.android.importer.GncXmlHandler: android.database.sqlite.SQLiteDatabase mainDb>;
+
+        specialinvoke $r8.<org.gnucash.android.db.adapter.SplitsDbAdapter: void <init>(android.database.sqlite.SQLiteDatabase)>($r9);
+
+        specialinvoke $r7.<org.gnucash.android.db.adapter.TransactionsDbAdapter: void <init>(android.database.sqlite.SQLiteDatabase,org.gnucash.android.db.adapter.SplitsDbAdapter)>($r6, $r8);
+
+        r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.db.adapter.TransactionsDbAdapter mTransactionsDbAdapter> = $r7;
+
+        $r10 = new org.gnucash.android.db.adapter.AccountsDbAdapter;
+
+        $r6 = r0.<org.gnucash.android.importer.GncXmlHandler: android.database.sqlite.SQLiteDatabase mainDb>;
+
+        $r7 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.db.adapter.TransactionsDbAdapter mTransactionsDbAdapter>;
+
+        specialinvoke $r10.<org.gnucash.android.db.adapter.AccountsDbAdapter: void <init>(android.database.sqlite.SQLiteDatabase,org.gnucash.android.db.adapter.TransactionsDbAdapter)>($r6, $r7);
+
+        r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.db.adapter.AccountsDbAdapter mAccountsDbAdapter> = $r10;
+
+        r2 = new org.gnucash.android.db.adapter.RecurrenceDbAdapter;
+
+        $r6 = r0.<org.gnucash.android.importer.GncXmlHandler: android.database.sqlite.SQLiteDatabase mainDb>;
+
+        specialinvoke r2.<org.gnucash.android.db.adapter.RecurrenceDbAdapter: void <init>(android.database.sqlite.SQLiteDatabase)>($r6);
+
+        $r11 = new org.gnucash.android.db.adapter.ScheduledActionDbAdapter;
+
+        $r6 = r0.<org.gnucash.android.importer.GncXmlHandler: android.database.sqlite.SQLiteDatabase mainDb>;
+
+        specialinvoke $r11.<org.gnucash.android.db.adapter.ScheduledActionDbAdapter: void <init>(android.database.sqlite.SQLiteDatabase,org.gnucash.android.db.adapter.RecurrenceDbAdapter)>($r6, r2);
+
+        r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.db.adapter.ScheduledActionDbAdapter mScheduledActionsDbAdapter> = $r11;
+
+        $r12 = new org.gnucash.android.db.adapter.CommoditiesDbAdapter;
+
+        $r6 = r0.<org.gnucash.android.importer.GncXmlHandler: android.database.sqlite.SQLiteDatabase mainDb>;
+
+        specialinvoke $r12.<org.gnucash.android.db.adapter.CommoditiesDbAdapter: void <init>(android.database.sqlite.SQLiteDatabase)>($r6);
+
+        r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.db.adapter.CommoditiesDbAdapter mCommoditiesDbAdapter> = $r12;
+
+        $r13 = new org.gnucash.android.db.adapter.PricesDbAdapter;
+
+        $r6 = r0.<org.gnucash.android.importer.GncXmlHandler: android.database.sqlite.SQLiteDatabase mainDb>;
+
+        specialinvoke $r13.<org.gnucash.android.db.adapter.PricesDbAdapter: void <init>(android.database.sqlite.SQLiteDatabase)>($r6);
+
+        r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.db.adapter.PricesDbAdapter mPricesDbAdapter> = $r13;
+
+        $r14 = new org.gnucash.android.db.adapter.BudgetsDbAdapter;
+
+        $r6 = r0.<org.gnucash.android.importer.GncXmlHandler: android.database.sqlite.SQLiteDatabase mainDb>;
+
+        $r15 = new org.gnucash.android.db.adapter.BudgetAmountsDbAdapter;
+
+        $r9 = r0.<org.gnucash.android.importer.GncXmlHandler: android.database.sqlite.SQLiteDatabase mainDb>;
+
+        specialinvoke $r15.<org.gnucash.android.db.adapter.BudgetAmountsDbAdapter: void <init>(android.database.sqlite.SQLiteDatabase)>($r9);
+
+        specialinvoke $r14.<org.gnucash.android.db.adapter.BudgetsDbAdapter: void <init>(android.database.sqlite.SQLiteDatabase,org.gnucash.android.db.adapter.BudgetAmountsDbAdapter,org.gnucash.android.db.adapter.RecurrenceDbAdapter)>($r6, $r15, r2);
+
+        r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.db.adapter.BudgetsDbAdapter mBudgetsDbAdapter> = $r14;
+
+        $r16 = new java.lang.StringBuilder;
+
+        specialinvoke $r16.<java.lang.StringBuilder: void <init>()>();
+
+        r0.<org.gnucash.android.importer.GncXmlHandler: java.lang.StringBuilder mContent> = $r16;
+
+        $r17 = new java.util.ArrayList;
+
+        specialinvoke $r17.<java.util.ArrayList: void <init>()>();
+
+        r0.<org.gnucash.android.importer.GncXmlHandler: java.util.List mAccountList> = $r17;
+
+        $r18 = new java.util.HashMap;
+
+        specialinvoke $r18.<java.util.HashMap: void <init>()>();
+
+        r0.<org.gnucash.android.importer.GncXmlHandler: java.util.HashMap mAccountMap> = $r18;
+
+        $r17 = new java.util.ArrayList;
+
+        specialinvoke $r17.<java.util.ArrayList: void <init>()>();
+
+        r0.<org.gnucash.android.importer.GncXmlHandler: java.util.List mTransactionList> = $r17;
+
+        $r17 = new java.util.ArrayList;
+
+        specialinvoke $r17.<java.util.ArrayList: void <init>()>();
+
+        r0.<org.gnucash.android.importer.GncXmlHandler: java.util.List mScheduledActionsList> = $r17;
+
+        $r17 = new java.util.ArrayList;
+
+        specialinvoke $r17.<java.util.ArrayList: void <init>()>();
+
+        r0.<org.gnucash.android.importer.GncXmlHandler: java.util.List mBudgetList> = $r17;
+
+        $r17 = new java.util.ArrayList;
+
+        specialinvoke $r17.<java.util.ArrayList: void <init>()>();
+
+        r0.<org.gnucash.android.importer.GncXmlHandler: java.util.List mTemplatAccountList> = $r17;
+
+        $r17 = new java.util.ArrayList;
+
+        specialinvoke $r17.<java.util.ArrayList: void <init>()>();
+
+        r0.<org.gnucash.android.importer.GncXmlHandler: java.util.List mTemplateTransactions> = $r17;
+
+        $r18 = new java.util.HashMap;
+
+        specialinvoke $r18.<java.util.HashMap: void <init>()>();
+
+        r0.<org.gnucash.android.importer.GncXmlHandler: java.util.Map mTemplateAccountToTransactionMap> = $r18;
+
+        $r17 = new java.util.ArrayList;
+
+        specialinvoke $r17.<java.util.ArrayList: void <init>()>();
+
+        r0.<org.gnucash.android.importer.GncXmlHandler: java.util.List mAutoBalanceSplits> = $r17;
+
+        $r17 = new java.util.ArrayList;
+
+        specialinvoke $r17.<java.util.ArrayList: void <init>()>();
+
+        r0.<org.gnucash.android.importer.GncXmlHandler: java.util.List mPriceList> = $r17;
+
+        $r18 = new java.util.HashMap;
+
+        specialinvoke $r18.<java.util.HashMap: void <init>()>();
+
+        r0.<org.gnucash.android.importer.GncXmlHandler: java.util.Map mCurrencyCount> = $r18;
+
+        return;
+    }
+    private void saveToDatabase()
+    {
+        org.gnucash.android.importer.GncXmlHandler r0;
+        org.gnucash.android.db.adapter.BooksDbAdapter $r1;
+        org.gnucash.android.model.Book $r2;
+        org.gnucash.android.model.Account $r3;
+        java.lang.String $r4, $r9;
+        long $l0, $l1;
+        org.gnucash.android.db.adapter.AccountsDbAdapter $r5;
+        java.lang.Class $r6;
+        java.lang.Object[] $r7;
+        java.lang.Long $r8;
+        java.util.List $r10;
+        org.gnucash.android.db.adapter.DatabaseAdapter$UpdateMethod $r11;
+        org.gnucash.android.db.adapter.ScheduledActionDbAdapter $r12;
+        org.gnucash.android.db.adapter.TransactionsDbAdapter $r13;
+        org.gnucash.android.db.adapter.PricesDbAdapter $r14;
+        android.database.sqlite.SQLiteDatabase $r15;
+        java.lang.Throwable $r16;
+
+        r0 := @this: org.gnucash.android.importer.GncXmlHandler;
+
+        $r1 = staticinvoke <org.gnucash.android.db.adapter.BooksDbAdapter: org.gnucash.android.db.adapter.BooksDbAdapter getInstance()>();
+
+        $r2 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Book mBook>;
+
+        $r3 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Account mRootAccount>;
+
+        $r4 = virtualinvoke $r3.<org.gnucash.android.model.Account: java.lang.String getUID()>();
+
+        virtualinvoke $r2.<org.gnucash.android.model.Book: void setRootAccountUID(java.lang.String)>($r4);
+
+        $r2 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Book mBook>;
+
+        $r4 = virtualinvoke $r1.<org.gnucash.android.db.adapter.BooksDbAdapter: java.lang.String generateDefaultBookName()>();
+
+        virtualinvoke $r2.<org.gnucash.android.model.Book: void setDisplayName(java.lang.String)>($r4);
+
+        $l0 = staticinvoke <java.lang.System: long nanoTime()>();
+
+        $r5 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.db.adapter.AccountsDbAdapter mAccountsDbAdapter>;
+
+        virtualinvoke $r5.<org.gnucash.android.db.adapter.AccountsDbAdapter: void beginTransaction()>();
+
+        $r6 = virtualinvoke r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r4 = virtualinvoke $r6.<java.lang.Class: java.lang.String getSimpleName()>();
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>($r4, "bulk insert starts");
+
+     label1:
+        $r5 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.db.adapter.AccountsDbAdapter mAccountsDbAdapter>;
+
+        virtualinvoke $r5.<org.gnucash.android.db.adapter.AccountsDbAdapter: void enableForeignKey(boolean)>(0);
+
+        $r6 = virtualinvoke r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r4 = virtualinvoke $r6.<java.lang.Class: java.lang.String getSimpleName()>();
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>($r4, "before clean up db");
+
+        $r5 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.db.adapter.AccountsDbAdapter mAccountsDbAdapter>;
+
+        virtualinvoke $r5.<org.gnucash.android.db.adapter.AccountsDbAdapter: int deleteAllRecords()>();
+
+        $r6 = virtualinvoke r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r4 = virtualinvoke $r6.<java.lang.Class: java.lang.String getSimpleName()>();
+
+        $r7 = newarray (java.lang.Object)[1];
+
+        $l1 = staticinvoke <java.lang.System: long nanoTime()>();
+
+     label2:
+        $l1 = $l1 - $l0;
+
+     label3:
+        $r8 = staticinvoke <java.lang.Long: java.lang.Long valueOf(long)>($l1);
+
+        $r7[0] = $r8;
+
+        $r9 = staticinvoke <java.lang.String: java.lang.String format(java.lang.String,java.lang.Object[])>("deb clean up done %d ns", $r7);
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>($r4, $r9);
+
+        $r5 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.db.adapter.AccountsDbAdapter mAccountsDbAdapter>;
+
+        $r10 = r0.<org.gnucash.android.importer.GncXmlHandler: java.util.List mAccountList>;
+
+        $r11 = <org.gnucash.android.db.adapter.DatabaseAdapter$UpdateMethod: org.gnucash.android.db.adapter.DatabaseAdapter$UpdateMethod insert>;
+
+        $l1 = virtualinvoke $r5.<org.gnucash.android.db.adapter.AccountsDbAdapter: long bulkAddRecords(java.util.List,org.gnucash.android.db.adapter.DatabaseAdapter$UpdateMethod)>($r10, $r11);
+
+        $r7 = newarray (java.lang.Object)[1];
+
+        $r8 = staticinvoke <java.lang.Long: java.lang.Long valueOf(long)>($l1);
+
+        $r7[0] = $r8;
+
+        $r4 = staticinvoke <java.lang.String: java.lang.String format(java.lang.String,java.lang.Object[])>("%d accounts inserted", $r7);
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("Handler:", $r4);
+
+        $r12 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.db.adapter.ScheduledActionDbAdapter mScheduledActionsDbAdapter>;
+
+        $r10 = r0.<org.gnucash.android.importer.GncXmlHandler: java.util.List mScheduledActionsList>;
+
+        $r11 = <org.gnucash.android.db.adapter.DatabaseAdapter$UpdateMethod: org.gnucash.android.db.adapter.DatabaseAdapter$UpdateMethod insert>;
+
+        $l1 = virtualinvoke $r12.<org.gnucash.android.db.adapter.ScheduledActionDbAdapter: long bulkAddRecords(java.util.List,org.gnucash.android.db.adapter.DatabaseAdapter$UpdateMethod)>($r10, $r11);
+
+        $r7 = newarray (java.lang.Object)[1];
+
+        $r8 = staticinvoke <java.lang.Long: java.lang.Long valueOf(long)>($l1);
+
+        $r7[0] = $r8;
+
+        $r4 = staticinvoke <java.lang.String: java.lang.String format(java.lang.String,java.lang.Object[])>("%d scheduled actions inserted", $r7);
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("Handler:", $r4);
+
+        $r13 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.db.adapter.TransactionsDbAdapter mTransactionsDbAdapter>;
+
+        $r10 = r0.<org.gnucash.android.importer.GncXmlHandler: java.util.List mTemplateTransactions>;
+
+        $r11 = <org.gnucash.android.db.adapter.DatabaseAdapter$UpdateMethod: org.gnucash.android.db.adapter.DatabaseAdapter$UpdateMethod insert>;
+
+        $l1 = virtualinvoke $r13.<org.gnucash.android.db.adapter.TransactionsDbAdapter: long bulkAddRecords(java.util.List,org.gnucash.android.db.adapter.DatabaseAdapter$UpdateMethod)>($r10, $r11);
+
+        $r7 = newarray (java.lang.Object)[1];
+
+        $r8 = staticinvoke <java.lang.Long: java.lang.Long valueOf(long)>($l1);
+
+        $r7[0] = $r8;
+
+        $r4 = staticinvoke <java.lang.String: java.lang.String format(java.lang.String,java.lang.Object[])>("%d template transactions inserted", $r7);
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("Handler:", $r4);
+
+        $r13 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.db.adapter.TransactionsDbAdapter mTransactionsDbAdapter>;
+
+        $r10 = r0.<org.gnucash.android.importer.GncXmlHandler: java.util.List mTransactionList>;
+
+        $r11 = <org.gnucash.android.db.adapter.DatabaseAdapter$UpdateMethod: org.gnucash.android.db.adapter.DatabaseAdapter$UpdateMethod insert>;
+
+        $l1 = virtualinvoke $r13.<org.gnucash.android.db.adapter.TransactionsDbAdapter: long bulkAddRecords(java.util.List,org.gnucash.android.db.adapter.DatabaseAdapter$UpdateMethod)>($r10, $r11);
+
+        $r7 = newarray (java.lang.Object)[1];
+
+        $r8 = staticinvoke <java.lang.Long: java.lang.Long valueOf(long)>($l1);
+
+        $r7[0] = $r8;
+
+        $r4 = staticinvoke <java.lang.String: java.lang.String format(java.lang.String,java.lang.Object[])>("%d transactions inserted", $r7);
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("Handler:", $r4);
+
+        $r14 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.db.adapter.PricesDbAdapter mPricesDbAdapter>;
+
+        $r10 = r0.<org.gnucash.android.importer.GncXmlHandler: java.util.List mPriceList>;
+
+        $r11 = <org.gnucash.android.db.adapter.DatabaseAdapter$UpdateMethod: org.gnucash.android.db.adapter.DatabaseAdapter$UpdateMethod insert>;
+
+        $l1 = virtualinvoke $r14.<org.gnucash.android.db.adapter.PricesDbAdapter: long bulkAddRecords(java.util.List,org.gnucash.android.db.adapter.DatabaseAdapter$UpdateMethod)>($r10, $r11);
+
+        $r6 = virtualinvoke r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r4 = virtualinvoke $r6.<java.lang.Class: java.lang.String getSimpleName()>();
+
+        $r7 = newarray (java.lang.Object)[1];
+
+        $r8 = staticinvoke <java.lang.Long: java.lang.Long valueOf(long)>($l1);
+
+        $r7[0] = $r8;
+
+        $r9 = staticinvoke <java.lang.String: java.lang.String format(java.lang.String,java.lang.Object[])>("%d prices inserted", $r7);
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>($r4, $r9);
+
+        $l1 = staticinvoke <java.lang.System: long nanoTime()>();
+
+        $r6 = virtualinvoke r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r4 = virtualinvoke $r6.<java.lang.Class: java.lang.String getSimpleName()>();
+
+        $r7 = newarray (java.lang.Object)[1];
+
+     label4:
+        $l0 = $l1 - $l0;
+
+     label5:
+        $r8 = staticinvoke <java.lang.Long: java.lang.Long valueOf(long)>($l0);
+
+        $r7[0] = $r8;
+
+        $r9 = staticinvoke <java.lang.String: java.lang.String format(java.lang.String,java.lang.Object[])>("bulk insert time: %d", $r7);
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>($r4, $r9);
+
+        $r2 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Book mBook>;
+
+        $r11 = <org.gnucash.android.db.adapter.DatabaseAdapter$UpdateMethod: org.gnucash.android.db.adapter.DatabaseAdapter$UpdateMethod insert>;
+
+        virtualinvoke $r1.<org.gnucash.android.db.adapter.BooksDbAdapter: void addRecord(org.gnucash.android.model.BaseModel,org.gnucash.android.db.adapter.DatabaseAdapter$UpdateMethod)>($r2, $r11);
+
+        $r5 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.db.adapter.AccountsDbAdapter mAccountsDbAdapter>;
+
+        virtualinvoke $r5.<org.gnucash.android.db.adapter.AccountsDbAdapter: void setTransactionSuccessful()>();
+
+     label6:
+        $r5 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.db.adapter.AccountsDbAdapter mAccountsDbAdapter>;
+
+        virtualinvoke $r5.<org.gnucash.android.db.adapter.AccountsDbAdapter: void enableForeignKey(boolean)>(1);
+
+        $r5 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.db.adapter.AccountsDbAdapter mAccountsDbAdapter>;
+
+        virtualinvoke $r5.<org.gnucash.android.db.adapter.AccountsDbAdapter: void endTransaction()>();
+
+        $r15 = r0.<org.gnucash.android.importer.GncXmlHandler: android.database.sqlite.SQLiteDatabase mainDb>;
+
+        virtualinvoke $r15.<android.database.sqlite.SQLiteDatabase: void close()>();
+
+        return;
+
+     label7:
+        $r16 := @caughtexception;
+
+        $r5 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.db.adapter.AccountsDbAdapter mAccountsDbAdapter>;
+
+        virtualinvoke $r5.<org.gnucash.android.db.adapter.AccountsDbAdapter: void enableForeignKey(boolean)>(1);
+
+        $r5 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.db.adapter.AccountsDbAdapter mAccountsDbAdapter>;
+
+        virtualinvoke $r5.<org.gnucash.android.db.adapter.AccountsDbAdapter: void endTransaction()>();
+
+        $r15 = r0.<org.gnucash.android.importer.GncXmlHandler: android.database.sqlite.SQLiteDatabase mainDb>;
+
+        virtualinvoke $r15.<android.database.sqlite.SQLiteDatabase: void close()>();
+
+        throw $r16;
+
+        catch java.lang.Throwable from label1 to label2 with label7;
+        catch java.lang.Throwable from label3 to label4 with label7;
+        catch java.lang.Throwable from label5 to label6 with label7;
+    }
+    public void characters(char[], int, int) throws org.xml.sax.SAXException
+    {
+        org.gnucash.android.importer.GncXmlHandler r0;
+        char[] $r1;
+        int $i0, $i1;
+        java.lang.StringBuilder $r2;
+
+        r0 := @this: org.gnucash.android.importer.GncXmlHandler;
+
+        $r1 := @parameter0: char[];
+
+        $i0 := @parameter1: int;
+
+        $i1 := @parameter2: int;
+
+        $r2 = r0.<org.gnucash.android.importer.GncXmlHandler: java.lang.StringBuilder mContent>;
+
+        virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(char[],int,int)>($r1, $i0, $i1);
+
+        return;
+    }
+    public void endDocument() throws org.xml.sax.SAXException
+    {
+        org.gnucash.android.importer.GncXmlHandler r0;
+        java.util.HashMap r1, r2, $r7;
+        java.util.Stack r3;
+        java.util.List $r4;
+        int $i0, $i1;
+        org.gnucash.android.model.Account $r5, $r13;
+        org.gnucash.android.model.AccountType $r6, $r12;
+        java.lang.String $r8, $r11, $r14;
+        java.util.Iterator $r9;
+        boolean $z0;
+        java.lang.Object $r10;
+        org.gnucash.android.model.Split r15;
+        java.lang.StringBuilder $r16;
+        org.gnucash.android.db.adapter.CommoditiesDbAdapter $r17;
+        org.gnucash.android.model.Commodity $r18;
+        java.util.Map $r19;
+        java.util.Set $r20;
+        java.util.Map$Entry r21;
+        java.lang.Integer $r22;
+
+        r0 := @this: org.gnucash.android.importer.GncXmlHandler;
+
+        specialinvoke r0.<org.xml.sax.helpers.DefaultHandler: void endDocument()>();
+
+        r1 = new java.util.HashMap;
+
+        $r4 = r0.<org.gnucash.android.importer.GncXmlHandler: java.util.List mAccountList>;
+
+        $i0 = interfaceinvoke $r4.<java.util.List: int size()>();
+
+        specialinvoke r1.<java.util.HashMap: void <init>(int)>($i0);
+
+        r2 = new java.util.HashMap;
+
+        specialinvoke r2.<java.util.HashMap: void <init>()>();
+
+        $r5 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Account mRootAccount>;
+
+        if $r5 != null goto label01;
+
+        $r5 = new org.gnucash.android.model.Account;
+
+        specialinvoke $r5.<org.gnucash.android.model.Account: void <init>(java.lang.String)>("ROOT");
+
+        r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Account mRootAccount> = $r5;
+
+        $r5 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Account mRootAccount>;
+
+        $r6 = <org.gnucash.android.model.AccountType: org.gnucash.android.model.AccountType ROOT>;
+
+        virtualinvoke $r5.<org.gnucash.android.model.Account: void setAccountType(org.gnucash.android.model.AccountType)>($r6);
+
+        $r4 = r0.<org.gnucash.android.importer.GncXmlHandler: java.util.List mAccountList>;
+
+        $r5 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Account mRootAccount>;
+
+        interfaceinvoke $r4.<java.util.List: boolean add(java.lang.Object)>($r5);
+
+        $r7 = r0.<org.gnucash.android.importer.GncXmlHandler: java.util.HashMap mAccountMap>;
+
+        $r5 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Account mRootAccount>;
+
+        $r8 = virtualinvoke $r5.<org.gnucash.android.model.Account: java.lang.String getUID()>();
+
+        $r5 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Account mRootAccount>;
+
+        virtualinvoke $r7.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>($r8, $r5);
+
+     label01:
+        $r8 = staticinvoke <org.gnucash.android.db.adapter.AccountsDbAdapter: java.lang.String getImbalanceAccountPrefix()>();
+
+        $r4 = r0.<org.gnucash.android.importer.GncXmlHandler: java.util.List mAccountList>;
+
+        $r9 = interfaceinvoke $r4.<java.util.List: java.util.Iterator iterator()>();
+
+     label02:
+        $z0 = interfaceinvoke $r9.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label05;
+
+        $r10 = interfaceinvoke $r9.<java.util.Iterator: java.lang.Object next()>();
+
+        $r5 = (org.gnucash.android.model.Account) $r10;
+
+        $r11 = virtualinvoke $r5.<org.gnucash.android.model.Account: java.lang.String getUID()>();
+
+        virtualinvoke r1.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>($r11, null);
+
+        $z0 = 0;
+
+        $r11 = virtualinvoke $r5.<org.gnucash.android.model.Account: java.lang.String getParentUID()>();
+
+        if $r11 != null goto label03;
+
+        $r6 = virtualinvoke $r5.<org.gnucash.android.model.Account: org.gnucash.android.model.AccountType getAccountType()>();
+
+        $r12 = <org.gnucash.android.model.AccountType: org.gnucash.android.model.AccountType ROOT>;
+
+        if $r6 == $r12 goto label03;
+
+        $r13 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Account mRootAccount>;
+
+        $r11 = virtualinvoke $r13.<org.gnucash.android.model.Account: java.lang.String getUID()>();
+
+        virtualinvoke $r5.<org.gnucash.android.model.Account: void setParentUID(java.lang.String)>($r11);
+
+        $z0 = 1;
+
+     label03:
+        if $z0 != 0 goto label04;
+
+        $r13 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Account mRootAccount>;
+
+        $r11 = virtualinvoke $r13.<org.gnucash.android.model.Account: java.lang.String getUID()>();
+
+        $r14 = virtualinvoke $r5.<org.gnucash.android.model.Account: java.lang.String getParentUID()>();
+
+        $z0 = virtualinvoke $r11.<java.lang.String: boolean equals(java.lang.Object)>($r14);
+
+        if $z0 == 0 goto label02;
+
+     label04:
+        $r11 = virtualinvoke $r5.<org.gnucash.android.model.Account: java.lang.String getName()>();
+
+        $z0 = virtualinvoke $r11.<java.lang.String: boolean startsWith(java.lang.String)>($r8);
+
+        if $z0 == 0 goto label02;
+
+        $r11 = virtualinvoke $r5.<org.gnucash.android.model.Account: java.lang.String getName()>();
+
+        $i0 = virtualinvoke $r8.<java.lang.String: int length()>();
+
+        $r11 = virtualinvoke $r11.<java.lang.String: java.lang.String substring(int)>($i0);
+
+        virtualinvoke r2.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>($r11, $r5);
+
+        goto label02;
+
+     label05:
+        $r4 = r0.<org.gnucash.android.importer.GncXmlHandler: java.util.List mAutoBalanceSplits>;
+
+        $r9 = interfaceinvoke $r4.<java.util.List: java.util.Iterator iterator()>();
+
+     label06:
+        $z0 = interfaceinvoke $r9.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label08;
+
+        $r10 = interfaceinvoke $r9.<java.util.Iterator: java.lang.Object next()>();
+
+        r15 = (org.gnucash.android.model.Split) $r10;
+
+        $r11 = virtualinvoke r15.<org.gnucash.android.model.Split: java.lang.String getAccountUID()>();
+
+        $r10 = virtualinvoke r2.<java.util.HashMap: java.lang.Object get(java.lang.Object)>($r11);
+
+        $r5 = (org.gnucash.android.model.Account) $r10;
+
+        if $r5 != null goto label07;
+
+        $r5 = new org.gnucash.android.model.Account;
+
+        $r16 = new java.lang.StringBuilder;
+
+        specialinvoke $r16.<java.lang.StringBuilder: void <init>()>();
+
+        $r16 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r8);
+
+        $r16 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r11);
+
+        $r14 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r17 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.db.adapter.CommoditiesDbAdapter mCommoditiesDbAdapter>;
+
+        $r18 = virtualinvoke $r17.<org.gnucash.android.db.adapter.CommoditiesDbAdapter: org.gnucash.android.model.Commodity getCommodity(java.lang.String)>($r11);
+
+        specialinvoke $r5.<org.gnucash.android.model.Account: void <init>(java.lang.String,org.gnucash.android.model.Commodity)>($r14, $r18);
+
+        $r13 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Account mRootAccount>;
+
+        $r14 = virtualinvoke $r13.<org.gnucash.android.model.Account: java.lang.String getUID()>();
+
+        virtualinvoke $r5.<org.gnucash.android.model.Account: void setParentUID(java.lang.String)>($r14);
+
+        $r6 = <org.gnucash.android.model.AccountType: org.gnucash.android.model.AccountType BANK>;
+
+        virtualinvoke $r5.<org.gnucash.android.model.Account: void setAccountType(org.gnucash.android.model.AccountType)>($r6);
+
+        virtualinvoke r2.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>($r11, $r5);
+
+        $r4 = r0.<org.gnucash.android.importer.GncXmlHandler: java.util.List mAccountList>;
+
+        interfaceinvoke $r4.<java.util.List: boolean add(java.lang.Object)>($r5);
+
+     label07:
+        $r11 = virtualinvoke $r5.<org.gnucash.android.model.Account: java.lang.String getUID()>();
+
+        virtualinvoke r15.<org.gnucash.android.model.Split: void setAccountUID(java.lang.String)>($r11);
+
+        goto label06;
+
+     label08:
+        r3 = new java.util.Stack;
+
+        specialinvoke r3.<java.util.Stack: void <init>()>();
+
+        $r4 = r0.<org.gnucash.android.importer.GncXmlHandler: java.util.List mAccountList>;
+
+        $r9 = interfaceinvoke $r4.<java.util.List: java.util.Iterator iterator()>();
+
+     label09:
+        $z0 = interfaceinvoke $r9.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label14;
+
+        $r10 = interfaceinvoke $r9.<java.util.Iterator: java.lang.Object next()>();
+
+        $r5 = (org.gnucash.android.model.Account) $r10;
+
+        $r8 = virtualinvoke $r5.<org.gnucash.android.model.Account: java.lang.String getUID()>();
+
+        $r10 = virtualinvoke r1.<java.util.HashMap: java.lang.Object get(java.lang.Object)>($r8);
+
+        if $r10 != null goto label09;
+
+        virtualinvoke r3.<java.util.Stack: java.lang.Object push(java.lang.Object)>($r5);
+
+     label10:
+        $z0 = virtualinvoke r3.<java.util.Stack: boolean isEmpty()>();
+
+        if $z0 != 0 goto label09;
+
+        $r10 = virtualinvoke r3.<java.util.Stack: java.lang.Object peek()>();
+
+        $r5 = (org.gnucash.android.model.Account) $r10;
+
+        $r6 = virtualinvoke $r5.<org.gnucash.android.model.Account: org.gnucash.android.model.AccountType getAccountType()>();
+
+        $r12 = <org.gnucash.android.model.AccountType: org.gnucash.android.model.AccountType ROOT>;
+
+        if $r6 != $r12 goto label11;
+
+        $r8 = virtualinvoke $r5.<org.gnucash.android.model.Account: java.lang.String getUID()>();
+
+        virtualinvoke r1.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>($r8, " ");
+
+        virtualinvoke r3.<java.util.Stack: java.lang.Object pop()>();
+
+        goto label10;
+
+     label11:
+        $r8 = virtualinvoke $r5.<org.gnucash.android.model.Account: java.lang.String getParentUID()>();
+
+        r2 = r0.<org.gnucash.android.importer.GncXmlHandler: java.util.HashMap mAccountMap>;
+
+        $r10 = virtualinvoke r2.<java.util.HashMap: java.lang.Object get(java.lang.Object)>($r8);
+
+        $r13 = (org.gnucash.android.model.Account) $r10;
+
+        $r6 = virtualinvoke $r13.<org.gnucash.android.model.Account: org.gnucash.android.model.AccountType getAccountType()>();
+
+        $r12 = <org.gnucash.android.model.AccountType: org.gnucash.android.model.AccountType ROOT>;
+
+        if $r6 != $r12 goto label12;
+
+        $r8 = virtualinvoke $r5.<org.gnucash.android.model.Account: java.lang.String getUID()>();
+
+        $r11 = virtualinvoke $r5.<org.gnucash.android.model.Account: java.lang.String getName()>();
+
+        virtualinvoke r1.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>($r8, $r11);
+
+        virtualinvoke r3.<java.util.Stack: java.lang.Object pop()>();
+
+        goto label10;
+
+     label12:
+        $r10 = virtualinvoke r1.<java.util.HashMap: java.lang.Object get(java.lang.Object)>($r8);
+
+        $r11 = (java.lang.String) $r10;
+
+        if $r11 != null goto label13;
+
+        virtualinvoke r3.<java.util.Stack: java.lang.Object push(java.lang.Object)>($r13);
+
+        goto label10;
+
+     label13:
+        $r8 = virtualinvoke $r5.<org.gnucash.android.model.Account: java.lang.String getUID()>();
+
+        $r16 = new java.lang.StringBuilder;
+
+        specialinvoke $r16.<java.lang.StringBuilder: void <init>()>();
+
+        $r16 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r11);
+
+        $r16 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(":");
+
+        $r11 = virtualinvoke $r5.<org.gnucash.android.model.Account: java.lang.String getName()>();
+
+        $r16 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r11);
+
+        $r11 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r1.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>($r8, $r11);
+
+        virtualinvoke r3.<java.util.Stack: java.lang.Object pop()>();
+
+        goto label10;
+
+     label14:
+        $r4 = r0.<org.gnucash.android.importer.GncXmlHandler: java.util.List mAccountList>;
+
+        $r9 = interfaceinvoke $r4.<java.util.List: java.util.Iterator iterator()>();
+
+     label15:
+        $z0 = interfaceinvoke $r9.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label16;
+
+        $r10 = interfaceinvoke $r9.<java.util.Iterator: java.lang.Object next()>();
+
+        $r5 = (org.gnucash.android.model.Account) $r10;
+
+        $r8 = virtualinvoke $r5.<org.gnucash.android.model.Account: java.lang.String getUID()>();
+
+        $r10 = virtualinvoke r1.<java.util.HashMap: java.lang.Object get(java.lang.Object)>($r8);
+
+        $r8 = (java.lang.String) $r10;
+
+        virtualinvoke $r5.<org.gnucash.android.model.Account: void setFullName(java.lang.String)>($r8);
+
+        goto label15;
+
+     label16:
+        $r8 = "";
+
+        $i0 = 0;
+
+        $r19 = r0.<org.gnucash.android.importer.GncXmlHandler: java.util.Map mCurrencyCount>;
+
+        $r20 = interfaceinvoke $r19.<java.util.Map: java.util.Set entrySet()>();
+
+        $r9 = interfaceinvoke $r20.<java.util.Set: java.util.Iterator iterator()>();
+
+     label17:
+        $z0 = interfaceinvoke $r9.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label18;
+
+        $r10 = interfaceinvoke $r9.<java.util.Iterator: java.lang.Object next()>();
+
+        r21 = (java.util.Map$Entry) $r10;
+
+        $r10 = interfaceinvoke r21.<java.util.Map$Entry: java.lang.Object getValue()>();
+
+        $r22 = (java.lang.Integer) $r10;
+
+        $i1 = virtualinvoke $r22.<java.lang.Integer: int intValue()>();
+
+        if $i1 <= $i0 goto label17;
+
+        $r10 = interfaceinvoke r21.<java.util.Map$Entry: java.lang.Object getValue()>();
+
+        $r22 = (java.lang.Integer) $r10;
+
+        $i0 = virtualinvoke $r22.<java.lang.Integer: int intValue()>();
+
+        $r10 = interfaceinvoke r21.<java.util.Map$Entry: java.lang.Object getKey()>();
+
+        $r8 = (java.lang.String) $r10;
+
+        goto label17;
+
+     label18:
+        if $i0 <= 0 goto label19;
+
+        staticinvoke <org.gnucash.android.app.GnuCashApplication: void setDefaultCurrencyCode(java.lang.String)>($r8);
+
+     label19:
+        specialinvoke r0.<org.gnucash.android.importer.GncXmlHandler: void saveToDatabase()>();
+
+        return;
+    }
+    public void endElement(java.lang.String, java.lang.String, java.lang.String) throws org.xml.sax.SAXException
+    {
+        org.gnucash.android.importer.GncXmlHandler r0;
+        java.lang.String $r1, $r2, $r3;
+        java.sql.Timestamp r4;
+        java.lang.StringBuilder $r5;
+        boolean $z0;
+        byte $b0;
+        int $i1;
+        org.gnucash.android.model.Account $r6;
+        org.gnucash.android.model.AccountType $r7, $r8;
+        org.gnucash.android.db.adapter.CommoditiesDbAdapter $r9;
+        org.gnucash.android.model.Commodity $r10;
+        java.util.Map $r11, $r12;
+        java.lang.Object $r13;
+        java.lang.Integer $r14;
+        org.gnucash.android.model.Transaction $r15;
+        org.gnucash.android.model.Price $r16;
+        org.xml.sax.SAXException $r17;
+        java.util.List $r18;
+        java.util.HashMap $r19;
+        org.gnucash.android.model.BudgetAmount $r20;
+        long $l2;
+        java.lang.IllegalArgumentException r21, r37;
+        org.gnucash.android.model.Split $r22;
+        org.gnucash.android.model.TransactionType $r23;
+        java.math.BigDecimal $r24;
+        org.gnucash.android.model.Money $r25;
+        org.gnucash.android.model.Budget $r26;
+        java.text.ParseException r27, r29, r30, r31, r40;
+        java.lang.Throwable $r28;
+        char $c3;
+        java.util.Currency $r32;
+        org.gnucash.android.model.ScheduledAction $r33;
+        org.gnucash.android.model.ScheduledAction$ActionType $r34, $r41;
+        org.gnucash.android.model.PeriodType $r35;
+        org.gnucash.android.model.Recurrence $r36;
+        java.text.SimpleDateFormat $r38;
+        java.util.Date $r39;
+        java.lang.Object[] $r42;
+        java.lang.String[] $r43;
+        java.lang.Long $r44;
+        java.lang.Class $r45;
+
+        r0 := @this: org.gnucash.android.importer.GncXmlHandler;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $r3 := @parameter2: java.lang.String;
+
+        $r5 = r0.<org.gnucash.android.importer.GncXmlHandler: java.lang.StringBuilder mContent>;
+
+        $r1 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r1 = virtualinvoke $r1.<java.lang.String: java.lang.String trim()>();
+
+        $r2 = r0.<org.gnucash.android.importer.GncXmlHandler: java.lang.String mIgnoreElement>;
+
+        if $r2 == null goto label002;
+
+        $r1 = r0.<org.gnucash.android.importer.GncXmlHandler: java.lang.String mIgnoreElement>;
+
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>($r1);
+
+        if $z0 == 0 goto label001;
+
+        r0.<org.gnucash.android.importer.GncXmlHandler: java.lang.String mIgnoreElement> = null;
+
+     label001:
+        $r5 = r0.<org.gnucash.android.importer.GncXmlHandler: java.lang.StringBuilder mContent>;
+
+        virtualinvoke $r5.<java.lang.StringBuilder: void setLength(int)>(0);
+
+        return;
+
+     label002:
+        $b0 = -1;
+
+        $i1 = virtualinvoke $r3.<java.lang.String: int hashCode()>();
+
+        lookupswitch($i1)
+        {
+            case -1926644357: goto label021;
+            case -1852746635: goto label039;
+            case -1818823040: goto label030;
+            case -1783108400: goto label026;
+            case -1699618701: goto label005;
+            case -1699416798: goto label007;
+            case -1592660976: goto label033;
+            case -1497327925: goto label043;
+            case -1422996221: goto label006;
+            case -1356844864: goto label027;
+            case -1324434991: goto label047;
+            case -1233676043: goto label015;
+            case -1188588398: goto label011;
+            case -1176976148: goto label040;
+            case -1175760282: goto label020;
+            case -1087326493: goto label014;
+            case -1074762807: goto label019;
+            case -960093731: goto label037;
+            case -865368283: goto label017;
+            case -809752300: goto label010;
+            case -720589789: goto label045;
+            case -701760938: goto label046;
+            case -374198886: goto label022;
+            case -274804790: goto label016;
+            case -219012768: goto label048;
+            case -155791508: goto label041;
+            case -150399539: goto label025;
+            case -20053237: goto label008;
+            case 3533310: goto label013;
+            case 41509674: goto label028;
+            case 98198677: goto label036;
+            case 106934601: goto label044;
+            case 109838928: goto label029;
+            case 267278011: goto label049;
+            case 484723947: goto label024;
+            case 535934258: goto label018;
+            case 828603392: goto label042;
+            case 1042679610: goto label034;
+            case 1236474816: goto label032;
+            case 1292928273: goto label023;
+            case 1666892086: goto label009;
+            case 1713737516: goto label031;
+            case 2028022031: goto label012;
+            case 2034666926: goto label035;
+            case 2081192206: goto label038;
+            default: goto label003;
+        };
+
+     label003:
+        lookupswitch($b0)
+        {
+            case 0: goto label050;
+            case 1: goto label051;
+            case 2: goto label052;
+            case 3: goto label055;
+            case 4: goto label057;
+            case 5: goto label065;
+            case 6: goto label066;
+            case 7: goto label067;
+            case 8: goto label004;
+            case 9: goto label070;
+            case 10: goto label092;
+            case 11: goto label116;
+            case 12: goto label117;
+            case 13: goto label118;
+            case 14: goto label119;
+            case 15: goto label131;
+            case 16: goto label134;
+            case 17: goto label135;
+            case 18: goto label136;
+            case 19: goto label143;
+            case 20: goto label146;
+            case 21: goto label150;
+            case 22: goto label151;
+            case 23: goto label156;
+            case 24: goto label157;
+            case 25: goto label158;
+            case 26: goto label160;
+            case 27: goto label161;
+            case 28: goto label162;
+            case 29: goto label163;
+            case 30: goto label164;
+            case 31: goto label171;
+            case 32: goto label186;
+            case 33: goto label188;
+            case 34: goto label189;
+            case 35: goto label191;
+            case 36: goto label192;
+            case 37: goto label193;
+            case 38: goto label195;
+            case 39: goto label196;
+            case 40: goto label197;
+            case 41: goto label198;
+            case 42: goto label199;
+            case 43: goto label200;
+            case 44: goto label201;
+            default: goto label004;
+        };
+
+     label004:
+        $r5 = r0.<org.gnucash.android.importer.GncXmlHandler: java.lang.StringBuilder mContent>;
+
+        virtualinvoke $r5.<java.lang.StringBuilder: void setLength(int)>(0);
+
+        return;
+
+     label005:
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("act:name");
+
+        if $z0 == 0 goto label003;
+
+        $b0 = 0;
+
+        goto label003;
+
+     label006:
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("act:id");
+
+        if $z0 == 0 goto label003;
+
+        $b0 = 1;
+
+        goto label003;
+
+     label007:
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("act:type");
+
+        if $z0 == 0 goto label003;
+
+        $b0 = 2;
+
+        goto label003;
+
+     label008:
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("cmdty:space");
+
+        if $z0 == 0 goto label003;
+
+        $b0 = 3;
+
+        goto label003;
+
+     label009:
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("cmdty:id");
+
+        if $z0 == 0 goto label003;
+
+        $b0 = 4;
+
+        goto label003;
+
+     label010:
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("act:description");
+
+        if $z0 == 0 goto label003;
+
+        $b0 = 5;
+
+        goto label003;
+
+     label011:
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("act:parent");
+
+        if $z0 == 0 goto label003;
+
+        $b0 = 6;
+
+        goto label003;
+
+     label012:
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("gnc:account");
+
+        if $z0 == 0 goto label003;
+
+        $b0 = 7;
+
+        goto label003;
+
+     label013:
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("slot");
+
+        if $z0 == 0 goto label003;
+
+        $b0 = 8;
+
+        goto label003;
+
+     label014:
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("slot:key");
+
+        if $z0 == 0 goto label003;
+
+        $b0 = 9;
+
+        goto label003;
+
+     label015:
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("slot:value");
+
+        if $z0 == 0 goto label003;
+
+        $b0 = 10;
+
+        goto label003;
+
+     label016:
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("bgt:slots");
+
+        if $z0 == 0 goto label003;
+
+        $b0 = 11;
+
+        goto label003;
+
+     label017:
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("trn:id");
+
+        if $z0 == 0 goto label003;
+
+        $b0 = 12;
+
+        goto label003;
+
+     label018:
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("trn:description");
+
+        if $z0 == 0 goto label003;
+
+        $b0 = 13;
+
+        goto label003;
+
+     label019:
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("ts:date");
+
+        if $z0 == 0 goto label003;
+
+        $b0 = 14;
+
+        goto label003;
+
+     label020:
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("trn:recurrence_period");
+
+        if $z0 == 0 goto label003;
+
+        $b0 = 15;
+
+        goto label003;
+
+     label021:
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("split:id");
+
+        if $z0 == 0 goto label003;
+
+        $b0 = 16;
+
+        goto label003;
+
+     label022:
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("split:memo");
+
+        if $z0 == 0 goto label003;
+
+        $b0 = 17;
+
+        goto label003;
+
+     label023:
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("split:value");
+
+        if $z0 == 0 goto label003;
+
+        $b0 = 18;
+
+        goto label003;
+
+     label024:
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("split:quantity");
+
+        if $z0 == 0 goto label003;
+
+        $b0 = 19;
+
+        goto label003;
+
+     label025:
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("split:account");
+
+        if $z0 == 0 goto label003;
+
+        $b0 = 20;
+
+        goto label003;
+
+     label026:
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("trn:split");
+
+        if $z0 == 0 goto label003;
+
+        $b0 = 21;
+
+        goto label003;
+
+     label027:
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("gnc:transaction");
+
+        if $z0 == 0 goto label003;
+
+        $b0 = 22;
+
+        goto label003;
+
+     label028:
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("gnc:template-transactions");
+
+        if $z0 == 0 goto label003;
+
+        $b0 = 23;
+
+        goto label003;
+
+     label029:
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("sx:id");
+
+        if $z0 == 0 goto label003;
+
+        $b0 = 24;
+
+        goto label003;
+
+     label030:
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("sx:name");
+
+        if $z0 == 0 goto label003;
+
+        $b0 = 25;
+
+        goto label003;
+
+     label031:
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("sx:enabled");
+
+        if $z0 == 0 goto label003;
+
+        $b0 = 26;
+
+        goto label003;
+
+     label032:
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("sx:autoCreate");
+
+        if $z0 == 0 goto label003;
+
+        $b0 = 27;
+
+        goto label003;
+
+     label033:
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("sx:num-occur");
+
+        if $z0 == 0 goto label003;
+
+        $b0 = 28;
+
+        goto label003;
+
+     label034:
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("recurrence:mult");
+
+        if $z0 == 0 goto label003;
+
+        $b0 = 29;
+
+        goto label003;
+
+     label035:
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("recurrence:period_type");
+
+        if $z0 == 0 goto label003;
+
+        $b0 = 30;
+
+        goto label003;
+
+     label036:
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("gdate");
+
+        if $z0 == 0 goto label003;
+
+        $b0 = 31;
+
+        goto label003;
+
+     label037:
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("sx:templ-acct");
+
+        if $z0 == 0 goto label003;
+
+        $b0 = 32;
+
+        goto label003;
+
+     label038:
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("gnc:recurrence");
+
+        if $z0 == 0 goto label003;
+
+        $b0 = 33;
+
+        goto label003;
+
+     label039:
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("gnc:schedxaction");
+
+        if $z0 == 0 goto label003;
+
+        $b0 = 34;
+
+        goto label003;
+
+     label040:
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("price:id");
+
+        if $z0 == 0 goto label003;
+
+        $b0 = 35;
+
+        goto label003;
+
+     label041:
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("price:source");
+
+        if $z0 == 0 goto label003;
+
+        $b0 = 36;
+
+        goto label003;
+
+     label042:
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("price:value");
+
+        if $z0 == 0 goto label003;
+
+        $b0 = 37;
+
+        goto label003;
+
+     label043:
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("price:type");
+
+        if $z0 == 0 goto label003;
+
+        $b0 = 38;
+
+        goto label003;
+
+     label044:
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("price");
+
+        if $z0 == 0 goto label003;
+
+        $b0 = 39;
+
+        goto label003;
+
+     label045:
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("gnc:budget");
+
+        if $z0 == 0 goto label003;
+
+        $b0 = 40;
+
+        goto label003;
+
+     label046:
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("bgt:name");
+
+        if $z0 == 0 goto label003;
+
+        $b0 = 41;
+
+        goto label003;
+
+     label047:
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("bgt:description");
+
+        if $z0 == 0 goto label003;
+
+        $b0 = 42;
+
+        goto label003;
+
+     label048:
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("bgt:num-periods");
+
+        if $z0 == 0 goto label003;
+
+        $b0 = 43;
+
+        goto label003;
+
+     label049:
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("bgt:recurrence");
+
+        if $z0 == 0 goto label003;
+
+        $b0 = 44;
+
+        goto label003;
+
+     label050:
+        $r6 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Account mAccount>;
+
+        virtualinvoke $r6.<org.gnucash.android.model.Account: void setName(java.lang.String)>($r1);
+
+        $r6 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Account mAccount>;
+
+        virtualinvoke $r6.<org.gnucash.android.model.Account: void setFullName(java.lang.String)>($r1);
+
+        goto label004;
+
+     label051:
+        $r6 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Account mAccount>;
+
+        virtualinvoke $r6.<org.gnucash.android.model.Account: void setUID(java.lang.String)>($r1);
+
+        goto label004;
+
+     label052:
+        $r7 = staticinvoke <org.gnucash.android.model.AccountType: org.gnucash.android.model.AccountType valueOf(java.lang.String)>($r1);
+
+        $r6 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Account mAccount>;
+
+        virtualinvoke $r6.<org.gnucash.android.model.Account: void setAccountType(org.gnucash.android.model.AccountType)>($r7);
+
+        $r6 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Account mAccount>;
+
+        $r8 = <org.gnucash.android.model.AccountType: org.gnucash.android.model.AccountType ROOT>;
+
+        if $r7 != $r8 goto label054;
+
+        $z0 = 1;
+
+     label053:
+        virtualinvoke $r6.<org.gnucash.android.model.Account: void setHidden(boolean)>($z0);
+
+        goto label004;
+
+     label054:
+        $z0 = 0;
+
+        goto label053;
+
+     label055:
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean equals(java.lang.Object)>("ISO4217");
+
+        if $z0 == 0 goto label056;
+
+        r0.<org.gnucash.android.importer.GncXmlHandler: boolean mISO4217Currency> = 1;
+
+        goto label004;
+
+     label056:
+        r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Price mPrice> = null;
+
+        goto label004;
+
+     label057:
+        $z0 = r0.<org.gnucash.android.importer.GncXmlHandler: boolean mISO4217Currency>;
+
+        if $z0 == 0 goto label062;
+
+     label058:
+        $r6 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Account mAccount>;
+
+        if $r6 == null goto label059;
+
+        $r9 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.db.adapter.CommoditiesDbAdapter mCommoditiesDbAdapter>;
+
+        $r10 = virtualinvoke $r9.<org.gnucash.android.db.adapter.CommoditiesDbAdapter: org.gnucash.android.model.Commodity getCommodity(java.lang.String)>($r1);
+
+        if $r10 == null goto label063;
+
+        $r6 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Account mAccount>;
+
+        virtualinvoke $r6.<org.gnucash.android.model.Account: void setCommodity(org.gnucash.android.model.Commodity)>($r10);
+
+        $r11 = r0.<org.gnucash.android.importer.GncXmlHandler: java.util.Map mCurrencyCount>;
+
+        $z0 = interfaceinvoke $r11.<java.util.Map: boolean containsKey(java.lang.Object)>($r1);
+
+        if $z0 == 0 goto label064;
+
+        $r11 = r0.<org.gnucash.android.importer.GncXmlHandler: java.util.Map mCurrencyCount>;
+
+        $r12 = r0.<org.gnucash.android.importer.GncXmlHandler: java.util.Map mCurrencyCount>;
+
+        $r13 = interfaceinvoke $r12.<java.util.Map: java.lang.Object get(java.lang.Object)>($r1);
+
+        $r14 = (java.lang.Integer) $r13;
+
+        $i1 = virtualinvoke $r14.<java.lang.Integer: int intValue()>();
+
+        $i1 = $i1 + 1;
+
+        $r14 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i1);
+
+        interfaceinvoke $r11.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r1, $r14);
+
+     label059:
+        $r15 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Transaction mTransaction>;
+
+        if $r15 == null goto label060;
+
+        $r15 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Transaction mTransaction>;
+
+        virtualinvoke $r15.<org.gnucash.android.model.Transaction: void setCurrencyCode(java.lang.String)>($r1);
+
+     label060:
+        $r16 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Price mPrice>;
+
+        if $r16 == null goto label004;
+
+        $z0 = r0.<org.gnucash.android.importer.GncXmlHandler: boolean mPriceCommodity>;
+
+        if $z0 == 0 goto label061;
+
+        $r16 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Price mPrice>;
+
+        $r9 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.db.adapter.CommoditiesDbAdapter mCommoditiesDbAdapter>;
+
+        $r2 = virtualinvoke $r9.<org.gnucash.android.db.adapter.CommoditiesDbAdapter: java.lang.String getCommodityUID(java.lang.String)>($r1);
+
+        virtualinvoke $r16.<org.gnucash.android.model.Price: void setCommodityUID(java.lang.String)>($r2);
+
+        r0.<org.gnucash.android.importer.GncXmlHandler: boolean mPriceCommodity> = 0;
+
+     label061:
+        $z0 = r0.<org.gnucash.android.importer.GncXmlHandler: boolean mPriceCurrency>;
+
+        if $z0 == 0 goto label004;
+
+        $r16 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Price mPrice>;
+
+        $r9 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.db.adapter.CommoditiesDbAdapter mCommoditiesDbAdapter>;
+
+        $r1 = virtualinvoke $r9.<org.gnucash.android.db.adapter.CommoditiesDbAdapter: java.lang.String getCommodityUID(java.lang.String)>($r1);
+
+        virtualinvoke $r16.<org.gnucash.android.model.Price: void setCurrencyUID(java.lang.String)>($r1);
+
+        r0.<org.gnucash.android.importer.GncXmlHandler: boolean mPriceCurrency> = 0;
+
+        goto label004;
+
+     label062:
+        $r1 = "XXX";
+
+        goto label058;
+
+     label063:
+        $r17 = new org.xml.sax.SAXException;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Commodity with \'");
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\' currency code not found in the database");
+
+        $r1 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r17.<org.xml.sax.SAXException: void <init>(java.lang.String)>($r1);
+
+        throw $r17;
+
+     label064:
+        $r11 = r0.<org.gnucash.android.importer.GncXmlHandler: java.util.Map mCurrencyCount>;
+
+        $r14 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(1);
+
+        interfaceinvoke $r11.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r1, $r14);
+
+        goto label059;
+
+     label065:
+        $r6 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Account mAccount>;
+
+        virtualinvoke $r6.<org.gnucash.android.model.Account: void setDescription(java.lang.String)>($r1);
+
+        goto label004;
+
+     label066:
+        $r6 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Account mAccount>;
+
+        virtualinvoke $r6.<org.gnucash.android.model.Account: void setParentUID(java.lang.String)>($r1);
+
+        goto label004;
+
+     label067:
+        $z0 = r0.<org.gnucash.android.importer.GncXmlHandler: boolean mInTemplates>;
+
+        if $z0 != 0 goto label004;
+
+        $r18 = r0.<org.gnucash.android.importer.GncXmlHandler: java.util.List mAccountList>;
+
+        $r6 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Account mAccount>;
+
+        interfaceinvoke $r18.<java.util.List: boolean add(java.lang.Object)>($r6);
+
+        $r19 = r0.<org.gnucash.android.importer.GncXmlHandler: java.util.HashMap mAccountMap>;
+
+        $r6 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Account mAccount>;
+
+        $r1 = virtualinvoke $r6.<org.gnucash.android.model.Account: java.lang.String getUID()>();
+
+        $r6 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Account mAccount>;
+
+        virtualinvoke $r19.<java.util.HashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>($r1, $r6);
+
+        $r6 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Account mAccount>;
+
+        $r7 = virtualinvoke $r6.<org.gnucash.android.model.Account: org.gnucash.android.model.AccountType getAccountType()>();
+
+        $r8 = <org.gnucash.android.model.AccountType: org.gnucash.android.model.AccountType ROOT>;
+
+        if $r7 != $r8 goto label068;
+
+        $r6 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Account mRootAccount>;
+
+        if $r6 != null goto label069;
+
+        $r6 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Account mAccount>;
+
+        r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Account mRootAccount> = $r6;
+
+     label068:
+        r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Account mAccount> = null;
+
+        r0.<org.gnucash.android.importer.GncXmlHandler: boolean mISO4217Currency> = 0;
+
+        goto label004;
+
+     label069:
+        $r17 = new org.xml.sax.SAXException;
+
+        specialinvoke $r17.<org.xml.sax.SAXException: void <init>(java.lang.String)>("Multiple ROOT accounts exist in book");
+
+        throw $r17;
+
+     label070:
+        $b0 = -1;
+
+        $i1 = virtualinvoke $r1.<java.lang.String: int hashCode()>();
+
+        lookupswitch($i1)
+        {
+            case -1926036653: goto label078;
+            case -1177318867: goto label079;
+            case -301686727: goto label080;
+            case 94842723: goto label074;
+            case 105008833: goto label076;
+            case 598246771: goto label073;
+            case 1050790300: goto label075;
+            case 1615587116: goto label081;
+            case 2018346007: goto label077;
+            default: goto label071;
+        };
+
+     label071:
+        lookupswitch($b0)
+        {
+            case 0: goto label082;
+            case 1: goto label083;
+            case 2: goto label084;
+            case 3: goto label085;
+            case 4: goto label086;
+            case 5: goto label087;
+            case 6: goto label088;
+            case 7: goto label089;
+            case 8: goto label090;
+            default: goto label072;
+        };
+
+     label072:
+        $z0 = r0.<org.gnucash.android.importer.GncXmlHandler: boolean mInBudgetSlot>;
+
+        if $z0 == 0 goto label091;
+
+        $r2 = r0.<org.gnucash.android.importer.GncXmlHandler: java.lang.String mBudgetAmountAccountUID>;
+
+        if $r2 != null goto label091;
+
+        r0.<org.gnucash.android.importer.GncXmlHandler: java.lang.String mBudgetAmountAccountUID> = $r1;
+
+        $r20 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.BudgetAmount mBudgetAmount>;
+
+        virtualinvoke $r20.<org.gnucash.android.model.BudgetAmount: void setAccountUID(java.lang.String)>($r1);
+
+        goto label004;
+
+     label073:
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean equals(java.lang.Object)>("placeholder");
+
+        if $z0 == 0 goto label071;
+
+        $b0 = 0;
+
+        goto label071;
+
+     label074:
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean equals(java.lang.Object)>("color");
+
+        if $z0 == 0 goto label071;
+
+        $b0 = 1;
+
+        goto label071;
+
+     label075:
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean equals(java.lang.Object)>("favorite");
+
+        if $z0 == 0 goto label071;
+
+        $b0 = 2;
+
+        goto label071;
+
+     label076:
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean equals(java.lang.Object)>("notes");
+
+        if $z0 == 0 goto label071;
+
+        $b0 = 3;
+
+        goto label071;
+
+     label077:
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean equals(java.lang.Object)>("default_transfer_account");
+
+        if $z0 == 0 goto label071;
+
+        $b0 = 4;
+
+        goto label071;
+
+     label078:
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean equals(java.lang.Object)>("exported");
+
+        if $z0 == 0 goto label071;
+
+        $b0 = 5;
+
+        goto label071;
+
+     label079:
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean equals(java.lang.Object)>("account");
+
+        if $z0 == 0 goto label071;
+
+        $b0 = 6;
+
+        goto label071;
+
+     label080:
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean equals(java.lang.Object)>("credit-numeric");
+
+        if $z0 == 0 goto label071;
+
+        $b0 = 7;
+
+        goto label071;
+
+     label081:
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean equals(java.lang.Object)>("debit-numeric");
+
+        if $z0 == 0 goto label071;
+
+        $b0 = 8;
+
+        goto label071;
+
+     label082:
+        r0.<org.gnucash.android.importer.GncXmlHandler: boolean mInPlaceHolderSlot> = 1;
+
+        goto label072;
+
+     label083:
+        r0.<org.gnucash.android.importer.GncXmlHandler: boolean mInColorSlot> = 1;
+
+        goto label072;
+
+     label084:
+        r0.<org.gnucash.android.importer.GncXmlHandler: boolean mInFavoriteSlot> = 1;
+
+        goto label072;
+
+     label085:
+        r0.<org.gnucash.android.importer.GncXmlHandler: boolean mIsNote> = 1;
+
+        goto label072;
+
+     label086:
+        r0.<org.gnucash.android.importer.GncXmlHandler: boolean mInDefaultTransferAccount> = 1;
+
+        goto label072;
+
+     label087:
+        r0.<org.gnucash.android.importer.GncXmlHandler: boolean mInExported> = 1;
+
+        goto label072;
+
+     label088:
+        r0.<org.gnucash.android.importer.GncXmlHandler: boolean mInSplitAccountSlot> = 1;
+
+        goto label072;
+
+     label089:
+        r0.<org.gnucash.android.importer.GncXmlHandler: boolean mInCreditNumericSlot> = 1;
+
+        goto label072;
+
+     label090:
+        r0.<org.gnucash.android.importer.GncXmlHandler: boolean mInDebitNumericSlot> = 1;
+
+        goto label072;
+
+     label091:
+        $z0 = r0.<org.gnucash.android.importer.GncXmlHandler: boolean mInBudgetSlot>;
+
+        if $z0 == 0 goto label004;
+
+        $r20 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.BudgetAmount mBudgetAmount>;
+
+        $l2 = staticinvoke <java.lang.Long: long parseLong(java.lang.String)>($r1);
+
+        virtualinvoke $r20.<org.gnucash.android.model.BudgetAmount: void setPeriodNum(long)>($l2);
+
+        goto label004;
+
+     label092:
+        $z0 = r0.<org.gnucash.android.importer.GncXmlHandler: boolean mInPlaceHolderSlot>;
+
+        if $z0 == 0 goto label093;
+
+        $r6 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Account mAccount>;
+
+        $z0 = staticinvoke <java.lang.Boolean: boolean parseBoolean(java.lang.String)>($r1);
+
+        virtualinvoke $r6.<org.gnucash.android.model.Account: void setPlaceHolderFlag(boolean)>($z0);
+
+        r0.<org.gnucash.android.importer.GncXmlHandler: boolean mInPlaceHolderSlot> = 0;
+
+        goto label004;
+
+     label093:
+        $z0 = r0.<org.gnucash.android.importer.GncXmlHandler: boolean mInColorSlot>;
+
+        if $z0 == 0 goto label098;
+
+        $r1 = virtualinvoke $r1.<java.lang.String: java.lang.String trim()>();
+
+        $r2 = $r1;
+
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean equals(java.lang.Object)>("Not Set");
+
+        if $z0 != 0 goto label096;
+
+        $z0 = staticinvoke <java.util.regex.Pattern: boolean matches(java.lang.String,java.lang.CharSequence)>("^#(?:[0-9a-fA-F]{3}){2}$", $r1);
+
+        if $z0 != 0 goto label094;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("#");
+
+        $r1 = virtualinvoke $r1.<java.lang.String: java.lang.String replaceAll(java.lang.String,java.lang.String)>(".(.)?", "$1");
+
+        $r1 = virtualinvoke $r1.<java.lang.String: java.lang.String replace(java.lang.CharSequence,java.lang.CharSequence)>("null", "");
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r2 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label094:
+        $r6 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Account mAccount>;
+
+        if $r6 == null goto label096;
+
+        $r6 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Account mAccount>;
+
+     label095:
+        virtualinvoke $r6.<org.gnucash.android.model.Account: void setColor(java.lang.String)>($r2);
+
+     label096:
+        r0.<org.gnucash.android.importer.GncXmlHandler: boolean mInColorSlot> = 0;
+
+        goto label004;
+
+     label097:
+        r21 := @caughtexception;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Invalid color code \'");
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\' for account ");
+
+        $r6 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Account mAccount>;
+
+        $r1 = virtualinvoke $r6.<org.gnucash.android.model.Account: java.lang.String getName()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r1 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String)>("GnuCashAccountImporter", $r1);
+
+        staticinvoke <com.crashlytics.android.Crashlytics: void logException(java.lang.Throwable)>(r21);
+
+        goto label096;
+
+     label098:
+        $z0 = r0.<org.gnucash.android.importer.GncXmlHandler: boolean mInFavoriteSlot>;
+
+        if $z0 == 0 goto label099;
+
+        $r6 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Account mAccount>;
+
+        $z0 = staticinvoke <java.lang.Boolean: boolean parseBoolean(java.lang.String)>($r1);
+
+        virtualinvoke $r6.<org.gnucash.android.model.Account: void setFavorite(boolean)>($z0);
+
+        r0.<org.gnucash.android.importer.GncXmlHandler: boolean mInFavoriteSlot> = 0;
+
+        goto label004;
+
+     label099:
+        $z0 = r0.<org.gnucash.android.importer.GncXmlHandler: boolean mIsNote>;
+
+        if $z0 == 0 goto label100;
+
+        $r15 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Transaction mTransaction>;
+
+        if $r15 == null goto label004;
+
+        $r15 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Transaction mTransaction>;
+
+        virtualinvoke $r15.<org.gnucash.android.model.Transaction: void setNote(java.lang.String)>($r1);
+
+        r0.<org.gnucash.android.importer.GncXmlHandler: boolean mIsNote> = 0;
+
+        goto label004;
+
+     label100:
+        $z0 = r0.<org.gnucash.android.importer.GncXmlHandler: boolean mInDefaultTransferAccount>;
+
+        if $z0 == 0 goto label101;
+
+        $r6 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Account mAccount>;
+
+        virtualinvoke $r6.<org.gnucash.android.model.Account: void setDefaultTransferAccountUID(java.lang.String)>($r1);
+
+        r0.<org.gnucash.android.importer.GncXmlHandler: boolean mInDefaultTransferAccount> = 0;
+
+        goto label004;
+
+     label101:
+        $z0 = r0.<org.gnucash.android.importer.GncXmlHandler: boolean mInExported>;
+
+        if $z0 == 0 goto label102;
+
+        $r15 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Transaction mTransaction>;
+
+        if $r15 == null goto label004;
+
+        $r15 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Transaction mTransaction>;
+
+        $z0 = staticinvoke <java.lang.Boolean: boolean parseBoolean(java.lang.String)>($r1);
+
+        virtualinvoke $r15.<org.gnucash.android.model.Transaction: void setExported(boolean)>($z0);
+
+        r0.<org.gnucash.android.importer.GncXmlHandler: boolean mInExported> = 0;
+
+        goto label004;
+
+     label102:
+        $z0 = r0.<org.gnucash.android.importer.GncXmlHandler: boolean mInTemplates>;
+
+        if $z0 == 0 goto label103;
+
+        $z0 = r0.<org.gnucash.android.importer.GncXmlHandler: boolean mInSplitAccountSlot>;
+
+        if $z0 == 0 goto label103;
+
+        $r22 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Split mSplit>;
+
+        virtualinvoke $r22.<org.gnucash.android.model.Split: void setAccountUID(java.lang.String)>($r1);
+
+        r0.<org.gnucash.android.importer.GncXmlHandler: boolean mInSplitAccountSlot> = 0;
+
+        goto label004;
+
+     label103:
+        $z0 = r0.<org.gnucash.android.importer.GncXmlHandler: boolean mInTemplates>;
+
+        if $z0 == 0 goto label104;
+
+        $z0 = r0.<org.gnucash.android.importer.GncXmlHandler: boolean mInCreditNumericSlot>;
+
+        if $z0 == 0 goto label104;
+
+        $r23 = <org.gnucash.android.model.TransactionType: org.gnucash.android.model.TransactionType CREDIT>;
+
+        specialinvoke r0.<org.gnucash.android.importer.GncXmlHandler: void handleEndOfTemplateNumericSlot(java.lang.String,org.gnucash.android.model.TransactionType)>($r1, $r23);
+
+        goto label004;
+
+     label104:
+        $z0 = r0.<org.gnucash.android.importer.GncXmlHandler: boolean mInTemplates>;
+
+        if $z0 == 0 goto label105;
+
+        $z0 = r0.<org.gnucash.android.importer.GncXmlHandler: boolean mInDebitNumericSlot>;
+
+        if $z0 == 0 goto label105;
+
+        $r23 = <org.gnucash.android.model.TransactionType: org.gnucash.android.model.TransactionType DEBIT>;
+
+        specialinvoke r0.<org.gnucash.android.importer.GncXmlHandler: void handleEndOfTemplateNumericSlot(java.lang.String,org.gnucash.android.model.TransactionType)>($r1, $r23);
+
+        goto label004;
+
+     label105:
+        $z0 = r0.<org.gnucash.android.importer.GncXmlHandler: boolean mInBudgetSlot>;
+
+        if $z0 == 0 goto label004;
+
+        $r2 = r0.<org.gnucash.android.importer.GncXmlHandler: java.lang.String mSlotTagAttribute>;
+
+        $z0 = virtualinvoke $r2.<java.lang.String: boolean equals(java.lang.Object)>("numeric");
+
+        if $z0 == 0 goto label115;
+
+     label106:
+        $r24 = staticinvoke <org.gnucash.android.export.xml.GncXmlHelper: java.math.BigDecimal parseSplitAmount(java.lang.String)>($r1);
+
+     label107:
+        $r20 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.BudgetAmount mBudgetAmount>;
+
+        $r25 = new org.gnucash.android.model.Money;
+
+        $r10 = <org.gnucash.android.model.Commodity: org.gnucash.android.model.Commodity DEFAULT_COMMODITY>;
+
+     label108:
+        specialinvoke $r25.<org.gnucash.android.model.Money: void <init>(java.math.BigDecimal,org.gnucash.android.model.Commodity)>($r24, $r10);
+
+        virtualinvoke $r20.<org.gnucash.android.model.BudgetAmount: void setAmount(org.gnucash.android.model.Money)>($r25);
+
+     label109:
+        $r26 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Budget mBudget>;
+
+        $r20 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.BudgetAmount mBudgetAmount>;
+
+        virtualinvoke $r26.<org.gnucash.android.model.Budget: void addBudgetAmount(org.gnucash.android.model.BudgetAmount)>($r20);
+
+     label110:
+        r0.<org.gnucash.android.importer.GncXmlHandler: java.lang.String mSlotTagAttribute> = "frame";
+
+        goto label004;
+
+     label111:
+        r27 := @caughtexception;
+
+     label112:
+        $r20 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.BudgetAmount mBudgetAmount>;
+
+        $r25 = staticinvoke <org.gnucash.android.model.Money: org.gnucash.android.model.Money getZeroInstance()>();
+
+        virtualinvoke $r20.<org.gnucash.android.model.BudgetAmount: void setAmount(org.gnucash.android.model.Money)>($r25);
+
+        virtualinvoke r27.<java.text.ParseException: void printStackTrace()>();
+
+     label113:
+        $r26 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Budget mBudget>;
+
+        $r20 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.BudgetAmount mBudgetAmount>;
+
+        virtualinvoke $r26.<org.gnucash.android.model.Budget: void addBudgetAmount(org.gnucash.android.model.BudgetAmount)>($r20);
+
+        goto label110;
+
+     label114:
+        $r28 := @caughtexception;
+
+        $r26 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Budget mBudget>;
+
+        $r20 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.BudgetAmount mBudgetAmount>;
+
+        virtualinvoke $r26.<org.gnucash.android.model.Budget: void addBudgetAmount(org.gnucash.android.model.BudgetAmount)>($r20);
+
+        throw $r28;
+
+     label115:
+        r0.<org.gnucash.android.importer.GncXmlHandler: java.lang.String mBudgetAmountAccountUID> = null;
+
+        goto label004;
+
+     label116:
+        r0.<org.gnucash.android.importer.GncXmlHandler: boolean mInBudgetSlot> = 0;
+
+        goto label004;
+
+     label117:
+        $r15 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Transaction mTransaction>;
+
+        virtualinvoke $r15.<org.gnucash.android.model.Transaction: void setUID(java.lang.String)>($r1);
+
+        goto label004;
+
+     label118:
+        $r15 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Transaction mTransaction>;
+
+        virtualinvoke $r15.<org.gnucash.android.model.Transaction: void setDescription(java.lang.String)>($r1);
+
+        goto label004;
+
+     label119:
+        $z0 = r0.<org.gnucash.android.importer.GncXmlHandler: boolean mIsDatePosted>;
+
+        if $z0 == 0 goto label122;
+
+        $r15 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Transaction mTransaction>;
+
+        if $r15 == null goto label122;
+
+        $r15 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Transaction mTransaction>;
+
+     label120:
+        $l2 = staticinvoke <org.gnucash.android.export.xml.GncXmlHelper: long parseDate(java.lang.String)>($r1);
+
+        virtualinvoke $r15.<org.gnucash.android.model.Transaction: void setTime(long)>($l2);
+
+     label121:
+        r0.<org.gnucash.android.importer.GncXmlHandler: boolean mIsDatePosted> = 0;
+
+     label122:
+        $z0 = r0.<org.gnucash.android.importer.GncXmlHandler: boolean mIsDateEntered>;
+
+        if $z0 == 0 goto label127;
+
+        $r15 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Transaction mTransaction>;
+
+        if $r15 == null goto label127;
+
+        r4 = new java.sql.Timestamp;
+
+     label123:
+        $l2 = staticinvoke <org.gnucash.android.export.xml.GncXmlHelper: long parseDate(java.lang.String)>($r1);
+
+        specialinvoke r4.<java.sql.Timestamp: void <init>(long)>($l2);
+
+     label124:
+        $r15 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Transaction mTransaction>;
+
+     label125:
+        virtualinvoke $r15.<org.gnucash.android.model.Transaction: void setCreatedTimestamp(java.sql.Timestamp)>(r4);
+
+     label126:
+        r0.<org.gnucash.android.importer.GncXmlHandler: boolean mIsDateEntered> = 0;
+
+     label127:
+        $r16 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Price mPrice>;
+
+        if $r16 == null goto label004;
+
+        $r16 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Price mPrice>;
+
+        r4 = new java.sql.Timestamp;
+
+     label128:
+        $l2 = staticinvoke <org.gnucash.android.export.xml.GncXmlHelper: long parseDate(java.lang.String)>($r1);
+
+        specialinvoke r4.<java.sql.Timestamp: void <init>(long)>($l2);
+
+        virtualinvoke $r16.<org.gnucash.android.model.Price: void setDate(java.sql.Timestamp)>(r4);
+
+     label129:
+        goto label004;
+
+     label130:
+        r29 := @caughtexception;
+
+        staticinvoke <com.crashlytics.android.Crashlytics: void logException(java.lang.Throwable)>(r29);
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unable to parse transaction time - ");
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r1 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\n");
+
+        $r2 = virtualinvoke r29.<java.text.ParseException: java.lang.String getMessage()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r2 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String)>("GnuCashAccountImporter", $r2);
+
+        staticinvoke <com.crashlytics.android.Crashlytics: void log(java.lang.String)>($r1);
+
+        $r17 = new org.xml.sax.SAXException;
+
+        specialinvoke $r17.<org.xml.sax.SAXException: void <init>(java.lang.String,java.lang.Exception)>($r1, r29);
+
+        throw $r17;
+
+     label131:
+        $l2 = staticinvoke <java.lang.Long: long parseLong(java.lang.String)>($r1);
+
+        r0.<org.gnucash.android.importer.GncXmlHandler: long mRecurrencePeriod> = $l2;
+
+        $r15 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Transaction mTransaction>;
+
+        $l2 = r0.<org.gnucash.android.importer.GncXmlHandler: long mRecurrencePeriod>;
+
+        $b0 = $l2 cmp 0L;
+
+        if $b0 <= 0 goto label133;
+
+        $z0 = 1;
+
+     label132:
+        virtualinvoke $r15.<org.gnucash.android.model.Transaction: void setTemplate(boolean)>($z0);
+
+        goto label004;
+
+     label133:
+        $z0 = 0;
+
+        goto label132;
+
+     label134:
+        $r22 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Split mSplit>;
+
+        virtualinvoke $r22.<org.gnucash.android.model.Split: void setUID(java.lang.String)>($r1);
+
+        goto label004;
+
+     label135:
+        $r22 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Split mSplit>;
+
+        virtualinvoke $r22.<org.gnucash.android.model.Split: void setMemo(java.lang.String)>($r1);
+
+        goto label004;
+
+     label136:
+        $c3 = virtualinvoke $r1.<java.lang.String: char charAt(int)>(0);
+
+     label137:
+        if $c3 != 45 goto label142;
+
+        r0.<org.gnucash.android.importer.GncXmlHandler: boolean mNegativeQuantity> = 1;
+
+     label138:
+        virtualinvoke $r1.<java.lang.String: java.lang.String substring(int)>(1);
+
+     label139:
+        $r24 = staticinvoke <org.gnucash.android.export.xml.GncXmlHelper: java.math.BigDecimal parseSplitAmount(java.lang.String)>($r1);
+
+        $r24 = virtualinvoke $r24.<java.math.BigDecimal: java.math.BigDecimal abs()>();
+
+     label140:
+        r0.<org.gnucash.android.importer.GncXmlHandler: java.math.BigDecimal mValue> = $r24;
+
+        goto label004;
+
+     label141:
+        r30 := @caughtexception;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Error parsing split quantity - ");
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r1 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.crashlytics.android.Crashlytics: void log(java.lang.String)>($r1);
+
+        staticinvoke <com.crashlytics.android.Crashlytics: void logException(java.lang.Throwable)>(r30);
+
+        $r17 = new org.xml.sax.SAXException;
+
+        specialinvoke $r17.<org.xml.sax.SAXException: void <init>(java.lang.String,java.lang.Exception)>($r1, r30);
+
+        throw $r17;
+
+     label142:
+        r0.<org.gnucash.android.importer.GncXmlHandler: boolean mNegativeQuantity> = 0;
+
+        goto label139;
+
+     label143:
+        $r24 = staticinvoke <org.gnucash.android.export.xml.GncXmlHelper: java.math.BigDecimal parseSplitAmount(java.lang.String)>($r1);
+
+        $r24 = virtualinvoke $r24.<java.math.BigDecimal: java.math.BigDecimal abs()>();
+
+     label144:
+        r0.<org.gnucash.android.importer.GncXmlHandler: java.math.BigDecimal mQuantity> = $r24;
+
+        goto label004;
+
+     label145:
+        r31 := @caughtexception;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Error parsing split quantity - ");
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r1 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.crashlytics.android.Crashlytics: void log(java.lang.String)>($r1);
+
+        staticinvoke <com.crashlytics.android.Crashlytics: void logException(java.lang.Throwable)>(r31);
+
+        $r17 = new org.xml.sax.SAXException;
+
+        specialinvoke $r17.<org.xml.sax.SAXException: void <init>(java.lang.String,java.lang.Exception)>($r1, r31);
+
+        throw $r17;
+
+     label146:
+        $z0 = r0.<org.gnucash.android.importer.GncXmlHandler: boolean mInTemplates>;
+
+        if $z0 != 0 goto label149;
+
+        $r22 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Split mSplit>;
+
+        $z0 = r0.<org.gnucash.android.importer.GncXmlHandler: boolean mNegativeQuantity>;
+
+        if $z0 == 0 goto label148;
+
+        $r23 = <org.gnucash.android.model.TransactionType: org.gnucash.android.model.TransactionType CREDIT>;
+
+     label147:
+        virtualinvoke $r22.<org.gnucash.android.model.Split: void setType(org.gnucash.android.model.TransactionType)>($r23);
+
+        $r22 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Split mSplit>;
+
+        $r25 = new org.gnucash.android.model.Money;
+
+        $r24 = r0.<org.gnucash.android.importer.GncXmlHandler: java.math.BigDecimal mQuantity>;
+
+        $r10 = specialinvoke r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Commodity getCommodityForAccount(java.lang.String)>($r1);
+
+        specialinvoke $r25.<org.gnucash.android.model.Money: void <init>(java.math.BigDecimal,org.gnucash.android.model.Commodity)>($r24, $r10);
+
+        virtualinvoke $r22.<org.gnucash.android.model.Split: void setQuantity(org.gnucash.android.model.Money)>($r25);
+
+        $r22 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Split mSplit>;
+
+        $r25 = new org.gnucash.android.model.Money;
+
+        $r24 = r0.<org.gnucash.android.importer.GncXmlHandler: java.math.BigDecimal mValue>;
+
+        $r9 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.db.adapter.CommoditiesDbAdapter mCommoditiesDbAdapter>;
+
+        $r15 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Transaction mTransaction>;
+
+        $r32 = virtualinvoke $r15.<org.gnucash.android.model.Transaction: java.util.Currency getCurrency()>();
+
+        $r2 = virtualinvoke $r32.<java.util.Currency: java.lang.String getCurrencyCode()>();
+
+        $r10 = virtualinvoke $r9.<org.gnucash.android.db.adapter.CommoditiesDbAdapter: org.gnucash.android.model.Commodity getCommodity(java.lang.String)>($r2);
+
+        specialinvoke $r25.<org.gnucash.android.model.Money: void <init>(java.math.BigDecimal,org.gnucash.android.model.Commodity)>($r24, $r10);
+
+        virtualinvoke $r22.<org.gnucash.android.model.Split: void setValue(org.gnucash.android.model.Money)>($r25);
+
+        $r22 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Split mSplit>;
+
+        virtualinvoke $r22.<org.gnucash.android.model.Split: void setAccountUID(java.lang.String)>($r1);
+
+        goto label004;
+
+     label148:
+        $r23 = <org.gnucash.android.model.TransactionType: org.gnucash.android.model.TransactionType DEBIT>;
+
+        goto label147;
+
+     label149:
+        $z0 = r0.<org.gnucash.android.importer.GncXmlHandler: boolean mIgnoreTemplateTransaction>;
+
+        if $z0 != 0 goto label004;
+
+        $r11 = r0.<org.gnucash.android.importer.GncXmlHandler: java.util.Map mTemplateAccountToTransactionMap>;
+
+        $r15 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Transaction mTransaction>;
+
+        $r2 = virtualinvoke $r15.<org.gnucash.android.model.Transaction: java.lang.String getUID()>();
+
+        interfaceinvoke $r11.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r1, $r2);
+
+        goto label004;
+
+     label150:
+        $r15 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Transaction mTransaction>;
+
+        $r22 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Split mSplit>;
+
+        virtualinvoke $r15.<org.gnucash.android.model.Transaction: void addSplit(org.gnucash.android.model.Split)>($r22);
+
+        goto label004;
+
+     label151:
+        $r15 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Transaction mTransaction>;
+
+        $z0 = r0.<org.gnucash.android.importer.GncXmlHandler: boolean mInTemplates>;
+
+        virtualinvoke $r15.<org.gnucash.android.model.Transaction: void setTemplate(boolean)>($z0);
+
+        $r15 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Transaction mTransaction>;
+
+        $r22 = virtualinvoke $r15.<org.gnucash.android.model.Transaction: org.gnucash.android.model.Split createAutoBalanceSplit()>();
+
+        if $r22 == null goto label152;
+
+        $r18 = r0.<org.gnucash.android.importer.GncXmlHandler: java.util.List mAutoBalanceSplits>;
+
+        interfaceinvoke $r18.<java.util.List: boolean add(java.lang.Object)>($r22);
+
+     label152:
+        $z0 = r0.<org.gnucash.android.importer.GncXmlHandler: boolean mInTemplates>;
+
+        if $z0 == 0 goto label155;
+
+        $z0 = r0.<org.gnucash.android.importer.GncXmlHandler: boolean mIgnoreTemplateTransaction>;
+
+        if $z0 != 0 goto label153;
+
+        $r18 = r0.<org.gnucash.android.importer.GncXmlHandler: java.util.List mTemplateTransactions>;
+
+        $r15 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Transaction mTransaction>;
+
+        interfaceinvoke $r18.<java.util.List: boolean add(java.lang.Object)>($r15);
+
+     label153:
+        $l2 = r0.<org.gnucash.android.importer.GncXmlHandler: long mRecurrencePeriod>;
+
+        $b0 = $l2 cmp 0L;
+
+        if $b0 <= 0 goto label154;
+
+        $r15 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Transaction mTransaction>;
+
+        virtualinvoke $r15.<org.gnucash.android.model.Transaction: void setTemplate(boolean)>(1);
+
+        $r15 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Transaction mTransaction>;
+
+        $l2 = r0.<org.gnucash.android.importer.GncXmlHandler: long mRecurrencePeriod>;
+
+        $r33 = staticinvoke <org.gnucash.android.model.ScheduledAction: org.gnucash.android.model.ScheduledAction parseScheduledAction(org.gnucash.android.model.Transaction,long)>($r15, $l2);
+
+        $r18 = r0.<org.gnucash.android.importer.GncXmlHandler: java.util.List mScheduledActionsList>;
+
+        interfaceinvoke $r18.<java.util.List: boolean add(java.lang.Object)>($r33);
+
+     label154:
+        r0.<org.gnucash.android.importer.GncXmlHandler: long mRecurrencePeriod> = 0L;
+
+        r0.<org.gnucash.android.importer.GncXmlHandler: boolean mIgnoreTemplateTransaction> = 1;
+
+        r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Transaction mTransaction> = null;
+
+        goto label004;
+
+     label155:
+        $r18 = r0.<org.gnucash.android.importer.GncXmlHandler: java.util.List mTransactionList>;
+
+        $r15 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Transaction mTransaction>;
+
+        interfaceinvoke $r18.<java.util.List: boolean add(java.lang.Object)>($r15);
+
+        goto label153;
+
+     label156:
+        r0.<org.gnucash.android.importer.GncXmlHandler: boolean mInTemplates> = 0;
+
+        goto label004;
+
+     label157:
+        $r33 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.ScheduledAction mScheduledAction>;
+
+        virtualinvoke $r33.<org.gnucash.android.model.ScheduledAction: void setUID(java.lang.String)>($r1);
+
+        goto label004;
+
+     label158:
+        $r34 = <org.gnucash.android.model.ScheduledAction$ActionType: org.gnucash.android.model.ScheduledAction$ActionType BACKUP>;
+
+        $r2 = virtualinvoke $r34.<org.gnucash.android.model.ScheduledAction$ActionType: java.lang.String name()>();
+
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean equals(java.lang.Object)>($r2);
+
+        if $z0 == 0 goto label159;
+
+        $r33 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.ScheduledAction mScheduledAction>;
+
+        $r34 = <org.gnucash.android.model.ScheduledAction$ActionType: org.gnucash.android.model.ScheduledAction$ActionType BACKUP>;
+
+        virtualinvoke $r33.<org.gnucash.android.model.ScheduledAction: void setActionType(org.gnucash.android.model.ScheduledAction$ActionType)>($r34);
+
+        goto label004;
+
+     label159:
+        $r33 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.ScheduledAction mScheduledAction>;
+
+        $r34 = <org.gnucash.android.model.ScheduledAction$ActionType: org.gnucash.android.model.ScheduledAction$ActionType TRANSACTION>;
+
+        virtualinvoke $r33.<org.gnucash.android.model.ScheduledAction: void setActionType(org.gnucash.android.model.ScheduledAction$ActionType)>($r34);
+
+        goto label004;
+
+     label160:
+        $r33 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.ScheduledAction mScheduledAction>;
+
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean equals(java.lang.Object)>("y");
+
+        virtualinvoke $r33.<org.gnucash.android.model.ScheduledAction: void setEnabled(boolean)>($z0);
+
+        goto label004;
+
+     label161:
+        $r33 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.ScheduledAction mScheduledAction>;
+
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean equals(java.lang.Object)>("y");
+
+        virtualinvoke $r33.<org.gnucash.android.model.ScheduledAction: void setAutoCreate(boolean)>($z0);
+
+        goto label004;
+
+     label162:
+        $r33 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.ScheduledAction mScheduledAction>;
+
+        $i1 = staticinvoke <java.lang.Integer: int parseInt(java.lang.String)>($r1);
+
+        virtualinvoke $r33.<org.gnucash.android.model.ScheduledAction: void setTotalPlannedExecutionCount(int)>($i1);
+
+        goto label004;
+
+     label163:
+        $i1 = staticinvoke <java.lang.Integer: int parseInt(java.lang.String)>($r1);
+
+        r0.<org.gnucash.android.importer.GncXmlHandler: int mRecurrenceMultiplier> = $i1;
+
+        goto label004;
+
+     label164:
+        $r2 = virtualinvoke $r1.<java.lang.String: java.lang.String toUpperCase()>();
+
+        $r35 = staticinvoke <org.gnucash.android.model.PeriodType: org.gnucash.android.model.PeriodType valueOf(java.lang.String)>($r2);
+
+     label165:
+        $i1 = r0.<org.gnucash.android.importer.GncXmlHandler: int mRecurrenceMultiplier>;
+
+     label166:
+        virtualinvoke $r35.<org.gnucash.android.model.PeriodType: void setMultiplier(int)>($i1);
+
+     label167:
+        $r36 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Recurrence mRecurrence>;
+
+     label168:
+        virtualinvoke $r36.<org.gnucash.android.model.Recurrence: void setPeriodType(org.gnucash.android.model.PeriodType)>($r35);
+
+     label169:
+        goto label004;
+
+     label170:
+        r37 := @caughtexception;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unsupported period constant: ");
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r1 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String)>("GnuCashAccountImporter", $r1);
+
+        staticinvoke <com.crashlytics.android.Crashlytics: void logException(java.lang.Throwable)>(r37);
+
+        r0.<org.gnucash.android.importer.GncXmlHandler: boolean mIgnoreScheduledAction> = 1;
+
+        goto label004;
+
+     label171:
+        $r38 = <org.gnucash.android.export.xml.GncXmlHelper: java.text.SimpleDateFormat DATE_FORMATTER>;
+
+     label172:
+        $r39 = virtualinvoke $r38.<java.text.SimpleDateFormat: java.util.Date parse(java.lang.String)>($r1);
+
+        $l2 = virtualinvoke $r39.<java.util.Date: long getTime()>();
+
+     label173:
+        $z0 = r0.<org.gnucash.android.importer.GncXmlHandler: boolean mIsScheduledStart>;
+
+        if $z0 == 0 goto label176;
+
+        $r33 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.ScheduledAction mScheduledAction>;
+
+        if $r33 == null goto label176;
+
+        $r33 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.ScheduledAction mScheduledAction>;
+
+        r4 = new java.sql.Timestamp;
+
+     label174:
+        specialinvoke r4.<java.sql.Timestamp: void <init>(long)>($l2);
+
+        virtualinvoke $r33.<org.gnucash.android.model.ScheduledAction: void setCreatedTimestamp(java.sql.Timestamp)>(r4);
+
+     label175:
+        r0.<org.gnucash.android.importer.GncXmlHandler: boolean mIsScheduledStart> = 0;
+
+     label176:
+        $z0 = r0.<org.gnucash.android.importer.GncXmlHandler: boolean mIsScheduledEnd>;
+
+        if $z0 == 0 goto label179;
+
+        $r33 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.ScheduledAction mScheduledAction>;
+
+        if $r33 == null goto label179;
+
+        $r33 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.ScheduledAction mScheduledAction>;
+
+     label177:
+        virtualinvoke $r33.<org.gnucash.android.model.ScheduledAction: void setEndTime(long)>($l2);
+
+     label178:
+        r0.<org.gnucash.android.importer.GncXmlHandler: boolean mIsScheduledEnd> = 0;
+
+     label179:
+        $z0 = r0.<org.gnucash.android.importer.GncXmlHandler: boolean mIsLastRun>;
+
+        if $z0 == 0 goto label182;
+
+        $r33 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.ScheduledAction mScheduledAction>;
+
+        if $r33 == null goto label182;
+
+        $r33 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.ScheduledAction mScheduledAction>;
+
+     label180:
+        virtualinvoke $r33.<org.gnucash.android.model.ScheduledAction: void setLastRun(long)>($l2);
+
+     label181:
+        r0.<org.gnucash.android.importer.GncXmlHandler: boolean mIsLastRun> = 0;
+
+     label182:
+        $z0 = r0.<org.gnucash.android.importer.GncXmlHandler: boolean mIsRecurrenceStart>;
+
+        if $z0 == 0 goto label004;
+
+        $r33 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.ScheduledAction mScheduledAction>;
+
+        if $r33 == null goto label004;
+
+        $r36 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Recurrence mRecurrence>;
+
+        r4 = new java.sql.Timestamp;
+
+     label183:
+        specialinvoke r4.<java.sql.Timestamp: void <init>(long)>($l2);
+
+        virtualinvoke $r36.<org.gnucash.android.model.Recurrence: void setPeriodStart(java.sql.Timestamp)>(r4);
+
+     label184:
+        r0.<org.gnucash.android.importer.GncXmlHandler: boolean mIsRecurrenceStart> = 0;
+
+        goto label004;
+
+     label185:
+        r40 := @caughtexception;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Error parsing scheduled action date ");
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r1 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r2 = virtualinvoke r40.<java.text.ParseException: java.lang.String getMessage()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r2 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String)>("GnuCashAccountImporter", $r2);
+
+        staticinvoke <com.crashlytics.android.Crashlytics: void log(java.lang.String)>($r1);
+
+        staticinvoke <com.crashlytics.android.Crashlytics: void logException(java.lang.Throwable)>(r40);
+
+        $r17 = new org.xml.sax.SAXException;
+
+        specialinvoke $r17.<org.xml.sax.SAXException: void <init>(java.lang.String,java.lang.Exception)>($r1, r40);
+
+        throw $r17;
+
+     label186:
+        $r33 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.ScheduledAction mScheduledAction>;
+
+        $r34 = virtualinvoke $r33.<org.gnucash.android.model.ScheduledAction: org.gnucash.android.model.ScheduledAction$ActionType getActionType()>();
+
+        $r41 = <org.gnucash.android.model.ScheduledAction$ActionType: org.gnucash.android.model.ScheduledAction$ActionType TRANSACTION>;
+
+        if $r34 != $r41 goto label187;
+
+        $r33 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.ScheduledAction mScheduledAction>;
+
+        $r11 = r0.<org.gnucash.android.importer.GncXmlHandler: java.util.Map mTemplateAccountToTransactionMap>;
+
+        $r13 = interfaceinvoke $r11.<java.util.Map: java.lang.Object get(java.lang.Object)>($r1);
+
+        $r1 = (java.lang.String) $r13;
+
+        virtualinvoke $r33.<org.gnucash.android.model.ScheduledAction: void setActionUID(java.lang.String)>($r1);
+
+        goto label004;
+
+     label187:
+        $r33 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.ScheduledAction mScheduledAction>;
+
+        $r1 = staticinvoke <org.gnucash.android.model.BaseModel: java.lang.String generateUID()>();
+
+        virtualinvoke $r33.<org.gnucash.android.model.ScheduledAction: void setActionUID(java.lang.String)>($r1);
+
+        goto label004;
+
+     label188:
+        $r33 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.ScheduledAction mScheduledAction>;
+
+        if $r33 == null goto label004;
+
+        $r33 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.ScheduledAction mScheduledAction>;
+
+        $r36 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Recurrence mRecurrence>;
+
+        virtualinvoke $r33.<org.gnucash.android.model.ScheduledAction: void setRecurrence(org.gnucash.android.model.Recurrence)>($r36);
+
+        goto label004;
+
+     label189:
+        $r33 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.ScheduledAction mScheduledAction>;
+
+        $r1 = virtualinvoke $r33.<org.gnucash.android.model.ScheduledAction: java.lang.String getActionUID()>();
+
+        if $r1 == null goto label190;
+
+        $z0 = r0.<org.gnucash.android.importer.GncXmlHandler: boolean mIgnoreScheduledAction>;
+
+        if $z0 != 0 goto label190;
+
+        $r18 = r0.<org.gnucash.android.importer.GncXmlHandler: java.util.List mScheduledActionsList>;
+
+        $r33 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.ScheduledAction mScheduledAction>;
+
+        interfaceinvoke $r18.<java.util.List: boolean add(java.lang.Object)>($r33);
+
+        $r33 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.ScheduledAction mScheduledAction>;
+
+        $i1 = specialinvoke r0.<org.gnucash.android.importer.GncXmlHandler: int generateMissedScheduledTransactions(org.gnucash.android.model.ScheduledAction)>($r33);
+
+        $r42 = newarray (java.lang.Object)[1];
+
+        $r14 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i1);
+
+        $r42[0] = $r14;
+
+        $r1 = staticinvoke <java.lang.String: java.lang.String format(java.lang.String,java.lang.Object[])>("Generated %d transactions from scheduled action", $r42);
+
+        staticinvoke <android.util.Log: int i(java.lang.String,java.lang.String)>("GnuCashAccountImporter", $r1);
+
+     label190:
+        r0.<org.gnucash.android.importer.GncXmlHandler: boolean mIgnoreScheduledAction> = 0;
+
+        goto label004;
+
+     label191:
+        $r16 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Price mPrice>;
+
+        virtualinvoke $r16.<org.gnucash.android.model.Price: void setUID(java.lang.String)>($r1);
+
+        goto label004;
+
+     label192:
+        $r16 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Price mPrice>;
+
+        if $r16 == null goto label004;
+
+        $r16 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Price mPrice>;
+
+        virtualinvoke $r16.<org.gnucash.android.model.Price: void setSource(java.lang.String)>($r1);
+
+        goto label004;
+
+     label193:
+        $r16 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Price mPrice>;
+
+        if $r16 == null goto label004;
+
+        $r43 = virtualinvoke $r1.<java.lang.String: java.lang.String[] split(java.lang.String)>("/");
+
+        $i1 = lengthof $r43;
+
+        if $i1 == 2 goto label194;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Illegal price - ");
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r1 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String)>("GnuCashAccountImporter", $r1);
+
+        staticinvoke <com.crashlytics.android.Crashlytics: void log(java.lang.String)>($r1);
+
+        $r17 = new org.xml.sax.SAXException;
+
+        specialinvoke $r17.<org.xml.sax.SAXException: void <init>(java.lang.String)>($r1);
+
+        throw $r17;
+
+     label194:
+        $r16 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Price mPrice>;
+
+        $r2 = $r43[0];
+
+        $r44 = staticinvoke <java.lang.Long: java.lang.Long valueOf(java.lang.String)>($r2);
+
+        $l2 = virtualinvoke $r44.<java.lang.Long: long longValue()>();
+
+        virtualinvoke $r16.<org.gnucash.android.model.Price: void setValueNum(long)>($l2);
+
+        $r16 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Price mPrice>;
+
+        $r2 = $r43[1];
+
+        $r44 = staticinvoke <java.lang.Long: java.lang.Long valueOf(java.lang.String)>($r2);
+
+        $l2 = virtualinvoke $r44.<java.lang.Long: long longValue()>();
+
+        virtualinvoke $r16.<org.gnucash.android.model.Price: void setValueDenom(long)>($l2);
+
+        $r45 = virtualinvoke r0.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r2 = virtualinvoke $r45.<java.lang.Class: java.lang.String getName()>();
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("price ");
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" .. ");
+
+        $r16 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Price mPrice>;
+
+        $l2 = virtualinvoke $r16.<org.gnucash.android.model.Price: long getValueNum()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l2);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("/");
+
+        $r16 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Price mPrice>;
+
+        $l2 = virtualinvoke $r16.<org.gnucash.android.model.Price: long getValueDenom()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l2);
+
+        $r1 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>($r2, $r1);
+
+        goto label004;
+
+     label195:
+        $r16 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Price mPrice>;
+
+        if $r16 == null goto label004;
+
+        $r16 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Price mPrice>;
+
+        virtualinvoke $r16.<org.gnucash.android.model.Price: void setType(java.lang.String)>($r1);
+
+        goto label004;
+
+     label196:
+        $r16 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Price mPrice>;
+
+        if $r16 == null goto label004;
+
+        $r18 = r0.<org.gnucash.android.importer.GncXmlHandler: java.util.List mPriceList>;
+
+        $r16 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Price mPrice>;
+
+        interfaceinvoke $r18.<java.util.List: boolean add(java.lang.Object)>($r16);
+
+        r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Price mPrice> = null;
+
+        goto label004;
+
+     label197:
+        $r26 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Budget mBudget>;
+
+        $r18 = virtualinvoke $r26.<org.gnucash.android.model.Budget: java.util.List getBudgetAmounts()>();
+
+        $i1 = interfaceinvoke $r18.<java.util.List: int size()>();
+
+        if $i1 <= 0 goto label004;
+
+        $r18 = r0.<org.gnucash.android.importer.GncXmlHandler: java.util.List mBudgetList>;
+
+        $r26 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Budget mBudget>;
+
+        interfaceinvoke $r18.<java.util.List: boolean add(java.lang.Object)>($r26);
+
+        goto label004;
+
+     label198:
+        $r26 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Budget mBudget>;
+
+        virtualinvoke $r26.<org.gnucash.android.model.Budget: void setName(java.lang.String)>($r1);
+
+        goto label004;
+
+     label199:
+        $r26 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Budget mBudget>;
+
+        virtualinvoke $r26.<org.gnucash.android.model.Budget: void setDescription(java.lang.String)>($r1);
+
+        goto label004;
+
+     label200:
+        $r26 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Budget mBudget>;
+
+        $l2 = staticinvoke <java.lang.Long: long parseLong(java.lang.String)>($r1);
+
+        virtualinvoke $r26.<org.gnucash.android.model.Budget: void setNumberOfPeriods(long)>($l2);
+
+        goto label004;
+
+     label201:
+        $r26 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Budget mBudget>;
+
+        $r36 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Recurrence mRecurrence>;
+
+        virtualinvoke $r26.<org.gnucash.android.model.Budget: void setRecurrence(org.gnucash.android.model.Recurrence)>($r36);
+
+        goto label004;
+
+        catch java.lang.IllegalArgumentException from label095 to label096 with label097;
+        catch java.text.ParseException from label106 to label107 with label111;
+        catch java.text.ParseException from label108 to label109 with label111;
+        catch java.lang.Throwable from label106 to label109 with label114;
+        catch java.lang.Throwable from label112 to label113 with label114;
+        catch java.text.ParseException from label120 to label121 with label130;
+        catch java.text.ParseException from label123 to label124 with label130;
+        catch java.text.ParseException from label125 to label126 with label130;
+        catch java.text.ParseException from label128 to label129 with label130;
+        catch java.text.ParseException from label136 to label137 with label141;
+        catch java.text.ParseException from label138 to label140 with label141;
+        catch java.text.ParseException from label143 to label144 with label145;
+        catch java.lang.IllegalArgumentException from label164 to label165 with label170;
+        catch java.lang.IllegalArgumentException from label166 to label167 with label170;
+        catch java.lang.IllegalArgumentException from label168 to label169 with label170;
+        catch java.text.ParseException from label172 to label173 with label185;
+        catch java.text.ParseException from label174 to label175 with label185;
+        catch java.text.ParseException from label177 to label178 with label185;
+        catch java.text.ParseException from label180 to label181 with label185;
+        catch java.text.ParseException from label183 to label184 with label185;
+    }
+    public java.lang.String getBookUID()
+    {
+        org.gnucash.android.importer.GncXmlHandler r0;
+        java.lang.String $r1;
+        org.gnucash.android.model.Book $r2;
+
+        r0 := @this: org.gnucash.android.importer.GncXmlHandler;
+
+        $r2 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Book mBook>;
+
+        $r1 = virtualinvoke $r2.<org.gnucash.android.model.Book: java.lang.String getUID()>();
+
+        return $r1;
+    }
+    public void startElement(java.lang.String, java.lang.String, java.lang.String, org.xml.sax.Attributes) throws org.xml.sax.SAXException
+    {
+        org.gnucash.android.importer.GncXmlHandler r0;
+        java.lang.String $r1, $r2, $r3;
+        org.xml.sax.Attributes $r4;
+        byte $b0;
+        int $i1;
+        boolean $z0;
+        org.gnucash.android.model.Account $r5;
+        org.gnucash.android.model.Transaction $r6;
+        org.gnucash.android.model.Split $r7;
+        org.gnucash.android.model.Money $r8;
+        org.gnucash.android.model.ScheduledAction $r9;
+        org.gnucash.android.model.ScheduledAction$ActionType $r10;
+        org.gnucash.android.model.Price $r11;
+        org.gnucash.android.model.Budget $r12;
+        org.gnucash.android.model.Recurrence $r13;
+        org.gnucash.android.model.PeriodType $r14;
+        org.gnucash.android.model.BudgetAmount $r15;
+
+        r0 := @this: org.gnucash.android.importer.GncXmlHandler;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $r3 := @parameter2: java.lang.String;
+
+        $r4 := @parameter3: org.xml.sax.Attributes;
+
+        $b0 = -1;
+
+        $i1 = virtualinvoke $r3.<java.lang.String: int hashCode()>();
+
+        lookupswitch($i1)
+        {
+            case -2031169640: goto label13;
+            case -1852746635: goto label09;
+            case -1818882421: goto label12;
+            case -1783108400: goto label05;
+            case -1356844864: goto label04;
+            case -1233676043: goto label22;
+            case -889963962: goto label11;
+            case -791742494: goto label07;
+            case -720589789: goto label17;
+            case -562706654: goto label15;
+            case -543766771: goto label10;
+            case -274804790: goto label20;
+            case 3533310: goto label21;
+            case 41509674: goto label08;
+            case 106934601: goto label14;
+            case 267278011: goto label19;
+            case 1887248956: goto label16;
+            case 2028022031: goto label03;
+            case 2081192206: goto label18;
+            case 2091403636: goto label06;
+            default: goto label01;
+        };
+
+     label01:
+        lookupswitch($b0)
+        {
+            case 0: goto label23;
+            case 1: goto label24;
+            case 2: goto label25;
+            case 3: goto label26;
+            case 4: goto label27;
+            case 5: goto label28;
+            case 6: goto label29;
+            case 7: goto label30;
+            case 8: goto label31;
+            case 9: goto label32;
+            case 10: goto label33;
+            case 11: goto label34;
+            case 12: goto label35;
+            case 13: goto label36;
+            case 14: goto label37;
+            case 15: goto label38;
+            case 16: goto label38;
+            case 17: goto label39;
+            case 18: goto label40;
+            case 19: goto label41;
+            default: goto label02;
+        };
+
+     label02:
+        return;
+
+     label03:
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("gnc:account");
+
+        if $z0 == 0 goto label01;
+
+        $b0 = 0;
+
+        goto label01;
+
+     label04:
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("gnc:transaction");
+
+        if $z0 == 0 goto label01;
+
+        $b0 = 1;
+
+        goto label01;
+
+     label05:
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("trn:split");
+
+        if $z0 == 0 goto label01;
+
+        $b0 = 2;
+
+        goto label01;
+
+     label06:
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("trn:date-posted");
+
+        if $z0 == 0 goto label01;
+
+        $b0 = 3;
+
+        goto label01;
+
+     label07:
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("trn:date-entered");
+
+        if $z0 == 0 goto label01;
+
+        $b0 = 4;
+
+        goto label01;
+
+     label08:
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("gnc:template-transactions");
+
+        if $z0 == 0 goto label01;
+
+        $b0 = 5;
+
+        goto label01;
+
+     label09:
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("gnc:schedxaction");
+
+        if $z0 == 0 goto label01;
+
+        $b0 = 6;
+
+        goto label01;
+
+     label10:
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("sx:start");
+
+        if $z0 == 0 goto label01;
+
+        $b0 = 7;
+
+        goto label01;
+
+     label11:
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("sx:end");
+
+        if $z0 == 0 goto label01;
+
+        $b0 = 8;
+
+        goto label01;
+
+     label12:
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("sx:last");
+
+        if $z0 == 0 goto label01;
+
+        $b0 = 9;
+
+        goto label01;
+
+     label13:
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("recurrence:start");
+
+        if $z0 == 0 goto label01;
+
+        $b0 = 10;
+
+        goto label01;
+
+     label14:
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("price");
+
+        if $z0 == 0 goto label01;
+
+        $b0 = 11;
+
+        goto label01;
+
+     label15:
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("price:currency");
+
+        if $z0 == 0 goto label01;
+
+        $b0 = 12;
+
+        goto label01;
+
+     label16:
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("price:commodity");
+
+        if $z0 == 0 goto label01;
+
+        $b0 = 13;
+
+        goto label01;
+
+     label17:
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("gnc:budget");
+
+        if $z0 == 0 goto label01;
+
+        $b0 = 14;
+
+        goto label01;
+
+     label18:
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("gnc:recurrence");
+
+        if $z0 == 0 goto label01;
+
+        $b0 = 15;
+
+        goto label01;
+
+     label19:
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("bgt:recurrence");
+
+        if $z0 == 0 goto label01;
+
+        $b0 = 16;
+
+        goto label01;
+
+     label20:
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("bgt:slots");
+
+        if $z0 == 0 goto label01;
+
+        $b0 = 17;
+
+        goto label01;
+
+     label21:
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("slot");
+
+        if $z0 == 0 goto label01;
+
+        $b0 = 18;
+
+        goto label01;
+
+     label22:
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>("slot:value");
+
+        if $z0 == 0 goto label01;
+
+        $b0 = 19;
+
+        goto label01;
+
+     label23:
+        $r5 = new org.gnucash.android.model.Account;
+
+        specialinvoke $r5.<org.gnucash.android.model.Account: void <init>(java.lang.String)>("");
+
+        r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Account mAccount> = $r5;
+
+        r0.<org.gnucash.android.importer.GncXmlHandler: boolean mISO4217Currency> = 0;
+
+        return;
+
+     label24:
+        $r6 = new org.gnucash.android.model.Transaction;
+
+        specialinvoke $r6.<org.gnucash.android.model.Transaction: void <init>(java.lang.String)>("");
+
+        r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Transaction mTransaction> = $r6;
+
+        $r6 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Transaction mTransaction>;
+
+        virtualinvoke $r6.<org.gnucash.android.model.Transaction: void setExported(boolean)>(1);
+
+        r0.<org.gnucash.android.importer.GncXmlHandler: boolean mISO4217Currency> = 0;
+
+        return;
+
+     label25:
+        $r7 = new org.gnucash.android.model.Split;
+
+        $r8 = staticinvoke <org.gnucash.android.model.Money: org.gnucash.android.model.Money getZeroInstance()>();
+
+        specialinvoke $r7.<org.gnucash.android.model.Split: void <init>(org.gnucash.android.model.Money,java.lang.String)>($r8, "");
+
+        r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Split mSplit> = $r7;
+
+        return;
+
+     label26:
+        r0.<org.gnucash.android.importer.GncXmlHandler: boolean mIsDatePosted> = 1;
+
+        return;
+
+     label27:
+        r0.<org.gnucash.android.importer.GncXmlHandler: boolean mIsDateEntered> = 1;
+
+        return;
+
+     label28:
+        r0.<org.gnucash.android.importer.GncXmlHandler: boolean mInTemplates> = 1;
+
+        return;
+
+     label29:
+        $r9 = new org.gnucash.android.model.ScheduledAction;
+
+        $r10 = <org.gnucash.android.model.ScheduledAction$ActionType: org.gnucash.android.model.ScheduledAction$ActionType TRANSACTION>;
+
+        specialinvoke $r9.<org.gnucash.android.model.ScheduledAction: void <init>(org.gnucash.android.model.ScheduledAction$ActionType)>($r10);
+
+        r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.ScheduledAction mScheduledAction> = $r9;
+
+        return;
+
+     label30:
+        r0.<org.gnucash.android.importer.GncXmlHandler: boolean mIsScheduledStart> = 1;
+
+        return;
+
+     label31:
+        r0.<org.gnucash.android.importer.GncXmlHandler: boolean mIsScheduledEnd> = 1;
+
+        return;
+
+     label32:
+        r0.<org.gnucash.android.importer.GncXmlHandler: boolean mIsLastRun> = 1;
+
+        return;
+
+     label33:
+        r0.<org.gnucash.android.importer.GncXmlHandler: boolean mIsRecurrenceStart> = 1;
+
+        return;
+
+     label34:
+        $r11 = new org.gnucash.android.model.Price;
+
+        specialinvoke $r11.<org.gnucash.android.model.Price: void <init>()>();
+
+        r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Price mPrice> = $r11;
+
+        return;
+
+     label35:
+        r0.<org.gnucash.android.importer.GncXmlHandler: boolean mPriceCurrency> = 1;
+
+        r0.<org.gnucash.android.importer.GncXmlHandler: boolean mPriceCommodity> = 0;
+
+        r0.<org.gnucash.android.importer.GncXmlHandler: boolean mISO4217Currency> = 0;
+
+        return;
+
+     label36:
+        r0.<org.gnucash.android.importer.GncXmlHandler: boolean mPriceCurrency> = 0;
+
+        r0.<org.gnucash.android.importer.GncXmlHandler: boolean mPriceCommodity> = 1;
+
+        r0.<org.gnucash.android.importer.GncXmlHandler: boolean mISO4217Currency> = 0;
+
+        return;
+
+     label37:
+        $r12 = new org.gnucash.android.model.Budget;
+
+        specialinvoke $r12.<org.gnucash.android.model.Budget: void <init>()>();
+
+        r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Budget mBudget> = $r12;
+
+        return;
+
+     label38:
+        r0.<org.gnucash.android.importer.GncXmlHandler: int mRecurrenceMultiplier> = 1;
+
+        $r13 = new org.gnucash.android.model.Recurrence;
+
+        $r14 = <org.gnucash.android.model.PeriodType: org.gnucash.android.model.PeriodType MONTH>;
+
+        specialinvoke $r13.<org.gnucash.android.model.Recurrence: void <init>(org.gnucash.android.model.PeriodType)>($r14);
+
+        r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Recurrence mRecurrence> = $r13;
+
+        return;
+
+     label39:
+        r0.<org.gnucash.android.importer.GncXmlHandler: boolean mInBudgetSlot> = 1;
+
+        return;
+
+     label40:
+        $z0 = r0.<org.gnucash.android.importer.GncXmlHandler: boolean mInBudgetSlot>;
+
+        if $z0 == 0 goto label42;
+
+        $r15 = new org.gnucash.android.model.BudgetAmount;
+
+        $r12 = r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.Budget mBudget>;
+
+        $r1 = virtualinvoke $r12.<org.gnucash.android.model.Budget: java.lang.String getUID()>();
+
+        $r2 = r0.<org.gnucash.android.importer.GncXmlHandler: java.lang.String mBudgetAmountAccountUID>;
+
+        specialinvoke $r15.<org.gnucash.android.model.BudgetAmount: void <init>(java.lang.String,java.lang.String)>($r1, $r2);
+
+        r0.<org.gnucash.android.importer.GncXmlHandler: org.gnucash.android.model.BudgetAmount mBudgetAmount> = $r15;
+
+        return;
+
+     label41:
+        $r1 = interfaceinvoke $r4.<org.xml.sax.Attributes: java.lang.String getValue(java.lang.String)>("type");
+
+        r0.<org.gnucash.android.importer.GncXmlHandler: java.lang.String mSlotTagAttribute> = $r1;
+
+     label42:
+        return;
+    }

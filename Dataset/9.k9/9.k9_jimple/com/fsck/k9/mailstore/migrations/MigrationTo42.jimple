@@ -1,0 +1,110 @@
+com.fsck.k9.mailstore.migrations.MigrationTo42 extends java.lang.Object
+    void <init>()
+    {
+        com.fsck.k9.mailstore.migrations.MigrationTo42 r0;
+
+        r0 := @this: com.fsck.k9.mailstore.migrations.MigrationTo42;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+    public static void from41MoveFolderPreferences(com.fsck.k9.mailstore.migrations.MigrationsHelper)
+    {
+        com.fsck.k9.mailstore.migrations.MigrationsHelper $r0;
+        java.lang.Exception r1;
+        com.fsck.k9.mailstore.LocalStore $r2;
+        com.fsck.k9.preferences.Storage $r3;
+        long $l0, $l1;
+        com.fsck.k9.preferences.StorageEditor $r4;
+        java.util.List $r5;
+        java.util.Iterator $r6;
+        boolean $z0;
+        java.lang.Object $r7;
+        com.fsck.k9.mail.Folder r8;
+        com.fsck.k9.mailstore.LocalFolder $r9;
+        java.lang.Object[] $r10;
+        int $i2;
+        java.lang.Integer $r11;
+        java.lang.Long $r12;
+
+        $r0 := @parameter0: com.fsck.k9.mailstore.migrations.MigrationsHelper;
+
+     label01:
+        $r2 = interfaceinvoke $r0.<com.fsck.k9.mailstore.migrations.MigrationsHelper: com.fsck.k9.mailstore.LocalStore getLocalStore()>();
+
+        $r3 = interfaceinvoke $r0.<com.fsck.k9.mailstore.migrations.MigrationsHelper: com.fsck.k9.preferences.Storage getStorage()>();
+
+        $l0 = staticinvoke <android.os.SystemClock: long elapsedRealtime()>();
+
+        $r4 = virtualinvoke $r3.<com.fsck.k9.preferences.Storage: com.fsck.k9.preferences.StorageEditor edit()>();
+
+        $r5 = virtualinvoke $r2.<com.fsck.k9.mailstore.LocalStore: java.util.List getPersonalNamespaces(boolean)>(1);
+
+        $r6 = interfaceinvoke $r5.<java.util.List: java.util.Iterator iterator()>();
+
+     label02:
+        $z0 = interfaceinvoke $r6.<java.util.Iterator: boolean hasNext()>();
+
+     label03:
+        if $z0 == 0 goto label09;
+
+     label04:
+        $r7 = interfaceinvoke $r6.<java.util.Iterator: java.lang.Object next()>();
+
+        r8 = (com.fsck.k9.mail.Folder) $r7;
+
+     label05:
+        $z0 = r8 instanceof com.fsck.k9.mailstore.LocalFolder;
+
+        if $z0 == 0 goto label02;
+
+     label06:
+        $r9 = (com.fsck.k9.mailstore.LocalFolder) r8;
+
+        virtualinvoke $r9.<com.fsck.k9.mailstore.LocalFolder: void save(com.fsck.k9.preferences.StorageEditor)>($r4);
+
+     label07:
+        goto label02;
+
+     label08:
+        r1 := @caughtexception;
+
+        $r10 = newarray (java.lang.Object)[0];
+
+        staticinvoke <timber.log.Timber: void e(java.lang.Throwable,java.lang.String,java.lang.Object[])>(r1, "Could not replace Preferences in upgrade from DB_VERSION 41", $r10);
+
+        return;
+
+     label09:
+        virtualinvoke $r4.<com.fsck.k9.preferences.StorageEditor: boolean commit()>();
+
+        $l1 = staticinvoke <android.os.SystemClock: long elapsedRealtime()>();
+
+        $r10 = newarray (java.lang.Object)[2];
+
+        $i2 = interfaceinvoke $r5.<java.util.List: int size()>();
+
+        $r11 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i2);
+
+        $r10[0] = $r11;
+
+     label10:
+        $l0 = $l1 - $l0;
+
+     label11:
+        $r12 = staticinvoke <java.lang.Long: java.lang.Long valueOf(long)>($l0);
+
+        $r10[1] = $r12;
+
+        staticinvoke <timber.log.Timber: void i(java.lang.String,java.lang.Object[])>("Putting folder preferences for %d folders back into Preferences took %d ms", $r10);
+
+     label12:
+        return;
+
+        catch java.lang.Exception from label01 to label03 with label08;
+        catch java.lang.Exception from label04 to label05 with label08;
+        catch java.lang.Exception from label06 to label07 with label08;
+        catch java.lang.Exception from label09 to label10 with label08;
+        catch java.lang.Exception from label11 to label12 with label08;
+    }

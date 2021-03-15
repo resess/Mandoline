@@ -1,0 +1,1867 @@
+com.dropbox.sync.android.CoreAccountManager extends java.lang.Object
+private static final char CACHE_DIR_PREFIX_SEPARATOR
+private static final java.lang.String CACHE_SUBDIR_NAME
+private static final java.lang.String LEDGER_SUBDIR_NAME
+private static final java.lang.String LOCAL_DATASTORE_NAME
+private static final java.lang.String LOG_SUBDIR_NAME
+private static final java.lang.String PREFS_NAME
+private static final java.util.List RESERVED_CACHE_DIR_NAMES
+private static final java.lang.String TAG
+private static final java.lang.String TEMP_SUBDIR_NAME
+private final java.util.concurrent.CopyOnWriteArraySet mAcctListeners
+private final com.dropbox.sync.android.CoreAccountManager$AccountStorageProvider mAcctStorage
+private final android.content.Context mAppContext
+private final java.lang.String mAppKey
+private final java.io.File mCacheDir
+private final com.dropbox.sync.android.CoreConfig mConfig
+private final com.dropbox.ledger.android.Ledger mLedger
+private final java.util.LinkedHashMap mLinkedAccounts
+private com.dropbox.sync.android.DbxAccount mLocalAccount
+private final java.util.Set mLocallyUnlinkedAccounts
+private com.dropbox.sync.android.CoreLogger mLog
+private final com.dropbox.sync.android.NativeLib mNativeLib
+    static void <clinit>()
+    {
+        java.lang.Class $r0;
+        java.lang.String $r1;
+        java.lang.String[] $r2;
+        java.util.List $r3;
+
+        $r0 = class "Lcom/dropbox/sync/android/CoreAccountManager;";
+
+        $r1 = virtualinvoke $r0.<java.lang.Class: java.lang.String getName()>();
+
+        <com.dropbox.sync.android.CoreAccountManager: java.lang.String TAG> = $r1;
+
+        $r2 = newarray (java.lang.String)[4];
+
+        $r2[0] = "logs";
+
+        $r2[1] = "Temp";
+
+        $r2[2] = "Ledger_Logfiles";
+
+        $r2[3] = "local-datastores";
+
+        $r3 = staticinvoke <java.util.Arrays: java.util.List asList(java.lang.Object[])>($r2);
+
+        <com.dropbox.sync.android.CoreAccountManager: java.util.List RESERVED_CACHE_DIR_NAMES> = $r3;
+
+        return;
+    }
+    void <init>(android.content.Context, com.dropbox.sync.android.CoreConfig, com.dropbox.sync.android.CoreAccountManager$AccountStorageProvider)
+    {
+        com.dropbox.sync.android.CoreAccountManager r0;
+        android.content.Context $r1;
+        com.dropbox.sync.android.CoreConfig $r2;
+        com.dropbox.sync.android.CoreAccountManager$AccountStorageProvider $r3;
+        com.dropbox.sync.android.CoreLogger $r4;
+        com.dropbox.sync.android.DbxConfig $r5;
+        java.lang.String $r6;
+        java.io.File $r7, $r8, $r9;
+        com.dropbox.sync.android.NativeLib $r10;
+        java.util.LinkedHashMap $r11;
+        java.util.HashSet $r12;
+        java.util.concurrent.CopyOnWriteArraySet $r13;
+        boolean $z0;
+        com.dropbox.ledger.android.Ledger $r14;
+        com.dropbox.sync.android.CoreBackgroundProcessor $r15;
+        com.dropbox.sync.android.CoreAccountManager$1 $r16;
+
+        r0 := @this: com.dropbox.sync.android.CoreAccountManager;
+
+        $r1 := @parameter0: android.content.Context;
+
+        $r2 := @parameter1: com.dropbox.sync.android.CoreConfig;
+
+        $r3 := @parameter2: com.dropbox.sync.android.CoreAccountManager$AccountStorageProvider;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r4 = staticinvoke <com.dropbox.sync.android.CoreLogger: com.dropbox.sync.android.CoreLogger getGlobal()>();
+
+        r0.<com.dropbox.sync.android.CoreAccountManager: com.dropbox.sync.android.CoreLogger mLog> = $r4;
+
+        r0.<com.dropbox.sync.android.CoreAccountManager: android.content.Context mAppContext> = $r1;
+
+        r0.<com.dropbox.sync.android.CoreAccountManager: com.dropbox.sync.android.CoreConfig mConfig> = $r2;
+
+        $r5 = $r2.<com.dropbox.sync.android.CoreConfig: com.dropbox.sync.android.DbxConfig publicConfig>;
+
+        $r6 = $r5.<com.dropbox.sync.android.DbxConfig: java.lang.String appKey>;
+
+        r0.<com.dropbox.sync.android.CoreAccountManager: java.lang.String mAppKey> = $r6;
+
+        $r7 = virtualinvoke $r1.<android.content.Context: java.io.File getDir(java.lang.String,int)>("DropboxSyncCache", 0);
+
+        $r5 = $r2.<com.dropbox.sync.android.CoreConfig: com.dropbox.sync.android.DbxConfig publicConfig>;
+
+        $r6 = $r5.<com.dropbox.sync.android.DbxConfig: java.lang.String appKey>;
+
+        $r7 = specialinvoke r0.<com.dropbox.sync.android.CoreAccountManager: java.io.File prepCacheDir(java.io.File,java.lang.String)>($r7, $r6);
+
+        r0.<com.dropbox.sync.android.CoreAccountManager: java.io.File mCacheDir> = $r7;
+
+        $r7 = new java.io.File;
+
+        $r8 = r0.<com.dropbox.sync.android.CoreAccountManager: java.io.File mCacheDir>;
+
+        specialinvoke $r7.<java.io.File: void <init>(java.io.File,java.lang.String)>($r8, "Temp");
+
+        $r8 = new java.io.File;
+
+        $r9 = r0.<com.dropbox.sync.android.CoreAccountManager: java.io.File mCacheDir>;
+
+        specialinvoke $r8.<java.io.File: void <init>(java.io.File,java.lang.String)>($r9, "logs");
+
+        $r10 = specialinvoke r0.<com.dropbox.sync.android.CoreAccountManager: com.dropbox.sync.android.NativeLib initNativeLib(java.io.File,java.io.File)>($r7, $r8);
+
+        r0.<com.dropbox.sync.android.CoreAccountManager: com.dropbox.sync.android.NativeLib mNativeLib> = $r10;
+
+        $r11 = new java.util.LinkedHashMap;
+
+        specialinvoke $r11.<java.util.LinkedHashMap: void <init>()>();
+
+        r0.<com.dropbox.sync.android.CoreAccountManager: java.util.LinkedHashMap mLinkedAccounts> = $r11;
+
+        $r12 = new java.util.HashSet;
+
+        specialinvoke $r12.<java.util.HashSet: void <init>()>();
+
+        r0.<com.dropbox.sync.android.CoreAccountManager: java.util.Set mLocallyUnlinkedAccounts> = $r12;
+
+        $r13 = new java.util.concurrent.CopyOnWriteArraySet;
+
+        specialinvoke $r13.<java.util.concurrent.CopyOnWriteArraySet: void <init>()>();
+
+        r0.<com.dropbox.sync.android.CoreAccountManager: java.util.concurrent.CopyOnWriteArraySet mAcctListeners> = $r13;
+
+        r0.<com.dropbox.sync.android.CoreAccountManager: com.dropbox.sync.android.CoreAccountManager$AccountStorageProvider mAcctStorage> = $r3;
+
+        $r5 = $r2.<com.dropbox.sync.android.CoreConfig: com.dropbox.sync.android.DbxConfig publicConfig>;
+
+        $z0 = $r5.<com.dropbox.sync.android.DbxConfig: boolean enableLedger>;
+
+        if $z0 == 0 goto label2;
+
+        $r14 = specialinvoke r0.<com.dropbox.sync.android.CoreAccountManager: com.dropbox.ledger.android.Ledger initLedger()>();
+
+        r0.<com.dropbox.sync.android.CoreAccountManager: com.dropbox.ledger.android.Ledger mLedger> = $r14;
+
+     label1:
+        $r14 = r0.<com.dropbox.sync.android.CoreAccountManager: com.dropbox.ledger.android.Ledger mLedger>;
+
+        staticinvoke <com.dropbox.sync.android.CoreLogger: boolean globalInitialize(android.content.Context,com.dropbox.sync.android.CoreConfig,com.dropbox.ledger.android.Ledger)>($r1, $r2, $r14);
+
+        $r4 = staticinvoke <com.dropbox.sync.android.CoreLogger: com.dropbox.sync.android.CoreLogger getGlobal()>();
+
+        r0.<com.dropbox.sync.android.CoreAccountManager: com.dropbox.sync.android.CoreLogger mLog> = $r4;
+
+        $r15 = staticinvoke <com.dropbox.sync.android.CoreBackgroundProcessor: com.dropbox.sync.android.CoreBackgroundProcessor getInstance()>();
+
+        virtualinvoke $r15.<com.dropbox.sync.android.CoreBackgroundProcessor: void setContext(android.content.Context)>($r1);
+
+        $r16 = new com.dropbox.sync.android.CoreAccountManager$1;
+
+        specialinvoke $r16.<com.dropbox.sync.android.CoreAccountManager$1: void <init>(com.dropbox.sync.android.CoreAccountManager)>(r0);
+
+        staticinvoke <com.dropbox.client2.android.AuthActivity: void setSecurityProvider(com.dropbox.client2.android.AuthActivity$SecurityProvider)>($r16);
+
+        specialinvoke r0.<com.dropbox.sync.android.CoreAccountManager: void loadAccounts()>();
+
+        specialinvoke r0.<com.dropbox.sync.android.CoreAccountManager: void saveAccounts()>();
+
+        specialinvoke r0.<com.dropbox.sync.android.CoreAccountManager: void scheduleLocallyUnlinkedAccounts()>();
+
+        return;
+
+     label2:
+        r0.<com.dropbox.sync.android.CoreAccountManager: com.dropbox.ledger.android.Ledger mLedger> = null;
+
+        goto label1;
+    }
+    static java.lang.String access$000()
+    {
+        java.lang.String r0;
+
+        r0 = <com.dropbox.sync.android.CoreAccountManager: java.lang.String TAG>;
+
+        return r0;
+    }
+    private void deleteCacheDirsForAccount(com.dropbox.sync.android.DbxAccount)
+    {
+        com.dropbox.sync.android.CoreAccountManager r0;
+        com.dropbox.sync.android.DbxAccount $r1;
+        int i0, i1;
+        java.lang.String r2, $r3, $r6;
+        java.lang.String[] $r4;
+        boolean $z0;
+        java.lang.StringBuilder $r5;
+        java.io.File $r7, $r8;
+
+        r0 := @this: com.dropbox.sync.android.CoreAccountManager;
+
+        $r1 := @parameter0: com.dropbox.sync.android.DbxAccount;
+
+        $r3 = specialinvoke r0.<com.dropbox.sync.android.CoreAccountManager: java.lang.String getCacheDirPrefixForAccount(com.dropbox.sync.android.DbxAccount)>($r1);
+
+        $r4 = specialinvoke r0.<com.dropbox.sync.android.CoreAccountManager: java.lang.String[] listCacheSubdirs()>();
+
+        i0 = lengthof $r4;
+
+        i1 = 0;
+
+     label1:
+        if i1 >= i0 goto label4;
+
+        r2 = $r4[i1];
+
+        $z0 = virtualinvoke r2.<java.lang.String: boolean equals(java.lang.Object)>($r3);
+
+        if $z0 != 0 goto label2;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(45);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $z0 = virtualinvoke r2.<java.lang.String: boolean startsWith(java.lang.String)>($r6);
+
+        if $z0 == 0 goto label3;
+
+     label2:
+        $r7 = new java.io.File;
+
+        $r8 = r0.<com.dropbox.sync.android.CoreAccountManager: java.io.File mCacheDir>;
+
+        specialinvoke $r7.<java.io.File: void <init>(java.io.File,java.lang.String)>($r8, r2);
+
+        staticinvoke <com.dropbox.sync.android.CoreFileUtil: boolean recursiveDelete(java.io.File)>($r7);
+
+     label3:
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label4:
+        return;
+    }
+    private java.lang.String getCacheDirPrefixForAccount(com.dropbox.sync.android.DbxAccount)
+    {
+        com.dropbox.sync.android.CoreAccountManager r0;
+        com.dropbox.sync.android.DbxAccount $r1;
+        java.lang.String $r2;
+
+        r0 := @this: com.dropbox.sync.android.CoreAccountManager;
+
+        $r1 := @parameter0: com.dropbox.sync.android.DbxAccount;
+
+        $r2 = virtualinvoke $r1.<com.dropbox.sync.android.DbxAccount: java.lang.String getUserId()>();
+
+        if $r2 != null goto label1;
+
+        return "local";
+
+     label1:
+        return $r2;
+    }
+    private com.dropbox.ledger.android.Ledger initLedger()
+    {
+        com.dropbox.sync.android.CoreAccountManager r0;
+        com.dropbox.sync.android.LedgerUrlCallbackImpl r1;
+        java.lang.String $r2, $r9, $r16, $r17, $r18, $r19, $r20, $r21;
+        com.dropbox.sync.android.NativeEnv$Config r3;
+        int i0;
+        com.dropbox.ledger.android.Ledger $r4;
+        com.dropbox.sync.android.DbxRuntimeException$BadState $r5;
+        com.dropbox.ledger.android.Ledger$Builder $r6;
+        java.lang.StringBuilder $r7;
+        java.io.File $r8;
+        android.content.Context $r10;
+        android.content.SharedPreferences $r11;
+        android.content.SharedPreferences$Editor $r12;
+        java.util.UUID $r13;
+        com.dropbox.sync.android.CoreConfig $r14;
+        com.dropbox.sync.android.DbxConfig $r15;
+        com.dropbox.sync.android.CoreLogger $r22;
+
+        r0 := @this: com.dropbox.sync.android.CoreAccountManager;
+
+        $r4 = r0.<com.dropbox.sync.android.CoreAccountManager: com.dropbox.ledger.android.Ledger mLedger>;
+
+        if $r4 == null goto label1;
+
+        $r5 = new com.dropbox.sync.android.DbxRuntimeException$BadState;
+
+        specialinvoke $r5.<com.dropbox.sync.android.DbxRuntimeException$BadState: void <init>(java.lang.String)>("Ledger already initialized!");
+
+        throw $r5;
+
+     label1:
+        $r6 = staticinvoke <com.dropbox.ledger.android.Ledger: com.dropbox.ledger.android.Ledger$Builder newBuilder()>();
+
+        virtualinvoke $r6.<com.dropbox.ledger.android.Ledger$Builder: com.dropbox.ledger.android.Ledger$Builder setFlushInterval(long)>(86400L);
+
+        virtualinvoke $r6.<com.dropbox.ledger.android.Ledger$Builder: com.dropbox.ledger.android.Ledger$Builder setLogfileSize(long)>(1048576L);
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = r0.<com.dropbox.sync.android.CoreAccountManager: java.io.File mCacheDir>;
+
+        $r9 = virtualinvoke $r8.<java.io.File: java.lang.String getAbsolutePath()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r9);
+
+        $r9 = <java.io.File: java.lang.String separator>;
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r9);
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Ledger_Logfiles");
+
+        $r9 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r6.<com.dropbox.ledger.android.Ledger$Builder: com.dropbox.ledger.android.Ledger$Builder setLogfileDirectory(java.lang.String)>($r9);
+
+        $r10 = r0.<com.dropbox.sync.android.CoreAccountManager: android.content.Context mAppContext>;
+
+        $r11 = virtualinvoke $r10.<android.content.Context: android.content.SharedPreferences getSharedPreferences(java.lang.String,int)>("CoreAccountManager-preferences", 0);
+
+        $r12 = interfaceinvoke $r11.<android.content.SharedPreferences: android.content.SharedPreferences$Editor edit()>();
+
+        i0 = interfaceinvoke $r11.<android.content.SharedPreferences: int getInt(java.lang.String,int)>("log_session_id", 0);
+
+        i0 = i0 + 1;
+
+        $r2 = interfaceinvoke $r11.<android.content.SharedPreferences: java.lang.String getString(java.lang.String,java.lang.String)>("log_UUID", null);
+
+        $r9 = $r2;
+
+        if $r2 != null goto label2;
+
+        $r13 = staticinvoke <java.util.UUID: java.util.UUID randomUUID()>();
+
+        $r2 = virtualinvoke $r13.<java.util.UUID: java.lang.String toString()>();
+
+        $r9 = $r2;
+
+        interfaceinvoke $r12.<android.content.SharedPreferences$Editor: android.content.SharedPreferences$Editor putString(java.lang.String,java.lang.String)>("log_UUID", $r2);
+
+     label2:
+        interfaceinvoke $r12.<android.content.SharedPreferences$Editor: android.content.SharedPreferences$Editor putInt(java.lang.String,int)>("log_session_id", i0);
+
+        interfaceinvoke $r12.<android.content.SharedPreferences$Editor: boolean commit()>();
+
+        r3 = new com.dropbox.sync.android.NativeEnv$Config;
+
+        $r10 = r0.<com.dropbox.sync.android.CoreAccountManager: android.content.Context mAppContext>;
+
+        $r14 = r0.<com.dropbox.sync.android.CoreAccountManager: com.dropbox.sync.android.CoreConfig mConfig>;
+
+        specialinvoke r3.<com.dropbox.sync.android.NativeEnv$Config: void <init>(android.content.Context,com.dropbox.sync.android.CoreConfig,com.dropbox.ledger.android.Ledger)>($r10, $r14, null);
+
+        r1 = new com.dropbox.sync.android.LedgerUrlCallbackImpl;
+
+        $r14 = r0.<com.dropbox.sync.android.CoreAccountManager: com.dropbox.sync.android.CoreConfig mConfig>;
+
+        $r15 = $r14.<com.dropbox.sync.android.CoreConfig: com.dropbox.sync.android.DbxConfig publicConfig>;
+
+        $r16 = $r15.<com.dropbox.sync.android.DbxConfig: java.lang.String appPlatform>;
+
+        $r17 = r3.<com.dropbox.sync.android.NativeEnv$Config: java.lang.String logSystemModel>;
+
+        $r18 = r3.<com.dropbox.sync.android.NativeEnv$Config: java.lang.String logSystemVersion>;
+
+        $r19 = r3.<com.dropbox.sync.android.NativeEnv$Config: java.lang.String logAppVersion>;
+
+        $r20 = r3.<com.dropbox.sync.android.NativeEnv$Config: java.lang.String logSystemManufacturer>;
+
+        $r2 = r3.<com.dropbox.sync.android.NativeEnv$Config: java.lang.String logDeviceId>;
+
+        $r21 = staticinvoke <java.lang.Integer: java.lang.String toString(int)>(i0);
+
+        specialinvoke r1.<com.dropbox.sync.android.LedgerUrlCallbackImpl: void <init>(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String)>($r16, $r17, $r18, $r19, $r20, $r2, $r21, $r9);
+
+        virtualinvoke $r6.<com.dropbox.ledger.android.Ledger$Builder: com.dropbox.ledger.android.Ledger$Builder setLedgerURLCallback(com.dropbox.ledger.android.LedgerUrlCallback)>(r1);
+
+        $r22 = r0.<com.dropbox.sync.android.CoreAccountManager: com.dropbox.sync.android.CoreLogger mLog>;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Ledger configured to upload to: ");
+
+        $r9 = virtualinvoke r1.<com.dropbox.sync.android.LedgerUrlCallbackImpl: java.lang.String getUploadUrl(long)>(-1L);
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r9);
+
+        $r9 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r22.<com.dropbox.sync.android.CoreLogger: void d(java.lang.String,java.lang.String)>("LEDGER_INIT", $r9);
+
+        $r4 = virtualinvoke $r6.<com.dropbox.ledger.android.Ledger$Builder: com.dropbox.ledger.android.Ledger build()>();
+
+        return $r4;
+    }
+    private com.dropbox.sync.android.NativeLib initNativeLib(java.io.File, java.io.File)
+    {
+        com.dropbox.sync.android.CoreAccountManager r0;
+        java.io.File $r1, $r2;
+        com.dropbox.sync.android.DbxException r3;
+        java.lang.String $r4;
+        com.dropbox.sync.android.DbxRuntimeException$System $r5;
+        com.dropbox.sync.android.NativeLib $r6;
+        com.dropbox.sync.android.CoreLogger $r7;
+        java.lang.RuntimeException $r8;
+
+        r0 := @this: com.dropbox.sync.android.CoreAccountManager;
+
+        $r1 := @parameter0: java.io.File;
+
+        $r2 := @parameter1: java.io.File;
+
+        staticinvoke <com.dropbox.sync.android.CoreFileUtil: boolean recursiveDelete(java.io.File)>($r1);
+
+        staticinvoke <com.dropbox.sync.android.CoreFileUtil: void prepCacheDirectory(java.io.File)>($r1);
+
+        $r6 = staticinvoke <com.dropbox.sync.android.NativeLib: com.dropbox.sync.android.NativeLib getInstance()>();
+
+     label1:
+        virtualinvoke $r6.<com.dropbox.sync.android.NativeLib: void setTempDir(java.io.File)>($r1);
+
+        $r4 = virtualinvoke $r2.<java.io.File: java.lang.String toString()>();
+
+        virtualinvoke $r6.<com.dropbox.sync.android.NativeLib: void setLogDir(java.lang.String)>($r4);
+
+     label2:
+        return $r6;
+
+     label3:
+        r3 := @caughtexception;
+
+        $r7 = r0.<com.dropbox.sync.android.CoreAccountManager: com.dropbox.sync.android.CoreLogger mLog>;
+
+        $r4 = <com.dropbox.sync.android.CoreAccountManager: java.lang.String TAG>;
+
+        $r5 = new com.dropbox.sync.android.DbxRuntimeException$System;
+
+        specialinvoke $r5.<com.dropbox.sync.android.DbxRuntimeException$System: void <init>(java.lang.String,java.lang.Throwable)>("Failed to set temp dir.", r3);
+
+        $r8 = virtualinvoke $r7.<com.dropbox.sync.android.CoreLogger: java.lang.RuntimeException logAndThrow(java.lang.String,java.lang.RuntimeException)>($r4, $r5);
+
+        throw $r8;
+
+        catch com.dropbox.sync.android.DbxException from label1 to label2 with label3;
+    }
+    private java.lang.String[] listCacheSubdirs()
+    {
+        com.dropbox.sync.android.CoreAccountManager r0;
+        java.io.File $r1;
+        boolean $z0;
+        java.lang.String[] r2;
+        com.dropbox.sync.android.DbxRuntimeException$System $r3;
+        java.lang.StringBuilder $r4;
+        java.lang.String $r5;
+
+        r0 := @this: com.dropbox.sync.android.CoreAccountManager;
+
+        $r1 = r0.<com.dropbox.sync.android.CoreAccountManager: java.io.File mCacheDir>;
+
+        $z0 = virtualinvoke $r1.<java.io.File: boolean isDirectory()>();
+
+        if $z0 != 0 goto label1;
+
+        r2 = newarray (java.lang.String)[0];
+
+        return r2;
+
+     label1:
+        $r1 = r0.<com.dropbox.sync.android.CoreAccountManager: java.io.File mCacheDir>;
+
+        r2 = virtualinvoke $r1.<java.io.File: java.lang.String[] list()>();
+
+        if r2 != null goto label2;
+
+        $r3 = new com.dropbox.sync.android.DbxRuntimeException$System;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unable to list cache directory: ");
+
+        $r1 = r0.<com.dropbox.sync.android.CoreAccountManager: java.io.File mCacheDir>;
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r1);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r3.<com.dropbox.sync.android.DbxRuntimeException$System: void <init>(java.lang.String)>($r5);
+
+        throw $r3;
+
+     label2:
+        return r2;
+    }
+    private void loadAccounts()
+    {
+        com.dropbox.sync.android.CoreAccountManager r0;
+        com.dropbox.sync.android.DbxException r1;
+        java.util.TreeSet r2;
+        java.lang.String[] $r3;
+        java.util.List $r4;
+        java.util.LinkedHashMap $r5;
+        java.util.Set $r6;
+        com.dropbox.sync.android.CoreAccountManager$AccountStorageProvider $r7;
+        java.lang.String $r8, $r15, $r18;
+        com.dropbox.sync.android.CoreConfig $r9;
+        java.util.Iterator $r10;
+        boolean $z0;
+        java.lang.Object $r11;
+        com.dropbox.sync.android.DbxAccount r12;
+        com.dropbox.sync.android.CoreLogger $r13;
+        java.lang.StringBuilder $r14;
+        java.lang.Throwable $r16;
+        java.util.SortedSet $r17;
+        java.io.File $r19, $r20;
+        com.dropbox.sync.android.DbxRuntimeException$Internal $r21;
+        java.lang.RuntimeException $r22;
+
+        r0 := @this: com.dropbox.sync.android.CoreAccountManager;
+
+        r2 = new java.util.TreeSet;
+
+        specialinvoke r2.<java.util.TreeSet: void <init>()>();
+
+        $r3 = specialinvoke r0.<com.dropbox.sync.android.CoreAccountManager: java.lang.String[] listCacheSubdirs()>();
+
+        staticinvoke <java.util.Collections: boolean addAll(java.util.Collection,java.lang.Object[])>(r2, $r3);
+
+        $r4 = <com.dropbox.sync.android.CoreAccountManager: java.util.List RESERVED_CACHE_DIR_NAMES>;
+
+        virtualinvoke r2.<java.util.TreeSet: boolean removeAll(java.util.Collection)>($r4);
+
+        entermonitor r0;
+
+     label01:
+        $r5 = r0.<com.dropbox.sync.android.CoreAccountManager: java.util.LinkedHashMap mLinkedAccounts>;
+
+        virtualinvoke $r5.<java.util.LinkedHashMap: void clear()>();
+
+        $r6 = r0.<com.dropbox.sync.android.CoreAccountManager: java.util.Set mLocallyUnlinkedAccounts>;
+
+        interfaceinvoke $r6.<java.util.Set: void clear()>();
+
+        $r7 = r0.<com.dropbox.sync.android.CoreAccountManager: com.dropbox.sync.android.CoreAccountManager$AccountStorageProvider mAcctStorage>;
+
+        $r8 = r0.<com.dropbox.sync.android.CoreAccountManager: java.lang.String mAppKey>;
+
+        $r9 = r0.<com.dropbox.sync.android.CoreAccountManager: com.dropbox.sync.android.CoreConfig mConfig>;
+
+        $r4 = interfaceinvoke $r7.<com.dropbox.sync.android.CoreAccountManager$AccountStorageProvider: java.util.List getAccounts(java.lang.String,com.dropbox.sync.android.CoreAccountManager,com.dropbox.sync.android.CoreConfig)>($r8, r0, $r9);
+
+        $r10 = interfaceinvoke $r4.<java.util.List: java.util.Iterator iterator()>();
+
+     label02:
+        $z0 = interfaceinvoke $r10.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label07;
+
+        $r11 = interfaceinvoke $r10.<java.util.Iterator: java.lang.Object next()>();
+
+        r12 = (com.dropbox.sync.android.DbxAccount) $r11;
+
+        $z0 = virtualinvoke r12.<com.dropbox.sync.android.DbxAccount: boolean isLinked()>();
+
+        if $z0 == 0 goto label06;
+
+        $r5 = r0.<com.dropbox.sync.android.CoreAccountManager: java.util.LinkedHashMap mLinkedAccounts>;
+
+        $r8 = virtualinvoke r12.<com.dropbox.sync.android.DbxAccount: java.lang.String getUserId()>();
+
+        $z0 = virtualinvoke $r5.<java.util.LinkedHashMap: boolean containsKey(java.lang.Object)>($r8);
+
+        if $z0 == 0 goto label05;
+
+        $r13 = r0.<com.dropbox.sync.android.CoreAccountManager: com.dropbox.sync.android.CoreLogger mLog>;
+
+        $r8 = <com.dropbox.sync.android.CoreAccountManager: java.lang.String TAG>;
+
+        $r14 = new java.lang.StringBuilder;
+
+        specialinvoke $r14.<java.lang.StringBuilder: void <init>()>();
+
+        $r14 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Ignoring duplicate account in persistent linked accounts set for uid=");
+
+        $r15 = virtualinvoke r12.<com.dropbox.sync.android.DbxAccount: java.lang.String getUserId()>();
+
+        $r14 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r15);
+
+        $r14 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".");
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r13.<com.dropbox.sync.android.CoreLogger: void e(java.lang.String,java.lang.String)>($r8, $r15);
+
+        virtualinvoke r12.<com.dropbox.sync.android.DbxAccount: void deinitialize()>();
+
+        goto label02;
+
+     label03:
+        $r16 := @caughtexception;
+
+        exitmonitor r0;
+
+     label04:
+        throw $r16;
+
+     label05:
+        $r15 = virtualinvoke r12.<com.dropbox.sync.android.DbxAccount: java.lang.String getUserId()>();
+
+        $r5 = r0.<com.dropbox.sync.android.CoreAccountManager: java.util.LinkedHashMap mLinkedAccounts>;
+
+        virtualinvoke $r5.<java.util.LinkedHashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>($r15, r12);
+
+        virtualinvoke r2.<java.util.TreeSet: boolean remove(java.lang.Object)>($r15);
+
+        $r14 = new java.lang.StringBuilder;
+
+        specialinvoke $r14.<java.lang.StringBuilder: void <init>()>();
+
+        $r14 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r15);
+
+        $r14 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(45);
+
+        $r8 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r14 = new java.lang.StringBuilder;
+
+        specialinvoke $r14.<java.lang.StringBuilder: void <init>()>();
+
+        $r14 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r15);
+
+        $r14 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(46);
+
+        $r15 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r17 = virtualinvoke r2.<java.util.TreeSet: java.util.SortedSet subSet(java.lang.Object,java.lang.Object)>($r8, $r15);
+
+        interfaceinvoke $r17.<java.util.SortedSet: void clear()>();
+
+        goto label02;
+
+     label06:
+        $r6 = r0.<com.dropbox.sync.android.CoreAccountManager: java.util.Set mLocallyUnlinkedAccounts>;
+
+        interfaceinvoke $r6.<java.util.Set: boolean add(java.lang.Object)>(r12);
+
+        goto label02;
+
+     label07:
+        exitmonitor r0;
+
+     label08:
+        r12 = new com.dropbox.sync.android.DbxAccount;
+
+        $r9 = r0.<com.dropbox.sync.android.CoreAccountManager: com.dropbox.sync.android.CoreConfig mConfig>;
+
+     label09:
+        specialinvoke r12.<com.dropbox.sync.android.DbxAccount: void <init>(com.dropbox.sync.android.CoreAccountManager,com.dropbox.sync.android.CoreConfig)>(r0, $r9);
+
+     label10:
+        r0.<com.dropbox.sync.android.CoreAccountManager: com.dropbox.sync.android.DbxAccount mLocalAccount> = r12;
+
+        $r10 = virtualinvoke r2.<java.util.TreeSet: java.util.Iterator iterator()>();
+
+     label11:
+        $z0 = interfaceinvoke $r10.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label13;
+
+        $r11 = interfaceinvoke $r10.<java.util.Iterator: java.lang.Object next()>();
+
+        $r8 = (java.lang.String) $r11;
+
+        $r13 = r0.<com.dropbox.sync.android.CoreAccountManager: com.dropbox.sync.android.CoreLogger mLog>;
+
+        $r15 = <com.dropbox.sync.android.CoreAccountManager: java.lang.String TAG>;
+
+        $r14 = new java.lang.StringBuilder;
+
+        specialinvoke $r14.<java.lang.StringBuilder: void <init>()>();
+
+        $r14 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Removing unclaimed file/directory in cache: ");
+
+        $r18 = staticinvoke <com.dropbox.sync.android.CoreStringUtil: java.lang.String jq(java.lang.String)>($r8);
+
+        $r14 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r18);
+
+        $r18 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r13.<com.dropbox.sync.android.CoreLogger: void i(java.lang.String,java.lang.String)>($r15, $r18);
+
+        $r19 = new java.io.File;
+
+        $r20 = r0.<com.dropbox.sync.android.CoreAccountManager: java.io.File mCacheDir>;
+
+        specialinvoke $r19.<java.io.File: void <init>(java.io.File,java.lang.String)>($r20, $r8);
+
+        staticinvoke <com.dropbox.sync.android.CoreFileUtil: boolean recursiveDelete(java.io.File)>($r19);
+
+        goto label11;
+
+     label12:
+        r1 := @caughtexception;
+
+        $r13 = r0.<com.dropbox.sync.android.CoreAccountManager: com.dropbox.sync.android.CoreLogger mLog>;
+
+        $r8 = <com.dropbox.sync.android.CoreAccountManager: java.lang.String TAG>;
+
+        $r21 = new com.dropbox.sync.android.DbxRuntimeException$Internal;
+
+        specialinvoke $r21.<com.dropbox.sync.android.DbxRuntimeException$Internal: void <init>(java.lang.String,java.lang.Throwable)>("Failed to set up local account.", r1);
+
+        $r22 = virtualinvoke $r13.<com.dropbox.sync.android.CoreLogger: java.lang.RuntimeException logAndThrow(java.lang.String,java.lang.RuntimeException)>($r8, $r21);
+
+        throw $r22;
+
+     label13:
+        return;
+
+        catch java.lang.Throwable from label01 to label04 with label03;
+        catch java.lang.Throwable from label05 to label08 with label03;
+        catch com.dropbox.sync.android.DbxException from label09 to label10 with label12;
+    }
+    private static void notifyListeners(java.util.Iterator, com.dropbox.sync.android.DbxAccount)
+    {
+        java.util.Iterator r0;
+        com.dropbox.sync.android.DbxAccount $r1;
+        com.dropbox.sync.android.CoreAccountManager$2 $r2;
+
+        r0 := @parameter0: java.util.Iterator;
+
+        $r1 := @parameter1: com.dropbox.sync.android.DbxAccount;
+
+        $r2 = new com.dropbox.sync.android.CoreAccountManager$2;
+
+        specialinvoke $r2.<com.dropbox.sync.android.CoreAccountManager$2: void <init>(java.util.Iterator,com.dropbox.sync.android.DbxAccount)>(r0, $r1);
+
+        staticinvoke <com.dropbox.sync.android.CoreAndroidUtil: void postUserCallback(java.lang.Runnable)>($r2);
+
+        return;
+    }
+    private java.io.File prepCacheDir(java.io.File, java.lang.String)
+    {
+        com.dropbox.sync.android.CoreAccountManager r0;
+        java.io.File $r1, r3;
+        java.lang.String $r2, $r5, $r8;
+        int i0, i1;
+        java.io.File[] $r4;
+        boolean $z0;
+        com.dropbox.sync.android.CoreLogger $r6;
+        java.lang.StringBuilder $r7;
+
+        r0 := @this: com.dropbox.sync.android.CoreAccountManager;
+
+        $r1 := @parameter0: java.io.File;
+
+        $r2 := @parameter1: java.lang.String;
+
+        staticinvoke <com.dropbox.sync.android.CoreFileUtil: void prepCacheDirectory(java.io.File)>($r1);
+
+        $r4 = virtualinvoke $r1.<java.io.File: java.io.File[] listFiles()>();
+
+        if $r4 == null goto label4;
+
+        i0 = lengthof $r4;
+
+        i1 = 0;
+
+     label1:
+        if i1 >= i0 goto label5;
+
+        r3 = $r4[i1];
+
+        $r5 = virtualinvoke r3.<java.io.File: java.lang.String getName()>();
+
+        $z0 = virtualinvoke $r5.<java.lang.String: boolean equals(java.lang.Object)>($r2);
+
+        if $z0 == 0 goto label3;
+
+        $z0 = virtualinvoke r3.<java.io.File: boolean isDirectory()>();
+
+        if $z0 == 0 goto label3;
+
+     label2:
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label3:
+        staticinvoke <com.dropbox.sync.android.CoreFileUtil: boolean recursiveDelete(java.io.File)>(r3);
+
+        goto label2;
+
+     label4:
+        $r6 = r0.<com.dropbox.sync.android.CoreAccountManager: com.dropbox.sync.android.CoreLogger mLog>;
+
+        $r5 = <com.dropbox.sync.android.CoreAccountManager: java.lang.String TAG>;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Failed to list cache dir: ");
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r1);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r6.<com.dropbox.sync.android.CoreLogger: void w(java.lang.String,java.lang.String)>($r5, $r8);
+
+     label5:
+        r3 = new java.io.File;
+
+        specialinvoke r3.<java.io.File: void <init>(java.io.File,java.lang.String)>($r1, $r2);
+
+        staticinvoke <com.dropbox.sync.android.CoreFileUtil: void prepCacheDirectory(java.io.File)>(r3);
+
+        $r1 = new java.io.File;
+
+        specialinvoke $r1.<java.io.File: void <init>(java.io.File,java.lang.String)>(r3, "logs");
+
+        staticinvoke <com.dropbox.sync.android.CoreFileUtil: void prepCacheDirectory(java.io.File)>($r1);
+
+        $r6 = r0.<com.dropbox.sync.android.CoreAccountManager: com.dropbox.sync.android.CoreLogger mLog>;
+
+        $r2 = <com.dropbox.sync.android.CoreAccountManager: java.lang.String TAG>;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Prepared cache dir \'");
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r3);
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\'.");
+
+        $r5 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r6.<com.dropbox.sync.android.CoreLogger: void i(java.lang.String,java.lang.String)>($r2, $r5);
+
+        return r3;
+    }
+    private void saveAccounts()
+    {
+        com.dropbox.sync.android.CoreAccountManager r0;
+        java.util.ArrayList r1;
+        java.lang.String $r2;
+        java.util.Collection $r3;
+        java.util.LinkedHashMap $r4;
+        java.util.Set $r5;
+        com.dropbox.sync.android.CoreAccountManager$AccountStorageProvider $r6;
+        java.lang.Throwable $r7;
+
+        r0 := @this: com.dropbox.sync.android.CoreAccountManager;
+
+        r1 = new java.util.ArrayList;
+
+        specialinvoke r1.<java.util.ArrayList: void <init>()>();
+
+        entermonitor r0;
+
+     label1:
+        $r4 = r0.<com.dropbox.sync.android.CoreAccountManager: java.util.LinkedHashMap mLinkedAccounts>;
+
+        $r3 = virtualinvoke $r4.<java.util.LinkedHashMap: java.util.Collection values()>();
+
+        virtualinvoke r1.<java.util.ArrayList: boolean addAll(java.util.Collection)>($r3);
+
+        $r5 = r0.<com.dropbox.sync.android.CoreAccountManager: java.util.Set mLocallyUnlinkedAccounts>;
+
+        virtualinvoke r1.<java.util.ArrayList: boolean addAll(java.util.Collection)>($r5);
+
+        exitmonitor r0;
+
+     label2:
+        $r6 = r0.<com.dropbox.sync.android.CoreAccountManager: com.dropbox.sync.android.CoreAccountManager$AccountStorageProvider mAcctStorage>;
+
+        $r2 = r0.<com.dropbox.sync.android.CoreAccountManager: java.lang.String mAppKey>;
+
+        interfaceinvoke $r6.<com.dropbox.sync.android.CoreAccountManager$AccountStorageProvider: void setAccounts(java.lang.String,java.util.List)>($r2, r1);
+
+        return;
+
+     label3:
+        $r7 := @caughtexception;
+
+     label4:
+        exitmonitor r0;
+
+     label5:
+        throw $r7;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label4 to label5 with label3;
+    }
+    private void scheduleLocallyUnlinkedAccounts()
+    {
+        com.dropbox.sync.android.CoreAccountManager r0;
+        java.util.HashSet r1;
+        java.util.Set $r2;
+        java.util.Iterator $r3;
+        boolean $z0;
+        java.lang.Object $r4;
+        com.dropbox.sync.android.DbxAccount r5;
+        com.dropbox.sync.android.CoreBackgroundProcessor $r6;
+        java.lang.Throwable $r7;
+
+        r0 := @this: com.dropbox.sync.android.CoreAccountManager;
+
+        entermonitor r0;
+
+     label1:
+        r1 = new java.util.HashSet;
+
+        $r2 = r0.<com.dropbox.sync.android.CoreAccountManager: java.util.Set mLocallyUnlinkedAccounts>;
+
+        specialinvoke r1.<java.util.HashSet: void <init>(java.util.Collection)>($r2);
+
+        exitmonitor r0;
+
+     label2:
+        $r3 = interfaceinvoke r1.<java.util.Set: java.util.Iterator iterator()>();
+
+     label3:
+        $z0 = interfaceinvoke $r3.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label7;
+
+        $r4 = interfaceinvoke $r3.<java.util.Iterator: java.lang.Object next()>();
+
+        r5 = (com.dropbox.sync.android.DbxAccount) $r4;
+
+        $r6 = staticinvoke <com.dropbox.sync.android.CoreBackgroundProcessor: com.dropbox.sync.android.CoreBackgroundProcessor getInstance()>();
+
+        virtualinvoke $r6.<com.dropbox.sync.android.CoreBackgroundProcessor: void notifyServerOfLocalUnlink(com.dropbox.sync.android.DbxAccount)>(r5);
+
+        goto label3;
+
+     label4:
+        $r7 := @caughtexception;
+
+     label5:
+        exitmonitor r0;
+
+     label6:
+        throw $r7;
+
+     label7:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label4;
+        catch java.lang.Throwable from label5 to label6 with label4;
+    }
+    private java.util.Iterator snapshotListeners()
+    {
+        com.dropbox.sync.android.CoreAccountManager r0;
+        java.util.Iterator $r1;
+        java.util.concurrent.CopyOnWriteArraySet $r2;
+
+        r0 := @this: com.dropbox.sync.android.CoreAccountManager;
+
+        $r2 = r0.<com.dropbox.sync.android.CoreAccountManager: java.util.concurrent.CopyOnWriteArraySet mAcctListeners>;
+
+        $r1 = virtualinvoke $r2.<java.util.concurrent.CopyOnWriteArraySet: java.util.Iterator iterator()>();
+
+        return $r1;
+    }
+    com.dropbox.sync.android.DbxAccount addLinkedAcct(java.lang.String, com.dropbox.sync.android.DbxToken, com.dropbox.sync.android.DbxAccountInfo)
+    {
+        com.dropbox.sync.android.CoreAccountManager r0;
+        java.lang.String $r1, $r15;
+        com.dropbox.sync.android.DbxToken $r2, $r14;
+        com.dropbox.sync.android.DbxAccountInfo $r3;
+        com.dropbox.sync.android.DbxException r4;
+        com.dropbox.sync.android.CoreConfig $r5;
+        boolean $z0, $z1;
+        com.dropbox.sync.android.DbxAccount r6, r10;
+        java.util.Iterator r7;
+        java.util.LinkedHashMap $r8;
+        java.lang.Object $r9;
+        com.dropbox.sync.android.CoreLogger $r11;
+        com.dropbox.sync.android.DbxRuntimeException$Internal $r12;
+        java.lang.RuntimeException $r13;
+        java.lang.StringBuilder $r16;
+        java.lang.Throwable $r17;
+
+        r0 := @this: com.dropbox.sync.android.CoreAccountManager;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: com.dropbox.sync.android.DbxToken;
+
+        $r3 := @parameter2: com.dropbox.sync.android.DbxAccountInfo;
+
+        $r5 = r0.<com.dropbox.sync.android.CoreAccountManager: com.dropbox.sync.android.CoreConfig mConfig>;
+
+        $z0 = staticinvoke <com.dropbox.sync.android.DbxAccount: boolean isTokenCompatible(com.dropbox.sync.android.CoreConfig,com.dropbox.sync.android.DbxToken)>($r5, $r2);
+
+        staticinvoke <com.dropbox.sync.android.CoreAssert: void isTrue(boolean)>($z0);
+
+        r6 = new com.dropbox.sync.android.DbxAccount;
+
+        $r5 = r0.<com.dropbox.sync.android.CoreAccountManager: com.dropbox.sync.android.CoreConfig mConfig>;
+
+     label01:
+        specialinvoke r6.<com.dropbox.sync.android.DbxAccount: void <init>(com.dropbox.sync.android.CoreAccountManager,com.dropbox.sync.android.CoreConfig,java.lang.String,com.dropbox.sync.android.DbxToken,com.dropbox.sync.android.DbxAccountInfo,boolean)>(r0, $r5, $r1, $r2, $r3, 1);
+
+     label02:
+        r7 = null;
+
+        $z0 = 0;
+
+        entermonitor r0;
+
+     label03:
+        $r8 = r0.<com.dropbox.sync.android.CoreAccountManager: java.util.LinkedHashMap mLinkedAccounts>;
+
+        $r9 = virtualinvoke $r8.<java.util.LinkedHashMap: java.lang.Object get(java.lang.Object)>($r1);
+
+        r10 = (com.dropbox.sync.android.DbxAccount) $r9;
+
+        if r10 != null goto label08;
+
+        $r8 = r0.<com.dropbox.sync.android.CoreAccountManager: java.util.LinkedHashMap mLinkedAccounts>;
+
+        virtualinvoke $r8.<java.util.LinkedHashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>($r1, r6);
+
+        specialinvoke r0.<com.dropbox.sync.android.CoreAccountManager: void saveAccounts()>();
+
+        r7 = specialinvoke r0.<com.dropbox.sync.android.CoreAccountManager: java.util.Iterator snapshotListeners()>();
+
+     label04:
+        exitmonitor r0;
+
+     label05:
+        if $z0 == 0 goto label06;
+
+        virtualinvoke r6.<com.dropbox.sync.android.DbxAccount: void unlink()>();
+
+        r6 = null;
+
+     label06:
+        if r7 == null goto label12;
+
+        staticinvoke <com.dropbox.sync.android.CoreAccountManager: void notifyListeners(java.util.Iterator,com.dropbox.sync.android.DbxAccount)>(r7, r6);
+
+        return r6;
+
+     label07:
+        r4 := @caughtexception;
+
+        $r11 = r0.<com.dropbox.sync.android.CoreAccountManager: com.dropbox.sync.android.CoreLogger mLog>;
+
+        $r1 = <com.dropbox.sync.android.CoreAccountManager: java.lang.String TAG>;
+
+        $r12 = new com.dropbox.sync.android.DbxRuntimeException$Internal;
+
+        specialinvoke $r12.<com.dropbox.sync.android.DbxRuntimeException$Internal: void <init>(java.lang.String,java.lang.Throwable)>("Failed to set up newly linked user account.", r4);
+
+        $r13 = virtualinvoke $r11.<com.dropbox.sync.android.CoreLogger: java.lang.RuntimeException logAndThrow(java.lang.String,java.lang.RuntimeException)>($r1, $r12);
+
+        throw $r13;
+
+     label08:
+        $r2 = virtualinvoke r6.<com.dropbox.sync.android.DbxAccount: com.dropbox.sync.android.DbxToken getToken()>();
+
+        $r14 = virtualinvoke r10.<com.dropbox.sync.android.DbxAccount: com.dropbox.sync.android.DbxToken getToken()>();
+
+        $z1 = virtualinvoke $r2.<java.lang.Object: boolean equals(java.lang.Object)>($r14);
+
+        if $z1 == 0 goto label09;
+
+        $r11 = r0.<com.dropbox.sync.android.CoreAccountManager: com.dropbox.sync.android.CoreLogger mLog>;
+
+        $r15 = <com.dropbox.sync.android.CoreAccountManager: java.lang.String TAG>;
+
+        $r16 = new java.lang.StringBuilder;
+
+        specialinvoke $r16.<java.lang.StringBuilder: void <init>()>();
+
+        $r16 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Duplicate link for user ID ");
+
+        $r16 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r16 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" with same token, ignoring.");
+
+        $r1 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r11.<com.dropbox.sync.android.CoreLogger: void i(java.lang.String,java.lang.String)>($r15, $r1);
+
+        r6 = null;
+
+        goto label04;
+
+     label09:
+        $r11 = r0.<com.dropbox.sync.android.CoreAccountManager: com.dropbox.sync.android.CoreLogger mLog>;
+
+        $r15 = <com.dropbox.sync.android.CoreAccountManager: java.lang.String TAG>;
+
+        $r16 = new java.lang.StringBuilder;
+
+        specialinvoke $r16.<java.lang.StringBuilder: void <init>()>();
+
+        $r16 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Duplicate link for user ID ");
+
+        $r16 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r16 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", unlinking new account.");
+
+        $r1 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r11.<com.dropbox.sync.android.CoreLogger: void w(java.lang.String,java.lang.String)>($r15, $r1);
+
+        $z0 = 1;
+
+        goto label04;
+
+     label10:
+        $r17 := @caughtexception;
+
+        exitmonitor r0;
+
+     label11:
+        throw $r17;
+
+     label12:
+        return r6;
+
+        catch com.dropbox.sync.android.DbxException from label01 to label02 with label07;
+        catch java.lang.Throwable from label03 to label05 with label10;
+        catch java.lang.Throwable from label08 to label11 with label10;
+    }
+    public void addListener(com.dropbox.sync.android.CoreAccountManager$AccountListener)
+    {
+        com.dropbox.sync.android.CoreAccountManager r0;
+        com.dropbox.sync.android.CoreAccountManager$AccountListener $r1;
+        java.util.concurrent.CopyOnWriteArraySet $r2;
+
+        r0 := @this: com.dropbox.sync.android.CoreAccountManager;
+
+        $r1 := @parameter0: com.dropbox.sync.android.CoreAccountManager$AccountListener;
+
+        if $r1 == null goto label1;
+
+        $r2 = r0.<com.dropbox.sync.android.CoreAccountManager: java.util.concurrent.CopyOnWriteArraySet mAcctListeners>;
+
+        virtualinvoke $r2.<java.util.concurrent.CopyOnWriteArraySet: boolean add(java.lang.Object)>($r1);
+
+     label1:
+        return;
+    }
+    android.content.Context getAppContext()
+    {
+        com.dropbox.sync.android.CoreAccountManager r0;
+        android.content.Context r1;
+
+        r0 := @this: com.dropbox.sync.android.CoreAccountManager;
+
+        r1 = r0.<com.dropbox.sync.android.CoreAccountManager: android.content.Context mAppContext>;
+
+        return r1;
+    }
+    java.io.File getCacheDirForAccount(java.lang.String)
+    {
+        com.dropbox.sync.android.CoreAccountManager r0;
+        java.lang.String $r1;
+        java.io.File $r2, $r3;
+        java.lang.StringBuilder $r4;
+
+        r0 := @this: com.dropbox.sync.android.CoreAccountManager;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = new java.io.File;
+
+        $r3 = r0.<com.dropbox.sync.android.CoreAccountManager: java.io.File mCacheDir>;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(45);
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("account");
+
+        $r1 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r2.<java.io.File: void <init>(java.io.File,java.lang.String)>($r3, $r1);
+
+        return $r2;
+    }
+    java.io.File getCacheDirForClient(java.lang.String, java.lang.String)
+    {
+        com.dropbox.sync.android.CoreAccountManager r0;
+        java.lang.String $r1, $r2;
+        java.io.File $r3, $r4;
+        java.lang.StringBuilder $r5;
+
+        r0 := @this: com.dropbox.sync.android.CoreAccountManager;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.lang.String;
+
+        if $r2 != null goto label2;
+
+     label1:
+        $r3 = new java.io.File;
+
+        $r4 = r0.<com.dropbox.sync.android.CoreAccountManager: java.io.File mCacheDir>;
+
+        specialinvoke $r3.<java.io.File: void <init>(java.io.File,java.lang.String)>($r4, $r1);
+
+        return $r3;
+
+     label2:
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(45);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r1 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        goto label1;
+    }
+    java.io.File getCacheDirForLocalClient(java.lang.String)
+    {
+        com.dropbox.sync.android.CoreAccountManager r0;
+        java.lang.String $r1, r2;
+        java.lang.StringBuilder $r3;
+        java.io.File $r4, $r5;
+
+        r0 := @this: com.dropbox.sync.android.CoreAccountManager;
+
+        $r1 := @parameter0: java.lang.String;
+
+        r2 = "local";
+
+        if $r1 == null goto label1;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("local");
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(45);
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        r2 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label1:
+        $r4 = new java.io.File;
+
+        $r5 = r0.<com.dropbox.sync.android.CoreAccountManager: java.io.File mCacheDir>;
+
+        specialinvoke $r4.<java.io.File: void <init>(java.io.File,java.lang.String)>($r5, r2);
+
+        return $r4;
+    }
+    public com.dropbox.sync.android.DbxConfig getConfig()
+    {
+        com.dropbox.sync.android.CoreAccountManager r0;
+        com.dropbox.sync.android.CoreConfig $r1;
+        com.dropbox.sync.android.DbxConfig r2;
+
+        r0 := @this: com.dropbox.sync.android.CoreAccountManager;
+
+        $r1 = r0.<com.dropbox.sync.android.CoreAccountManager: com.dropbox.sync.android.CoreConfig mConfig>;
+
+        r2 = $r1.<com.dropbox.sync.android.CoreConfig: com.dropbox.sync.android.DbxConfig publicConfig>;
+
+        return r2;
+    }
+    com.dropbox.sync.android.CoreConfig getCoreConfig()
+    {
+        com.dropbox.sync.android.CoreAccountManager r0;
+        com.dropbox.sync.android.CoreConfig r1;
+
+        r0 := @this: com.dropbox.sync.android.CoreAccountManager;
+
+        r1 = r0.<com.dropbox.sync.android.CoreAccountManager: com.dropbox.sync.android.CoreConfig mConfig>;
+
+        return r1;
+    }
+    public com.dropbox.sync.android.DbxAccount getLastLinkedAccount()
+    {
+        com.dropbox.sync.android.CoreAccountManager r0;
+        java.util.LinkedHashMap $r1;
+        java.util.Collection $r2;
+        java.util.Iterator $r3;
+        com.dropbox.sync.android.DbxAccount r4;
+        boolean $z0;
+        java.lang.Object $r5;
+        java.lang.Throwable $r6;
+
+        r0 := @this: com.dropbox.sync.android.CoreAccountManager;
+
+        entermonitor r0;
+
+     label1:
+        $r1 = r0.<com.dropbox.sync.android.CoreAccountManager: java.util.LinkedHashMap mLinkedAccounts>;
+
+        $r2 = virtualinvoke $r1.<java.util.LinkedHashMap: java.util.Collection values()>();
+
+        $r3 = interfaceinvoke $r2.<java.util.Collection: java.util.Iterator iterator()>();
+
+        r4 = null;
+
+     label2:
+        $z0 = interfaceinvoke $r3.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label4;
+
+        $r5 = interfaceinvoke $r3.<java.util.Iterator: java.lang.Object next()>();
+
+        r4 = (com.dropbox.sync.android.DbxAccount) $r5;
+
+     label3:
+        goto label2;
+
+     label4:
+        exitmonitor r0;
+
+        return r4;
+
+     label5:
+        $r6 := @caughtexception;
+
+        exitmonitor r0;
+
+        throw $r6;
+
+        catch java.lang.Throwable from label1 to label3 with label5;
+    }
+    com.dropbox.ledger.android.Ledger getLedger()
+    {
+        com.dropbox.sync.android.CoreAccountManager r0;
+        com.dropbox.ledger.android.Ledger r1;
+
+        r0 := @this: com.dropbox.sync.android.CoreAccountManager;
+
+        r1 = r0.<com.dropbox.sync.android.CoreAccountManager: com.dropbox.ledger.android.Ledger mLedger>;
+
+        return r1;
+    }
+    public java.util.List getLinkedAccounts()
+    {
+        com.dropbox.sync.android.CoreAccountManager r0;
+        java.util.Collection $r1;
+        java.util.ArrayList $r2;
+        java.util.LinkedHashMap $r3;
+        java.lang.Throwable $r4;
+
+        r0 := @this: com.dropbox.sync.android.CoreAccountManager;
+
+        entermonitor r0;
+
+     label1:
+        $r2 = new java.util.ArrayList;
+
+        $r3 = r0.<com.dropbox.sync.android.CoreAccountManager: java.util.LinkedHashMap mLinkedAccounts>;
+
+        $r1 = virtualinvoke $r3.<java.util.LinkedHashMap: java.util.Collection values()>();
+
+        specialinvoke $r2.<java.util.ArrayList: void <init>(java.util.Collection)>($r1);
+
+     label2:
+        exitmonitor r0;
+
+        return $r2;
+
+     label3:
+        $r4 := @caughtexception;
+
+        exitmonitor r0;
+
+        throw $r4;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+    public com.dropbox.sync.android.DbxAccount getLocalAccount()
+    {
+        com.dropbox.sync.android.CoreAccountManager r0;
+        java.lang.Throwable $r1;
+        com.dropbox.sync.android.DbxAccount r2;
+
+        r0 := @this: com.dropbox.sync.android.CoreAccountManager;
+
+        entermonitor r0;
+
+     label1:
+        r2 = r0.<com.dropbox.sync.android.CoreAccountManager: com.dropbox.sync.android.DbxAccount mLocalAccount>;
+
+     label2:
+        exitmonitor r0;
+
+        return r2;
+
+     label3:
+        $r1 := @caughtexception;
+
+        exitmonitor r0;
+
+        throw $r1;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+    com.dropbox.sync.android.NativeLib getNativeLib()
+    {
+        com.dropbox.sync.android.CoreAccountManager r0;
+        com.dropbox.sync.android.NativeLib r1;
+
+        r0 := @this: com.dropbox.sync.android.CoreAccountManager;
+
+        r1 = r0.<com.dropbox.sync.android.CoreAccountManager: com.dropbox.sync.android.NativeLib mNativeLib>;
+
+        return r1;
+    }
+    public boolean hasLinkedAccounts()
+    {
+        com.dropbox.sync.android.CoreAccountManager r0;
+        boolean $z0;
+        java.util.LinkedHashMap $r1;
+        java.lang.Throwable $r2;
+
+        r0 := @this: com.dropbox.sync.android.CoreAccountManager;
+
+        entermonitor r0;
+
+     label1:
+        $r1 = r0.<com.dropbox.sync.android.CoreAccountManager: java.util.LinkedHashMap mLinkedAccounts>;
+
+        $z0 = virtualinvoke $r1.<java.util.LinkedHashMap: boolean isEmpty()>();
+
+     label2:
+        if $z0 != 0 goto label4;
+
+        $z0 = 1;
+
+     label3:
+        exitmonitor r0;
+
+        return $z0;
+
+     label4:
+        $z0 = 0;
+
+        goto label3;
+
+     label5:
+        $r2 := @caughtexception;
+
+        exitmonitor r0;
+
+        throw $r2;
+
+        catch java.lang.Throwable from label1 to label2 with label5;
+    }
+    void onNewAccountInfo(com.dropbox.sync.android.DbxAccount)
+    {
+        com.dropbox.sync.android.CoreAccountManager r0;
+        com.dropbox.sync.android.DbxAccount $r1;
+
+        r0 := @this: com.dropbox.sync.android.CoreAccountManager;
+
+        $r1 := @parameter0: com.dropbox.sync.android.DbxAccount;
+
+        specialinvoke r0.<com.dropbox.sync.android.CoreAccountManager: void saveAccounts()>();
+
+        return;
+    }
+    void onServerNotifiedOfUnlink(com.dropbox.sync.android.DbxAccount)
+    {
+        com.dropbox.sync.android.CoreAccountManager r0;
+        com.dropbox.sync.android.DbxAccount $r1;
+        java.util.Set $r2;
+        java.lang.Throwable $r3;
+
+        r0 := @this: com.dropbox.sync.android.CoreAccountManager;
+
+        $r1 := @parameter0: com.dropbox.sync.android.DbxAccount;
+
+        entermonitor r0;
+
+     label1:
+        $r2 = r0.<com.dropbox.sync.android.CoreAccountManager: java.util.Set mLocallyUnlinkedAccounts>;
+
+        interfaceinvoke $r2.<java.util.Set: boolean remove(java.lang.Object)>($r1);
+
+        specialinvoke r0.<com.dropbox.sync.android.CoreAccountManager: void saveAccounts()>();
+
+        exitmonitor r0;
+
+     label2:
+        virtualinvoke $r1.<com.dropbox.sync.android.DbxAccount: void deinitialize()>();
+
+        return;
+
+     label3:
+        $r3 := @caughtexception;
+
+     label4:
+        exitmonitor r0;
+
+     label5:
+        throw $r3;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label4 to label5 with label3;
+    }
+    void onUnlink(com.dropbox.sync.android.DbxAccount, boolean)
+    {
+        com.dropbox.sync.android.CoreAccountManager r0;
+        com.dropbox.sync.android.DbxAccount $r1, r6;
+        boolean $z0, $z1;
+        java.util.Iterator r2;
+        java.util.LinkedHashMap $r3;
+        java.lang.String $r4;
+        java.lang.Object $r5;
+        java.util.Set $r7;
+        com.dropbox.sync.android.CoreBackgroundProcessor $r8;
+        java.lang.Throwable $r9;
+
+        r0 := @this: com.dropbox.sync.android.CoreAccountManager;
+
+        $r1 := @parameter0: com.dropbox.sync.android.DbxAccount;
+
+        $z0 := @parameter1: boolean;
+
+        $z1 = virtualinvoke $r1.<com.dropbox.sync.android.DbxAccount: boolean isLinked()>();
+
+        if $z1 != 0 goto label07;
+
+        $z1 = 1;
+
+     label01:
+        staticinvoke <com.dropbox.sync.android.CoreAssert: void isTrue(boolean)>($z1);
+
+        specialinvoke r0.<com.dropbox.sync.android.CoreAccountManager: void deleteCacheDirsForAccount(com.dropbox.sync.android.DbxAccount)>($r1);
+
+        r2 = null;
+
+        entermonitor r0;
+
+     label02:
+        $r3 = r0.<com.dropbox.sync.android.CoreAccountManager: java.util.LinkedHashMap mLinkedAccounts>;
+
+        $r4 = virtualinvoke $r1.<com.dropbox.sync.android.DbxAccount: java.lang.String getUserId()>();
+
+        $r5 = virtualinvoke $r3.<java.util.LinkedHashMap: java.lang.Object get(java.lang.Object)>($r4);
+
+        r6 = (com.dropbox.sync.android.DbxAccount) $r5;
+
+        if r6 != $r1 goto label03;
+
+        $r3 = r0.<com.dropbox.sync.android.CoreAccountManager: java.util.LinkedHashMap mLinkedAccounts>;
+
+        $r4 = virtualinvoke $r1.<com.dropbox.sync.android.DbxAccount: java.lang.String getUserId()>();
+
+        virtualinvoke $r3.<java.util.LinkedHashMap: java.lang.Object remove(java.lang.Object)>($r4);
+
+        r2 = specialinvoke r0.<com.dropbox.sync.android.CoreAccountManager: java.util.Iterator snapshotListeners()>();
+
+     label03:
+        if $z0 == 0 goto label04;
+
+        $r7 = r0.<com.dropbox.sync.android.CoreAccountManager: java.util.Set mLocallyUnlinkedAccounts>;
+
+        interfaceinvoke $r7.<java.util.Set: boolean add(java.lang.Object)>($r1);
+
+     label04:
+        specialinvoke r0.<com.dropbox.sync.android.CoreAccountManager: void saveAccounts()>();
+
+        exitmonitor r0;
+
+     label05:
+        if r2 == null goto label06;
+
+        staticinvoke <com.dropbox.sync.android.CoreAccountManager: void notifyListeners(java.util.Iterator,com.dropbox.sync.android.DbxAccount)>(r2, $r1);
+
+     label06:
+        if $z0 == 0 goto label11;
+
+        $r8 = staticinvoke <com.dropbox.sync.android.CoreBackgroundProcessor: com.dropbox.sync.android.CoreBackgroundProcessor getInstance()>();
+
+        virtualinvoke $r8.<com.dropbox.sync.android.CoreBackgroundProcessor: void notifyServerOfLocalUnlink(com.dropbox.sync.android.DbxAccount)>($r1);
+
+        return;
+
+     label07:
+        $z1 = 0;
+
+        goto label01;
+
+     label08:
+        $r9 := @caughtexception;
+
+     label09:
+        exitmonitor r0;
+
+     label10:
+        throw $r9;
+
+     label11:
+        virtualinvoke $r1.<com.dropbox.sync.android.DbxAccount: void deinitialize()>();
+
+        return;
+
+        catch java.lang.Throwable from label02 to label05 with label08;
+        catch java.lang.Throwable from label09 to label10 with label08;
+    }
+    public void removeListener(com.dropbox.sync.android.CoreAccountManager$AccountListener)
+    {
+        com.dropbox.sync.android.CoreAccountManager r0;
+        com.dropbox.sync.android.CoreAccountManager$AccountListener $r1;
+        java.util.concurrent.CopyOnWriteArraySet $r2;
+
+        r0 := @this: com.dropbox.sync.android.CoreAccountManager;
+
+        $r1 := @parameter0: com.dropbox.sync.android.CoreAccountManager$AccountListener;
+
+        if $r1 == null goto label1;
+
+        $r2 = r0.<com.dropbox.sync.android.CoreAccountManager: java.util.concurrent.CopyOnWriteArraySet mAcctListeners>;
+
+        virtualinvoke $r2.<java.util.concurrent.CopyOnWriteArraySet: boolean remove(java.lang.Object)>($r1);
+
+     label1:
+        return;
+    }
+    public void startLink(android.app.Activity, int)
+    {
+        com.dropbox.sync.android.CoreAccountManager r0;
+        android.app.Activity $r1;
+        int $i0;
+        com.dropbox.sync.android.CoreLogger $r2;
+        java.lang.String $r3;
+        com.dropbox.sync.android.CoreConfig $r4;
+        com.dropbox.sync.android.DbxConfig $r5;
+        boolean $z0;
+        android.content.Intent $r6;
+
+        r0 := @this: com.dropbox.sync.android.CoreAccountManager;
+
+        $r1 := @parameter0: android.app.Activity;
+
+        $i0 := @parameter1: int;
+
+        $r2 = r0.<com.dropbox.sync.android.CoreAccountManager: com.dropbox.sync.android.CoreLogger mLog>;
+
+        $r3 = <com.dropbox.sync.android.CoreAccountManager: java.lang.String TAG>;
+
+        virtualinvoke $r2.<com.dropbox.sync.android.CoreLogger: void i(java.lang.String,java.lang.String)>($r3, "Requesting link for a Dropbox new account.");
+
+        $r4 = r0.<com.dropbox.sync.android.CoreAccountManager: com.dropbox.sync.android.CoreConfig mConfig>;
+
+        $r5 = $r4.<com.dropbox.sync.android.CoreConfig: com.dropbox.sync.android.DbxConfig publicConfig>;
+
+        $r3 = $r5.<com.dropbox.sync.android.DbxConfig: java.lang.String appKey>;
+
+        $z0 = staticinvoke <com.dropbox.client2.android.AuthActivity: boolean checkAppBeforeAuth(android.content.Context,java.lang.String,boolean)>($r1, $r3, 0);
+
+        if $z0 != 0 goto label1;
+
+        return;
+
+     label1:
+        $r4 = r0.<com.dropbox.sync.android.CoreAccountManager: com.dropbox.sync.android.CoreConfig mConfig>;
+
+        $r6 = staticinvoke <com.dropbox.sync.android.DbxAuthActivity: android.content.Intent makeIntent(android.content.Context,com.dropbox.sync.android.CoreConfig)>($r1, $r4);
+
+        virtualinvoke $r1.<android.app.Activity: void startActivityForResult(android.content.Intent,int)>($r6, $i0);
+
+        return;
+    }
+    public void startLink(android.app.Fragment, int)
+    {
+        com.dropbox.sync.android.CoreAccountManager r0;
+        android.app.Fragment $r1;
+        int $i0;
+        com.dropbox.sync.android.CoreLogger $r2;
+        java.lang.String $r3;
+        android.app.Activity $r4;
+        com.dropbox.sync.android.CoreConfig $r5;
+        com.dropbox.sync.android.DbxConfig $r6;
+        boolean $z0;
+        android.content.Intent $r7;
+
+        r0 := @this: com.dropbox.sync.android.CoreAccountManager;
+
+        $r1 := @parameter0: android.app.Fragment;
+
+        $i0 := @parameter1: int;
+
+        $r2 = r0.<com.dropbox.sync.android.CoreAccountManager: com.dropbox.sync.android.CoreLogger mLog>;
+
+        $r3 = <com.dropbox.sync.android.CoreAccountManager: java.lang.String TAG>;
+
+        virtualinvoke $r2.<com.dropbox.sync.android.CoreLogger: void i(java.lang.String,java.lang.String)>($r3, "Requesting link for a Dropbox new account.");
+
+        $r4 = virtualinvoke $r1.<android.app.Fragment: android.app.Activity getActivity()>();
+
+        $r5 = r0.<com.dropbox.sync.android.CoreAccountManager: com.dropbox.sync.android.CoreConfig mConfig>;
+
+        $r6 = $r5.<com.dropbox.sync.android.CoreConfig: com.dropbox.sync.android.DbxConfig publicConfig>;
+
+        $r3 = $r6.<com.dropbox.sync.android.DbxConfig: java.lang.String appKey>;
+
+        $z0 = staticinvoke <com.dropbox.client2.android.AuthActivity: boolean checkAppBeforeAuth(android.content.Context,java.lang.String,boolean)>($r4, $r3, 0);
+
+        if $z0 != 0 goto label1;
+
+        return;
+
+     label1:
+        $r4 = virtualinvoke $r1.<android.app.Fragment: android.app.Activity getActivity()>();
+
+        $r5 = r0.<com.dropbox.sync.android.CoreAccountManager: com.dropbox.sync.android.CoreConfig mConfig>;
+
+        $r7 = staticinvoke <com.dropbox.sync.android.DbxAuthActivity: android.content.Intent makeIntent(android.content.Context,com.dropbox.sync.android.CoreConfig)>($r4, $r5);
+
+        virtualinvoke $r1.<android.app.Fragment: void startActivityForResult(android.content.Intent,int)>($r7, $i0);
+
+        return;
+    }
+    public void startLink(android.support.v4.app.Fragment, int)
+    {
+        com.dropbox.sync.android.CoreAccountManager r0;
+        android.support.v4.app.Fragment $r1;
+        int $i0;
+        com.dropbox.sync.android.CoreLogger $r2;
+        java.lang.String $r3;
+        android.support.v4.app.FragmentActivity $r4;
+        com.dropbox.sync.android.CoreConfig $r5;
+        com.dropbox.sync.android.DbxConfig $r6;
+        boolean $z0;
+        android.content.Intent $r7;
+
+        r0 := @this: com.dropbox.sync.android.CoreAccountManager;
+
+        $r1 := @parameter0: android.support.v4.app.Fragment;
+
+        $i0 := @parameter1: int;
+
+        $r2 = r0.<com.dropbox.sync.android.CoreAccountManager: com.dropbox.sync.android.CoreLogger mLog>;
+
+        $r3 = <com.dropbox.sync.android.CoreAccountManager: java.lang.String TAG>;
+
+        virtualinvoke $r2.<com.dropbox.sync.android.CoreLogger: void i(java.lang.String,java.lang.String)>($r3, "Requesting link for a Dropbox new account.");
+
+        $r4 = virtualinvoke $r1.<android.support.v4.app.Fragment: android.support.v4.app.FragmentActivity getActivity()>();
+
+        $r5 = r0.<com.dropbox.sync.android.CoreAccountManager: com.dropbox.sync.android.CoreConfig mConfig>;
+
+        $r6 = $r5.<com.dropbox.sync.android.CoreConfig: com.dropbox.sync.android.DbxConfig publicConfig>;
+
+        $r3 = $r6.<com.dropbox.sync.android.DbxConfig: java.lang.String appKey>;
+
+        $z0 = staticinvoke <com.dropbox.client2.android.AuthActivity: boolean checkAppBeforeAuth(android.content.Context,java.lang.String,boolean)>($r4, $r3, 0);
+
+        if $z0 != 0 goto label1;
+
+        return;
+
+     label1:
+        $r4 = virtualinvoke $r1.<android.support.v4.app.Fragment: android.support.v4.app.FragmentActivity getActivity()>();
+
+        $r5 = r0.<com.dropbox.sync.android.CoreAccountManager: com.dropbox.sync.android.CoreConfig mConfig>;
+
+        $r7 = staticinvoke <com.dropbox.sync.android.DbxAuthActivity: android.content.Intent makeIntent(android.content.Context,com.dropbox.sync.android.CoreConfig)>($r4, $r5);
+
+        virtualinvoke $r1.<android.support.v4.app.Fragment: void startActivityForResult(android.content.Intent,int)>($r7, $i0);
+
+        return;
+    }
+    public void unlinkAll()
+    {
+        com.dropbox.sync.android.CoreAccountManager r0;
+        java.util.HashSet r1;
+        java.util.LinkedHashMap $r2;
+        java.util.Collection $r3;
+        java.util.Iterator $r4;
+        boolean $z0;
+        java.lang.Object $r5;
+        com.dropbox.sync.android.DbxAccount r6;
+        java.lang.Throwable $r7;
+
+        r0 := @this: com.dropbox.sync.android.CoreAccountManager;
+
+        entermonitor r0;
+
+     label1:
+        r1 = new java.util.HashSet;
+
+        $r2 = r0.<com.dropbox.sync.android.CoreAccountManager: java.util.LinkedHashMap mLinkedAccounts>;
+
+        $r3 = virtualinvoke $r2.<java.util.LinkedHashMap: java.util.Collection values()>();
+
+        specialinvoke r1.<java.util.HashSet: void <init>(java.util.Collection)>($r3);
+
+        $r2 = r0.<com.dropbox.sync.android.CoreAccountManager: java.util.LinkedHashMap mLinkedAccounts>;
+
+        virtualinvoke $r2.<java.util.LinkedHashMap: void clear()>();
+
+        specialinvoke r0.<com.dropbox.sync.android.CoreAccountManager: void saveAccounts()>();
+
+        exitmonitor r0;
+
+     label2:
+        $r4 = interfaceinvoke r1.<java.util.Set: java.util.Iterator iterator()>();
+
+     label3:
+        $z0 = interfaceinvoke $r4.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label7;
+
+        $r5 = interfaceinvoke $r4.<java.util.Iterator: java.lang.Object next()>();
+
+        r6 = (com.dropbox.sync.android.DbxAccount) $r5;
+
+        virtualinvoke r6.<com.dropbox.sync.android.DbxAccount: void unlink()>();
+
+        goto label3;
+
+     label4:
+        $r7 := @caughtexception;
+
+     label5:
+        exitmonitor r0;
+
+     label6:
+        throw $r7;
+
+     label7:
+        return;
+
+        catch java.lang.Throwable from label1 to label2 with label4;
+        catch java.lang.Throwable from label5 to label6 with label4;
+    }

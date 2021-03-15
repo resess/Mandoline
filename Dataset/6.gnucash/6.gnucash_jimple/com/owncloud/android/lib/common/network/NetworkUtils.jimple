@@ -1,0 +1,434 @@
+com.owncloud.android.lib.common.network.NetworkUtils extends java.lang.Object
+public static final int DEFAULT_CONNECTION_TIMEOUT
+public static final int DEFAULT_DATA_TIMEOUT
+private static java.lang.String LOCAL_TRUSTSTORE_FILENAME
+private static java.lang.String LOCAL_TRUSTSTORE_PASSWORD
+public static final java.lang.String PROTOCOL_TLSv1_0
+public static final java.lang.String PROTOCOL_TLSv1_2
+private static final java.lang.String TAG
+private static com.owncloud.android.lib.common.network.AdvancedSslSocketFactory mAdvancedSslSocketFactory
+private static org.apache.commons.httpclient.MultiThreadedHttpConnectionManager mConnManager
+private static org.apache.commons.httpclient.protocol.Protocol mDefaultHttpsProtocol
+private static org.apache.http.conn.ssl.X509HostnameVerifier mHostnameVerifier
+private static java.security.KeyStore mKnownServersStore
+    static void <clinit>()
+    {
+        java.lang.String $r0;
+        java.lang.Class $r1;
+
+        $r1 = class "Lcom/owncloud/android/lib/common/network/NetworkUtils;";
+
+        $r0 = virtualinvoke $r1.<java.lang.Class: java.lang.String getSimpleName()>();
+
+        <com.owncloud.android.lib.common.network.NetworkUtils: java.lang.String TAG> = $r0;
+
+        <com.owncloud.android.lib.common.network.NetworkUtils: org.apache.commons.httpclient.MultiThreadedHttpConnectionManager mConnManager> = null;
+
+        <com.owncloud.android.lib.common.network.NetworkUtils: org.apache.commons.httpclient.protocol.Protocol mDefaultHttpsProtocol> = null;
+
+        <com.owncloud.android.lib.common.network.NetworkUtils: com.owncloud.android.lib.common.network.AdvancedSslSocketFactory mAdvancedSslSocketFactory> = null;
+
+        <com.owncloud.android.lib.common.network.NetworkUtils: org.apache.http.conn.ssl.X509HostnameVerifier mHostnameVerifier> = null;
+
+        <com.owncloud.android.lib.common.network.NetworkUtils: java.lang.String LOCAL_TRUSTSTORE_FILENAME> = "knownServers.bks";
+
+        <com.owncloud.android.lib.common.network.NetworkUtils: java.lang.String LOCAL_TRUSTSTORE_PASSWORD> = "password";
+
+        <com.owncloud.android.lib.common.network.NetworkUtils: java.security.KeyStore mKnownServersStore> = null;
+
+        return;
+    }
+    public void <init>()
+    {
+        com.owncloud.android.lib.common.network.NetworkUtils r0;
+
+        r0 := @this: com.owncloud.android.lib.common.network.NetworkUtils;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+    public static void addCertToKnownServersStore(java.security.cert.Certificate, android.content.Context) throws java.security.KeyStoreException, java.security.NoSuchAlgorithmException, java.security.cert.CertificateException, java.io.IOException
+    {
+        java.security.cert.Certificate $r0;
+        android.content.Context $r1;
+        java.security.KeyStore $r2;
+        int $i0;
+        java.lang.String $r3;
+        java.io.FileOutputStream r4, $r5;
+        char[] $r6;
+        java.lang.Throwable $r7;
+
+        $r0 := @parameter0: java.security.cert.Certificate;
+
+        $r1 := @parameter1: android.content.Context;
+
+        $r2 = staticinvoke <com.owncloud.android.lib.common.network.NetworkUtils: java.security.KeyStore getKnownServersStore(android.content.Context)>($r1);
+
+        $i0 = virtualinvoke $r0.<java.security.cert.Certificate: int hashCode()>();
+
+        $r3 = staticinvoke <java.lang.Integer: java.lang.String toString(int)>($i0);
+
+        virtualinvoke $r2.<java.security.KeyStore: void setCertificateEntry(java.lang.String,java.security.cert.Certificate)>($r3, $r0);
+
+        r4 = null;
+
+     label1:
+        $r3 = <com.owncloud.android.lib.common.network.NetworkUtils: java.lang.String LOCAL_TRUSTSTORE_FILENAME>;
+
+        $r5 = virtualinvoke $r1.<android.content.Context: java.io.FileOutputStream openFileOutput(java.lang.String,int)>($r3, 0);
+
+     label2:
+        r4 = $r5;
+
+     label3:
+        $r3 = <com.owncloud.android.lib.common.network.NetworkUtils: java.lang.String LOCAL_TRUSTSTORE_PASSWORD>;
+
+        $r6 = virtualinvoke $r3.<java.lang.String: char[] toCharArray()>();
+
+        virtualinvoke $r2.<java.security.KeyStore: void store(java.io.OutputStream,char[])>($r5, $r6);
+
+     label4:
+        virtualinvoke $r5.<java.io.FileOutputStream: void close()>();
+
+        return;
+
+     label5:
+        $r7 := @caughtexception;
+
+        virtualinvoke r4.<java.io.FileOutputStream: void close()>();
+
+        throw $r7;
+
+        catch java.lang.Throwable from label1 to label2 with label5;
+        catch java.lang.Throwable from label3 to label4 with label5;
+    }
+    public static com.owncloud.android.lib.common.network.AdvancedSslSocketFactory getAdvancedSslSocketFactory(android.content.Context) throws java.security.GeneralSecurityException, java.io.IOException
+    {
+        android.content.Context $r0;
+        java.security.NoSuchAlgorithmException r1;
+        javax.net.ssl.TrustManager[] r2;
+        com.owncloud.android.lib.common.network.AdvancedX509TrustManager r3;
+        com.owncloud.android.lib.common.network.AdvancedSslSocketFactory $r4;
+        java.security.KeyStore $r5;
+        javax.net.ssl.SSLContext $r6;
+        org.apache.http.conn.ssl.BrowserCompatHostnameVerifier $r7;
+        org.apache.http.conn.ssl.X509HostnameVerifier $r8;
+        java.lang.String $r9;
+
+        $r0 := @parameter0: android.content.Context;
+
+        $r4 = <com.owncloud.android.lib.common.network.NetworkUtils: com.owncloud.android.lib.common.network.AdvancedSslSocketFactory mAdvancedSslSocketFactory>;
+
+        if $r4 != null goto label3;
+
+        $r5 = staticinvoke <com.owncloud.android.lib.common.network.NetworkUtils: java.security.KeyStore getKnownServersStore(android.content.Context)>($r0);
+
+        r3 = new com.owncloud.android.lib.common.network.AdvancedX509TrustManager;
+
+        specialinvoke r3.<com.owncloud.android.lib.common.network.AdvancedX509TrustManager: void <init>(java.security.KeyStore)>($r5);
+
+        r2 = newarray (javax.net.ssl.TrustManager)[1];
+
+        r2[0] = r3;
+
+     label1:
+        $r6 = staticinvoke <javax.net.ssl.SSLContext: javax.net.ssl.SSLContext getInstance(java.lang.String)>("TLSv1.2");
+
+     label2:
+        virtualinvoke $r6.<javax.net.ssl.SSLContext: void init(javax.net.ssl.KeyManager[],javax.net.ssl.TrustManager[],java.security.SecureRandom)>(null, r2, null);
+
+        $r7 = new org.apache.http.conn.ssl.BrowserCompatHostnameVerifier;
+
+        specialinvoke $r7.<org.apache.http.conn.ssl.BrowserCompatHostnameVerifier: void <init>()>();
+
+        <com.owncloud.android.lib.common.network.NetworkUtils: org.apache.http.conn.ssl.X509HostnameVerifier mHostnameVerifier> = $r7;
+
+        $r4 = new com.owncloud.android.lib.common.network.AdvancedSslSocketFactory;
+
+        $r8 = <com.owncloud.android.lib.common.network.NetworkUtils: org.apache.http.conn.ssl.X509HostnameVerifier mHostnameVerifier>;
+
+        specialinvoke $r4.<com.owncloud.android.lib.common.network.AdvancedSslSocketFactory: void <init>(javax.net.ssl.SSLContext,com.owncloud.android.lib.common.network.AdvancedX509TrustManager,org.apache.http.conn.ssl.X509HostnameVerifier)>($r6, r3, $r8);
+
+        <com.owncloud.android.lib.common.network.NetworkUtils: com.owncloud.android.lib.common.network.AdvancedSslSocketFactory mAdvancedSslSocketFactory> = $r4;
+
+     label3:
+        $r4 = <com.owncloud.android.lib.common.network.NetworkUtils: com.owncloud.android.lib.common.network.AdvancedSslSocketFactory mAdvancedSslSocketFactory>;
+
+        return $r4;
+
+     label4:
+        r1 := @caughtexception;
+
+        $r9 = <com.owncloud.android.lib.common.network.NetworkUtils: java.lang.String TAG>;
+
+        staticinvoke <com.owncloud.android.lib.common.utils.Log_OC: void w(java.lang.String,java.lang.String)>($r9, "TLSv1.2 is not supported in this device; falling through TLSv1.0");
+
+        $r6 = staticinvoke <javax.net.ssl.SSLContext: javax.net.ssl.SSLContext getInstance(java.lang.String)>("TLSv1");
+
+        goto label2;
+
+        catch java.security.NoSuchAlgorithmException from label1 to label2 with label4;
+    }
+    private static java.security.KeyStore getKnownServersStore(android.content.Context) throws java.security.KeyStoreException, java.io.IOException, java.security.NoSuchAlgorithmException, java.security.cert.CertificateException
+    {
+        android.content.Context $r0;
+        java.io.FileInputStream r1;
+        java.io.File r2, $r5;
+        java.security.KeyStore $r3;
+        java.lang.String $r4, $r7;
+        java.lang.StringBuilder $r6;
+        boolean $z0;
+        char[] $r8;
+        java.lang.Throwable $r9;
+
+        $r0 := @parameter0: android.content.Context;
+
+        $r3 = <com.owncloud.android.lib.common.network.NetworkUtils: java.security.KeyStore mKnownServersStore>;
+
+        if $r3 != null goto label3;
+
+        $r4 = staticinvoke <java.security.KeyStore: java.lang.String getDefaultType()>();
+
+        $r3 = staticinvoke <java.security.KeyStore: java.security.KeyStore getInstance(java.lang.String)>($r4);
+
+        <com.owncloud.android.lib.common.network.NetworkUtils: java.security.KeyStore mKnownServersStore> = $r3;
+
+        r2 = new java.io.File;
+
+        $r5 = virtualinvoke $r0.<android.content.Context: java.io.File getFilesDir()>();
+
+        $r4 = <com.owncloud.android.lib.common.network.NetworkUtils: java.lang.String LOCAL_TRUSTSTORE_FILENAME>;
+
+        specialinvoke r2.<java.io.File: void <init>(java.io.File,java.lang.String)>($r5, $r4);
+
+        $r4 = <com.owncloud.android.lib.common.network.NetworkUtils: java.lang.String TAG>;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Searching known-servers store at ");
+
+        $r7 = virtualinvoke r2.<java.io.File: java.lang.String getAbsolutePath()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r7);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.owncloud.android.lib.common.utils.Log_OC: void d(java.lang.String,java.lang.String)>($r4, $r7);
+
+        $z0 = virtualinvoke r2.<java.io.File: boolean exists()>();
+
+        if $z0 == 0 goto label5;
+
+        r1 = new java.io.FileInputStream;
+
+        specialinvoke r1.<java.io.FileInputStream: void <init>(java.io.File)>(r2);
+
+     label1:
+        $r3 = <com.owncloud.android.lib.common.network.NetworkUtils: java.security.KeyStore mKnownServersStore>;
+
+        $r4 = <com.owncloud.android.lib.common.network.NetworkUtils: java.lang.String LOCAL_TRUSTSTORE_PASSWORD>;
+
+        $r8 = virtualinvoke $r4.<java.lang.String: char[] toCharArray()>();
+
+        virtualinvoke $r3.<java.security.KeyStore: void load(java.io.InputStream,char[])>(r1, $r8);
+
+     label2:
+        virtualinvoke r1.<java.io.InputStream: void close()>();
+
+     label3:
+        $r3 = <com.owncloud.android.lib.common.network.NetworkUtils: java.security.KeyStore mKnownServersStore>;
+
+        return $r3;
+
+     label4:
+        $r9 := @caughtexception;
+
+        virtualinvoke r1.<java.io.InputStream: void close()>();
+
+        throw $r9;
+
+     label5:
+        $r3 = <com.owncloud.android.lib.common.network.NetworkUtils: java.security.KeyStore mKnownServersStore>;
+
+        $r4 = <com.owncloud.android.lib.common.network.NetworkUtils: java.lang.String LOCAL_TRUSTSTORE_PASSWORD>;
+
+        $r8 = virtualinvoke $r4.<java.lang.String: char[] toCharArray()>();
+
+        virtualinvoke $r3.<java.security.KeyStore: void load(java.io.InputStream,char[])>(null, $r8);
+
+        goto label3;
+
+        catch java.lang.Throwable from label1 to label2 with label4;
+    }
+    public static org.apache.commons.httpclient.MultiThreadedHttpConnectionManager getMultiThreadedConnManager()
+    {
+        org.apache.commons.httpclient.MultiThreadedHttpConnectionManager $r0;
+        org.apache.commons.httpclient.params.HttpConnectionManagerParams $r1;
+
+        $r0 = <com.owncloud.android.lib.common.network.NetworkUtils: org.apache.commons.httpclient.MultiThreadedHttpConnectionManager mConnManager>;
+
+        if $r0 != null goto label1;
+
+        $r0 = new org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
+
+        specialinvoke $r0.<org.apache.commons.httpclient.MultiThreadedHttpConnectionManager: void <init>()>();
+
+        <com.owncloud.android.lib.common.network.NetworkUtils: org.apache.commons.httpclient.MultiThreadedHttpConnectionManager mConnManager> = $r0;
+
+        $r0 = <com.owncloud.android.lib.common.network.NetworkUtils: org.apache.commons.httpclient.MultiThreadedHttpConnectionManager mConnManager>;
+
+        $r1 = virtualinvoke $r0.<org.apache.commons.httpclient.MultiThreadedHttpConnectionManager: org.apache.commons.httpclient.params.HttpConnectionManagerParams getParams()>();
+
+        virtualinvoke $r1.<org.apache.commons.httpclient.params.HttpConnectionManagerParams: void setDefaultMaxConnectionsPerHost(int)>(5);
+
+        $r0 = <com.owncloud.android.lib.common.network.NetworkUtils: org.apache.commons.httpclient.MultiThreadedHttpConnectionManager mConnManager>;
+
+        $r1 = virtualinvoke $r0.<org.apache.commons.httpclient.MultiThreadedHttpConnectionManager: org.apache.commons.httpclient.params.HttpConnectionManagerParams getParams()>();
+
+        virtualinvoke $r1.<org.apache.commons.httpclient.params.HttpConnectionManagerParams: void setMaxTotalConnections(int)>(5);
+
+     label1:
+        $r0 = <com.owncloud.android.lib.common.network.NetworkUtils: org.apache.commons.httpclient.MultiThreadedHttpConnectionManager mConnManager>;
+
+        return $r0;
+    }
+    public static boolean isCertInKnownServersStore(java.security.cert.Certificate, android.content.Context) throws java.security.KeyStoreException, java.security.NoSuchAlgorithmException, java.security.cert.CertificateException, java.io.IOException
+    {
+        java.security.cert.Certificate $r0;
+        android.content.Context $r1;
+        java.security.KeyStore $r2;
+        java.lang.String $r3, $r5;
+        java.lang.StringBuilder $r4;
+        int $i0;
+        boolean $z0;
+
+        $r0 := @parameter0: java.security.cert.Certificate;
+
+        $r1 := @parameter1: android.content.Context;
+
+        $r2 = staticinvoke <com.owncloud.android.lib.common.network.NetworkUtils: java.security.KeyStore getKnownServersStore(android.content.Context)>($r1);
+
+        $r3 = <com.owncloud.android.lib.common.network.NetworkUtils: java.lang.String TAG>;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Certificate - HashCode: ");
+
+        $i0 = virtualinvoke $r0.<java.security.cert.Certificate: int hashCode()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ");
+
+        $i0 = virtualinvoke $r0.<java.security.cert.Certificate: int hashCode()>();
+
+        $r5 = staticinvoke <java.lang.Integer: java.lang.String toString(int)>($i0);
+
+        $z0 = virtualinvoke $r2.<java.security.KeyStore: boolean isCertificateEntry(java.lang.String)>($r5);
+
+        $r5 = staticinvoke <java.lang.Boolean: java.lang.String toString(boolean)>($z0);
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.owncloud.android.lib.common.utils.Log_OC: void d(java.lang.String,java.lang.String)>($r3, $r5);
+
+        $i0 = virtualinvoke $r0.<java.security.cert.Certificate: int hashCode()>();
+
+        $r3 = staticinvoke <java.lang.Integer: java.lang.String toString(int)>($i0);
+
+        $z0 = virtualinvoke $r2.<java.security.KeyStore: boolean isCertificateEntry(java.lang.String)>($r3);
+
+        return $z0;
+    }
+    public static void registerAdvancedSslContext(boolean, android.content.Context) throws java.security.GeneralSecurityException, java.io.IOException
+    {
+        boolean $z0, $z1;
+        android.content.Context $r0;
+        org.apache.commons.httpclient.protocol.Protocol r1, $r2, $r3;
+        org.apache.commons.httpclient.protocol.ProtocolSocketFactory $r4;
+        com.owncloud.android.lib.common.network.AdvancedSslSocketFactory $r5;
+        java.lang.IllegalStateException $r6;
+
+        $z0 := @parameter0: boolean;
+
+        $r0 := @parameter1: android.content.Context;
+
+        r1 = null;
+
+     label1:
+        $r2 = staticinvoke <org.apache.commons.httpclient.protocol.Protocol: org.apache.commons.httpclient.protocol.Protocol getProtocol(java.lang.String)>("https");
+
+     label2:
+        r1 = $r2;
+
+        if $r2 == null goto label3;
+
+        $r3 = <com.owncloud.android.lib.common.network.NetworkUtils: org.apache.commons.httpclient.protocol.Protocol mDefaultHttpsProtocol>;
+
+        if $r3 != null goto label3;
+
+        <com.owncloud.android.lib.common.network.NetworkUtils: org.apache.commons.httpclient.protocol.Protocol mDefaultHttpsProtocol> = $r2;
+
+     label3:
+        if r1 == null goto label5;
+
+        $r4 = virtualinvoke r1.<org.apache.commons.httpclient.protocol.Protocol: org.apache.commons.httpclient.protocol.ProtocolSocketFactory getSocketFactory()>();
+
+        $z1 = $r4 instanceof com.owncloud.android.lib.common.network.AdvancedSslSocketFactory;
+
+        if $z1 == 0 goto label5;
+
+        $z1 = 1;
+
+     label4:
+        if $z0 == 0 goto label6;
+
+        if $z1 != 0 goto label6;
+
+        r1 = new org.apache.commons.httpclient.protocol.Protocol;
+
+        $r5 = staticinvoke <com.owncloud.android.lib.common.network.NetworkUtils: com.owncloud.android.lib.common.network.AdvancedSslSocketFactory getAdvancedSslSocketFactory(android.content.Context)>($r0);
+
+        specialinvoke r1.<org.apache.commons.httpclient.protocol.Protocol: void <init>(java.lang.String,org.apache.commons.httpclient.protocol.SecureProtocolSocketFactory,int)>("https", $r5, 443);
+
+        staticinvoke <org.apache.commons.httpclient.protocol.Protocol: void registerProtocol(java.lang.String,org.apache.commons.httpclient.protocol.Protocol)>("https", r1);
+
+        return;
+
+     label5:
+        $z1 = 0;
+
+        goto label4;
+
+     label6:
+        if $z0 != 0 goto label8;
+
+        if $z1 == 0 goto label8;
+
+        r1 = <com.owncloud.android.lib.common.network.NetworkUtils: org.apache.commons.httpclient.protocol.Protocol mDefaultHttpsProtocol>;
+
+        if r1 == null goto label8;
+
+        r1 = <com.owncloud.android.lib.common.network.NetworkUtils: org.apache.commons.httpclient.protocol.Protocol mDefaultHttpsProtocol>;
+
+        staticinvoke <org.apache.commons.httpclient.protocol.Protocol: void registerProtocol(java.lang.String,org.apache.commons.httpclient.protocol.Protocol)>("https", r1);
+
+        return;
+
+     label7:
+        $r6 := @caughtexception;
+
+        goto label3;
+
+     label8:
+        return;
+
+        catch java.lang.IllegalStateException from label1 to label2 with label7;
+    }

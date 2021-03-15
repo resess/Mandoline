@@ -1,0 +1,449 @@
+org.gnucash.android.export.Exporter extends java.lang.Object
+public static final java.lang.String BACKUP_FOLDER_PATH
+private static final java.lang.String BASE_FOLDER_PATH
+private static final java.text.SimpleDateFormat EXPORT_FILENAME_DATE_FORMAT
+public static final java.lang.String EXPORT_FOLDER_PATH
+protected static java.lang.String LOG_TAG
+public static final java.lang.String PREF_LAST_EXPORT_TIME
+public static final java.lang.String TIMESTAMP_ZERO
+protected final org.gnucash.android.db.AccountsDbAdapter mAccountsDbAdapter
+private final java.io.File mCacheDir
+protected final org.gnucash.android.db.CommoditiesDbAdapter mCommoditiesDbAdapter
+protected final android.content.Context mContext
+private java.lang.String mExportCacheFilePath
+protected final org.gnucash.android.export.ExportParams mExportParams
+protected final org.gnucash.android.db.PricesDbAdapter mPricesDbAdapter
+protected final org.gnucash.android.db.ScheduledActionDbAdapter mScheduledActionDbAdapter
+protected final org.gnucash.android.db.SplitsDbAdapter mSplitsDbAdapter
+protected final org.gnucash.android.db.TransactionsDbAdapter mTransactionsDbAdapter
+    static void <clinit>()
+    {
+        java.lang.StringBuilder $r0;
+        java.io.File $r1;
+        java.lang.String $r2;
+        java.text.SimpleDateFormat $r3;
+        java.util.Locale $r4;
+        java.sql.Timestamp $r5;
+
+        <org.gnucash.android.export.Exporter: java.lang.String LOG_TAG> = "Exporter";
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $r1 = staticinvoke <android.os.Environment: java.io.File getExternalStorageDirectory()>();
+
+        $r0 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r1);
+
+        $r0 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("/");
+
+        $r0 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("org.gnucash.android");
+
+        $r2 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        <org.gnucash.android.export.Exporter: java.lang.String BASE_FOLDER_PATH> = $r2;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = <org.gnucash.android.export.Exporter: java.lang.String BASE_FOLDER_PATH>;
+
+        $r0 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r0 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("/exports/");
+
+        $r2 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        <org.gnucash.android.export.Exporter: java.lang.String EXPORT_FOLDER_PATH> = $r2;
+
+        $r0 = new java.lang.StringBuilder;
+
+        specialinvoke $r0.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = <org.gnucash.android.export.Exporter: java.lang.String BASE_FOLDER_PATH>;
+
+        $r0 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r0 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("/backups/");
+
+        $r2 = virtualinvoke $r0.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        <org.gnucash.android.export.Exporter: java.lang.String BACKUP_FOLDER_PATH> = $r2;
+
+        $r3 = new java.text.SimpleDateFormat;
+
+        $r4 = <java.util.Locale: java.util.Locale US>;
+
+        specialinvoke $r3.<java.text.SimpleDateFormat: void <init>(java.lang.String,java.util.Locale)>("yyyyMMdd_HHmmss", $r4);
+
+        <org.gnucash.android.export.Exporter: java.text.SimpleDateFormat EXPORT_FILENAME_DATE_FORMAT> = $r3;
+
+        $r5 = new java.sql.Timestamp;
+
+        specialinvoke $r5.<java.sql.Timestamp: void <init>(long)>(0L);
+
+        $r2 = virtualinvoke $r5.<java.sql.Timestamp: java.lang.String toString()>();
+
+        <org.gnucash.android.export.Exporter: java.lang.String TIMESTAMP_ZERO> = $r2;
+
+        return;
+    }
+    public void <init>(org.gnucash.android.export.ExportParams, android.database.sqlite.SQLiteDatabase)
+    {
+        org.gnucash.android.export.Exporter r0;
+        org.gnucash.android.export.ExportParams $r1;
+        android.database.sqlite.SQLiteDatabase $r2;
+        android.content.Context $r3;
+        org.gnucash.android.db.AccountsDbAdapter $r4;
+        org.gnucash.android.db.TransactionsDbAdapter $r5;
+        org.gnucash.android.db.SplitsDbAdapter $r6;
+        org.gnucash.android.db.ScheduledActionDbAdapter $r7;
+        org.gnucash.android.db.PricesDbAdapter $r8;
+        org.gnucash.android.db.CommoditiesDbAdapter $r9;
+        java.io.File $r10, $r11;
+        org.gnucash.android.export.ExportFormat $r12;
+        java.lang.String $r13;
+
+        r0 := @this: org.gnucash.android.export.Exporter;
+
+        $r1 := @parameter0: org.gnucash.android.export.ExportParams;
+
+        $r2 := @parameter1: android.database.sqlite.SQLiteDatabase;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<org.gnucash.android.export.Exporter: org.gnucash.android.export.ExportParams mExportParams> = $r1;
+
+        $r3 = staticinvoke <org.gnucash.android.app.GnuCashApplication: android.content.Context getAppContext()>();
+
+        r0.<org.gnucash.android.export.Exporter: android.content.Context mContext> = $r3;
+
+        if $r2 != null goto label2;
+
+        $r4 = staticinvoke <org.gnucash.android.db.AccountsDbAdapter: org.gnucash.android.db.AccountsDbAdapter getInstance()>();
+
+        r0.<org.gnucash.android.export.Exporter: org.gnucash.android.db.AccountsDbAdapter mAccountsDbAdapter> = $r4;
+
+        $r5 = staticinvoke <org.gnucash.android.db.TransactionsDbAdapter: org.gnucash.android.db.TransactionsDbAdapter getInstance()>();
+
+        r0.<org.gnucash.android.export.Exporter: org.gnucash.android.db.TransactionsDbAdapter mTransactionsDbAdapter> = $r5;
+
+        $r6 = staticinvoke <org.gnucash.android.db.SplitsDbAdapter: org.gnucash.android.db.SplitsDbAdapter getInstance()>();
+
+        r0.<org.gnucash.android.export.Exporter: org.gnucash.android.db.SplitsDbAdapter mSplitsDbAdapter> = $r6;
+
+        $r7 = staticinvoke <org.gnucash.android.db.ScheduledActionDbAdapter: org.gnucash.android.db.ScheduledActionDbAdapter getInstance()>();
+
+        r0.<org.gnucash.android.export.Exporter: org.gnucash.android.db.ScheduledActionDbAdapter mScheduledActionDbAdapter> = $r7;
+
+        $r8 = staticinvoke <org.gnucash.android.db.PricesDbAdapter: org.gnucash.android.db.PricesDbAdapter getInstance()>();
+
+        r0.<org.gnucash.android.export.Exporter: org.gnucash.android.db.PricesDbAdapter mPricesDbAdapter> = $r8;
+
+        $r9 = staticinvoke <org.gnucash.android.db.CommoditiesDbAdapter: org.gnucash.android.db.CommoditiesDbAdapter getInstance()>();
+
+        r0.<org.gnucash.android.export.Exporter: org.gnucash.android.db.CommoditiesDbAdapter mCommoditiesDbAdapter> = $r9;
+
+     label1:
+        r0.<org.gnucash.android.export.Exporter: java.lang.String mExportCacheFilePath> = null;
+
+        $r10 = new java.io.File;
+
+        $r3 = r0.<org.gnucash.android.export.Exporter: android.content.Context mContext>;
+
+        $r11 = virtualinvoke $r3.<android.content.Context: java.io.File getCacheDir()>();
+
+        $r12 = virtualinvoke $r1.<org.gnucash.android.export.ExportParams: org.gnucash.android.export.ExportFormat getExportFormat()>();
+
+        $r13 = virtualinvoke $r12.<org.gnucash.android.export.ExportFormat: java.lang.String name()>();
+
+        specialinvoke $r10.<java.io.File: void <init>(java.io.File,java.lang.String)>($r11, $r13);
+
+        r0.<org.gnucash.android.export.Exporter: java.io.File mCacheDir> = $r10;
+
+        $r10 = r0.<org.gnucash.android.export.Exporter: java.io.File mCacheDir>;
+
+        virtualinvoke $r10.<java.io.File: boolean mkdir()>();
+
+        $r10 = r0.<org.gnucash.android.export.Exporter: java.io.File mCacheDir>;
+
+        specialinvoke r0.<org.gnucash.android.export.Exporter: void purgeDirectory(java.io.File)>($r10);
+
+        return;
+
+     label2:
+        $r6 = new org.gnucash.android.db.SplitsDbAdapter;
+
+        specialinvoke $r6.<org.gnucash.android.db.SplitsDbAdapter: void <init>(android.database.sqlite.SQLiteDatabase)>($r2);
+
+        r0.<org.gnucash.android.export.Exporter: org.gnucash.android.db.SplitsDbAdapter mSplitsDbAdapter> = $r6;
+
+        $r5 = new org.gnucash.android.db.TransactionsDbAdapter;
+
+        $r6 = r0.<org.gnucash.android.export.Exporter: org.gnucash.android.db.SplitsDbAdapter mSplitsDbAdapter>;
+
+        specialinvoke $r5.<org.gnucash.android.db.TransactionsDbAdapter: void <init>(android.database.sqlite.SQLiteDatabase,org.gnucash.android.db.SplitsDbAdapter)>($r2, $r6);
+
+        r0.<org.gnucash.android.export.Exporter: org.gnucash.android.db.TransactionsDbAdapter mTransactionsDbAdapter> = $r5;
+
+        $r4 = new org.gnucash.android.db.AccountsDbAdapter;
+
+        $r5 = r0.<org.gnucash.android.export.Exporter: org.gnucash.android.db.TransactionsDbAdapter mTransactionsDbAdapter>;
+
+        specialinvoke $r4.<org.gnucash.android.db.AccountsDbAdapter: void <init>(android.database.sqlite.SQLiteDatabase,org.gnucash.android.db.TransactionsDbAdapter)>($r2, $r5);
+
+        r0.<org.gnucash.android.export.Exporter: org.gnucash.android.db.AccountsDbAdapter mAccountsDbAdapter> = $r4;
+
+        $r7 = new org.gnucash.android.db.ScheduledActionDbAdapter;
+
+        specialinvoke $r7.<org.gnucash.android.db.ScheduledActionDbAdapter: void <init>(android.database.sqlite.SQLiteDatabase)>($r2);
+
+        r0.<org.gnucash.android.export.Exporter: org.gnucash.android.db.ScheduledActionDbAdapter mScheduledActionDbAdapter> = $r7;
+
+        $r8 = new org.gnucash.android.db.PricesDbAdapter;
+
+        specialinvoke $r8.<org.gnucash.android.db.PricesDbAdapter: void <init>(android.database.sqlite.SQLiteDatabase)>($r2);
+
+        r0.<org.gnucash.android.export.Exporter: org.gnucash.android.db.PricesDbAdapter mPricesDbAdapter> = $r8;
+
+        $r9 = new org.gnucash.android.db.CommoditiesDbAdapter;
+
+        specialinvoke $r9.<org.gnucash.android.db.CommoditiesDbAdapter: void <init>(android.database.sqlite.SQLiteDatabase)>($r2);
+
+        r0.<org.gnucash.android.export.Exporter: org.gnucash.android.db.CommoditiesDbAdapter mCommoditiesDbAdapter> = $r9;
+
+        goto label1;
+    }
+    public static java.lang.String buildExportFilename(org.gnucash.android.export.ExportFormat)
+    {
+        org.gnucash.android.export.ExportFormat $r0;
+        java.util.Date $r1;
+        java.lang.StringBuilder $r2;
+        java.text.SimpleDateFormat $r3;
+        long $l0;
+        java.lang.String $r4;
+
+        $r0 := @parameter0: org.gnucash.android.export.ExportFormat;
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = <org.gnucash.android.export.Exporter: java.text.SimpleDateFormat EXPORT_FILENAME_DATE_FORMAT>;
+
+        $r1 = new java.util.Date;
+
+        $l0 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        specialinvoke $r1.<java.util.Date: void <init>(long)>($l0);
+
+        $r4 = virtualinvoke $r3.<java.text.SimpleDateFormat: java.lang.String format(java.util.Date)>($r1);
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("_gnucash_export");
+
+        $r4 = virtualinvoke $r0.<org.gnucash.android.export.ExportFormat: java.lang.String getExtension()>();
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r4 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r4;
+    }
+    public static long getExportTime(java.lang.String)
+    {
+        java.lang.String $r0;
+        java.text.ParseException r1;
+        java.lang.String[] $r2;
+        long l0, $l2;
+        int $i1;
+        java.text.SimpleDateFormat $r3;
+        java.lang.StringBuilder $r4;
+        java.util.Date $r5;
+
+        $r0 := @parameter0: java.lang.String;
+
+        $r2 = virtualinvoke $r0.<java.lang.String: java.lang.String[] split(java.lang.String)>("_");
+
+        l0 = 0L;
+
+        $i1 = lengthof $r2;
+
+        if $i1 >= 2 goto label1;
+
+        return 0L;
+
+     label1:
+        $r3 = <org.gnucash.android.export.Exporter: java.text.SimpleDateFormat EXPORT_FILENAME_DATE_FORMAT>;
+
+        $r4 = new java.lang.StringBuilder;
+
+     label2:
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+     label3:
+        $r0 = $r2[0];
+
+     label4:
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r0);
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("_");
+
+     label5:
+        $r0 = $r2[1];
+
+     label6:
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r0);
+
+        $r0 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r5 = virtualinvoke $r3.<java.text.SimpleDateFormat: java.util.Date parse(java.lang.String)>($r0);
+
+        $l2 = virtualinvoke $r5.<java.util.Date: long getTime()>();
+
+     label7:
+        l0 = $l2;
+
+     label8:
+        return l0;
+
+     label9:
+        r1 := @caughtexception;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Error parsing time from file name: ");
+
+        $r0 = virtualinvoke r1.<java.text.ParseException: java.lang.String getMessage()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r0);
+
+        $r0 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String)>("Exporter", $r0);
+
+        staticinvoke <com.crashlytics.android.Crashlytics: void logException(java.lang.Throwable)>(r1);
+
+        goto label8;
+
+        catch java.text.ParseException from label2 to label3 with label9;
+        catch java.text.ParseException from label4 to label5 with label9;
+        catch java.text.ParseException from label6 to label7 with label9;
+    }
+    private void purgeDirectory(java.io.File)
+    {
+        org.gnucash.android.export.Exporter r0;
+        java.io.File $r1;
+        int i0, i1;
+        java.io.File[] $r2;
+        boolean $z0;
+
+        r0 := @this: org.gnucash.android.export.Exporter;
+
+        $r1 := @parameter0: java.io.File;
+
+        $r2 = virtualinvoke $r1.<java.io.File: java.io.File[] listFiles()>();
+
+        i0 = lengthof $r2;
+
+        i1 = 0;
+
+     label1:
+        if i1 >= i0 goto label4;
+
+        $r1 = $r2[i1];
+
+        $z0 = virtualinvoke $r1.<java.io.File: boolean isDirectory()>();
+
+        if $z0 == 0 goto label3;
+
+        specialinvoke r0.<org.gnucash.android.export.Exporter: void purgeDirectory(java.io.File)>($r1);
+
+     label2:
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label3:
+        virtualinvoke $r1.<java.io.File: boolean delete()>();
+
+        goto label2;
+
+     label4:
+        return;
+    }
+public abstract java.util.List generateExport() throws org.gnucash.android.export.Exporter$ExporterException { 
+// no body
+} 
+    protected java.lang.String getExportCacheFilePath()
+    {
+        org.gnucash.android.export.Exporter r0;
+        java.lang.String $r1, r3;
+        java.io.File $r2;
+        boolean $z0;
+        java.lang.StringBuilder $r4;
+        org.gnucash.android.export.ExportParams $r5;
+        org.gnucash.android.export.ExportFormat $r6;
+
+        r0 := @this: org.gnucash.android.export.Exporter;
+
+        $r1 = r0.<org.gnucash.android.export.Exporter: java.lang.String mExportCacheFilePath>;
+
+        if $r1 != null goto label2;
+
+        $r2 = r0.<org.gnucash.android.export.Exporter: java.io.File mCacheDir>;
+
+        $r1 = virtualinvoke $r2.<java.io.File: java.lang.String getAbsolutePath()>();
+
+        r3 = $r1;
+
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean endsWith(java.lang.String)>("/");
+
+        if $z0 != 0 goto label1;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("/");
+
+        r3 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label1:
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r3);
+
+        $r5 = r0.<org.gnucash.android.export.Exporter: org.gnucash.android.export.ExportParams mExportParams>;
+
+        $r6 = virtualinvoke $r5.<org.gnucash.android.export.ExportParams: org.gnucash.android.export.ExportFormat getExportFormat()>();
+
+        $r1 = staticinvoke <org.gnucash.android.export.Exporter: java.lang.String buildExportFilename(org.gnucash.android.export.ExportFormat)>($r6);
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r1 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        r0.<org.gnucash.android.export.Exporter: java.lang.String mExportCacheFilePath> = $r1;
+
+     label2:
+        $r1 = r0.<org.gnucash.android.export.Exporter: java.lang.String mExportCacheFilePath>;
+
+        return $r1;
+    }
+    public java.lang.String getExportMimeType()
+    {
+        org.gnucash.android.export.Exporter r0;
+
+        r0 := @this: org.gnucash.android.export.Exporter;
+
+        return "text/plain";
+    }

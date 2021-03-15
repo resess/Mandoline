@@ -1,0 +1,122 @@
+org.gnucash.android.importer.GncXmlImporter extends java.lang.Object
+    public void <init>()
+    {
+        org.gnucash.android.importer.GncXmlImporter r0;
+
+        r0 := @this: org.gnucash.android.importer.GncXmlImporter;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+    public static java.lang.String parse(java.io.InputStream) throws javax.xml.parsers.ParserConfigurationException, org.xml.sax.SAXException, java.io.IOException
+    {
+        java.io.InputStream $r0;
+        org.gnucash.android.importer.GncXmlHandler r1;
+        java.io.PushbackInputStream r2;
+        byte[] r3;
+        javax.xml.parsers.SAXParserFactory $r4;
+        javax.xml.parsers.SAXParser $r5;
+        org.xml.sax.XMLReader $r6;
+        byte $b0;
+        java.io.BufferedInputStream r7;
+        java.util.zip.GZIPInputStream $r8;
+        java.lang.Class $r9;
+        java.lang.String $r10, $r14;
+        long $l1, $l2;
+        org.xml.sax.InputSource $r11;
+        java.lang.Object[] $r12;
+        java.lang.Long $r13;
+        org.gnucash.android.db.adapter.TransactionsDbAdapter $r15;
+        java.sql.Timestamp $r16;
+
+        $r0 := @parameter0: java.io.InputStream;
+
+        $r4 = staticinvoke <javax.xml.parsers.SAXParserFactory: javax.xml.parsers.SAXParserFactory newInstance()>();
+
+        $r5 = virtualinvoke $r4.<javax.xml.parsers.SAXParserFactory: javax.xml.parsers.SAXParser newSAXParser()>();
+
+        $r6 = virtualinvoke $r5.<javax.xml.parsers.SAXParser: org.xml.sax.XMLReader getXMLReader()>();
+
+        r2 = new java.io.PushbackInputStream;
+
+        specialinvoke r2.<java.io.PushbackInputStream: void <init>(java.io.InputStream,int)>($r0, 2);
+
+        r3 = newarray (byte)[2];
+
+        virtualinvoke r2.<java.io.PushbackInputStream: int read(byte[])>(r3);
+
+        virtualinvoke r2.<java.io.PushbackInputStream: void unread(byte[])>(r3);
+
+        $b0 = r3[0];
+
+        if $b0 != 31 goto label2;
+
+        $b0 = r3[1];
+
+        if $b0 != -117 goto label2;
+
+        r7 = new java.io.BufferedInputStream;
+
+        $r8 = new java.util.zip.GZIPInputStream;
+
+        specialinvoke $r8.<java.util.zip.GZIPInputStream: void <init>(java.io.InputStream)>(r2);
+
+        specialinvoke r7.<java.io.BufferedInputStream: void <init>(java.io.InputStream)>($r8);
+
+     label1:
+        $r9 = class "Lorg/gnucash/android/importer/GncXmlImporter;";
+
+        $r10 = virtualinvoke $r9.<java.lang.Class: java.lang.String getSimpleName()>();
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>($r10, "Start import");
+
+        r1 = new org.gnucash.android.importer.GncXmlHandler;
+
+        specialinvoke r1.<org.gnucash.android.importer.GncXmlHandler: void <init>()>();
+
+        interfaceinvoke $r6.<org.xml.sax.XMLReader: void setContentHandler(org.xml.sax.ContentHandler)>(r1);
+
+        $l1 = staticinvoke <java.lang.System: long nanoTime()>();
+
+        $r11 = new org.xml.sax.InputSource;
+
+        specialinvoke $r11.<org.xml.sax.InputSource: void <init>(java.io.InputStream)>(r7);
+
+        interfaceinvoke $r6.<org.xml.sax.XMLReader: void parse(org.xml.sax.InputSource)>($r11);
+
+        $l2 = staticinvoke <java.lang.System: long nanoTime()>();
+
+        $r9 = class "Lorg/gnucash/android/importer/GncXmlImporter;";
+
+        $r10 = virtualinvoke $r9.<java.lang.Class: java.lang.String getSimpleName()>();
+
+        $r12 = newarray (java.lang.Object)[1];
+
+        $l1 = $l2 - $l1;
+
+        $r13 = staticinvoke <java.lang.Long: java.lang.Long valueOf(long)>($l1);
+
+        $r12[0] = $r13;
+
+        $r14 = staticinvoke <java.lang.String: java.lang.String format(java.lang.String,java.lang.Object[])>("%d ns spent on importing the file", $r12);
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>($r10, $r14);
+
+        $r10 = virtualinvoke r1.<org.gnucash.android.importer.GncXmlHandler: java.lang.String getBookUID()>();
+
+        $r15 = staticinvoke <org.gnucash.android.db.adapter.TransactionsDbAdapter: org.gnucash.android.db.adapter.TransactionsDbAdapter getInstance()>();
+
+        $r16 = virtualinvoke $r15.<org.gnucash.android.db.adapter.TransactionsDbAdapter: java.sql.Timestamp getTimestampOfLastModification()>();
+
+        staticinvoke <org.gnucash.android.util.PreferencesHelper: void setLastExportTime(java.sql.Timestamp,java.lang.String)>($r16, $r10);
+
+        return $r10;
+
+     label2:
+        r7 = new java.io.BufferedInputStream;
+
+        specialinvoke r7.<java.io.BufferedInputStream: void <init>(java.io.InputStream)>(r2);
+
+        goto label1;
+    }

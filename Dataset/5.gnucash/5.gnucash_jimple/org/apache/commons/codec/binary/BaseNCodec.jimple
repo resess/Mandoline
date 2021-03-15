@@ -1,0 +1,676 @@
+org.apache.commons.codec.binary.BaseNCodec extends java.lang.Object implements org.apache.commons.codec.BinaryEncoder org.apache.commons.codec.BinaryDecoder
+private static final int DEFAULT_BUFFER_RESIZE_FACTOR
+private static final int DEFAULT_BUFFER_SIZE
+static final int EOF
+protected static final int MASK_8BITS
+public static final int MIME_CHUNK_SIZE
+protected static final byte PAD_DEFAULT
+public static final int PEM_CHUNK_SIZE
+protected final byte PAD
+private final int chunkSeparatorLength
+private final int encodedBlockSize
+protected final int lineLength
+private final int unencodedBlockSize
+    protected void <init>(int, int, int, int)
+    {
+        org.apache.commons.codec.binary.BaseNCodec r0;
+        int $i0, $i1, $i2, $i3, $i4;
+        boolean z0;
+
+        r0 := @this: org.apache.commons.codec.binary.BaseNCodec;
+
+        $i0 := @parameter0: int;
+
+        $i1 := @parameter1: int;
+
+        $i2 := @parameter2: int;
+
+        $i3 := @parameter3: int;
+
+        $i4 = 0;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<org.apache.commons.codec.binary.BaseNCodec: byte PAD> = 61;
+
+        r0.<org.apache.commons.codec.binary.BaseNCodec: int unencodedBlockSize> = $i0;
+
+        r0.<org.apache.commons.codec.binary.BaseNCodec: int encodedBlockSize> = $i1;
+
+        if $i2 <= 0 goto label3;
+
+        if $i3 <= 0 goto label3;
+
+        z0 = 1;
+
+     label1:
+        if z0 == 0 goto label2;
+
+        $i0 = $i2 / $i1;
+
+        $i4 = $i0 * $i1;
+
+     label2:
+        r0.<org.apache.commons.codec.binary.BaseNCodec: int lineLength> = $i4;
+
+        r0.<org.apache.commons.codec.binary.BaseNCodec: int chunkSeparatorLength> = $i3;
+
+        return;
+
+     label3:
+        z0 = 0;
+
+        goto label1;
+    }
+    protected static boolean isWhiteSpace(byte)
+    {
+        byte $b0;
+
+        $b0 := @parameter0: byte;
+
+        lookupswitch($b0)
+        {
+            case 9: goto label2;
+            case 10: goto label2;
+            case 13: goto label2;
+            case 32: goto label2;
+            default: goto label1;
+        };
+
+     label1:
+        return 0;
+
+     label2:
+        return 1;
+    }
+    private byte[] resizeBuffer(org.apache.commons.codec.binary.BaseNCodec$Context)
+    {
+        org.apache.commons.codec.binary.BaseNCodec r0;
+        org.apache.commons.codec.binary.BaseNCodec$Context $r1;
+        byte[] r2, $r3, $r4;
+        int $i0;
+
+        r0 := @this: org.apache.commons.codec.binary.BaseNCodec;
+
+        $r1 := @parameter0: org.apache.commons.codec.binary.BaseNCodec$Context;
+
+        r2 = $r1.<org.apache.commons.codec.binary.BaseNCodec$Context: byte[] buffer>;
+
+        if r2 != null goto label2;
+
+        $i0 = virtualinvoke r0.<org.apache.commons.codec.binary.BaseNCodec: int getDefaultBufferSize()>();
+
+        r2 = newarray (byte)[$i0];
+
+        $r1.<org.apache.commons.codec.binary.BaseNCodec$Context: byte[] buffer> = r2;
+
+        $r1.<org.apache.commons.codec.binary.BaseNCodec$Context: int pos> = 0;
+
+        $r1.<org.apache.commons.codec.binary.BaseNCodec$Context: int readPos> = 0;
+
+     label1:
+        r2 = $r1.<org.apache.commons.codec.binary.BaseNCodec$Context: byte[] buffer>;
+
+        return r2;
+
+     label2:
+        r2 = $r1.<org.apache.commons.codec.binary.BaseNCodec$Context: byte[] buffer>;
+
+        $i0 = lengthof r2;
+
+        $i0 = $i0 * 2;
+
+        r2 = newarray (byte)[$i0];
+
+        $r3 = $r1.<org.apache.commons.codec.binary.BaseNCodec$Context: byte[] buffer>;
+
+        $r4 = $r1.<org.apache.commons.codec.binary.BaseNCodec$Context: byte[] buffer>;
+
+        $i0 = lengthof $r4;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r3, 0, r2, 0, $i0);
+
+        $r1.<org.apache.commons.codec.binary.BaseNCodec$Context: byte[] buffer> = r2;
+
+        goto label1;
+    }
+    int available(org.apache.commons.codec.binary.BaseNCodec$Context)
+    {
+        org.apache.commons.codec.binary.BaseNCodec r0;
+        org.apache.commons.codec.binary.BaseNCodec$Context $r1;
+        int $i0, $i1;
+        byte[] $r2;
+
+        r0 := @this: org.apache.commons.codec.binary.BaseNCodec;
+
+        $r1 := @parameter0: org.apache.commons.codec.binary.BaseNCodec$Context;
+
+        $r2 = $r1.<org.apache.commons.codec.binary.BaseNCodec$Context: byte[] buffer>;
+
+        if $r2 == null goto label1;
+
+        $i1 = $r1.<org.apache.commons.codec.binary.BaseNCodec$Context: int pos>;
+
+        $i0 = $r1.<org.apache.commons.codec.binary.BaseNCodec$Context: int readPos>;
+
+        $i0 = $i1 - $i0;
+
+        return $i0;
+
+     label1:
+        return 0;
+    }
+    protected boolean containsAlphabetOrPad(byte[])
+    {
+        org.apache.commons.codec.binary.BaseNCodec r0;
+        byte[] $r1;
+        byte b0;
+        int i1, i2;
+        boolean $z0;
+
+        r0 := @this: org.apache.commons.codec.binary.BaseNCodec;
+
+        $r1 := @parameter0: byte[];
+
+        if $r1 != null goto label1;
+
+        return 0;
+
+     label1:
+        i1 = lengthof $r1;
+
+        i2 = 0;
+
+     label2:
+        if i2 >= i1 goto label5;
+
+        b0 = $r1[i2];
+
+        if 61 == b0 goto label3;
+
+        $z0 = virtualinvoke r0.<org.apache.commons.codec.binary.BaseNCodec: boolean isInAlphabet(byte)>(b0);
+
+        if $z0 == 0 goto label4;
+
+     label3:
+        return 1;
+
+     label4:
+        i2 = i2 + 1;
+
+        goto label2;
+
+     label5:
+        return 0;
+    }
+    public java.lang.Object decode(java.lang.Object) throws org.apache.commons.codec.DecoderException
+    {
+        org.apache.commons.codec.binary.BaseNCodec r0;
+        java.lang.Object r1;
+        boolean $z0;
+        byte[] r2;
+        java.lang.String r3;
+        org.apache.commons.codec.DecoderException $r4;
+
+        r0 := @this: org.apache.commons.codec.binary.BaseNCodec;
+
+        r1 := @parameter0: java.lang.Object;
+
+        $z0 = r1 instanceof byte[];
+
+        if $z0 == 0 goto label1;
+
+        r2 = (byte[]) r1;
+
+        r2 = virtualinvoke r0.<org.apache.commons.codec.binary.BaseNCodec: byte[] decode(byte[])>(r2);
+
+        return r2;
+
+     label1:
+        $z0 = r1 instanceof java.lang.String;
+
+        if $z0 == 0 goto label2;
+
+        r3 = (java.lang.String) r1;
+
+        r2 = virtualinvoke r0.<org.apache.commons.codec.binary.BaseNCodec: byte[] decode(java.lang.String)>(r3);
+
+        return r2;
+
+     label2:
+        $r4 = new org.apache.commons.codec.DecoderException;
+
+        specialinvoke $r4.<org.apache.commons.codec.DecoderException: void <init>(java.lang.String)>("Parameter supplied to Base-N decode is not a byte[] or a String");
+
+        throw $r4;
+    }
+abstract void decode(byte[], int, int, org.apache.commons.codec.binary.BaseNCodec$Context) { 
+// no body
+} 
+    public byte[] decode(java.lang.String)
+    {
+        org.apache.commons.codec.binary.BaseNCodec r0;
+        java.lang.String $r1;
+        byte[] $r2;
+
+        r0 := @this: org.apache.commons.codec.binary.BaseNCodec;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = staticinvoke <org.apache.commons.codec.binary.StringUtils: byte[] getBytesUtf8(java.lang.String)>($r1);
+
+        $r2 = virtualinvoke r0.<org.apache.commons.codec.binary.BaseNCodec: byte[] decode(byte[])>($r2);
+
+        return $r2;
+    }
+    public byte[] decode(byte[])
+    {
+        org.apache.commons.codec.binary.BaseNCodec r0;
+        byte[] $r1;
+        org.apache.commons.codec.binary.BaseNCodec$Context r2;
+        int $i0;
+
+        r0 := @this: org.apache.commons.codec.binary.BaseNCodec;
+
+        $r1 := @parameter0: byte[];
+
+        if $r1 == null goto label1;
+
+        $i0 = lengthof $r1;
+
+        if $i0 != 0 goto label2;
+
+     label1:
+        return $r1;
+
+     label2:
+        r2 = new org.apache.commons.codec.binary.BaseNCodec$Context;
+
+        specialinvoke r2.<org.apache.commons.codec.binary.BaseNCodec$Context: void <init>()>();
+
+        $i0 = lengthof $r1;
+
+        virtualinvoke r0.<org.apache.commons.codec.binary.BaseNCodec: void decode(byte[],int,int,org.apache.commons.codec.binary.BaseNCodec$Context)>($r1, 0, $i0, r2);
+
+        virtualinvoke r0.<org.apache.commons.codec.binary.BaseNCodec: void decode(byte[],int,int,org.apache.commons.codec.binary.BaseNCodec$Context)>($r1, 0, -1, r2);
+
+        $i0 = r2.<org.apache.commons.codec.binary.BaseNCodec$Context: int pos>;
+
+        $r1 = newarray (byte)[$i0];
+
+        $i0 = lengthof $r1;
+
+        virtualinvoke r0.<org.apache.commons.codec.binary.BaseNCodec: int readResults(byte[],int,int,org.apache.commons.codec.binary.BaseNCodec$Context)>($r1, 0, $i0, r2);
+
+        return $r1;
+    }
+    public java.lang.Object encode(java.lang.Object) throws org.apache.commons.codec.EncoderException
+    {
+        org.apache.commons.codec.binary.BaseNCodec r0;
+        byte[] $r1;
+        java.lang.Object $r2;
+        boolean $z0;
+        org.apache.commons.codec.EncoderException $r3;
+
+        r0 := @this: org.apache.commons.codec.binary.BaseNCodec;
+
+        $r2 := @parameter0: java.lang.Object;
+
+        $z0 = $r2 instanceof byte[];
+
+        if $z0 != 0 goto label1;
+
+        $r3 = new org.apache.commons.codec.EncoderException;
+
+        specialinvoke $r3.<org.apache.commons.codec.EncoderException: void <init>(java.lang.String)>("Parameter supplied to Base-N encode is not a byte[]");
+
+        throw $r3;
+
+     label1:
+        $r1 = (byte[]) $r2;
+
+        $r1 = virtualinvoke r0.<org.apache.commons.codec.binary.BaseNCodec: byte[] encode(byte[])>($r1);
+
+        return $r1;
+    }
+abstract void encode(byte[], int, int, org.apache.commons.codec.binary.BaseNCodec$Context) { 
+// no body
+} 
+    public byte[] encode(byte[])
+    {
+        org.apache.commons.codec.binary.BaseNCodec r0;
+        byte[] $r1;
+        org.apache.commons.codec.binary.BaseNCodec$Context r2;
+        int $i0, $i1;
+
+        r0 := @this: org.apache.commons.codec.binary.BaseNCodec;
+
+        $r1 := @parameter0: byte[];
+
+        if $r1 == null goto label1;
+
+        $i0 = lengthof $r1;
+
+        if $i0 != 0 goto label2;
+
+     label1:
+        return $r1;
+
+     label2:
+        r2 = new org.apache.commons.codec.binary.BaseNCodec$Context;
+
+        specialinvoke r2.<org.apache.commons.codec.binary.BaseNCodec$Context: void <init>()>();
+
+        $i0 = lengthof $r1;
+
+        virtualinvoke r0.<org.apache.commons.codec.binary.BaseNCodec: void encode(byte[],int,int,org.apache.commons.codec.binary.BaseNCodec$Context)>($r1, 0, $i0, r2);
+
+        virtualinvoke r0.<org.apache.commons.codec.binary.BaseNCodec: void encode(byte[],int,int,org.apache.commons.codec.binary.BaseNCodec$Context)>($r1, 0, -1, r2);
+
+        $i1 = r2.<org.apache.commons.codec.binary.BaseNCodec$Context: int pos>;
+
+        $i0 = r2.<org.apache.commons.codec.binary.BaseNCodec$Context: int readPos>;
+
+        $i0 = $i1 - $i0;
+
+        $r1 = newarray (byte)[$i0];
+
+        $i0 = lengthof $r1;
+
+        virtualinvoke r0.<org.apache.commons.codec.binary.BaseNCodec: int readResults(byte[],int,int,org.apache.commons.codec.binary.BaseNCodec$Context)>($r1, 0, $i0, r2);
+
+        return $r1;
+    }
+    public java.lang.String encodeAsString(byte[])
+    {
+        org.apache.commons.codec.binary.BaseNCodec r0;
+        byte[] $r1;
+        java.lang.String $r2;
+
+        r0 := @this: org.apache.commons.codec.binary.BaseNCodec;
+
+        $r1 := @parameter0: byte[];
+
+        $r1 = virtualinvoke r0.<org.apache.commons.codec.binary.BaseNCodec: byte[] encode(byte[])>($r1);
+
+        $r2 = staticinvoke <org.apache.commons.codec.binary.StringUtils: java.lang.String newStringUtf8(byte[])>($r1);
+
+        return $r2;
+    }
+    public java.lang.String encodeToString(byte[])
+    {
+        org.apache.commons.codec.binary.BaseNCodec r0;
+        byte[] $r1;
+        java.lang.String $r2;
+
+        r0 := @this: org.apache.commons.codec.binary.BaseNCodec;
+
+        $r1 := @parameter0: byte[];
+
+        $r1 = virtualinvoke r0.<org.apache.commons.codec.binary.BaseNCodec: byte[] encode(byte[])>($r1);
+
+        $r2 = staticinvoke <org.apache.commons.codec.binary.StringUtils: java.lang.String newStringUtf8(byte[])>($r1);
+
+        return $r2;
+    }
+    protected byte[] ensureBufferSize(int, org.apache.commons.codec.binary.BaseNCodec$Context)
+    {
+        org.apache.commons.codec.binary.BaseNCodec r0;
+        int $i0, $i1, $i2;
+        org.apache.commons.codec.binary.BaseNCodec$Context $r1;
+        byte[] $r2;
+
+        r0 := @this: org.apache.commons.codec.binary.BaseNCodec;
+
+        $i0 := @parameter0: int;
+
+        $r1 := @parameter1: org.apache.commons.codec.binary.BaseNCodec$Context;
+
+        $r2 = $r1.<org.apache.commons.codec.binary.BaseNCodec$Context: byte[] buffer>;
+
+        if $r2 == null goto label1;
+
+        $r2 = $r1.<org.apache.commons.codec.binary.BaseNCodec$Context: byte[] buffer>;
+
+        $i1 = lengthof $r2;
+
+        $i2 = $r1.<org.apache.commons.codec.binary.BaseNCodec$Context: int pos>;
+
+        $i0 = $i2 + $i0;
+
+        if $i1 >= $i0 goto label2;
+
+     label1:
+        $r2 = specialinvoke r0.<org.apache.commons.codec.binary.BaseNCodec: byte[] resizeBuffer(org.apache.commons.codec.binary.BaseNCodec$Context)>($r1);
+
+        return $r2;
+
+     label2:
+        $r2 = $r1.<org.apache.commons.codec.binary.BaseNCodec$Context: byte[] buffer>;
+
+        return $r2;
+    }
+    protected int getDefaultBufferSize()
+    {
+        org.apache.commons.codec.binary.BaseNCodec r0;
+
+        r0 := @this: org.apache.commons.codec.binary.BaseNCodec;
+
+        return 8192;
+    }
+    public long getEncodedLength(byte[])
+    {
+        org.apache.commons.codec.binary.BaseNCodec r0;
+        byte[] $r1;
+        int $i0, $i1;
+        long $l2, $l3, $l4;
+
+        r0 := @this: org.apache.commons.codec.binary.BaseNCodec;
+
+        $r1 := @parameter0: byte[];
+
+        $i0 = lengthof $r1;
+
+        $i1 = r0.<org.apache.commons.codec.binary.BaseNCodec: int unencodedBlockSize>;
+
+        $i0 = $i0 + $i1;
+
+        $i0 = $i0 + -1;
+
+        $i1 = r0.<org.apache.commons.codec.binary.BaseNCodec: int unencodedBlockSize>;
+
+        $i0 = $i0 / $i1;
+
+        $l2 = (long) $i0;
+
+        $i0 = r0.<org.apache.commons.codec.binary.BaseNCodec: int encodedBlockSize>;
+
+        $l3 = (long) $i0;
+
+        $l2 = $l2 * $l3;
+
+        $i0 = r0.<org.apache.commons.codec.binary.BaseNCodec: int lineLength>;
+
+        if $i0 <= 0 goto label1;
+
+        $i0 = r0.<org.apache.commons.codec.binary.BaseNCodec: int lineLength>;
+
+        $l3 = (long) $i0;
+
+        $l3 = $l3 + $l2;
+
+        $l3 = $l3 - 1L;
+
+        $i0 = r0.<org.apache.commons.codec.binary.BaseNCodec: int lineLength>;
+
+        $l4 = (long) $i0;
+
+        $l3 = $l3 / $l4;
+
+        $i0 = r0.<org.apache.commons.codec.binary.BaseNCodec: int chunkSeparatorLength>;
+
+        $l4 = (long) $i0;
+
+        $l3 = $l3 * $l4;
+
+        $l2 = $l2 + $l3;
+
+     label1:
+        return $l2;
+    }
+    boolean hasData(org.apache.commons.codec.binary.BaseNCodec$Context)
+    {
+        org.apache.commons.codec.binary.BaseNCodec r0;
+        org.apache.commons.codec.binary.BaseNCodec$Context $r1;
+        byte[] $r2;
+
+        r0 := @this: org.apache.commons.codec.binary.BaseNCodec;
+
+        $r1 := @parameter0: org.apache.commons.codec.binary.BaseNCodec$Context;
+
+        $r2 = $r1.<org.apache.commons.codec.binary.BaseNCodec$Context: byte[] buffer>;
+
+        if $r2 == null goto label1;
+
+        return 1;
+
+     label1:
+        return 0;
+    }
+protected abstract boolean isInAlphabet(byte) { 
+// no body
+} 
+    public boolean isInAlphabet(java.lang.String)
+    {
+        org.apache.commons.codec.binary.BaseNCodec r0;
+        java.lang.String $r1;
+        byte[] $r2;
+        boolean $z0;
+
+        r0 := @this: org.apache.commons.codec.binary.BaseNCodec;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = staticinvoke <org.apache.commons.codec.binary.StringUtils: byte[] getBytesUtf8(java.lang.String)>($r1);
+
+        $z0 = virtualinvoke r0.<org.apache.commons.codec.binary.BaseNCodec: boolean isInAlphabet(byte[],boolean)>($r2, 1);
+
+        return $z0;
+    }
+    public boolean isInAlphabet(byte[], boolean)
+    {
+        org.apache.commons.codec.binary.BaseNCodec r0;
+        byte[] $r1;
+        boolean $z0, $z1;
+        int i0, $i1;
+        byte $b2;
+
+        r0 := @this: org.apache.commons.codec.binary.BaseNCodec;
+
+        $r1 := @parameter0: byte[];
+
+        $z0 := @parameter1: boolean;
+
+        i0 = 0;
+
+     label1:
+        $i1 = lengthof $r1;
+
+        if i0 >= $i1 goto label4;
+
+        $b2 = $r1[i0];
+
+        $z1 = virtualinvoke r0.<org.apache.commons.codec.binary.BaseNCodec: boolean isInAlphabet(byte)>($b2);
+
+        if $z1 != 0 goto label3;
+
+        if $z0 == 0 goto label2;
+
+        $b2 = $r1[i0];
+
+        if $b2 == 61 goto label3;
+
+        $b2 = $r1[i0];
+
+        $z1 = staticinvoke <org.apache.commons.codec.binary.BaseNCodec: boolean isWhiteSpace(byte)>($b2);
+
+        if $z1 != 0 goto label3;
+
+     label2:
+        return 0;
+
+     label3:
+        i0 = i0 + 1;
+
+        goto label1;
+
+     label4:
+        return 1;
+    }
+    int readResults(byte[], int, int, org.apache.commons.codec.binary.BaseNCodec$Context)
+    {
+        org.apache.commons.codec.binary.BaseNCodec r0;
+        byte[] $r1, $r3;
+        int $i0, $i1, $i2;
+        org.apache.commons.codec.binary.BaseNCodec$Context $r2;
+        boolean $z0;
+        byte $b3;
+
+        r0 := @this: org.apache.commons.codec.binary.BaseNCodec;
+
+        $r1 := @parameter0: byte[];
+
+        $i0 := @parameter1: int;
+
+        $i1 := @parameter2: int;
+
+        $r2 := @parameter3: org.apache.commons.codec.binary.BaseNCodec$Context;
+
+        $r3 = $r2.<org.apache.commons.codec.binary.BaseNCodec$Context: byte[] buffer>;
+
+        if $r3 == null goto label1;
+
+        $i2 = virtualinvoke r0.<org.apache.commons.codec.binary.BaseNCodec: int available(org.apache.commons.codec.binary.BaseNCodec$Context)>($r2);
+
+        $i1 = staticinvoke <java.lang.Math: int min(int,int)>($i2, $i1);
+
+        $r3 = $r2.<org.apache.commons.codec.binary.BaseNCodec$Context: byte[] buffer>;
+
+        $i2 = $r2.<org.apache.commons.codec.binary.BaseNCodec$Context: int readPos>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r3, $i2, $r1, $i0, $i1);
+
+        $i0 = $r2.<org.apache.commons.codec.binary.BaseNCodec$Context: int readPos>;
+
+        $i0 = $i0 + $i1;
+
+        $r2.<org.apache.commons.codec.binary.BaseNCodec$Context: int readPos> = $i0;
+
+        $i0 = $r2.<org.apache.commons.codec.binary.BaseNCodec$Context: int readPos>;
+
+        $i2 = $r2.<org.apache.commons.codec.binary.BaseNCodec$Context: int pos>;
+
+        if $i0 < $i2 goto label4;
+
+        $r2.<org.apache.commons.codec.binary.BaseNCodec$Context: byte[] buffer> = null;
+
+        return $i1;
+
+     label1:
+        $z0 = $r2.<org.apache.commons.codec.binary.BaseNCodec$Context: boolean eof>;
+
+        if $z0 == 0 goto label3;
+
+        $b3 = -1;
+
+     label2:
+        return $b3;
+
+     label3:
+        $b3 = 0;
+
+        goto label2;
+
+     label4:
+        return $i1;
+    }

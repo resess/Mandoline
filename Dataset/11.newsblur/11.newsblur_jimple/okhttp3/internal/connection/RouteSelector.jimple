@@ -1,0 +1,692 @@
+okhttp3.internal.connection.RouteSelector extends java.lang.Object
+private final okhttp3.Address address
+private java.util.List inetSocketAddresses
+private java.net.InetSocketAddress lastInetSocketAddress
+private java.net.Proxy lastProxy
+private int nextInetSocketAddressIndex
+private int nextProxyIndex
+private final java.util.List postponedRoutes
+private java.util.List proxies
+private final okhttp3.internal.connection.RouteDatabase routeDatabase
+    public void <init>(okhttp3.Address, okhttp3.internal.connection.RouteDatabase)
+    {
+        okhttp3.internal.connection.RouteSelector r0;
+        okhttp3.Address $r1;
+        okhttp3.internal.connection.RouteDatabase $r2;
+        java.util.List $r3;
+        java.util.ArrayList $r4;
+        okhttp3.HttpUrl $r5;
+        java.net.Proxy $r6;
+
+        r0 := @this: okhttp3.internal.connection.RouteSelector;
+
+        $r1 := @parameter0: okhttp3.Address;
+
+        $r2 := @parameter1: okhttp3.internal.connection.RouteDatabase;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r3 = staticinvoke <java.util.Collections: java.util.List emptyList()>();
+
+        r0.<okhttp3.internal.connection.RouteSelector: java.util.List proxies> = $r3;
+
+        $r3 = staticinvoke <java.util.Collections: java.util.List emptyList()>();
+
+        r0.<okhttp3.internal.connection.RouteSelector: java.util.List inetSocketAddresses> = $r3;
+
+        $r4 = new java.util.ArrayList;
+
+        specialinvoke $r4.<java.util.ArrayList: void <init>()>();
+
+        r0.<okhttp3.internal.connection.RouteSelector: java.util.List postponedRoutes> = $r4;
+
+        r0.<okhttp3.internal.connection.RouteSelector: okhttp3.Address address> = $r1;
+
+        r0.<okhttp3.internal.connection.RouteSelector: okhttp3.internal.connection.RouteDatabase routeDatabase> = $r2;
+
+        $r5 = virtualinvoke $r1.<okhttp3.Address: okhttp3.HttpUrl url()>();
+
+        $r6 = virtualinvoke $r1.<okhttp3.Address: java.net.Proxy proxy()>();
+
+        specialinvoke r0.<okhttp3.internal.connection.RouteSelector: void resetNextProxy(okhttp3.HttpUrl,java.net.Proxy)>($r5, $r6);
+
+        return;
+    }
+    static java.lang.String getHostString(java.net.InetSocketAddress)
+    {
+        java.net.InetSocketAddress $r0;
+        java.net.InetAddress $r1;
+        java.lang.String $r2;
+
+        $r0 := @parameter0: java.net.InetSocketAddress;
+
+        $r1 = virtualinvoke $r0.<java.net.InetSocketAddress: java.net.InetAddress getAddress()>();
+
+        if $r1 != null goto label1;
+
+        $r2 = virtualinvoke $r0.<java.net.InetSocketAddress: java.lang.String getHostName()>();
+
+        return $r2;
+
+     label1:
+        $r2 = virtualinvoke $r1.<java.net.InetAddress: java.lang.String getHostAddress()>();
+
+        return $r2;
+    }
+    private boolean hasNextInetSocketAddress()
+    {
+        okhttp3.internal.connection.RouteSelector r0;
+        int $i0, $i1;
+        java.util.List $r1;
+
+        r0 := @this: okhttp3.internal.connection.RouteSelector;
+
+        $i1 = r0.<okhttp3.internal.connection.RouteSelector: int nextInetSocketAddressIndex>;
+
+        $r1 = r0.<okhttp3.internal.connection.RouteSelector: java.util.List inetSocketAddresses>;
+
+        $i0 = interfaceinvoke $r1.<java.util.List: int size()>();
+
+        if $i1 >= $i0 goto label1;
+
+        return 1;
+
+     label1:
+        return 0;
+    }
+    private boolean hasNextPostponed()
+    {
+        okhttp3.internal.connection.RouteSelector r0;
+        boolean $z0;
+        java.util.List $r1;
+
+        r0 := @this: okhttp3.internal.connection.RouteSelector;
+
+        $r1 = r0.<okhttp3.internal.connection.RouteSelector: java.util.List postponedRoutes>;
+
+        $z0 = interfaceinvoke $r1.<java.util.List: boolean isEmpty()>();
+
+        if $z0 != 0 goto label1;
+
+        return 1;
+
+     label1:
+        return 0;
+    }
+    private boolean hasNextProxy()
+    {
+        okhttp3.internal.connection.RouteSelector r0;
+        int $i0, $i1;
+        java.util.List $r1;
+
+        r0 := @this: okhttp3.internal.connection.RouteSelector;
+
+        $i1 = r0.<okhttp3.internal.connection.RouteSelector: int nextProxyIndex>;
+
+        $r1 = r0.<okhttp3.internal.connection.RouteSelector: java.util.List proxies>;
+
+        $i0 = interfaceinvoke $r1.<java.util.List: int size()>();
+
+        if $i1 >= $i0 goto label1;
+
+        return 1;
+
+     label1:
+        return 0;
+    }
+    private java.net.InetSocketAddress nextInetSocketAddress() throws java.io.IOException
+    {
+        okhttp3.internal.connection.RouteSelector r0;
+        boolean $z0;
+        java.net.SocketException $r1;
+        java.lang.StringBuilder $r2;
+        okhttp3.Address $r3;
+        okhttp3.HttpUrl $r4;
+        java.lang.String $r5;
+        java.util.List $r6;
+        int $i0, $i1;
+        java.lang.Object $r7;
+        java.net.InetSocketAddress $r8;
+
+        r0 := @this: okhttp3.internal.connection.RouteSelector;
+
+        $z0 = specialinvoke r0.<okhttp3.internal.connection.RouteSelector: boolean hasNextInetSocketAddress()>();
+
+        if $z0 != 0 goto label1;
+
+        $r1 = new java.net.SocketException;
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("No route to ");
+
+        $r3 = r0.<okhttp3.internal.connection.RouteSelector: okhttp3.Address address>;
+
+        $r4 = virtualinvoke $r3.<okhttp3.Address: okhttp3.HttpUrl url()>();
+
+        $r5 = virtualinvoke $r4.<okhttp3.HttpUrl: java.lang.String host()>();
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("; exhausted inet socket addresses: ");
+
+        $r6 = r0.<okhttp3.internal.connection.RouteSelector: java.util.List inetSocketAddresses>;
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r6);
+
+        $r5 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r1.<java.net.SocketException: void <init>(java.lang.String)>($r5);
+
+        throw $r1;
+
+     label1:
+        $r6 = r0.<okhttp3.internal.connection.RouteSelector: java.util.List inetSocketAddresses>;
+
+        $i0 = r0.<okhttp3.internal.connection.RouteSelector: int nextInetSocketAddressIndex>;
+
+        $i1 = $i0 + 1;
+
+        r0.<okhttp3.internal.connection.RouteSelector: int nextInetSocketAddressIndex> = $i1;
+
+        $r7 = interfaceinvoke $r6.<java.util.List: java.lang.Object get(int)>($i0);
+
+        $r8 = (java.net.InetSocketAddress) $r7;
+
+        return $r8;
+    }
+    private okhttp3.Route nextPostponed()
+    {
+        okhttp3.internal.connection.RouteSelector r0;
+        java.lang.Object $r1;
+        java.util.List $r2;
+        okhttp3.Route $r3;
+
+        r0 := @this: okhttp3.internal.connection.RouteSelector;
+
+        $r2 = r0.<okhttp3.internal.connection.RouteSelector: java.util.List postponedRoutes>;
+
+        $r1 = interfaceinvoke $r2.<java.util.List: java.lang.Object remove(int)>(0);
+
+        $r3 = (okhttp3.Route) $r1;
+
+        return $r3;
+    }
+    private java.net.Proxy nextProxy() throws java.io.IOException
+    {
+        okhttp3.internal.connection.RouteSelector r0;
+        boolean $z0;
+        java.net.SocketException $r1;
+        java.lang.StringBuilder $r2;
+        okhttp3.Address $r3;
+        okhttp3.HttpUrl $r4;
+        java.lang.String $r5;
+        java.util.List $r6;
+        int $i0, $i1;
+        java.lang.Object $r7;
+        java.net.Proxy r8;
+
+        r0 := @this: okhttp3.internal.connection.RouteSelector;
+
+        $z0 = specialinvoke r0.<okhttp3.internal.connection.RouteSelector: boolean hasNextProxy()>();
+
+        if $z0 != 0 goto label1;
+
+        $r1 = new java.net.SocketException;
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("No route to ");
+
+        $r3 = r0.<okhttp3.internal.connection.RouteSelector: okhttp3.Address address>;
+
+        $r4 = virtualinvoke $r3.<okhttp3.Address: okhttp3.HttpUrl url()>();
+
+        $r5 = virtualinvoke $r4.<okhttp3.HttpUrl: java.lang.String host()>();
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("; exhausted proxy configurations: ");
+
+        $r6 = r0.<okhttp3.internal.connection.RouteSelector: java.util.List proxies>;
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r6);
+
+        $r5 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r1.<java.net.SocketException: void <init>(java.lang.String)>($r5);
+
+        throw $r1;
+
+     label1:
+        $r6 = r0.<okhttp3.internal.connection.RouteSelector: java.util.List proxies>;
+
+        $i0 = r0.<okhttp3.internal.connection.RouteSelector: int nextProxyIndex>;
+
+        $i1 = $i0 + 1;
+
+        r0.<okhttp3.internal.connection.RouteSelector: int nextProxyIndex> = $i1;
+
+        $r7 = interfaceinvoke $r6.<java.util.List: java.lang.Object get(int)>($i0);
+
+        r8 = (java.net.Proxy) $r7;
+
+        specialinvoke r0.<okhttp3.internal.connection.RouteSelector: void resetNextInetSocketAddress(java.net.Proxy)>(r8);
+
+        return r8;
+    }
+    private void resetNextInetSocketAddress(java.net.Proxy) throws java.io.IOException
+    {
+        okhttp3.internal.connection.RouteSelector r0;
+        java.net.Proxy $r1;
+        java.util.ArrayList $r2;
+        java.net.Proxy$Type $r3, $r4;
+        okhttp3.Address $r5;
+        okhttp3.HttpUrl $r6;
+        java.lang.String $r7;
+        int $i0, i1, $i2;
+        java.net.SocketException $r8;
+        java.lang.StringBuilder $r9;
+        java.net.SocketAddress $r10;
+        boolean $z0;
+        java.lang.IllegalArgumentException $r11;
+        java.lang.Class $r12;
+        java.net.InetSocketAddress r13;
+        java.util.List $r14, $r19;
+        okhttp3.Dns $r15;
+        java.net.UnknownHostException $r16;
+        java.lang.Object $r17;
+        java.net.InetAddress r18;
+
+        r0 := @this: okhttp3.internal.connection.RouteSelector;
+
+        $r1 := @parameter0: java.net.Proxy;
+
+        $r2 = new java.util.ArrayList;
+
+        specialinvoke $r2.<java.util.ArrayList: void <init>()>();
+
+        r0.<okhttp3.internal.connection.RouteSelector: java.util.List inetSocketAddresses> = $r2;
+
+        $r3 = virtualinvoke $r1.<java.net.Proxy: java.net.Proxy$Type type()>();
+
+        $r4 = <java.net.Proxy$Type: java.net.Proxy$Type DIRECT>;
+
+        if $r3 == $r4 goto label01;
+
+        $r3 = virtualinvoke $r1.<java.net.Proxy: java.net.Proxy$Type type()>();
+
+        $r4 = <java.net.Proxy$Type: java.net.Proxy$Type SOCKS>;
+
+        if $r3 != $r4 goto label04;
+
+     label01:
+        $r5 = r0.<okhttp3.internal.connection.RouteSelector: okhttp3.Address address>;
+
+        $r6 = virtualinvoke $r5.<okhttp3.Address: okhttp3.HttpUrl url()>();
+
+        $r7 = virtualinvoke $r6.<okhttp3.HttpUrl: java.lang.String host()>();
+
+        $r5 = r0.<okhttp3.internal.connection.RouteSelector: okhttp3.Address address>;
+
+        $r6 = virtualinvoke $r5.<okhttp3.Address: okhttp3.HttpUrl url()>();
+
+        $i0 = virtualinvoke $r6.<okhttp3.HttpUrl: int port()>();
+
+     label02:
+        if $i0 < 1 goto label03;
+
+        if $i0 <= 65535 goto label06;
+
+     label03:
+        $r8 = new java.net.SocketException;
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("No route to ");
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r7);
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(":");
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("; port is out of range");
+
+        $r7 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r8.<java.net.SocketException: void <init>(java.lang.String)>($r7);
+
+        throw $r8;
+
+     label04:
+        $r10 = virtualinvoke $r1.<java.net.Proxy: java.net.SocketAddress address()>();
+
+        $z0 = $r10 instanceof java.net.InetSocketAddress;
+
+        if $z0 != 0 goto label05;
+
+        $r11 = new java.lang.IllegalArgumentException;
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Proxy.address() is not an InetSocketAddress: ");
+
+        $r12 = virtualinvoke $r10.<java.lang.Object: java.lang.Class getClass()>();
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r12);
+
+        $r7 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r11.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r7);
+
+        throw $r11;
+
+     label05:
+        r13 = (java.net.InetSocketAddress) $r10;
+
+        $r7 = staticinvoke <okhttp3.internal.connection.RouteSelector: java.lang.String getHostString(java.net.InetSocketAddress)>(r13);
+
+        $i0 = virtualinvoke r13.<java.net.InetSocketAddress: int getPort()>();
+
+        goto label02;
+
+     label06:
+        $r3 = virtualinvoke $r1.<java.net.Proxy: java.net.Proxy$Type type()>();
+
+        $r4 = <java.net.Proxy$Type: java.net.Proxy$Type SOCKS>;
+
+        if $r3 != $r4 goto label08;
+
+        $r14 = r0.<okhttp3.internal.connection.RouteSelector: java.util.List inetSocketAddresses>;
+
+        r13 = staticinvoke <java.net.InetSocketAddress: java.net.InetSocketAddress createUnresolved(java.lang.String,int)>($r7, $i0);
+
+        interfaceinvoke $r14.<java.util.List: boolean add(java.lang.Object)>(r13);
+
+     label07:
+        r0.<okhttp3.internal.connection.RouteSelector: int nextInetSocketAddressIndex> = 0;
+
+        return;
+
+     label08:
+        $r5 = r0.<okhttp3.internal.connection.RouteSelector: okhttp3.Address address>;
+
+        $r15 = virtualinvoke $r5.<okhttp3.Address: okhttp3.Dns dns()>();
+
+        $r14 = interfaceinvoke $r15.<okhttp3.Dns: java.util.List lookup(java.lang.String)>($r7);
+
+        $z0 = interfaceinvoke $r14.<java.util.List: boolean isEmpty()>();
+
+        if $z0 == 0 goto label09;
+
+        $r16 = new java.net.UnknownHostException;
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = r0.<okhttp3.internal.connection.RouteSelector: okhttp3.Address address>;
+
+        $r15 = virtualinvoke $r5.<okhttp3.Address: okhttp3.Dns dns()>();
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r15);
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" returned no addresses for ");
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r7);
+
+        $r7 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r16.<java.net.UnknownHostException: void <init>(java.lang.String)>($r7);
+
+        throw $r16;
+
+     label09:
+        i1 = 0;
+
+        $i2 = interfaceinvoke $r14.<java.util.List: int size()>();
+
+     label10:
+        if i1 >= $i2 goto label07;
+
+        $r17 = interfaceinvoke $r14.<java.util.List: java.lang.Object get(int)>(i1);
+
+        r18 = (java.net.InetAddress) $r17;
+
+        $r19 = r0.<okhttp3.internal.connection.RouteSelector: java.util.List inetSocketAddresses>;
+
+        r13 = new java.net.InetSocketAddress;
+
+        specialinvoke r13.<java.net.InetSocketAddress: void <init>(java.net.InetAddress,int)>(r18, $i0);
+
+        interfaceinvoke $r19.<java.util.List: boolean add(java.lang.Object)>(r13);
+
+        i1 = i1 + 1;
+
+        goto label10;
+    }
+    private void resetNextProxy(okhttp3.HttpUrl, java.net.Proxy)
+    {
+        okhttp3.internal.connection.RouteSelector r0;
+        okhttp3.HttpUrl $r1;
+        java.net.Proxy $r2;
+        java.util.List $r3;
+        okhttp3.Address $r4;
+        java.net.ProxySelector $r5;
+        java.net.URI $r6;
+        boolean $z0;
+        java.net.Proxy[] $r7;
+
+        r0 := @this: okhttp3.internal.connection.RouteSelector;
+
+        $r1 := @parameter0: okhttp3.HttpUrl;
+
+        $r2 := @parameter1: java.net.Proxy;
+
+        if $r2 == null goto label2;
+
+        $r3 = staticinvoke <java.util.Collections: java.util.List singletonList(java.lang.Object)>($r2);
+
+        r0.<okhttp3.internal.connection.RouteSelector: java.util.List proxies> = $r3;
+
+     label1:
+        r0.<okhttp3.internal.connection.RouteSelector: int nextProxyIndex> = 0;
+
+        return;
+
+     label2:
+        $r4 = r0.<okhttp3.internal.connection.RouteSelector: okhttp3.Address address>;
+
+        $r5 = virtualinvoke $r4.<okhttp3.Address: java.net.ProxySelector proxySelector()>();
+
+        $r6 = virtualinvoke $r1.<okhttp3.HttpUrl: java.net.URI uri()>();
+
+        $r3 = virtualinvoke $r5.<java.net.ProxySelector: java.util.List select(java.net.URI)>($r6);
+
+        if $r3 == null goto label4;
+
+        $z0 = interfaceinvoke $r3.<java.util.List: boolean isEmpty()>();
+
+        if $z0 != 0 goto label4;
+
+        $r3 = staticinvoke <okhttp3.internal.Util: java.util.List immutableList(java.util.List)>($r3);
+
+     label3:
+        r0.<okhttp3.internal.connection.RouteSelector: java.util.List proxies> = $r3;
+
+        goto label1;
+
+     label4:
+        $r7 = newarray (java.net.Proxy)[1];
+
+        $r2 = <java.net.Proxy: java.net.Proxy NO_PROXY>;
+
+        $r7[0] = $r2;
+
+        $r3 = staticinvoke <okhttp3.internal.Util: java.util.List immutableList(java.lang.Object[])>($r7);
+
+        goto label3;
+    }
+    public void connectFailed(okhttp3.Route, java.io.IOException)
+    {
+        okhttp3.internal.connection.RouteSelector r0;
+        okhttp3.Route $r1;
+        java.io.IOException $r2;
+        java.net.Proxy $r3;
+        java.net.Proxy$Type $r4, $r5;
+        okhttp3.Address $r6;
+        java.net.ProxySelector $r7;
+        okhttp3.HttpUrl $r8;
+        java.net.URI $r9;
+        java.net.SocketAddress $r10;
+        okhttp3.internal.connection.RouteDatabase $r11;
+
+        r0 := @this: okhttp3.internal.connection.RouteSelector;
+
+        $r1 := @parameter0: okhttp3.Route;
+
+        $r2 := @parameter1: java.io.IOException;
+
+        $r3 = virtualinvoke $r1.<okhttp3.Route: java.net.Proxy proxy()>();
+
+        $r4 = virtualinvoke $r3.<java.net.Proxy: java.net.Proxy$Type type()>();
+
+        $r5 = <java.net.Proxy$Type: java.net.Proxy$Type DIRECT>;
+
+        if $r4 == $r5 goto label1;
+
+        $r6 = r0.<okhttp3.internal.connection.RouteSelector: okhttp3.Address address>;
+
+        $r7 = virtualinvoke $r6.<okhttp3.Address: java.net.ProxySelector proxySelector()>();
+
+        if $r7 == null goto label1;
+
+        $r6 = r0.<okhttp3.internal.connection.RouteSelector: okhttp3.Address address>;
+
+        $r7 = virtualinvoke $r6.<okhttp3.Address: java.net.ProxySelector proxySelector()>();
+
+        $r6 = r0.<okhttp3.internal.connection.RouteSelector: okhttp3.Address address>;
+
+        $r8 = virtualinvoke $r6.<okhttp3.Address: okhttp3.HttpUrl url()>();
+
+        $r9 = virtualinvoke $r8.<okhttp3.HttpUrl: java.net.URI uri()>();
+
+        $r3 = virtualinvoke $r1.<okhttp3.Route: java.net.Proxy proxy()>();
+
+        $r10 = virtualinvoke $r3.<java.net.Proxy: java.net.SocketAddress address()>();
+
+        virtualinvoke $r7.<java.net.ProxySelector: void connectFailed(java.net.URI,java.net.SocketAddress,java.io.IOException)>($r9, $r10, $r2);
+
+     label1:
+        $r11 = r0.<okhttp3.internal.connection.RouteSelector: okhttp3.internal.connection.RouteDatabase routeDatabase>;
+
+        virtualinvoke $r11.<okhttp3.internal.connection.RouteDatabase: void failed(okhttp3.Route)>($r1);
+
+        return;
+    }
+    public boolean hasNext()
+    {
+        okhttp3.internal.connection.RouteSelector r0;
+        boolean $z0;
+
+        r0 := @this: okhttp3.internal.connection.RouteSelector;
+
+        $z0 = specialinvoke r0.<okhttp3.internal.connection.RouteSelector: boolean hasNextInetSocketAddress()>();
+
+        if $z0 != 0 goto label1;
+
+        $z0 = specialinvoke r0.<okhttp3.internal.connection.RouteSelector: boolean hasNextProxy()>();
+
+        if $z0 != 0 goto label1;
+
+        $z0 = specialinvoke r0.<okhttp3.internal.connection.RouteSelector: boolean hasNextPostponed()>();
+
+        if $z0 == 0 goto label2;
+
+     label1:
+        return 1;
+
+     label2:
+        return 0;
+    }
+    public okhttp3.Route next() throws java.io.IOException
+    {
+        okhttp3.internal.connection.RouteSelector r0;
+        java.net.Proxy $r1;
+        java.net.InetSocketAddress $r2;
+        boolean $z0;
+        java.util.NoSuchElementException $r3;
+        okhttp3.Route $r4;
+        okhttp3.Address $r5;
+        okhttp3.internal.connection.RouteDatabase $r6;
+        java.util.List $r7;
+
+        r0 := @this: okhttp3.internal.connection.RouteSelector;
+
+        $z0 = specialinvoke r0.<okhttp3.internal.connection.RouteSelector: boolean hasNextInetSocketAddress()>();
+
+        if $z0 != 0 goto label3;
+
+        $z0 = specialinvoke r0.<okhttp3.internal.connection.RouteSelector: boolean hasNextProxy()>();
+
+        if $z0 != 0 goto label2;
+
+        $z0 = specialinvoke r0.<okhttp3.internal.connection.RouteSelector: boolean hasNextPostponed()>();
+
+        if $z0 != 0 goto label1;
+
+        $r3 = new java.util.NoSuchElementException;
+
+        specialinvoke $r3.<java.util.NoSuchElementException: void <init>()>();
+
+        throw $r3;
+
+     label1:
+        $r4 = specialinvoke r0.<okhttp3.internal.connection.RouteSelector: okhttp3.Route nextPostponed()>();
+
+        return $r4;
+
+     label2:
+        $r1 = specialinvoke r0.<okhttp3.internal.connection.RouteSelector: java.net.Proxy nextProxy()>();
+
+        r0.<okhttp3.internal.connection.RouteSelector: java.net.Proxy lastProxy> = $r1;
+
+     label3:
+        $r2 = specialinvoke r0.<okhttp3.internal.connection.RouteSelector: java.net.InetSocketAddress nextInetSocketAddress()>();
+
+        r0.<okhttp3.internal.connection.RouteSelector: java.net.InetSocketAddress lastInetSocketAddress> = $r2;
+
+        $r4 = new okhttp3.Route;
+
+        $r5 = r0.<okhttp3.internal.connection.RouteSelector: okhttp3.Address address>;
+
+        $r1 = r0.<okhttp3.internal.connection.RouteSelector: java.net.Proxy lastProxy>;
+
+        $r2 = r0.<okhttp3.internal.connection.RouteSelector: java.net.InetSocketAddress lastInetSocketAddress>;
+
+        specialinvoke $r4.<okhttp3.Route: void <init>(okhttp3.Address,java.net.Proxy,java.net.InetSocketAddress)>($r5, $r1, $r2);
+
+        $r6 = r0.<okhttp3.internal.connection.RouteSelector: okhttp3.internal.connection.RouteDatabase routeDatabase>;
+
+        $z0 = virtualinvoke $r6.<okhttp3.internal.connection.RouteDatabase: boolean shouldPostpone(okhttp3.Route)>($r4);
+
+        if $z0 == 0 goto label4;
+
+        $r7 = r0.<okhttp3.internal.connection.RouteSelector: java.util.List postponedRoutes>;
+
+        interfaceinvoke $r7.<java.util.List: boolean add(java.lang.Object)>($r4);
+
+        $r4 = virtualinvoke r0.<okhttp3.internal.connection.RouteSelector: okhttp3.Route next()>();
+
+     label4:
+        return $r4;
+    }

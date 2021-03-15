@@ -1,0 +1,621 @@
+com.getkeepsafe.relinker.ReLinkerInstance extends java.lang.Object
+private static final java.lang.String LIB_DIR
+protected boolean force
+protected final com.getkeepsafe.relinker.ReLinker$LibraryInstaller libraryInstaller
+protected final com.getkeepsafe.relinker.ReLinker$LibraryLoader libraryLoader
+protected final java.util.Set loadedLibraries
+protected com.getkeepsafe.relinker.ReLinker$Logger logger
+protected boolean recursive
+    protected void <init>()
+    {
+        com.getkeepsafe.relinker.ReLinkerInstance r0;
+        com.getkeepsafe.relinker.SystemLibraryLoader $r1;
+        com.getkeepsafe.relinker.ApkLibraryInstaller $r2;
+
+        r0 := @this: com.getkeepsafe.relinker.ReLinkerInstance;
+
+        $r1 = new com.getkeepsafe.relinker.SystemLibraryLoader;
+
+        specialinvoke $r1.<com.getkeepsafe.relinker.SystemLibraryLoader: void <init>()>();
+
+        $r2 = new com.getkeepsafe.relinker.ApkLibraryInstaller;
+
+        specialinvoke $r2.<com.getkeepsafe.relinker.ApkLibraryInstaller: void <init>()>();
+
+        specialinvoke r0.<com.getkeepsafe.relinker.ReLinkerInstance: void <init>(com.getkeepsafe.relinker.ReLinker$LibraryLoader,com.getkeepsafe.relinker.ReLinker$LibraryInstaller)>($r1, $r2);
+
+        return;
+    }
+    protected void <init>(com.getkeepsafe.relinker.ReLinker$LibraryLoader, com.getkeepsafe.relinker.ReLinker$LibraryInstaller)
+    {
+        com.getkeepsafe.relinker.ReLinkerInstance r0;
+        com.getkeepsafe.relinker.ReLinker$LibraryLoader $r1;
+        com.getkeepsafe.relinker.ReLinker$LibraryInstaller $r2;
+        java.util.HashSet $r3;
+        java.lang.IllegalArgumentException $r4;
+
+        r0 := @this: com.getkeepsafe.relinker.ReLinkerInstance;
+
+        $r1 := @parameter0: com.getkeepsafe.relinker.ReLinker$LibraryLoader;
+
+        $r2 := @parameter1: com.getkeepsafe.relinker.ReLinker$LibraryInstaller;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r3 = new java.util.HashSet;
+
+        specialinvoke $r3.<java.util.HashSet: void <init>()>();
+
+        r0.<com.getkeepsafe.relinker.ReLinkerInstance: java.util.Set loadedLibraries> = $r3;
+
+        if $r1 != null goto label1;
+
+        $r4 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r4.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Cannot pass null library loader");
+
+        throw $r4;
+
+     label1:
+        if $r2 != null goto label2;
+
+        $r4 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r4.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Cannot pass null library installer");
+
+        throw $r4;
+
+     label2:
+        r0.<com.getkeepsafe.relinker.ReLinkerInstance: com.getkeepsafe.relinker.ReLinker$LibraryLoader libraryLoader> = $r1;
+
+        r0.<com.getkeepsafe.relinker.ReLinkerInstance: com.getkeepsafe.relinker.ReLinker$LibraryInstaller libraryInstaller> = $r2;
+
+        return;
+    }
+    static void access$000(com.getkeepsafe.relinker.ReLinkerInstance, android.content.Context, java.lang.String, java.lang.String)
+    {
+        com.getkeepsafe.relinker.ReLinkerInstance $r0;
+        android.content.Context $r1;
+        java.lang.String $r2, $r3;
+
+        $r0 := @parameter0: com.getkeepsafe.relinker.ReLinkerInstance;
+
+        $r1 := @parameter1: android.content.Context;
+
+        $r2 := @parameter2: java.lang.String;
+
+        $r3 := @parameter3: java.lang.String;
+
+        specialinvoke $r0.<com.getkeepsafe.relinker.ReLinkerInstance: void loadLibraryInternal(android.content.Context,java.lang.String,java.lang.String)>($r1, $r2, $r3);
+
+        return;
+    }
+    private void loadLibraryInternal(android.content.Context, java.lang.String, java.lang.String)
+    {
+        com.getkeepsafe.relinker.ReLinkerInstance r0;
+        android.content.Context $r1;
+        java.lang.String $r2, $r3, $r9;
+        java.lang.UnsatisfiedLinkError r4;
+        com.getkeepsafe.relinker.elf.ElfParser r5;
+        java.util.Set $r6;
+        boolean $z0;
+        java.lang.Object[] $r7;
+        com.getkeepsafe.relinker.ReLinker$LibraryLoader $r8;
+        java.io.File $r10;
+        com.getkeepsafe.relinker.ReLinker$LibraryInstaller $r11;
+        java.lang.String[] $r12;
+        java.util.List $r13;
+        java.util.Iterator $r14;
+        java.lang.Object $r15;
+        java.io.IOException $r16;
+
+        r0 := @this: com.getkeepsafe.relinker.ReLinkerInstance;
+
+        $r1 := @parameter0: android.content.Context;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $r3 := @parameter2: java.lang.String;
+
+        $r6 = r0.<com.getkeepsafe.relinker.ReLinkerInstance: java.util.Set loadedLibraries>;
+
+        $z0 = interfaceinvoke $r6.<java.util.Set: boolean contains(java.lang.Object)>($r2);
+
+        if $z0 == 0 goto label01;
+
+        $z0 = r0.<com.getkeepsafe.relinker.ReLinkerInstance: boolean force>;
+
+        if $z0 != 0 goto label01;
+
+        $r7 = newarray (java.lang.Object)[1];
+
+        $r7[0] = $r2;
+
+        virtualinvoke r0.<com.getkeepsafe.relinker.ReLinkerInstance: void log(java.lang.String,java.lang.Object[])>("%s already loaded previously!", $r7);
+
+        return;
+
+     label01:
+        $r8 = r0.<com.getkeepsafe.relinker.ReLinkerInstance: com.getkeepsafe.relinker.ReLinker$LibraryLoader libraryLoader>;
+
+     label02:
+        interfaceinvoke $r8.<com.getkeepsafe.relinker.ReLinker$LibraryLoader: void loadLibrary(java.lang.String)>($r2);
+
+     label03:
+        $r6 = r0.<com.getkeepsafe.relinker.ReLinkerInstance: java.util.Set loadedLibraries>;
+
+     label04:
+        interfaceinvoke $r6.<java.util.Set: boolean add(java.lang.Object)>($r2);
+
+     label05:
+        $r7 = newarray (java.lang.Object)[2];
+
+        $r7[0] = $r2;
+
+        $r7[1] = $r3;
+
+     label06:
+        virtualinvoke r0.<com.getkeepsafe.relinker.ReLinkerInstance: void log(java.lang.String,java.lang.Object[])>("%s (%s) was loaded normally!", $r7);
+
+     label07:
+        return;
+
+     label08:
+        r4 := @caughtexception;
+
+        $r7 = newarray (java.lang.Object)[1];
+
+        $r9 = staticinvoke <android.util.Log: java.lang.String getStackTraceString(java.lang.Throwable)>(r4);
+
+        $r7[0] = $r9;
+
+        virtualinvoke r0.<com.getkeepsafe.relinker.ReLinkerInstance: void log(java.lang.String,java.lang.Object[])>("Loading the library normally failed: %s", $r7);
+
+        $r7 = newarray (java.lang.Object)[2];
+
+        $r7[0] = $r2;
+
+        $r7[1] = $r3;
+
+        virtualinvoke r0.<com.getkeepsafe.relinker.ReLinkerInstance: void log(java.lang.String,java.lang.Object[])>("%s (%s) was not loaded normally, re-linking...", $r7);
+
+        $r10 = virtualinvoke r0.<com.getkeepsafe.relinker.ReLinkerInstance: java.io.File getWorkaroundLibFile(android.content.Context,java.lang.String,java.lang.String)>($r1, $r2, $r3);
+
+        $z0 = virtualinvoke $r10.<java.io.File: boolean exists()>();
+
+        if $z0 == 0 goto label09;
+
+        $z0 = r0.<com.getkeepsafe.relinker.ReLinkerInstance: boolean force>;
+
+        if $z0 == 0 goto label11;
+
+     label09:
+        $z0 = r0.<com.getkeepsafe.relinker.ReLinkerInstance: boolean force>;
+
+        if $z0 == 0 goto label10;
+
+        $r7 = newarray (java.lang.Object)[2];
+
+        $r7[0] = $r2;
+
+        $r7[1] = $r3;
+
+        virtualinvoke r0.<com.getkeepsafe.relinker.ReLinkerInstance: void log(java.lang.String,java.lang.Object[])>("Forcing a re-link of %s (%s)...", $r7);
+
+     label10:
+        virtualinvoke r0.<com.getkeepsafe.relinker.ReLinkerInstance: void cleanupOldLibFiles(android.content.Context,java.lang.String,java.lang.String)>($r1, $r2, $r3);
+
+        $r11 = r0.<com.getkeepsafe.relinker.ReLinkerInstance: com.getkeepsafe.relinker.ReLinker$LibraryInstaller libraryInstaller>;
+
+        $r8 = r0.<com.getkeepsafe.relinker.ReLinkerInstance: com.getkeepsafe.relinker.ReLinker$LibraryLoader libraryLoader>;
+
+        $r12 = interfaceinvoke $r8.<com.getkeepsafe.relinker.ReLinker$LibraryLoader: java.lang.String[] supportedAbis()>();
+
+        $r8 = r0.<com.getkeepsafe.relinker.ReLinkerInstance: com.getkeepsafe.relinker.ReLinker$LibraryLoader libraryLoader>;
+
+        $r9 = interfaceinvoke $r8.<com.getkeepsafe.relinker.ReLinker$LibraryLoader: java.lang.String mapLibraryName(java.lang.String)>($r2);
+
+        interfaceinvoke $r11.<com.getkeepsafe.relinker.ReLinker$LibraryInstaller: void installLibrary(android.content.Context,java.lang.String[],java.lang.String,java.io.File,com.getkeepsafe.relinker.ReLinkerInstance)>($r1, $r12, $r9, $r10, r0);
+
+     label11:
+        $z0 = r0.<com.getkeepsafe.relinker.ReLinkerInstance: boolean recursive>;
+
+        if $z0 == 0 goto label20;
+
+        r5 = new com.getkeepsafe.relinker.elf.ElfParser;
+
+     label12:
+        specialinvoke r5.<com.getkeepsafe.relinker.elf.ElfParser: void <init>(java.io.File)>($r10);
+
+        $r13 = virtualinvoke r5.<com.getkeepsafe.relinker.elf.ElfParser: java.util.List parseNeededDependencies()>();
+
+        $r14 = interfaceinvoke $r13.<java.util.List: java.util.Iterator iterator()>();
+
+     label13:
+        $z0 = interfaceinvoke $r14.<java.util.Iterator: boolean hasNext()>();
+
+     label14:
+        if $z0 == 0 goto label20;
+
+     label15:
+        $r15 = interfaceinvoke $r14.<java.util.Iterator: java.lang.Object next()>();
+
+     label16:
+        $r9 = (java.lang.String) $r15;
+
+        $r8 = r0.<com.getkeepsafe.relinker.ReLinkerInstance: com.getkeepsafe.relinker.ReLinker$LibraryLoader libraryLoader>;
+
+     label17:
+        $r9 = interfaceinvoke $r8.<com.getkeepsafe.relinker.ReLinker$LibraryLoader: java.lang.String unmapLibraryName(java.lang.String)>($r9);
+
+        virtualinvoke r0.<com.getkeepsafe.relinker.ReLinkerInstance: void loadLibrary(android.content.Context,java.lang.String)>($r1, $r9);
+
+     label18:
+        goto label13;
+
+     label19:
+        $r16 := @caughtexception;
+
+     label20:
+        $r8 = r0.<com.getkeepsafe.relinker.ReLinkerInstance: com.getkeepsafe.relinker.ReLinker$LibraryLoader libraryLoader>;
+
+        $r9 = virtualinvoke $r10.<java.io.File: java.lang.String getAbsolutePath()>();
+
+        interfaceinvoke $r8.<com.getkeepsafe.relinker.ReLinker$LibraryLoader: void loadPath(java.lang.String)>($r9);
+
+        $r6 = r0.<com.getkeepsafe.relinker.ReLinkerInstance: java.util.Set loadedLibraries>;
+
+        interfaceinvoke $r6.<java.util.Set: boolean add(java.lang.Object)>($r2);
+
+        $r7 = newarray (java.lang.Object)[2];
+
+        $r7[0] = $r2;
+
+        $r7[1] = $r3;
+
+        virtualinvoke r0.<com.getkeepsafe.relinker.ReLinkerInstance: void log(java.lang.String,java.lang.Object[])>("%s (%s) was re-linked!", $r7);
+
+        return;
+
+        catch java.lang.UnsatisfiedLinkError from label02 to label03 with label08;
+        catch java.lang.UnsatisfiedLinkError from label04 to label05 with label08;
+        catch java.lang.UnsatisfiedLinkError from label06 to label07 with label08;
+        catch java.io.IOException from label12 to label14 with label19;
+        catch java.io.IOException from label15 to label16 with label19;
+        catch java.io.IOException from label17 to label18 with label19;
+    }
+    protected void cleanupOldLibFiles(android.content.Context, java.lang.String, java.lang.String)
+    {
+        com.getkeepsafe.relinker.ReLinkerInstance r0;
+        android.content.Context $r1;
+        java.lang.String $r2, $r3;
+        java.io.File r4, $r5;
+        int i0, i1;
+        com.getkeepsafe.relinker.ReLinker$LibraryLoader $r6;
+        com.getkeepsafe.relinker.ReLinkerInstance$2 $r7;
+        java.io.File[] $r8;
+        boolean $z0;
+
+        r0 := @this: com.getkeepsafe.relinker.ReLinkerInstance;
+
+        $r1 := @parameter0: android.content.Context;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $r3 := @parameter2: java.lang.String;
+
+        r4 = virtualinvoke r0.<com.getkeepsafe.relinker.ReLinkerInstance: java.io.File getWorkaroundLibDir(android.content.Context)>($r1);
+
+        $r5 = virtualinvoke r0.<com.getkeepsafe.relinker.ReLinkerInstance: java.io.File getWorkaroundLibFile(android.content.Context,java.lang.String,java.lang.String)>($r1, $r2, $r3);
+
+        $r6 = r0.<com.getkeepsafe.relinker.ReLinkerInstance: com.getkeepsafe.relinker.ReLinker$LibraryLoader libraryLoader>;
+
+        $r2 = interfaceinvoke $r6.<com.getkeepsafe.relinker.ReLinker$LibraryLoader: java.lang.String mapLibraryName(java.lang.String)>($r2);
+
+        $r7 = new com.getkeepsafe.relinker.ReLinkerInstance$2;
+
+        specialinvoke $r7.<com.getkeepsafe.relinker.ReLinkerInstance$2: void <init>(com.getkeepsafe.relinker.ReLinkerInstance,java.lang.String)>(r0, $r2);
+
+        $r8 = virtualinvoke r4.<java.io.File: java.io.File[] listFiles(java.io.FilenameFilter)>($r7);
+
+        if $r8 != null goto label1;
+
+        return;
+
+     label1:
+        i0 = lengthof $r8;
+
+        i1 = 0;
+
+     label2:
+        if i1 >= i0 goto label5;
+
+        r4 = $r8[i1];
+
+        $z0 = r0.<com.getkeepsafe.relinker.ReLinkerInstance: boolean force>;
+
+        if $z0 != 0 goto label3;
+
+        $r2 = virtualinvoke r4.<java.io.File: java.lang.String getAbsolutePath()>();
+
+        $r3 = virtualinvoke $r5.<java.io.File: java.lang.String getAbsolutePath()>();
+
+        $z0 = virtualinvoke $r2.<java.lang.String: boolean equals(java.lang.Object)>($r3);
+
+        if $z0 != 0 goto label4;
+
+     label3:
+        virtualinvoke r4.<java.io.File: boolean delete()>();
+
+     label4:
+        i1 = i1 + 1;
+
+        goto label2;
+
+     label5:
+        return;
+    }
+    public com.getkeepsafe.relinker.ReLinkerInstance force()
+    {
+        com.getkeepsafe.relinker.ReLinkerInstance r0;
+
+        r0 := @this: com.getkeepsafe.relinker.ReLinkerInstance;
+
+        r0.<com.getkeepsafe.relinker.ReLinkerInstance: boolean force> = 1;
+
+        return r0;
+    }
+    protected java.io.File getWorkaroundLibDir(android.content.Context)
+    {
+        com.getkeepsafe.relinker.ReLinkerInstance r0;
+        android.content.Context $r1;
+        java.io.File $r2;
+
+        r0 := @this: com.getkeepsafe.relinker.ReLinkerInstance;
+
+        $r1 := @parameter0: android.content.Context;
+
+        $r2 = virtualinvoke $r1.<android.content.Context: java.io.File getDir(java.lang.String,int)>("lib", 0);
+
+        return $r2;
+    }
+    protected java.io.File getWorkaroundLibFile(android.content.Context, java.lang.String, java.lang.String)
+    {
+        com.getkeepsafe.relinker.ReLinkerInstance r0;
+        android.content.Context $r1;
+        java.lang.String $r2, $r3;
+        com.getkeepsafe.relinker.ReLinker$LibraryLoader $r4;
+        boolean $z0;
+        java.io.File $r5, $r6;
+        java.lang.StringBuilder $r7;
+
+        r0 := @this: com.getkeepsafe.relinker.ReLinkerInstance;
+
+        $r1 := @parameter0: android.content.Context;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $r3 := @parameter2: java.lang.String;
+
+        $r4 = r0.<com.getkeepsafe.relinker.ReLinkerInstance: com.getkeepsafe.relinker.ReLinker$LibraryLoader libraryLoader>;
+
+        $r2 = interfaceinvoke $r4.<com.getkeepsafe.relinker.ReLinker$LibraryLoader: java.lang.String mapLibraryName(java.lang.String)>($r2);
+
+        $z0 = staticinvoke <android.text.TextUtils: boolean isEmpty(java.lang.CharSequence)>($r3);
+
+        if $z0 == 0 goto label1;
+
+        $r5 = new java.io.File;
+
+        $r6 = virtualinvoke r0.<com.getkeepsafe.relinker.ReLinkerInstance: java.io.File getWorkaroundLibDir(android.content.Context)>($r1);
+
+        specialinvoke $r5.<java.io.File: void <init>(java.io.File,java.lang.String)>($r6, $r2);
+
+        return $r5;
+
+     label1:
+        $r5 = new java.io.File;
+
+        $r6 = virtualinvoke r0.<com.getkeepsafe.relinker.ReLinkerInstance: java.io.File getWorkaroundLibDir(android.content.Context)>($r1);
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(".");
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r2 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r5.<java.io.File: void <init>(java.io.File,java.lang.String)>($r6, $r2);
+
+        return $r5;
+    }
+    public void loadLibrary(android.content.Context, java.lang.String)
+    {
+        com.getkeepsafe.relinker.ReLinkerInstance r0;
+        android.content.Context $r1;
+        java.lang.String $r2;
+
+        r0 := @this: com.getkeepsafe.relinker.ReLinkerInstance;
+
+        $r1 := @parameter0: android.content.Context;
+
+        $r2 := @parameter1: java.lang.String;
+
+        virtualinvoke r0.<com.getkeepsafe.relinker.ReLinkerInstance: void loadLibrary(android.content.Context,java.lang.String,java.lang.String,com.getkeepsafe.relinker.ReLinker$LoadListener)>($r1, $r2, null, null);
+
+        return;
+    }
+    public void loadLibrary(android.content.Context, java.lang.String, com.getkeepsafe.relinker.ReLinker$LoadListener)
+    {
+        com.getkeepsafe.relinker.ReLinkerInstance r0;
+        android.content.Context $r1;
+        java.lang.String $r2;
+        com.getkeepsafe.relinker.ReLinker$LoadListener $r3;
+
+        r0 := @this: com.getkeepsafe.relinker.ReLinkerInstance;
+
+        $r1 := @parameter0: android.content.Context;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $r3 := @parameter2: com.getkeepsafe.relinker.ReLinker$LoadListener;
+
+        virtualinvoke r0.<com.getkeepsafe.relinker.ReLinkerInstance: void loadLibrary(android.content.Context,java.lang.String,java.lang.String,com.getkeepsafe.relinker.ReLinker$LoadListener)>($r1, $r2, null, $r3);
+
+        return;
+    }
+    public void loadLibrary(android.content.Context, java.lang.String, java.lang.String)
+    {
+        com.getkeepsafe.relinker.ReLinkerInstance r0;
+        android.content.Context $r1;
+        java.lang.String $r2, $r3;
+
+        r0 := @this: com.getkeepsafe.relinker.ReLinkerInstance;
+
+        $r1 := @parameter0: android.content.Context;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $r3 := @parameter2: java.lang.String;
+
+        virtualinvoke r0.<com.getkeepsafe.relinker.ReLinkerInstance: void loadLibrary(android.content.Context,java.lang.String,java.lang.String,com.getkeepsafe.relinker.ReLinker$LoadListener)>($r1, $r2, $r3, null);
+
+        return;
+    }
+    public void loadLibrary(android.content.Context, java.lang.String, java.lang.String, com.getkeepsafe.relinker.ReLinker$LoadListener)
+    {
+        com.getkeepsafe.relinker.ReLinkerInstance r0;
+        android.content.Context $r1;
+        java.lang.String $r2, $r3;
+        com.getkeepsafe.relinker.ReLinker$LoadListener $r4;
+        java.lang.Thread $r5;
+        boolean $z0;
+        java.lang.IllegalArgumentException $r6;
+        java.lang.Object[] $r7;
+        com.getkeepsafe.relinker.ReLinkerInstance$1 $r8;
+
+        r0 := @this: com.getkeepsafe.relinker.ReLinkerInstance;
+
+        $r1 := @parameter0: android.content.Context;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $r3 := @parameter2: java.lang.String;
+
+        $r4 := @parameter3: com.getkeepsafe.relinker.ReLinker$LoadListener;
+
+        if $r1 != null goto label1;
+
+        $r6 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r6.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Given context is null");
+
+        throw $r6;
+
+     label1:
+        $z0 = staticinvoke <android.text.TextUtils: boolean isEmpty(java.lang.CharSequence)>($r2);
+
+        if $z0 == 0 goto label2;
+
+        $r6 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r6.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Given library is either null or empty");
+
+        throw $r6;
+
+     label2:
+        $r7 = newarray (java.lang.Object)[1];
+
+        $r7[0] = $r2;
+
+        virtualinvoke r0.<com.getkeepsafe.relinker.ReLinkerInstance: void log(java.lang.String,java.lang.Object[])>("Beginning load of %s...", $r7);
+
+        if $r4 != null goto label3;
+
+        specialinvoke r0.<com.getkeepsafe.relinker.ReLinkerInstance: void loadLibraryInternal(android.content.Context,java.lang.String,java.lang.String)>($r1, $r2, $r3);
+
+        return;
+
+     label3:
+        $r5 = new java.lang.Thread;
+
+        $r8 = new com.getkeepsafe.relinker.ReLinkerInstance$1;
+
+        specialinvoke $r8.<com.getkeepsafe.relinker.ReLinkerInstance$1: void <init>(com.getkeepsafe.relinker.ReLinkerInstance,android.content.Context,java.lang.String,java.lang.String,com.getkeepsafe.relinker.ReLinker$LoadListener)>(r0, $r1, $r2, $r3, $r4);
+
+        specialinvoke $r5.<java.lang.Thread: void <init>(java.lang.Runnable)>($r8);
+
+        virtualinvoke $r5.<java.lang.Thread: void start()>();
+
+        return;
+    }
+    public com.getkeepsafe.relinker.ReLinkerInstance log(com.getkeepsafe.relinker.ReLinker$Logger)
+    {
+        com.getkeepsafe.relinker.ReLinkerInstance r0;
+        com.getkeepsafe.relinker.ReLinker$Logger $r1;
+
+        r0 := @this: com.getkeepsafe.relinker.ReLinkerInstance;
+
+        $r1 := @parameter0: com.getkeepsafe.relinker.ReLinker$Logger;
+
+        r0.<com.getkeepsafe.relinker.ReLinkerInstance: com.getkeepsafe.relinker.ReLinker$Logger logger> = $r1;
+
+        return r0;
+    }
+    public void log(java.lang.String)
+    {
+        com.getkeepsafe.relinker.ReLinkerInstance r0;
+        java.lang.String $r1;
+        com.getkeepsafe.relinker.ReLinker$Logger $r2;
+
+        r0 := @this: com.getkeepsafe.relinker.ReLinkerInstance;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = r0.<com.getkeepsafe.relinker.ReLinkerInstance: com.getkeepsafe.relinker.ReLinker$Logger logger>;
+
+        if $r2 == null goto label1;
+
+        $r2 = r0.<com.getkeepsafe.relinker.ReLinkerInstance: com.getkeepsafe.relinker.ReLinker$Logger logger>;
+
+        interfaceinvoke $r2.<com.getkeepsafe.relinker.ReLinker$Logger: void log(java.lang.String)>($r1);
+
+     label1:
+        return;
+    }
+    public transient void log(java.lang.String, java.lang.Object[])
+    {
+        com.getkeepsafe.relinker.ReLinkerInstance r0;
+        java.lang.String $r1;
+        java.lang.Object[] $r2;
+        java.util.Locale $r3;
+
+        r0 := @this: com.getkeepsafe.relinker.ReLinkerInstance;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.lang.Object[];
+
+        $r3 = <java.util.Locale: java.util.Locale US>;
+
+        $r1 = staticinvoke <java.lang.String: java.lang.String format(java.util.Locale,java.lang.String,java.lang.Object[])>($r3, $r1, $r2);
+
+        virtualinvoke r0.<com.getkeepsafe.relinker.ReLinkerInstance: void log(java.lang.String)>($r1);
+
+        return;
+    }
+    public com.getkeepsafe.relinker.ReLinkerInstance recursively()
+    {
+        com.getkeepsafe.relinker.ReLinkerInstance r0;
+
+        r0 := @this: com.getkeepsafe.relinker.ReLinkerInstance;
+
+        r0.<com.getkeepsafe.relinker.ReLinkerInstance: boolean recursive> = 1;
+
+        return r0;
+    }

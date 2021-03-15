@@ -1,0 +1,448 @@
+org.gnucash.android.export.ofx.OfxExporter extends org.gnucash.android.export.Exporter
+private java.util.List mAccountsList
+    public void <init>(org.gnucash.android.export.ExportParams)
+    {
+        org.gnucash.android.export.ofx.OfxExporter r0;
+        org.gnucash.android.export.ExportParams $r1;
+
+        r0 := @this: org.gnucash.android.export.ofx.OfxExporter;
+
+        $r1 := @parameter0: org.gnucash.android.export.ExportParams;
+
+        specialinvoke r0.<org.gnucash.android.export.Exporter: void <init>(org.gnucash.android.export.ExportParams,android.database.sqlite.SQLiteDatabase)>($r1, null);
+
+        <org.gnucash.android.export.ofx.OfxExporter: java.lang.String LOG_TAG> = "OfxExporter";
+
+        return;
+    }
+    public void <init>(org.gnucash.android.export.ExportParams, android.database.sqlite.SQLiteDatabase)
+    {
+        org.gnucash.android.export.ofx.OfxExporter r0;
+        org.gnucash.android.export.ExportParams $r1;
+        android.database.sqlite.SQLiteDatabase $r2;
+
+        r0 := @this: org.gnucash.android.export.ofx.OfxExporter;
+
+        $r1 := @parameter0: org.gnucash.android.export.ExportParams;
+
+        $r2 := @parameter1: android.database.sqlite.SQLiteDatabase;
+
+        specialinvoke r0.<org.gnucash.android.export.Exporter: void <init>(org.gnucash.android.export.ExportParams,android.database.sqlite.SQLiteDatabase)>($r1, $r2);
+
+        <org.gnucash.android.export.ofx.OfxExporter: java.lang.String LOG_TAG> = "OfxExporter";
+
+        return;
+    }
+    private void generateOfx(org.w3c.dom.Document, org.w3c.dom.Element)
+    {
+        org.gnucash.android.export.ofx.OfxExporter r0;
+        org.w3c.dom.Document $r1;
+        org.w3c.dom.Element $r2, $r4, $r6;
+        org.gnucash.android.db.adapter.AccountsDbAdapter r3;
+        org.w3c.dom.Text $r5;
+        java.util.List $r7;
+        java.util.Iterator $r8;
+        boolean $z0;
+        java.lang.Object $r9;
+        org.gnucash.android.model.Account r10;
+        int $i0;
+        java.lang.String $r11, $r13;
+        android.content.Context $r12;
+        org.gnucash.android.export.ExportParams $r14;
+        java.sql.Timestamp $r15;
+
+        r0 := @this: org.gnucash.android.export.ofx.OfxExporter;
+
+        $r1 := @parameter0: org.w3c.dom.Document;
+
+        $r2 := @parameter1: org.w3c.dom.Element;
+
+        $r4 = interfaceinvoke $r1.<org.w3c.dom.Document: org.w3c.dom.Element createElement(java.lang.String)>("TRNUID");
+
+        $r5 = interfaceinvoke $r1.<org.w3c.dom.Document: org.w3c.dom.Text createTextNode(java.lang.String)>("0");
+
+        interfaceinvoke $r4.<org.w3c.dom.Element: org.w3c.dom.Node appendChild(org.w3c.dom.Node)>($r5);
+
+        $r6 = interfaceinvoke $r1.<org.w3c.dom.Document: org.w3c.dom.Element createElement(java.lang.String)>("STMTTRNRS");
+
+        interfaceinvoke $r6.<org.w3c.dom.Element: org.w3c.dom.Node appendChild(org.w3c.dom.Node)>($r4);
+
+        $r4 = interfaceinvoke $r1.<org.w3c.dom.Document: org.w3c.dom.Element createElement(java.lang.String)>("BANKMSGSRSV1");
+
+        interfaceinvoke $r4.<org.w3c.dom.Element: org.w3c.dom.Node appendChild(org.w3c.dom.Node)>($r6);
+
+        interfaceinvoke $r2.<org.w3c.dom.Element: org.w3c.dom.Node appendChild(org.w3c.dom.Node)>($r4);
+
+        r3 = r0.<org.gnucash.android.export.ofx.OfxExporter: org.gnucash.android.db.adapter.AccountsDbAdapter mAccountsDbAdapter>;
+
+        $r7 = r0.<org.gnucash.android.export.ofx.OfxExporter: java.util.List mAccountsList>;
+
+        $r8 = interfaceinvoke $r7.<java.util.List: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r8.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label3;
+
+        $r9 = interfaceinvoke $r8.<java.util.Iterator: java.lang.Object next()>();
+
+        r10 = (org.gnucash.android.model.Account) $r9;
+
+        $i0 = virtualinvoke r10.<org.gnucash.android.model.Account: int getTransactionCount()>();
+
+        if $i0 == 0 goto label1;
+
+        $z0 = staticinvoke <org.gnucash.android.app.GnuCashApplication: boolean isDoubleEntryEnabled()>();
+
+        if $z0 != 0 goto label2;
+
+        $r11 = virtualinvoke r10.<org.gnucash.android.model.Account: java.lang.String getName()>();
+
+        $r12 = r0.<org.gnucash.android.export.ofx.OfxExporter: android.content.Context mContext>;
+
+        $r13 = virtualinvoke $r12.<android.content.Context: java.lang.String getString(int)>(2131296323);
+
+        $z0 = virtualinvoke $r11.<java.lang.String: boolean contains(java.lang.CharSequence)>($r13);
+
+        if $z0 != 0 goto label1;
+
+     label2:
+        $r14 = r0.<org.gnucash.android.export.ofx.OfxExporter: org.gnucash.android.export.ExportParams mExportParams>;
+
+        $r15 = virtualinvoke $r14.<org.gnucash.android.export.ExportParams: java.sql.Timestamp getExportStartTime()>();
+
+        virtualinvoke r10.<org.gnucash.android.model.Account: void toOfx(org.w3c.dom.Document,org.w3c.dom.Element,java.sql.Timestamp)>($r1, $r6, $r15);
+
+        $r11 = virtualinvoke r10.<org.gnucash.android.model.Account: java.lang.String getUID()>();
+
+        virtualinvoke r3.<org.gnucash.android.db.adapter.AccountsDbAdapter: int markAsExported(java.lang.String)>($r11);
+
+        goto label1;
+
+     label3:
+        return;
+    }
+    private java.lang.String generateOfxExport() throws org.gnucash.android.export.Exporter$ExporterException
+    {
+        org.gnucash.android.export.ofx.OfxExporter r0;
+        javax.xml.parsers.ParserConfigurationException r1;
+        java.io.StringWriter r2;
+        org.gnucash.android.db.adapter.AccountsDbAdapter $r3;
+        org.gnucash.android.export.ExportParams $r4;
+        java.sql.Timestamp $r5;
+        java.util.List $r6;
+        javax.xml.parsers.DocumentBuilderFactory $r7;
+        javax.xml.parsers.DocumentBuilder $r8;
+        org.w3c.dom.Document $r9;
+        org.w3c.dom.Element $r10;
+        org.w3c.dom.ProcessingInstruction $r11;
+        android.content.Context $r12;
+        android.content.SharedPreferences $r13;
+        java.lang.String $r14;
+        boolean $z0;
+        org.gnucash.android.export.Exporter$ExporterException $r15;
+        org.w3c.dom.NodeList $r16;
+        org.w3c.dom.Node $r17;
+        java.lang.StringBuilder $r18;
+
+        r0 := @this: org.gnucash.android.export.ofx.OfxExporter;
+
+        $r3 = r0.<org.gnucash.android.export.ofx.OfxExporter: org.gnucash.android.db.adapter.AccountsDbAdapter mAccountsDbAdapter>;
+
+        $r4 = r0.<org.gnucash.android.export.ofx.OfxExporter: org.gnucash.android.export.ExportParams mExportParams>;
+
+        $r5 = virtualinvoke $r4.<org.gnucash.android.export.ExportParams: java.sql.Timestamp getExportStartTime()>();
+
+        $r6 = virtualinvoke $r3.<org.gnucash.android.db.adapter.AccountsDbAdapter: java.util.List getExportableAccounts(java.sql.Timestamp)>($r5);
+
+        r0.<org.gnucash.android.export.ofx.OfxExporter: java.util.List mAccountsList> = $r6;
+
+        $r7 = staticinvoke <javax.xml.parsers.DocumentBuilderFactory: javax.xml.parsers.DocumentBuilderFactory newInstance()>();
+
+     label1:
+        $r8 = virtualinvoke $r7.<javax.xml.parsers.DocumentBuilderFactory: javax.xml.parsers.DocumentBuilder newDocumentBuilder()>();
+
+     label2:
+        $r9 = virtualinvoke $r8.<javax.xml.parsers.DocumentBuilder: org.w3c.dom.Document newDocument()>();
+
+        $r10 = interfaceinvoke $r9.<org.w3c.dom.Document: org.w3c.dom.Element createElement(java.lang.String)>("OFX");
+
+        $r11 = interfaceinvoke $r9.<org.w3c.dom.Document: org.w3c.dom.ProcessingInstruction createProcessingInstruction(java.lang.String,java.lang.String)>("OFX", "OFXHEADER=\"200\" VERSION=\"211\" SECURITY=\"NONE\" OLDFILEUID=\"NONE\" NEWFILEUID=\"NONE\"");
+
+        interfaceinvoke $r9.<org.w3c.dom.Document: org.w3c.dom.Node appendChild(org.w3c.dom.Node)>($r11);
+
+        interfaceinvoke $r9.<org.w3c.dom.Document: org.w3c.dom.Node appendChild(org.w3c.dom.Node)>($r10);
+
+        specialinvoke r0.<org.gnucash.android.export.ofx.OfxExporter: void generateOfx(org.w3c.dom.Document,org.w3c.dom.Element)>($r9, $r10);
+
+        $r12 = r0.<org.gnucash.android.export.ofx.OfxExporter: android.content.Context mContext>;
+
+        $r13 = staticinvoke <android.preference.PreferenceManager: android.content.SharedPreferences getDefaultSharedPreferences(android.content.Context)>($r12);
+
+        $r12 = r0.<org.gnucash.android.export.ofx.OfxExporter: android.content.Context mContext>;
+
+        $r14 = virtualinvoke $r12.<android.content.Context: java.lang.String getString(int)>(2131296888);
+
+        $z0 = interfaceinvoke $r13.<android.content.SharedPreferences: boolean getBoolean(java.lang.String,boolean)>($r14, 0);
+
+        $r5 = staticinvoke <org.gnucash.android.util.TimestampHelper: java.sql.Timestamp getTimestampFromNow()>();
+
+        staticinvoke <org.gnucash.android.util.PreferencesHelper: void setLastExportTime(java.sql.Timestamp)>($r5);
+
+        r2 = new java.io.StringWriter;
+
+        specialinvoke r2.<java.io.StringWriter: void <init>()>();
+
+        if $z0 == 0 goto label4;
+
+        specialinvoke r0.<org.gnucash.android.export.ofx.OfxExporter: void write(org.w3c.dom.Node,java.io.Writer,boolean)>($r9, r2, 0);
+
+        $r14 = virtualinvoke r2.<java.io.StringWriter: java.lang.String toString()>();
+
+        return $r14;
+
+     label3:
+        r1 := @caughtexception;
+
+        $r15 = new org.gnucash.android.export.Exporter$ExporterException;
+
+        $r4 = r0.<org.gnucash.android.export.ofx.OfxExporter: org.gnucash.android.export.ExportParams mExportParams>;
+
+        specialinvoke $r15.<org.gnucash.android.export.Exporter$ExporterException: void <init>(org.gnucash.android.export.ExportParams,java.lang.Throwable)>($r4, r1);
+
+        throw $r15;
+
+     label4:
+        $r16 = interfaceinvoke $r9.<org.w3c.dom.Document: org.w3c.dom.NodeList getElementsByTagName(java.lang.String)>("OFX");
+
+        $r17 = interfaceinvoke $r16.<org.w3c.dom.NodeList: org.w3c.dom.Node item(int)>(0);
+
+        specialinvoke r0.<org.gnucash.android.export.ofx.OfxExporter: void write(org.w3c.dom.Node,java.io.Writer,boolean)>($r17, r2, 1);
+
+        $r18 = new java.lang.StringBuilder;
+
+        specialinvoke $r18.<java.lang.StringBuilder: void <init>()>();
+
+        $r18 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("ENCODING:UTF-8\nOFXHEADER:100\nDATA:OFXSGML\nVERSION:211\nSECURITY:NONE\nCHARSET:UTF-8\nCOMPRESSION:NONE\nOLDFILEUID:NONE\nNEWFILEUID:NONE\n");
+
+        $r14 = virtualinvoke r2.<java.io.StringWriter: java.lang.String toString()>();
+
+        $r18 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r14);
+
+        $r14 = virtualinvoke $r18.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r14;
+
+        catch javax.xml.parsers.ParserConfigurationException from label1 to label2 with label3;
+    }
+    private void write(org.w3c.dom.Node, java.io.Writer, boolean)
+    {
+        org.gnucash.android.export.ofx.OfxExporter r0;
+        org.w3c.dom.Node $r1;
+        java.io.Writer $r2;
+        boolean $z0;
+        javax.xml.transform.stream.StreamResult r3;
+        javax.xml.transform.dom.DOMSource r4;
+        javax.xml.transform.TransformerException r5;
+        javax.xml.transform.TransformerFactory $r6;
+        javax.xml.transform.Transformer $r7;
+        java.lang.String $r8, $r9;
+
+        r0 := @this: org.gnucash.android.export.ofx.OfxExporter;
+
+        $r1 := @parameter0: org.w3c.dom.Node;
+
+        $r2 := @parameter1: java.io.Writer;
+
+        $z0 := @parameter2: boolean;
+
+     label01:
+        $r6 = staticinvoke <javax.xml.transform.TransformerFactory: javax.xml.transform.TransformerFactory newInstance()>();
+
+        $r7 = virtualinvoke $r6.<javax.xml.transform.TransformerFactory: javax.xml.transform.Transformer newTransformer()>();
+
+     label02:
+        r4 = new javax.xml.transform.dom.DOMSource;
+
+     label03:
+        specialinvoke r4.<javax.xml.transform.dom.DOMSource: void <init>(org.w3c.dom.Node)>($r1);
+
+     label04:
+        r3 = new javax.xml.transform.stream.StreamResult;
+
+     label05:
+        specialinvoke r3.<javax.xml.transform.stream.StreamResult: void <init>(java.io.Writer)>($r2);
+
+        virtualinvoke $r7.<javax.xml.transform.Transformer: void setOutputProperty(java.lang.String,java.lang.String)>("{http://xml.apache.org/xslt}indent-amount", "2");
+
+        virtualinvoke $r7.<javax.xml.transform.Transformer: void setOutputProperty(java.lang.String,java.lang.String)>("indent", "yes");
+
+     label06:
+        if $z0 == 0 goto label08;
+
+     label07:
+        virtualinvoke $r7.<javax.xml.transform.Transformer: void setOutputProperty(java.lang.String,java.lang.String)>("omit-xml-declaration", "yes");
+
+     label08:
+        virtualinvoke $r7.<javax.xml.transform.Transformer: void transform(javax.xml.transform.Source,javax.xml.transform.Result)>(r4, r3);
+
+     label09:
+        return;
+
+     label10:
+        r5 := @caughtexception;
+
+        $r8 = <org.gnucash.android.export.ofx.OfxExporter: java.lang.String LOG_TAG>;
+
+        $r9 = virtualinvoke r5.<javax.xml.transform.TransformerException: java.lang.String getMessage()>();
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String)>($r8, $r9);
+
+        staticinvoke <com.crashlytics.android.Crashlytics: void logException(java.lang.Throwable)>(r5);
+
+        return;
+
+        catch javax.xml.transform.TransformerException from label01 to label02 with label10;
+        catch javax.xml.transform.TransformerException from label03 to label04 with label10;
+        catch javax.xml.transform.TransformerException from label05 to label06 with label10;
+        catch javax.xml.transform.TransformerException from label07 to label09 with label10;
+    }
+    public java.util.List generateExport() throws org.gnucash.android.export.Exporter$ExporterException
+    {
+        org.gnucash.android.export.ofx.OfxExporter r0;
+        java.util.ArrayList r1;
+        java.io.File r2;
+        java.io.BufferedWriter r3, r4;
+        java.lang.String $r5;
+        java.io.OutputStreamWriter $r6;
+        java.io.FileOutputStream $r7;
+        java.io.IOException r8, r11, r13;
+        org.gnucash.android.export.Exporter$ExporterException $r9;
+        org.gnucash.android.export.ExportParams $r10;
+        java.lang.Throwable $r12;
+
+        r0 := @this: org.gnucash.android.export.ofx.OfxExporter;
+
+        r4 = null;
+
+     label01:
+        r2 = new java.io.File;
+
+     label02:
+        $r5 = virtualinvoke r0.<org.gnucash.android.export.ofx.OfxExporter: java.lang.String getExportCacheFilePath()>();
+
+        specialinvoke r2.<java.io.File: void <init>(java.lang.String)>($r5);
+
+     label03:
+        r3 = new java.io.BufferedWriter;
+
+        $r6 = new java.io.OutputStreamWriter;
+
+        $r7 = new java.io.FileOutputStream;
+
+     label04:
+        specialinvoke $r7.<java.io.FileOutputStream: void <init>(java.io.File)>(r2);
+
+        specialinvoke $r6.<java.io.OutputStreamWriter: void <init>(java.io.OutputStream,java.lang.String)>($r7, "UTF-8");
+
+        specialinvoke r3.<java.io.BufferedWriter: void <init>(java.io.Writer)>($r6);
+
+     label05:
+        $r5 = specialinvoke r0.<org.gnucash.android.export.ofx.OfxExporter: java.lang.String generateOfxExport()>();
+
+        virtualinvoke r3.<java.io.BufferedWriter: void write(java.lang.String)>($r5);
+
+     label06:
+        if r3 == null goto label08;
+
+     label07:
+        virtualinvoke r3.<java.io.BufferedWriter: void close()>();
+
+     label08:
+        r1 = new java.util.ArrayList;
+
+        specialinvoke r1.<java.util.ArrayList: void <init>()>();
+
+        $r5 = virtualinvoke r0.<org.gnucash.android.export.ofx.OfxExporter: java.lang.String getExportCacheFilePath()>();
+
+        interfaceinvoke r1.<java.util.List: boolean add(java.lang.Object)>($r5);
+
+        return r1;
+
+     label09:
+        r8 := @caughtexception;
+
+        $r9 = new org.gnucash.android.export.Exporter$ExporterException;
+
+        $r10 = r0.<org.gnucash.android.export.ofx.OfxExporter: org.gnucash.android.export.ExportParams mExportParams>;
+
+        specialinvoke $r9.<org.gnucash.android.export.Exporter$ExporterException: void <init>(org.gnucash.android.export.ExportParams,java.lang.Throwable)>($r10, r8);
+
+        throw $r9;
+
+     label10:
+        r11 := @caughtexception;
+
+     label11:
+        $r9 = new org.gnucash.android.export.Exporter$ExporterException;
+
+        $r10 = r0.<org.gnucash.android.export.ofx.OfxExporter: org.gnucash.android.export.ExportParams mExportParams>;
+
+        specialinvoke $r9.<org.gnucash.android.export.Exporter$ExporterException: void <init>(org.gnucash.android.export.ExportParams,java.lang.Throwable)>($r10, r11);
+
+        throw $r9;
+
+     label12:
+        $r12 := @caughtexception;
+
+     label13:
+        if r4 == null goto label15;
+
+     label14:
+        virtualinvoke r4.<java.io.BufferedWriter: void close()>();
+
+     label15:
+        throw $r12;
+
+     label16:
+        r13 := @caughtexception;
+
+        $r9 = new org.gnucash.android.export.Exporter$ExporterException;
+
+        $r10 = r0.<org.gnucash.android.export.ofx.OfxExporter: org.gnucash.android.export.ExportParams mExportParams>;
+
+        specialinvoke $r9.<org.gnucash.android.export.Exporter$ExporterException: void <init>(org.gnucash.android.export.ExportParams,java.lang.Throwable)>($r10, r13);
+
+        throw $r9;
+
+     label17:
+        $r12 := @caughtexception;
+
+        r4 = r3;
+
+        goto label13;
+
+     label18:
+        r11 := @caughtexception;
+
+        r4 = r3;
+
+        goto label11;
+
+        catch java.io.IOException from label02 to label03 with label10;
+        catch java.io.IOException from label04 to label05 with label10;
+        catch java.lang.Throwable from label01 to label05 with label12;
+        catch java.io.IOException from label05 to label06 with label18;
+        catch java.lang.Throwable from label05 to label06 with label17;
+        catch java.io.IOException from label07 to label08 with label09;
+        catch java.lang.Throwable from label11 to label12 with label12;
+        catch java.io.IOException from label14 to label15 with label16;
+    }
+    public java.lang.String getExportMimeType()
+    {
+        org.gnucash.android.export.ofx.OfxExporter r0;
+
+        r0 := @this: org.gnucash.android.export.ofx.OfxExporter;
+
+        return "text/xml";
+    }

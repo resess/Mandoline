@@ -1,0 +1,152 @@
+okio.SegmentPool extends java.lang.Object
+static long byteCount
+static okio.Segment next
+    private void <init>()
+    {
+        okio.SegmentPool r0;
+
+        r0 := @this: okio.SegmentPool;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+    static void recycle(okio.Segment)
+    {
+        okio.Segment $r0, $r1;
+        java.lang.IllegalArgumentException $r2;
+        boolean $z0;
+        long $l0;
+        byte $b1;
+        java.lang.Throwable $r3;
+
+        $r0 := @parameter0: okio.Segment;
+
+        $r1 = $r0.<okio.Segment: okio.Segment next>;
+
+        if $r1 != null goto label1;
+
+        $r1 = $r0.<okio.Segment: okio.Segment prev>;
+
+        if $r1 == null goto label2;
+
+     label1:
+        $r2 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r2.<java.lang.IllegalArgumentException: void <init>()>();
+
+        throw $r2;
+
+     label2:
+        $z0 = $r0.<okio.Segment: boolean shared>;
+
+        if $z0 == 0 goto label3;
+
+        return;
+
+     label3:
+        entermonitor class "Lokio/SegmentPool;";
+
+     label4:
+        $l0 = <okio.SegmentPool: long byteCount>;
+
+        $l0 = $l0 + 8192L;
+
+        $b1 = $l0 cmp 65536L;
+
+        if $b1 <= 0 goto label8;
+
+        exitmonitor class "Lokio/SegmentPool;";
+
+     label5:
+        return;
+
+     label6:
+        $r3 := @caughtexception;
+
+        exitmonitor class "Lokio/SegmentPool;";
+
+     label7:
+        throw $r3;
+
+     label8:
+        $l0 = <okio.SegmentPool: long byteCount>;
+
+        $l0 = $l0 + 8192L;
+
+        <okio.SegmentPool: long byteCount> = $l0;
+
+        $r1 = <okio.SegmentPool: okio.Segment next>;
+
+        $r0.<okio.Segment: okio.Segment next> = $r1;
+
+        $r0.<okio.Segment: int limit> = 0;
+
+        $r0.<okio.Segment: int pos> = 0;
+
+        <okio.SegmentPool: okio.Segment next> = $r0;
+
+        exitmonitor class "Lokio/SegmentPool;";
+
+     label9:
+        return;
+
+        catch java.lang.Throwable from label4 to label5 with label6;
+        catch java.lang.Throwable from label6 to label7 with label6;
+        catch java.lang.Throwable from label8 to label9 with label6;
+    }
+    static okio.Segment take()
+    {
+        okio.Segment $r0, $r1;
+        long $l0;
+        java.lang.Throwable $r2;
+
+        entermonitor class "Lokio/SegmentPool;";
+
+     label1:
+        $r0 = <okio.SegmentPool: okio.Segment next>;
+
+        if $r0 == null goto label3;
+
+        $r0 = <okio.SegmentPool: okio.Segment next>;
+
+        $r1 = $r0.<okio.Segment: okio.Segment next>;
+
+        <okio.SegmentPool: okio.Segment next> = $r1;
+
+        $r0.<okio.Segment: okio.Segment next> = null;
+
+        $l0 = <okio.SegmentPool: long byteCount>;
+
+        $l0 = $l0 - 8192L;
+
+        <okio.SegmentPool: long byteCount> = $l0;
+
+        exitmonitor class "Lokio/SegmentPool;";
+
+     label2:
+        return $r0;
+
+     label3:
+        exitmonitor class "Lokio/SegmentPool;";
+
+     label4:
+        $r0 = new okio.Segment;
+
+        specialinvoke $r0.<okio.Segment: void <init>()>();
+
+        return $r0;
+
+     label5:
+        $r2 := @caughtexception;
+
+     label6:
+        exitmonitor class "Lokio/SegmentPool;";
+
+     label7:
+        throw $r2;
+
+        catch java.lang.Throwable from label1 to label2 with label5;
+        catch java.lang.Throwable from label3 to label4 with label5;
+        catch java.lang.Throwable from label6 to label7 with label5;
+    }

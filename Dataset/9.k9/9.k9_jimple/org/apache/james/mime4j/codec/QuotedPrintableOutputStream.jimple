@@ -1,0 +1,626 @@
+org.apache.james.mime4j.codec.QuotedPrintableOutputStream extends java.io.FilterOutputStream
+private static final byte CR
+private static final int DEFAULT_BUFFER_SIZE
+private static final byte DOT
+private static final byte EQ
+private static final byte[] HEX_DIGITS
+private static final byte LF
+private static final byte QUOTED_PRINTABLE_LAST_PLAIN
+private static final int QUOTED_PRINTABLE_MAX_LINE_LENGTH
+private static final int QUOTED_PRINTABLE_OCTETS_PER_ESCAPE
+private static final byte SP
+private static final byte TB
+private final boolean binary
+private boolean closed
+private int nextSoftBreak
+private final byte[] outBuffer
+private int outputIndex
+private boolean pendingCR
+private boolean pendingSpace
+private boolean pendingTab
+private final byte[] singleByte
+    static void <clinit>()
+    {
+        byte[] $r0;
+
+        $r0 = newarray (byte)[16];
+
+        $r0[0] = 48;
+
+        $r0[1] = 49;
+
+        $r0[2] = 50;
+
+        $r0[3] = 51;
+
+        $r0[4] = 52;
+
+        $r0[5] = 53;
+
+        $r0[6] = 54;
+
+        $r0[7] = 55;
+
+        $r0[8] = 56;
+
+        $r0[9] = 57;
+
+        $r0[10] = 65;
+
+        $r0[11] = 66;
+
+        $r0[12] = 67;
+
+        $r0[13] = 68;
+
+        $r0[14] = 69;
+
+        $r0[15] = 70;
+
+        <org.apache.james.mime4j.codec.QuotedPrintableOutputStream: byte[] HEX_DIGITS> = $r0;
+
+        return;
+    }
+    public void <init>(int, java.io.OutputStream, boolean)
+    {
+        org.apache.james.mime4j.codec.QuotedPrintableOutputStream r0;
+        int $i0;
+        java.io.OutputStream $r1;
+        boolean $z0;
+        byte[] $r2;
+
+        r0 := @this: org.apache.james.mime4j.codec.QuotedPrintableOutputStream;
+
+        $i0 := @parameter0: int;
+
+        $r1 := @parameter1: java.io.OutputStream;
+
+        $z0 := @parameter2: boolean;
+
+        specialinvoke r0.<java.io.FilterOutputStream: void <init>(java.io.OutputStream)>($r1);
+
+        r0.<org.apache.james.mime4j.codec.QuotedPrintableOutputStream: boolean closed> = 0;
+
+        $r2 = newarray (byte)[1];
+
+        r0.<org.apache.james.mime4j.codec.QuotedPrintableOutputStream: byte[] singleByte> = $r2;
+
+        $r2 = newarray (byte)[$i0];
+
+        r0.<org.apache.james.mime4j.codec.QuotedPrintableOutputStream: byte[] outBuffer> = $r2;
+
+        r0.<org.apache.james.mime4j.codec.QuotedPrintableOutputStream: boolean binary> = $z0;
+
+        r0.<org.apache.james.mime4j.codec.QuotedPrintableOutputStream: boolean pendingSpace> = 0;
+
+        r0.<org.apache.james.mime4j.codec.QuotedPrintableOutputStream: boolean pendingTab> = 0;
+
+        r0.<org.apache.james.mime4j.codec.QuotedPrintableOutputStream: boolean pendingCR> = 0;
+
+        r0.<org.apache.james.mime4j.codec.QuotedPrintableOutputStream: int outputIndex> = 0;
+
+        r0.<org.apache.james.mime4j.codec.QuotedPrintableOutputStream: int nextSoftBreak> = 77;
+
+        return;
+    }
+    public void <init>(java.io.OutputStream, boolean)
+    {
+        org.apache.james.mime4j.codec.QuotedPrintableOutputStream r0;
+        java.io.OutputStream $r1;
+        boolean $z0;
+
+        r0 := @this: org.apache.james.mime4j.codec.QuotedPrintableOutputStream;
+
+        $r1 := @parameter0: java.io.OutputStream;
+
+        $z0 := @parameter1: boolean;
+
+        specialinvoke r0.<org.apache.james.mime4j.codec.QuotedPrintableOutputStream: void <init>(int,java.io.OutputStream,boolean)>(3072, $r1, $z0);
+
+        return;
+    }
+    private void clearPending() throws java.io.IOException
+    {
+        org.apache.james.mime4j.codec.QuotedPrintableOutputStream r0;
+
+        r0 := @this: org.apache.james.mime4j.codec.QuotedPrintableOutputStream;
+
+        r0.<org.apache.james.mime4j.codec.QuotedPrintableOutputStream: boolean pendingSpace> = 0;
+
+        r0.<org.apache.james.mime4j.codec.QuotedPrintableOutputStream: boolean pendingTab> = 0;
+
+        r0.<org.apache.james.mime4j.codec.QuotedPrintableOutputStream: boolean pendingCR> = 0;
+
+        return;
+    }
+    private void completeEncoding() throws java.io.IOException
+    {
+        org.apache.james.mime4j.codec.QuotedPrintableOutputStream r0;
+
+        r0 := @this: org.apache.james.mime4j.codec.QuotedPrintableOutputStream;
+
+        specialinvoke r0.<org.apache.james.mime4j.codec.QuotedPrintableOutputStream: void writePending()>();
+
+        virtualinvoke r0.<org.apache.james.mime4j.codec.QuotedPrintableOutputStream: void flushOutput()>();
+
+        return;
+    }
+    private void encode(byte) throws java.io.IOException
+    {
+        org.apache.james.mime4j.codec.QuotedPrintableOutputStream r0;
+        byte $b0;
+        boolean $z0;
+
+        r0 := @this: org.apache.james.mime4j.codec.QuotedPrintableOutputStream;
+
+        $b0 := @parameter0: byte;
+
+        if $b0 != 10 goto label05;
+
+        $z0 = r0.<org.apache.james.mime4j.codec.QuotedPrintableOutputStream: boolean binary>;
+
+        if $z0 == 0 goto label01;
+
+        specialinvoke r0.<org.apache.james.mime4j.codec.QuotedPrintableOutputStream: void writePending()>();
+
+        specialinvoke r0.<org.apache.james.mime4j.codec.QuotedPrintableOutputStream: void escape(byte)>($b0);
+
+        return;
+
+     label01:
+        $z0 = r0.<org.apache.james.mime4j.codec.QuotedPrintableOutputStream: boolean pendingCR>;
+
+        if $z0 == 0 goto label04;
+
+        $z0 = r0.<org.apache.james.mime4j.codec.QuotedPrintableOutputStream: boolean pendingSpace>;
+
+        if $z0 == 0 goto label03;
+
+        specialinvoke r0.<org.apache.james.mime4j.codec.QuotedPrintableOutputStream: void escape(byte)>(32);
+
+     label02:
+        specialinvoke r0.<org.apache.james.mime4j.codec.QuotedPrintableOutputStream: void lineBreak()>();
+
+        specialinvoke r0.<org.apache.james.mime4j.codec.QuotedPrintableOutputStream: void clearPending()>();
+
+        return;
+
+     label03:
+        $z0 = r0.<org.apache.james.mime4j.codec.QuotedPrintableOutputStream: boolean pendingTab>;
+
+        if $z0 == 0 goto label02;
+
+        specialinvoke r0.<org.apache.james.mime4j.codec.QuotedPrintableOutputStream: void escape(byte)>(9);
+
+        goto label02;
+
+     label04:
+        specialinvoke r0.<org.apache.james.mime4j.codec.QuotedPrintableOutputStream: void writePending()>();
+
+        specialinvoke r0.<org.apache.james.mime4j.codec.QuotedPrintableOutputStream: void plain(byte)>($b0);
+
+        return;
+
+     label05:
+        if $b0 != 13 goto label07;
+
+        $z0 = r0.<org.apache.james.mime4j.codec.QuotedPrintableOutputStream: boolean binary>;
+
+        if $z0 == 0 goto label06;
+
+        specialinvoke r0.<org.apache.james.mime4j.codec.QuotedPrintableOutputStream: void escape(byte)>($b0);
+
+        return;
+
+     label06:
+        r0.<org.apache.james.mime4j.codec.QuotedPrintableOutputStream: boolean pendingCR> = 1;
+
+        return;
+
+     label07:
+        specialinvoke r0.<org.apache.james.mime4j.codec.QuotedPrintableOutputStream: void writePending()>();
+
+        if $b0 != 32 goto label09;
+
+        $z0 = r0.<org.apache.james.mime4j.codec.QuotedPrintableOutputStream: boolean binary>;
+
+        if $z0 == 0 goto label08;
+
+        specialinvoke r0.<org.apache.james.mime4j.codec.QuotedPrintableOutputStream: void escape(byte)>($b0);
+
+        return;
+
+     label08:
+        r0.<org.apache.james.mime4j.codec.QuotedPrintableOutputStream: boolean pendingSpace> = 1;
+
+        return;
+
+     label09:
+        if $b0 != 9 goto label11;
+
+        $z0 = r0.<org.apache.james.mime4j.codec.QuotedPrintableOutputStream: boolean binary>;
+
+        if $z0 == 0 goto label10;
+
+        specialinvoke r0.<org.apache.james.mime4j.codec.QuotedPrintableOutputStream: void escape(byte)>($b0);
+
+        return;
+
+     label10:
+        r0.<org.apache.james.mime4j.codec.QuotedPrintableOutputStream: boolean pendingTab> = 1;
+
+        return;
+
+     label11:
+        if $b0 >= 32 goto label12;
+
+        specialinvoke r0.<org.apache.james.mime4j.codec.QuotedPrintableOutputStream: void escape(byte)>($b0);
+
+        return;
+
+     label12:
+        if $b0 <= 126 goto label13;
+
+        specialinvoke r0.<org.apache.james.mime4j.codec.QuotedPrintableOutputStream: void escape(byte)>($b0);
+
+        return;
+
+     label13:
+        if $b0 == 61 goto label14;
+
+        if $b0 != 46 goto label15;
+
+     label14:
+        specialinvoke r0.<org.apache.james.mime4j.codec.QuotedPrintableOutputStream: void escape(byte)>($b0);
+
+        return;
+
+     label15:
+        specialinvoke r0.<org.apache.james.mime4j.codec.QuotedPrintableOutputStream: void plain(byte)>($b0);
+
+        return;
+    }
+    private void encodeChunk(byte[], int, int) throws java.io.IOException
+    {
+        org.apache.james.mime4j.codec.QuotedPrintableOutputStream r0;
+        byte[] $r1;
+        int $i0, $i1, i2, $i3;
+        byte $b4;
+
+        r0 := @this: org.apache.james.mime4j.codec.QuotedPrintableOutputStream;
+
+        $r1 := @parameter0: byte[];
+
+        $i0 := @parameter1: int;
+
+        $i1 := @parameter2: int;
+
+        i2 = $i0;
+
+     label1:
+        $i3 = $i1 + $i0;
+
+        if i2 >= $i3 goto label2;
+
+        $b4 = $r1[i2];
+
+        specialinvoke r0.<org.apache.james.mime4j.codec.QuotedPrintableOutputStream: void encode(byte)>($b4);
+
+        i2 = i2 + 1;
+
+        goto label1;
+
+     label2:
+        return;
+    }
+    private void escape(byte) throws java.io.IOException
+    {
+        org.apache.james.mime4j.codec.QuotedPrintableOutputStream r0;
+        byte $b0;
+        int i1, $i2;
+        byte[] $r1;
+
+        r0 := @this: org.apache.james.mime4j.codec.QuotedPrintableOutputStream;
+
+        $b0 := @parameter0: byte;
+
+        i1 = r0.<org.apache.james.mime4j.codec.QuotedPrintableOutputStream: int nextSoftBreak>;
+
+        i1 = i1 + -1;
+
+        r0.<org.apache.james.mime4j.codec.QuotedPrintableOutputStream: int nextSoftBreak> = i1;
+
+        if i1 > 3 goto label1;
+
+        specialinvoke r0.<org.apache.james.mime4j.codec.QuotedPrintableOutputStream: void softBreak()>();
+
+     label1:
+        i1 = $b0 & 255;
+
+        specialinvoke r0.<org.apache.james.mime4j.codec.QuotedPrintableOutputStream: void write(byte)>(61);
+
+        $i2 = r0.<org.apache.james.mime4j.codec.QuotedPrintableOutputStream: int nextSoftBreak>;
+
+        $i2 = $i2 + -1;
+
+        r0.<org.apache.james.mime4j.codec.QuotedPrintableOutputStream: int nextSoftBreak> = $i2;
+
+        $r1 = <org.apache.james.mime4j.codec.QuotedPrintableOutputStream: byte[] HEX_DIGITS>;
+
+        $i2 = i1 >> 4;
+
+        $b0 = $r1[$i2];
+
+        specialinvoke r0.<org.apache.james.mime4j.codec.QuotedPrintableOutputStream: void write(byte)>($b0);
+
+        $i2 = r0.<org.apache.james.mime4j.codec.QuotedPrintableOutputStream: int nextSoftBreak>;
+
+        $i2 = $i2 + -1;
+
+        r0.<org.apache.james.mime4j.codec.QuotedPrintableOutputStream: int nextSoftBreak> = $i2;
+
+        $r1 = <org.apache.james.mime4j.codec.QuotedPrintableOutputStream: byte[] HEX_DIGITS>;
+
+        i1 = i1 % 16;
+
+        $b0 = $r1[i1];
+
+        specialinvoke r0.<org.apache.james.mime4j.codec.QuotedPrintableOutputStream: void write(byte)>($b0);
+
+        return;
+    }
+    private void lineBreak() throws java.io.IOException
+    {
+        org.apache.james.mime4j.codec.QuotedPrintableOutputStream r0;
+
+        r0 := @this: org.apache.james.mime4j.codec.QuotedPrintableOutputStream;
+
+        specialinvoke r0.<org.apache.james.mime4j.codec.QuotedPrintableOutputStream: void write(byte)>(13);
+
+        specialinvoke r0.<org.apache.james.mime4j.codec.QuotedPrintableOutputStream: void write(byte)>(10);
+
+        r0.<org.apache.james.mime4j.codec.QuotedPrintableOutputStream: int nextSoftBreak> = 76;
+
+        return;
+    }
+    private void plain(byte) throws java.io.IOException
+    {
+        org.apache.james.mime4j.codec.QuotedPrintableOutputStream r0;
+        byte $b0;
+        int $i1;
+
+        r0 := @this: org.apache.james.mime4j.codec.QuotedPrintableOutputStream;
+
+        $b0 := @parameter0: byte;
+
+        $i1 = r0.<org.apache.james.mime4j.codec.QuotedPrintableOutputStream: int nextSoftBreak>;
+
+        $i1 = $i1 + -1;
+
+        r0.<org.apache.james.mime4j.codec.QuotedPrintableOutputStream: int nextSoftBreak> = $i1;
+
+        if $i1 > 1 goto label1;
+
+        specialinvoke r0.<org.apache.james.mime4j.codec.QuotedPrintableOutputStream: void softBreak()>();
+
+     label1:
+        specialinvoke r0.<org.apache.james.mime4j.codec.QuotedPrintableOutputStream: void write(byte)>($b0);
+
+        return;
+    }
+    private void softBreak() throws java.io.IOException
+    {
+        org.apache.james.mime4j.codec.QuotedPrintableOutputStream r0;
+
+        r0 := @this: org.apache.james.mime4j.codec.QuotedPrintableOutputStream;
+
+        specialinvoke r0.<org.apache.james.mime4j.codec.QuotedPrintableOutputStream: void write(byte)>(61);
+
+        specialinvoke r0.<org.apache.james.mime4j.codec.QuotedPrintableOutputStream: void lineBreak()>();
+
+        return;
+    }
+    private void write(byte) throws java.io.IOException
+    {
+        org.apache.james.mime4j.codec.QuotedPrintableOutputStream r0;
+        byte $b0;
+        int $i1, $i2;
+        byte[] $r1;
+
+        r0 := @this: org.apache.james.mime4j.codec.QuotedPrintableOutputStream;
+
+        $b0 := @parameter0: byte;
+
+        $r1 = r0.<org.apache.james.mime4j.codec.QuotedPrintableOutputStream: byte[] outBuffer>;
+
+        $i2 = r0.<org.apache.james.mime4j.codec.QuotedPrintableOutputStream: int outputIndex>;
+
+        $i1 = $i2 + 1;
+
+        r0.<org.apache.james.mime4j.codec.QuotedPrintableOutputStream: int outputIndex> = $i1;
+
+        $r1[$i2] = $b0;
+
+        $i1 = r0.<org.apache.james.mime4j.codec.QuotedPrintableOutputStream: int outputIndex>;
+
+        $r1 = r0.<org.apache.james.mime4j.codec.QuotedPrintableOutputStream: byte[] outBuffer>;
+
+        $i2 = lengthof $r1;
+
+        if $i1 < $i2 goto label1;
+
+        virtualinvoke r0.<org.apache.james.mime4j.codec.QuotedPrintableOutputStream: void flushOutput()>();
+
+     label1:
+        return;
+    }
+    private void writePending() throws java.io.IOException
+    {
+        org.apache.james.mime4j.codec.QuotedPrintableOutputStream r0;
+        boolean $z0;
+
+        r0 := @this: org.apache.james.mime4j.codec.QuotedPrintableOutputStream;
+
+        $z0 = r0.<org.apache.james.mime4j.codec.QuotedPrintableOutputStream: boolean pendingSpace>;
+
+        if $z0 == 0 goto label2;
+
+        specialinvoke r0.<org.apache.james.mime4j.codec.QuotedPrintableOutputStream: void plain(byte)>(32);
+
+     label1:
+        specialinvoke r0.<org.apache.james.mime4j.codec.QuotedPrintableOutputStream: void clearPending()>();
+
+        return;
+
+     label2:
+        $z0 = r0.<org.apache.james.mime4j.codec.QuotedPrintableOutputStream: boolean pendingTab>;
+
+        if $z0 == 0 goto label3;
+
+        specialinvoke r0.<org.apache.james.mime4j.codec.QuotedPrintableOutputStream: void plain(byte)>(9);
+
+        goto label1;
+
+     label3:
+        $z0 = r0.<org.apache.james.mime4j.codec.QuotedPrintableOutputStream: boolean pendingCR>;
+
+        if $z0 == 0 goto label1;
+
+        specialinvoke r0.<org.apache.james.mime4j.codec.QuotedPrintableOutputStream: void plain(byte)>(13);
+
+        goto label1;
+    }
+    public void close() throws java.io.IOException
+    {
+        org.apache.james.mime4j.codec.QuotedPrintableOutputStream r0;
+        boolean $z0;
+        java.lang.Throwable $r1;
+
+        r0 := @this: org.apache.james.mime4j.codec.QuotedPrintableOutputStream;
+
+        $z0 = r0.<org.apache.james.mime4j.codec.QuotedPrintableOutputStream: boolean closed>;
+
+        if $z0 == 0 goto label1;
+
+        return;
+
+     label1:
+        specialinvoke r0.<org.apache.james.mime4j.codec.QuotedPrintableOutputStream: void completeEncoding()>();
+
+     label2:
+        r0.<org.apache.james.mime4j.codec.QuotedPrintableOutputStream: boolean closed> = 1;
+
+        return;
+
+     label3:
+        $r1 := @caughtexception;
+
+        r0.<org.apache.james.mime4j.codec.QuotedPrintableOutputStream: boolean closed> = 1;
+
+        throw $r1;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+    public void flush() throws java.io.IOException
+    {
+        org.apache.james.mime4j.codec.QuotedPrintableOutputStream r0;
+
+        r0 := @this: org.apache.james.mime4j.codec.QuotedPrintableOutputStream;
+
+        virtualinvoke r0.<org.apache.james.mime4j.codec.QuotedPrintableOutputStream: void flushOutput()>();
+
+        return;
+    }
+    void flushOutput() throws java.io.IOException
+    {
+        org.apache.james.mime4j.codec.QuotedPrintableOutputStream r0;
+        int $i0, $i1;
+        byte[] $r1;
+        java.io.OutputStream $r2;
+
+        r0 := @this: org.apache.james.mime4j.codec.QuotedPrintableOutputStream;
+
+        $i0 = r0.<org.apache.james.mime4j.codec.QuotedPrintableOutputStream: int outputIndex>;
+
+        $r1 = r0.<org.apache.james.mime4j.codec.QuotedPrintableOutputStream: byte[] outBuffer>;
+
+        $i1 = lengthof $r1;
+
+        if $i0 >= $i1 goto label2;
+
+        $r2 = r0.<org.apache.james.mime4j.codec.QuotedPrintableOutputStream: java.io.OutputStream out>;
+
+        $r1 = r0.<org.apache.james.mime4j.codec.QuotedPrintableOutputStream: byte[] outBuffer>;
+
+        $i0 = r0.<org.apache.james.mime4j.codec.QuotedPrintableOutputStream: int outputIndex>;
+
+        virtualinvoke $r2.<java.io.OutputStream: void write(byte[],int,int)>($r1, 0, $i0);
+
+     label1:
+        r0.<org.apache.james.mime4j.codec.QuotedPrintableOutputStream: int outputIndex> = 0;
+
+        return;
+
+     label2:
+        $r2 = r0.<org.apache.james.mime4j.codec.QuotedPrintableOutputStream: java.io.OutputStream out>;
+
+        $r1 = r0.<org.apache.james.mime4j.codec.QuotedPrintableOutputStream: byte[] outBuffer>;
+
+        virtualinvoke $r2.<java.io.OutputStream: void write(byte[])>($r1);
+
+        goto label1;
+    }
+    public void write(int) throws java.io.IOException
+    {
+        org.apache.james.mime4j.codec.QuotedPrintableOutputStream r0;
+        int $i0;
+        byte[] $r1;
+        byte $b1;
+
+        r0 := @this: org.apache.james.mime4j.codec.QuotedPrintableOutputStream;
+
+        $i0 := @parameter0: int;
+
+        $r1 = r0.<org.apache.james.mime4j.codec.QuotedPrintableOutputStream: byte[] singleByte>;
+
+        $b1 = (byte) $i0;
+
+        $r1[0] = $b1;
+
+        $r1 = r0.<org.apache.james.mime4j.codec.QuotedPrintableOutputStream: byte[] singleByte>;
+
+        virtualinvoke r0.<org.apache.james.mime4j.codec.QuotedPrintableOutputStream: void write(byte[],int,int)>($r1, 0, 1);
+
+        return;
+    }
+    public void write(byte[], int, int) throws java.io.IOException
+    {
+        org.apache.james.mime4j.codec.QuotedPrintableOutputStream r0;
+        byte[] $r1;
+        int $i0, $i1;
+        boolean $z0;
+        java.io.IOException $r2;
+
+        r0 := @this: org.apache.james.mime4j.codec.QuotedPrintableOutputStream;
+
+        $r1 := @parameter0: byte[];
+
+        $i0 := @parameter1: int;
+
+        $i1 := @parameter2: int;
+
+        $z0 = r0.<org.apache.james.mime4j.codec.QuotedPrintableOutputStream: boolean closed>;
+
+        if $z0 == 0 goto label1;
+
+        $r2 = new java.io.IOException;
+
+        specialinvoke $r2.<java.io.IOException: void <init>(java.lang.String)>("Stream has been closed");
+
+        throw $r2;
+
+     label1:
+        specialinvoke r0.<org.apache.james.mime4j.codec.QuotedPrintableOutputStream: void encodeChunk(byte[],int,int)>($r1, $i0, $i1);
+
+        return;
+    }

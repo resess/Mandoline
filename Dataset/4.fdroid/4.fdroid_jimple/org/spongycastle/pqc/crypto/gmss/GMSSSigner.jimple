@@ -1,0 +1,819 @@
+org.spongycastle.pqc.crypto.gmss.GMSSSigner extends java.lang.Object implements org.spongycastle.pqc.crypto.MessageSigner
+private byte[][][] currentAuthPaths
+private org.spongycastle.pqc.crypto.gmss.GMSSDigestProvider digestProvider
+private org.spongycastle.pqc.crypto.gmss.GMSSParameters gmssPS
+private org.spongycastle.pqc.crypto.gmss.util.GMSSRandom gmssRandom
+private org.spongycastle.pqc.crypto.gmss.util.GMSSUtil gmssUtil
+private int[] index
+org.spongycastle.pqc.crypto.gmss.GMSSKeyParameters key
+private int mdLength
+private org.spongycastle.crypto.Digest messDigestOTS
+private org.spongycastle.crypto.Digest messDigestTrees
+private int numLayer
+private org.spongycastle.pqc.crypto.gmss.util.WinternitzOTSignature ots
+private byte[] pubKeyBytes
+private java.security.SecureRandom random
+private byte[][] subtreeRootSig
+    public void <init>(org.spongycastle.pqc.crypto.gmss.GMSSDigestProvider)
+    {
+        org.spongycastle.pqc.crypto.gmss.GMSSSigner r0;
+        org.spongycastle.pqc.crypto.gmss.GMSSDigestProvider $r1;
+        org.spongycastle.crypto.Digest $r2;
+        org.spongycastle.pqc.crypto.gmss.util.GMSSUtil $r3;
+        int $i0;
+        org.spongycastle.pqc.crypto.gmss.util.GMSSRandom $r4;
+
+        r0 := @this: org.spongycastle.pqc.crypto.gmss.GMSSSigner;
+
+        $r1 := @parameter0: org.spongycastle.pqc.crypto.gmss.GMSSDigestProvider;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r3 = new org.spongycastle.pqc.crypto.gmss.util.GMSSUtil;
+
+        specialinvoke $r3.<org.spongycastle.pqc.crypto.gmss.util.GMSSUtil: void <init>()>();
+
+        r0.<org.spongycastle.pqc.crypto.gmss.GMSSSigner: org.spongycastle.pqc.crypto.gmss.util.GMSSUtil gmssUtil> = $r3;
+
+        r0.<org.spongycastle.pqc.crypto.gmss.GMSSSigner: org.spongycastle.pqc.crypto.gmss.GMSSDigestProvider digestProvider> = $r1;
+
+        $r2 = interfaceinvoke $r1.<org.spongycastle.pqc.crypto.gmss.GMSSDigestProvider: org.spongycastle.crypto.Digest get()>();
+
+        r0.<org.spongycastle.pqc.crypto.gmss.GMSSSigner: org.spongycastle.crypto.Digest messDigestTrees> = $r2;
+
+        $r2 = r0.<org.spongycastle.pqc.crypto.gmss.GMSSSigner: org.spongycastle.crypto.Digest messDigestTrees>;
+
+        r0.<org.spongycastle.pqc.crypto.gmss.GMSSSigner: org.spongycastle.crypto.Digest messDigestOTS> = $r2;
+
+        $r2 = r0.<org.spongycastle.pqc.crypto.gmss.GMSSSigner: org.spongycastle.crypto.Digest messDigestTrees>;
+
+        $i0 = interfaceinvoke $r2.<org.spongycastle.crypto.Digest: int getDigestSize()>();
+
+        r0.<org.spongycastle.pqc.crypto.gmss.GMSSSigner: int mdLength> = $i0;
+
+        $r4 = new org.spongycastle.pqc.crypto.gmss.util.GMSSRandom;
+
+        $r2 = r0.<org.spongycastle.pqc.crypto.gmss.GMSSSigner: org.spongycastle.crypto.Digest messDigestTrees>;
+
+        specialinvoke $r4.<org.spongycastle.pqc.crypto.gmss.util.GMSSRandom: void <init>(org.spongycastle.crypto.Digest)>($r2);
+
+        r0.<org.spongycastle.pqc.crypto.gmss.GMSSSigner: org.spongycastle.pqc.crypto.gmss.util.GMSSRandom gmssRandom> = $r4;
+
+        return;
+    }
+    private void initSign()
+    {
+        org.spongycastle.pqc.crypto.gmss.GMSSSigner r0;
+        byte[] r1, r2;
+        org.spongycastle.crypto.Digest $r3;
+        org.spongycastle.pqc.crypto.gmss.GMSSKeyParameters r4;
+        org.spongycastle.pqc.crypto.gmss.GMSSPrivateKeyParameters r5;
+        boolean $z0;
+        java.lang.IllegalStateException $r6;
+        int $i0, $i1, $i2;
+        org.spongycastle.pqc.crypto.gmss.GMSSParameters $r7;
+        byte[][] $r8;
+        org.spongycastle.pqc.crypto.gmss.util.GMSSRandom $r9;
+        org.spongycastle.pqc.crypto.gmss.util.WinternitzOTSignature $r10;
+        org.spongycastle.pqc.crypto.gmss.GMSSDigestProvider $r11;
+        int[] $r12, $r17;
+        byte[][][] $r13, $r14;
+        java.lang.Class $r15;
+        java.lang.Object $r16;
+
+        r0 := @this: org.spongycastle.pqc.crypto.gmss.GMSSSigner;
+
+        $r3 = r0.<org.spongycastle.pqc.crypto.gmss.GMSSSigner: org.spongycastle.crypto.Digest messDigestTrees>;
+
+        interfaceinvoke $r3.<org.spongycastle.crypto.Digest: void reset()>();
+
+        r4 = r0.<org.spongycastle.pqc.crypto.gmss.GMSSSigner: org.spongycastle.pqc.crypto.gmss.GMSSKeyParameters key>;
+
+        r5 = (org.spongycastle.pqc.crypto.gmss.GMSSPrivateKeyParameters) r4;
+
+        $z0 = virtualinvoke r5.<org.spongycastle.pqc.crypto.gmss.GMSSPrivateKeyParameters: boolean isUsed()>();
+
+        if $z0 == 0 goto label1;
+
+        $r6 = new java.lang.IllegalStateException;
+
+        specialinvoke $r6.<java.lang.IllegalStateException: void <init>(java.lang.String)>("Private key already used");
+
+        throw $r6;
+
+     label1:
+        $i0 = virtualinvoke r5.<org.spongycastle.pqc.crypto.gmss.GMSSPrivateKeyParameters: int getIndex(int)>(0);
+
+        $i1 = virtualinvoke r5.<org.spongycastle.pqc.crypto.gmss.GMSSPrivateKeyParameters: int getNumLeafs(int)>(0);
+
+        if $i0 < $i1 goto label2;
+
+        $r6 = new java.lang.IllegalStateException;
+
+        specialinvoke $r6.<java.lang.IllegalStateException: void <init>(java.lang.String)>("No more signatures can be generated");
+
+        throw $r6;
+
+     label2:
+        $r7 = virtualinvoke r5.<org.spongycastle.pqc.crypto.gmss.GMSSPrivateKeyParameters: org.spongycastle.pqc.crypto.gmss.GMSSParameters getParameters()>();
+
+        r0.<org.spongycastle.pqc.crypto.gmss.GMSSSigner: org.spongycastle.pqc.crypto.gmss.GMSSParameters gmssPS> = $r7;
+
+        $r7 = r0.<org.spongycastle.pqc.crypto.gmss.GMSSSigner: org.spongycastle.pqc.crypto.gmss.GMSSParameters gmssPS>;
+
+        $i0 = virtualinvoke $r7.<org.spongycastle.pqc.crypto.gmss.GMSSParameters: int getNumOfLayers()>();
+
+        r0.<org.spongycastle.pqc.crypto.gmss.GMSSSigner: int numLayer> = $i0;
+
+        $r8 = virtualinvoke r5.<org.spongycastle.pqc.crypto.gmss.GMSSPrivateKeyParameters: byte[][] getCurrentSeeds()>();
+
+        $i0 = r0.<org.spongycastle.pqc.crypto.gmss.GMSSSigner: int numLayer>;
+
+        $i0 = $i0 + -1;
+
+        r2 = $r8[$i0];
+
+        $i0 = r0.<org.spongycastle.pqc.crypto.gmss.GMSSSigner: int mdLength>;
+
+        r1 = newarray (byte)[$i0];
+
+        $i0 = r0.<org.spongycastle.pqc.crypto.gmss.GMSSSigner: int mdLength>;
+
+        r1 = newarray (byte)[$i0];
+
+        $i0 = r0.<org.spongycastle.pqc.crypto.gmss.GMSSSigner: int mdLength>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r2, 0, r1, 0, $i0);
+
+        $r9 = r0.<org.spongycastle.pqc.crypto.gmss.GMSSSigner: org.spongycastle.pqc.crypto.gmss.util.GMSSRandom gmssRandom>;
+
+        r2 = virtualinvoke $r9.<org.spongycastle.pqc.crypto.gmss.util.GMSSRandom: byte[] nextSeed(byte[])>(r1);
+
+        $r10 = new org.spongycastle.pqc.crypto.gmss.util.WinternitzOTSignature;
+
+        $r11 = r0.<org.spongycastle.pqc.crypto.gmss.GMSSSigner: org.spongycastle.pqc.crypto.gmss.GMSSDigestProvider digestProvider>;
+
+        $r3 = interfaceinvoke $r11.<org.spongycastle.pqc.crypto.gmss.GMSSDigestProvider: org.spongycastle.crypto.Digest get()>();
+
+        $r7 = r0.<org.spongycastle.pqc.crypto.gmss.GMSSSigner: org.spongycastle.pqc.crypto.gmss.GMSSParameters gmssPS>;
+
+        $r12 = virtualinvoke $r7.<org.spongycastle.pqc.crypto.gmss.GMSSParameters: int[] getWinternitzParameter()>();
+
+        $i0 = r0.<org.spongycastle.pqc.crypto.gmss.GMSSSigner: int numLayer>;
+
+        $i0 = $i0 + -1;
+
+        $i0 = $r12[$i0];
+
+        specialinvoke $r10.<org.spongycastle.pqc.crypto.gmss.util.WinternitzOTSignature: void <init>(byte[],org.spongycastle.crypto.Digest,int)>(r2, $r3, $i0);
+
+        r0.<org.spongycastle.pqc.crypto.gmss.GMSSSigner: org.spongycastle.pqc.crypto.gmss.util.WinternitzOTSignature ots> = $r10;
+
+        $r13 = virtualinvoke r5.<org.spongycastle.pqc.crypto.gmss.GMSSPrivateKeyParameters: byte[][][] getCurrentAuthPaths()>();
+
+        $i0 = r0.<org.spongycastle.pqc.crypto.gmss.GMSSSigner: int numLayer>;
+
+        $r14 = newarray (byte[][])[$i0];
+
+        r0.<org.spongycastle.pqc.crypto.gmss.GMSSSigner: byte[][][] currentAuthPaths> = $r14;
+
+        $i0 = 0;
+
+     label3:
+        $i1 = r0.<org.spongycastle.pqc.crypto.gmss.GMSSSigner: int numLayer>;
+
+        if $i0 >= $i1 goto label6;
+
+        $r14 = r0.<org.spongycastle.pqc.crypto.gmss.GMSSSigner: byte[][][] currentAuthPaths>;
+
+        $r8 = $r13[$i0];
+
+        $i1 = lengthof $r8;
+
+        $i2 = r0.<org.spongycastle.pqc.crypto.gmss.GMSSSigner: int mdLength>;
+
+        $r12 = newarray (int)[2];
+
+        $r12[0] = $i1;
+
+        $r12[1] = $i2;
+
+        $r15 = <java.lang.Byte: java.lang.Class TYPE>;
+
+        $r16 = staticinvoke <java.lang.reflect.Array: java.lang.Object newInstance(java.lang.Class,int[])>($r15, $r12);
+
+        $r8 = (byte[][]) $r16;
+
+        $r14[$i0] = $r8;
+
+        $i1 = 0;
+
+     label4:
+        $r8 = $r13[$i0];
+
+        $i2 = lengthof $r8;
+
+        if $i1 >= $i2 goto label5;
+
+        $r8 = $r13[$i0];
+
+        r2 = $r8[$i1];
+
+        $r14 = r0.<org.spongycastle.pqc.crypto.gmss.GMSSSigner: byte[][][] currentAuthPaths>;
+
+        $r8 = $r14[$i0];
+
+        r1 = $r8[$i1];
+
+        $i2 = r0.<org.spongycastle.pqc.crypto.gmss.GMSSSigner: int mdLength>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r2, 0, r1, 0, $i2);
+
+        $i1 = $i1 + 1;
+
+        goto label4;
+
+     label5:
+        $i0 = $i0 + 1;
+
+        goto label3;
+
+     label6:
+        $i0 = r0.<org.spongycastle.pqc.crypto.gmss.GMSSSigner: int numLayer>;
+
+        $r12 = newarray (int)[$i0];
+
+        r0.<org.spongycastle.pqc.crypto.gmss.GMSSSigner: int[] index> = $r12;
+
+        $r12 = virtualinvoke r5.<org.spongycastle.pqc.crypto.gmss.GMSSPrivateKeyParameters: int[] getIndex()>();
+
+        $r17 = r0.<org.spongycastle.pqc.crypto.gmss.GMSSSigner: int[] index>;
+
+        $i0 = r0.<org.spongycastle.pqc.crypto.gmss.GMSSSigner: int numLayer>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r12, 0, $r17, 0, $i0);
+
+        $i0 = r0.<org.spongycastle.pqc.crypto.gmss.GMSSSigner: int numLayer>;
+
+        $i0 = $i0 + -1;
+
+        $r8 = newarray (byte[])[$i0];
+
+        r0.<org.spongycastle.pqc.crypto.gmss.GMSSSigner: byte[][] subtreeRootSig> = $r8;
+
+        $i0 = 0;
+
+     label7:
+        $i1 = r0.<org.spongycastle.pqc.crypto.gmss.GMSSSigner: int numLayer>;
+
+        $i1 = $i1 + -1;
+
+        if $i0 >= $i1 goto label8;
+
+        r2 = virtualinvoke r5.<org.spongycastle.pqc.crypto.gmss.GMSSPrivateKeyParameters: byte[] getSubtreeRootSig(int)>($i0);
+
+        $r8 = r0.<org.spongycastle.pqc.crypto.gmss.GMSSSigner: byte[][] subtreeRootSig>;
+
+        $i1 = lengthof r2;
+
+        r1 = newarray (byte)[$i1];
+
+        $r8[$i0] = r1;
+
+        $r8 = r0.<org.spongycastle.pqc.crypto.gmss.GMSSSigner: byte[][] subtreeRootSig>;
+
+        r1 = $r8[$i0];
+
+        $i1 = lengthof r2;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r2, 0, r1, 0, $i1);
+
+        $i0 = $i0 + 1;
+
+        goto label7;
+
+     label8:
+        virtualinvoke r5.<org.spongycastle.pqc.crypto.gmss.GMSSPrivateKeyParameters: void markUsed()>();
+
+        return;
+    }
+    private void initVerify()
+    {
+        org.spongycastle.pqc.crypto.gmss.GMSSSigner r0;
+        org.spongycastle.crypto.Digest $r1;
+        org.spongycastle.pqc.crypto.gmss.GMSSKeyParameters r2;
+        org.spongycastle.pqc.crypto.gmss.GMSSPublicKeyParameters r3;
+        byte[] $r4;
+        org.spongycastle.pqc.crypto.gmss.GMSSParameters $r5;
+        int $i0;
+
+        r0 := @this: org.spongycastle.pqc.crypto.gmss.GMSSSigner;
+
+        $r1 = r0.<org.spongycastle.pqc.crypto.gmss.GMSSSigner: org.spongycastle.crypto.Digest messDigestTrees>;
+
+        interfaceinvoke $r1.<org.spongycastle.crypto.Digest: void reset()>();
+
+        r2 = r0.<org.spongycastle.pqc.crypto.gmss.GMSSSigner: org.spongycastle.pqc.crypto.gmss.GMSSKeyParameters key>;
+
+        r3 = (org.spongycastle.pqc.crypto.gmss.GMSSPublicKeyParameters) r2;
+
+        $r4 = virtualinvoke r3.<org.spongycastle.pqc.crypto.gmss.GMSSPublicKeyParameters: byte[] getPublicKey()>();
+
+        r0.<org.spongycastle.pqc.crypto.gmss.GMSSSigner: byte[] pubKeyBytes> = $r4;
+
+        $r5 = virtualinvoke r3.<org.spongycastle.pqc.crypto.gmss.GMSSPublicKeyParameters: org.spongycastle.pqc.crypto.gmss.GMSSParameters getParameters()>();
+
+        r0.<org.spongycastle.pqc.crypto.gmss.GMSSSigner: org.spongycastle.pqc.crypto.gmss.GMSSParameters gmssPS> = $r5;
+
+        $r5 = r0.<org.spongycastle.pqc.crypto.gmss.GMSSSigner: org.spongycastle.pqc.crypto.gmss.GMSSParameters gmssPS>;
+
+        $i0 = virtualinvoke $r5.<org.spongycastle.pqc.crypto.gmss.GMSSParameters: int getNumOfLayers()>();
+
+        r0.<org.spongycastle.pqc.crypto.gmss.GMSSSigner: int numLayer> = $i0;
+
+        return;
+    }
+    public byte[] generateSignature(byte[])
+    {
+        org.spongycastle.pqc.crypto.gmss.GMSSSigner r0;
+        byte[] $r1, r2, r3, r4, $r10, $r11, $r12;
+        int $i0, $i1, $i2;
+        org.spongycastle.pqc.crypto.gmss.util.WinternitzOTSignature $r5;
+        org.spongycastle.pqc.crypto.gmss.util.GMSSUtil $r6;
+        byte[][][] $r7;
+        byte[][] $r8;
+        int[] $r9;
+
+        r0 := @this: org.spongycastle.pqc.crypto.gmss.GMSSSigner;
+
+        $r1 := @parameter0: byte[];
+
+        $i0 = r0.<org.spongycastle.pqc.crypto.gmss.GMSSSigner: int mdLength>;
+
+        r4 = newarray (byte)[$i0];
+
+        $r5 = r0.<org.spongycastle.pqc.crypto.gmss.GMSSSigner: org.spongycastle.pqc.crypto.gmss.util.WinternitzOTSignature ots>;
+
+        r4 = virtualinvoke $r5.<org.spongycastle.pqc.crypto.gmss.util.WinternitzOTSignature: byte[] getSignature(byte[])>($r1);
+
+        $r6 = r0.<org.spongycastle.pqc.crypto.gmss.GMSSSigner: org.spongycastle.pqc.crypto.gmss.util.GMSSUtil gmssUtil>;
+
+        $r7 = r0.<org.spongycastle.pqc.crypto.gmss.GMSSSigner: byte[][][] currentAuthPaths>;
+
+        $i0 = r0.<org.spongycastle.pqc.crypto.gmss.GMSSSigner: int numLayer>;
+
+        $i0 = $i0 + -1;
+
+        $r8 = $r7[$i0];
+
+        r2 = virtualinvoke $r6.<org.spongycastle.pqc.crypto.gmss.util.GMSSUtil: byte[] concatenateArray(byte[][])>($r8);
+
+        $r6 = r0.<org.spongycastle.pqc.crypto.gmss.GMSSSigner: org.spongycastle.pqc.crypto.gmss.util.GMSSUtil gmssUtil>;
+
+        $r9 = r0.<org.spongycastle.pqc.crypto.gmss.GMSSSigner: int[] index>;
+
+        $i0 = r0.<org.spongycastle.pqc.crypto.gmss.GMSSSigner: int numLayer>;
+
+        $i0 = $i0 + -1;
+
+        $i0 = $r9[$i0];
+
+        r3 = virtualinvoke $r6.<org.spongycastle.pqc.crypto.gmss.util.GMSSUtil: byte[] intToBytesLittleEndian(int)>($i0);
+
+        $i0 = lengthof r3;
+
+        $i1 = lengthof r4;
+
+        $i0 = $i0 + $i1;
+
+        $i1 = lengthof r2;
+
+        $i0 = $i0 + $i1;
+
+        $r1 = newarray (byte)[$i0];
+
+        $i0 = lengthof r3;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r3, 0, $r1, 0, $i0);
+
+        $i0 = lengthof r3;
+
+        $i1 = lengthof r4;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r4, 0, $r1, $i0, $i1);
+
+        $i0 = lengthof r3;
+
+        $i1 = lengthof r4;
+
+        $i0 = $i0 + $i1;
+
+        $i1 = lengthof r2;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r2, 0, $r1, $i0, $i1);
+
+        r4 = newarray (byte)[0];
+
+        $i0 = r0.<org.spongycastle.pqc.crypto.gmss.GMSSSigner: int numLayer>;
+
+        $i0 = $i0 + -1;
+
+        $i0 = $i0 + -1;
+
+     label1:
+        if $i0 < 0 goto label2;
+
+        $r6 = r0.<org.spongycastle.pqc.crypto.gmss.GMSSSigner: org.spongycastle.pqc.crypto.gmss.util.GMSSUtil gmssUtil>;
+
+        $r7 = r0.<org.spongycastle.pqc.crypto.gmss.GMSSSigner: byte[][][] currentAuthPaths>;
+
+        $r8 = $r7[$i0];
+
+        r2 = virtualinvoke $r6.<org.spongycastle.pqc.crypto.gmss.util.GMSSUtil: byte[] concatenateArray(byte[][])>($r8);
+
+        $r6 = r0.<org.spongycastle.pqc.crypto.gmss.GMSSSigner: org.spongycastle.pqc.crypto.gmss.util.GMSSUtil gmssUtil>;
+
+        $r9 = r0.<org.spongycastle.pqc.crypto.gmss.GMSSSigner: int[] index>;
+
+        $i1 = $r9[$i0];
+
+        $r10 = virtualinvoke $r6.<org.spongycastle.pqc.crypto.gmss.util.GMSSUtil: byte[] intToBytesLittleEndian(int)>($i1);
+
+        $i1 = lengthof r4;
+
+        r3 = newarray (byte)[$i1];
+
+        $i1 = lengthof r4;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r4, 0, r3, 0, $i1);
+
+        $i1 = lengthof r3;
+
+        $i2 = lengthof $r10;
+
+        $i1 = $i1 + $i2;
+
+        $r8 = r0.<org.spongycastle.pqc.crypto.gmss.GMSSSigner: byte[][] subtreeRootSig>;
+
+        r4 = $r8[$i0];
+
+        $i2 = lengthof r4;
+
+        $i1 = $i1 + $i2;
+
+        $i2 = lengthof r2;
+
+        $i1 = $i1 + $i2;
+
+        r4 = newarray (byte)[$i1];
+
+        $i1 = lengthof r3;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r3, 0, r4, 0, $i1);
+
+        $i1 = lengthof r3;
+
+        $i2 = lengthof $r10;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r10, 0, r4, $i1, $i2);
+
+        $r8 = r0.<org.spongycastle.pqc.crypto.gmss.GMSSSigner: byte[][] subtreeRootSig>;
+
+        $r11 = $r8[$i0];
+
+        $i1 = lengthof r3;
+
+        $i2 = lengthof $r10;
+
+        $i1 = $i1 + $i2;
+
+        $r8 = r0.<org.spongycastle.pqc.crypto.gmss.GMSSSigner: byte[][] subtreeRootSig>;
+
+        $r12 = $r8[$i0];
+
+        $i2 = lengthof $r12;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r11, 0, r4, $i1, $i2);
+
+        $i1 = lengthof r3;
+
+        $i2 = lengthof $r10;
+
+        $i1 = $i1 + $i2;
+
+        $r8 = r0.<org.spongycastle.pqc.crypto.gmss.GMSSSigner: byte[][] subtreeRootSig>;
+
+        r3 = $r8[$i0];
+
+        $i2 = lengthof r3;
+
+        $i1 = $i1 + $i2;
+
+        $i2 = lengthof r2;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r2, 0, r4, $i1, $i2);
+
+        $i0 = $i0 + -1;
+
+        goto label1;
+
+     label2:
+        $i0 = lengthof $r1;
+
+        $i1 = lengthof r4;
+
+        $i0 = $i0 + $i1;
+
+        r2 = newarray (byte)[$i0];
+
+        $i0 = lengthof $r1;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r1, 0, r2, 0, $i0);
+
+        $i0 = lengthof $r1;
+
+        $i1 = lengthof r4;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>(r4, 0, r2, $i0, $i1);
+
+        return r2;
+    }
+    public void init(boolean, org.spongycastle.crypto.CipherParameters)
+    {
+        org.spongycastle.pqc.crypto.gmss.GMSSSigner r0;
+        boolean $z0;
+        org.spongycastle.crypto.CipherParameters r1;
+        org.spongycastle.crypto.params.ParametersWithRandom r2;
+        java.security.SecureRandom $r3;
+        org.spongycastle.pqc.crypto.gmss.GMSSPrivateKeyParameters $r4;
+        org.spongycastle.pqc.crypto.gmss.GMSSPublicKeyParameters r5;
+
+        r0 := @this: org.spongycastle.pqc.crypto.gmss.GMSSSigner;
+
+        $z0 := @parameter0: boolean;
+
+        r1 := @parameter1: org.spongycastle.crypto.CipherParameters;
+
+        if $z0 == 0 goto label2;
+
+        $z0 = r1 instanceof org.spongycastle.crypto.params.ParametersWithRandom;
+
+        if $z0 == 0 goto label1;
+
+        r2 = (org.spongycastle.crypto.params.ParametersWithRandom) r1;
+
+        $r3 = virtualinvoke r2.<org.spongycastle.crypto.params.ParametersWithRandom: java.security.SecureRandom getRandom()>();
+
+        r0.<org.spongycastle.pqc.crypto.gmss.GMSSSigner: java.security.SecureRandom random> = $r3;
+
+        r1 = virtualinvoke r2.<org.spongycastle.crypto.params.ParametersWithRandom: org.spongycastle.crypto.CipherParameters getParameters()>();
+
+        $r4 = (org.spongycastle.pqc.crypto.gmss.GMSSPrivateKeyParameters) r1;
+
+        r0.<org.spongycastle.pqc.crypto.gmss.GMSSSigner: org.spongycastle.pqc.crypto.gmss.GMSSKeyParameters key> = $r4;
+
+        specialinvoke r0.<org.spongycastle.pqc.crypto.gmss.GMSSSigner: void initSign()>();
+
+        return;
+
+     label1:
+        $r3 = new java.security.SecureRandom;
+
+        specialinvoke $r3.<java.security.SecureRandom: void <init>()>();
+
+        r0.<org.spongycastle.pqc.crypto.gmss.GMSSSigner: java.security.SecureRandom random> = $r3;
+
+        $r4 = (org.spongycastle.pqc.crypto.gmss.GMSSPrivateKeyParameters) r1;
+
+        r0.<org.spongycastle.pqc.crypto.gmss.GMSSSigner: org.spongycastle.pqc.crypto.gmss.GMSSKeyParameters key> = $r4;
+
+        specialinvoke r0.<org.spongycastle.pqc.crypto.gmss.GMSSSigner: void initSign()>();
+
+        return;
+
+     label2:
+        r5 = (org.spongycastle.pqc.crypto.gmss.GMSSPublicKeyParameters) r1;
+
+        r0.<org.spongycastle.pqc.crypto.gmss.GMSSSigner: org.spongycastle.pqc.crypto.gmss.GMSSKeyParameters key> = r5;
+
+        specialinvoke r0.<org.spongycastle.pqc.crypto.gmss.GMSSSigner: void initVerify()>();
+
+        return;
+    }
+    public boolean verifySignature(byte[], byte[])
+    {
+        org.spongycastle.pqc.crypto.gmss.GMSSSigner r0;
+        byte[] $r1, r2, $r4, $r14;
+        org.spongycastle.pqc.crypto.gmss.util.WinternitzOTSVerify r3;
+        boolean z0, $z1;
+        org.spongycastle.crypto.Digest $r5;
+        int i0, $i1, $i2, $i3, $i4, $i5;
+        org.spongycastle.pqc.crypto.gmss.GMSSDigestProvider $r6;
+        org.spongycastle.pqc.crypto.gmss.GMSSParameters $r7;
+        int[] $r8;
+        org.spongycastle.pqc.crypto.gmss.util.GMSSUtil $r9;
+        java.io.PrintStream $r10;
+        java.lang.Class $r11;
+        java.lang.Object $r12;
+        byte[][] r13;
+
+        r0 := @this: org.spongycastle.pqc.crypto.gmss.GMSSSigner;
+
+        $r4 := @parameter0: byte[];
+
+        $r1 := @parameter1: byte[];
+
+        z0 = 0;
+
+        $r5 = r0.<org.spongycastle.pqc.crypto.gmss.GMSSSigner: org.spongycastle.crypto.Digest messDigestOTS>;
+
+        interfaceinvoke $r5.<org.spongycastle.crypto.Digest: void reset()>();
+
+        i0 = 0;
+
+        $i1 = r0.<org.spongycastle.pqc.crypto.gmss.GMSSSigner: int numLayer>;
+
+        $i1 = $i1 + -1;
+
+     label01:
+        if $i1 < 0 goto label09;
+
+        r3 = new org.spongycastle.pqc.crypto.gmss.util.WinternitzOTSVerify;
+
+        $r6 = r0.<org.spongycastle.pqc.crypto.gmss.GMSSSigner: org.spongycastle.pqc.crypto.gmss.GMSSDigestProvider digestProvider>;
+
+        $r5 = interfaceinvoke $r6.<org.spongycastle.pqc.crypto.gmss.GMSSDigestProvider: org.spongycastle.crypto.Digest get()>();
+
+        $r7 = r0.<org.spongycastle.pqc.crypto.gmss.GMSSSigner: org.spongycastle.pqc.crypto.gmss.GMSSParameters gmssPS>;
+
+        $r8 = virtualinvoke $r7.<org.spongycastle.pqc.crypto.gmss.GMSSParameters: int[] getWinternitzParameter()>();
+
+        $i2 = $r8[$i1];
+
+        specialinvoke r3.<org.spongycastle.pqc.crypto.gmss.util.WinternitzOTSVerify: void <init>(org.spongycastle.crypto.Digest,int)>($r5, $i2);
+
+        $i3 = virtualinvoke r3.<org.spongycastle.pqc.crypto.gmss.util.WinternitzOTSVerify: int getSignatureLength()>();
+
+        $r9 = r0.<org.spongycastle.pqc.crypto.gmss.GMSSSigner: org.spongycastle.pqc.crypto.gmss.util.GMSSUtil gmssUtil>;
+
+        $i2 = virtualinvoke $r9.<org.spongycastle.pqc.crypto.gmss.util.GMSSUtil: int bytesToIntLittleEndian(byte[],int)>($r1, i0);
+
+        i0 = i0 + 4;
+
+        r2 = newarray (byte)[$i3];
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r1, i0, r2, 0, $i3);
+
+        i0 = i0 + $i3;
+
+        $r4 = virtualinvoke r3.<org.spongycastle.pqc.crypto.gmss.util.WinternitzOTSVerify: byte[] Verify(byte[],byte[])>($r4, r2);
+
+        if $r4 != null goto label02;
+
+        $r10 = <java.lang.System: java.io.PrintStream err>;
+
+        virtualinvoke $r10.<java.io.PrintStream: void println(java.lang.String)>("OTS Public Key is null in GMSSSignature.verify");
+
+        return 0;
+
+     label02:
+        $r7 = r0.<org.spongycastle.pqc.crypto.gmss.GMSSSigner: org.spongycastle.pqc.crypto.gmss.GMSSParameters gmssPS>;
+
+        $r8 = virtualinvoke $r7.<org.spongycastle.pqc.crypto.gmss.GMSSParameters: int[] getHeightOfTrees()>();
+
+        $i3 = $r8[$i1];
+
+        $i4 = r0.<org.spongycastle.pqc.crypto.gmss.GMSSSigner: int mdLength>;
+
+        $r8 = newarray (int)[2];
+
+        $r8[0] = $i3;
+
+        $r8[1] = $i4;
+
+        $r11 = <java.lang.Byte: java.lang.Class TYPE>;
+
+        $r12 = staticinvoke <java.lang.reflect.Array: java.lang.Object newInstance(java.lang.Class,int[])>($r11, $r8);
+
+        r13 = (byte[][]) $r12;
+
+        $i3 = 0;
+
+     label03:
+        $i4 = lengthof r13;
+
+        if $i3 >= $i4 goto label04;
+
+        r2 = r13[$i3];
+
+        $i4 = r0.<org.spongycastle.pqc.crypto.gmss.GMSSSigner: int mdLength>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r1, i0, r2, 0, $i4);
+
+        $i4 = r0.<org.spongycastle.pqc.crypto.gmss.GMSSSigner: int mdLength>;
+
+        i0 = i0 + $i4;
+
+        $i3 = $i3 + 1;
+
+        goto label03;
+
+     label04:
+        $i3 = r0.<org.spongycastle.pqc.crypto.gmss.GMSSSigner: int mdLength>;
+
+        r2 = newarray (byte)[$i3];
+
+        $i3 = lengthof r13;
+
+        $i3 = 1 << $i3;
+
+        $i3 = $i3 + $i2;
+
+        $i2 = 0;
+
+     label05:
+        $i4 = lengthof r13;
+
+        if $i2 >= $i4 goto label08;
+
+        $i4 = r0.<org.spongycastle.pqc.crypto.gmss.GMSSSigner: int mdLength>;
+
+        $i4 = $i4 << 1;
+
+        r2 = newarray (byte)[$i4];
+
+        $i4 = $i3 % 2;
+
+        if $i4 != 0 goto label07;
+
+        $i4 = r0.<org.spongycastle.pqc.crypto.gmss.GMSSSigner: int mdLength>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r4, 0, r2, 0, $i4);
+
+        $r4 = r13[$i2];
+
+        $i4 = r0.<org.spongycastle.pqc.crypto.gmss.GMSSSigner: int mdLength>;
+
+        $i5 = r0.<org.spongycastle.pqc.crypto.gmss.GMSSSigner: int mdLength>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r4, 0, r2, $i4, $i5);
+
+        $i3 = $i3 / 2;
+
+     label06:
+        $r5 = r0.<org.spongycastle.pqc.crypto.gmss.GMSSSigner: org.spongycastle.crypto.Digest messDigestTrees>;
+
+        $i4 = lengthof r2;
+
+        interfaceinvoke $r5.<org.spongycastle.crypto.Digest: void update(byte[],int,int)>(r2, 0, $i4);
+
+        $r5 = r0.<org.spongycastle.pqc.crypto.gmss.GMSSSigner: org.spongycastle.crypto.Digest messDigestTrees>;
+
+        $i4 = interfaceinvoke $r5.<org.spongycastle.crypto.Digest: int getDigestSize()>();
+
+        $r4 = newarray (byte)[$i4];
+
+        $r5 = r0.<org.spongycastle.pqc.crypto.gmss.GMSSSigner: org.spongycastle.crypto.Digest messDigestTrees>;
+
+        interfaceinvoke $r5.<org.spongycastle.crypto.Digest: int doFinal(byte[],int)>($r4, 0);
+
+        $i2 = $i2 + 1;
+
+        goto label05;
+
+     label07:
+        $r14 = r13[$i2];
+
+        $i4 = r0.<org.spongycastle.pqc.crypto.gmss.GMSSSigner: int mdLength>;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r14, 0, r2, 0, $i4);
+
+        $i4 = r0.<org.spongycastle.pqc.crypto.gmss.GMSSSigner: int mdLength>;
+
+        $i5 = lengthof $r4;
+
+        staticinvoke <java.lang.System: void arraycopy(java.lang.Object,int,java.lang.Object,int,int)>($r4, 0, r2, $i4, $i5);
+
+        $i3 = $i3 + -1;
+
+        $i3 = $i3 / 2;
+
+        goto label06;
+
+     label08:
+        $i1 = $i1 + -1;
+
+        goto label01;
+
+     label09:
+        $r1 = r0.<org.spongycastle.pqc.crypto.gmss.GMSSSigner: byte[] pubKeyBytes>;
+
+        $z1 = staticinvoke <org.spongycastle.util.Arrays: boolean areEqual(byte[],byte[])>($r1, $r4);
+
+        if $z1 == 0 goto label10;
+
+        z0 = 1;
+
+     label10:
+        return z0;
+    }

@@ -1,0 +1,574 @@
+okio.GzipSource extends java.lang.Object implements okio.Source
+private static final byte FCOMMENT
+private static final byte FEXTRA
+private static final byte FHCRC
+private static final byte FNAME
+private static final byte SECTION_BODY
+private static final byte SECTION_DONE
+private static final byte SECTION_HEADER
+private static final byte SECTION_TRAILER
+private final java.util.zip.CRC32 crc
+private final java.util.zip.Inflater inflater
+private final okio.InflaterSource inflaterSource
+private int section
+private final okio.BufferedSource source
+    public void <init>(okio.Source)
+    {
+        okio.GzipSource r0;
+        okio.Source $r1;
+        java.util.zip.Inflater $r2;
+        okio.BufferedSource $r3;
+        java.util.zip.CRC32 $r4;
+        java.lang.IllegalArgumentException $r5;
+        okio.InflaterSource $r6;
+
+        r0 := @this: okio.GzipSource;
+
+        $r1 := @parameter0: okio.Source;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<okio.GzipSource: int section> = 0;
+
+        $r4 = new java.util.zip.CRC32;
+
+        specialinvoke $r4.<java.util.zip.CRC32: void <init>()>();
+
+        r0.<okio.GzipSource: java.util.zip.CRC32 crc> = $r4;
+
+        if $r1 != null goto label1;
+
+        $r5 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r5.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("source == null");
+
+        throw $r5;
+
+     label1:
+        $r2 = new java.util.zip.Inflater;
+
+        specialinvoke $r2.<java.util.zip.Inflater: void <init>(boolean)>(1);
+
+        r0.<okio.GzipSource: java.util.zip.Inflater inflater> = $r2;
+
+        $r3 = staticinvoke <okio.Okio: okio.BufferedSource buffer(okio.Source)>($r1);
+
+        r0.<okio.GzipSource: okio.BufferedSource source> = $r3;
+
+        $r6 = new okio.InflaterSource;
+
+        $r3 = r0.<okio.GzipSource: okio.BufferedSource source>;
+
+        $r2 = r0.<okio.GzipSource: java.util.zip.Inflater inflater>;
+
+        specialinvoke $r6.<okio.InflaterSource: void <init>(okio.BufferedSource,java.util.zip.Inflater)>($r3, $r2);
+
+        r0.<okio.GzipSource: okio.InflaterSource inflaterSource> = $r6;
+
+        return;
+    }
+    private void checkEqual(java.lang.String, int, int) throws java.io.IOException
+    {
+        okio.GzipSource r0;
+        java.lang.String $r1;
+        int $i0, $i1;
+        java.io.IOException $r2;
+        java.lang.Object[] $r3;
+        java.lang.Integer $r4;
+
+        r0 := @this: okio.GzipSource;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $i0 := @parameter1: int;
+
+        $i1 := @parameter2: int;
+
+        if $i1 == $i0 goto label1;
+
+        $r2 = new java.io.IOException;
+
+        $r3 = newarray (java.lang.Object)[3];
+
+        $r3[0] = $r1;
+
+        $r4 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i1);
+
+        $r3[1] = $r4;
+
+        $r4 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        $r3[2] = $r4;
+
+        $r1 = staticinvoke <java.lang.String: java.lang.String format(java.lang.String,java.lang.Object[])>("%s: actual 0x%08x != expected 0x%08x", $r3);
+
+        specialinvoke $r2.<java.io.IOException: void <init>(java.lang.String)>($r1);
+
+        throw $r2;
+
+     label1:
+        return;
+    }
+    private void consumeHeader() throws java.io.IOException
+    {
+        okio.GzipSource r0;
+        okio.BufferedSource $r1;
+        okio.Buffer $r2;
+        byte $b0, $b4;
+        int $i1;
+        boolean z0;
+        short $s2, $s6;
+        long $l3, $l5;
+        java.io.EOFException $r3;
+        java.util.zip.CRC32 $r4;
+
+        r0 := @this: okio.GzipSource;
+
+        $r1 = r0.<okio.GzipSource: okio.BufferedSource source>;
+
+        interfaceinvoke $r1.<okio.BufferedSource: void require(long)>(10L);
+
+        $r1 = r0.<okio.GzipSource: okio.BufferedSource source>;
+
+        $r2 = interfaceinvoke $r1.<okio.BufferedSource: okio.Buffer buffer()>();
+
+        $b0 = virtualinvoke $r2.<okio.Buffer: byte getByte(long)>(3L);
+
+        $i1 = $b0 >> 1;
+
+        $i1 = $i1 & 1;
+
+        if $i1 != 1 goto label06;
+
+        z0 = 1;
+
+     label01:
+        if z0 == 0 goto label02;
+
+        $r1 = r0.<okio.GzipSource: okio.BufferedSource source>;
+
+        $r2 = interfaceinvoke $r1.<okio.BufferedSource: okio.Buffer buffer()>();
+
+        specialinvoke r0.<okio.GzipSource: void updateCrc(okio.Buffer,long,long)>($r2, 0L, 10L);
+
+     label02:
+        $r1 = r0.<okio.GzipSource: okio.BufferedSource source>;
+
+        $s2 = interfaceinvoke $r1.<okio.BufferedSource: short readShort()>();
+
+        specialinvoke r0.<okio.GzipSource: void checkEqual(java.lang.String,int,int)>("ID1ID2", 8075, $s2);
+
+        $r1 = r0.<okio.GzipSource: okio.BufferedSource source>;
+
+        interfaceinvoke $r1.<okio.BufferedSource: void skip(long)>(8L);
+
+        $i1 = $b0 >> 2;
+
+        $i1 = $i1 & 1;
+
+        if $i1 != 1 goto label05;
+
+        $r1 = r0.<okio.GzipSource: okio.BufferedSource source>;
+
+        interfaceinvoke $r1.<okio.BufferedSource: void require(long)>(2L);
+
+        if z0 == 0 goto label03;
+
+        $r1 = r0.<okio.GzipSource: okio.BufferedSource source>;
+
+        $r2 = interfaceinvoke $r1.<okio.BufferedSource: okio.Buffer buffer()>();
+
+        specialinvoke r0.<okio.GzipSource: void updateCrc(okio.Buffer,long,long)>($r2, 0L, 2L);
+
+     label03:
+        $r1 = r0.<okio.GzipSource: okio.BufferedSource source>;
+
+        $r2 = interfaceinvoke $r1.<okio.BufferedSource: okio.Buffer buffer()>();
+
+        $s2 = virtualinvoke $r2.<okio.Buffer: short readShortLe()>();
+
+        $r1 = r0.<okio.GzipSource: okio.BufferedSource source>;
+
+        $l3 = (long) $s2;
+
+        interfaceinvoke $r1.<okio.BufferedSource: void require(long)>($l3);
+
+        if z0 == 0 goto label04;
+
+        $r1 = r0.<okio.GzipSource: okio.BufferedSource source>;
+
+        $r2 = interfaceinvoke $r1.<okio.BufferedSource: okio.Buffer buffer()>();
+
+        $l3 = (long) $s2;
+
+        specialinvoke r0.<okio.GzipSource: void updateCrc(okio.Buffer,long,long)>($r2, 0L, $l3);
+
+     label04:
+        $r1 = r0.<okio.GzipSource: okio.BufferedSource source>;
+
+        $l3 = (long) $s2;
+
+        interfaceinvoke $r1.<okio.BufferedSource: void skip(long)>($l3);
+
+     label05:
+        $i1 = $b0 >> 3;
+
+        $i1 = $i1 & 1;
+
+        if $i1 != 1 goto label09;
+
+        $r1 = r0.<okio.GzipSource: okio.BufferedSource source>;
+
+        $l3 = interfaceinvoke $r1.<okio.BufferedSource: long indexOf(byte)>(0);
+
+        $b4 = $l3 cmp -1L;
+
+        if $b4 != 0 goto label07;
+
+        $r3 = new java.io.EOFException;
+
+        specialinvoke $r3.<java.io.EOFException: void <init>()>();
+
+        throw $r3;
+
+     label06:
+        z0 = 0;
+
+        goto label01;
+
+     label07:
+        if z0 == 0 goto label08;
+
+        $r1 = r0.<okio.GzipSource: okio.BufferedSource source>;
+
+        $r2 = interfaceinvoke $r1.<okio.BufferedSource: okio.Buffer buffer()>();
+
+        $l5 = 1L + $l3;
+
+        specialinvoke r0.<okio.GzipSource: void updateCrc(okio.Buffer,long,long)>($r2, 0L, $l5);
+
+     label08:
+        $r1 = r0.<okio.GzipSource: okio.BufferedSource source>;
+
+        $l3 = 1L + $l3;
+
+        interfaceinvoke $r1.<okio.BufferedSource: void skip(long)>($l3);
+
+     label09:
+        $i1 = $b0 >> 4;
+
+        $i1 = $i1 & 1;
+
+        if $i1 != 1 goto label12;
+
+        $r1 = r0.<okio.GzipSource: okio.BufferedSource source>;
+
+        $l3 = interfaceinvoke $r1.<okio.BufferedSource: long indexOf(byte)>(0);
+
+        $b0 = $l3 cmp -1L;
+
+        if $b0 != 0 goto label10;
+
+        $r3 = new java.io.EOFException;
+
+        specialinvoke $r3.<java.io.EOFException: void <init>()>();
+
+        throw $r3;
+
+     label10:
+        if z0 == 0 goto label11;
+
+        $r1 = r0.<okio.GzipSource: okio.BufferedSource source>;
+
+        $r2 = interfaceinvoke $r1.<okio.BufferedSource: okio.Buffer buffer()>();
+
+        $l5 = 1L + $l3;
+
+        specialinvoke r0.<okio.GzipSource: void updateCrc(okio.Buffer,long,long)>($r2, 0L, $l5);
+
+     label11:
+        $r1 = r0.<okio.GzipSource: okio.BufferedSource source>;
+
+        $l3 = 1L + $l3;
+
+        interfaceinvoke $r1.<okio.BufferedSource: void skip(long)>($l3);
+
+     label12:
+        if z0 == 0 goto label13;
+
+        $r1 = r0.<okio.GzipSource: okio.BufferedSource source>;
+
+        $s2 = interfaceinvoke $r1.<okio.BufferedSource: short readShortLe()>();
+
+        $r4 = r0.<okio.GzipSource: java.util.zip.CRC32 crc>;
+
+        $l3 = virtualinvoke $r4.<java.util.zip.CRC32: long getValue()>();
+
+        $i1 = (int) $l3;
+
+        $s6 = (short) $i1;
+
+        specialinvoke r0.<okio.GzipSource: void checkEqual(java.lang.String,int,int)>("FHCRC", $s2, $s6);
+
+        $r4 = r0.<okio.GzipSource: java.util.zip.CRC32 crc>;
+
+        virtualinvoke $r4.<java.util.zip.CRC32: void reset()>();
+
+     label13:
+        return;
+    }
+    private void consumeTrailer() throws java.io.IOException
+    {
+        okio.GzipSource r0;
+        okio.BufferedSource $r1;
+        int $i0, $i2;
+        java.util.zip.CRC32 $r2;
+        long $l1;
+        java.util.zip.Inflater $r3;
+
+        r0 := @this: okio.GzipSource;
+
+        $r1 = r0.<okio.GzipSource: okio.BufferedSource source>;
+
+        $i0 = interfaceinvoke $r1.<okio.BufferedSource: int readIntLe()>();
+
+        $r2 = r0.<okio.GzipSource: java.util.zip.CRC32 crc>;
+
+        $l1 = virtualinvoke $r2.<java.util.zip.CRC32: long getValue()>();
+
+        $i2 = (int) $l1;
+
+        specialinvoke r0.<okio.GzipSource: void checkEqual(java.lang.String,int,int)>("CRC", $i0, $i2);
+
+        $r1 = r0.<okio.GzipSource: okio.BufferedSource source>;
+
+        $i0 = interfaceinvoke $r1.<okio.BufferedSource: int readIntLe()>();
+
+        $r3 = r0.<okio.GzipSource: java.util.zip.Inflater inflater>;
+
+        $i2 = virtualinvoke $r3.<java.util.zip.Inflater: int getTotalOut()>();
+
+        specialinvoke r0.<okio.GzipSource: void checkEqual(java.lang.String,int,int)>("ISIZE", $i0, $i2);
+
+        return;
+    }
+    private void updateCrc(okio.Buffer, long, long)
+    {
+        okio.GzipSource r0;
+        okio.Buffer $r1;
+        int i0, i1;
+        long $l2, $l3, $l4;
+        okio.Segment r2;
+        byte $b5;
+        java.util.zip.CRC32 $r3;
+        byte[] $r4;
+
+        r0 := @this: okio.GzipSource;
+
+        $r1 := @parameter0: okio.Buffer;
+
+        $l2 := @parameter1: long;
+
+        $l3 := @parameter2: long;
+
+        r2 = $r1.<okio.Buffer: okio.Segment head>;
+
+     label1:
+        i0 = r2.<okio.Segment: int limit>;
+
+        i1 = r2.<okio.Segment: int pos>;
+
+        i0 = i0 - i1;
+
+        $l4 = (long) i0;
+
+        $b5 = $l2 cmp $l4;
+
+        if $b5 < 0 goto label2;
+
+        i0 = r2.<okio.Segment: int limit>;
+
+        i1 = r2.<okio.Segment: int pos>;
+
+        i0 = i0 - i1;
+
+        $l4 = (long) i0;
+
+        $l2 = $l2 - $l4;
+
+        r2 = r2.<okio.Segment: okio.Segment next>;
+
+        goto label1;
+
+     label2:
+        $b5 = $l3 cmp 0L;
+
+        if $b5 <= 0 goto label3;
+
+        i0 = r2.<okio.Segment: int pos>;
+
+        $l4 = (long) i0;
+
+        $l2 = $l4 + $l2;
+
+        i0 = (int) $l2;
+
+        i1 = r2.<okio.Segment: int limit>;
+
+        i1 = i1 - i0;
+
+        $l2 = (long) i1;
+
+        $l2 = staticinvoke <java.lang.Math: long min(long,long)>($l2, $l3);
+
+        i1 = (int) $l2;
+
+        $r3 = r0.<okio.GzipSource: java.util.zip.CRC32 crc>;
+
+        $r4 = r2.<okio.Segment: byte[] data>;
+
+        virtualinvoke $r3.<java.util.zip.CRC32: void update(byte[],int,int)>($r4, i0, i1);
+
+        $l2 = (long) i1;
+
+        $l3 = $l3 - $l2;
+
+        $l2 = 0L;
+
+        r2 = r2.<okio.Segment: okio.Segment next>;
+
+        goto label2;
+
+     label3:
+        return;
+    }
+    public void close() throws java.io.IOException
+    {
+        okio.GzipSource r0;
+        okio.InflaterSource $r1;
+
+        r0 := @this: okio.GzipSource;
+
+        $r1 = r0.<okio.GzipSource: okio.InflaterSource inflaterSource>;
+
+        virtualinvoke $r1.<okio.InflaterSource: void close()>();
+
+        return;
+    }
+    public long read(okio.Buffer, long) throws java.io.IOException
+    {
+        okio.GzipSource r0;
+        okio.Buffer $r1;
+        long $l0, l1;
+        byte $b2;
+        java.lang.IllegalArgumentException $r2;
+        java.lang.StringBuilder $r3;
+        java.lang.String $r4;
+        int $i3;
+        okio.InflaterSource $r5;
+        okio.BufferedSource $r6;
+        boolean $z0;
+        java.io.IOException $r7;
+
+        r0 := @this: okio.GzipSource;
+
+        $r1 := @parameter0: okio.Buffer;
+
+        $l0 := @parameter1: long;
+
+        $b2 = $l0 cmp 0L;
+
+        if $b2 >= 0 goto label1;
+
+        $r2 = new java.lang.IllegalArgumentException;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("byteCount < 0: ");
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l0);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r2.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>($r4);
+
+        throw $r2;
+
+     label1:
+        $b2 = $l0 cmp 0L;
+
+        if $b2 != 0 goto label2;
+
+        return 0L;
+
+     label2:
+        $i3 = r0.<okio.GzipSource: int section>;
+
+        if $i3 != 0 goto label3;
+
+        specialinvoke r0.<okio.GzipSource: void consumeHeader()>();
+
+        r0.<okio.GzipSource: int section> = 1;
+
+     label3:
+        $i3 = r0.<okio.GzipSource: int section>;
+
+        if $i3 != 1 goto label5;
+
+        l1 = $r1.<okio.Buffer: long size>;
+
+        $r5 = r0.<okio.GzipSource: okio.InflaterSource inflaterSource>;
+
+        $l0 = virtualinvoke $r5.<okio.InflaterSource: long read(okio.Buffer,long)>($r1, $l0);
+
+        $b2 = $l0 cmp -1L;
+
+        if $b2 == 0 goto label4;
+
+        specialinvoke r0.<okio.GzipSource: void updateCrc(okio.Buffer,long,long)>($r1, l1, $l0);
+
+        return $l0;
+
+     label4:
+        r0.<okio.GzipSource: int section> = 2;
+
+     label5:
+        $i3 = r0.<okio.GzipSource: int section>;
+
+        if $i3 != 2 goto label6;
+
+        specialinvoke r0.<okio.GzipSource: void consumeTrailer()>();
+
+        r0.<okio.GzipSource: int section> = 3;
+
+        $r6 = r0.<okio.GzipSource: okio.BufferedSource source>;
+
+        $z0 = interfaceinvoke $r6.<okio.BufferedSource: boolean exhausted()>();
+
+        if $z0 != 0 goto label6;
+
+        $r7 = new java.io.IOException;
+
+        specialinvoke $r7.<java.io.IOException: void <init>(java.lang.String)>("gzip finished without exhausting source");
+
+        throw $r7;
+
+     label6:
+        return -1L;
+    }
+    public okio.Timeout timeout()
+    {
+        okio.GzipSource r0;
+        okio.Timeout $r1;
+        okio.BufferedSource $r2;
+
+        r0 := @this: okio.GzipSource;
+
+        $r2 = r0.<okio.GzipSource: okio.BufferedSource source>;
+
+        $r1 = interfaceinvoke $r2.<okio.BufferedSource: okio.Timeout timeout()>();
+
+        return $r1;
+    }

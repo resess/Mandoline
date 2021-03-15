@@ -1,0 +1,2252 @@
+com.fsck.k9.mailstore.LocalStore extends com.fsck.k9.mail.Store
+private static final int ATTACH_DATA_INDEX
+private static final int ATTACH_ENCODING_INDEX
+private static final int ATTACH_LOCATION_INDEX
+private static final int ATTACH_PART_ID_INDEX
+private static final int ATTACH_ROOT_INDEX
+public static final int DB_VERSION
+static final byte[] EMPTY_BYTE_ARRAY
+static final java.lang.String[] EMPTY_STRING_ARRAY
+private static final int FLAG_UPDATE_BATCH_SIZE
+static final int FOLDER_DISPLAY_CLASS_INDEX
+static final int FOLDER_ID_INDEX
+static final int FOLDER_INTEGRATE_INDEX
+static final int FOLDER_LAST_CHECKED_INDEX
+static final int FOLDER_LAST_PUSHED_INDEX
+static final int FOLDER_NAME_INDEX
+static final int FOLDER_NOTIFY_CLASS_INDEX
+static final int FOLDER_PUSH_CLASS_INDEX
+static final int FOLDER_PUSH_STATE_INDEX
+static final int FOLDER_STATUS_INDEX
+static final int FOLDER_SYNC_CLASS_INDEX
+static final int FOLDER_TOP_GROUP_INDEX
+static final int FOLDER_VISIBLE_LIMIT_INDEX
+private static final java.lang.String[] GET_ATTACHMENT_COLS
+static final java.lang.String GET_FOLDER_COLS
+static java.lang.String GET_MESSAGES_COLS
+static final int MORE_MESSAGES_INDEX
+static final int MSG_INDEX_ATTACHMENT_COUNT
+static final int MSG_INDEX_BCC
+static final int MSG_INDEX_CC
+static final int MSG_INDEX_DATE
+static final int MSG_INDEX_FLAGS
+static final int MSG_INDEX_FLAG_ANSWERED
+static final int MSG_INDEX_FLAG_DELETED
+static final int MSG_INDEX_FLAG_FLAGGED
+static final int MSG_INDEX_FLAG_FORWARDED
+static final int MSG_INDEX_FLAG_READ
+static final int MSG_INDEX_FOLDER_ID
+static final int MSG_INDEX_HEADER_DATA
+static final int MSG_INDEX_ID
+static final int MSG_INDEX_INTERNAL_DATE
+static final int MSG_INDEX_MESSAGE_ID_HEADER
+static final int MSG_INDEX_MESSAGE_PART_ID
+static final int MSG_INDEX_MIME_TYPE
+static final int MSG_INDEX_PREVIEW
+static final int MSG_INDEX_PREVIEW_TYPE
+static final int MSG_INDEX_REPLY_TO
+static final int MSG_INDEX_SENDER_LIST
+static final int MSG_INDEX_SUBJECT
+static final int MSG_INDEX_THREAD_ID
+static final int MSG_INDEX_THREAD_ROOT_ID
+static final int MSG_INDEX_TO
+static final int MSG_INDEX_UID
+private static final int THREAD_FLAG_UPDATE_BATCH_SIZE
+static final int UID_CHECK_BATCH_SIZE
+static final java.lang.String[] UID_CHECK_PROJECTION
+private static java.util.concurrent.ConcurrentMap sAccountLocks
+private static java.util.concurrent.ConcurrentMap sLocalStores
+private final com.fsck.k9.Account account
+private final com.fsck.k9.message.extractors.AttachmentCounter attachmentCounter
+private final com.fsck.k9.message.extractors.AttachmentInfoExtractor attachmentInfoExtractor
+private final android.content.ContentResolver contentResolver
+private final android.content.Context context
+private final com.fsck.k9.mailstore.LockableDatabase database
+private final com.fsck.k9.message.extractors.MessageFulltextCreator messageFulltextCreator
+private final com.fsck.k9.message.extractors.MessagePreviewCreator messagePreviewCreator
+private final com.fsck.k9.controller.PendingCommandSerializer pendingCommandSerializer
+    static void <clinit>()
+    {
+        java.lang.String[] $r0;
+        byte[] $r1;
+        java.util.concurrent.ConcurrentHashMap $r2;
+
+        $r0 = newarray (java.lang.String)[0];
+
+        <com.fsck.k9.mailstore.LocalStore: java.lang.String[] EMPTY_STRING_ARRAY> = $r0;
+
+        $r1 = newarray (byte)[0];
+
+        <com.fsck.k9.mailstore.LocalStore: byte[] EMPTY_BYTE_ARRAY> = $r1;
+
+        $r2 = new java.util.concurrent.ConcurrentHashMap;
+
+        specialinvoke $r2.<java.util.concurrent.ConcurrentHashMap: void <init>()>();
+
+        <com.fsck.k9.mailstore.LocalStore: java.util.concurrent.ConcurrentMap sAccountLocks> = $r2;
+
+        $r2 = new java.util.concurrent.ConcurrentHashMap;
+
+        specialinvoke $r2.<java.util.concurrent.ConcurrentHashMap: void <init>()>();
+
+        <com.fsck.k9.mailstore.LocalStore: java.util.concurrent.ConcurrentMap sLocalStores> = $r2;
+
+        <com.fsck.k9.mailstore.LocalStore: java.lang.String GET_MESSAGES_COLS> = "subject, sender_list, date, uid, flags, messages.id, to_list, cc_list, bcc_list, reply_to_list, attachment_count, internal_date, messages.message_id, folder_id, preview, threads.id, threads.root, deleted, read, flagged, answered, forwarded, message_part_id, messages.mime_type, preview_type, header ";
+
+        $r0 = newarray (java.lang.String)[1];
+
+        $r0[0] = "uid";
+
+        <com.fsck.k9.mailstore.LocalStore: java.lang.String[] UID_CHECK_PROJECTION> = $r0;
+
+        $r0 = newarray (java.lang.String)[5];
+
+        $r0[0] = "id";
+
+        $r0[1] = "root";
+
+        $r0[2] = "data_location";
+
+        $r0[3] = "encoding";
+
+        $r0[4] = "data";
+
+        <com.fsck.k9.mailstore.LocalStore: java.lang.String[] GET_ATTACHMENT_COLS> = $r0;
+
+        return;
+    }
+    private void <init>(com.fsck.k9.Account, android.content.Context) throws com.fsck.k9.mail.MessagingException
+    {
+        com.fsck.k9.mailstore.LocalStore r0;
+        com.fsck.k9.Account $r1;
+        android.content.Context $r2;
+        com.fsck.k9.mailstore.StoreSchemaDefinition $r3;
+        android.content.ContentResolver $r4;
+        com.fsck.k9.message.extractors.MessagePreviewCreator $r5;
+        com.fsck.k9.message.extractors.MessageFulltextCreator $r6;
+        com.fsck.k9.message.extractors.AttachmentCounter $r7;
+        com.fsck.k9.controller.PendingCommandSerializer $r8;
+        com.fsck.k9.message.extractors.AttachmentInfoExtractor $r9;
+        com.fsck.k9.mailstore.LockableDatabase $r10;
+        java.lang.String $r11;
+
+        r0 := @this: com.fsck.k9.mailstore.LocalStore;
+
+        $r1 := @parameter0: com.fsck.k9.Account;
+
+        $r2 := @parameter1: android.content.Context;
+
+        specialinvoke r0.<com.fsck.k9.mail.Store: void <init>()>();
+
+        r0.<com.fsck.k9.mailstore.LocalStore: android.content.Context context> = $r2;
+
+        $r4 = virtualinvoke $r2.<android.content.Context: android.content.ContentResolver getContentResolver()>();
+
+        r0.<com.fsck.k9.mailstore.LocalStore: android.content.ContentResolver contentResolver> = $r4;
+
+        $r5 = staticinvoke <com.fsck.k9.message.extractors.MessagePreviewCreator: com.fsck.k9.message.extractors.MessagePreviewCreator newInstance()>();
+
+        r0.<com.fsck.k9.mailstore.LocalStore: com.fsck.k9.message.extractors.MessagePreviewCreator messagePreviewCreator> = $r5;
+
+        $r6 = staticinvoke <com.fsck.k9.message.extractors.MessageFulltextCreator: com.fsck.k9.message.extractors.MessageFulltextCreator newInstance()>();
+
+        r0.<com.fsck.k9.mailstore.LocalStore: com.fsck.k9.message.extractors.MessageFulltextCreator messageFulltextCreator> = $r6;
+
+        $r7 = staticinvoke <com.fsck.k9.message.extractors.AttachmentCounter: com.fsck.k9.message.extractors.AttachmentCounter newInstance()>();
+
+        r0.<com.fsck.k9.mailstore.LocalStore: com.fsck.k9.message.extractors.AttachmentCounter attachmentCounter> = $r7;
+
+        $r8 = staticinvoke <com.fsck.k9.controller.PendingCommandSerializer: com.fsck.k9.controller.PendingCommandSerializer getInstance()>();
+
+        r0.<com.fsck.k9.mailstore.LocalStore: com.fsck.k9.controller.PendingCommandSerializer pendingCommandSerializer> = $r8;
+
+        $r9 = staticinvoke <com.fsck.k9.message.extractors.AttachmentInfoExtractor: com.fsck.k9.message.extractors.AttachmentInfoExtractor getInstance()>();
+
+        r0.<com.fsck.k9.mailstore.LocalStore: com.fsck.k9.message.extractors.AttachmentInfoExtractor attachmentInfoExtractor> = $r9;
+
+        r0.<com.fsck.k9.mailstore.LocalStore: com.fsck.k9.Account account> = $r1;
+
+        $r10 = new com.fsck.k9.mailstore.LockableDatabase;
+
+        $r11 = virtualinvoke $r1.<com.fsck.k9.Account: java.lang.String getUuid()>();
+
+        $r3 = new com.fsck.k9.mailstore.StoreSchemaDefinition;
+
+        specialinvoke $r3.<com.fsck.k9.mailstore.StoreSchemaDefinition: void <init>(com.fsck.k9.mailstore.LocalStore)>(r0);
+
+        specialinvoke $r10.<com.fsck.k9.mailstore.LockableDatabase: void <init>(android.content.Context,java.lang.String,com.fsck.k9.mailstore.LockableDatabase$SchemaDefinition)>($r2, $r11, $r3);
+
+        r0.<com.fsck.k9.mailstore.LocalStore: com.fsck.k9.mailstore.LockableDatabase database> = $r10;
+
+        $r10 = r0.<com.fsck.k9.mailstore.LocalStore: com.fsck.k9.mailstore.LockableDatabase database>;
+
+        $r11 = virtualinvoke $r1.<com.fsck.k9.Account: java.lang.String getLocalStorageProviderId()>();
+
+        virtualinvoke $r10.<com.fsck.k9.mailstore.LockableDatabase: void setStorageProviderId(java.lang.String)>($r11);
+
+        $r10 = r0.<com.fsck.k9.mailstore.LocalStore: com.fsck.k9.mailstore.LockableDatabase database>;
+
+        virtualinvoke $r10.<com.fsck.k9.mailstore.LockableDatabase: void open()>();
+
+        return;
+    }
+    static com.fsck.k9.Account access$000(com.fsck.k9.mailstore.LocalStore)
+    {
+        com.fsck.k9.mailstore.LocalStore $r0;
+        com.fsck.k9.Account r1;
+
+        $r0 := @parameter0: com.fsck.k9.mailstore.LocalStore;
+
+        r1 = $r0.<com.fsck.k9.mailstore.LocalStore: com.fsck.k9.Account account>;
+
+        return r1;
+    }
+    static com.fsck.k9.mailstore.LockableDatabase access$100(com.fsck.k9.mailstore.LocalStore)
+    {
+        com.fsck.k9.mailstore.LocalStore $r0;
+        com.fsck.k9.mailstore.LockableDatabase r1;
+
+        $r0 := @parameter0: com.fsck.k9.mailstore.LocalStore;
+
+        r1 = $r0.<com.fsck.k9.mailstore.LocalStore: com.fsck.k9.mailstore.LockableDatabase database>;
+
+        return r1;
+    }
+    static com.fsck.k9.controller.PendingCommandSerializer access$200(com.fsck.k9.mailstore.LocalStore)
+    {
+        com.fsck.k9.mailstore.LocalStore $r0;
+        com.fsck.k9.controller.PendingCommandSerializer r1;
+
+        $r0 := @parameter0: com.fsck.k9.mailstore.LocalStore;
+
+        r1 = $r0.<com.fsck.k9.mailstore.LocalStore: com.fsck.k9.controller.PendingCommandSerializer pendingCommandSerializer>;
+
+        return r1;
+    }
+    static void access$300(com.fsck.k9.mailstore.LocalStore, java.lang.String, java.io.OutputStream) throws java.io.IOException
+    {
+        com.fsck.k9.mailstore.LocalStore $r0;
+        java.lang.String $r1;
+        java.io.OutputStream $r2;
+
+        $r0 := @parameter0: com.fsck.k9.mailstore.LocalStore;
+
+        $r1 := @parameter1: java.lang.String;
+
+        $r2 := @parameter2: java.io.OutputStream;
+
+        specialinvoke $r0.<com.fsck.k9.mailstore.LocalStore: void writeAttachmentDataToOutputStream(java.lang.String,java.io.OutputStream)>($r1, $r2);
+
+        return;
+    }
+    static java.lang.String[] access$400()
+    {
+        java.lang.String[] r0;
+
+        r0 = <com.fsck.k9.mailstore.LocalStore: java.lang.String[] GET_ATTACHMENT_COLS>;
+
+        return r0;
+    }
+    static void access$500(com.fsck.k9.mailstore.LocalStore, android.database.sqlite.SQLiteDatabase, android.database.Cursor, java.io.OutputStream) throws java.io.IOException, com.fsck.k9.mail.MessagingException
+    {
+        com.fsck.k9.mailstore.LocalStore $r0;
+        android.database.sqlite.SQLiteDatabase $r1;
+        android.database.Cursor $r2;
+        java.io.OutputStream $r3;
+
+        $r0 := @parameter0: com.fsck.k9.mailstore.LocalStore;
+
+        $r1 := @parameter1: android.database.sqlite.SQLiteDatabase;
+
+        $r2 := @parameter2: android.database.Cursor;
+
+        $r3 := @parameter3: java.io.OutputStream;
+
+        specialinvoke $r0.<com.fsck.k9.mailstore.LocalStore: void writeCursorPartsToOutputStream(android.database.sqlite.SQLiteDatabase,android.database.Cursor,java.io.OutputStream)>($r1, $r2, $r3);
+
+        return;
+    }
+    private void deleteAllMessageDataFromDisk() throws com.fsck.k9.mail.MessagingException
+    {
+        com.fsck.k9.mailstore.LocalStore r0;
+
+        r0 := @this: com.fsck.k9.mailstore.LocalStore;
+
+        specialinvoke r0.<com.fsck.k9.mailstore.LocalStore: void markAllMessagePartsDataAsMissing()>();
+
+        specialinvoke r0.<com.fsck.k9.mailstore.LocalStore: void deleteAllMessagePartsDataFromDisk()>();
+
+        return;
+    }
+    private void deleteAllMessagePartsDataFromDisk()
+    {
+        com.fsck.k9.mailstore.LocalStore r0;
+        java.io.File r1;
+        android.content.Context $r2;
+        com.fsck.k9.mailstore.StorageManager $r3;
+        com.fsck.k9.Account $r4;
+        java.lang.String $r5, $r7;
+        com.fsck.k9.mailstore.LockableDatabase $r6;
+        java.io.File[] $r8;
+        int $i0, $i1;
+        boolean $z0;
+
+        r0 := @this: com.fsck.k9.mailstore.LocalStore;
+
+        $r2 = r0.<com.fsck.k9.mailstore.LocalStore: android.content.Context context>;
+
+        $r3 = staticinvoke <com.fsck.k9.mailstore.StorageManager: com.fsck.k9.mailstore.StorageManager getInstance(android.content.Context)>($r2);
+
+        $r4 = r0.<com.fsck.k9.mailstore.LocalStore: com.fsck.k9.Account account>;
+
+        $r5 = virtualinvoke $r4.<com.fsck.k9.Account: java.lang.String getUuid()>();
+
+        $r6 = r0.<com.fsck.k9.mailstore.LocalStore: com.fsck.k9.mailstore.LockableDatabase database>;
+
+        $r7 = virtualinvoke $r6.<com.fsck.k9.mailstore.LockableDatabase: java.lang.String getStorageProviderId()>();
+
+        r1 = virtualinvoke $r3.<com.fsck.k9.mailstore.StorageManager: java.io.File getAttachmentDirectory(java.lang.String,java.lang.String)>($r5, $r7);
+
+        $r8 = virtualinvoke r1.<java.io.File: java.io.File[] listFiles()>();
+
+        if $r8 != null goto label1;
+
+        return;
+
+     label1:
+        $i0 = lengthof $r8;
+
+        $i1 = 0;
+
+     label2:
+        if $i1 >= $i0 goto label4;
+
+        r1 = $r8[$i1];
+
+        $z0 = virtualinvoke r1.<java.io.File: boolean exists()>();
+
+        if $z0 == 0 goto label3;
+
+        $z0 = virtualinvoke r1.<java.io.File: boolean delete()>();
+
+        if $z0 != 0 goto label3;
+
+        virtualinvoke r1.<java.io.File: void deleteOnExit()>();
+
+     label3:
+        $i1 = $i1 + 1;
+
+        goto label2;
+
+     label4:
+        return;
+    }
+    private void doBatchSetSelection(com.fsck.k9.mailstore.LocalStore$BatchSetSelection, int) throws com.fsck.k9.mail.MessagingException
+    {
+        com.fsck.k9.mailstore.LocalStore r0;
+        com.fsck.k9.mailstore.LocalStore$BatchSetSelection $r1;
+        int $i0, i1, i2, $i3, i4;
+        com.fsck.k9.mailstore.LockableDatabase$WrappedException r2;
+        java.lang.StringBuilder r3;
+        java.util.ArrayList r4;
+        com.fsck.k9.mailstore.LocalStore$20 $r5;
+        java.lang.String $r6;
+        com.fsck.k9.mailstore.LockableDatabase $r7;
+        java.lang.Throwable $r8;
+        com.fsck.k9.mail.MessagingException $r9;
+
+        r0 := @this: com.fsck.k9.mailstore.LocalStore;
+
+        $r1 := @parameter0: com.fsck.k9.mailstore.LocalStore$BatchSetSelection;
+
+        $i0 := @parameter1: int;
+
+        r4 = new java.util.ArrayList;
+
+        specialinvoke r4.<java.util.ArrayList: void <init>()>();
+
+        i2 = 0;
+
+     label1:
+        i1 = interfaceinvoke $r1.<com.fsck.k9.mailstore.LocalStore$BatchSetSelection: int getListSize()>();
+
+        if i2 >= i1 goto label9;
+
+        r3 = new java.lang.StringBuilder;
+
+        specialinvoke r3.<java.lang.StringBuilder: void <init>()>();
+
+        virtualinvoke r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" IN (");
+
+        i1 = interfaceinvoke $r1.<com.fsck.k9.mailstore.LocalStore$BatchSetSelection: int getListSize()>();
+
+        i1 = i1 - i2;
+
+        $i3 = staticinvoke <java.lang.Math: int min(int,int)>(i1, $i0);
+
+        i4 = i2;
+
+        i1 = i2 + $i3;
+
+     label2:
+        if i4 >= i1 goto label5;
+
+        if i4 <= i2 goto label4;
+
+        virtualinvoke r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(",?");
+
+     label3:
+        $r6 = interfaceinvoke $r1.<com.fsck.k9.mailstore.LocalStore$BatchSetSelection: java.lang.String getListItem(int)>(i4);
+
+        interfaceinvoke r4.<java.util.List: boolean add(java.lang.Object)>($r6);
+
+        i4 = i4 + 1;
+
+        goto label2;
+
+     label4:
+        virtualinvoke r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("?");
+
+        goto label3;
+
+     label5:
+        virtualinvoke r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(")");
+
+        $r7 = r0.<com.fsck.k9.mailstore.LocalStore: com.fsck.k9.mailstore.LockableDatabase database>;
+
+        $r5 = new com.fsck.k9.mailstore.LocalStore$20;
+
+     label6:
+        specialinvoke $r5.<com.fsck.k9.mailstore.LocalStore$20: void <init>(com.fsck.k9.mailstore.LocalStore,com.fsck.k9.mailstore.LocalStore$BatchSetSelection,java.lang.StringBuilder,java.util.List)>(r0, $r1, r3, r4);
+
+        virtualinvoke $r7.<com.fsck.k9.mailstore.LockableDatabase: java.lang.Object execute(boolean,com.fsck.k9.mailstore.LockableDatabase$DbCallback)>(1, $r5);
+
+        interfaceinvoke $r1.<com.fsck.k9.mailstore.LocalStore$BatchSetSelection: void postDbWork()>();
+
+     label7:
+        interfaceinvoke r4.<java.util.List: void clear()>();
+
+        i2 = i2 + $i3;
+
+        goto label1;
+
+     label8:
+        r2 := @caughtexception;
+
+        $r8 = virtualinvoke r2.<com.fsck.k9.mailstore.LockableDatabase$WrappedException: java.lang.Throwable getCause()>();
+
+        $r9 = (com.fsck.k9.mail.MessagingException) $r8;
+
+        throw $r9;
+
+     label9:
+        return;
+
+        catch com.fsck.k9.mailstore.LockableDatabase$WrappedException from label6 to label7 with label8;
+    }
+    static com.fsck.k9.mail.Part findPartById(com.fsck.k9.mail.Part, long)
+    {
+        com.fsck.k9.mail.Part $r0;
+        long $l0, $l1;
+        java.util.Stack r1;
+        boolean $z0;
+        com.fsck.k9.mailstore.LocalMessage r2;
+        byte $b2;
+        java.lang.Object $r3;
+        com.fsck.k9.mailstore.LocalPart r4;
+        com.fsck.k9.mail.Body $r5;
+        com.fsck.k9.mail.Multipart r6;
+        java.util.List $r7;
+        java.util.Iterator $r8;
+        com.fsck.k9.mail.BodyPart r9;
+
+        $r0 := @parameter0: com.fsck.k9.mail.Part;
+
+        $l0 := @parameter1: long;
+
+        $z0 = $r0 instanceof com.fsck.k9.mailstore.LocalMessage;
+
+        if $z0 == 0 goto label1;
+
+        r2 = (com.fsck.k9.mailstore.LocalMessage) $r0;
+
+        $l1 = virtualinvoke r2.<com.fsck.k9.mailstore.LocalMessage: long getMessagePartId()>();
+
+        $b2 = $l1 cmp $l0;
+
+        if $b2 != 0 goto label1;
+
+        return r2;
+
+     label1:
+        r1 = new java.util.Stack;
+
+        specialinvoke r1.<java.util.Stack: void <init>()>();
+
+        virtualinvoke r1.<java.util.Stack: boolean add(java.lang.Object)>($r0);
+
+     label2:
+        $z0 = virtualinvoke r1.<java.util.Stack: boolean empty()>();
+
+        if $z0 != 0 goto label6;
+
+        $r3 = virtualinvoke r1.<java.util.Stack: java.lang.Object pop()>();
+
+        $r0 = (com.fsck.k9.mail.Part) $r3;
+
+        $z0 = $r0 instanceof com.fsck.k9.mailstore.LocalPart;
+
+        if $z0 == 0 goto label3;
+
+        r4 = (com.fsck.k9.mailstore.LocalPart) $r0;
+
+        $l1 = interfaceinvoke r4.<com.fsck.k9.mailstore.LocalPart: long getPartId()>();
+
+        $b2 = $l1 cmp $l0;
+
+        if $b2 != 0 goto label3;
+
+        return $r0;
+
+     label3:
+        $r5 = interfaceinvoke $r0.<com.fsck.k9.mail.Part: com.fsck.k9.mail.Body getBody()>();
+
+        $z0 = $r5 instanceof com.fsck.k9.mail.Multipart;
+
+        if $z0 == 0 goto label5;
+
+        r6 = (com.fsck.k9.mail.Multipart) $r5;
+
+        $r7 = virtualinvoke r6.<com.fsck.k9.mail.Multipart: java.util.List getBodyParts()>();
+
+        $r8 = interfaceinvoke $r7.<java.util.List: java.util.Iterator iterator()>();
+
+     label4:
+        $z0 = interfaceinvoke $r8.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label5;
+
+        $r3 = interfaceinvoke $r8.<java.util.Iterator: java.lang.Object next()>();
+
+        r9 = (com.fsck.k9.mail.BodyPart) $r3;
+
+        virtualinvoke r1.<java.util.Stack: boolean add(java.lang.Object)>(r9);
+
+        goto label4;
+
+     label5:
+        $z0 = $r5 instanceof com.fsck.k9.mail.Part;
+
+        if $z0 == 0 goto label2;
+
+        $r0 = (com.fsck.k9.mail.Part) $r5;
+
+        virtualinvoke r1.<java.util.Stack: boolean add(java.lang.Object)>($r0);
+
+        goto label2;
+
+     label6:
+        return null;
+    }
+    public static java.lang.String getColumnNameForFlag(com.fsck.k9.mail.Flag)
+    {
+        com.fsck.k9.mail.Flag $r0;
+        int $i0;
+        int[] $r1;
+        java.lang.IllegalArgumentException $r2;
+
+        $r0 := @parameter0: com.fsck.k9.mail.Flag;
+
+        $r1 = <com.fsck.k9.mailstore.LocalStore$24: int[] $SwitchMap$com$fsck$k9$mail$Flag>;
+
+        $i0 = virtualinvoke $r0.<com.fsck.k9.mail.Flag: int ordinal()>();
+
+        $i0 = $r1[$i0];
+
+        lookupswitch($i0)
+        {
+            case 2: goto label2;
+            case 3: goto label3;
+            case 4: goto label4;
+            case 5: goto label5;
+            default: goto label1;
+        };
+
+     label1:
+        $r2 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r2.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Flag must be a special column flag");
+
+        throw $r2;
+
+     label2:
+        return "read";
+
+     label3:
+        return "flagged";
+
+     label4:
+        return "answered";
+
+     label5:
+        return "forwarded";
+    }
+    private int getFolderCount() throws com.fsck.k9.mail.MessagingException
+    {
+        com.fsck.k9.mailstore.LocalStore r0;
+        com.fsck.k9.mailstore.LocalStore$5 $r1;
+        com.fsck.k9.mailstore.LockableDatabase $r2;
+        java.lang.Object $r3;
+        java.lang.Integer $r4;
+        int $i0;
+
+        r0 := @this: com.fsck.k9.mailstore.LocalStore;
+
+        $r2 = r0.<com.fsck.k9.mailstore.LocalStore: com.fsck.k9.mailstore.LockableDatabase database>;
+
+        $r1 = new com.fsck.k9.mailstore.LocalStore$5;
+
+        specialinvoke $r1.<com.fsck.k9.mailstore.LocalStore$5: void <init>(com.fsck.k9.mailstore.LocalStore)>(r0);
+
+        $r3 = virtualinvoke $r2.<com.fsck.k9.mailstore.LockableDatabase: java.lang.Object execute(boolean,com.fsck.k9.mailstore.LockableDatabase$DbCallback)>(0, $r1);
+
+        $r4 = (java.lang.Integer) $r3;
+
+        $i0 = virtualinvoke $r4.<java.lang.Integer: int intValue()>();
+
+        return $i0;
+    }
+    public static com.fsck.k9.mailstore.LocalStore getInstance(com.fsck.k9.Account, android.content.Context) throws com.fsck.k9.mail.MessagingException
+    {
+        com.fsck.k9.Account $r0;
+        android.content.Context $r1;
+        java.lang.String $r2;
+        java.util.concurrent.ConcurrentMap $r3;
+        java.lang.Object $r4, $r5;
+        com.fsck.k9.mailstore.LocalStore r6;
+        java.lang.Throwable $r7;
+
+        $r0 := @parameter0: com.fsck.k9.Account;
+
+        $r1 := @parameter1: android.content.Context;
+
+        $r2 = virtualinvoke $r0.<com.fsck.k9.Account: java.lang.String getUuid()>();
+
+        $r3 = <com.fsck.k9.mailstore.LocalStore: java.util.concurrent.ConcurrentMap sAccountLocks>;
+
+        $r4 = new java.lang.Object;
+
+        specialinvoke $r4.<java.lang.Object: void <init>()>();
+
+        interfaceinvoke $r3.<java.util.concurrent.ConcurrentMap: java.lang.Object putIfAbsent(java.lang.Object,java.lang.Object)>($r2, $r4);
+
+        $r3 = <com.fsck.k9.mailstore.LocalStore: java.util.concurrent.ConcurrentMap sAccountLocks>;
+
+        $r4 = interfaceinvoke $r3.<java.util.concurrent.ConcurrentMap: java.lang.Object get(java.lang.Object)>($r2);
+
+        entermonitor $r4;
+
+     label1:
+        $r3 = <com.fsck.k9.mailstore.LocalStore: java.util.concurrent.ConcurrentMap sLocalStores>;
+
+        $r5 = interfaceinvoke $r3.<java.util.concurrent.ConcurrentMap: java.lang.Object get(java.lang.Object)>($r2);
+
+        r6 = (com.fsck.k9.mailstore.LocalStore) $r5;
+
+        if r6 != null goto label2;
+
+        r6 = new com.fsck.k9.mailstore.LocalStore;
+
+        specialinvoke r6.<com.fsck.k9.mailstore.LocalStore: void <init>(com.fsck.k9.Account,android.content.Context)>($r0, $r1);
+
+        $r3 = <com.fsck.k9.mailstore.LocalStore: java.util.concurrent.ConcurrentMap sLocalStores>;
+
+        interfaceinvoke $r3.<java.util.concurrent.ConcurrentMap: java.lang.Object put(java.lang.Object,java.lang.Object)>($r2, r6);
+
+     label2:
+        exitmonitor $r4;
+
+     label3:
+        return r6;
+
+     label4:
+        $r7 := @caughtexception;
+
+        exitmonitor $r4;
+
+     label5:
+        throw $r7;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+    private int getMessageCount() throws com.fsck.k9.mail.MessagingException
+    {
+        com.fsck.k9.mailstore.LocalStore r0;
+        com.fsck.k9.mailstore.LocalStore$4 $r1;
+        com.fsck.k9.mailstore.LockableDatabase $r2;
+        java.lang.Object $r3;
+        java.lang.Integer $r4;
+        int $i0;
+
+        r0 := @this: com.fsck.k9.mailstore.LocalStore;
+
+        $r2 = r0.<com.fsck.k9.mailstore.LocalStore: com.fsck.k9.mailstore.LockableDatabase database>;
+
+        $r1 = new com.fsck.k9.mailstore.LocalStore$4;
+
+        specialinvoke $r1.<com.fsck.k9.mailstore.LocalStore$4: void <init>(com.fsck.k9.mailstore.LocalStore)>(r0);
+
+        $r3 = virtualinvoke $r2.<com.fsck.k9.mailstore.LockableDatabase: java.lang.Object execute(boolean,com.fsck.k9.mailstore.LockableDatabase$DbCallback)>(0, $r1);
+
+        $r4 = (java.lang.Integer) $r3;
+
+        $i0 = virtualinvoke $r4.<java.lang.Integer: int intValue()>();
+
+        return $i0;
+    }
+    private java.io.InputStream getRawAttachmentInputStream(java.lang.String, int, android.database.Cursor) throws java.io.FileNotFoundException
+    {
+        com.fsck.k9.mailstore.LocalStore r0;
+        java.lang.String $r1;
+        int $i0;
+        android.database.Cursor $r2;
+        java.lang.IllegalStateException $r3;
+        byte[] $r4;
+        java.io.ByteArrayInputStream $r5;
+        java.io.File $r6;
+        java.io.FileInputStream $r7;
+
+        r0 := @this: com.fsck.k9.mailstore.LocalStore;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $i0 := @parameter1: int;
+
+        $r2 := @parameter2: android.database.Cursor;
+
+        lookupswitch($i0)
+        {
+            case 1: goto label2;
+            case 2: goto label3;
+            default: goto label1;
+        };
+
+     label1:
+        $r3 = new java.lang.IllegalStateException;
+
+        specialinvoke $r3.<java.lang.IllegalStateException: void <init>(java.lang.String)>("unhandled case");
+
+        throw $r3;
+
+     label2:
+        $r4 = interfaceinvoke $r2.<android.database.Cursor: byte[] getBlob(int)>(4);
+
+        $r5 = new java.io.ByteArrayInputStream;
+
+        specialinvoke $r5.<java.io.ByteArrayInputStream: void <init>(byte[])>($r4);
+
+        return $r5;
+
+     label3:
+        $r6 = virtualinvoke r0.<com.fsck.k9.mailstore.LocalStore: java.io.File getAttachmentFile(java.lang.String)>($r1);
+
+        $r7 = new java.io.FileInputStream;
+
+        specialinvoke $r7.<java.io.FileInputStream: void <init>(java.io.File)>($r6);
+
+        return $r7;
+    }
+    private com.fsck.k9.mailstore.LocalMessage loadLocalMessageByMessageId(long) throws com.fsck.k9.mail.MessagingException
+    {
+        com.fsck.k9.mailstore.LocalStore r0;
+        long $l0;
+        com.fsck.k9.mail.FetchProfile r1;
+        java.lang.Long $r2;
+        java.util.List $r3;
+        java.util.Map $r4;
+        boolean $z0;
+        java.util.Set $r5;
+        java.util.Iterator $r6;
+        java.lang.Object $r7;
+        java.util.Map$Entry r8;
+        java.lang.String r9, r10;
+        com.fsck.k9.mailstore.LocalFolder $r11;
+        com.fsck.k9.mailstore.LocalMessage $r12;
+        com.fsck.k9.mail.FetchProfile$Item $r13;
+
+        r0 := @this: com.fsck.k9.mailstore.LocalStore;
+
+        $l0 := @parameter0: long;
+
+        $r2 = staticinvoke <java.lang.Long: java.lang.Long valueOf(long)>($l0);
+
+        $r3 = staticinvoke <java.util.Collections: java.util.List singletonList(java.lang.Object)>($r2);
+
+        $r4 = virtualinvoke r0.<com.fsck.k9.mailstore.LocalStore: java.util.Map getFoldersAndUids(java.util.List,boolean)>($r3, 0);
+
+        $z0 = interfaceinvoke $r4.<java.util.Map: boolean isEmpty()>();
+
+        if $z0 == 0 goto label1;
+
+        return null;
+
+     label1:
+        $r5 = interfaceinvoke $r4.<java.util.Map: java.util.Set entrySet()>();
+
+        $r6 = interfaceinvoke $r5.<java.util.Set: java.util.Iterator iterator()>();
+
+        $r7 = interfaceinvoke $r6.<java.util.Iterator: java.lang.Object next()>();
+
+        r8 = (java.util.Map$Entry) $r7;
+
+        $r7 = interfaceinvoke r8.<java.util.Map$Entry: java.lang.Object getKey()>();
+
+        r9 = (java.lang.String) $r7;
+
+        $r7 = interfaceinvoke r8.<java.util.Map$Entry: java.lang.Object getValue()>();
+
+        $r3 = (java.util.List) $r7;
+
+        $r7 = interfaceinvoke $r3.<java.util.List: java.lang.Object get(int)>(0);
+
+        r10 = (java.lang.String) $r7;
+
+        $r11 = virtualinvoke r0.<com.fsck.k9.mailstore.LocalStore: com.fsck.k9.mailstore.LocalFolder getFolder(java.lang.String)>(r9);
+
+        $r12 = virtualinvoke $r11.<com.fsck.k9.mailstore.LocalFolder: com.fsck.k9.mailstore.LocalMessage getMessage(java.lang.String)>(r10);
+
+        r1 = new com.fsck.k9.mail.FetchProfile;
+
+        specialinvoke r1.<com.fsck.k9.mail.FetchProfile: void <init>()>();
+
+        $r13 = <com.fsck.k9.mail.FetchProfile$Item: com.fsck.k9.mail.FetchProfile$Item BODY>;
+
+        virtualinvoke r1.<com.fsck.k9.mail.FetchProfile: boolean add(java.lang.Object)>($r13);
+
+        $r3 = staticinvoke <java.util.Collections: java.util.List singletonList(java.lang.Object)>($r12);
+
+        virtualinvoke $r11.<com.fsck.k9.mailstore.LocalFolder: void fetch(java.util.List,com.fsck.k9.mail.FetchProfile,com.fsck.k9.mail.MessageRetrievalListener)>($r3, r1, null);
+
+        return $r12;
+    }
+    private com.fsck.k9.mailstore.LocalMessage loadLocalMessageByRootPartId(android.database.sqlite.SQLiteDatabase, java.lang.String) throws com.fsck.k9.mail.MessagingException
+    {
+        com.fsck.k9.mailstore.LocalStore r0;
+        android.database.sqlite.SQLiteDatabase $r1;
+        java.lang.String $r2;
+        java.lang.String[] $r3, $r4;
+        android.database.Cursor $r5;
+        boolean $z0;
+        long $l0;
+        com.fsck.k9.mailstore.LocalMessage $r6;
+        java.lang.Throwable $r7;
+
+        r0 := @this: com.fsck.k9.mailstore.LocalStore;
+
+        $r1 := @parameter0: android.database.sqlite.SQLiteDatabase;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $r3 = newarray (java.lang.String)[1];
+
+        $r3[0] = "id";
+
+        $r4 = newarray (java.lang.String)[1];
+
+        $r4[0] = $r2;
+
+        $r5 = virtualinvoke $r1.<android.database.sqlite.SQLiteDatabase: android.database.Cursor query(java.lang.String,java.lang.String[],java.lang.String,java.lang.String[],java.lang.String,java.lang.String,java.lang.String)>("messages", $r3, "message_part_id = ?", $r4, null, null, null);
+
+     label1:
+        $z0 = interfaceinvoke $r5.<android.database.Cursor: boolean moveToFirst()>();
+
+     label2:
+        if $z0 != 0 goto label3;
+
+        staticinvoke <com.fsck.k9.helper.Utility: void closeQuietly(android.database.Cursor)>($r5);
+
+        return null;
+
+     label3:
+        $l0 = interfaceinvoke $r5.<android.database.Cursor: long getLong(int)>(0);
+
+     label4:
+        staticinvoke <com.fsck.k9.helper.Utility: void closeQuietly(android.database.Cursor)>($r5);
+
+        $r6 = specialinvoke r0.<com.fsck.k9.mailstore.LocalStore: com.fsck.k9.mailstore.LocalMessage loadLocalMessageByMessageId(long)>($l0);
+
+        return $r6;
+
+     label5:
+        $r7 := @caughtexception;
+
+        staticinvoke <com.fsck.k9.helper.Utility: void closeQuietly(android.database.Cursor)>($r5);
+
+        throw $r7;
+
+        catch java.lang.Throwable from label1 to label2 with label5;
+        catch java.lang.Throwable from label3 to label4 with label5;
+    }
+    private void markAllMessagePartsDataAsMissing() throws com.fsck.k9.mail.MessagingException
+    {
+        com.fsck.k9.mailstore.LocalStore r0;
+        com.fsck.k9.mailstore.LockableDatabase $r1;
+        com.fsck.k9.mailstore.LocalStore$7 $r2;
+
+        r0 := @this: com.fsck.k9.mailstore.LocalStore;
+
+        $r1 = r0.<com.fsck.k9.mailstore.LocalStore: com.fsck.k9.mailstore.LockableDatabase database>;
+
+        $r2 = new com.fsck.k9.mailstore.LocalStore$7;
+
+        specialinvoke $r2.<com.fsck.k9.mailstore.LocalStore$7: void <init>(com.fsck.k9.mailstore.LocalStore)>(r0);
+
+        virtualinvoke $r1.<com.fsck.k9.mailstore.LockableDatabase: java.lang.Object execute(boolean,com.fsck.k9.mailstore.LockableDatabase$DbCallback)>(0, $r2);
+
+        return;
+    }
+    public static void removeAccount(com.fsck.k9.Account)
+    {
+        com.fsck.k9.Account $r0;
+        java.lang.Exception r1;
+        java.lang.String $r2;
+        java.lang.Object[] $r3;
+
+        $r0 := @parameter0: com.fsck.k9.Account;
+
+     label1:
+        staticinvoke <com.fsck.k9.mailstore.LocalStore: void removeInstance(com.fsck.k9.Account)>($r0);
+
+     label2:
+        return;
+
+     label3:
+        r1 := @caughtexception;
+
+        $r3 = newarray (java.lang.Object)[1];
+
+        $r2 = virtualinvoke $r0.<com.fsck.k9.Account: java.lang.String getUuid()>();
+
+        $r3[0] = $r2;
+
+        staticinvoke <timber.log.Timber: void e(java.lang.Throwable,java.lang.String,java.lang.Object[])>(r1, "Failed to reset local store for account %s", $r3);
+
+        return;
+
+        catch java.lang.Exception from label1 to label2 with label3;
+    }
+    private static void removeInstance(com.fsck.k9.Account)
+    {
+        com.fsck.k9.Account $r0;
+        java.util.concurrent.ConcurrentMap $r1;
+        java.lang.String $r2;
+
+        $r0 := @parameter0: com.fsck.k9.Account;
+
+        $r2 = virtualinvoke $r0.<com.fsck.k9.Account: java.lang.String getUuid()>();
+
+        $r1 = <com.fsck.k9.mailstore.LocalStore: java.util.concurrent.ConcurrentMap sLocalStores>;
+
+        interfaceinvoke $r1.<java.util.concurrent.ConcurrentMap: java.lang.Object remove(java.lang.Object)>($r2);
+
+        return;
+    }
+    static java.lang.String serializeFlags(java.lang.Iterable)
+    {
+        java.lang.Iterable r0;
+        java.util.ArrayList r1;
+        java.util.Iterator $r2;
+        boolean $z0;
+        java.lang.Object $r3;
+        com.fsck.k9.mail.Flag r4;
+        int[] $r5;
+        int $i0;
+        java.lang.String $r6;
+        java.util.Locale $r7;
+
+        r0 := @parameter0: java.lang.Iterable;
+
+        r1 = new java.util.ArrayList;
+
+        specialinvoke r1.<java.util.ArrayList: void <init>()>();
+
+        $r2 = interfaceinvoke r0.<java.lang.Iterable: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r2.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label3;
+
+        $r3 = interfaceinvoke $r2.<java.util.Iterator: java.lang.Object next()>();
+
+        r4 = (com.fsck.k9.mail.Flag) $r3;
+
+        $r5 = <com.fsck.k9.mailstore.LocalStore$24: int[] $SwitchMap$com$fsck$k9$mail$Flag>;
+
+        $i0 = virtualinvoke r4.<com.fsck.k9.mail.Flag: int ordinal()>();
+
+        $i0 = $r5[$i0];
+
+        lookupswitch($i0)
+        {
+            case 1: goto label1;
+            case 2: goto label1;
+            case 3: goto label1;
+            case 4: goto label1;
+            case 5: goto label1;
+            default: goto label2;
+        };
+
+     label2:
+        interfaceinvoke r1.<java.util.List: boolean add(java.lang.Object)>(r4);
+
+        goto label1;
+
+     label3:
+        $r6 = staticinvoke <com.fsck.k9.helper.Utility: java.lang.String combine(java.lang.Iterable,char)>(r1, 44);
+
+        $r7 = <java.util.Locale: java.util.Locale US>;
+
+        $r6 = virtualinvoke $r6.<java.lang.String: java.lang.String toUpperCase(java.util.Locale)>($r7);
+
+        return $r6;
+    }
+    private void writeAttachmentDataToOutputStream(java.lang.String, java.io.OutputStream) throws java.io.IOException
+    {
+        com.fsck.k9.mailstore.LocalStore r0;
+        java.lang.String $r1;
+        java.io.OutputStream $r2;
+        com.fsck.k9.mailstore.LocalStore$16 $r3;
+        java.lang.Throwable $r4;
+        com.fsck.k9.mailstore.LockableDatabase $r5;
+        com.fsck.k9.mail.MessagingException r6;
+        java.io.IOException $r7;
+        com.fsck.k9.mailstore.LockableDatabase$WrappedException r8;
+
+        r0 := @this: com.fsck.k9.mailstore.LocalStore;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.io.OutputStream;
+
+        $r5 = r0.<com.fsck.k9.mailstore.LocalStore: com.fsck.k9.mailstore.LockableDatabase database>;
+
+        $r3 = new com.fsck.k9.mailstore.LocalStore$16;
+
+     label1:
+        specialinvoke $r3.<com.fsck.k9.mailstore.LocalStore$16: void <init>(com.fsck.k9.mailstore.LocalStore,java.lang.String,java.io.OutputStream)>(r0, $r1, $r2);
+
+        virtualinvoke $r5.<com.fsck.k9.mailstore.LockableDatabase: java.lang.Object execute(boolean,com.fsck.k9.mailstore.LockableDatabase$DbCallback)>(0, $r3);
+
+     label2:
+        return;
+
+     label3:
+        r6 := @caughtexception;
+
+        $r7 = new java.io.IOException;
+
+        specialinvoke $r7.<java.io.IOException: void <init>(java.lang.String,java.lang.Throwable)>("Got a MessagingException while writing attachment data!", r6);
+
+        throw $r7;
+
+     label4:
+        r8 := @caughtexception;
+
+        $r4 = virtualinvoke r8.<com.fsck.k9.mailstore.LockableDatabase$WrappedException: java.lang.Throwable getCause()>();
+
+        $r7 = (java.io.IOException) $r4;
+
+        throw $r7;
+
+        catch com.fsck.k9.mail.MessagingException from label1 to label2 with label3;
+        catch com.fsck.k9.mailstore.LockableDatabase$WrappedException from label1 to label2 with label4;
+    }
+    private void writeCursorPartsToOutputStream(android.database.sqlite.SQLiteDatabase, android.database.Cursor, java.io.OutputStream) throws java.io.IOException, com.fsck.k9.mail.MessagingException
+    {
+        com.fsck.k9.mailstore.LocalStore r0;
+        android.database.sqlite.SQLiteDatabase $r1;
+        android.database.Cursor $r2;
+        java.io.OutputStream $r3;
+        boolean $z0;
+        java.lang.String $r4;
+        int $i0;
+
+        r0 := @this: com.fsck.k9.mailstore.LocalStore;
+
+        $r1 := @parameter0: android.database.sqlite.SQLiteDatabase;
+
+        $r2 := @parameter1: android.database.Cursor;
+
+        $r3 := @parameter2: java.io.OutputStream;
+
+     label1:
+        $z0 = interfaceinvoke $r2.<android.database.Cursor: boolean moveToNext()>();
+
+        if $z0 == 0 goto label4;
+
+        $r4 = interfaceinvoke $r2.<android.database.Cursor: java.lang.String getString(int)>(0);
+
+        $i0 = interfaceinvoke $r2.<android.database.Cursor: int getInt(int)>(2);
+
+        if $i0 == 1 goto label2;
+
+        if $i0 != 2 goto label3;
+
+     label2:
+        specialinvoke r0.<com.fsck.k9.mailstore.LocalStore: void writeSimplePartToOutputStream(java.lang.String,android.database.Cursor,java.io.OutputStream)>($r4, $r2, $r3);
+
+        goto label1;
+
+     label3:
+        if $i0 != 3 goto label1;
+
+        specialinvoke r0.<com.fsck.k9.mailstore.LocalStore: void writeRawBodyToStream(android.database.Cursor,android.database.sqlite.SQLiteDatabase,java.io.OutputStream)>($r2, $r1, $r3);
+
+        goto label1;
+
+     label4:
+        return;
+    }
+    private void writeRawBodyToStream(android.database.Cursor, android.database.sqlite.SQLiteDatabase, java.io.OutputStream) throws java.io.IOException, com.fsck.k9.mail.MessagingException
+    {
+        com.fsck.k9.mailstore.LocalStore r0;
+        android.database.Cursor $r1;
+        android.database.sqlite.SQLiteDatabase $r2;
+        java.io.OutputStream $r3;
+        long $l0;
+        java.lang.String $r4;
+        com.fsck.k9.mailstore.LocalMessage $r5;
+        com.fsck.k9.mail.MessagingException $r6;
+        com.fsck.k9.mail.Part $r7;
+        com.fsck.k9.mail.Body $r8;
+
+        r0 := @this: com.fsck.k9.mailstore.LocalStore;
+
+        $r1 := @parameter0: android.database.Cursor;
+
+        $r2 := @parameter1: android.database.sqlite.SQLiteDatabase;
+
+        $r3 := @parameter2: java.io.OutputStream;
+
+        $l0 = interfaceinvoke $r1.<android.database.Cursor: long getLong(int)>(0);
+
+        $r4 = interfaceinvoke $r1.<android.database.Cursor: java.lang.String getString(int)>(1);
+
+        $r5 = specialinvoke r0.<com.fsck.k9.mailstore.LocalStore: com.fsck.k9.mailstore.LocalMessage loadLocalMessageByRootPartId(android.database.sqlite.SQLiteDatabase,java.lang.String)>($r2, $r4);
+
+        if $r5 != null goto label1;
+
+        $r6 = new com.fsck.k9.mail.MessagingException;
+
+        specialinvoke $r6.<com.fsck.k9.mail.MessagingException: void <init>(java.lang.String)>("Unable to find message for attachment!");
+
+        throw $r6;
+
+     label1:
+        $r7 = staticinvoke <com.fsck.k9.mailstore.LocalStore: com.fsck.k9.mail.Part findPartById(com.fsck.k9.mail.Part,long)>($r5, $l0);
+
+        if $r7 != null goto label2;
+
+        $r6 = new com.fsck.k9.mail.MessagingException;
+
+        specialinvoke $r6.<com.fsck.k9.mail.MessagingException: void <init>(java.lang.String)>("Unable to find attachment part in associated message (db integrity error?)");
+
+        throw $r6;
+
+     label2:
+        $r8 = interfaceinvoke $r7.<com.fsck.k9.mail.Part: com.fsck.k9.mail.Body getBody()>();
+
+        if $r8 != null goto label3;
+
+        $r6 = new com.fsck.k9.mail.MessagingException;
+
+        specialinvoke $r6.<com.fsck.k9.mail.MessagingException: void <init>(java.lang.String)>("Attachment part isn\'t available!");
+
+        throw $r6;
+
+     label3:
+        interfaceinvoke $r8.<com.fsck.k9.mail.Body: void writeTo(java.io.OutputStream)>($r3);
+
+        return;
+    }
+    private void writeSimplePartToOutputStream(java.lang.String, android.database.Cursor, java.io.OutputStream) throws java.io.IOException
+    {
+        com.fsck.k9.mailstore.LocalStore r0;
+        java.lang.String $r1;
+        android.database.Cursor $r2;
+        java.io.OutputStream $r3;
+        int $i0;
+        java.io.InputStream $r4, r5;
+        java.lang.Throwable $r6;
+
+        r0 := @this: com.fsck.k9.mailstore.LocalStore;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: android.database.Cursor;
+
+        $r3 := @parameter2: java.io.OutputStream;
+
+        $i0 = interfaceinvoke $r2.<android.database.Cursor: int getInt(int)>(2);
+
+        $r4 = specialinvoke r0.<com.fsck.k9.mailstore.LocalStore: java.io.InputStream getRawAttachmentInputStream(java.lang.String,int,android.database.Cursor)>($r1, $i0, $r2);
+
+        r5 = $r4;
+
+     label1:
+        $r1 = interfaceinvoke $r2.<android.database.Cursor: java.lang.String getString(int)>(3);
+
+        $r4 = virtualinvoke r0.<com.fsck.k9.mailstore.LocalStore: java.io.InputStream getDecodingInputStream(java.io.InputStream,java.lang.String)>($r4, $r1);
+
+     label2:
+        r5 = $r4;
+
+     label3:
+        staticinvoke <org.apache.commons.io.IOUtils: int copy(java.io.InputStream,java.io.OutputStream)>($r4, $r3);
+
+     label4:
+        staticinvoke <org.apache.commons.io.IOUtils: void closeQuietly(java.io.InputStream)>($r4);
+
+        return;
+
+     label5:
+        $r6 := @caughtexception;
+
+        staticinvoke <org.apache.commons.io.IOUtils: void closeQuietly(java.io.InputStream)>(r5);
+
+        throw $r6;
+
+        catch java.lang.Throwable from label1 to label2 with label5;
+        catch java.lang.Throwable from label3 to label4 with label5;
+    }
+    public void addPendingCommand(com.fsck.k9.controller.MessagingControllerCommands$PendingCommand) throws com.fsck.k9.mail.MessagingException
+    {
+        com.fsck.k9.mailstore.LocalStore r0;
+        com.fsck.k9.controller.MessagingControllerCommands$PendingCommand $r1;
+        android.content.ContentValues r2;
+        com.fsck.k9.mailstore.LocalStore$10 $r3;
+        java.lang.String $r4;
+        com.fsck.k9.controller.PendingCommandSerializer $r5;
+        com.fsck.k9.mailstore.LockableDatabase $r6;
+
+        r0 := @this: com.fsck.k9.mailstore.LocalStore;
+
+        $r1 := @parameter0: com.fsck.k9.controller.MessagingControllerCommands$PendingCommand;
+
+        r2 = new android.content.ContentValues;
+
+        specialinvoke r2.<android.content.ContentValues: void <init>()>();
+
+        $r4 = virtualinvoke $r1.<com.fsck.k9.controller.MessagingControllerCommands$PendingCommand: java.lang.String getCommandName()>();
+
+        virtualinvoke r2.<android.content.ContentValues: void put(java.lang.String,java.lang.String)>("command", $r4);
+
+        $r5 = r0.<com.fsck.k9.mailstore.LocalStore: com.fsck.k9.controller.PendingCommandSerializer pendingCommandSerializer>;
+
+        $r4 = virtualinvoke $r5.<com.fsck.k9.controller.PendingCommandSerializer: java.lang.String serialize(com.fsck.k9.controller.MessagingControllerCommands$PendingCommand)>($r1);
+
+        virtualinvoke r2.<android.content.ContentValues: void put(java.lang.String,java.lang.String)>("data", $r4);
+
+        $r6 = r0.<com.fsck.k9.mailstore.LocalStore: com.fsck.k9.mailstore.LockableDatabase database>;
+
+        $r3 = new com.fsck.k9.mailstore.LocalStore$10;
+
+        specialinvoke $r3.<com.fsck.k9.mailstore.LocalStore$10: void <init>(com.fsck.k9.mailstore.LocalStore,android.content.ContentValues)>(r0, r2);
+
+        virtualinvoke $r6.<com.fsck.k9.mailstore.LockableDatabase: java.lang.Object execute(boolean,com.fsck.k9.mailstore.LockableDatabase$DbCallback)>(0, $r3);
+
+        return;
+    }
+    public void checkSettings() throws com.fsck.k9.mail.MessagingException
+    {
+        com.fsck.k9.mailstore.LocalStore r0;
+
+        r0 := @this: com.fsck.k9.mailstore.LocalStore;
+
+        return;
+    }
+    public void clear() throws com.fsck.k9.mail.MessagingException
+    {
+        com.fsck.k9.mailstore.LocalStore r0;
+        boolean $z0;
+        java.lang.Object[] $r1;
+        long $l0;
+        java.lang.Long $r2;
+        int $i1;
+        java.lang.Integer $r3;
+        com.fsck.k9.mailstore.LockableDatabase $r4;
+        com.fsck.k9.mailstore.LocalStore$3 $r5;
+
+        r0 := @this: com.fsck.k9.mailstore.LocalStore;
+
+        $z0 = staticinvoke <com.fsck.k9.K9: boolean isDebug()>();
+
+        if $z0 == 0 goto label1;
+
+        $r1 = newarray (java.lang.Object)[1];
+
+        $l0 = virtualinvoke r0.<com.fsck.k9.mailstore.LocalStore: long getSize()>();
+
+        $r2 = staticinvoke <java.lang.Long: java.lang.Long valueOf(long)>($l0);
+
+        $r1[0] = $r2;
+
+        staticinvoke <timber.log.Timber: void i(java.lang.String,java.lang.Object[])>("Before prune size = %d", $r1);
+
+     label1:
+        specialinvoke r0.<com.fsck.k9.mailstore.LocalStore: void deleteAllMessageDataFromDisk()>();
+
+        $z0 = staticinvoke <com.fsck.k9.K9: boolean isDebug()>();
+
+        if $z0 == 0 goto label2;
+
+        $r1 = newarray (java.lang.Object)[1];
+
+        $l0 = virtualinvoke r0.<com.fsck.k9.mailstore.LocalStore: long getSize()>();
+
+        $r2 = staticinvoke <java.lang.Long: java.lang.Long valueOf(long)>($l0);
+
+        $r1[0] = $r2;
+
+        staticinvoke <timber.log.Timber: void i(java.lang.String,java.lang.Object[])>("After prune / before compaction size = %d", $r1);
+
+        $r1 = newarray (java.lang.Object)[1];
+
+        $i1 = specialinvoke r0.<com.fsck.k9.mailstore.LocalStore: int getFolderCount()>();
+
+        $r3 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i1);
+
+        $r1[0] = $r3;
+
+        staticinvoke <timber.log.Timber: void i(java.lang.String,java.lang.Object[])>("Before clear folder count = %d", $r1);
+
+        $r1 = newarray (java.lang.Object)[1];
+
+        $i1 = specialinvoke r0.<com.fsck.k9.mailstore.LocalStore: int getMessageCount()>();
+
+        $r3 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i1);
+
+        $r1[0] = $r3;
+
+        staticinvoke <timber.log.Timber: void i(java.lang.String,java.lang.Object[])>("Before clear message count = %d", $r1);
+
+        $r1 = newarray (java.lang.Object)[1];
+
+        $l0 = virtualinvoke r0.<com.fsck.k9.mailstore.LocalStore: long getSize()>();
+
+        $r2 = staticinvoke <java.lang.Long: java.lang.Long valueOf(long)>($l0);
+
+        $r1[0] = $r2;
+
+        staticinvoke <timber.log.Timber: void i(java.lang.String,java.lang.Object[])>("After prune / before clear size = %d", $r1);
+
+     label2:
+        $r4 = r0.<com.fsck.k9.mailstore.LocalStore: com.fsck.k9.mailstore.LockableDatabase database>;
+
+        $r5 = new com.fsck.k9.mailstore.LocalStore$3;
+
+        specialinvoke $r5.<com.fsck.k9.mailstore.LocalStore$3: void <init>(com.fsck.k9.mailstore.LocalStore)>(r0);
+
+        virtualinvoke $r4.<com.fsck.k9.mailstore.LockableDatabase: java.lang.Object execute(boolean,com.fsck.k9.mailstore.LockableDatabase$DbCallback)>(0, $r5);
+
+        virtualinvoke r0.<com.fsck.k9.mailstore.LocalStore: void compact()>();
+
+        $z0 = staticinvoke <com.fsck.k9.K9: boolean isDebug()>();
+
+        if $z0 == 0 goto label3;
+
+        $r1 = newarray (java.lang.Object)[1];
+
+        $i1 = specialinvoke r0.<com.fsck.k9.mailstore.LocalStore: int getMessageCount()>();
+
+        $r3 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i1);
+
+        $r1[0] = $r3;
+
+        staticinvoke <timber.log.Timber: void i(java.lang.String,java.lang.Object[])>("After clear message count = %d", $r1);
+
+        $r1 = newarray (java.lang.Object)[1];
+
+        $l0 = virtualinvoke r0.<com.fsck.k9.mailstore.LocalStore: long getSize()>();
+
+        $r2 = staticinvoke <java.lang.Long: java.lang.Long valueOf(long)>($l0);
+
+        $r1[0] = $r2;
+
+        staticinvoke <timber.log.Timber: void i(java.lang.String,java.lang.Object[])>("After clear size = %d", $r1);
+
+     label3:
+        return;
+    }
+    public void compact() throws com.fsck.k9.mail.MessagingException
+    {
+        com.fsck.k9.mailstore.LocalStore r0;
+        boolean $z0;
+        java.lang.Object[] $r1;
+        long $l0;
+        java.lang.Long $r2;
+        com.fsck.k9.mailstore.LockableDatabase $r3;
+        com.fsck.k9.mailstore.LocalStore$2 $r4;
+
+        r0 := @this: com.fsck.k9.mailstore.LocalStore;
+
+        $z0 = staticinvoke <com.fsck.k9.K9: boolean isDebug()>();
+
+        if $z0 == 0 goto label1;
+
+        $r1 = newarray (java.lang.Object)[1];
+
+        $l0 = virtualinvoke r0.<com.fsck.k9.mailstore.LocalStore: long getSize()>();
+
+        $r2 = staticinvoke <java.lang.Long: java.lang.Long valueOf(long)>($l0);
+
+        $r1[0] = $r2;
+
+        staticinvoke <timber.log.Timber: void i(java.lang.String,java.lang.Object[])>("Before compaction size = %d", $r1);
+
+     label1:
+        $r3 = r0.<com.fsck.k9.mailstore.LocalStore: com.fsck.k9.mailstore.LockableDatabase database>;
+
+        $r4 = new com.fsck.k9.mailstore.LocalStore$2;
+
+        specialinvoke $r4.<com.fsck.k9.mailstore.LocalStore$2: void <init>(com.fsck.k9.mailstore.LocalStore)>(r0);
+
+        virtualinvoke $r3.<com.fsck.k9.mailstore.LockableDatabase: java.lang.Object execute(boolean,com.fsck.k9.mailstore.LockableDatabase$DbCallback)>(0, $r4);
+
+        $z0 = staticinvoke <com.fsck.k9.K9: boolean isDebug()>();
+
+        if $z0 == 0 goto label2;
+
+        $r1 = newarray (java.lang.Object)[1];
+
+        $l0 = virtualinvoke r0.<com.fsck.k9.mailstore.LocalStore: long getSize()>();
+
+        $r2 = staticinvoke <java.lang.Long: java.lang.Long valueOf(long)>($l0);
+
+        $r1[0] = $r2;
+
+        staticinvoke <timber.log.Timber: void i(java.lang.String,java.lang.Object[])>("After compaction size = %d", $r1);
+
+     label2:
+        return;
+    }
+    public void createFolders(java.util.List, int) throws com.fsck.k9.mail.MessagingException
+    {
+        com.fsck.k9.mailstore.LocalStore r0;
+        java.util.List r1;
+        int $i0;
+        com.fsck.k9.mailstore.LockableDatabase $r2;
+        com.fsck.k9.mailstore.LocalStore$19 $r3;
+
+        r0 := @this: com.fsck.k9.mailstore.LocalStore;
+
+        r1 := @parameter0: java.util.List;
+
+        $i0 := @parameter1: int;
+
+        $r2 = r0.<com.fsck.k9.mailstore.LocalStore: com.fsck.k9.mailstore.LockableDatabase database>;
+
+        $r3 = new com.fsck.k9.mailstore.LocalStore$19;
+
+        specialinvoke $r3.<com.fsck.k9.mailstore.LocalStore$19: void <init>(com.fsck.k9.mailstore.LocalStore,java.util.List,int)>(r0, r1, $i0);
+
+        virtualinvoke $r2.<com.fsck.k9.mailstore.LockableDatabase: java.lang.Object execute(boolean,com.fsck.k9.mailstore.LockableDatabase$DbCallback)>(1, $r3);
+
+        return;
+    }
+    public void delete() throws com.fsck.k9.mailstore.UnavailableStorageException
+    {
+        com.fsck.k9.mailstore.LocalStore r0;
+        com.fsck.k9.mailstore.LockableDatabase $r1;
+
+        r0 := @this: com.fsck.k9.mailstore.LocalStore;
+
+        $r1 = r0.<com.fsck.k9.mailstore.LocalStore: com.fsck.k9.mailstore.LockableDatabase database>;
+
+        virtualinvoke $r1.<com.fsck.k9.mailstore.LockableDatabase: void delete()>();
+
+        return;
+    }
+    com.fsck.k9.Account getAccount()
+    {
+        com.fsck.k9.mailstore.LocalStore r0;
+        com.fsck.k9.Account r1;
+
+        r0 := @this: com.fsck.k9.mailstore.LocalStore;
+
+        r1 = r0.<com.fsck.k9.mailstore.LocalStore: com.fsck.k9.Account account>;
+
+        return r1;
+    }
+    com.fsck.k9.message.extractors.AttachmentCounter getAttachmentCounter()
+    {
+        com.fsck.k9.mailstore.LocalStore r0;
+        com.fsck.k9.message.extractors.AttachmentCounter r1;
+
+        r0 := @this: com.fsck.k9.mailstore.LocalStore;
+
+        r1 = r0.<com.fsck.k9.mailstore.LocalStore: com.fsck.k9.message.extractors.AttachmentCounter attachmentCounter>;
+
+        return r1;
+    }
+    public org.openintents.openpgp.util.OpenPgpApi$OpenPgpDataSource getAttachmentDataSource(java.lang.String) throws com.fsck.k9.mail.MessagingException
+    {
+        com.fsck.k9.mailstore.LocalStore r0;
+        java.lang.String $r1;
+        com.fsck.k9.mailstore.LocalStore$15 $r2;
+
+        r0 := @this: com.fsck.k9.mailstore.LocalStore;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = new com.fsck.k9.mailstore.LocalStore$15;
+
+        specialinvoke $r2.<com.fsck.k9.mailstore.LocalStore$15: void <init>(com.fsck.k9.mailstore.LocalStore,java.lang.String)>(r0, $r1);
+
+        return $r2;
+    }
+    java.io.File getAttachmentFile(java.lang.String)
+    {
+        com.fsck.k9.mailstore.LocalStore r0;
+        java.lang.String $r1, $r5, $r7;
+        android.content.Context $r2;
+        com.fsck.k9.mailstore.StorageManager $r3;
+        com.fsck.k9.Account $r4;
+        com.fsck.k9.mailstore.LockableDatabase $r6;
+        java.io.File $r8, $r9;
+
+        r0 := @this: com.fsck.k9.mailstore.LocalStore;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = r0.<com.fsck.k9.mailstore.LocalStore: android.content.Context context>;
+
+        $r3 = staticinvoke <com.fsck.k9.mailstore.StorageManager: com.fsck.k9.mailstore.StorageManager getInstance(android.content.Context)>($r2);
+
+        $r4 = r0.<com.fsck.k9.mailstore.LocalStore: com.fsck.k9.Account account>;
+
+        $r5 = virtualinvoke $r4.<com.fsck.k9.Account: java.lang.String getUuid()>();
+
+        $r6 = r0.<com.fsck.k9.mailstore.LocalStore: com.fsck.k9.mailstore.LockableDatabase database>;
+
+        $r7 = virtualinvoke $r6.<com.fsck.k9.mailstore.LockableDatabase: java.lang.String getStorageProviderId()>();
+
+        $r8 = virtualinvoke $r3.<com.fsck.k9.mailstore.StorageManager: java.io.File getAttachmentDirectory(java.lang.String,java.lang.String)>($r5, $r7);
+
+        $r9 = new java.io.File;
+
+        specialinvoke $r9.<java.io.File: void <init>(java.io.File,java.lang.String)>($r8, $r1);
+
+        return $r9;
+    }
+    public com.fsck.k9.mailstore.LocalStore$AttachmentInfo getAttachmentInfo(java.lang.String) throws com.fsck.k9.mail.MessagingException
+    {
+        com.fsck.k9.mailstore.LocalStore r0;
+        java.lang.String $r1;
+        com.fsck.k9.mailstore.LocalStore$14 $r2;
+        java.lang.Object $r3;
+        com.fsck.k9.mailstore.LockableDatabase $r4;
+        com.fsck.k9.mailstore.LocalStore$AttachmentInfo $r5;
+
+        r0 := @this: com.fsck.k9.mailstore.LocalStore;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r4 = r0.<com.fsck.k9.mailstore.LocalStore: com.fsck.k9.mailstore.LockableDatabase database>;
+
+        $r2 = new com.fsck.k9.mailstore.LocalStore$14;
+
+        specialinvoke $r2.<com.fsck.k9.mailstore.LocalStore$14: void <init>(com.fsck.k9.mailstore.LocalStore,java.lang.String)>(r0, $r1);
+
+        $r3 = virtualinvoke $r4.<com.fsck.k9.mailstore.LockableDatabase: java.lang.Object execute(boolean,com.fsck.k9.mailstore.LockableDatabase$DbCallback)>(0, $r2);
+
+        $r5 = (com.fsck.k9.mailstore.LocalStore$AttachmentInfo) $r3;
+
+        return $r5;
+    }
+    com.fsck.k9.message.extractors.AttachmentInfoExtractor getAttachmentInfoExtractor()
+    {
+        com.fsck.k9.mailstore.LocalStore r0;
+        com.fsck.k9.message.extractors.AttachmentInfoExtractor r1;
+
+        r0 := @this: com.fsck.k9.mailstore.LocalStore;
+
+        r1 = r0.<com.fsck.k9.mailstore.LocalStore: com.fsck.k9.message.extractors.AttachmentInfoExtractor attachmentInfoExtractor>;
+
+        return r1;
+    }
+    android.content.Context getContext()
+    {
+        com.fsck.k9.mailstore.LocalStore r0;
+        android.content.Context r1;
+
+        r0 := @this: com.fsck.k9.mailstore.LocalStore;
+
+        r1 = r0.<com.fsck.k9.mailstore.LocalStore: android.content.Context context>;
+
+        return r1;
+    }
+    public com.fsck.k9.mailstore.LockableDatabase getDatabase()
+    {
+        com.fsck.k9.mailstore.LocalStore r0;
+        com.fsck.k9.mailstore.LockableDatabase r1;
+
+        r0 := @this: com.fsck.k9.mailstore.LocalStore;
+
+        r1 = r0.<com.fsck.k9.mailstore.LocalStore: com.fsck.k9.mailstore.LockableDatabase database>;
+
+        return r1;
+    }
+    java.io.InputStream getDecodingInputStream(java.io.InputStream, java.lang.String)
+    {
+        com.fsck.k9.mailstore.LocalStore r0;
+        java.lang.String $r1, $r3;
+        java.io.InputStream r2;
+        boolean $z0;
+        com.fsck.k9.mailstore.LocalStore$17 $r4;
+        com.fsck.k9.mailstore.LocalStore$18 $r5;
+
+        r0 := @this: com.fsck.k9.mailstore.LocalStore;
+
+        r2 := @parameter0: java.io.InputStream;
+
+        $r1 := @parameter1: java.lang.String;
+
+        $r3 = "base64";
+
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>($r1);
+
+        if $z0 == 0 goto label1;
+
+        $r4 = new com.fsck.k9.mailstore.LocalStore$17;
+
+        specialinvoke $r4.<com.fsck.k9.mailstore.LocalStore$17: void <init>(com.fsck.k9.mailstore.LocalStore,java.io.InputStream,java.io.InputStream)>(r0, r2, r2);
+
+        return $r4;
+
+     label1:
+        $r3 = "quoted-printable";
+
+        $z0 = virtualinvoke $r3.<java.lang.String: boolean equals(java.lang.Object)>($r1);
+
+        if $z0 == 0 goto label2;
+
+        $r5 = new com.fsck.k9.mailstore.LocalStore$18;
+
+        specialinvoke $r5.<com.fsck.k9.mailstore.LocalStore$18: void <init>(com.fsck.k9.mailstore.LocalStore,java.io.InputStream,java.io.InputStream)>(r0, r2, r2);
+
+        return $r5;
+
+     label2:
+        return r2;
+    }
+    public volatile com.fsck.k9.mail.Folder getFolder(java.lang.String)
+    {
+        com.fsck.k9.mailstore.LocalStore r0;
+        java.lang.String $r1;
+        com.fsck.k9.mailstore.LocalFolder $r2;
+
+        r0 := @this: com.fsck.k9.mailstore.LocalStore;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = virtualinvoke r0.<com.fsck.k9.mailstore.LocalStore: com.fsck.k9.mailstore.LocalFolder getFolder(java.lang.String)>($r1);
+
+        return $r2;
+    }
+    public com.fsck.k9.mailstore.LocalFolder getFolder(java.lang.String)
+    {
+        com.fsck.k9.mailstore.LocalStore r0;
+        java.lang.String $r1;
+        com.fsck.k9.mailstore.LocalFolder $r2;
+
+        r0 := @this: com.fsck.k9.mailstore.LocalStore;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = new com.fsck.k9.mailstore.LocalFolder;
+
+        specialinvoke $r2.<com.fsck.k9.mailstore.LocalFolder: void <init>(com.fsck.k9.mailstore.LocalStore,java.lang.String)>(r0, $r1);
+
+        return $r2;
+    }
+    public java.util.Map getFoldersAndUids(java.util.List, boolean) throws com.fsck.k9.mail.MessagingException
+    {
+        com.fsck.k9.mailstore.LocalStore r0;
+        java.util.List r1;
+        boolean $z0;
+        java.util.HashMap r2;
+        com.fsck.k9.mailstore.LocalStore$23 $r3;
+
+        r0 := @this: com.fsck.k9.mailstore.LocalStore;
+
+        r1 := @parameter0: java.util.List;
+
+        $z0 := @parameter1: boolean;
+
+        r2 = new java.util.HashMap;
+
+        specialinvoke r2.<java.util.HashMap: void <init>()>();
+
+        $r3 = new com.fsck.k9.mailstore.LocalStore$23;
+
+        specialinvoke $r3.<com.fsck.k9.mailstore.LocalStore$23: void <init>(com.fsck.k9.mailstore.LocalStore,java.util.List,boolean,java.util.Map)>(r0, r1, $z0, r2);
+
+        specialinvoke r0.<com.fsck.k9.mailstore.LocalStore: void doBatchSetSelection(com.fsck.k9.mailstore.LocalStore$BatchSetSelection,int)>($r3, 500);
+
+        return r2;
+    }
+    public com.fsck.k9.message.extractors.MessageFulltextCreator getMessageFulltextCreator()
+    {
+        com.fsck.k9.mailstore.LocalStore r0;
+        com.fsck.k9.message.extractors.MessageFulltextCreator r1;
+
+        r0 := @this: com.fsck.k9.mailstore.LocalStore;
+
+        r1 = r0.<com.fsck.k9.mailstore.LocalStore: com.fsck.k9.message.extractors.MessageFulltextCreator messageFulltextCreator>;
+
+        return r1;
+    }
+    com.fsck.k9.message.extractors.MessagePreviewCreator getMessagePreviewCreator()
+    {
+        com.fsck.k9.mailstore.LocalStore r0;
+        com.fsck.k9.message.extractors.MessagePreviewCreator r1;
+
+        r0 := @this: com.fsck.k9.mailstore.LocalStore;
+
+        r1 = r0.<com.fsck.k9.mailstore.LocalStore: com.fsck.k9.message.extractors.MessagePreviewCreator messagePreviewCreator>;
+
+        return r1;
+    }
+    java.util.List getMessages(com.fsck.k9.mail.MessageRetrievalListener, com.fsck.k9.mailstore.LocalFolder, java.lang.String, java.lang.String[]) throws com.fsck.k9.mail.MessagingException
+    {
+        com.fsck.k9.mailstore.LocalStore r0;
+        com.fsck.k9.mail.MessageRetrievalListener r1;
+        com.fsck.k9.mailstore.LocalFolder $r2;
+        java.lang.String $r3;
+        java.lang.String[] $r4;
+        java.util.ArrayList r5;
+        com.fsck.k9.mailstore.LockableDatabase $r6;
+        com.fsck.k9.mailstore.LocalStore$13 $r7;
+        java.lang.Object $r8;
+        java.lang.Integer $r9;
+        int $i0;
+        java.util.List $r10;
+
+        r0 := @this: com.fsck.k9.mailstore.LocalStore;
+
+        r1 := @parameter0: com.fsck.k9.mail.MessageRetrievalListener;
+
+        $r2 := @parameter1: com.fsck.k9.mailstore.LocalFolder;
+
+        $r3 := @parameter2: java.lang.String;
+
+        $r4 := @parameter3: java.lang.String[];
+
+        r5 = new java.util.ArrayList;
+
+        specialinvoke r5.<java.util.ArrayList: void <init>()>();
+
+        $r6 = r0.<com.fsck.k9.mailstore.LocalStore: com.fsck.k9.mailstore.LockableDatabase database>;
+
+        $r7 = new com.fsck.k9.mailstore.LocalStore$13;
+
+        specialinvoke $r7.<com.fsck.k9.mailstore.LocalStore$13: void <init>(com.fsck.k9.mailstore.LocalStore,java.lang.String,java.lang.String[],com.fsck.k9.mailstore.LocalFolder,java.util.List,com.fsck.k9.mail.MessageRetrievalListener)>(r0, $r3, $r4, $r2, r5, r1);
+
+        $r8 = virtualinvoke $r6.<com.fsck.k9.mailstore.LockableDatabase: java.lang.Object execute(boolean,com.fsck.k9.mailstore.LockableDatabase$DbCallback)>(0, $r7);
+
+        $r9 = (java.lang.Integer) $r8;
+
+        $i0 = virtualinvoke $r9.<java.lang.Integer: int intValue()>();
+
+        if r1 == null goto label1;
+
+        interfaceinvoke r1.<com.fsck.k9.mail.MessageRetrievalListener: void messagesFinished(int)>($i0);
+
+     label1:
+        $r10 = staticinvoke <java.util.Collections: java.util.List unmodifiableList(java.util.List)>(r5);
+
+        return $r10;
+    }
+    public java.util.List getMessagesInThread(long) throws com.fsck.k9.mail.MessagingException
+    {
+        com.fsck.k9.mailstore.LocalStore r0;
+        long $l0;
+        com.fsck.k9.search.LocalSearch r1;
+        com.fsck.k9.search.SearchSpecification$Attribute $r2;
+        java.lang.String $r3;
+        com.fsck.k9.search.SearchSpecification$SearchField $r4;
+        java.util.List $r5;
+
+        r0 := @this: com.fsck.k9.mailstore.LocalStore;
+
+        $l0 := @parameter0: long;
+
+        $r3 = staticinvoke <java.lang.Long: java.lang.String toString(long)>($l0);
+
+        r1 = new com.fsck.k9.search.LocalSearch;
+
+        specialinvoke r1.<com.fsck.k9.search.LocalSearch: void <init>()>();
+
+        $r4 = <com.fsck.k9.search.SearchSpecification$SearchField: com.fsck.k9.search.SearchSpecification$SearchField THREAD_ID>;
+
+        $r2 = <com.fsck.k9.search.SearchSpecification$Attribute: com.fsck.k9.search.SearchSpecification$Attribute EQUALS>;
+
+        virtualinvoke r1.<com.fsck.k9.search.LocalSearch: void and(com.fsck.k9.search.SearchSpecification$SearchField,java.lang.String,com.fsck.k9.search.SearchSpecification$Attribute)>($r4, $r3, $r2);
+
+        $r5 = virtualinvoke r0.<com.fsck.k9.mailstore.LocalStore: java.util.List searchForMessages(com.fsck.k9.mail.MessageRetrievalListener,com.fsck.k9.search.LocalSearch)>(null, r1);
+
+        return $r5;
+    }
+    public java.util.List getPendingCommands() throws com.fsck.k9.mail.MessagingException
+    {
+        com.fsck.k9.mailstore.LocalStore r0;
+        com.fsck.k9.mailstore.LocalStore$9 $r1;
+        java.lang.Object $r2;
+        com.fsck.k9.mailstore.LockableDatabase $r3;
+        java.util.List $r4;
+
+        r0 := @this: com.fsck.k9.mailstore.LocalStore;
+
+        $r3 = r0.<com.fsck.k9.mailstore.LocalStore: com.fsck.k9.mailstore.LockableDatabase database>;
+
+        $r1 = new com.fsck.k9.mailstore.LocalStore$9;
+
+        specialinvoke $r1.<com.fsck.k9.mailstore.LocalStore$9: void <init>(com.fsck.k9.mailstore.LocalStore)>(r0);
+
+        $r2 = virtualinvoke $r3.<com.fsck.k9.mailstore.LockableDatabase: java.lang.Object execute(boolean,com.fsck.k9.mailstore.LockableDatabase$DbCallback)>(0, $r1);
+
+        $r4 = (java.util.List) $r2;
+
+        return $r4;
+    }
+    public java.util.List getPersonalNamespaces(boolean) throws com.fsck.k9.mail.MessagingException
+    {
+        com.fsck.k9.mailstore.LocalStore r0;
+        boolean $z0;
+        com.fsck.k9.mailstore.LockableDatabase$WrappedException r1;
+        java.util.LinkedList r2;
+        com.fsck.k9.mailstore.LocalStore$6 $r3;
+        java.lang.Throwable $r4;
+        com.fsck.k9.mailstore.LockableDatabase $r5;
+        com.fsck.k9.mail.MessagingException $r6;
+
+        r0 := @this: com.fsck.k9.mailstore.LocalStore;
+
+        $z0 := @parameter0: boolean;
+
+        r2 = new java.util.LinkedList;
+
+        specialinvoke r2.<java.util.LinkedList: void <init>()>();
+
+        $r5 = r0.<com.fsck.k9.mailstore.LocalStore: com.fsck.k9.mailstore.LockableDatabase database>;
+
+        $r3 = new com.fsck.k9.mailstore.LocalStore$6;
+
+     label1:
+        specialinvoke $r3.<com.fsck.k9.mailstore.LocalStore$6: void <init>(com.fsck.k9.mailstore.LocalStore,java.util.List)>(r0, r2);
+
+        virtualinvoke $r5.<com.fsck.k9.mailstore.LockableDatabase: java.lang.Object execute(boolean,com.fsck.k9.mailstore.LockableDatabase$DbCallback)>(0, $r3);
+
+     label2:
+        return r2;
+
+     label3:
+        r1 := @caughtexception;
+
+        $r4 = virtualinvoke r1.<com.fsck.k9.mailstore.LockableDatabase$WrappedException: java.lang.Throwable getCause()>();
+
+        $r6 = (com.fsck.k9.mail.MessagingException) $r4;
+
+        throw $r6;
+
+        catch com.fsck.k9.mailstore.LockableDatabase$WrappedException from label1 to label2 with label3;
+    }
+    public long getSize() throws com.fsck.k9.mail.MessagingException
+    {
+        com.fsck.k9.mailstore.LocalStore r0;
+        com.fsck.k9.mailstore.LocalStore$1 $r1;
+        android.content.Context $r2;
+        com.fsck.k9.mailstore.StorageManager $r3;
+        com.fsck.k9.Account $r4;
+        java.lang.String $r5, $r7;
+        com.fsck.k9.mailstore.LockableDatabase $r6;
+        java.io.File $r8;
+        java.lang.Object $r9;
+        java.lang.Long $r10;
+        long $l0;
+
+        r0 := @this: com.fsck.k9.mailstore.LocalStore;
+
+        $r2 = r0.<com.fsck.k9.mailstore.LocalStore: android.content.Context context>;
+
+        $r3 = staticinvoke <com.fsck.k9.mailstore.StorageManager: com.fsck.k9.mailstore.StorageManager getInstance(android.content.Context)>($r2);
+
+        $r4 = r0.<com.fsck.k9.mailstore.LocalStore: com.fsck.k9.Account account>;
+
+        $r5 = virtualinvoke $r4.<com.fsck.k9.Account: java.lang.String getUuid()>();
+
+        $r6 = r0.<com.fsck.k9.mailstore.LocalStore: com.fsck.k9.mailstore.LockableDatabase database>;
+
+        $r7 = virtualinvoke $r6.<com.fsck.k9.mailstore.LockableDatabase: java.lang.String getStorageProviderId()>();
+
+        $r8 = virtualinvoke $r3.<com.fsck.k9.mailstore.StorageManager: java.io.File getAttachmentDirectory(java.lang.String,java.lang.String)>($r5, $r7);
+
+        $r6 = r0.<com.fsck.k9.mailstore.LocalStore: com.fsck.k9.mailstore.LockableDatabase database>;
+
+        $r1 = new com.fsck.k9.mailstore.LocalStore$1;
+
+        specialinvoke $r1.<com.fsck.k9.mailstore.LocalStore$1: void <init>(com.fsck.k9.mailstore.LocalStore,java.io.File,com.fsck.k9.mailstore.StorageManager)>(r0, $r8, $r3);
+
+        $r9 = virtualinvoke $r6.<com.fsck.k9.mailstore.LockableDatabase: java.lang.Object execute(boolean,com.fsck.k9.mailstore.LockableDatabase$DbCallback)>(0, $r1);
+
+        $r10 = (java.lang.Long) $r9;
+
+        $l0 = virtualinvoke $r10.<java.lang.Long: long longValue()>();
+
+        return $l0;
+    }
+    protected com.fsck.k9.preferences.Storage getStorage()
+    {
+        com.fsck.k9.mailstore.LocalStore r0;
+        android.content.Context $r1;
+        com.fsck.k9.Preferences $r2;
+        com.fsck.k9.preferences.Storage $r3;
+
+        r0 := @this: com.fsck.k9.mailstore.LocalStore;
+
+        $r1 = r0.<com.fsck.k9.mailstore.LocalStore: android.content.Context context>;
+
+        $r2 = staticinvoke <com.fsck.k9.Preferences: com.fsck.k9.Preferences getPreferences(android.content.Context)>($r1);
+
+        $r3 = virtualinvoke $r2.<com.fsck.k9.Preferences: com.fsck.k9.preferences.Storage getStorage()>();
+
+        return $r3;
+    }
+    public boolean isCopyCapable()
+    {
+        com.fsck.k9.mailstore.LocalStore r0;
+
+        r0 := @this: com.fsck.k9.mailstore.LocalStore;
+
+        return 1;
+    }
+    public boolean isMoveCapable()
+    {
+        com.fsck.k9.mailstore.LocalStore r0;
+
+        r0 := @this: com.fsck.k9.mailstore.LocalStore;
+
+        return 1;
+    }
+    void notifyChange()
+    {
+        com.fsck.k9.mailstore.LocalStore r0;
+        android.net.Uri $r1;
+        java.lang.StringBuilder $r2;
+        com.fsck.k9.Account $r3;
+        java.lang.String $r4;
+        android.content.ContentResolver $r5;
+
+        r0 := @this: com.fsck.k9.mailstore.LocalStore;
+
+        $r1 = <com.fsck.k9.provider.EmailProvider: android.net.Uri CONTENT_URI>;
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("account/");
+
+        $r3 = r0.<com.fsck.k9.mailstore.LocalStore: com.fsck.k9.Account account>;
+
+        $r4 = virtualinvoke $r3.<com.fsck.k9.Account: java.lang.String getUuid()>();
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("/messages");
+
+        $r4 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r1 = staticinvoke <android.net.Uri: android.net.Uri withAppendedPath(android.net.Uri,java.lang.String)>($r1, $r4);
+
+        $r5 = r0.<com.fsck.k9.mailstore.LocalStore: android.content.ContentResolver contentResolver>;
+
+        virtualinvoke $r5.<android.content.ContentResolver: void notifyChange(android.net.Uri,android.database.ContentObserver)>($r1, null);
+
+        return;
+    }
+    public void recreate() throws com.fsck.k9.mailstore.UnavailableStorageException
+    {
+        com.fsck.k9.mailstore.LocalStore r0;
+        com.fsck.k9.mailstore.LockableDatabase $r1;
+
+        r0 := @this: com.fsck.k9.mailstore.LocalStore;
+
+        $r1 = r0.<com.fsck.k9.mailstore.LocalStore: com.fsck.k9.mailstore.LockableDatabase database>;
+
+        virtualinvoke $r1.<com.fsck.k9.mailstore.LockableDatabase: void recreate()>();
+
+        return;
+    }
+    public void removePendingCommand(com.fsck.k9.controller.MessagingControllerCommands$PendingCommand) throws com.fsck.k9.mail.MessagingException
+    {
+        com.fsck.k9.mailstore.LocalStore r0;
+        com.fsck.k9.controller.MessagingControllerCommands$PendingCommand $r1;
+        com.fsck.k9.mailstore.LockableDatabase $r2;
+        com.fsck.k9.mailstore.LocalStore$11 $r3;
+
+        r0 := @this: com.fsck.k9.mailstore.LocalStore;
+
+        $r1 := @parameter0: com.fsck.k9.controller.MessagingControllerCommands$PendingCommand;
+
+        $r2 = r0.<com.fsck.k9.mailstore.LocalStore: com.fsck.k9.mailstore.LockableDatabase database>;
+
+        $r3 = new com.fsck.k9.mailstore.LocalStore$11;
+
+        specialinvoke $r3.<com.fsck.k9.mailstore.LocalStore$11: void <init>(com.fsck.k9.mailstore.LocalStore,com.fsck.k9.controller.MessagingControllerCommands$PendingCommand)>(r0, $r1);
+
+        virtualinvoke $r2.<com.fsck.k9.mailstore.LockableDatabase: java.lang.Object execute(boolean,com.fsck.k9.mailstore.LockableDatabase$DbCallback)>(0, $r3);
+
+        return;
+    }
+    public void removePendingCommands() throws com.fsck.k9.mail.MessagingException
+    {
+        com.fsck.k9.mailstore.LocalStore r0;
+        com.fsck.k9.mailstore.LockableDatabase $r1;
+        com.fsck.k9.mailstore.LocalStore$12 $r2;
+
+        r0 := @this: com.fsck.k9.mailstore.LocalStore;
+
+        $r1 = r0.<com.fsck.k9.mailstore.LocalStore: com.fsck.k9.mailstore.LockableDatabase database>;
+
+        $r2 = new com.fsck.k9.mailstore.LocalStore$12;
+
+        specialinvoke $r2.<com.fsck.k9.mailstore.LocalStore$12: void <init>(com.fsck.k9.mailstore.LocalStore)>(r0);
+
+        virtualinvoke $r1.<com.fsck.k9.mailstore.LockableDatabase: java.lang.Object execute(boolean,com.fsck.k9.mailstore.LockableDatabase$DbCallback)>(0, $r2);
+
+        return;
+    }
+    public void resetVisibleLimits(int) throws com.fsck.k9.mail.MessagingException
+    {
+        com.fsck.k9.mailstore.LocalStore r0;
+        int $i0;
+        android.content.ContentValues r1;
+        com.fsck.k9.mailstore.LocalStore$8 $r2;
+        java.lang.String $r3;
+        com.fsck.k9.mailstore.LocalFolder$MoreMessages $r4;
+        com.fsck.k9.mailstore.LockableDatabase $r5;
+
+        r0 := @this: com.fsck.k9.mailstore.LocalStore;
+
+        $i0 := @parameter0: int;
+
+        r1 = new android.content.ContentValues;
+
+        specialinvoke r1.<android.content.ContentValues: void <init>()>();
+
+        $r3 = staticinvoke <java.lang.Integer: java.lang.String toString(int)>($i0);
+
+        virtualinvoke r1.<android.content.ContentValues: void put(java.lang.String,java.lang.String)>("visible_limit", $r3);
+
+        $r4 = <com.fsck.k9.mailstore.LocalFolder$MoreMessages: com.fsck.k9.mailstore.LocalFolder$MoreMessages UNKNOWN>;
+
+        $r3 = virtualinvoke $r4.<com.fsck.k9.mailstore.LocalFolder$MoreMessages: java.lang.String getDatabaseName()>();
+
+        virtualinvoke r1.<android.content.ContentValues: void put(java.lang.String,java.lang.String)>("more_messages", $r3);
+
+        $r5 = r0.<com.fsck.k9.mailstore.LocalStore: com.fsck.k9.mailstore.LockableDatabase database>;
+
+        $r2 = new com.fsck.k9.mailstore.LocalStore$8;
+
+        specialinvoke $r2.<com.fsck.k9.mailstore.LocalStore$8: void <init>(com.fsck.k9.mailstore.LocalStore,android.content.ContentValues)>(r0, r1);
+
+        virtualinvoke $r5.<com.fsck.k9.mailstore.LockableDatabase: java.lang.Object execute(boolean,com.fsck.k9.mailstore.LockableDatabase$DbCallback)>(0, $r2);
+
+        return;
+    }
+    public java.util.List searchForMessages(com.fsck.k9.mail.MessageRetrievalListener, com.fsck.k9.search.LocalSearch) throws com.fsck.k9.mail.MessagingException
+    {
+        com.fsck.k9.mailstore.LocalStore r0;
+        com.fsck.k9.mail.MessageRetrievalListener r1;
+        com.fsck.k9.search.LocalSearch $r2;
+        java.lang.StringBuilder r3, $r11;
+        java.util.ArrayList r4;
+        com.fsck.k9.Account $r5;
+        com.fsck.k9.search.ConditionsTreeNode $r6;
+        java.lang.String[] $r7;
+        java.lang.String $r8, $r10;
+        int $i0;
+        java.lang.Object[] $r9;
+        boolean $z0;
+        java.util.List $r12;
+
+        r0 := @this: com.fsck.k9.mailstore.LocalStore;
+
+        r1 := @parameter0: com.fsck.k9.mail.MessageRetrievalListener;
+
+        $r2 := @parameter1: com.fsck.k9.search.LocalSearch;
+
+        r3 = new java.lang.StringBuilder;
+
+        specialinvoke r3.<java.lang.StringBuilder: void <init>()>();
+
+        r4 = new java.util.ArrayList;
+
+        specialinvoke r4.<java.util.ArrayList: void <init>()>();
+
+        $r5 = r0.<com.fsck.k9.mailstore.LocalStore: com.fsck.k9.Account account>;
+
+        $r6 = virtualinvoke $r2.<com.fsck.k9.search.LocalSearch: com.fsck.k9.search.ConditionsTreeNode getConditions()>();
+
+        staticinvoke <com.fsck.k9.search.SqlQueryBuilder: void buildWhereClause(com.fsck.k9.Account,com.fsck.k9.search.ConditionsTreeNode,java.lang.StringBuilder,java.util.List)>($r5, $r6, r3, r4);
+
+        $r7 = newarray (java.lang.String)[1];
+
+        $r7[0] = "id";
+
+        $r8 = virtualinvoke r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r8 = staticinvoke <com.fsck.k9.search.SqlQueryBuilder: java.lang.String addPrefixToSelection(java.lang.String[],java.lang.String,java.lang.String)>($r7, "messages.", $r8);
+
+        $i0 = interfaceinvoke r4.<java.util.List: int size()>();
+
+        $r7 = newarray (java.lang.String)[$i0];
+
+        $r9 = interfaceinvoke r4.<java.util.List: java.lang.Object[] toArray(java.lang.Object[])>($r7);
+
+        $r7 = (java.lang.String[]) $r9;
+
+        r3 = new java.lang.StringBuilder;
+
+        specialinvoke r3.<java.lang.StringBuilder: void <init>()>();
+
+        r3 = virtualinvoke r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("SELECT ");
+
+        $r10 = <com.fsck.k9.mailstore.LocalStore: java.lang.String GET_MESSAGES_COLS>;
+
+        r3 = virtualinvoke r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r10);
+
+        r3 = virtualinvoke r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("FROM messages LEFT JOIN threads ON (threads.message_id = messages.id) LEFT JOIN message_parts ON (message_parts.id = messages.message_part_id) LEFT JOIN folders ON (folders.id = messages.folder_id) WHERE (empty = 0 AND deleted = 0)");
+
+        $z0 = staticinvoke <android.text.TextUtils: boolean isEmpty(java.lang.CharSequence)>($r8);
+
+        if $z0 != 0 goto label2;
+
+        $r11 = new java.lang.StringBuilder;
+
+        specialinvoke $r11.<java.lang.StringBuilder: void <init>()>();
+
+        $r11 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" AND (");
+
+        $r11 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r8);
+
+        $r11 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(")");
+
+        $r8 = virtualinvoke $r11.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label1:
+        r3 = virtualinvoke r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r8);
+
+        r3 = virtualinvoke r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ORDER BY date DESC");
+
+        $r8 = virtualinvoke r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r9 = newarray (java.lang.Object)[1];
+
+        $r9[0] = $r8;
+
+        staticinvoke <timber.log.Timber: void d(java.lang.String,java.lang.Object[])>("Query = %s", $r9);
+
+        $r12 = virtualinvoke r0.<com.fsck.k9.mailstore.LocalStore: java.util.List getMessages(com.fsck.k9.mail.MessageRetrievalListener,com.fsck.k9.mailstore.LocalFolder,java.lang.String,java.lang.String[])>(r1, null, $r8, $r7);
+
+        return $r12;
+
+     label2:
+        $r8 = "";
+
+        goto label1;
+    }
+    public void setFlag(java.util.List, com.fsck.k9.mail.Flag, boolean) throws com.fsck.k9.mail.MessagingException
+    {
+        com.fsck.k9.mailstore.LocalStore r0;
+        java.util.List r1;
+        com.fsck.k9.mail.Flag $r2;
+        boolean $z0;
+        android.content.ContentValues r3;
+        java.lang.String $r4;
+        java.lang.Boolean $r5;
+        com.fsck.k9.mailstore.LocalStore$21 $r6;
+
+        r0 := @this: com.fsck.k9.mailstore.LocalStore;
+
+        r1 := @parameter0: java.util.List;
+
+        $r2 := @parameter1: com.fsck.k9.mail.Flag;
+
+        $z0 := @parameter2: boolean;
+
+        r3 = new android.content.ContentValues;
+
+        specialinvoke r3.<android.content.ContentValues: void <init>()>();
+
+        $r4 = staticinvoke <com.fsck.k9.mailstore.LocalStore: java.lang.String getColumnNameForFlag(com.fsck.k9.mail.Flag)>($r2);
+
+        $r5 = staticinvoke <java.lang.Boolean: java.lang.Boolean valueOf(boolean)>($z0);
+
+        virtualinvoke r3.<android.content.ContentValues: void put(java.lang.String,java.lang.Boolean)>($r4, $r5);
+
+        $r6 = new com.fsck.k9.mailstore.LocalStore$21;
+
+        specialinvoke $r6.<com.fsck.k9.mailstore.LocalStore$21: void <init>(com.fsck.k9.mailstore.LocalStore,java.util.List,android.content.ContentValues)>(r0, r1, r3);
+
+        specialinvoke r0.<com.fsck.k9.mailstore.LocalStore: void doBatchSetSelection(com.fsck.k9.mailstore.LocalStore$BatchSetSelection,int)>($r6, 500);
+
+        return;
+    }
+    public void setFlagForThreads(java.util.List, com.fsck.k9.mail.Flag, boolean) throws com.fsck.k9.mail.MessagingException
+    {
+        com.fsck.k9.mailstore.LocalStore r0;
+        java.util.List r1;
+        com.fsck.k9.mail.Flag $r2;
+        boolean $z0;
+        com.fsck.k9.mailstore.LocalStore$22 $r3;
+        java.lang.String $r4;
+
+        r0 := @this: com.fsck.k9.mailstore.LocalStore;
+
+        r1 := @parameter0: java.util.List;
+
+        $r2 := @parameter1: com.fsck.k9.mail.Flag;
+
+        $z0 := @parameter2: boolean;
+
+        $r4 = staticinvoke <com.fsck.k9.mailstore.LocalStore: java.lang.String getColumnNameForFlag(com.fsck.k9.mail.Flag)>($r2);
+
+        $r3 = new com.fsck.k9.mailstore.LocalStore$22;
+
+        specialinvoke $r3.<com.fsck.k9.mailstore.LocalStore$22: void <init>(com.fsck.k9.mailstore.LocalStore,java.util.List,java.lang.String,boolean)>(r0, r1, $r4, $z0);
+
+        specialinvoke r0.<com.fsck.k9.mailstore.LocalStore: void doBatchSetSelection(com.fsck.k9.mailstore.LocalStore$BatchSetSelection,int)>($r3, 500);
+
+        return;
+    }
+    public void switchLocalStorage(java.lang.String) throws com.fsck.k9.mail.MessagingException
+    {
+        com.fsck.k9.mailstore.LocalStore r0;
+        java.lang.String $r1;
+        com.fsck.k9.mailstore.LockableDatabase $r2;
+
+        r0 := @this: com.fsck.k9.mailstore.LocalStore;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = r0.<com.fsck.k9.mailstore.LocalStore: com.fsck.k9.mailstore.LockableDatabase database>;
+
+        virtualinvoke $r2.<com.fsck.k9.mailstore.LockableDatabase: void switchProvider(java.lang.String)>($r1);
+
+        return;
+    }

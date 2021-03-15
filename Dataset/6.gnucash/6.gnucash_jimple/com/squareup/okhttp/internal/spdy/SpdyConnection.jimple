@@ -1,0 +1,2236 @@
+com.squareup.okhttp.internal.spdy.SpdyConnection extends java.lang.Object implements java.io.Closeable
+static final boolean $assertionsDisabled
+private static final int OKHTTP_CLIENT_WINDOW_SIZE
+private static final java.util.concurrent.ExecutorService executor
+long bytesLeftInWriteWindow
+final boolean client
+private final java.util.Set currentPushRequests
+final com.squareup.okhttp.internal.spdy.FrameWriter frameWriter
+private final com.squareup.okhttp.internal.spdy.IncomingStreamHandler handler
+private final java.lang.String hostName
+private long idleStartTimeNs
+private int lastGoodStreamId
+private int nextPingId
+private int nextStreamId
+final com.squareup.okhttp.internal.spdy.Settings okHttpSettings
+final com.squareup.okhttp.internal.spdy.Settings peerSettings
+private java.util.Map pings
+final com.squareup.okhttp.Protocol protocol
+private final java.util.concurrent.ExecutorService pushExecutor
+private final com.squareup.okhttp.internal.spdy.PushObserver pushObserver
+final com.squareup.okhttp.internal.spdy.SpdyConnection$Reader readerRunnable
+private boolean receivedInitialPeerSettings
+private boolean shutdown
+final java.net.Socket socket
+private final java.util.Map streams
+long unacknowledgedBytesRead
+final com.squareup.okhttp.internal.spdy.Variant variant
+    static void <clinit>()
+    {
+        java.util.concurrent.ThreadPoolExecutor $r0;
+        java.util.concurrent.TimeUnit $r1;
+        java.util.concurrent.SynchronousQueue $r2;
+        java.lang.Class $r3;
+        boolean $z0;
+        java.util.concurrent.ThreadFactory $r4;
+
+        $r3 = class "Lcom/squareup/okhttp/internal/spdy/SpdyConnection;";
+
+        $z0 = virtualinvoke $r3.<java.lang.Class: boolean desiredAssertionStatus()>();
+
+        if $z0 != 0 goto label2;
+
+        $z0 = 1;
+
+     label1:
+        <com.squareup.okhttp.internal.spdy.SpdyConnection: boolean $assertionsDisabled> = $z0;
+
+        $r0 = new java.util.concurrent.ThreadPoolExecutor;
+
+        $r1 = <java.util.concurrent.TimeUnit: java.util.concurrent.TimeUnit SECONDS>;
+
+        $r2 = new java.util.concurrent.SynchronousQueue;
+
+        specialinvoke $r2.<java.util.concurrent.SynchronousQueue: void <init>()>();
+
+        $r4 = staticinvoke <com.squareup.okhttp.internal.Util: java.util.concurrent.ThreadFactory threadFactory(java.lang.String,boolean)>("OkHttp SpdyConnection", 1);
+
+        specialinvoke $r0.<java.util.concurrent.ThreadPoolExecutor: void <init>(int,int,long,java.util.concurrent.TimeUnit,java.util.concurrent.BlockingQueue,java.util.concurrent.ThreadFactory)>(0, 2147483647, 60L, $r1, $r2, $r4);
+
+        <com.squareup.okhttp.internal.spdy.SpdyConnection: java.util.concurrent.ExecutorService executor> = $r0;
+
+        return;
+
+     label2:
+        $z0 = 0;
+
+        goto label1;
+    }
+    private void <init>(com.squareup.okhttp.internal.spdy.SpdyConnection$Builder) throws java.io.IOException
+    {
+        com.squareup.okhttp.internal.spdy.SpdyConnection r0;
+        com.squareup.okhttp.internal.spdy.SpdyConnection$Builder $r1;
+        java.util.concurrent.TimeUnit $r2;
+        java.util.concurrent.LinkedBlockingQueue $r3;
+        java.lang.String $r4;
+        byte $b0, $b2;
+        java.util.HashMap $r5;
+        long $l1;
+        com.squareup.okhttp.internal.spdy.Settings $r6;
+        java.util.LinkedHashSet $r7;
+        com.squareup.okhttp.Protocol $r8, $r11;
+        com.squareup.okhttp.internal.spdy.PushObserver $r9;
+        boolean $z0;
+        com.squareup.okhttp.internal.spdy.IncomingStreamHandler $r10;
+        int $i3;
+        com.squareup.okhttp.internal.spdy.Http2 $r12;
+        java.util.concurrent.ThreadPoolExecutor $r13;
+        java.lang.Object[] $r14;
+        java.util.concurrent.ThreadFactory $r15;
+        java.net.Socket $r16;
+        com.squareup.okhttp.internal.spdy.Variant $r17;
+        okio.Sink $r18;
+        okio.BufferedSink $r19;
+        com.squareup.okhttp.internal.spdy.FrameWriter $r20;
+        com.squareup.okhttp.internal.spdy.SpdyConnection$Reader $r21;
+        java.lang.Thread $r22;
+        com.squareup.okhttp.internal.spdy.Spdy3 $r23;
+        java.lang.AssertionError $r24;
+
+        r0 := @this: com.squareup.okhttp.internal.spdy.SpdyConnection;
+
+        $r1 := @parameter0: com.squareup.okhttp.internal.spdy.SpdyConnection$Builder;
+
+        $b0 = 2;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        $r5 = new java.util.HashMap;
+
+        specialinvoke $r5.<java.util.HashMap: void <init>()>();
+
+        r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: java.util.Map streams> = $r5;
+
+        $l1 = staticinvoke <java.lang.System: long nanoTime()>();
+
+        r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: long idleStartTimeNs> = $l1;
+
+        r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: long unacknowledgedBytesRead> = 0L;
+
+        $r6 = new com.squareup.okhttp.internal.spdy.Settings;
+
+        specialinvoke $r6.<com.squareup.okhttp.internal.spdy.Settings: void <init>()>();
+
+        r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: com.squareup.okhttp.internal.spdy.Settings okHttpSettings> = $r6;
+
+        $r6 = new com.squareup.okhttp.internal.spdy.Settings;
+
+        specialinvoke $r6.<com.squareup.okhttp.internal.spdy.Settings: void <init>()>();
+
+        r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: com.squareup.okhttp.internal.spdy.Settings peerSettings> = $r6;
+
+        r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: boolean receivedInitialPeerSettings> = 0;
+
+        $r7 = new java.util.LinkedHashSet;
+
+        specialinvoke $r7.<java.util.LinkedHashSet: void <init>()>();
+
+        r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: java.util.Set currentPushRequests> = $r7;
+
+        $r8 = staticinvoke <com.squareup.okhttp.internal.spdy.SpdyConnection$Builder: com.squareup.okhttp.Protocol access$000(com.squareup.okhttp.internal.spdy.SpdyConnection$Builder)>($r1);
+
+        r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: com.squareup.okhttp.Protocol protocol> = $r8;
+
+        $r9 = staticinvoke <com.squareup.okhttp.internal.spdy.SpdyConnection$Builder: com.squareup.okhttp.internal.spdy.PushObserver access$100(com.squareup.okhttp.internal.spdy.SpdyConnection$Builder)>($r1);
+
+        r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: com.squareup.okhttp.internal.spdy.PushObserver pushObserver> = $r9;
+
+        $z0 = staticinvoke <com.squareup.okhttp.internal.spdy.SpdyConnection$Builder: boolean access$200(com.squareup.okhttp.internal.spdy.SpdyConnection$Builder)>($r1);
+
+        r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: boolean client> = $z0;
+
+        $r10 = staticinvoke <com.squareup.okhttp.internal.spdy.SpdyConnection$Builder: com.squareup.okhttp.internal.spdy.IncomingStreamHandler access$300(com.squareup.okhttp.internal.spdy.SpdyConnection$Builder)>($r1);
+
+        r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: com.squareup.okhttp.internal.spdy.IncomingStreamHandler handler> = $r10;
+
+        $z0 = staticinvoke <com.squareup.okhttp.internal.spdy.SpdyConnection$Builder: boolean access$200(com.squareup.okhttp.internal.spdy.SpdyConnection$Builder)>($r1);
+
+        if $z0 == 0 goto label6;
+
+        $b2 = 1;
+
+     label1:
+        r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: int nextStreamId> = $b2;
+
+        $z0 = staticinvoke <com.squareup.okhttp.internal.spdy.SpdyConnection$Builder: boolean access$200(com.squareup.okhttp.internal.spdy.SpdyConnection$Builder)>($r1);
+
+        if $z0 == 0 goto label2;
+
+        $r8 = r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: com.squareup.okhttp.Protocol protocol>;
+
+        $r11 = <com.squareup.okhttp.Protocol: com.squareup.okhttp.Protocol HTTP_2>;
+
+        if $r8 != $r11 goto label2;
+
+        $i3 = r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: int nextStreamId>;
+
+        $i3 = $i3 + 2;
+
+        r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: int nextStreamId> = $i3;
+
+     label2:
+        $z0 = staticinvoke <com.squareup.okhttp.internal.spdy.SpdyConnection$Builder: boolean access$200(com.squareup.okhttp.internal.spdy.SpdyConnection$Builder)>($r1);
+
+        if $z0 == 0 goto label3;
+
+        $b0 = 1;
+
+     label3:
+        r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: int nextPingId> = $b0;
+
+        $z0 = staticinvoke <com.squareup.okhttp.internal.spdy.SpdyConnection$Builder: boolean access$200(com.squareup.okhttp.internal.spdy.SpdyConnection$Builder)>($r1);
+
+        if $z0 == 0 goto label4;
+
+        $r6 = r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: com.squareup.okhttp.internal.spdy.Settings okHttpSettings>;
+
+        virtualinvoke $r6.<com.squareup.okhttp.internal.spdy.Settings: com.squareup.okhttp.internal.spdy.Settings set(int,int,int)>(7, 0, 16777216);
+
+     label4:
+        $r4 = staticinvoke <com.squareup.okhttp.internal.spdy.SpdyConnection$Builder: java.lang.String access$400(com.squareup.okhttp.internal.spdy.SpdyConnection$Builder)>($r1);
+
+        r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: java.lang.String hostName> = $r4;
+
+        $r8 = r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: com.squareup.okhttp.Protocol protocol>;
+
+        $r11 = <com.squareup.okhttp.Protocol: com.squareup.okhttp.Protocol HTTP_2>;
+
+        if $r8 != $r11 goto label7;
+
+        $r12 = new com.squareup.okhttp.internal.spdy.Http2;
+
+        specialinvoke $r12.<com.squareup.okhttp.internal.spdy.Http2: void <init>()>();
+
+        r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: com.squareup.okhttp.internal.spdy.Variant variant> = $r12;
+
+        $r13 = new java.util.concurrent.ThreadPoolExecutor;
+
+        $r2 = <java.util.concurrent.TimeUnit: java.util.concurrent.TimeUnit SECONDS>;
+
+        $r3 = new java.util.concurrent.LinkedBlockingQueue;
+
+        specialinvoke $r3.<java.util.concurrent.LinkedBlockingQueue: void <init>()>();
+
+        $r14 = newarray (java.lang.Object)[1];
+
+        $r4 = r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: java.lang.String hostName>;
+
+        $r14[0] = $r4;
+
+        $r4 = staticinvoke <java.lang.String: java.lang.String format(java.lang.String,java.lang.Object[])>("OkHttp %s Push Observer", $r14);
+
+        $r15 = staticinvoke <com.squareup.okhttp.internal.Util: java.util.concurrent.ThreadFactory threadFactory(java.lang.String,boolean)>($r4, 1);
+
+        specialinvoke $r13.<java.util.concurrent.ThreadPoolExecutor: void <init>(int,int,long,java.util.concurrent.TimeUnit,java.util.concurrent.BlockingQueue,java.util.concurrent.ThreadFactory)>(0, 1, 60L, $r2, $r3, $r15);
+
+        r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: java.util.concurrent.ExecutorService pushExecutor> = $r13;
+
+        $r6 = r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: com.squareup.okhttp.internal.spdy.Settings peerSettings>;
+
+        virtualinvoke $r6.<com.squareup.okhttp.internal.spdy.Settings: com.squareup.okhttp.internal.spdy.Settings set(int,int,int)>(7, 0, 65535);
+
+        $r6 = r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: com.squareup.okhttp.internal.spdy.Settings peerSettings>;
+
+        virtualinvoke $r6.<com.squareup.okhttp.internal.spdy.Settings: com.squareup.okhttp.internal.spdy.Settings set(int,int,int)>(5, 0, 16384);
+
+     label5:
+        $r6 = r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: com.squareup.okhttp.internal.spdy.Settings peerSettings>;
+
+        $i3 = virtualinvoke $r6.<com.squareup.okhttp.internal.spdy.Settings: int getInitialWindowSize(int)>(65536);
+
+        $l1 = (long) $i3;
+
+        r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: long bytesLeftInWriteWindow> = $l1;
+
+        $r16 = staticinvoke <com.squareup.okhttp.internal.spdy.SpdyConnection$Builder: java.net.Socket access$500(com.squareup.okhttp.internal.spdy.SpdyConnection$Builder)>($r1);
+
+        r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: java.net.Socket socket> = $r16;
+
+        $r17 = r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: com.squareup.okhttp.internal.spdy.Variant variant>;
+
+        $r16 = staticinvoke <com.squareup.okhttp.internal.spdy.SpdyConnection$Builder: java.net.Socket access$500(com.squareup.okhttp.internal.spdy.SpdyConnection$Builder)>($r1);
+
+        $r18 = staticinvoke <okio.Okio: okio.Sink sink(java.net.Socket)>($r16);
+
+        $r19 = staticinvoke <okio.Okio: okio.BufferedSink buffer(okio.Sink)>($r18);
+
+        $z0 = r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: boolean client>;
+
+        $r20 = interfaceinvoke $r17.<com.squareup.okhttp.internal.spdy.Variant: com.squareup.okhttp.internal.spdy.FrameWriter newWriter(okio.BufferedSink,boolean)>($r19, $z0);
+
+        r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: com.squareup.okhttp.internal.spdy.FrameWriter frameWriter> = $r20;
+
+        $r21 = new com.squareup.okhttp.internal.spdy.SpdyConnection$Reader;
+
+        specialinvoke $r21.<com.squareup.okhttp.internal.spdy.SpdyConnection$Reader: void <init>(com.squareup.okhttp.internal.spdy.SpdyConnection,com.squareup.okhttp.internal.spdy.SpdyConnection$1)>(r0, null);
+
+        r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: com.squareup.okhttp.internal.spdy.SpdyConnection$Reader readerRunnable> = $r21;
+
+        $r22 = new java.lang.Thread;
+
+        $r21 = r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: com.squareup.okhttp.internal.spdy.SpdyConnection$Reader readerRunnable>;
+
+        specialinvoke $r22.<java.lang.Thread: void <init>(java.lang.Runnable)>($r21);
+
+        virtualinvoke $r22.<java.lang.Thread: void start()>();
+
+        return;
+
+     label6:
+        $b2 = 2;
+
+        goto label1;
+
+     label7:
+        $r8 = r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: com.squareup.okhttp.Protocol protocol>;
+
+        $r11 = <com.squareup.okhttp.Protocol: com.squareup.okhttp.Protocol SPDY_3>;
+
+        if $r8 != $r11 goto label8;
+
+        $r23 = new com.squareup.okhttp.internal.spdy.Spdy3;
+
+        specialinvoke $r23.<com.squareup.okhttp.internal.spdy.Spdy3: void <init>()>();
+
+        r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: com.squareup.okhttp.internal.spdy.Variant variant> = $r23;
+
+        r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: java.util.concurrent.ExecutorService pushExecutor> = null;
+
+        goto label5;
+
+     label8:
+        $r24 = new java.lang.AssertionError;
+
+        $r8 = r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: com.squareup.okhttp.Protocol protocol>;
+
+        specialinvoke $r24.<java.lang.AssertionError: void <init>(java.lang.Object)>($r8);
+
+        throw $r24;
+    }
+    void <init>(com.squareup.okhttp.internal.spdy.SpdyConnection$Builder, com.squareup.okhttp.internal.spdy.SpdyConnection$1) throws java.io.IOException
+    {
+        com.squareup.okhttp.internal.spdy.SpdyConnection r0;
+        com.squareup.okhttp.internal.spdy.SpdyConnection$Builder $r1;
+        com.squareup.okhttp.internal.spdy.SpdyConnection$1 $r2;
+
+        r0 := @this: com.squareup.okhttp.internal.spdy.SpdyConnection;
+
+        $r1 := @parameter0: com.squareup.okhttp.internal.spdy.SpdyConnection$Builder;
+
+        $r2 := @parameter1: com.squareup.okhttp.internal.spdy.SpdyConnection$1;
+
+        specialinvoke r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: void <init>(com.squareup.okhttp.internal.spdy.SpdyConnection$Builder)>($r1);
+
+        return;
+    }
+    static void access$1000(com.squareup.okhttp.internal.spdy.SpdyConnection, com.squareup.okhttp.internal.spdy.ErrorCode, com.squareup.okhttp.internal.spdy.ErrorCode) throws java.io.IOException
+    {
+        com.squareup.okhttp.internal.spdy.SpdyConnection $r0;
+        com.squareup.okhttp.internal.spdy.ErrorCode $r1, $r2;
+
+        $r0 := @parameter0: com.squareup.okhttp.internal.spdy.SpdyConnection;
+
+        $r1 := @parameter1: com.squareup.okhttp.internal.spdy.ErrorCode;
+
+        $r2 := @parameter2: com.squareup.okhttp.internal.spdy.ErrorCode;
+
+        specialinvoke $r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: void close(com.squareup.okhttp.internal.spdy.ErrorCode,com.squareup.okhttp.internal.spdy.ErrorCode)>($r1, $r2);
+
+        return;
+    }
+    static boolean access$1100(com.squareup.okhttp.internal.spdy.SpdyConnection, int)
+    {
+        com.squareup.okhttp.internal.spdy.SpdyConnection $r0;
+        int $i0;
+        boolean $z0;
+
+        $r0 := @parameter0: com.squareup.okhttp.internal.spdy.SpdyConnection;
+
+        $i0 := @parameter1: int;
+
+        $z0 = specialinvoke $r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: boolean pushedStream(int)>($i0);
+
+        return $z0;
+    }
+    static void access$1200(com.squareup.okhttp.internal.spdy.SpdyConnection, int, okio.BufferedSource, int, boolean) throws java.io.IOException
+    {
+        com.squareup.okhttp.internal.spdy.SpdyConnection $r0;
+        int $i0, $i1;
+        okio.BufferedSource $r1;
+        boolean $z0;
+
+        $r0 := @parameter0: com.squareup.okhttp.internal.spdy.SpdyConnection;
+
+        $i0 := @parameter1: int;
+
+        $r1 := @parameter2: okio.BufferedSource;
+
+        $i1 := @parameter3: int;
+
+        $z0 := @parameter4: boolean;
+
+        specialinvoke $r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: void pushDataLater(int,okio.BufferedSource,int,boolean)>($i0, $r1, $i1, $z0);
+
+        return;
+    }
+    static void access$1300(com.squareup.okhttp.internal.spdy.SpdyConnection, int, java.util.List, boolean)
+    {
+        com.squareup.okhttp.internal.spdy.SpdyConnection $r0;
+        int $i0;
+        java.util.List $r1;
+        boolean $z0;
+
+        $r0 := @parameter0: com.squareup.okhttp.internal.spdy.SpdyConnection;
+
+        $i0 := @parameter1: int;
+
+        $r1 := @parameter2: java.util.List;
+
+        $z0 := @parameter3: boolean;
+
+        specialinvoke $r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: void pushHeadersLater(int,java.util.List,boolean)>($i0, $r1, $z0);
+
+        return;
+    }
+    static boolean access$1400(com.squareup.okhttp.internal.spdy.SpdyConnection)
+    {
+        com.squareup.okhttp.internal.spdy.SpdyConnection $r0;
+        boolean z0;
+
+        $r0 := @parameter0: com.squareup.okhttp.internal.spdy.SpdyConnection;
+
+        z0 = $r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: boolean shutdown>;
+
+        return z0;
+    }
+    static boolean access$1402(com.squareup.okhttp.internal.spdy.SpdyConnection, boolean)
+    {
+        com.squareup.okhttp.internal.spdy.SpdyConnection $r0;
+        boolean $z0;
+
+        $r0 := @parameter0: com.squareup.okhttp.internal.spdy.SpdyConnection;
+
+        $z0 := @parameter1: boolean;
+
+        $r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: boolean shutdown> = $z0;
+
+        return $z0;
+    }
+    static int access$1500(com.squareup.okhttp.internal.spdy.SpdyConnection)
+    {
+        com.squareup.okhttp.internal.spdy.SpdyConnection $r0;
+        int i0;
+
+        $r0 := @parameter0: com.squareup.okhttp.internal.spdy.SpdyConnection;
+
+        i0 = $r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: int lastGoodStreamId>;
+
+        return i0;
+    }
+    static int access$1502(com.squareup.okhttp.internal.spdy.SpdyConnection, int)
+    {
+        com.squareup.okhttp.internal.spdy.SpdyConnection $r0;
+        int $i0;
+
+        $r0 := @parameter0: com.squareup.okhttp.internal.spdy.SpdyConnection;
+
+        $i0 := @parameter1: int;
+
+        $r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: int lastGoodStreamId> = $i0;
+
+        return $i0;
+    }
+    static int access$1600(com.squareup.okhttp.internal.spdy.SpdyConnection)
+    {
+        com.squareup.okhttp.internal.spdy.SpdyConnection $r0;
+        int i0;
+
+        $r0 := @parameter0: com.squareup.okhttp.internal.spdy.SpdyConnection;
+
+        i0 = $r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: int nextStreamId>;
+
+        return i0;
+    }
+    static java.util.Map access$1700(com.squareup.okhttp.internal.spdy.SpdyConnection)
+    {
+        com.squareup.okhttp.internal.spdy.SpdyConnection $r0;
+        java.util.Map r1;
+
+        $r0 := @parameter0: com.squareup.okhttp.internal.spdy.SpdyConnection;
+
+        r1 = $r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: java.util.Map streams>;
+
+        return r1;
+    }
+    static com.squareup.okhttp.internal.spdy.IncomingStreamHandler access$1800(com.squareup.okhttp.internal.spdy.SpdyConnection)
+    {
+        com.squareup.okhttp.internal.spdy.SpdyConnection $r0;
+        com.squareup.okhttp.internal.spdy.IncomingStreamHandler r1;
+
+        $r0 := @parameter0: com.squareup.okhttp.internal.spdy.SpdyConnection;
+
+        r1 = $r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: com.squareup.okhttp.internal.spdy.IncomingStreamHandler handler>;
+
+        return r1;
+    }
+    static java.util.concurrent.ExecutorService access$1900()
+    {
+        java.util.concurrent.ExecutorService r0;
+
+        r0 = <com.squareup.okhttp.internal.spdy.SpdyConnection: java.util.concurrent.ExecutorService executor>;
+
+        return r0;
+    }
+    static void access$2000(com.squareup.okhttp.internal.spdy.SpdyConnection, int, com.squareup.okhttp.internal.spdy.ErrorCode)
+    {
+        com.squareup.okhttp.internal.spdy.SpdyConnection $r0;
+        int $i0;
+        com.squareup.okhttp.internal.spdy.ErrorCode $r1;
+
+        $r0 := @parameter0: com.squareup.okhttp.internal.spdy.SpdyConnection;
+
+        $i0 := @parameter1: int;
+
+        $r1 := @parameter2: com.squareup.okhttp.internal.spdy.ErrorCode;
+
+        specialinvoke $r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: void pushResetLater(int,com.squareup.okhttp.internal.spdy.ErrorCode)>($i0, $r1);
+
+        return;
+    }
+    static boolean access$2100(com.squareup.okhttp.internal.spdy.SpdyConnection)
+    {
+        com.squareup.okhttp.internal.spdy.SpdyConnection $r0;
+        boolean z0;
+
+        $r0 := @parameter0: com.squareup.okhttp.internal.spdy.SpdyConnection;
+
+        z0 = $r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: boolean receivedInitialPeerSettings>;
+
+        return z0;
+    }
+    static boolean access$2102(com.squareup.okhttp.internal.spdy.SpdyConnection, boolean)
+    {
+        com.squareup.okhttp.internal.spdy.SpdyConnection $r0;
+        boolean $z0;
+
+        $r0 := @parameter0: com.squareup.okhttp.internal.spdy.SpdyConnection;
+
+        $z0 := @parameter1: boolean;
+
+        $r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: boolean receivedInitialPeerSettings> = $z0;
+
+        return $z0;
+    }
+    static com.squareup.okhttp.internal.spdy.Ping access$2200(com.squareup.okhttp.internal.spdy.SpdyConnection, int)
+    {
+        com.squareup.okhttp.internal.spdy.SpdyConnection $r0;
+        int $i0;
+        com.squareup.okhttp.internal.spdy.Ping $r1;
+
+        $r0 := @parameter0: com.squareup.okhttp.internal.spdy.SpdyConnection;
+
+        $i0 := @parameter1: int;
+
+        $r1 = specialinvoke $r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: com.squareup.okhttp.internal.spdy.Ping removePing(int)>($i0);
+
+        return $r1;
+    }
+    static void access$2300(com.squareup.okhttp.internal.spdy.SpdyConnection, boolean, int, int, com.squareup.okhttp.internal.spdy.Ping)
+    {
+        com.squareup.okhttp.internal.spdy.SpdyConnection $r0;
+        boolean $z0;
+        int $i0, $i1;
+        com.squareup.okhttp.internal.spdy.Ping $r1;
+
+        $r0 := @parameter0: com.squareup.okhttp.internal.spdy.SpdyConnection;
+
+        $z0 := @parameter1: boolean;
+
+        $i0 := @parameter2: int;
+
+        $i1 := @parameter3: int;
+
+        $r1 := @parameter4: com.squareup.okhttp.internal.spdy.Ping;
+
+        specialinvoke $r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: void writePingLater(boolean,int,int,com.squareup.okhttp.internal.spdy.Ping)>($z0, $i0, $i1, $r1);
+
+        return;
+    }
+    static void access$2400(com.squareup.okhttp.internal.spdy.SpdyConnection, int, java.util.List)
+    {
+        com.squareup.okhttp.internal.spdy.SpdyConnection $r0;
+        int $i0;
+        java.util.List $r1;
+
+        $r0 := @parameter0: com.squareup.okhttp.internal.spdy.SpdyConnection;
+
+        $i0 := @parameter1: int;
+
+        $r1 := @parameter2: java.util.List;
+
+        specialinvoke $r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: void pushRequestLater(int,java.util.List)>($i0, $r1);
+
+        return;
+    }
+    static com.squareup.okhttp.internal.spdy.PushObserver access$2500(com.squareup.okhttp.internal.spdy.SpdyConnection)
+    {
+        com.squareup.okhttp.internal.spdy.SpdyConnection $r0;
+        com.squareup.okhttp.internal.spdy.PushObserver r1;
+
+        $r0 := @parameter0: com.squareup.okhttp.internal.spdy.SpdyConnection;
+
+        r1 = $r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: com.squareup.okhttp.internal.spdy.PushObserver pushObserver>;
+
+        return r1;
+    }
+    static java.util.Set access$2600(com.squareup.okhttp.internal.spdy.SpdyConnection)
+    {
+        com.squareup.okhttp.internal.spdy.SpdyConnection $r0;
+        java.util.Set r1;
+
+        $r0 := @parameter0: com.squareup.okhttp.internal.spdy.SpdyConnection;
+
+        r1 = $r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: java.util.Set currentPushRequests>;
+
+        return r1;
+    }
+    static void access$700(com.squareup.okhttp.internal.spdy.SpdyConnection, boolean, int, int, com.squareup.okhttp.internal.spdy.Ping) throws java.io.IOException
+    {
+        com.squareup.okhttp.internal.spdy.SpdyConnection $r0;
+        boolean $z0;
+        int $i0, $i1;
+        com.squareup.okhttp.internal.spdy.Ping $r1;
+
+        $r0 := @parameter0: com.squareup.okhttp.internal.spdy.SpdyConnection;
+
+        $z0 := @parameter1: boolean;
+
+        $i0 := @parameter2: int;
+
+        $i1 := @parameter3: int;
+
+        $r1 := @parameter4: com.squareup.okhttp.internal.spdy.Ping;
+
+        specialinvoke $r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: void writePing(boolean,int,int,com.squareup.okhttp.internal.spdy.Ping)>($z0, $i0, $i1, $r1);
+
+        return;
+    }
+    static java.lang.String access$900(com.squareup.okhttp.internal.spdy.SpdyConnection)
+    {
+        com.squareup.okhttp.internal.spdy.SpdyConnection $r0;
+        java.lang.String r1;
+
+        $r0 := @parameter0: com.squareup.okhttp.internal.spdy.SpdyConnection;
+
+        r1 = $r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: java.lang.String hostName>;
+
+        return r1;
+    }
+    private void close(com.squareup.okhttp.internal.spdy.ErrorCode, com.squareup.okhttp.internal.spdy.ErrorCode) throws java.io.IOException
+    {
+        com.squareup.okhttp.internal.spdy.SpdyConnection r0;
+        com.squareup.okhttp.internal.spdy.ErrorCode $r1, $r2;
+        com.squareup.okhttp.internal.spdy.Ping r3;
+        com.squareup.okhttp.internal.spdy.SpdyStream r4;
+        boolean $z0;
+        java.lang.AssertionError $r5;
+        java.io.IOException r6, r13, r16, r17;
+        com.squareup.okhttp.internal.spdy.SpdyStream[] r7;
+        com.squareup.okhttp.internal.spdy.Ping[] r8;
+        java.util.Map $r9;
+        java.util.Collection $r10;
+        int $i0, $i1;
+        java.lang.Object[] $r11;
+        java.lang.Throwable $r12;
+        com.squareup.okhttp.internal.spdy.FrameWriter $r14;
+        java.net.Socket $r15;
+
+        r0 := @this: com.squareup.okhttp.internal.spdy.SpdyConnection;
+
+        $r1 := @parameter0: com.squareup.okhttp.internal.spdy.ErrorCode;
+
+        $r2 := @parameter1: com.squareup.okhttp.internal.spdy.ErrorCode;
+
+        $z0 = <com.squareup.okhttp.internal.spdy.SpdyConnection: boolean $assertionsDisabled>;
+
+        if $z0 != 0 goto label01;
+
+        $z0 = staticinvoke <java.lang.Thread: boolean holdsLock(java.lang.Object)>(r0);
+
+        if $z0 == 0 goto label01;
+
+        $r5 = new java.lang.AssertionError;
+
+        specialinvoke $r5.<java.lang.AssertionError: void <init>()>();
+
+        throw $r5;
+
+     label01:
+        r6 = null;
+
+     label02:
+        virtualinvoke r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: void shutdown(com.squareup.okhttp.internal.spdy.ErrorCode)>($r1);
+
+     label03:
+        r7 = null;
+
+        r8 = null;
+
+        entermonitor r0;
+
+     label04:
+        $r9 = r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: java.util.Map streams>;
+
+        $z0 = interfaceinvoke $r9.<java.util.Map: boolean isEmpty()>();
+
+        if $z0 != 0 goto label05;
+
+        $r9 = r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: java.util.Map streams>;
+
+        $r10 = interfaceinvoke $r9.<java.util.Map: java.util.Collection values()>();
+
+        $r9 = r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: java.util.Map streams>;
+
+        $i0 = interfaceinvoke $r9.<java.util.Map: int size()>();
+
+        r7 = newarray (com.squareup.okhttp.internal.spdy.SpdyStream)[$i0];
+
+        $r11 = interfaceinvoke $r10.<java.util.Collection: java.lang.Object[] toArray(java.lang.Object[])>(r7);
+
+        r7 = (com.squareup.okhttp.internal.spdy.SpdyStream[]) $r11;
+
+        $r9 = r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: java.util.Map streams>;
+
+        interfaceinvoke $r9.<java.util.Map: void clear()>();
+
+        specialinvoke r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: void setIdle(boolean)>(0);
+
+     label05:
+        $r9 = r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: java.util.Map pings>;
+
+        if $r9 == null goto label06;
+
+        $r9 = r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: java.util.Map pings>;
+
+        $r10 = interfaceinvoke $r9.<java.util.Map: java.util.Collection values()>();
+
+        $r9 = r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: java.util.Map pings>;
+
+        $i0 = interfaceinvoke $r9.<java.util.Map: int size()>();
+
+        r8 = newarray (com.squareup.okhttp.internal.spdy.Ping)[$i0];
+
+        $r11 = interfaceinvoke $r10.<java.util.Collection: java.lang.Object[] toArray(java.lang.Object[])>(r8);
+
+        r8 = (com.squareup.okhttp.internal.spdy.Ping[]) $r11;
+
+        r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: java.util.Map pings> = null;
+
+     label06:
+        exitmonitor r0;
+
+     label07:
+        if r7 == null goto label16;
+
+        $i0 = lengthof r7;
+
+        $i1 = 0;
+
+     label08:
+        if $i1 >= $i0 goto label16;
+
+        r4 = r7[$i1];
+
+     label09:
+        virtualinvoke r4.<com.squareup.okhttp.internal.spdy.SpdyStream: void close(com.squareup.okhttp.internal.spdy.ErrorCode)>($r2);
+
+     label10:
+        $i1 = $i1 + 1;
+
+        goto label08;
+
+     label11:
+        r6 := @caughtexception;
+
+        goto label03;
+
+     label12:
+        $r12 := @caughtexception;
+
+     label13:
+        exitmonitor r0;
+
+     label14:
+        throw $r12;
+
+     label15:
+        r13 := @caughtexception;
+
+        if r6 == null goto label10;
+
+        r6 = r13;
+
+        goto label10;
+
+     label16:
+        if r8 == null goto label18;
+
+        $i0 = lengthof r8;
+
+        $i1 = 0;
+
+     label17:
+        if $i1 >= $i0 goto label18;
+
+        r3 = r8[$i1];
+
+        virtualinvoke r3.<com.squareup.okhttp.internal.spdy.Ping: void cancel()>();
+
+        $i1 = $i1 + 1;
+
+        goto label17;
+
+     label18:
+        $r14 = r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: com.squareup.okhttp.internal.spdy.FrameWriter frameWriter>;
+
+     label19:
+        interfaceinvoke $r14.<com.squareup.okhttp.internal.spdy.FrameWriter: void close()>();
+
+     label20:
+        $r15 = r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: java.net.Socket socket>;
+
+     label21:
+        virtualinvoke $r15.<java.net.Socket: void close()>();
+
+     label22:
+        if r6 == null goto label25;
+
+        throw r6;
+
+     label23:
+        r16 := @caughtexception;
+
+        if r6 != null goto label20;
+
+        r6 = r16;
+
+        goto label20;
+
+     label24:
+        r17 := @caughtexception;
+
+        r6 = r17;
+
+        goto label22;
+
+     label25:
+        return;
+
+        catch java.io.IOException from label02 to label03 with label11;
+        catch java.lang.Throwable from label04 to label07 with label12;
+        catch java.io.IOException from label09 to label10 with label15;
+        catch java.lang.Throwable from label13 to label14 with label12;
+        catch java.io.IOException from label19 to label20 with label23;
+        catch java.io.IOException from label21 to label22 with label24;
+    }
+    private com.squareup.okhttp.internal.spdy.SpdyStream newStream(int, java.util.List, boolean, boolean) throws java.io.IOException
+    {
+        com.squareup.okhttp.internal.spdy.SpdyConnection r0;
+        int $i0, i1, $i2;
+        java.util.List r1;
+        boolean $z0, $z1, z2, z3;
+        com.squareup.okhttp.internal.spdy.SpdyStream r2;
+        com.squareup.okhttp.internal.spdy.FrameWriter $r3, $r9;
+        java.io.IOException $r4;
+        java.lang.Throwable $r5, $r6;
+        java.util.Map $r7;
+        java.lang.Integer $r8;
+        java.lang.IllegalArgumentException $r10;
+
+        r0 := @this: com.squareup.okhttp.internal.spdy.SpdyConnection;
+
+        $i0 := @parameter0: int;
+
+        r1 := @parameter1: java.util.List;
+
+        $z0 := @parameter2: boolean;
+
+        $z1 := @parameter3: boolean;
+
+        z2 = 1;
+
+        if $z0 != 0 goto label09;
+
+        z3 = 1;
+
+     label01:
+        if $z1 != 0 goto label10;
+
+     label02:
+        $r3 = r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: com.squareup.okhttp.internal.spdy.FrameWriter frameWriter>;
+
+        entermonitor $r3;
+
+     label03:
+        entermonitor r0;
+
+     label04:
+        $z1 = r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: boolean shutdown>;
+
+        if $z1 == 0 goto label11;
+
+        $r4 = new java.io.IOException;
+
+        specialinvoke $r4.<java.io.IOException: void <init>(java.lang.String)>("shutdown");
+
+        throw $r4;
+
+     label05:
+        $r5 := @caughtexception;
+
+        exitmonitor r0;
+
+     label06:
+        throw $r5;
+
+     label07:
+        $r6 := @caughtexception;
+
+        exitmonitor $r3;
+
+     label08:
+        throw $r6;
+
+     label09:
+        z3 = 0;
+
+        goto label01;
+
+     label10:
+        z2 = 0;
+
+        goto label02;
+
+     label11:
+        i1 = r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: int nextStreamId>;
+
+        $i2 = r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: int nextStreamId>;
+
+        $i2 = $i2 + 2;
+
+        r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: int nextStreamId> = $i2;
+
+        r2 = new com.squareup.okhttp.internal.spdy.SpdyStream;
+
+        specialinvoke r2.<com.squareup.okhttp.internal.spdy.SpdyStream: void <init>(int,com.squareup.okhttp.internal.spdy.SpdyConnection,boolean,boolean,java.util.List)>(i1, r0, z3, z2, r1);
+
+        $z1 = virtualinvoke r2.<com.squareup.okhttp.internal.spdy.SpdyStream: boolean isOpen()>();
+
+        if $z1 == 0 goto label12;
+
+        $r7 = r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: java.util.Map streams>;
+
+        $r8 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(i1);
+
+        interfaceinvoke $r7.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r8, r2);
+
+        specialinvoke r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: void setIdle(boolean)>(0);
+
+     label12:
+        exitmonitor r0;
+
+     label13:
+        if $i0 != 0 goto label17;
+
+     label14:
+        $r9 = r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: com.squareup.okhttp.internal.spdy.FrameWriter frameWriter>;
+
+        interfaceinvoke $r9.<com.squareup.okhttp.internal.spdy.FrameWriter: void synStream(boolean,boolean,int,int,java.util.List)>(z3, z2, i1, $i0, r1);
+
+     label15:
+        exitmonitor $r3;
+
+     label16:
+        if $z0 != 0 goto label20;
+
+        $r3 = r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: com.squareup.okhttp.internal.spdy.FrameWriter frameWriter>;
+
+        interfaceinvoke $r3.<com.squareup.okhttp.internal.spdy.FrameWriter: void flush()>();
+
+        return r2;
+
+     label17:
+        $z1 = r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: boolean client>;
+
+        if $z1 == 0 goto label18;
+
+        $r10 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r10.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("client streams shouldn\'t have associated stream IDs");
+
+        throw $r10;
+
+     label18:
+        $r9 = r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: com.squareup.okhttp.internal.spdy.FrameWriter frameWriter>;
+
+        interfaceinvoke $r9.<com.squareup.okhttp.internal.spdy.FrameWriter: void pushPromise(int,int,java.util.List)>($i0, i1, r1);
+
+     label19:
+        goto label15;
+
+     label20:
+        return r2;
+
+        catch java.lang.Throwable from label03 to label04 with label07;
+        catch java.lang.Throwable from label04 to label06 with label05;
+        catch java.lang.Throwable from label06 to label08 with label07;
+        catch java.lang.Throwable from label11 to label13 with label05;
+        catch java.lang.Throwable from label14 to label16 with label07;
+        catch java.lang.Throwable from label17 to label19 with label07;
+    }
+    private void pushDataLater(int, okio.BufferedSource, int, boolean) throws java.io.IOException
+    {
+        com.squareup.okhttp.internal.spdy.SpdyConnection r0;
+        int $i0, $i1;
+        okio.BufferedSource $r1;
+        boolean $z0;
+        java.lang.Object[] $r2;
+        okio.Buffer r3;
+        java.util.concurrent.ExecutorService $r4;
+        long $l2, $l3;
+        byte $b4;
+        java.io.IOException $r5;
+        java.lang.StringBuilder $r6;
+        java.lang.String $r7;
+        com.squareup.okhttp.internal.spdy.SpdyConnection$6 $r8;
+        java.lang.Integer $r9;
+
+        r0 := @this: com.squareup.okhttp.internal.spdy.SpdyConnection;
+
+        $i0 := @parameter0: int;
+
+        $r1 := @parameter1: okio.BufferedSource;
+
+        $i1 := @parameter2: int;
+
+        $z0 := @parameter3: boolean;
+
+        r3 = new okio.Buffer;
+
+        specialinvoke r3.<okio.Buffer: void <init>()>();
+
+        $l2 = (long) $i1;
+
+        interfaceinvoke $r1.<okio.BufferedSource: void require(long)>($l2);
+
+        $l2 = (long) $i1;
+
+        interfaceinvoke $r1.<okio.BufferedSource: long read(okio.Buffer,long)>(r3, $l2);
+
+        $l2 = virtualinvoke r3.<okio.Buffer: long size()>();
+
+        $l3 = (long) $i1;
+
+        $b4 = $l2 cmp $l3;
+
+        if $b4 == 0 goto label1;
+
+        $r5 = new java.io.IOException;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $l2 = virtualinvoke r3.<okio.Buffer: long size()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(long)>($l2);
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" != ");
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i1);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r5.<java.io.IOException: void <init>(java.lang.String)>($r7);
+
+        throw $r5;
+
+     label1:
+        $r4 = r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: java.util.concurrent.ExecutorService pushExecutor>;
+
+        $r8 = new com.squareup.okhttp.internal.spdy.SpdyConnection$6;
+
+        $r2 = newarray (java.lang.Object)[2];
+
+        $r7 = r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: java.lang.String hostName>;
+
+        $r2[0] = $r7;
+
+        $r9 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        $r2[1] = $r9;
+
+        specialinvoke $r8.<com.squareup.okhttp.internal.spdy.SpdyConnection$6: void <init>(com.squareup.okhttp.internal.spdy.SpdyConnection,java.lang.String,java.lang.Object[],int,okio.Buffer,int,boolean)>(r0, "OkHttp %s Push Data[%s]", $r2, $i0, r3, $i1, $z0);
+
+        interfaceinvoke $r4.<java.util.concurrent.ExecutorService: void execute(java.lang.Runnable)>($r8);
+
+        return;
+    }
+    private void pushHeadersLater(int, java.util.List, boolean)
+    {
+        com.squareup.okhttp.internal.spdy.SpdyConnection r0;
+        int $i0;
+        java.util.List r1;
+        boolean $z0;
+        com.squareup.okhttp.internal.spdy.SpdyConnection$5 $r2;
+        java.lang.Object[] $r3;
+        java.util.concurrent.ExecutorService $r4;
+        java.lang.Integer $r5;
+        java.lang.String $r6;
+
+        r0 := @this: com.squareup.okhttp.internal.spdy.SpdyConnection;
+
+        $i0 := @parameter0: int;
+
+        r1 := @parameter1: java.util.List;
+
+        $z0 := @parameter2: boolean;
+
+        $r4 = r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: java.util.concurrent.ExecutorService pushExecutor>;
+
+        $r2 = new com.squareup.okhttp.internal.spdy.SpdyConnection$5;
+
+        $r3 = newarray (java.lang.Object)[2];
+
+        $r6 = r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: java.lang.String hostName>;
+
+        $r3[0] = $r6;
+
+        $r5 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        $r3[1] = $r5;
+
+        specialinvoke $r2.<com.squareup.okhttp.internal.spdy.SpdyConnection$5: void <init>(com.squareup.okhttp.internal.spdy.SpdyConnection,java.lang.String,java.lang.Object[],int,java.util.List,boolean)>(r0, "OkHttp %s Push Headers[%s]", $r3, $i0, r1, $z0);
+
+        interfaceinvoke $r4.<java.util.concurrent.ExecutorService: void execute(java.lang.Runnable)>($r2);
+
+        return;
+    }
+    private void pushRequestLater(int, java.util.List)
+    {
+        com.squareup.okhttp.internal.spdy.SpdyConnection r0;
+        int $i0;
+        java.util.List r1;
+        java.lang.Object[] $r2;
+        java.util.concurrent.ExecutorService $r3;
+        java.util.Set $r4;
+        java.lang.Integer $r5;
+        boolean $z0;
+        com.squareup.okhttp.internal.spdy.ErrorCode $r6;
+        com.squareup.okhttp.internal.spdy.SpdyConnection$4 $r7;
+        java.lang.String $r8;
+        java.lang.Throwable $r9;
+
+        r0 := @this: com.squareup.okhttp.internal.spdy.SpdyConnection;
+
+        $i0 := @parameter0: int;
+
+        r1 := @parameter1: java.util.List;
+
+        entermonitor r0;
+
+     label1:
+        $r4 = r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: java.util.Set currentPushRequests>;
+
+        $r5 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        $z0 = interfaceinvoke $r4.<java.util.Set: boolean contains(java.lang.Object)>($r5);
+
+        if $z0 == 0 goto label3;
+
+        $r6 = <com.squareup.okhttp.internal.spdy.ErrorCode: com.squareup.okhttp.internal.spdy.ErrorCode PROTOCOL_ERROR>;
+
+        virtualinvoke r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: void writeSynResetLater(int,com.squareup.okhttp.internal.spdy.ErrorCode)>($i0, $r6);
+
+        exitmonitor r0;
+
+     label2:
+        return;
+
+     label3:
+        $r4 = r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: java.util.Set currentPushRequests>;
+
+        $r5 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        interfaceinvoke $r4.<java.util.Set: boolean add(java.lang.Object)>($r5);
+
+        exitmonitor r0;
+
+     label4:
+        $r3 = r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: java.util.concurrent.ExecutorService pushExecutor>;
+
+        $r7 = new com.squareup.okhttp.internal.spdy.SpdyConnection$4;
+
+        $r2 = newarray (java.lang.Object)[2];
+
+        $r8 = r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: java.lang.String hostName>;
+
+        $r2[0] = $r8;
+
+        $r5 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        $r2[1] = $r5;
+
+        specialinvoke $r7.<com.squareup.okhttp.internal.spdy.SpdyConnection$4: void <init>(com.squareup.okhttp.internal.spdy.SpdyConnection,java.lang.String,java.lang.Object[],int,java.util.List)>(r0, "OkHttp %s Push Request[%s]", $r2, $i0, r1);
+
+        interfaceinvoke $r3.<java.util.concurrent.ExecutorService: void execute(java.lang.Runnable)>($r7);
+
+        return;
+
+     label5:
+        $r9 := @caughtexception;
+
+     label6:
+        exitmonitor r0;
+
+     label7:
+        throw $r9;
+
+        catch java.lang.Throwable from label1 to label2 with label5;
+        catch java.lang.Throwable from label3 to label4 with label5;
+        catch java.lang.Throwable from label6 to label7 with label5;
+    }
+    private void pushResetLater(int, com.squareup.okhttp.internal.spdy.ErrorCode)
+    {
+        com.squareup.okhttp.internal.spdy.SpdyConnection r0;
+        int $i0;
+        com.squareup.okhttp.internal.spdy.ErrorCode $r1;
+        com.squareup.okhttp.internal.spdy.SpdyConnection$7 $r2;
+        java.lang.Object[] $r3;
+        java.util.concurrent.ExecutorService $r4;
+        java.lang.Integer $r5;
+        java.lang.String $r6;
+
+        r0 := @this: com.squareup.okhttp.internal.spdy.SpdyConnection;
+
+        $i0 := @parameter0: int;
+
+        $r1 := @parameter1: com.squareup.okhttp.internal.spdy.ErrorCode;
+
+        $r4 = r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: java.util.concurrent.ExecutorService pushExecutor>;
+
+        $r2 = new com.squareup.okhttp.internal.spdy.SpdyConnection$7;
+
+        $r3 = newarray (java.lang.Object)[2];
+
+        $r6 = r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: java.lang.String hostName>;
+
+        $r3[0] = $r6;
+
+        $r5 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        $r3[1] = $r5;
+
+        specialinvoke $r2.<com.squareup.okhttp.internal.spdy.SpdyConnection$7: void <init>(com.squareup.okhttp.internal.spdy.SpdyConnection,java.lang.String,java.lang.Object[],int,com.squareup.okhttp.internal.spdy.ErrorCode)>(r0, "OkHttp %s Push Reset[%s]", $r3, $i0, $r1);
+
+        interfaceinvoke $r4.<java.util.concurrent.ExecutorService: void execute(java.lang.Runnable)>($r2);
+
+        return;
+    }
+    private boolean pushedStream(int)
+    {
+        com.squareup.okhttp.internal.spdy.SpdyConnection r0;
+        int $i0;
+        com.squareup.okhttp.Protocol $r1, $r2;
+
+        r0 := @this: com.squareup.okhttp.internal.spdy.SpdyConnection;
+
+        $i0 := @parameter0: int;
+
+        $r2 = r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: com.squareup.okhttp.Protocol protocol>;
+
+        $r1 = <com.squareup.okhttp.Protocol: com.squareup.okhttp.Protocol HTTP_2>;
+
+        if $r2 != $r1 goto label1;
+
+        if $i0 == 0 goto label1;
+
+        $i0 = $i0 & 1;
+
+        if $i0 != 0 goto label1;
+
+        return 1;
+
+     label1:
+        return 0;
+    }
+    private com.squareup.okhttp.internal.spdy.Ping removePing(int)
+    {
+        com.squareup.okhttp.internal.spdy.SpdyConnection r0;
+        int $i0;
+        java.util.Map $r1;
+        java.lang.Integer $r2;
+        java.lang.Object $r3;
+        com.squareup.okhttp.internal.spdy.Ping $r4;
+        java.lang.Throwable $r5;
+
+        r0 := @this: com.squareup.okhttp.internal.spdy.SpdyConnection;
+
+        $i0 := @parameter0: int;
+
+        entermonitor r0;
+
+     label1:
+        $r1 = r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: java.util.Map pings>;
+
+        if $r1 == null goto label3;
+
+        $r1 = r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: java.util.Map pings>;
+
+        $r2 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        $r3 = interfaceinvoke $r1.<java.util.Map: java.lang.Object remove(java.lang.Object)>($r2);
+
+        $r4 = (com.squareup.okhttp.internal.spdy.Ping) $r3;
+
+     label2:
+        exitmonitor r0;
+
+        return $r4;
+
+     label3:
+        $r4 = null;
+
+        goto label2;
+
+     label4:
+        $r5 := @caughtexception;
+
+        exitmonitor r0;
+
+        throw $r5;
+
+        catch java.lang.Throwable from label1 to label2 with label4;
+    }
+    private void setIdle(boolean)
+    {
+        com.squareup.okhttp.internal.spdy.SpdyConnection r0;
+        boolean $z0;
+        long $l0;
+        java.lang.Throwable $r1;
+
+        r0 := @this: com.squareup.okhttp.internal.spdy.SpdyConnection;
+
+        $z0 := @parameter0: boolean;
+
+        entermonitor r0;
+
+        if $z0 == 0 goto label4;
+
+     label1:
+        $l0 = staticinvoke <java.lang.System: long nanoTime()>();
+
+     label2:
+        r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: long idleStartTimeNs> = $l0;
+
+     label3:
+        exitmonitor r0;
+
+        return;
+
+     label4:
+        $l0 = 9223372036854775807L;
+
+        goto label2;
+
+     label5:
+        $r1 := @caughtexception;
+
+        exitmonitor r0;
+
+        throw $r1;
+
+        catch java.lang.Throwable from label1 to label3 with label5;
+    }
+    private void writePing(boolean, int, int, com.squareup.okhttp.internal.spdy.Ping) throws java.io.IOException
+    {
+        com.squareup.okhttp.internal.spdy.SpdyConnection r0;
+        boolean $z0;
+        int $i0, $i1;
+        com.squareup.okhttp.internal.spdy.Ping $r1;
+        com.squareup.okhttp.internal.spdy.FrameWriter $r2, $r3;
+        java.lang.Throwable $r4;
+
+        r0 := @this: com.squareup.okhttp.internal.spdy.SpdyConnection;
+
+        $z0 := @parameter0: boolean;
+
+        $i0 := @parameter1: int;
+
+        $i1 := @parameter2: int;
+
+        $r1 := @parameter3: com.squareup.okhttp.internal.spdy.Ping;
+
+        $r2 = r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: com.squareup.okhttp.internal.spdy.FrameWriter frameWriter>;
+
+        entermonitor $r2;
+
+        if $r1 == null goto label2;
+
+     label1:
+        virtualinvoke $r1.<com.squareup.okhttp.internal.spdy.Ping: void send()>();
+
+     label2:
+        $r3 = r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: com.squareup.okhttp.internal.spdy.FrameWriter frameWriter>;
+
+        interfaceinvoke $r3.<com.squareup.okhttp.internal.spdy.FrameWriter: void ping(boolean,int,int)>($z0, $i0, $i1);
+
+        exitmonitor $r2;
+
+     label3:
+        return;
+
+     label4:
+        $r4 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label5:
+        throw $r4;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+        catch java.lang.Throwable from label4 to label5 with label4;
+    }
+    private void writePingLater(boolean, int, int, com.squareup.okhttp.internal.spdy.Ping)
+    {
+        com.squareup.okhttp.internal.spdy.SpdyConnection r0;
+        boolean $z0;
+        int $i0, $i1;
+        com.squareup.okhttp.internal.spdy.Ping $r1;
+        com.squareup.okhttp.internal.spdy.SpdyConnection$3 $r2;
+        java.lang.Object[] $r3;
+        java.util.concurrent.ExecutorService $r4;
+        java.lang.String $r5;
+        java.lang.Integer $r6;
+
+        r0 := @this: com.squareup.okhttp.internal.spdy.SpdyConnection;
+
+        $z0 := @parameter0: boolean;
+
+        $i0 := @parameter1: int;
+
+        $i1 := @parameter2: int;
+
+        $r1 := @parameter3: com.squareup.okhttp.internal.spdy.Ping;
+
+        $r4 = <com.squareup.okhttp.internal.spdy.SpdyConnection: java.util.concurrent.ExecutorService executor>;
+
+        $r2 = new com.squareup.okhttp.internal.spdy.SpdyConnection$3;
+
+        $r3 = newarray (java.lang.Object)[3];
+
+        $r5 = r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: java.lang.String hostName>;
+
+        $r3[0] = $r5;
+
+        $r6 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        $r3[1] = $r6;
+
+        $r6 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i1);
+
+        $r3[2] = $r6;
+
+        specialinvoke $r2.<com.squareup.okhttp.internal.spdy.SpdyConnection$3: void <init>(com.squareup.okhttp.internal.spdy.SpdyConnection,java.lang.String,java.lang.Object[],boolean,int,int,com.squareup.okhttp.internal.spdy.Ping)>(r0, "OkHttp %s ping %08x%08x", $r3, $z0, $i0, $i1, $r1);
+
+        interfaceinvoke $r4.<java.util.concurrent.ExecutorService: void execute(java.lang.Runnable)>($r2);
+
+        return;
+    }
+    void addBytesToWriteWindow(long)
+    {
+        com.squareup.okhttp.internal.spdy.SpdyConnection r0;
+        long $l0, $l1;
+        byte $b2;
+
+        r0 := @this: com.squareup.okhttp.internal.spdy.SpdyConnection;
+
+        $l0 := @parameter0: long;
+
+        $l1 = r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: long bytesLeftInWriteWindow>;
+
+        $l1 = $l1 + $l0;
+
+        r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: long bytesLeftInWriteWindow> = $l1;
+
+        $b2 = $l0 cmp 0L;
+
+        if $b2 <= 0 goto label1;
+
+        virtualinvoke r0.<java.lang.Object: void notifyAll()>();
+
+     label1:
+        return;
+    }
+    public void close() throws java.io.IOException
+    {
+        com.squareup.okhttp.internal.spdy.SpdyConnection r0;
+        com.squareup.okhttp.internal.spdy.ErrorCode $r1, $r2;
+
+        r0 := @this: com.squareup.okhttp.internal.spdy.SpdyConnection;
+
+        $r1 = <com.squareup.okhttp.internal.spdy.ErrorCode: com.squareup.okhttp.internal.spdy.ErrorCode NO_ERROR>;
+
+        $r2 = <com.squareup.okhttp.internal.spdy.ErrorCode: com.squareup.okhttp.internal.spdy.ErrorCode CANCEL>;
+
+        specialinvoke r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: void close(com.squareup.okhttp.internal.spdy.ErrorCode,com.squareup.okhttp.internal.spdy.ErrorCode)>($r1, $r2);
+
+        return;
+    }
+    public void flush() throws java.io.IOException
+    {
+        com.squareup.okhttp.internal.spdy.SpdyConnection r0;
+        com.squareup.okhttp.internal.spdy.FrameWriter $r1;
+
+        r0 := @this: com.squareup.okhttp.internal.spdy.SpdyConnection;
+
+        $r1 = r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: com.squareup.okhttp.internal.spdy.FrameWriter frameWriter>;
+
+        interfaceinvoke $r1.<com.squareup.okhttp.internal.spdy.FrameWriter: void flush()>();
+
+        return;
+    }
+    public long getIdleStartTimeNs()
+    {
+        com.squareup.okhttp.internal.spdy.SpdyConnection r0;
+        java.lang.Throwable $r1;
+        long l0;
+
+        r0 := @this: com.squareup.okhttp.internal.spdy.SpdyConnection;
+
+        entermonitor r0;
+
+     label1:
+        l0 = r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: long idleStartTimeNs>;
+
+     label2:
+        exitmonitor r0;
+
+        return l0;
+
+     label3:
+        $r1 := @caughtexception;
+
+        exitmonitor r0;
+
+        throw $r1;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+    public com.squareup.okhttp.Protocol getProtocol()
+    {
+        com.squareup.okhttp.internal.spdy.SpdyConnection r0;
+        com.squareup.okhttp.Protocol r1;
+
+        r0 := @this: com.squareup.okhttp.internal.spdy.SpdyConnection;
+
+        r1 = r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: com.squareup.okhttp.Protocol protocol>;
+
+        return r1;
+    }
+    com.squareup.okhttp.internal.spdy.SpdyStream getStream(int)
+    {
+        com.squareup.okhttp.internal.spdy.SpdyConnection r0;
+        int $i0;
+        java.util.Map $r1;
+        java.lang.Integer $r2;
+        java.lang.Object $r3;
+        com.squareup.okhttp.internal.spdy.SpdyStream $r4;
+        java.lang.Throwable $r5;
+
+        r0 := @this: com.squareup.okhttp.internal.spdy.SpdyConnection;
+
+        $i0 := @parameter0: int;
+
+        entermonitor r0;
+
+     label1:
+        $r1 = r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: java.util.Map streams>;
+
+        $r2 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        $r3 = interfaceinvoke $r1.<java.util.Map: java.lang.Object get(java.lang.Object)>($r2);
+
+        $r4 = (com.squareup.okhttp.internal.spdy.SpdyStream) $r3;
+
+     label2:
+        exitmonitor r0;
+
+        return $r4;
+
+     label3:
+        $r5 := @caughtexception;
+
+        exitmonitor r0;
+
+        throw $r5;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+    public boolean isIdle()
+    {
+        com.squareup.okhttp.internal.spdy.SpdyConnection r0;
+        long $l0;
+        byte $b1;
+        boolean $z0;
+        java.lang.Throwable $r1;
+
+        r0 := @this: com.squareup.okhttp.internal.spdy.SpdyConnection;
+
+        entermonitor r0;
+
+     label1:
+        $l0 = r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: long idleStartTimeNs>;
+
+     label2:
+        $b1 = $l0 cmp 9223372036854775807L;
+
+        if $b1 == 0 goto label4;
+
+        $z0 = 1;
+
+     label3:
+        exitmonitor r0;
+
+        return $z0;
+
+     label4:
+        $z0 = 0;
+
+        goto label3;
+
+     label5:
+        $r1 := @caughtexception;
+
+        exitmonitor r0;
+
+        throw $r1;
+
+        catch java.lang.Throwable from label1 to label2 with label5;
+    }
+    public com.squareup.okhttp.internal.spdy.SpdyStream newStream(java.util.List, boolean, boolean) throws java.io.IOException
+    {
+        com.squareup.okhttp.internal.spdy.SpdyConnection r0;
+        java.util.List r1;
+        boolean $z0, $z1;
+        com.squareup.okhttp.internal.spdy.SpdyStream $r2;
+
+        r0 := @this: com.squareup.okhttp.internal.spdy.SpdyConnection;
+
+        r1 := @parameter0: java.util.List;
+
+        $z0 := @parameter1: boolean;
+
+        $z1 := @parameter2: boolean;
+
+        $r2 = specialinvoke r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: com.squareup.okhttp.internal.spdy.SpdyStream newStream(int,java.util.List,boolean,boolean)>(0, r1, $z0, $z1);
+
+        return $r2;
+    }
+    public int openStreamCount()
+    {
+        com.squareup.okhttp.internal.spdy.SpdyConnection r0;
+        int $i0;
+        java.util.Map $r1;
+        java.lang.Throwable $r2;
+
+        r0 := @this: com.squareup.okhttp.internal.spdy.SpdyConnection;
+
+        entermonitor r0;
+
+     label1:
+        $r1 = r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: java.util.Map streams>;
+
+        $i0 = interfaceinvoke $r1.<java.util.Map: int size()>();
+
+     label2:
+        exitmonitor r0;
+
+        return $i0;
+
+     label3:
+        $r2 := @caughtexception;
+
+        exitmonitor r0;
+
+        throw $r2;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+    public com.squareup.okhttp.internal.spdy.Ping ping() throws java.io.IOException
+    {
+        com.squareup.okhttp.internal.spdy.SpdyConnection r0;
+        com.squareup.okhttp.internal.spdy.Ping r1;
+        int i0, $i1;
+        java.lang.Integer $r2;
+        boolean $z0;
+        java.io.IOException $r3;
+        java.lang.Throwable $r4;
+        java.util.Map $r5;
+        java.util.HashMap $r6;
+
+        r0 := @this: com.squareup.okhttp.internal.spdy.SpdyConnection;
+
+        r1 = new com.squareup.okhttp.internal.spdy.Ping;
+
+        specialinvoke r1.<com.squareup.okhttp.internal.spdy.Ping: void <init>()>();
+
+        entermonitor r0;
+
+     label1:
+        $z0 = r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: boolean shutdown>;
+
+        if $z0 == 0 goto label4;
+
+        $r3 = new java.io.IOException;
+
+        specialinvoke $r3.<java.io.IOException: void <init>(java.lang.String)>("shutdown");
+
+        throw $r3;
+
+     label2:
+        $r4 := @caughtexception;
+
+        exitmonitor r0;
+
+     label3:
+        throw $r4;
+
+     label4:
+        i0 = r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: int nextPingId>;
+
+        $i1 = r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: int nextPingId>;
+
+        $i1 = $i1 + 2;
+
+        r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: int nextPingId> = $i1;
+
+        $r5 = r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: java.util.Map pings>;
+
+        if $r5 != null goto label5;
+
+        $r6 = new java.util.HashMap;
+
+        specialinvoke $r6.<java.util.HashMap: void <init>()>();
+
+        r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: java.util.Map pings> = $r6;
+
+     label5:
+        $r5 = r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: java.util.Map pings>;
+
+        $r2 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(i0);
+
+        interfaceinvoke $r5.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r2, r1);
+
+        exitmonitor r0;
+
+     label6:
+        specialinvoke r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: void writePing(boolean,int,int,com.squareup.okhttp.internal.spdy.Ping)>(0, i0, 1330343787, r1);
+
+        return r1;
+
+        catch java.lang.Throwable from label1 to label3 with label2;
+        catch java.lang.Throwable from label4 to label6 with label2;
+    }
+    public com.squareup.okhttp.internal.spdy.SpdyStream pushStream(int, java.util.List, boolean) throws java.io.IOException
+    {
+        com.squareup.okhttp.internal.spdy.SpdyConnection r0;
+        int $i0;
+        java.util.List r1;
+        boolean $z0, $z1;
+        com.squareup.okhttp.internal.spdy.SpdyStream $r2;
+        java.lang.IllegalStateException $r3;
+        com.squareup.okhttp.Protocol $r4, $r5;
+
+        r0 := @this: com.squareup.okhttp.internal.spdy.SpdyConnection;
+
+        $i0 := @parameter0: int;
+
+        r1 := @parameter1: java.util.List;
+
+        $z0 := @parameter2: boolean;
+
+        $z1 = r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: boolean client>;
+
+        if $z1 == 0 goto label1;
+
+        $r3 = new java.lang.IllegalStateException;
+
+        specialinvoke $r3.<java.lang.IllegalStateException: void <init>(java.lang.String)>("Client cannot push requests.");
+
+        throw $r3;
+
+     label1:
+        $r4 = r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: com.squareup.okhttp.Protocol protocol>;
+
+        $r5 = <com.squareup.okhttp.Protocol: com.squareup.okhttp.Protocol HTTP_2>;
+
+        if $r4 == $r5 goto label2;
+
+        $r3 = new java.lang.IllegalStateException;
+
+        specialinvoke $r3.<java.lang.IllegalStateException: void <init>(java.lang.String)>("protocol != HTTP_2");
+
+        throw $r3;
+
+     label2:
+        $r2 = specialinvoke r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: com.squareup.okhttp.internal.spdy.SpdyStream newStream(int,java.util.List,boolean,boolean)>($i0, r1, $z0, 0);
+
+        return $r2;
+    }
+    com.squareup.okhttp.internal.spdy.SpdyStream removeStream(int)
+    {
+        com.squareup.okhttp.internal.spdy.SpdyConnection r0;
+        int $i0;
+        java.util.Map $r1;
+        java.lang.Integer $r2;
+        java.lang.Object $r3;
+        com.squareup.okhttp.internal.spdy.SpdyStream r4;
+        boolean $z0;
+        java.lang.Throwable $r5;
+
+        r0 := @this: com.squareup.okhttp.internal.spdy.SpdyConnection;
+
+        $i0 := @parameter0: int;
+
+        entermonitor r0;
+
+     label1:
+        $r1 = r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: java.util.Map streams>;
+
+        $r2 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        $r3 = interfaceinvoke $r1.<java.util.Map: java.lang.Object remove(java.lang.Object)>($r2);
+
+        r4 = (com.squareup.okhttp.internal.spdy.SpdyStream) $r3;
+
+        if r4 == null goto label2;
+
+        $r1 = r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: java.util.Map streams>;
+
+        $z0 = interfaceinvoke $r1.<java.util.Map: boolean isEmpty()>();
+
+        if $z0 == 0 goto label2;
+
+        specialinvoke r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: void setIdle(boolean)>(1);
+
+     label2:
+        virtualinvoke r0.<java.lang.Object: void notifyAll()>();
+
+     label3:
+        exitmonitor r0;
+
+        return r4;
+
+     label4:
+        $r5 := @caughtexception;
+
+        exitmonitor r0;
+
+        throw $r5;
+
+        catch java.lang.Throwable from label1 to label3 with label4;
+    }
+    public void sendConnectionPreface() throws java.io.IOException
+    {
+        com.squareup.okhttp.internal.spdy.SpdyConnection r0;
+        long $l0;
+        int $i1;
+        com.squareup.okhttp.internal.spdy.FrameWriter $r1;
+        com.squareup.okhttp.internal.spdy.Settings $r2;
+
+        r0 := @this: com.squareup.okhttp.internal.spdy.SpdyConnection;
+
+        $r1 = r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: com.squareup.okhttp.internal.spdy.FrameWriter frameWriter>;
+
+        interfaceinvoke $r1.<com.squareup.okhttp.internal.spdy.FrameWriter: void connectionPreface()>();
+
+        $r1 = r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: com.squareup.okhttp.internal.spdy.FrameWriter frameWriter>;
+
+        $r2 = r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: com.squareup.okhttp.internal.spdy.Settings okHttpSettings>;
+
+        interfaceinvoke $r1.<com.squareup.okhttp.internal.spdy.FrameWriter: void settings(com.squareup.okhttp.internal.spdy.Settings)>($r2);
+
+        $r2 = r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: com.squareup.okhttp.internal.spdy.Settings okHttpSettings>;
+
+        $i1 = virtualinvoke $r2.<com.squareup.okhttp.internal.spdy.Settings: int getInitialWindowSize(int)>(65536);
+
+        if $i1 == 65536 goto label1;
+
+        $r1 = r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: com.squareup.okhttp.internal.spdy.FrameWriter frameWriter>;
+
+        $i1 = $i1 - 65536;
+
+        $l0 = (long) $i1;
+
+        interfaceinvoke $r1.<com.squareup.okhttp.internal.spdy.FrameWriter: void windowUpdate(int,long)>(0, $l0);
+
+     label1:
+        return;
+    }
+    public void shutdown(com.squareup.okhttp.internal.spdy.ErrorCode) throws java.io.IOException
+    {
+        com.squareup.okhttp.internal.spdy.SpdyConnection r0;
+        com.squareup.okhttp.internal.spdy.ErrorCode $r1;
+        int i0;
+        com.squareup.okhttp.internal.spdy.FrameWriter $r2, $r4;
+        byte[] $r3;
+        boolean $z0;
+        java.lang.Throwable $r5, $r6;
+
+        r0 := @this: com.squareup.okhttp.internal.spdy.SpdyConnection;
+
+        $r1 := @parameter0: com.squareup.okhttp.internal.spdy.ErrorCode;
+
+        $r2 = r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: com.squareup.okhttp.internal.spdy.FrameWriter frameWriter>;
+
+        entermonitor $r2;
+
+     label01:
+        entermonitor r0;
+
+     label02:
+        $z0 = r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: boolean shutdown>;
+
+        if $z0 == 0 goto label05;
+
+        exitmonitor r0;
+
+     label03:
+        exitmonitor $r2;
+
+     label04:
+        return;
+
+     label05:
+        r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: boolean shutdown> = 1;
+
+        i0 = r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: int lastGoodStreamId>;
+
+        exitmonitor r0;
+
+     label06:
+        $r4 = r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: com.squareup.okhttp.internal.spdy.FrameWriter frameWriter>;
+
+        $r3 = <com.squareup.okhttp.internal.Util: byte[] EMPTY_BYTE_ARRAY>;
+
+        interfaceinvoke $r4.<com.squareup.okhttp.internal.spdy.FrameWriter: void goAway(int,com.squareup.okhttp.internal.spdy.ErrorCode,byte[])>(i0, $r1, $r3);
+
+        exitmonitor $r2;
+
+     label07:
+        return;
+
+     label08:
+        $r5 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label09:
+        throw $r5;
+
+     label10:
+        $r6 := @caughtexception;
+
+     label11:
+        exitmonitor r0;
+
+     label12:
+        throw $r6;
+
+     label13:
+        nop;
+
+        catch java.lang.Throwable from label01 to label02 with label08;
+        catch java.lang.Throwable from label02 to label03 with label10;
+        catch java.lang.Throwable from label03 to label04 with label08;
+        catch java.lang.Throwable from label05 to label06 with label10;
+        catch java.lang.Throwable from label06 to label07 with label08;
+        catch java.lang.Throwable from label08 to label09 with label08;
+        catch java.lang.Throwable from label11 to label12 with label10;
+        catch java.lang.Throwable from label12 to label13 with label08;
+    }
+    public void writeData(int, boolean, okio.Buffer, long) throws java.io.IOException
+    {
+        com.squareup.okhttp.internal.spdy.SpdyConnection r0;
+        int $i0, i4, $i5;
+        boolean $z0, $z1;
+        okio.Buffer $r1;
+        java.lang.InterruptedException r2;
+        long $l1, $l2, $l6;
+        byte $b3;
+        com.squareup.okhttp.internal.spdy.FrameWriter $r3;
+        java.util.Map $r4;
+        java.lang.Integer $r5;
+        java.io.IOException $r6;
+        java.io.InterruptedIOException $r7;
+        java.lang.Throwable $r8;
+
+        r0 := @this: com.squareup.okhttp.internal.spdy.SpdyConnection;
+
+        $i0 := @parameter0: int;
+
+        $z0 := @parameter1: boolean;
+
+        $r1 := @parameter2: okio.Buffer;
+
+        $l2 := @parameter3: long;
+
+        $b3 = $l2 cmp 0L;
+
+        if $b3 != 0 goto label04;
+
+        $r3 = r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: com.squareup.okhttp.internal.spdy.FrameWriter frameWriter>;
+
+        interfaceinvoke $r3.<com.squareup.okhttp.internal.spdy.FrameWriter: void data(boolean,int,okio.Buffer,int)>($z0, $i0, $r1, 0);
+
+        return;
+
+     label01:
+        $l1 = r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: long bytesLeftInWriteWindow>;
+
+        $l1 = staticinvoke <java.lang.Math: long min(long,long)>($l2, $l1);
+
+        i4 = (int) $l1;
+
+        $r3 = r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: com.squareup.okhttp.internal.spdy.FrameWriter frameWriter>;
+
+        $i5 = interfaceinvoke $r3.<com.squareup.okhttp.internal.spdy.FrameWriter: int maxDataLength()>();
+
+        i4 = staticinvoke <java.lang.Math: int min(int,int)>(i4, $i5);
+
+        $l6 = r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: long bytesLeftInWriteWindow>;
+
+        $l1 = (long) i4;
+
+        $l1 = $l6 - $l1;
+
+        r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: long bytesLeftInWriteWindow> = $l1;
+
+        exitmonitor r0;
+
+     label02:
+        $l1 = (long) i4;
+
+        $l2 = $l2 - $l1;
+
+        $r3 = r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: com.squareup.okhttp.internal.spdy.FrameWriter frameWriter>;
+
+        if $z0 == 0 goto label16;
+
+        $b3 = $l2 cmp 0L;
+
+        if $b3 != 0 goto label16;
+
+        $z1 = 1;
+
+     label03:
+        interfaceinvoke $r3.<com.squareup.okhttp.internal.spdy.FrameWriter: void data(boolean,int,okio.Buffer,int)>($z1, $i0, $r1, i4);
+
+     label04:
+        $b3 = $l2 cmp 0L;
+
+        if $b3 <= 0 goto label17;
+
+        entermonitor r0;
+
+     label05:
+        $l1 = r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: long bytesLeftInWriteWindow>;
+
+        $b3 = $l1 cmp 0L;
+
+        if $b3 > 0 goto label01;
+
+        $r4 = r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: java.util.Map streams>;
+
+     label06:
+        $r5 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        $z1 = interfaceinvoke $r4.<java.util.Map: boolean containsKey(java.lang.Object)>($r5);
+
+     label07:
+        if $z1 != 0 goto label14;
+
+        $r6 = new java.io.IOException;
+
+     label08:
+        specialinvoke $r6.<java.io.IOException: void <init>(java.lang.String)>("stream closed");
+
+     label09:
+        throw $r6;
+
+     label10:
+        r2 := @caughtexception;
+
+     label11:
+        $r7 = new java.io.InterruptedIOException;
+
+        specialinvoke $r7.<java.io.InterruptedIOException: void <init>()>();
+
+        throw $r7;
+
+     label12:
+        $r8 := @caughtexception;
+
+        exitmonitor r0;
+
+     label13:
+        throw $r8;
+
+     label14:
+        virtualinvoke r0.<java.lang.Object: void wait()>();
+
+     label15:
+        goto label05;
+
+     label16:
+        $z1 = 0;
+
+        goto label03;
+
+     label17:
+        return;
+
+        catch java.lang.Throwable from label01 to label02 with label12;
+        catch java.lang.InterruptedException from label06 to label07 with label10;
+        catch java.lang.InterruptedException from label08 to label09 with label10;
+        catch java.lang.Throwable from label05 to label10 with label12;
+        catch java.lang.Throwable from label11 to label13 with label12;
+        catch java.lang.InterruptedException from label14 to label15 with label10;
+        catch java.lang.Throwable from label14 to label15 with label12;
+    }
+    void writeSynReply(int, boolean, java.util.List) throws java.io.IOException
+    {
+        com.squareup.okhttp.internal.spdy.SpdyConnection r0;
+        int $i0;
+        boolean $z0;
+        java.util.List r1;
+        com.squareup.okhttp.internal.spdy.FrameWriter $r2;
+
+        r0 := @this: com.squareup.okhttp.internal.spdy.SpdyConnection;
+
+        $i0 := @parameter0: int;
+
+        $z0 := @parameter1: boolean;
+
+        r1 := @parameter2: java.util.List;
+
+        $r2 = r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: com.squareup.okhttp.internal.spdy.FrameWriter frameWriter>;
+
+        interfaceinvoke $r2.<com.squareup.okhttp.internal.spdy.FrameWriter: void synReply(boolean,int,java.util.List)>($z0, $i0, r1);
+
+        return;
+    }
+    void writeSynReset(int, com.squareup.okhttp.internal.spdy.ErrorCode) throws java.io.IOException
+    {
+        com.squareup.okhttp.internal.spdy.SpdyConnection r0;
+        int $i0;
+        com.squareup.okhttp.internal.spdy.ErrorCode $r1;
+        com.squareup.okhttp.internal.spdy.FrameWriter $r2;
+
+        r0 := @this: com.squareup.okhttp.internal.spdy.SpdyConnection;
+
+        $i0 := @parameter0: int;
+
+        $r1 := @parameter1: com.squareup.okhttp.internal.spdy.ErrorCode;
+
+        $r2 = r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: com.squareup.okhttp.internal.spdy.FrameWriter frameWriter>;
+
+        interfaceinvoke $r2.<com.squareup.okhttp.internal.spdy.FrameWriter: void rstStream(int,com.squareup.okhttp.internal.spdy.ErrorCode)>($i0, $r1);
+
+        return;
+    }
+    void writeSynResetLater(int, com.squareup.okhttp.internal.spdy.ErrorCode)
+    {
+        com.squareup.okhttp.internal.spdy.SpdyConnection r0;
+        int $i0;
+        com.squareup.okhttp.internal.spdy.ErrorCode $r1;
+        com.squareup.okhttp.internal.spdy.SpdyConnection$1 $r2;
+        java.lang.Object[] $r3;
+        java.util.concurrent.ExecutorService $r4;
+        java.lang.Integer $r5;
+        java.lang.String $r6;
+
+        r0 := @this: com.squareup.okhttp.internal.spdy.SpdyConnection;
+
+        $i0 := @parameter0: int;
+
+        $r1 := @parameter1: com.squareup.okhttp.internal.spdy.ErrorCode;
+
+        $r4 = <com.squareup.okhttp.internal.spdy.SpdyConnection: java.util.concurrent.ExecutorService executor>;
+
+        $r2 = new com.squareup.okhttp.internal.spdy.SpdyConnection$1;
+
+        $r3 = newarray (java.lang.Object)[2];
+
+        $r6 = r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: java.lang.String hostName>;
+
+        $r3[0] = $r6;
+
+        $r5 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        $r3[1] = $r5;
+
+        specialinvoke $r2.<com.squareup.okhttp.internal.spdy.SpdyConnection$1: void <init>(com.squareup.okhttp.internal.spdy.SpdyConnection,java.lang.String,java.lang.Object[],int,com.squareup.okhttp.internal.spdy.ErrorCode)>(r0, "OkHttp %s stream %d", $r3, $i0, $r1);
+
+        interfaceinvoke $r4.<java.util.concurrent.ExecutorService: java.util.concurrent.Future submit(java.lang.Runnable)>($r2);
+
+        return;
+    }
+    void writeWindowUpdateLater(int, long)
+    {
+        com.squareup.okhttp.internal.spdy.SpdyConnection r0;
+        int $i0;
+        long $l1;
+        java.util.concurrent.ExecutorService $r1;
+        com.squareup.okhttp.internal.spdy.SpdyConnection$2 $r2;
+        java.lang.Object[] $r3;
+        java.lang.Integer $r4;
+        java.lang.String $r5;
+
+        r0 := @this: com.squareup.okhttp.internal.spdy.SpdyConnection;
+
+        $i0 := @parameter0: int;
+
+        $l1 := @parameter1: long;
+
+        $r1 = <com.squareup.okhttp.internal.spdy.SpdyConnection: java.util.concurrent.ExecutorService executor>;
+
+        $r2 = new com.squareup.okhttp.internal.spdy.SpdyConnection$2;
+
+        $r3 = newarray (java.lang.Object)[2];
+
+        $r5 = r0.<com.squareup.okhttp.internal.spdy.SpdyConnection: java.lang.String hostName>;
+
+        $r3[0] = $r5;
+
+        $r4 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        $r3[1] = $r4;
+
+        specialinvoke $r2.<com.squareup.okhttp.internal.spdy.SpdyConnection$2: void <init>(com.squareup.okhttp.internal.spdy.SpdyConnection,java.lang.String,java.lang.Object[],int,long)>(r0, "OkHttp Window Update %s stream %d", $r3, $i0, $l1);
+
+        interfaceinvoke $r1.<java.util.concurrent.ExecutorService: void execute(java.lang.Runnable)>($r2);
+
+        return;
+    }

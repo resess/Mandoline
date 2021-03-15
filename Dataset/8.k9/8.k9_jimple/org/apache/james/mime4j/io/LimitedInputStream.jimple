@@ -1,0 +1,138 @@
+org.apache.james.mime4j.io.LimitedInputStream extends org.apache.james.mime4j.io.PositionInputStream
+private final long limit
+    public void <init>(java.io.InputStream, long)
+    {
+        org.apache.james.mime4j.io.LimitedInputStream r0;
+        java.io.InputStream $r1;
+        long $l0;
+        byte $b1;
+        java.lang.IllegalArgumentException $r2;
+
+        r0 := @this: org.apache.james.mime4j.io.LimitedInputStream;
+
+        $r1 := @parameter0: java.io.InputStream;
+
+        $l0 := @parameter1: long;
+
+        specialinvoke r0.<org.apache.james.mime4j.io.PositionInputStream: void <init>(java.io.InputStream)>($r1);
+
+        $b1 = $l0 cmp 0L;
+
+        if $b1 >= 0 goto label1;
+
+        $r2 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r2.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("Limit may not be negative");
+
+        throw $r2;
+
+     label1:
+        r0.<org.apache.james.mime4j.io.LimitedInputStream: long limit> = $l0;
+
+        return;
+    }
+    private void enforceLimit() throws java.io.IOException
+    {
+        org.apache.james.mime4j.io.LimitedInputStream r0;
+        long $l0, $l1;
+        byte $b2;
+        java.io.IOException $r1;
+
+        r0 := @this: org.apache.james.mime4j.io.LimitedInputStream;
+
+        $l1 = r0.<org.apache.james.mime4j.io.LimitedInputStream: long position>;
+
+        $l0 = r0.<org.apache.james.mime4j.io.LimitedInputStream: long limit>;
+
+        $b2 = $l1 cmp $l0;
+
+        if $b2 < 0 goto label1;
+
+        $r1 = new java.io.IOException;
+
+        specialinvoke $r1.<java.io.IOException: void <init>(java.lang.String)>("Input stream limit exceeded");
+
+        throw $r1;
+
+     label1:
+        return;
+    }
+    private int getBytesLeft()
+    {
+        org.apache.james.mime4j.io.LimitedInputStream r0;
+        long $l0, $l1;
+        int $i2;
+
+        r0 := @this: org.apache.james.mime4j.io.LimitedInputStream;
+
+        $l1 = r0.<org.apache.james.mime4j.io.LimitedInputStream: long limit>;
+
+        $l0 = r0.<org.apache.james.mime4j.io.LimitedInputStream: long position>;
+
+        $l0 = $l1 - $l0;
+
+        $l0 = staticinvoke <java.lang.Math: long min(long,long)>(2147483647L, $l0);
+
+        $i2 = (int) $l0;
+
+        return $i2;
+    }
+    public int read() throws java.io.IOException
+    {
+        org.apache.james.mime4j.io.LimitedInputStream r0;
+        int $i0;
+
+        r0 := @this: org.apache.james.mime4j.io.LimitedInputStream;
+
+        specialinvoke r0.<org.apache.james.mime4j.io.LimitedInputStream: void enforceLimit()>();
+
+        $i0 = specialinvoke r0.<org.apache.james.mime4j.io.PositionInputStream: int read()>();
+
+        return $i0;
+    }
+    public int read(byte[], int, int) throws java.io.IOException
+    {
+        org.apache.james.mime4j.io.LimitedInputStream r0;
+        byte[] $r1;
+        int $i0, $i1, $i2;
+
+        r0 := @this: org.apache.james.mime4j.io.LimitedInputStream;
+
+        $r1 := @parameter0: byte[];
+
+        $i0 := @parameter1: int;
+
+        $i1 := @parameter2: int;
+
+        specialinvoke r0.<org.apache.james.mime4j.io.LimitedInputStream: void enforceLimit()>();
+
+        $i2 = specialinvoke r0.<org.apache.james.mime4j.io.LimitedInputStream: int getBytesLeft()>();
+
+        $i1 = staticinvoke <java.lang.Math: int min(int,int)>($i1, $i2);
+
+        $i0 = specialinvoke r0.<org.apache.james.mime4j.io.PositionInputStream: int read(byte[],int,int)>($r1, $i0, $i1);
+
+        return $i0;
+    }
+    public long skip(long) throws java.io.IOException
+    {
+        org.apache.james.mime4j.io.LimitedInputStream r0;
+        long $l0, $l2;
+        int $i1;
+
+        r0 := @this: org.apache.james.mime4j.io.LimitedInputStream;
+
+        $l0 := @parameter0: long;
+
+        specialinvoke r0.<org.apache.james.mime4j.io.LimitedInputStream: void enforceLimit()>();
+
+        $i1 = specialinvoke r0.<org.apache.james.mime4j.io.LimitedInputStream: int getBytesLeft()>();
+
+        $l2 = (long) $i1;
+
+        $l0 = staticinvoke <java.lang.Math: long min(long,long)>($l0, $l2);
+
+        $l0 = specialinvoke r0.<org.apache.james.mime4j.io.PositionInputStream: long skip(long)>($l0);
+
+        return $l0;
+    }

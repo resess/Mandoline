@@ -1,0 +1,607 @@
+org.spongycastle.crypto.digests.SHA512tDigest extends org.spongycastle.crypto.digests.LongDigest
+private long H1t
+private long H2t
+private long H3t
+private long H4t
+private long H5t
+private long H6t
+private long H7t
+private long H8t
+private int digestLength
+    public void <init>(int)
+    {
+        org.spongycastle.crypto.digests.SHA512tDigest r0;
+        int $i0, $i1;
+        java.lang.IllegalArgumentException $r1;
+
+        r0 := @this: org.spongycastle.crypto.digests.SHA512tDigest;
+
+        $i0 := @parameter0: int;
+
+        specialinvoke r0.<org.spongycastle.crypto.digests.LongDigest: void <init>()>();
+
+        if $i0 < 512 goto label1;
+
+        $r1 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r1.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("bitLength cannot be >= 512");
+
+        throw $r1;
+
+     label1:
+        $i1 = $i0 % 8;
+
+        if $i1 == 0 goto label2;
+
+        $r1 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r1.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("bitLength needs to be a multiple of 8");
+
+        throw $r1;
+
+     label2:
+        if $i0 != 384 goto label3;
+
+        $r1 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r1.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("bitLength cannot be 384 use SHA384 instead");
+
+        throw $r1;
+
+     label3:
+        $i0 = $i0 / 8;
+
+        r0.<org.spongycastle.crypto.digests.SHA512tDigest: int digestLength> = $i0;
+
+        $i0 = r0.<org.spongycastle.crypto.digests.SHA512tDigest: int digestLength>;
+
+        $i0 = $i0 * 8;
+
+        specialinvoke r0.<org.spongycastle.crypto.digests.SHA512tDigest: void tIvGenerate(int)>($i0);
+
+        virtualinvoke r0.<org.spongycastle.crypto.digests.SHA512tDigest: void reset()>();
+
+        return;
+    }
+    public void <init>(org.spongycastle.crypto.digests.SHA512tDigest)
+    {
+        org.spongycastle.crypto.digests.SHA512tDigest r0, $r1;
+        int $i0;
+
+        r0 := @this: org.spongycastle.crypto.digests.SHA512tDigest;
+
+        $r1 := @parameter0: org.spongycastle.crypto.digests.SHA512tDigest;
+
+        specialinvoke r0.<org.spongycastle.crypto.digests.LongDigest: void <init>(org.spongycastle.crypto.digests.LongDigest)>($r1);
+
+        $i0 = $r1.<org.spongycastle.crypto.digests.SHA512tDigest: int digestLength>;
+
+        r0.<org.spongycastle.crypto.digests.SHA512tDigest: int digestLength> = $i0;
+
+        virtualinvoke r0.<org.spongycastle.crypto.digests.SHA512tDigest: void reset(org.spongycastle.util.Memoable)>($r1);
+
+        return;
+    }
+    public void <init>(byte[])
+    {
+        org.spongycastle.crypto.digests.SHA512tDigest r0;
+        byte[] $r1;
+        int $i0;
+
+        r0 := @this: org.spongycastle.crypto.digests.SHA512tDigest;
+
+        $r1 := @parameter0: byte[];
+
+        $i0 = staticinvoke <org.spongycastle.crypto.digests.SHA512tDigest: int readDigestLength(byte[])>($r1);
+
+        specialinvoke r0.<org.spongycastle.crypto.digests.SHA512tDigest: void <init>(int)>($i0);
+
+        virtualinvoke r0.<org.spongycastle.crypto.digests.SHA512tDigest: void restoreState(byte[])>($r1);
+
+        return;
+    }
+    private static void intToBigEndian(int, byte[], int, int)
+    {
+        int $i0, $i1, $i2, i3, $i4;
+        byte[] $r0;
+        byte $b5;
+
+        $i0 := @parameter0: int;
+
+        $r0 := @parameter1: byte[];
+
+        $i1 := @parameter2: int;
+
+        $i2 := @parameter3: int;
+
+        $i2 = staticinvoke <java.lang.Math: int min(int,int)>(4, $i2);
+
+     label1:
+        $i2 = $i2 + -1;
+
+        if $i2 < 0 goto label2;
+
+        $i4 = 3 - $i2;
+
+        i3 = $i4 * 8;
+
+        $i4 = $i1 + $i2;
+
+        i3 = $i0 >>> i3;
+
+        $b5 = (byte) i3;
+
+        $r0[$i4] = $b5;
+
+        goto label1;
+
+     label2:
+        return;
+    }
+    private static void longToBigEndian(long, byte[], int, int)
+    {
+        long $l0, $l3;
+        byte[] $r0;
+        int $i1, $i2, $i4;
+
+        $l0 := @parameter0: long;
+
+        $r0 := @parameter1: byte[];
+
+        $i1 := @parameter2: int;
+
+        $i2 := @parameter3: int;
+
+        if $i2 <= 0 goto label1;
+
+        $l3 = $l0 >>> 32;
+
+        $i4 = (int) $l3;
+
+        staticinvoke <org.spongycastle.crypto.digests.SHA512tDigest: void intToBigEndian(int,byte[],int,int)>($i4, $r0, $i1, $i2);
+
+        if $i2 <= 4 goto label1;
+
+        $l0 = 4294967295L & $l0;
+
+        $i4 = (int) $l0;
+
+        $i1 = $i1 + 4;
+
+        $i2 = $i2 + -4;
+
+        staticinvoke <org.spongycastle.crypto.digests.SHA512tDigest: void intToBigEndian(int,byte[],int,int)>($i4, $r0, $i1, $i2);
+
+     label1:
+        return;
+    }
+    private static int readDigestLength(byte[])
+    {
+        byte[] $r0;
+        int $i0;
+
+        $r0 := @parameter0: byte[];
+
+        $i0 = lengthof $r0;
+
+        $i0 = $i0 + -4;
+
+        $i0 = staticinvoke <org.spongycastle.util.Pack: int bigEndianToInt(byte[],int)>($r0, $i0);
+
+        return $i0;
+    }
+    private void tIvGenerate(int)
+    {
+        org.spongycastle.crypto.digests.SHA512tDigest r0;
+        int $i0, $i1;
+        byte $b2;
+        long $l3;
+
+        r0 := @this: org.spongycastle.crypto.digests.SHA512tDigest;
+
+        $i0 := @parameter0: int;
+
+        r0.<org.spongycastle.crypto.digests.SHA512tDigest: long H1> = -3482333909917012819L;
+
+        r0.<org.spongycastle.crypto.digests.SHA512tDigest: long H2> = 2216346199247487646L;
+
+        r0.<org.spongycastle.crypto.digests.SHA512tDigest: long H3> = -7364697282686394994L;
+
+        r0.<org.spongycastle.crypto.digests.SHA512tDigest: long H4> = 65953792586715988L;
+
+        r0.<org.spongycastle.crypto.digests.SHA512tDigest: long H5> = -816286391624063116L;
+
+        r0.<org.spongycastle.crypto.digests.SHA512tDigest: long H6> = 4512832404995164602L;
+
+        r0.<org.spongycastle.crypto.digests.SHA512tDigest: long H7> = -5033199132376557362L;
+
+        r0.<org.spongycastle.crypto.digests.SHA512tDigest: long H8> = -124578254951840548L;
+
+        virtualinvoke r0.<org.spongycastle.crypto.digests.SHA512tDigest: void update(byte)>(83);
+
+        virtualinvoke r0.<org.spongycastle.crypto.digests.SHA512tDigest: void update(byte)>(72);
+
+        virtualinvoke r0.<org.spongycastle.crypto.digests.SHA512tDigest: void update(byte)>(65);
+
+        virtualinvoke r0.<org.spongycastle.crypto.digests.SHA512tDigest: void update(byte)>(45);
+
+        virtualinvoke r0.<org.spongycastle.crypto.digests.SHA512tDigest: void update(byte)>(53);
+
+        virtualinvoke r0.<org.spongycastle.crypto.digests.SHA512tDigest: void update(byte)>(49);
+
+        virtualinvoke r0.<org.spongycastle.crypto.digests.SHA512tDigest: void update(byte)>(50);
+
+        virtualinvoke r0.<org.spongycastle.crypto.digests.SHA512tDigest: void update(byte)>(47);
+
+        if $i0 <= 100 goto label2;
+
+        $i1 = $i0 / 100;
+
+        $i1 = $i1 + 48;
+
+        $b2 = (byte) $i1;
+
+        virtualinvoke r0.<org.spongycastle.crypto.digests.SHA512tDigest: void update(byte)>($b2);
+
+        $i0 = $i0 % 100;
+
+        $i1 = $i0 / 10;
+
+        $i1 = $i1 + 48;
+
+        $b2 = (byte) $i1;
+
+        virtualinvoke r0.<org.spongycastle.crypto.digests.SHA512tDigest: void update(byte)>($b2);
+
+        $i0 = $i0 % 10;
+
+        $i0 = $i0 + 48;
+
+        $b2 = (byte) $i0;
+
+        virtualinvoke r0.<org.spongycastle.crypto.digests.SHA512tDigest: void update(byte)>($b2);
+
+     label1:
+        virtualinvoke r0.<org.spongycastle.crypto.digests.SHA512tDigest: void finish()>();
+
+        $l3 = r0.<org.spongycastle.crypto.digests.SHA512tDigest: long H1>;
+
+        r0.<org.spongycastle.crypto.digests.SHA512tDigest: long H1t> = $l3;
+
+        $l3 = r0.<org.spongycastle.crypto.digests.SHA512tDigest: long H2>;
+
+        r0.<org.spongycastle.crypto.digests.SHA512tDigest: long H2t> = $l3;
+
+        $l3 = r0.<org.spongycastle.crypto.digests.SHA512tDigest: long H3>;
+
+        r0.<org.spongycastle.crypto.digests.SHA512tDigest: long H3t> = $l3;
+
+        $l3 = r0.<org.spongycastle.crypto.digests.SHA512tDigest: long H4>;
+
+        r0.<org.spongycastle.crypto.digests.SHA512tDigest: long H4t> = $l3;
+
+        $l3 = r0.<org.spongycastle.crypto.digests.SHA512tDigest: long H5>;
+
+        r0.<org.spongycastle.crypto.digests.SHA512tDigest: long H5t> = $l3;
+
+        $l3 = r0.<org.spongycastle.crypto.digests.SHA512tDigest: long H6>;
+
+        r0.<org.spongycastle.crypto.digests.SHA512tDigest: long H6t> = $l3;
+
+        $l3 = r0.<org.spongycastle.crypto.digests.SHA512tDigest: long H7>;
+
+        r0.<org.spongycastle.crypto.digests.SHA512tDigest: long H7t> = $l3;
+
+        $l3 = r0.<org.spongycastle.crypto.digests.SHA512tDigest: long H8>;
+
+        r0.<org.spongycastle.crypto.digests.SHA512tDigest: long H8t> = $l3;
+
+        return;
+
+     label2:
+        if $i0 <= 10 goto label3;
+
+        $i1 = $i0 / 10;
+
+        $i1 = $i1 + 48;
+
+        $b2 = (byte) $i1;
+
+        virtualinvoke r0.<org.spongycastle.crypto.digests.SHA512tDigest: void update(byte)>($b2);
+
+        $i0 = $i0 % 10;
+
+        $i0 = $i0 + 48;
+
+        $b2 = (byte) $i0;
+
+        virtualinvoke r0.<org.spongycastle.crypto.digests.SHA512tDigest: void update(byte)>($b2);
+
+        goto label1;
+
+     label3:
+        $i0 = $i0 + 48;
+
+        $b2 = (byte) $i0;
+
+        virtualinvoke r0.<org.spongycastle.crypto.digests.SHA512tDigest: void update(byte)>($b2);
+
+        goto label1;
+    }
+    public org.spongycastle.util.Memoable copy()
+    {
+        org.spongycastle.crypto.digests.SHA512tDigest r0, $r1;
+
+        r0 := @this: org.spongycastle.crypto.digests.SHA512tDigest;
+
+        $r1 = new org.spongycastle.crypto.digests.SHA512tDigest;
+
+        specialinvoke $r1.<org.spongycastle.crypto.digests.SHA512tDigest: void <init>(org.spongycastle.crypto.digests.SHA512tDigest)>(r0);
+
+        return $r1;
+    }
+    public int doFinal(byte[], int)
+    {
+        org.spongycastle.crypto.digests.SHA512tDigest r0;
+        byte[] $r1;
+        int $i0, $i2, $i3;
+        long $l1;
+
+        r0 := @this: org.spongycastle.crypto.digests.SHA512tDigest;
+
+        $r1 := @parameter0: byte[];
+
+        $i0 := @parameter1: int;
+
+        virtualinvoke r0.<org.spongycastle.crypto.digests.SHA512tDigest: void finish()>();
+
+        $l1 = r0.<org.spongycastle.crypto.digests.SHA512tDigest: long H1>;
+
+        $i2 = r0.<org.spongycastle.crypto.digests.SHA512tDigest: int digestLength>;
+
+        staticinvoke <org.spongycastle.crypto.digests.SHA512tDigest: void longToBigEndian(long,byte[],int,int)>($l1, $r1, $i0, $i2);
+
+        $l1 = r0.<org.spongycastle.crypto.digests.SHA512tDigest: long H2>;
+
+        $i2 = $i0 + 8;
+
+        $i3 = r0.<org.spongycastle.crypto.digests.SHA512tDigest: int digestLength>;
+
+        $i3 = $i3 + -8;
+
+        staticinvoke <org.spongycastle.crypto.digests.SHA512tDigest: void longToBigEndian(long,byte[],int,int)>($l1, $r1, $i2, $i3);
+
+        $l1 = r0.<org.spongycastle.crypto.digests.SHA512tDigest: long H3>;
+
+        $i2 = $i0 + 16;
+
+        $i3 = r0.<org.spongycastle.crypto.digests.SHA512tDigest: int digestLength>;
+
+        $i3 = $i3 + -16;
+
+        staticinvoke <org.spongycastle.crypto.digests.SHA512tDigest: void longToBigEndian(long,byte[],int,int)>($l1, $r1, $i2, $i3);
+
+        $l1 = r0.<org.spongycastle.crypto.digests.SHA512tDigest: long H4>;
+
+        $i2 = $i0 + 24;
+
+        $i3 = r0.<org.spongycastle.crypto.digests.SHA512tDigest: int digestLength>;
+
+        $i3 = $i3 + -24;
+
+        staticinvoke <org.spongycastle.crypto.digests.SHA512tDigest: void longToBigEndian(long,byte[],int,int)>($l1, $r1, $i2, $i3);
+
+        $l1 = r0.<org.spongycastle.crypto.digests.SHA512tDigest: long H5>;
+
+        $i2 = $i0 + 32;
+
+        $i3 = r0.<org.spongycastle.crypto.digests.SHA512tDigest: int digestLength>;
+
+        $i3 = $i3 + -32;
+
+        staticinvoke <org.spongycastle.crypto.digests.SHA512tDigest: void longToBigEndian(long,byte[],int,int)>($l1, $r1, $i2, $i3);
+
+        $l1 = r0.<org.spongycastle.crypto.digests.SHA512tDigest: long H6>;
+
+        $i2 = $i0 + 40;
+
+        $i3 = r0.<org.spongycastle.crypto.digests.SHA512tDigest: int digestLength>;
+
+        $i3 = $i3 + -40;
+
+        staticinvoke <org.spongycastle.crypto.digests.SHA512tDigest: void longToBigEndian(long,byte[],int,int)>($l1, $r1, $i2, $i3);
+
+        $l1 = r0.<org.spongycastle.crypto.digests.SHA512tDigest: long H7>;
+
+        $i2 = $i0 + 48;
+
+        $i3 = r0.<org.spongycastle.crypto.digests.SHA512tDigest: int digestLength>;
+
+        $i3 = $i3 + -48;
+
+        staticinvoke <org.spongycastle.crypto.digests.SHA512tDigest: void longToBigEndian(long,byte[],int,int)>($l1, $r1, $i2, $i3);
+
+        $l1 = r0.<org.spongycastle.crypto.digests.SHA512tDigest: long H8>;
+
+        $i0 = $i0 + 56;
+
+        $i2 = r0.<org.spongycastle.crypto.digests.SHA512tDigest: int digestLength>;
+
+        $i2 = $i2 + -56;
+
+        staticinvoke <org.spongycastle.crypto.digests.SHA512tDigest: void longToBigEndian(long,byte[],int,int)>($l1, $r1, $i0, $i2);
+
+        virtualinvoke r0.<org.spongycastle.crypto.digests.SHA512tDigest: void reset()>();
+
+        $i0 = r0.<org.spongycastle.crypto.digests.SHA512tDigest: int digestLength>;
+
+        return $i0;
+    }
+    public java.lang.String getAlgorithmName()
+    {
+        org.spongycastle.crypto.digests.SHA512tDigest r0;
+        java.lang.StringBuilder $r1;
+        int $i0;
+        java.lang.String $r2;
+
+        r0 := @this: org.spongycastle.crypto.digests.SHA512tDigest;
+
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r1 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("SHA-512/");
+
+        $i0 = r0.<org.spongycastle.crypto.digests.SHA512tDigest: int digestLength>;
+
+        $i0 = $i0 * 8;
+
+        $r2 = staticinvoke <java.lang.Integer: java.lang.String toString(int)>($i0);
+
+        $r1 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r2 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r2;
+    }
+    public int getDigestSize()
+    {
+        org.spongycastle.crypto.digests.SHA512tDigest r0;
+        int i0;
+
+        r0 := @this: org.spongycastle.crypto.digests.SHA512tDigest;
+
+        i0 = r0.<org.spongycastle.crypto.digests.SHA512tDigest: int digestLength>;
+
+        return i0;
+    }
+    public byte[] getEncodedState()
+    {
+        org.spongycastle.crypto.digests.SHA512tDigest r0;
+        byte[] r1;
+        int $i0, $i1;
+
+        r0 := @this: org.spongycastle.crypto.digests.SHA512tDigest;
+
+        $i0 = virtualinvoke r0.<org.spongycastle.crypto.digests.SHA512tDigest: int getEncodedStateSize()>();
+
+        $i1 = $i0 + 4;
+
+        r1 = newarray (byte)[$i1];
+
+        virtualinvoke r0.<org.spongycastle.crypto.digests.SHA512tDigest: void populateState(byte[])>(r1);
+
+        $i1 = r0.<org.spongycastle.crypto.digests.SHA512tDigest: int digestLength>;
+
+        $i1 = $i1 * 8;
+
+        staticinvoke <org.spongycastle.util.Pack: void intToBigEndian(int,byte[],int)>($i1, r1, $i0);
+
+        return r1;
+    }
+    public void reset()
+    {
+        org.spongycastle.crypto.digests.SHA512tDigest r0;
+        long $l0;
+
+        r0 := @this: org.spongycastle.crypto.digests.SHA512tDigest;
+
+        specialinvoke r0.<org.spongycastle.crypto.digests.LongDigest: void reset()>();
+
+        $l0 = r0.<org.spongycastle.crypto.digests.SHA512tDigest: long H1t>;
+
+        r0.<org.spongycastle.crypto.digests.SHA512tDigest: long H1> = $l0;
+
+        $l0 = r0.<org.spongycastle.crypto.digests.SHA512tDigest: long H2t>;
+
+        r0.<org.spongycastle.crypto.digests.SHA512tDigest: long H2> = $l0;
+
+        $l0 = r0.<org.spongycastle.crypto.digests.SHA512tDigest: long H3t>;
+
+        r0.<org.spongycastle.crypto.digests.SHA512tDigest: long H3> = $l0;
+
+        $l0 = r0.<org.spongycastle.crypto.digests.SHA512tDigest: long H4t>;
+
+        r0.<org.spongycastle.crypto.digests.SHA512tDigest: long H4> = $l0;
+
+        $l0 = r0.<org.spongycastle.crypto.digests.SHA512tDigest: long H5t>;
+
+        r0.<org.spongycastle.crypto.digests.SHA512tDigest: long H5> = $l0;
+
+        $l0 = r0.<org.spongycastle.crypto.digests.SHA512tDigest: long H6t>;
+
+        r0.<org.spongycastle.crypto.digests.SHA512tDigest: long H6> = $l0;
+
+        $l0 = r0.<org.spongycastle.crypto.digests.SHA512tDigest: long H7t>;
+
+        r0.<org.spongycastle.crypto.digests.SHA512tDigest: long H7> = $l0;
+
+        $l0 = r0.<org.spongycastle.crypto.digests.SHA512tDigest: long H8t>;
+
+        r0.<org.spongycastle.crypto.digests.SHA512tDigest: long H8> = $l0;
+
+        return;
+    }
+    public void reset(org.spongycastle.util.Memoable)
+    {
+        org.spongycastle.crypto.digests.SHA512tDigest r0, r2;
+        org.spongycastle.util.Memoable $r1;
+        int $i0, $i1;
+        org.spongycastle.util.MemoableResetException $r3;
+        long $l2;
+
+        r0 := @this: org.spongycastle.crypto.digests.SHA512tDigest;
+
+        $r1 := @parameter0: org.spongycastle.util.Memoable;
+
+        r2 = (org.spongycastle.crypto.digests.SHA512tDigest) $r1;
+
+        $i0 = r0.<org.spongycastle.crypto.digests.SHA512tDigest: int digestLength>;
+
+        $i1 = r2.<org.spongycastle.crypto.digests.SHA512tDigest: int digestLength>;
+
+        if $i0 == $i1 goto label1;
+
+        $r3 = new org.spongycastle.util.MemoableResetException;
+
+        specialinvoke $r3.<org.spongycastle.util.MemoableResetException: void <init>(java.lang.String)>("digestLength inappropriate in other");
+
+        throw $r3;
+
+     label1:
+        specialinvoke r0.<org.spongycastle.crypto.digests.LongDigest: void copyIn(org.spongycastle.crypto.digests.LongDigest)>(r2);
+
+        $l2 = r2.<org.spongycastle.crypto.digests.SHA512tDigest: long H1t>;
+
+        r0.<org.spongycastle.crypto.digests.SHA512tDigest: long H1t> = $l2;
+
+        $l2 = r2.<org.spongycastle.crypto.digests.SHA512tDigest: long H2t>;
+
+        r0.<org.spongycastle.crypto.digests.SHA512tDigest: long H2t> = $l2;
+
+        $l2 = r2.<org.spongycastle.crypto.digests.SHA512tDigest: long H3t>;
+
+        r0.<org.spongycastle.crypto.digests.SHA512tDigest: long H3t> = $l2;
+
+        $l2 = r2.<org.spongycastle.crypto.digests.SHA512tDigest: long H4t>;
+
+        r0.<org.spongycastle.crypto.digests.SHA512tDigest: long H4t> = $l2;
+
+        $l2 = r2.<org.spongycastle.crypto.digests.SHA512tDigest: long H5t>;
+
+        r0.<org.spongycastle.crypto.digests.SHA512tDigest: long H5t> = $l2;
+
+        $l2 = r2.<org.spongycastle.crypto.digests.SHA512tDigest: long H6t>;
+
+        r0.<org.spongycastle.crypto.digests.SHA512tDigest: long H6t> = $l2;
+
+        $l2 = r2.<org.spongycastle.crypto.digests.SHA512tDigest: long H7t>;
+
+        r0.<org.spongycastle.crypto.digests.SHA512tDigest: long H7t> = $l2;
+
+        $l2 = r2.<org.spongycastle.crypto.digests.SHA512tDigest: long H8t>;
+
+        r0.<org.spongycastle.crypto.digests.SHA512tDigest: long H8t> = $l2;
+
+        return;
+    }

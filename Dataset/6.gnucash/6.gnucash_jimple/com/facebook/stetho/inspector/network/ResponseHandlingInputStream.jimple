@@ -1,0 +1,707 @@
+com.facebook.stetho.inspector.network.ResponseHandlingInputStream extends java.io.FilterInputStream
+private static final int BUFFER_SIZE
+public static final java.lang.String TAG
+private boolean mClosed
+private final com.facebook.stetho.inspector.network.CountingOutputStream mDecompressedCounter
+private boolean mEofSeen
+private long mLastDecompressedCount
+private final com.facebook.stetho.inspector.helper.ChromePeerManager mNetworkPeerManager
+private final java.io.OutputStream mOutputStream
+private final java.lang.String mRequestId
+private final com.facebook.stetho.inspector.network.ResponseHandler mResponseHandler
+private byte[] mSkipBuffer
+    public void <init>(java.io.InputStream, java.lang.String, java.io.OutputStream, com.facebook.stetho.inspector.network.CountingOutputStream, com.facebook.stetho.inspector.helper.ChromePeerManager, com.facebook.stetho.inspector.network.ResponseHandler)
+    {
+        com.facebook.stetho.inspector.network.ResponseHandlingInputStream r0;
+        java.io.InputStream $r1;
+        java.lang.String $r2;
+        java.io.OutputStream $r3;
+        com.facebook.stetho.inspector.network.CountingOutputStream $r4;
+        com.facebook.stetho.inspector.helper.ChromePeerManager $r5;
+        com.facebook.stetho.inspector.network.ResponseHandler $r6;
+
+        r0 := @this: com.facebook.stetho.inspector.network.ResponseHandlingInputStream;
+
+        $r1 := @parameter0: java.io.InputStream;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $r3 := @parameter2: java.io.OutputStream;
+
+        $r4 := @parameter3: com.facebook.stetho.inspector.network.CountingOutputStream;
+
+        $r5 := @parameter4: com.facebook.stetho.inspector.helper.ChromePeerManager;
+
+        $r6 := @parameter5: com.facebook.stetho.inspector.network.ResponseHandler;
+
+        specialinvoke r0.<java.io.FilterInputStream: void <init>(java.io.InputStream)>($r1);
+
+        r0.<com.facebook.stetho.inspector.network.ResponseHandlingInputStream: long mLastDecompressedCount> = 0L;
+
+        r0.<com.facebook.stetho.inspector.network.ResponseHandlingInputStream: java.lang.String mRequestId> = $r2;
+
+        r0.<com.facebook.stetho.inspector.network.ResponseHandlingInputStream: java.io.OutputStream mOutputStream> = $r3;
+
+        r0.<com.facebook.stetho.inspector.network.ResponseHandlingInputStream: com.facebook.stetho.inspector.network.CountingOutputStream mDecompressedCounter> = $r4;
+
+        r0.<com.facebook.stetho.inspector.network.ResponseHandlingInputStream: com.facebook.stetho.inspector.helper.ChromePeerManager mNetworkPeerManager> = $r5;
+
+        r0.<com.facebook.stetho.inspector.network.ResponseHandlingInputStream: com.facebook.stetho.inspector.network.ResponseHandler mResponseHandler> = $r6;
+
+        r0.<com.facebook.stetho.inspector.network.ResponseHandlingInputStream: boolean mClosed> = 0;
+
+        return;
+    }
+    private int checkEOF(int)
+    {
+        com.facebook.stetho.inspector.network.ResponseHandlingInputStream r0;
+        int $i0;
+        com.facebook.stetho.inspector.network.ResponseHandler $r1;
+        java.lang.Throwable $r2;
+
+        r0 := @this: com.facebook.stetho.inspector.network.ResponseHandlingInputStream;
+
+        $i0 := @parameter0: int;
+
+        entermonitor r0;
+
+        if $i0 != -1 goto label2;
+
+     label1:
+        specialinvoke r0.<com.facebook.stetho.inspector.network.ResponseHandlingInputStream: void closeOutputStreamQuietly()>();
+
+        $r1 = r0.<com.facebook.stetho.inspector.network.ResponseHandlingInputStream: com.facebook.stetho.inspector.network.ResponseHandler mResponseHandler>;
+
+        interfaceinvoke $r1.<com.facebook.stetho.inspector.network.ResponseHandler: void onEOF()>();
+
+        r0.<com.facebook.stetho.inspector.network.ResponseHandlingInputStream: boolean mEofSeen> = 1;
+
+     label2:
+        exitmonitor r0;
+
+        return $i0;
+
+     label3:
+        $r2 := @caughtexception;
+
+        exitmonitor r0;
+
+        throw $r2;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+    private void closeOutputStreamQuietly()
+    {
+        com.facebook.stetho.inspector.network.ResponseHandlingInputStream r0;
+        java.io.IOException r1;
+        com.facebook.stetho.inspector.protocol.module.Console$MessageSource $r2;
+        boolean $z0;
+        java.io.OutputStream $r3;
+        com.facebook.stetho.inspector.helper.ChromePeerManager $r4;
+        com.facebook.stetho.inspector.protocol.module.Console$MessageLevel $r5;
+        java.lang.StringBuilder $r6;
+        java.lang.String $r7;
+        java.lang.Throwable $r8, $r9;
+
+        r0 := @this: com.facebook.stetho.inspector.network.ResponseHandlingInputStream;
+
+        entermonitor r0;
+
+     label01:
+        $z0 = r0.<com.facebook.stetho.inspector.network.ResponseHandlingInputStream: boolean mClosed>;
+
+     label02:
+        if $z0 != 0 goto label06;
+
+     label03:
+        $r3 = r0.<com.facebook.stetho.inspector.network.ResponseHandlingInputStream: java.io.OutputStream mOutputStream>;
+
+     label04:
+        virtualinvoke $r3.<java.io.OutputStream: void close()>();
+
+        specialinvoke r0.<com.facebook.stetho.inspector.network.ResponseHandlingInputStream: void reportDecodedSizeIfApplicable()>();
+
+     label05:
+        r0.<com.facebook.stetho.inspector.network.ResponseHandlingInputStream: boolean mClosed> = 1;
+
+     label06:
+        exitmonitor r0;
+
+        return;
+
+     label07:
+        r1 := @caughtexception;
+
+     label08:
+        $r4 = r0.<com.facebook.stetho.inspector.network.ResponseHandlingInputStream: com.facebook.stetho.inspector.helper.ChromePeerManager mNetworkPeerManager>;
+
+        $r5 = <com.facebook.stetho.inspector.protocol.module.Console$MessageLevel: com.facebook.stetho.inspector.protocol.module.Console$MessageLevel ERROR>;
+
+        $r2 = <com.facebook.stetho.inspector.protocol.module.Console$MessageSource: com.facebook.stetho.inspector.protocol.module.Console$MessageSource NETWORK>;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Could not close the output stream");
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r1);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.facebook.stetho.inspector.console.CLog: void writeToConsole(com.facebook.stetho.inspector.helper.ChromePeerManager,com.facebook.stetho.inspector.protocol.module.Console$MessageLevel,com.facebook.stetho.inspector.protocol.module.Console$MessageSource,java.lang.String)>($r4, $r5, $r2, $r7);
+
+     label09:
+        r0.<com.facebook.stetho.inspector.network.ResponseHandlingInputStream: boolean mClosed> = 1;
+
+     label10:
+        goto label06;
+
+     label11:
+        $r8 := @caughtexception;
+
+        exitmonitor r0;
+
+        throw $r8;
+
+     label12:
+        $r9 := @caughtexception;
+
+     label13:
+        r0.<com.facebook.stetho.inspector.network.ResponseHandlingInputStream: boolean mClosed> = 1;
+
+        throw $r9;
+
+     label14:
+        nop;
+
+        catch java.lang.Throwable from label01 to label02 with label11;
+        catch java.io.IOException from label04 to label05 with label07;
+        catch java.lang.Throwable from label03 to label05 with label12;
+        catch java.lang.Throwable from label05 to label06 with label11;
+        catch java.lang.Throwable from label08 to label09 with label12;
+        catch java.lang.Throwable from label09 to label10 with label11;
+        catch java.lang.Throwable from label13 to label14 with label11;
+    }
+    private byte[] getSkipBufferLocked()
+    {
+        com.facebook.stetho.inspector.network.ResponseHandlingInputStream r0;
+        byte[] $r1;
+
+        r0 := @this: com.facebook.stetho.inspector.network.ResponseHandlingInputStream;
+
+        $r1 = r0.<com.facebook.stetho.inspector.network.ResponseHandlingInputStream: byte[] mSkipBuffer>;
+
+        if $r1 != null goto label1;
+
+        $r1 = newarray (byte)[1024];
+
+        r0.<com.facebook.stetho.inspector.network.ResponseHandlingInputStream: byte[] mSkipBuffer> = $r1;
+
+     label1:
+        $r1 = r0.<com.facebook.stetho.inspector.network.ResponseHandlingInputStream: byte[] mSkipBuffer>;
+
+        return $r1;
+    }
+    private java.io.IOException handleIOException(java.io.IOException)
+    {
+        com.facebook.stetho.inspector.network.ResponseHandlingInputStream r0;
+        java.io.IOException $r1;
+        com.facebook.stetho.inspector.network.ResponseHandler $r2;
+
+        r0 := @this: com.facebook.stetho.inspector.network.ResponseHandlingInputStream;
+
+        $r1 := @parameter0: java.io.IOException;
+
+        $r2 = r0.<com.facebook.stetho.inspector.network.ResponseHandlingInputStream: com.facebook.stetho.inspector.network.ResponseHandler mResponseHandler>;
+
+        interfaceinvoke $r2.<com.facebook.stetho.inspector.network.ResponseHandler: void onError(java.io.IOException)>($r1);
+
+        return $r1;
+    }
+    private void handleIOExceptionWritingToStream(java.io.IOException)
+    {
+        com.facebook.stetho.inspector.network.ResponseHandlingInputStream r0;
+        java.io.IOException $r1;
+        com.facebook.stetho.inspector.helper.ChromePeerManager $r2;
+        com.facebook.stetho.inspector.protocol.module.Console$MessageLevel $r3;
+        com.facebook.stetho.inspector.protocol.module.Console$MessageSource $r4;
+        java.lang.StringBuilder $r5;
+        java.lang.String $r6;
+
+        r0 := @this: com.facebook.stetho.inspector.network.ResponseHandlingInputStream;
+
+        $r1 := @parameter0: java.io.IOException;
+
+        $r2 = r0.<com.facebook.stetho.inspector.network.ResponseHandlingInputStream: com.facebook.stetho.inspector.helper.ChromePeerManager mNetworkPeerManager>;
+
+        $r3 = <com.facebook.stetho.inspector.protocol.module.Console$MessageLevel: com.facebook.stetho.inspector.protocol.module.Console$MessageLevel ERROR>;
+
+        $r4 = <com.facebook.stetho.inspector.protocol.module.Console$MessageSource: com.facebook.stetho.inspector.protocol.module.Console$MessageSource NETWORK>;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Could not write response body to the stream ");
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r1);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.facebook.stetho.inspector.console.CLog: void writeToConsole(com.facebook.stetho.inspector.helper.ChromePeerManager,com.facebook.stetho.inspector.protocol.module.Console$MessageLevel,com.facebook.stetho.inspector.protocol.module.Console$MessageSource,java.lang.String)>($r2, $r3, $r4, $r6);
+
+        specialinvoke r0.<com.facebook.stetho.inspector.network.ResponseHandlingInputStream: void closeOutputStreamQuietly()>();
+
+        return;
+    }
+    private void reportDecodedSizeIfApplicable()
+    {
+        com.facebook.stetho.inspector.network.ResponseHandlingInputStream r0;
+        int i0;
+        long $l1, $l2;
+        com.facebook.stetho.inspector.network.CountingOutputStream $r1;
+        com.facebook.stetho.inspector.network.ResponseHandler $r2;
+
+        r0 := @this: com.facebook.stetho.inspector.network.ResponseHandlingInputStream;
+
+        $r1 = r0.<com.facebook.stetho.inspector.network.ResponseHandlingInputStream: com.facebook.stetho.inspector.network.CountingOutputStream mDecompressedCounter>;
+
+        if $r1 == null goto label1;
+
+        $r1 = r0.<com.facebook.stetho.inspector.network.ResponseHandlingInputStream: com.facebook.stetho.inspector.network.CountingOutputStream mDecompressedCounter>;
+
+        $l1 = virtualinvoke $r1.<com.facebook.stetho.inspector.network.CountingOutputStream: long getCount()>();
+
+        $l2 = r0.<com.facebook.stetho.inspector.network.ResponseHandlingInputStream: long mLastDecompressedCount>;
+
+        $l2 = $l1 - $l2;
+
+        i0 = (int) $l2;
+
+        $r2 = r0.<com.facebook.stetho.inspector.network.ResponseHandlingInputStream: com.facebook.stetho.inspector.network.ResponseHandler mResponseHandler>;
+
+        interfaceinvoke $r2.<com.facebook.stetho.inspector.network.ResponseHandler: void onReadDecoded(int)>(i0);
+
+        r0.<com.facebook.stetho.inspector.network.ResponseHandlingInputStream: long mLastDecompressedCount> = $l1;
+
+     label1:
+        return;
+    }
+    private void writeToOutputStream(int)
+    {
+        com.facebook.stetho.inspector.network.ResponseHandlingInputStream r0;
+        int $i0;
+        java.io.IOException r1;
+        boolean $z0;
+        java.io.OutputStream $r2;
+        java.lang.Throwable $r3;
+
+        r0 := @this: com.facebook.stetho.inspector.network.ResponseHandlingInputStream;
+
+        $i0 := @parameter0: int;
+
+        entermonitor r0;
+
+     label01:
+        $z0 = r0.<com.facebook.stetho.inspector.network.ResponseHandlingInputStream: boolean mClosed>;
+
+     label02:
+        if $z0 == 0 goto label04;
+
+     label03:
+        exitmonitor r0;
+
+        return;
+
+     label04:
+        $r2 = r0.<com.facebook.stetho.inspector.network.ResponseHandlingInputStream: java.io.OutputStream mOutputStream>;
+
+     label05:
+        virtualinvoke $r2.<java.io.OutputStream: void write(int)>($i0);
+
+        specialinvoke r0.<com.facebook.stetho.inspector.network.ResponseHandlingInputStream: void reportDecodedSizeIfApplicable()>();
+
+     label06:
+        goto label03;
+
+     label07:
+        r1 := @caughtexception;
+
+     label08:
+        specialinvoke r0.<com.facebook.stetho.inspector.network.ResponseHandlingInputStream: void handleIOExceptionWritingToStream(java.io.IOException)>(r1);
+
+     label09:
+        goto label03;
+
+     label10:
+        $r3 := @caughtexception;
+
+        exitmonitor r0;
+
+        throw $r3;
+
+        catch java.lang.Throwable from label01 to label02 with label10;
+        catch java.io.IOException from label05 to label06 with label07;
+        catch java.lang.Throwable from label04 to label06 with label10;
+        catch java.lang.Throwable from label08 to label09 with label10;
+    }
+    private void writeToOutputStream(byte[], int, int)
+    {
+        com.facebook.stetho.inspector.network.ResponseHandlingInputStream r0;
+        byte[] $r1;
+        int $i0, $i1;
+        java.io.IOException r2;
+        boolean $z0;
+        java.io.OutputStream $r3;
+        java.lang.Throwable $r4;
+
+        r0 := @this: com.facebook.stetho.inspector.network.ResponseHandlingInputStream;
+
+        $r1 := @parameter0: byte[];
+
+        $i0 := @parameter1: int;
+
+        $i1 := @parameter2: int;
+
+        entermonitor r0;
+
+     label01:
+        $z0 = r0.<com.facebook.stetho.inspector.network.ResponseHandlingInputStream: boolean mClosed>;
+
+     label02:
+        if $z0 == 0 goto label04;
+
+     label03:
+        exitmonitor r0;
+
+        return;
+
+     label04:
+        $r3 = r0.<com.facebook.stetho.inspector.network.ResponseHandlingInputStream: java.io.OutputStream mOutputStream>;
+
+     label05:
+        virtualinvoke $r3.<java.io.OutputStream: void write(byte[],int,int)>($r1, $i0, $i1);
+
+        specialinvoke r0.<com.facebook.stetho.inspector.network.ResponseHandlingInputStream: void reportDecodedSizeIfApplicable()>();
+
+     label06:
+        goto label03;
+
+     label07:
+        r2 := @caughtexception;
+
+     label08:
+        specialinvoke r0.<com.facebook.stetho.inspector.network.ResponseHandlingInputStream: void handleIOExceptionWritingToStream(java.io.IOException)>(r2);
+
+     label09:
+        goto label03;
+
+     label10:
+        $r4 := @caughtexception;
+
+        exitmonitor r0;
+
+        throw $r4;
+
+        catch java.lang.Throwable from label01 to label02 with label10;
+        catch java.io.IOException from label05 to label06 with label07;
+        catch java.lang.Throwable from label04 to label06 with label10;
+        catch java.lang.Throwable from label08 to label09 with label10;
+    }
+    public void close() throws java.io.IOException
+    {
+        com.facebook.stetho.inspector.network.ResponseHandlingInputStream r0;
+        byte[] r1;
+        com.facebook.stetho.inspector.protocol.module.Console$MessageLevel $r2;
+        com.facebook.stetho.inspector.protocol.module.Console$MessageSource $r3;
+        long l0, $l2;
+        boolean $z0;
+        int $i1;
+        byte $b3;
+        com.facebook.stetho.inspector.helper.ChromePeerManager $r4;
+        java.lang.StringBuilder $r5;
+        java.lang.String $r6;
+        java.lang.Throwable $r7;
+
+        r0 := @this: com.facebook.stetho.inspector.network.ResponseHandlingInputStream;
+
+        l0 = 0L;
+
+     label1:
+        $z0 = r0.<com.facebook.stetho.inspector.network.ResponseHandlingInputStream: boolean mEofSeen>;
+
+     label2:
+        if $z0 != 0 goto label6;
+
+     label3:
+        r1 = newarray (byte)[1024];
+
+     label4:
+        $i1 = virtualinvoke r0.<com.facebook.stetho.inspector.network.ResponseHandlingInputStream: int read(byte[])>(r1);
+
+     label5:
+        if $i1 == -1 goto label6;
+
+        $l2 = (long) $i1;
+
+        l0 = l0 + $l2;
+
+        goto label4;
+
+     label6:
+        $b3 = l0 cmp 0L;
+
+        if $b3 <= 0 goto label8;
+
+     label7:
+        $r4 = r0.<com.facebook.stetho.inspector.network.ResponseHandlingInputStream: com.facebook.stetho.inspector.helper.ChromePeerManager mNetworkPeerManager>;
+
+        $r2 = <com.facebook.stetho.inspector.protocol.module.Console$MessageLevel: com.facebook.stetho.inspector.protocol.module.Console$MessageLevel ERROR>;
+
+        $r3 = <com.facebook.stetho.inspector.protocol.module.Console$MessageSource: com.facebook.stetho.inspector.protocol.module.Console$MessageSource NETWORK>;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("There were ");
+
+        $r6 = staticinvoke <java.lang.String: java.lang.String valueOf(long)>(l0);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" bytes that were not consumed while ");
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("processing request ");
+
+        $r6 = r0.<com.facebook.stetho.inspector.network.ResponseHandlingInputStream: java.lang.String mRequestId>;
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.facebook.stetho.inspector.console.CLog: void writeToConsole(com.facebook.stetho.inspector.helper.ChromePeerManager,com.facebook.stetho.inspector.protocol.module.Console$MessageLevel,com.facebook.stetho.inspector.protocol.module.Console$MessageSource,java.lang.String)>($r4, $r2, $r3, $r6);
+
+     label8:
+        specialinvoke r0.<java.io.FilterInputStream: void close()>();
+
+        specialinvoke r0.<com.facebook.stetho.inspector.network.ResponseHandlingInputStream: void closeOutputStreamQuietly()>();
+
+        return;
+
+     label9:
+        $r7 := @caughtexception;
+
+        specialinvoke r0.<java.io.FilterInputStream: void close()>();
+
+        specialinvoke r0.<com.facebook.stetho.inspector.network.ResponseHandlingInputStream: void closeOutputStreamQuietly()>();
+
+        throw $r7;
+
+        catch java.lang.Throwable from label1 to label2 with label9;
+        catch java.lang.Throwable from label3 to label5 with label9;
+        catch java.lang.Throwable from label7 to label8 with label9;
+    }
+    public void mark(int)
+    {
+        com.facebook.stetho.inspector.network.ResponseHandlingInputStream r0;
+        int $i0;
+
+        r0 := @this: com.facebook.stetho.inspector.network.ResponseHandlingInputStream;
+
+        $i0 := @parameter0: int;
+
+        return;
+    }
+    public boolean markSupported()
+    {
+        com.facebook.stetho.inspector.network.ResponseHandlingInputStream r0;
+
+        r0 := @this: com.facebook.stetho.inspector.network.ResponseHandlingInputStream;
+
+        return 0;
+    }
+    public int read() throws java.io.IOException
+    {
+        com.facebook.stetho.inspector.network.ResponseHandlingInputStream r0;
+        java.io.IOException r1;
+        java.io.InputStream $r2;
+        int $i0;
+        com.facebook.stetho.inspector.network.ResponseHandler $r3;
+
+        r0 := @this: com.facebook.stetho.inspector.network.ResponseHandlingInputStream;
+
+        $r2 = r0.<com.facebook.stetho.inspector.network.ResponseHandlingInputStream: java.io.InputStream in>;
+
+     label1:
+        $i0 = virtualinvoke $r2.<java.io.InputStream: int read()>();
+
+        $i0 = specialinvoke r0.<com.facebook.stetho.inspector.network.ResponseHandlingInputStream: int checkEOF(int)>($i0);
+
+     label2:
+        if $i0 == -1 goto label6;
+
+        $r3 = r0.<com.facebook.stetho.inspector.network.ResponseHandlingInputStream: com.facebook.stetho.inspector.network.ResponseHandler mResponseHandler>;
+
+     label3:
+        interfaceinvoke $r3.<com.facebook.stetho.inspector.network.ResponseHandler: void onRead(int)>(1);
+
+        specialinvoke r0.<com.facebook.stetho.inspector.network.ResponseHandlingInputStream: void writeToOutputStream(int)>($i0);
+
+     label4:
+        return $i0;
+
+     label5:
+        r1 := @caughtexception;
+
+        r1 = specialinvoke r0.<com.facebook.stetho.inspector.network.ResponseHandlingInputStream: java.io.IOException handleIOException(java.io.IOException)>(r1);
+
+        throw r1;
+
+     label6:
+        return $i0;
+
+        catch java.io.IOException from label1 to label2 with label5;
+        catch java.io.IOException from label3 to label4 with label5;
+    }
+    public int read(byte[]) throws java.io.IOException
+    {
+        com.facebook.stetho.inspector.network.ResponseHandlingInputStream r0;
+        byte[] $r1;
+        int $i0;
+
+        r0 := @this: com.facebook.stetho.inspector.network.ResponseHandlingInputStream;
+
+        $r1 := @parameter0: byte[];
+
+        $i0 = lengthof $r1;
+
+        $i0 = virtualinvoke r0.<com.facebook.stetho.inspector.network.ResponseHandlingInputStream: int read(byte[],int,int)>($r1, 0, $i0);
+
+        return $i0;
+    }
+    public int read(byte[], int, int) throws java.io.IOException
+    {
+        com.facebook.stetho.inspector.network.ResponseHandlingInputStream r0;
+        byte[] $r1;
+        int $i0, $i1;
+        java.io.IOException r2;
+        java.io.InputStream $r3;
+        com.facebook.stetho.inspector.network.ResponseHandler $r4;
+
+        r0 := @this: com.facebook.stetho.inspector.network.ResponseHandlingInputStream;
+
+        $r1 := @parameter0: byte[];
+
+        $i0 := @parameter1: int;
+
+        $i1 := @parameter2: int;
+
+        $r3 = r0.<com.facebook.stetho.inspector.network.ResponseHandlingInputStream: java.io.InputStream in>;
+
+     label1:
+        $i1 = virtualinvoke $r3.<java.io.InputStream: int read(byte[],int,int)>($r1, $i0, $i1);
+
+        $i1 = specialinvoke r0.<com.facebook.stetho.inspector.network.ResponseHandlingInputStream: int checkEOF(int)>($i1);
+
+     label2:
+        if $i1 == -1 goto label6;
+
+        $r4 = r0.<com.facebook.stetho.inspector.network.ResponseHandlingInputStream: com.facebook.stetho.inspector.network.ResponseHandler mResponseHandler>;
+
+     label3:
+        interfaceinvoke $r4.<com.facebook.stetho.inspector.network.ResponseHandler: void onRead(int)>($i1);
+
+        specialinvoke r0.<com.facebook.stetho.inspector.network.ResponseHandlingInputStream: void writeToOutputStream(byte[],int,int)>($r1, $i0, $i1);
+
+     label4:
+        return $i1;
+
+     label5:
+        r2 := @caughtexception;
+
+        r2 = specialinvoke r0.<com.facebook.stetho.inspector.network.ResponseHandlingInputStream: java.io.IOException handleIOException(java.io.IOException)>(r2);
+
+        throw r2;
+
+     label6:
+        return $i1;
+
+        catch java.io.IOException from label1 to label2 with label5;
+        catch java.io.IOException from label3 to label4 with label5;
+    }
+    public void reset() throws java.io.IOException
+    {
+        com.facebook.stetho.inspector.network.ResponseHandlingInputStream r0;
+        java.lang.UnsupportedOperationException $r1;
+
+        r0 := @this: com.facebook.stetho.inspector.network.ResponseHandlingInputStream;
+
+        $r1 = new java.lang.UnsupportedOperationException;
+
+        specialinvoke $r1.<java.lang.UnsupportedOperationException: void <init>(java.lang.String)>("Mark not supported");
+
+        throw $r1;
+    }
+    public long skip(long) throws java.io.IOException
+    {
+        com.facebook.stetho.inspector.network.ResponseHandlingInputStream r0;
+        long $l0, l2, l3, $l5;
+        int i1;
+        byte[] $r1;
+        byte $b4;
+        java.lang.Throwable $r2;
+
+        r0 := @this: com.facebook.stetho.inspector.network.ResponseHandlingInputStream;
+
+        $l0 := @parameter0: long;
+
+        entermonitor r0;
+
+     label1:
+        $r1 = specialinvoke r0.<com.facebook.stetho.inspector.network.ResponseHandlingInputStream: byte[] getSkipBufferLocked()>();
+
+        l3 = 0L;
+
+     label2:
+        $b4 = l3 cmp $l0;
+
+        if $b4 >= 0 goto label4;
+
+        l2 = $l0 - l3;
+
+        i1 = lengthof $r1;
+
+        $l5 = (long) i1;
+
+        l2 = staticinvoke <java.lang.Math: long min(long,long)>($l5, l2);
+
+        i1 = (int) l2;
+
+        i1 = virtualinvoke r0.<com.facebook.stetho.inspector.network.ResponseHandlingInputStream: int read(byte[],int,int)>($r1, 0, i1);
+
+     label3:
+        if i1 != -1 goto label5;
+
+     label4:
+        exitmonitor r0;
+
+        return l3;
+
+     label5:
+        l2 = (long) i1;
+
+        l3 = l3 + l2;
+
+        goto label2;
+
+     label6:
+        $r2 := @caughtexception;
+
+        exitmonitor r0;
+
+        throw $r2;
+
+        catch java.lang.Throwable from label1 to label3 with label6;
+    }

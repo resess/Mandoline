@@ -1,0 +1,122 @@
+com.fsck.k9.message.extractors.PreviewTextExtractor extends java.lang.Object
+private static final int MAX_CHARACTERS_CHECKED_FOR_PREVIEW
+private static final int MAX_PREVIEW_LENGTH
+    void <init>()
+    {
+        com.fsck.k9.message.extractors.PreviewTextExtractor r0;
+
+        r0 := @this: com.fsck.k9.message.extractors.PreviewTextExtractor;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+    private java.lang.String convertFromHtmlIfNecessary(com.fsck.k9.mail.Part, java.lang.String)
+    {
+        com.fsck.k9.message.extractors.PreviewTextExtractor r0;
+        com.fsck.k9.mail.Part $r1;
+        java.lang.String r2, $r3;
+        boolean $z0;
+
+        r0 := @this: com.fsck.k9.message.extractors.PreviewTextExtractor;
+
+        $r1 := @parameter0: com.fsck.k9.mail.Part;
+
+        r2 := @parameter1: java.lang.String;
+
+        $r3 = interfaceinvoke $r1.<com.fsck.k9.mail.Part: java.lang.String getMimeType()>();
+
+        $z0 = staticinvoke <com.fsck.k9.mail.internet.MimeUtility: boolean isSameMimeType(java.lang.String,java.lang.String)>($r3, "text/html");
+
+        if $z0 != 0 goto label1;
+
+        return r2;
+
+     label1:
+        r2 = staticinvoke <com.fsck.k9.helper.HtmlConverter: java.lang.String htmlToText(java.lang.String)>(r2);
+
+        return r2;
+    }
+    private java.lang.String stripTextForPreview(java.lang.String)
+    {
+        com.fsck.k9.message.extractors.PreviewTextExtractor r0;
+        java.lang.String $r1;
+        int $i0;
+        java.lang.StringBuilder $r2;
+
+        r0 := @this: com.fsck.k9.message.extractors.PreviewTextExtractor;
+
+        $r1 := @parameter0: java.lang.String;
+
+        if $r1 != null goto label1;
+
+        return "";
+
+     label1:
+        $r1 = virtualinvoke $r1.<java.lang.String: java.lang.String replaceAll(java.lang.String,java.lang.String)>("(?ms)^-- [\\r\\n]+.*", "");
+
+        $r1 = virtualinvoke $r1.<java.lang.String: java.lang.String replaceAll(java.lang.String,java.lang.String)>("(?m)^----.*?$", "");
+
+        $r1 = virtualinvoke $r1.<java.lang.String: java.lang.String replaceAll(java.lang.String,java.lang.String)>("(?m)^[#>].*$", "");
+
+        $r1 = virtualinvoke $r1.<java.lang.String: java.lang.String replaceAll(java.lang.String,java.lang.String)>("(?m)^On .*wrote.?$", "");
+
+        $r1 = virtualinvoke $r1.<java.lang.String: java.lang.String replaceAll(java.lang.String,java.lang.String)>("(?m)^.*\\w+:$", "");
+
+        $r1 = virtualinvoke $r1.<java.lang.String: java.lang.String replaceAll(java.lang.String,java.lang.String)>("\\s*([-=_]{30,}+)\\s*", " ");
+
+        $r1 = virtualinvoke $r1.<java.lang.String: java.lang.String replaceAll(java.lang.String,java.lang.String)>("https?://\\S+", "...");
+
+        $r1 = virtualinvoke $r1.<java.lang.String: java.lang.String replaceAll(java.lang.String,java.lang.String)>("(\\r|\\n)+", " ");
+
+        $r1 = virtualinvoke $r1.<java.lang.String: java.lang.String replaceAll(java.lang.String,java.lang.String)>("\\s+", " ");
+
+        $r1 = virtualinvoke $r1.<java.lang.String: java.lang.String trim()>();
+
+        $i0 = virtualinvoke $r1.<java.lang.String: int length()>();
+
+        if $i0 <= 512 goto label2;
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r1 = virtualinvoke $r1.<java.lang.String: java.lang.String substring(int,int)>(0, 511);
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\u2026");
+
+        $r1 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label2:
+        return $r1;
+    }
+    public java.lang.String extractPreview(com.fsck.k9.mail.Part) throws com.fsck.k9.message.extractors.PreviewExtractionException
+    {
+        com.fsck.k9.message.extractors.PreviewTextExtractor r0;
+        com.fsck.k9.mail.Part $r1;
+        java.lang.String $r2;
+        com.fsck.k9.message.extractors.PreviewExtractionException $r3;
+
+        r0 := @this: com.fsck.k9.message.extractors.PreviewTextExtractor;
+
+        $r1 := @parameter0: com.fsck.k9.mail.Part;
+
+        $r2 = staticinvoke <com.fsck.k9.mail.internet.MessageExtractor: java.lang.String getTextFromPart(com.fsck.k9.mail.Part,long)>($r1, 8192L);
+
+        if $r2 != null goto label1;
+
+        $r3 = new com.fsck.k9.message.extractors.PreviewExtractionException;
+
+        specialinvoke $r3.<com.fsck.k9.message.extractors.PreviewExtractionException: void <init>(java.lang.String)>("Couldn\'t get text from part");
+
+        throw $r3;
+
+     label1:
+        $r2 = specialinvoke r0.<com.fsck.k9.message.extractors.PreviewTextExtractor: java.lang.String convertFromHtmlIfNecessary(com.fsck.k9.mail.Part,java.lang.String)>($r1, $r2);
+
+        $r2 = specialinvoke r0.<com.fsck.k9.message.extractors.PreviewTextExtractor: java.lang.String stripTextForPreview(java.lang.String)>($r2);
+
+        return $r2;
+    }

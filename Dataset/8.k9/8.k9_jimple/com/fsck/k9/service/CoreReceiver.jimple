@@ -1,0 +1,318 @@
+com.fsck.k9.service.CoreReceiver extends android.content.BroadcastReceiver
+public static final java.lang.String WAKE_LOCK_ID
+public static final java.lang.String WAKE_LOCK_RELEASE
+private static java.util.concurrent.atomic.AtomicInteger wakeLockSeq
+private static java.util.concurrent.ConcurrentHashMap wakeLocks
+    static void <clinit>()
+    {
+        java.util.concurrent.ConcurrentHashMap $r0;
+        java.util.concurrent.atomic.AtomicInteger $r1;
+
+        $r0 = new java.util.concurrent.ConcurrentHashMap;
+
+        specialinvoke $r0.<java.util.concurrent.ConcurrentHashMap: void <init>()>();
+
+        <com.fsck.k9.service.CoreReceiver: java.util.concurrent.ConcurrentHashMap wakeLocks> = $r0;
+
+        $r1 = new java.util.concurrent.atomic.AtomicInteger;
+
+        specialinvoke $r1.<java.util.concurrent.atomic.AtomicInteger: void <init>(int)>(0);
+
+        <com.fsck.k9.service.CoreReceiver: java.util.concurrent.atomic.AtomicInteger wakeLockSeq> = $r1;
+
+        return;
+    }
+    public void <init>()
+    {
+        com.fsck.k9.service.CoreReceiver r0;
+
+        r0 := @this: com.fsck.k9.service.CoreReceiver;
+
+        specialinvoke r0.<android.content.BroadcastReceiver: void <init>()>();
+
+        return;
+    }
+    private static java.lang.Integer getWakeLock(android.content.Context)
+    {
+        android.content.Context $r0;
+        com.fsck.k9.mail.power.TracingPowerManager $r1;
+        com.fsck.k9.mail.power.TracingPowerManager$TracingWakeLock $r2;
+        java.util.concurrent.atomic.AtomicInteger $r3;
+        int $i0;
+        java.lang.Integer $r4;
+        java.util.concurrent.ConcurrentHashMap $r5;
+        boolean $z0;
+        java.lang.StringBuilder $r6;
+        java.lang.String $r7;
+
+        $r0 := @parameter0: android.content.Context;
+
+        $r1 = staticinvoke <com.fsck.k9.mail.power.TracingPowerManager: com.fsck.k9.mail.power.TracingPowerManager getPowerManager(android.content.Context)>($r0);
+
+        $r2 = virtualinvoke $r1.<com.fsck.k9.mail.power.TracingPowerManager: com.fsck.k9.mail.power.TracingPowerManager$TracingWakeLock newWakeLock(int,java.lang.String)>(1, "CoreReceiver getWakeLock");
+
+        virtualinvoke $r2.<com.fsck.k9.mail.power.TracingPowerManager$TracingWakeLock: void setReferenceCounted(boolean)>(0);
+
+        virtualinvoke $r2.<com.fsck.k9.mail.power.TracingPowerManager$TracingWakeLock: void acquire(long)>(60000L);
+
+        $r3 = <com.fsck.k9.service.CoreReceiver: java.util.concurrent.atomic.AtomicInteger wakeLockSeq>;
+
+        $i0 = virtualinvoke $r3.<java.util.concurrent.atomic.AtomicInteger: int getAndIncrement()>();
+
+        $r4 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        $r5 = <com.fsck.k9.service.CoreReceiver: java.util.concurrent.ConcurrentHashMap wakeLocks>;
+
+        virtualinvoke $r5.<java.util.concurrent.ConcurrentHashMap: java.lang.Object put(java.lang.Object,java.lang.Object)>($r4, $r2);
+
+        $z0 = <com.fsck.k9.K9: boolean DEBUG>;
+
+        if $z0 == 0 goto label1;
+
+        $r6 = new java.lang.StringBuilder;
+
+        specialinvoke $r6.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("CoreReceiver Created wakeLock ");
+
+        $r6 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r4);
+
+        $r7 = virtualinvoke $r6.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int v(java.lang.String,java.lang.String)>("k9", $r7);
+
+     label1:
+        return $r4;
+    }
+    public static void releaseWakeLock(android.content.Context, int)
+    {
+        android.content.Context $r0;
+        int $i0;
+        android.content.Intent r1;
+        boolean $z0;
+        java.lang.StringBuilder $r2;
+        java.lang.String $r3;
+
+        $r0 := @parameter0: android.content.Context;
+
+        $i0 := @parameter1: int;
+
+        $z0 = <com.fsck.k9.K9: boolean DEBUG>;
+
+        if $z0 == 0 goto label1;
+
+        $r2 = new java.lang.StringBuilder;
+
+        specialinvoke $r2.<java.lang.StringBuilder: void <init>()>();
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("CoreReceiver Got request to release wakeLock ");
+
+        $r2 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r3 = virtualinvoke $r2.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int v(java.lang.String,java.lang.String)>("k9", $r3);
+
+     label1:
+        r1 = new android.content.Intent;
+
+        specialinvoke r1.<android.content.Intent: void <init>()>();
+
+        virtualinvoke r1.<android.content.Intent: android.content.Intent setClass(android.content.Context,java.lang.Class)>($r0, class "Lcom/fsck/k9/service/CoreReceiver;");
+
+        virtualinvoke r1.<android.content.Intent: android.content.Intent setAction(java.lang.String)>("com.fsck.k9.service.CoreReceiver.wakeLockRelease");
+
+        virtualinvoke r1.<android.content.Intent: android.content.Intent putExtra(java.lang.String,int)>("com.fsck.k9.service.CoreReceiver.wakeLockId", $i0);
+
+        virtualinvoke $r0.<android.content.Context: void sendBroadcast(android.content.Intent)>(r1);
+
+        return;
+    }
+    private static void releaseWakeLock(java.lang.Integer)
+    {
+        java.lang.Integer $r0;
+        java.util.concurrent.ConcurrentHashMap $r1;
+        java.lang.Object $r2;
+        com.fsck.k9.mail.power.TracingPowerManager$TracingWakeLock r3;
+        boolean $z0;
+        java.lang.StringBuilder $r4;
+        java.lang.String $r5;
+
+        $r0 := @parameter0: java.lang.Integer;
+
+        if $r0 == null goto label3;
+
+        $r1 = <com.fsck.k9.service.CoreReceiver: java.util.concurrent.ConcurrentHashMap wakeLocks>;
+
+        $r2 = virtualinvoke $r1.<java.util.concurrent.ConcurrentHashMap: java.lang.Object remove(java.lang.Object)>($r0);
+
+        r3 = (com.fsck.k9.mail.power.TracingPowerManager$TracingWakeLock) $r2;
+
+        if r3 == null goto label2;
+
+        $z0 = <com.fsck.k9.K9: boolean DEBUG>;
+
+        if $z0 == 0 goto label1;
+
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("CoreReceiver Releasing wakeLock ");
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r0);
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int v(java.lang.String,java.lang.String)>("k9", $r5);
+
+     label1:
+        virtualinvoke r3.<com.fsck.k9.mail.power.TracingPowerManager$TracingWakeLock: void release()>();
+
+        return;
+
+     label2:
+        $r4 = new java.lang.StringBuilder;
+
+        specialinvoke $r4.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("BootReceiver WakeLock ");
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r0);
+
+        $r4 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" doesn\'t exist");
+
+        $r5 = virtualinvoke $r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String)>("k9", $r5);
+
+     label3:
+        return;
+    }
+    public void onReceive(android.content.Context, android.content.Intent)
+    {
+        com.fsck.k9.service.CoreReceiver r0;
+        android.content.Context $r1;
+        android.content.Intent $r2;
+        java.lang.Integer $r3, r4, $r8;
+        boolean $z0;
+        java.lang.StringBuilder $r5;
+        java.lang.String $r6, $r7;
+        int $i0;
+        java.lang.Throwable $r9;
+
+        r0 := @this: com.fsck.k9.service.CoreReceiver;
+
+        $r1 := @parameter0: android.content.Context;
+
+        $r2 := @parameter1: android.content.Intent;
+
+        $r3 = staticinvoke <com.fsck.k9.service.CoreReceiver: java.lang.Integer getWakeLock(android.content.Context)>($r1);
+
+        r4 = $r3;
+
+     label01:
+        $z0 = <com.fsck.k9.K9: boolean DEBUG>;
+
+     label02:
+        if $z0 == 0 goto label04;
+
+     label03:
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("CoreReceiver.onReceive");
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r2);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int i(java.lang.String,java.lang.String)>("k9", $r6);
+
+     label04:
+        $r6 = "com.fsck.k9.service.CoreReceiver.wakeLockRelease";
+
+     label05:
+        $r7 = virtualinvoke $r2.<android.content.Intent: java.lang.String getAction()>();
+
+        $z0 = virtualinvoke $r6.<java.lang.String: boolean equals(java.lang.Object)>($r7);
+
+     label06:
+        if $z0 == 0 goto label14;
+
+     label07:
+        $i0 = virtualinvoke $r2.<android.content.Intent: int getIntExtra(java.lang.String,int)>("com.fsck.k9.service.CoreReceiver.wakeLockId", -1);
+
+        $r8 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        $i0 = virtualinvoke $r8.<java.lang.Integer: int intValue()>();
+
+     label08:
+        if $i0 == -1 goto label13;
+
+     label09:
+        $z0 = <com.fsck.k9.K9: boolean DEBUG>;
+
+     label10:
+        if $z0 == 0 goto label12;
+
+     label11:
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("CoreReceiver Release wakeLock ");
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r8);
+
+        $r6 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int v(java.lang.String,java.lang.String)>("k9", $r6);
+
+     label12:
+        staticinvoke <com.fsck.k9.service.CoreReceiver: void releaseWakeLock(java.lang.Integer)>($r8);
+
+     label13:
+        staticinvoke <com.fsck.k9.service.CoreReceiver: void releaseWakeLock(java.lang.Integer)>(r4);
+
+        return;
+
+     label14:
+        r4 = virtualinvoke r0.<com.fsck.k9.service.CoreReceiver: java.lang.Integer receive(android.content.Context,android.content.Intent,java.lang.Integer)>($r1, $r2, $r3);
+
+     label15:
+        goto label13;
+
+     label16:
+        $r9 := @caughtexception;
+
+        staticinvoke <com.fsck.k9.service.CoreReceiver: void releaseWakeLock(java.lang.Integer)>($r3);
+
+        throw $r9;
+
+        catch java.lang.Throwable from label01 to label02 with label16;
+        catch java.lang.Throwable from label03 to label04 with label16;
+        catch java.lang.Throwable from label05 to label06 with label16;
+        catch java.lang.Throwable from label07 to label08 with label16;
+        catch java.lang.Throwable from label09 to label10 with label16;
+        catch java.lang.Throwable from label11 to label13 with label16;
+        catch java.lang.Throwable from label14 to label15 with label16;
+    }
+    public java.lang.Integer receive(android.content.Context, android.content.Intent, java.lang.Integer)
+    {
+        com.fsck.k9.service.CoreReceiver r0;
+        android.content.Context $r1;
+        android.content.Intent $r2;
+        java.lang.Integer $r3;
+
+        r0 := @this: com.fsck.k9.service.CoreReceiver;
+
+        $r1 := @parameter0: android.content.Context;
+
+        $r2 := @parameter1: android.content.Intent;
+
+        $r3 := @parameter2: java.lang.Integer;
+
+        return $r3;
+    }

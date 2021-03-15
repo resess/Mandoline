@@ -1,0 +1,143 @@
+com.fsck.k9.mailstore.migrations.MigrationTo47 extends java.lang.Object
+    void <init>()
+    {
+        com.fsck.k9.mailstore.migrations.MigrationTo47 r0;
+
+        r0 := @this: com.fsck.k9.mailstore.migrations.MigrationTo47;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+    public static void createThreadsTable(android.database.sqlite.SQLiteDatabase)
+    {
+        android.database.sqlite.SQLiteDatabase $r0;
+        java.lang.String[] $r1;
+        android.database.Cursor $r2;
+        android.content.ContentValues r3;
+        boolean $z0;
+        long $l0, $l1;
+        java.lang.String $r4;
+        java.lang.Throwable $r5;
+
+        $r0 := @parameter0: android.database.sqlite.SQLiteDatabase;
+
+        virtualinvoke $r0.<android.database.sqlite.SQLiteDatabase: void execSQL(java.lang.String)>("DROP TABLE IF EXISTS threads");
+
+        virtualinvoke $r0.<android.database.sqlite.SQLiteDatabase: void execSQL(java.lang.String)>("CREATE TABLE threads (id INTEGER PRIMARY KEY, message_id INTEGER, root INTEGER, parent INTEGER)");
+
+        virtualinvoke $r0.<android.database.sqlite.SQLiteDatabase: void execSQL(java.lang.String)>("DROP INDEX IF EXISTS threads_message_id");
+
+        virtualinvoke $r0.<android.database.sqlite.SQLiteDatabase: void execSQL(java.lang.String)>("CREATE INDEX IF NOT EXISTS threads_message_id ON threads (message_id)");
+
+        virtualinvoke $r0.<android.database.sqlite.SQLiteDatabase: void execSQL(java.lang.String)>("DROP INDEX IF EXISTS threads_root");
+
+        virtualinvoke $r0.<android.database.sqlite.SQLiteDatabase: void execSQL(java.lang.String)>("CREATE INDEX IF NOT EXISTS threads_root ON threads (root)");
+
+        virtualinvoke $r0.<android.database.sqlite.SQLiteDatabase: void execSQL(java.lang.String)>("DROP INDEX IF EXISTS threads_parent");
+
+        virtualinvoke $r0.<android.database.sqlite.SQLiteDatabase: void execSQL(java.lang.String)>("CREATE INDEX IF NOT EXISTS threads_parent ON threads (parent)");
+
+        virtualinvoke $r0.<android.database.sqlite.SQLiteDatabase: void execSQL(java.lang.String)>("INSERT INTO threads (message_id) SELECT id FROM messages");
+
+        $r1 = newarray (java.lang.String)[3];
+
+        $r1[0] = "id";
+
+        $r1[1] = "thread_root";
+
+        $r1[2] = "thread_parent";
+
+        $r2 = virtualinvoke $r0.<android.database.sqlite.SQLiteDatabase: android.database.Cursor query(java.lang.String,java.lang.String[],java.lang.String,java.lang.String[],java.lang.String,java.lang.String,java.lang.String)>("messages", $r1, null, null, null, null, null);
+
+     label01:
+        r3 = new android.content.ContentValues;
+
+        specialinvoke r3.<android.content.ContentValues: void <init>()>();
+
+     label02:
+        $z0 = interfaceinvoke $r2.<android.database.Cursor: boolean moveToNext()>();
+
+     label03:
+        if $z0 == 0 goto label12;
+
+     label04:
+        virtualinvoke r3.<android.content.ContentValues: void clear()>();
+
+        $l0 = interfaceinvoke $r2.<android.database.Cursor: long getLong(int)>(0);
+
+        $z0 = interfaceinvoke $r2.<android.database.Cursor: boolean isNull(int)>(1);
+
+     label05:
+        if $z0 != 0 goto label07;
+
+     label06:
+        $l1 = interfaceinvoke $r2.<android.database.Cursor: long getLong(int)>(1);
+
+        $r1 = newarray (java.lang.String)[2];
+
+        $r4 = staticinvoke <java.lang.Long: java.lang.String toString(long)>($l1);
+
+        $r1[0] = $r4;
+
+        $r4 = staticinvoke <java.lang.Long: java.lang.String toString(long)>($l0);
+
+        $r1[1] = $r4;
+
+        virtualinvoke $r0.<android.database.sqlite.SQLiteDatabase: void execSQL(java.lang.String,java.lang.Object[])>("UPDATE threads SET root = (SELECT t.id FROM threads t WHERE t.message_id = ?) WHERE message_id = ?", $r1);
+
+     label07:
+        $z0 = interfaceinvoke $r2.<android.database.Cursor: boolean isNull(int)>(2);
+
+     label08:
+        if $z0 != 0 goto label02;
+
+     label09:
+        $l1 = interfaceinvoke $r2.<android.database.Cursor: long getLong(int)>(2);
+
+        $r1 = newarray (java.lang.String)[2];
+
+        $r4 = staticinvoke <java.lang.Long: java.lang.String toString(long)>($l1);
+
+        $r1[0] = $r4;
+
+        $r4 = staticinvoke <java.lang.Long: java.lang.String toString(long)>($l0);
+
+        $r1[1] = $r4;
+
+        virtualinvoke $r0.<android.database.sqlite.SQLiteDatabase: void execSQL(java.lang.String,java.lang.Object[])>("UPDATE threads SET parent = (SELECT t.id FROM threads t WHERE t.message_id = ?) WHERE message_id = ?", $r1);
+
+     label10:
+        goto label02;
+
+     label11:
+        $r5 := @caughtexception;
+
+        interfaceinvoke $r2.<android.database.Cursor: void close()>();
+
+        throw $r5;
+
+     label12:
+        interfaceinvoke $r2.<android.database.Cursor: void close()>();
+
+        virtualinvoke $r0.<android.database.sqlite.SQLiteDatabase: void execSQL(java.lang.String)>("DROP INDEX IF EXISTS msg_thread_root");
+
+        virtualinvoke $r0.<android.database.sqlite.SQLiteDatabase: void execSQL(java.lang.String)>("DROP INDEX IF EXISTS msg_thread_parent");
+
+        r3 = new android.content.ContentValues;
+
+        specialinvoke r3.<android.content.ContentValues: void <init>()>();
+
+        virtualinvoke r3.<android.content.ContentValues: void putNull(java.lang.String)>("thread_root");
+
+        virtualinvoke r3.<android.content.ContentValues: void putNull(java.lang.String)>("thread_parent");
+
+        virtualinvoke $r0.<android.database.sqlite.SQLiteDatabase: int update(java.lang.String,android.content.ContentValues,java.lang.String,java.lang.String[])>("messages", r3, null, null);
+
+        return;
+
+        catch java.lang.Throwable from label01 to label03 with label11;
+        catch java.lang.Throwable from label04 to label05 with label11;
+        catch java.lang.Throwable from label06 to label08 with label11;
+        catch java.lang.Throwable from label09 to label10 with label11;
+    }

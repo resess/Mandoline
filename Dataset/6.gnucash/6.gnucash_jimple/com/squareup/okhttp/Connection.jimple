@@ -1,0 +1,989 @@
+com.squareup.okhttp.Connection extends java.lang.Object
+private boolean connected
+private com.squareup.okhttp.Handshake handshake
+private com.squareup.okhttp.internal.http.HttpConnection httpConnection
+private long idleStartTimeNs
+private java.lang.Object owner
+private final com.squareup.okhttp.ConnectionPool pool
+private com.squareup.okhttp.Protocol protocol
+private int recycleCount
+private final com.squareup.okhttp.Route route
+private java.net.Socket socket
+private com.squareup.okhttp.internal.spdy.SpdyConnection spdyConnection
+    public void <init>(com.squareup.okhttp.ConnectionPool, com.squareup.okhttp.Route)
+    {
+        com.squareup.okhttp.Connection r0;
+        com.squareup.okhttp.ConnectionPool $r1;
+        com.squareup.okhttp.Route $r2;
+        com.squareup.okhttp.Protocol $r3;
+
+        r0 := @this: com.squareup.okhttp.Connection;
+
+        $r1 := @parameter0: com.squareup.okhttp.ConnectionPool;
+
+        $r2 := @parameter1: com.squareup.okhttp.Route;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<com.squareup.okhttp.Connection: boolean connected> = 0;
+
+        $r3 = <com.squareup.okhttp.Protocol: com.squareup.okhttp.Protocol HTTP_1_1>;
+
+        r0.<com.squareup.okhttp.Connection: com.squareup.okhttp.Protocol protocol> = $r3;
+
+        r0.<com.squareup.okhttp.Connection: com.squareup.okhttp.ConnectionPool pool> = $r1;
+
+        r0.<com.squareup.okhttp.Connection: com.squareup.okhttp.Route route> = $r2;
+
+        return;
+    }
+    boolean clearOwner()
+    {
+        com.squareup.okhttp.Connection r0;
+        com.squareup.okhttp.ConnectionPool $r1;
+        java.lang.Object $r2;
+        java.lang.Throwable $r3;
+
+        r0 := @this: com.squareup.okhttp.Connection;
+
+        $r1 = r0.<com.squareup.okhttp.Connection: com.squareup.okhttp.ConnectionPool pool>;
+
+        entermonitor $r1;
+
+     label1:
+        $r2 = r0.<com.squareup.okhttp.Connection: java.lang.Object owner>;
+
+        if $r2 != null goto label3;
+
+        exitmonitor $r1;
+
+     label2:
+        return 0;
+
+     label3:
+        r0.<com.squareup.okhttp.Connection: java.lang.Object owner> = null;
+
+        exitmonitor $r1;
+
+     label4:
+        return 1;
+
+     label5:
+        $r3 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label6:
+        throw $r3;
+
+        catch java.lang.Throwable from label1 to label2 with label5;
+        catch java.lang.Throwable from label3 to label4 with label5;
+        catch java.lang.Throwable from label5 to label6 with label5;
+    }
+    void closeIfOwnedBy(java.lang.Object) throws java.io.IOException
+    {
+        com.squareup.okhttp.Connection r0;
+        java.lang.Object $r1, $r4;
+        com.squareup.okhttp.ConnectionPool $r2;
+        boolean $z0;
+        java.lang.IllegalStateException $r3;
+        java.net.Socket $r5;
+        java.lang.Throwable $r6;
+
+        r0 := @this: com.squareup.okhttp.Connection;
+
+        $r1 := @parameter0: java.lang.Object;
+
+        $z0 = virtualinvoke r0.<com.squareup.okhttp.Connection: boolean isSpdy()>();
+
+        if $z0 == 0 goto label1;
+
+        $r3 = new java.lang.IllegalStateException;
+
+        specialinvoke $r3.<java.lang.IllegalStateException: void <init>()>();
+
+        throw $r3;
+
+     label1:
+        $r2 = r0.<com.squareup.okhttp.Connection: com.squareup.okhttp.ConnectionPool pool>;
+
+        entermonitor $r2;
+
+     label2:
+        $r4 = r0.<com.squareup.okhttp.Connection: java.lang.Object owner>;
+
+        if $r4 == $r1 goto label4;
+
+        exitmonitor $r2;
+
+     label3:
+        return;
+
+     label4:
+        r0.<com.squareup.okhttp.Connection: java.lang.Object owner> = null;
+
+        exitmonitor $r2;
+
+     label5:
+        $r5 = r0.<com.squareup.okhttp.Connection: java.net.Socket socket>;
+
+        virtualinvoke $r5.<java.net.Socket: void close()>();
+
+        return;
+
+     label6:
+        $r6 := @caughtexception;
+
+     label7:
+        exitmonitor $r2;
+
+     label8:
+        throw $r6;
+
+        catch java.lang.Throwable from label2 to label3 with label6;
+        catch java.lang.Throwable from label4 to label5 with label6;
+        catch java.lang.Throwable from label7 to label8 with label6;
+    }
+    void connect(int, int, int, com.squareup.okhttp.Request, java.util.List, boolean) throws com.squareup.okhttp.internal.http.RouteException
+    {
+        com.squareup.okhttp.Connection r0;
+        int $i0, $i1, $i2;
+        com.squareup.okhttp.Request $r1;
+        java.util.List r2;
+        boolean $z0, $z1;
+        com.squareup.okhttp.internal.http.SocketConnector r3;
+        com.squareup.okhttp.Route $r4;
+        java.io.IOException r5;
+        java.lang.IllegalStateException $r6;
+        com.squareup.okhttp.ConnectionPool $r7;
+        com.squareup.okhttp.Address $r8;
+        javax.net.ssl.SSLSocketFactory $r9;
+        com.squareup.okhttp.internal.http.SocketConnector$ConnectedSocket $r10;
+        java.net.Socket $r11;
+        com.squareup.okhttp.Handshake $r12;
+        com.squareup.okhttp.Protocol $r13, $r14;
+        com.squareup.okhttp.internal.spdy.SpdyConnection$Builder $r15;
+        java.lang.String $r16;
+        com.squareup.okhttp.internal.spdy.SpdyConnection $r17;
+        com.squareup.okhttp.ConnectionSpec $r18;
+        com.squareup.okhttp.internal.http.RouteException $r19;
+        java.net.UnknownServiceException $r20;
+        java.lang.StringBuilder $r21;
+        com.squareup.okhttp.internal.http.HttpConnection $r22;
+
+        r0 := @this: com.squareup.okhttp.Connection;
+
+        $i0 := @parameter0: int;
+
+        $i1 := @parameter1: int;
+
+        $i2 := @parameter2: int;
+
+        $r1 := @parameter3: com.squareup.okhttp.Request;
+
+        r2 := @parameter4: java.util.List;
+
+        $z0 := @parameter5: boolean;
+
+        $z1 = r0.<com.squareup.okhttp.Connection: boolean connected>;
+
+        if $z1 == 0 goto label01;
+
+        $r6 = new java.lang.IllegalStateException;
+
+        specialinvoke $r6.<java.lang.IllegalStateException: void <init>(java.lang.String)>("already connected");
+
+        throw $r6;
+
+     label01:
+        r3 = new com.squareup.okhttp.internal.http.SocketConnector;
+
+        $r7 = r0.<com.squareup.okhttp.Connection: com.squareup.okhttp.ConnectionPool pool>;
+
+        specialinvoke r3.<com.squareup.okhttp.internal.http.SocketConnector: void <init>(com.squareup.okhttp.Connection,com.squareup.okhttp.ConnectionPool)>(r0, $r7);
+
+        $r4 = r0.<com.squareup.okhttp.Connection: com.squareup.okhttp.Route route>;
+
+        $r8 = $r4.<com.squareup.okhttp.Route: com.squareup.okhttp.Address address>;
+
+        $r9 = virtualinvoke $r8.<com.squareup.okhttp.Address: javax.net.ssl.SSLSocketFactory getSslSocketFactory()>();
+
+        if $r9 == null goto label13;
+
+        $r4 = r0.<com.squareup.okhttp.Connection: com.squareup.okhttp.Route route>;
+
+        $r10 = virtualinvoke r3.<com.squareup.okhttp.internal.http.SocketConnector: com.squareup.okhttp.internal.http.SocketConnector$ConnectedSocket connectTls(int,int,int,com.squareup.okhttp.Request,com.squareup.okhttp.Route,java.util.List,boolean)>($i0, $i1, $i2, $r1, $r4, r2, $z0);
+
+     label02:
+        $r11 = $r10.<com.squareup.okhttp.internal.http.SocketConnector$ConnectedSocket: java.net.Socket socket>;
+
+        r0.<com.squareup.okhttp.Connection: java.net.Socket socket> = $r11;
+
+        $r12 = $r10.<com.squareup.okhttp.internal.http.SocketConnector$ConnectedSocket: com.squareup.okhttp.Handshake handshake>;
+
+        r0.<com.squareup.okhttp.Connection: com.squareup.okhttp.Handshake handshake> = $r12;
+
+        $r13 = $r10.<com.squareup.okhttp.internal.http.SocketConnector$ConnectedSocket: com.squareup.okhttp.Protocol alpnProtocol>;
+
+        if $r13 != null goto label15;
+
+        $r13 = <com.squareup.okhttp.Protocol: com.squareup.okhttp.Protocol HTTP_1_1>;
+
+     label03:
+        r0.<com.squareup.okhttp.Connection: com.squareup.okhttp.Protocol protocol> = $r13;
+
+        $r13 = r0.<com.squareup.okhttp.Connection: com.squareup.okhttp.Protocol protocol>;
+
+        $r14 = <com.squareup.okhttp.Protocol: com.squareup.okhttp.Protocol SPDY_3>;
+
+        if $r13 == $r14 goto label04;
+
+        $r13 = r0.<com.squareup.okhttp.Connection: com.squareup.okhttp.Protocol protocol>;
+
+        $r14 = <com.squareup.okhttp.Protocol: com.squareup.okhttp.Protocol HTTP_2>;
+
+        if $r13 != $r14 goto label16;
+
+     label04:
+        $r11 = r0.<com.squareup.okhttp.Connection: java.net.Socket socket>;
+
+     label05:
+        virtualinvoke $r11.<java.net.Socket: void setSoTimeout(int)>(0);
+
+     label06:
+        $r15 = new com.squareup.okhttp.internal.spdy.SpdyConnection$Builder;
+
+        $r4 = r0.<com.squareup.okhttp.Connection: com.squareup.okhttp.Route route>;
+
+        $r8 = $r4.<com.squareup.okhttp.Route: com.squareup.okhttp.Address address>;
+
+        $r16 = $r8.<com.squareup.okhttp.Address: java.lang.String uriHost>;
+
+        $r11 = r0.<com.squareup.okhttp.Connection: java.net.Socket socket>;
+
+     label07:
+        specialinvoke $r15.<com.squareup.okhttp.internal.spdy.SpdyConnection$Builder: void <init>(java.lang.String,boolean,java.net.Socket)>($r16, 1, $r11);
+
+     label08:
+        $r13 = r0.<com.squareup.okhttp.Connection: com.squareup.okhttp.Protocol protocol>;
+
+     label09:
+        $r15 = virtualinvoke $r15.<com.squareup.okhttp.internal.spdy.SpdyConnection$Builder: com.squareup.okhttp.internal.spdy.SpdyConnection$Builder protocol(com.squareup.okhttp.Protocol)>($r13);
+
+        $r17 = virtualinvoke $r15.<com.squareup.okhttp.internal.spdy.SpdyConnection$Builder: com.squareup.okhttp.internal.spdy.SpdyConnection build()>();
+
+     label10:
+        r0.<com.squareup.okhttp.Connection: com.squareup.okhttp.internal.spdy.SpdyConnection spdyConnection> = $r17;
+
+        $r17 = r0.<com.squareup.okhttp.Connection: com.squareup.okhttp.internal.spdy.SpdyConnection spdyConnection>;
+
+     label11:
+        virtualinvoke $r17.<com.squareup.okhttp.internal.spdy.SpdyConnection: void sendConnectionPreface()>();
+
+     label12:
+        r0.<com.squareup.okhttp.Connection: boolean connected> = 1;
+
+        return;
+
+     label13:
+        $r18 = <com.squareup.okhttp.ConnectionSpec: com.squareup.okhttp.ConnectionSpec CLEARTEXT>;
+
+        $z0 = interfaceinvoke r2.<java.util.List: boolean contains(java.lang.Object)>($r18);
+
+        if $z0 != 0 goto label14;
+
+        $r19 = new com.squareup.okhttp.internal.http.RouteException;
+
+        $r20 = new java.net.UnknownServiceException;
+
+        $r21 = new java.lang.StringBuilder;
+
+        specialinvoke $r21.<java.lang.StringBuilder: void <init>()>();
+
+        $r21 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("CLEARTEXT communication not supported: ");
+
+        $r21 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r2);
+
+        $r16 = virtualinvoke $r21.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r20.<java.net.UnknownServiceException: void <init>(java.lang.String)>($r16);
+
+        specialinvoke $r19.<com.squareup.okhttp.internal.http.RouteException: void <init>(java.io.IOException)>($r20);
+
+        throw $r19;
+
+     label14:
+        $r4 = r0.<com.squareup.okhttp.Connection: com.squareup.okhttp.Route route>;
+
+        $r10 = virtualinvoke r3.<com.squareup.okhttp.internal.http.SocketConnector: com.squareup.okhttp.internal.http.SocketConnector$ConnectedSocket connectCleartext(int,int,com.squareup.okhttp.Route)>($i0, $i1, $r4);
+
+        goto label02;
+
+     label15:
+        $r13 = $r10.<com.squareup.okhttp.internal.http.SocketConnector$ConnectedSocket: com.squareup.okhttp.Protocol alpnProtocol>;
+
+        goto label03;
+
+     label16:
+        $r22 = new com.squareup.okhttp.internal.http.HttpConnection;
+
+        $r7 = r0.<com.squareup.okhttp.Connection: com.squareup.okhttp.ConnectionPool pool>;
+
+        $r11 = r0.<com.squareup.okhttp.Connection: java.net.Socket socket>;
+
+     label17:
+        specialinvoke $r22.<com.squareup.okhttp.internal.http.HttpConnection: void <init>(com.squareup.okhttp.ConnectionPool,com.squareup.okhttp.Connection,java.net.Socket)>($r7, r0, $r11);
+
+     label18:
+        r0.<com.squareup.okhttp.Connection: com.squareup.okhttp.internal.http.HttpConnection httpConnection> = $r22;
+
+        goto label12;
+
+     label19:
+        r5 := @caughtexception;
+
+        $r19 = new com.squareup.okhttp.internal.http.RouteException;
+
+        specialinvoke $r19.<com.squareup.okhttp.internal.http.RouteException: void <init>(java.io.IOException)>(r5);
+
+        throw $r19;
+
+        catch java.io.IOException from label05 to label06 with label19;
+        catch java.io.IOException from label07 to label08 with label19;
+        catch java.io.IOException from label09 to label10 with label19;
+        catch java.io.IOException from label11 to label12 with label19;
+        catch java.io.IOException from label17 to label18 with label19;
+    }
+    void connectAndSetOwner(com.squareup.okhttp.OkHttpClient, java.lang.Object, com.squareup.okhttp.Request) throws com.squareup.okhttp.internal.http.RouteException
+    {
+        com.squareup.okhttp.Connection r0;
+        com.squareup.okhttp.OkHttpClient $r1;
+        java.lang.Object $r2;
+        com.squareup.okhttp.Request $r3;
+        boolean $z0;
+        com.squareup.okhttp.Route $r4;
+        com.squareup.okhttp.Address $r5;
+        java.util.List $r6;
+        int $i0, $i1, $i2;
+        com.squareup.okhttp.ConnectionPool $r7;
+        com.squareup.okhttp.internal.RouteDatabase $r8;
+
+        r0 := @this: com.squareup.okhttp.Connection;
+
+        $r1 := @parameter0: com.squareup.okhttp.OkHttpClient;
+
+        $r2 := @parameter1: java.lang.Object;
+
+        $r3 := @parameter2: com.squareup.okhttp.Request;
+
+        virtualinvoke r0.<com.squareup.okhttp.Connection: void setOwner(java.lang.Object)>($r2);
+
+        $z0 = virtualinvoke r0.<com.squareup.okhttp.Connection: boolean isConnected()>();
+
+        if $z0 != 0 goto label2;
+
+        $r4 = r0.<com.squareup.okhttp.Connection: com.squareup.okhttp.Route route>;
+
+        $r5 = $r4.<com.squareup.okhttp.Route: com.squareup.okhttp.Address address>;
+
+        $r6 = virtualinvoke $r5.<com.squareup.okhttp.Address: java.util.List getConnectionSpecs()>();
+
+        $i0 = virtualinvoke $r1.<com.squareup.okhttp.OkHttpClient: int getConnectTimeout()>();
+
+        $i1 = virtualinvoke $r1.<com.squareup.okhttp.OkHttpClient: int getReadTimeout()>();
+
+        $i2 = virtualinvoke $r1.<com.squareup.okhttp.OkHttpClient: int getWriteTimeout()>();
+
+        $z0 = virtualinvoke $r1.<com.squareup.okhttp.OkHttpClient: boolean getRetryOnConnectionFailure()>();
+
+        virtualinvoke r0.<com.squareup.okhttp.Connection: void connect(int,int,int,com.squareup.okhttp.Request,java.util.List,boolean)>($i0, $i1, $i2, $r3, $r6, $z0);
+
+        $z0 = virtualinvoke r0.<com.squareup.okhttp.Connection: boolean isSpdy()>();
+
+        if $z0 == 0 goto label1;
+
+        $r7 = virtualinvoke $r1.<com.squareup.okhttp.OkHttpClient: com.squareup.okhttp.ConnectionPool getConnectionPool()>();
+
+        virtualinvoke $r7.<com.squareup.okhttp.ConnectionPool: void share(com.squareup.okhttp.Connection)>(r0);
+
+     label1:
+        $r8 = virtualinvoke $r1.<com.squareup.okhttp.OkHttpClient: com.squareup.okhttp.internal.RouteDatabase routeDatabase()>();
+
+        $r4 = virtualinvoke r0.<com.squareup.okhttp.Connection: com.squareup.okhttp.Route getRoute()>();
+
+        virtualinvoke $r8.<com.squareup.okhttp.internal.RouteDatabase: void connected(com.squareup.okhttp.Route)>($r4);
+
+     label2:
+        $i0 = virtualinvoke $r1.<com.squareup.okhttp.OkHttpClient: int getReadTimeout()>();
+
+        $i1 = virtualinvoke $r1.<com.squareup.okhttp.OkHttpClient: int getWriteTimeout()>();
+
+        virtualinvoke r0.<com.squareup.okhttp.Connection: void setTimeouts(int,int)>($i0, $i1);
+
+        return;
+    }
+    public com.squareup.okhttp.Handshake getHandshake()
+    {
+        com.squareup.okhttp.Connection r0;
+        com.squareup.okhttp.Handshake r1;
+
+        r0 := @this: com.squareup.okhttp.Connection;
+
+        r1 = r0.<com.squareup.okhttp.Connection: com.squareup.okhttp.Handshake handshake>;
+
+        return r1;
+    }
+    long getIdleStartTimeNs()
+    {
+        com.squareup.okhttp.Connection r0;
+        long $l0;
+        com.squareup.okhttp.internal.spdy.SpdyConnection $r1;
+
+        r0 := @this: com.squareup.okhttp.Connection;
+
+        $r1 = r0.<com.squareup.okhttp.Connection: com.squareup.okhttp.internal.spdy.SpdyConnection spdyConnection>;
+
+        if $r1 != null goto label1;
+
+        $l0 = r0.<com.squareup.okhttp.Connection: long idleStartTimeNs>;
+
+        return $l0;
+
+     label1:
+        $r1 = r0.<com.squareup.okhttp.Connection: com.squareup.okhttp.internal.spdy.SpdyConnection spdyConnection>;
+
+        $l0 = virtualinvoke $r1.<com.squareup.okhttp.internal.spdy.SpdyConnection: long getIdleStartTimeNs()>();
+
+        return $l0;
+    }
+    java.lang.Object getOwner()
+    {
+        com.squareup.okhttp.Connection r0;
+        com.squareup.okhttp.ConnectionPool $r1;
+        java.lang.Throwable $r2;
+        java.lang.Object r3;
+
+        r0 := @this: com.squareup.okhttp.Connection;
+
+        $r1 = r0.<com.squareup.okhttp.Connection: com.squareup.okhttp.ConnectionPool pool>;
+
+        entermonitor $r1;
+
+     label1:
+        r3 = r0.<com.squareup.okhttp.Connection: java.lang.Object owner>;
+
+        exitmonitor $r1;
+
+     label2:
+        return r3;
+
+     label3:
+        $r2 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label4:
+        throw $r2;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+        catch java.lang.Throwable from label3 to label4 with label3;
+    }
+    public com.squareup.okhttp.Protocol getProtocol()
+    {
+        com.squareup.okhttp.Connection r0;
+        com.squareup.okhttp.Protocol r1;
+
+        r0 := @this: com.squareup.okhttp.Connection;
+
+        r1 = r0.<com.squareup.okhttp.Connection: com.squareup.okhttp.Protocol protocol>;
+
+        return r1;
+    }
+    public com.squareup.okhttp.Route getRoute()
+    {
+        com.squareup.okhttp.Connection r0;
+        com.squareup.okhttp.Route r1;
+
+        r0 := @this: com.squareup.okhttp.Connection;
+
+        r1 = r0.<com.squareup.okhttp.Connection: com.squareup.okhttp.Route route>;
+
+        return r1;
+    }
+    public java.net.Socket getSocket()
+    {
+        com.squareup.okhttp.Connection r0;
+        java.net.Socket r1;
+
+        r0 := @this: com.squareup.okhttp.Connection;
+
+        r1 = r0.<com.squareup.okhttp.Connection: java.net.Socket socket>;
+
+        return r1;
+    }
+    void incrementRecycleCount()
+    {
+        com.squareup.okhttp.Connection r0;
+        int $i0;
+
+        r0 := @this: com.squareup.okhttp.Connection;
+
+        $i0 = r0.<com.squareup.okhttp.Connection: int recycleCount>;
+
+        $i0 = $i0 + 1;
+
+        r0.<com.squareup.okhttp.Connection: int recycleCount> = $i0;
+
+        return;
+    }
+    boolean isAlive()
+    {
+        com.squareup.okhttp.Connection r0;
+        java.net.Socket $r1;
+        boolean $z0;
+
+        r0 := @this: com.squareup.okhttp.Connection;
+
+        $r1 = r0.<com.squareup.okhttp.Connection: java.net.Socket socket>;
+
+        $z0 = virtualinvoke $r1.<java.net.Socket: boolean isClosed()>();
+
+        if $z0 != 0 goto label1;
+
+        $r1 = r0.<com.squareup.okhttp.Connection: java.net.Socket socket>;
+
+        $z0 = virtualinvoke $r1.<java.net.Socket: boolean isInputShutdown()>();
+
+        if $z0 != 0 goto label1;
+
+        $r1 = r0.<com.squareup.okhttp.Connection: java.net.Socket socket>;
+
+        $z0 = virtualinvoke $r1.<java.net.Socket: boolean isOutputShutdown()>();
+
+        if $z0 != 0 goto label1;
+
+        return 1;
+
+     label1:
+        return 0;
+    }
+    boolean isConnected()
+    {
+        com.squareup.okhttp.Connection r0;
+        boolean z0;
+
+        r0 := @this: com.squareup.okhttp.Connection;
+
+        z0 = r0.<com.squareup.okhttp.Connection: boolean connected>;
+
+        return z0;
+    }
+    boolean isIdle()
+    {
+        com.squareup.okhttp.Connection r0;
+        boolean $z0;
+        com.squareup.okhttp.internal.spdy.SpdyConnection $r1;
+
+        r0 := @this: com.squareup.okhttp.Connection;
+
+        $r1 = r0.<com.squareup.okhttp.Connection: com.squareup.okhttp.internal.spdy.SpdyConnection spdyConnection>;
+
+        if $r1 == null goto label1;
+
+        $r1 = r0.<com.squareup.okhttp.Connection: com.squareup.okhttp.internal.spdy.SpdyConnection spdyConnection>;
+
+        $z0 = virtualinvoke $r1.<com.squareup.okhttp.internal.spdy.SpdyConnection: boolean isIdle()>();
+
+        if $z0 == 0 goto label2;
+
+     label1:
+        return 1;
+
+     label2:
+        return 0;
+    }
+    boolean isReadable()
+    {
+        com.squareup.okhttp.Connection r0;
+        boolean $z0;
+        com.squareup.okhttp.internal.http.HttpConnection $r1;
+
+        r0 := @this: com.squareup.okhttp.Connection;
+
+        $r1 = r0.<com.squareup.okhttp.Connection: com.squareup.okhttp.internal.http.HttpConnection httpConnection>;
+
+        if $r1 == null goto label1;
+
+        $r1 = r0.<com.squareup.okhttp.Connection: com.squareup.okhttp.internal.http.HttpConnection httpConnection>;
+
+        $z0 = virtualinvoke $r1.<com.squareup.okhttp.internal.http.HttpConnection: boolean isReadable()>();
+
+        return $z0;
+
+     label1:
+        return 1;
+    }
+    boolean isSpdy()
+    {
+        com.squareup.okhttp.Connection r0;
+        com.squareup.okhttp.internal.spdy.SpdyConnection $r1;
+
+        r0 := @this: com.squareup.okhttp.Connection;
+
+        $r1 = r0.<com.squareup.okhttp.Connection: com.squareup.okhttp.internal.spdy.SpdyConnection spdyConnection>;
+
+        if $r1 == null goto label1;
+
+        return 1;
+
+     label1:
+        return 0;
+    }
+    com.squareup.okhttp.internal.http.Transport newTransport(com.squareup.okhttp.internal.http.HttpEngine) throws java.io.IOException
+    {
+        com.squareup.okhttp.Connection r0;
+        com.squareup.okhttp.internal.http.HttpEngine $r1;
+        com.squareup.okhttp.internal.spdy.SpdyConnection $r2;
+        com.squareup.okhttp.internal.http.SpdyTransport $r3;
+        com.squareup.okhttp.internal.http.HttpTransport $r4;
+        com.squareup.okhttp.internal.http.HttpConnection $r5;
+
+        r0 := @this: com.squareup.okhttp.Connection;
+
+        $r1 := @parameter0: com.squareup.okhttp.internal.http.HttpEngine;
+
+        $r2 = r0.<com.squareup.okhttp.Connection: com.squareup.okhttp.internal.spdy.SpdyConnection spdyConnection>;
+
+        if $r2 == null goto label1;
+
+        $r3 = new com.squareup.okhttp.internal.http.SpdyTransport;
+
+        $r2 = r0.<com.squareup.okhttp.Connection: com.squareup.okhttp.internal.spdy.SpdyConnection spdyConnection>;
+
+        specialinvoke $r3.<com.squareup.okhttp.internal.http.SpdyTransport: void <init>(com.squareup.okhttp.internal.http.HttpEngine,com.squareup.okhttp.internal.spdy.SpdyConnection)>($r1, $r2);
+
+        return $r3;
+
+     label1:
+        $r4 = new com.squareup.okhttp.internal.http.HttpTransport;
+
+        $r5 = r0.<com.squareup.okhttp.Connection: com.squareup.okhttp.internal.http.HttpConnection httpConnection>;
+
+        specialinvoke $r4.<com.squareup.okhttp.internal.http.HttpTransport: void <init>(com.squareup.okhttp.internal.http.HttpEngine,com.squareup.okhttp.internal.http.HttpConnection)>($r1, $r5);
+
+        return $r4;
+    }
+    okio.BufferedSink rawSink()
+    {
+        com.squareup.okhttp.Connection r0;
+        okio.BufferedSink $r1;
+        com.squareup.okhttp.internal.http.HttpConnection $r2;
+        java.lang.UnsupportedOperationException $r3;
+
+        r0 := @this: com.squareup.okhttp.Connection;
+
+        $r2 = r0.<com.squareup.okhttp.Connection: com.squareup.okhttp.internal.http.HttpConnection httpConnection>;
+
+        if $r2 != null goto label1;
+
+        $r3 = new java.lang.UnsupportedOperationException;
+
+        specialinvoke $r3.<java.lang.UnsupportedOperationException: void <init>()>();
+
+        throw $r3;
+
+     label1:
+        $r2 = r0.<com.squareup.okhttp.Connection: com.squareup.okhttp.internal.http.HttpConnection httpConnection>;
+
+        $r1 = virtualinvoke $r2.<com.squareup.okhttp.internal.http.HttpConnection: okio.BufferedSink rawSink()>();
+
+        return $r1;
+    }
+    okio.BufferedSource rawSource()
+    {
+        com.squareup.okhttp.Connection r0;
+        okio.BufferedSource $r1;
+        com.squareup.okhttp.internal.http.HttpConnection $r2;
+        java.lang.UnsupportedOperationException $r3;
+
+        r0 := @this: com.squareup.okhttp.Connection;
+
+        $r2 = r0.<com.squareup.okhttp.Connection: com.squareup.okhttp.internal.http.HttpConnection httpConnection>;
+
+        if $r2 != null goto label1;
+
+        $r3 = new java.lang.UnsupportedOperationException;
+
+        specialinvoke $r3.<java.lang.UnsupportedOperationException: void <init>()>();
+
+        throw $r3;
+
+     label1:
+        $r2 = r0.<com.squareup.okhttp.Connection: com.squareup.okhttp.internal.http.HttpConnection httpConnection>;
+
+        $r1 = virtualinvoke $r2.<com.squareup.okhttp.internal.http.HttpConnection: okio.BufferedSource rawSource()>();
+
+        return $r1;
+    }
+    int recycleCount()
+    {
+        com.squareup.okhttp.Connection r0;
+        int i0;
+
+        r0 := @this: com.squareup.okhttp.Connection;
+
+        i0 = r0.<com.squareup.okhttp.Connection: int recycleCount>;
+
+        return i0;
+    }
+    void resetIdleStartTime()
+    {
+        com.squareup.okhttp.Connection r0;
+        long $l0;
+        com.squareup.okhttp.internal.spdy.SpdyConnection $r1;
+        java.lang.IllegalStateException $r2;
+
+        r0 := @this: com.squareup.okhttp.Connection;
+
+        $r1 = r0.<com.squareup.okhttp.Connection: com.squareup.okhttp.internal.spdy.SpdyConnection spdyConnection>;
+
+        if $r1 == null goto label1;
+
+        $r2 = new java.lang.IllegalStateException;
+
+        specialinvoke $r2.<java.lang.IllegalStateException: void <init>(java.lang.String)>("spdyConnection != null");
+
+        throw $r2;
+
+     label1:
+        $l0 = staticinvoke <java.lang.System: long nanoTime()>();
+
+        r0.<com.squareup.okhttp.Connection: long idleStartTimeNs> = $l0;
+
+        return;
+    }
+    void setOwner(java.lang.Object)
+    {
+        com.squareup.okhttp.Connection r0;
+        java.lang.Object $r1, $r3;
+        com.squareup.okhttp.ConnectionPool $r2;
+        boolean $z0;
+        java.lang.IllegalStateException $r4;
+        java.lang.Throwable $r5;
+
+        r0 := @this: com.squareup.okhttp.Connection;
+
+        $r1 := @parameter0: java.lang.Object;
+
+        $z0 = virtualinvoke r0.<com.squareup.okhttp.Connection: boolean isSpdy()>();
+
+        if $z0 == 0 goto label1;
+
+        return;
+
+     label1:
+        $r2 = r0.<com.squareup.okhttp.Connection: com.squareup.okhttp.ConnectionPool pool>;
+
+        entermonitor $r2;
+
+     label2:
+        $r3 = r0.<com.squareup.okhttp.Connection: java.lang.Object owner>;
+
+        if $r3 == null goto label5;
+
+        $r4 = new java.lang.IllegalStateException;
+
+        specialinvoke $r4.<java.lang.IllegalStateException: void <init>(java.lang.String)>("Connection already has an owner!");
+
+        throw $r4;
+
+     label3:
+        $r5 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label4:
+        throw $r5;
+
+     label5:
+        r0.<com.squareup.okhttp.Connection: java.lang.Object owner> = $r1;
+
+        exitmonitor $r2;
+
+     label6:
+        return;
+
+        catch java.lang.Throwable from label2 to label4 with label3;
+        catch java.lang.Throwable from label5 to label6 with label3;
+    }
+    void setProtocol(com.squareup.okhttp.Protocol)
+    {
+        com.squareup.okhttp.Connection r0;
+        com.squareup.okhttp.Protocol $r1;
+        java.lang.IllegalArgumentException $r2;
+
+        r0 := @this: com.squareup.okhttp.Connection;
+
+        $r1 := @parameter0: com.squareup.okhttp.Protocol;
+
+        if $r1 != null goto label1;
+
+        $r2 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r2.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("protocol == null");
+
+        throw $r2;
+
+     label1:
+        r0.<com.squareup.okhttp.Connection: com.squareup.okhttp.Protocol protocol> = $r1;
+
+        return;
+    }
+    void setTimeouts(int, int) throws com.squareup.okhttp.internal.http.RouteException
+    {
+        com.squareup.okhttp.Connection r0;
+        int $i0, $i1;
+        java.io.IOException r1;
+        boolean $z0;
+        java.lang.IllegalStateException $r2;
+        com.squareup.okhttp.internal.http.HttpConnection $r3;
+        java.net.Socket $r4;
+        com.squareup.okhttp.internal.http.RouteException $r5;
+
+        r0 := @this: com.squareup.okhttp.Connection;
+
+        $i0 := @parameter0: int;
+
+        $i1 := @parameter1: int;
+
+        $z0 = r0.<com.squareup.okhttp.Connection: boolean connected>;
+
+        if $z0 != 0 goto label1;
+
+        $r2 = new java.lang.IllegalStateException;
+
+        specialinvoke $r2.<java.lang.IllegalStateException: void <init>(java.lang.String)>("setTimeouts - not connected");
+
+        throw $r2;
+
+     label1:
+        $r3 = r0.<com.squareup.okhttp.Connection: com.squareup.okhttp.internal.http.HttpConnection httpConnection>;
+
+        if $r3 == null goto label5;
+
+        $r4 = r0.<com.squareup.okhttp.Connection: java.net.Socket socket>;
+
+     label2:
+        virtualinvoke $r4.<java.net.Socket: void setSoTimeout(int)>($i0);
+
+     label3:
+        $r3 = r0.<com.squareup.okhttp.Connection: com.squareup.okhttp.internal.http.HttpConnection httpConnection>;
+
+        virtualinvoke $r3.<com.squareup.okhttp.internal.http.HttpConnection: void setTimeouts(int,int)>($i0, $i1);
+
+        return;
+
+     label4:
+        r1 := @caughtexception;
+
+        $r5 = new com.squareup.okhttp.internal.http.RouteException;
+
+        specialinvoke $r5.<com.squareup.okhttp.internal.http.RouteException: void <init>(java.io.IOException)>(r1);
+
+        throw $r5;
+
+     label5:
+        return;
+
+        catch java.io.IOException from label2 to label3 with label4;
+    }
+    public java.lang.String toString()
+    {
+        com.squareup.okhttp.Connection r0;
+        java.lang.StringBuilder $r1;
+        com.squareup.okhttp.Route $r2;
+        com.squareup.okhttp.Address $r3;
+        java.lang.String $r4;
+        int $i0;
+        java.net.Proxy $r5;
+        java.net.InetSocketAddress $r6;
+        java.net.InetAddress $r7;
+        com.squareup.okhttp.Handshake $r8;
+        com.squareup.okhttp.Protocol $r9;
+
+        r0 := @this: com.squareup.okhttp.Connection;
+
+        $r1 = new java.lang.StringBuilder;
+
+        specialinvoke $r1.<java.lang.StringBuilder: void <init>()>();
+
+        $r1 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Connection{");
+
+        $r2 = r0.<com.squareup.okhttp.Connection: com.squareup.okhttp.Route route>;
+
+        $r3 = $r2.<com.squareup.okhttp.Route: com.squareup.okhttp.Address address>;
+
+        $r4 = $r3.<com.squareup.okhttp.Address: java.lang.String uriHost>;
+
+        $r1 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r1 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(":");
+
+        $r2 = r0.<com.squareup.okhttp.Connection: com.squareup.okhttp.Route route>;
+
+        $r3 = $r2.<com.squareup.okhttp.Route: com.squareup.okhttp.Address address>;
+
+        $i0 = $r3.<com.squareup.okhttp.Address: int uriPort>;
+
+        $r1 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($i0);
+
+        $r1 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(", proxy=");
+
+        $r2 = r0.<com.squareup.okhttp.Connection: com.squareup.okhttp.Route route>;
+
+        $r5 = $r2.<com.squareup.okhttp.Route: java.net.Proxy proxy>;
+
+        $r1 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r5);
+
+        $r1 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" hostAddress=");
+
+        $r2 = r0.<com.squareup.okhttp.Connection: com.squareup.okhttp.Route route>;
+
+        $r6 = $r2.<com.squareup.okhttp.Route: java.net.InetSocketAddress inetSocketAddress>;
+
+        $r7 = virtualinvoke $r6.<java.net.InetSocketAddress: java.net.InetAddress getAddress()>();
+
+        $r4 = virtualinvoke $r7.<java.net.InetAddress: java.lang.String getHostAddress()>();
+
+        $r1 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r1 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" cipherSuite=");
+
+        $r8 = r0.<com.squareup.okhttp.Connection: com.squareup.okhttp.Handshake handshake>;
+
+        if $r8 == null goto label2;
+
+        $r8 = r0.<com.squareup.okhttp.Connection: com.squareup.okhttp.Handshake handshake>;
+
+        $r4 = virtualinvoke $r8.<com.squareup.okhttp.Handshake: java.lang.String cipherSuite()>();
+
+     label1:
+        $r1 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r1 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" protocol=");
+
+        $r9 = r0.<com.squareup.okhttp.Connection: com.squareup.okhttp.Protocol protocol>;
+
+        $r1 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r9);
+
+        $r1 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>(125);
+
+        $r4 = virtualinvoke $r1.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r4;
+
+     label2:
+        $r4 = "none";
+
+        goto label1;
+    }

@@ -1,0 +1,1525 @@
+com.ichi2.libanki.sync.HttpSyncer extends java.lang.Object
+public static final java.lang.String ANKIWEB_STATUS_OK
+private static final java.lang.String BOUNDARY
+public volatile long bytesReceived
+public volatile long bytesSent
+protected com.ichi2.async.Connection mCon
+protected java.lang.String mHKey
+public volatile long mNextSendR
+public volatile long mNextSendS
+protected java.util.Map mPostVars
+protected java.lang.String mSKey
+    public void <init>(java.lang.String, com.ichi2.async.Connection)
+    {
+        com.ichi2.libanki.sync.HttpSyncer r0;
+        java.lang.String $r1;
+        com.ichi2.async.Connection $r2;
+        java.util.Random $r3;
+        float $f0;
+        java.util.HashMap $r4;
+
+        r0 := @this: com.ichi2.libanki.sync.HttpSyncer;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: com.ichi2.async.Connection;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<com.ichi2.libanki.sync.HttpSyncer: long bytesSent> = 0L;
+
+        r0.<com.ichi2.libanki.sync.HttpSyncer: long bytesReceived> = 0L;
+
+        r0.<com.ichi2.libanki.sync.HttpSyncer: long mNextSendS> = 1024L;
+
+        r0.<com.ichi2.libanki.sync.HttpSyncer: long mNextSendR> = 1024L;
+
+        r0.<com.ichi2.libanki.sync.HttpSyncer: java.lang.String mHKey> = $r1;
+
+        $r3 = new java.util.Random;
+
+        specialinvoke $r3.<java.util.Random: void <init>()>();
+
+        $f0 = virtualinvoke $r3.<java.util.Random: float nextFloat()>();
+
+        $r1 = staticinvoke <java.lang.Float: java.lang.String toString(float)>($f0);
+
+        $r1 = staticinvoke <com.ichi2.libanki.Utils: java.lang.String checksum(java.lang.String)>($r1);
+
+        $r1 = virtualinvoke $r1.<java.lang.String: java.lang.String substring(int,int)>(0, 8);
+
+        r0.<com.ichi2.libanki.sync.HttpSyncer: java.lang.String mSKey> = $r1;
+
+        r0.<com.ichi2.libanki.sync.HttpSyncer: com.ichi2.async.Connection mCon> = $r2;
+
+        $r4 = new java.util.HashMap;
+
+        specialinvoke $r4.<java.util.HashMap: void <init>()>();
+
+        r0.<com.ichi2.libanki.sync.HttpSyncer: java.util.Map mPostVars> = $r4;
+
+        return;
+    }
+    static void access$000(com.ichi2.libanki.sync.HttpSyncer)
+    {
+        com.ichi2.libanki.sync.HttpSyncer $r0;
+
+        $r0 := @parameter0: com.ichi2.libanki.sync.HttpSyncer;
+
+        specialinvoke $r0.<com.ichi2.libanki.sync.HttpSyncer: void publishProgress()>();
+
+        return;
+    }
+    public static java.io.ByteArrayInputStream getInputStream(java.lang.String)
+    {
+        java.lang.String $r0;
+        java.io.UnsupportedEncodingException r1;
+        byte[] $r2;
+        java.io.ByteArrayInputStream $r3;
+        java.lang.Object[] $r4;
+
+        $r0 := @parameter0: java.lang.String;
+
+        $r3 = new java.io.ByteArrayInputStream;
+
+     label1:
+        $r2 = virtualinvoke $r0.<java.lang.String: byte[] getBytes(java.lang.String)>("UTF-8");
+
+        specialinvoke $r3.<java.io.ByteArrayInputStream: void <init>(byte[])>($r2);
+
+     label2:
+        return $r3;
+
+     label3:
+        r1 := @caughtexception;
+
+        $r4 = newarray (java.lang.Object)[0];
+
+        staticinvoke <timber.log.Timber: void e(java.lang.Throwable,java.lang.String,java.lang.Object[])>(r1, "HttpSyncer: error on getting bytes from string", $r4);
+
+        return null;
+
+        catch java.io.UnsupportedEncodingException from label1 to label2 with label3;
+    }
+    private void publishProgress()
+    {
+        com.ichi2.libanki.sync.HttpSyncer r0;
+        long l0, l1, $l3;
+        com.ichi2.async.Connection $r1;
+        byte $b2;
+
+        r0 := @this: com.ichi2.libanki.sync.HttpSyncer;
+
+        $r1 = r0.<com.ichi2.libanki.sync.HttpSyncer: com.ichi2.async.Connection mCon>;
+
+        if $r1 == null goto label2;
+
+        l0 = r0.<com.ichi2.libanki.sync.HttpSyncer: long mNextSendR>;
+
+        l1 = r0.<com.ichi2.libanki.sync.HttpSyncer: long bytesReceived>;
+
+        $b2 = l0 cmp l1;
+
+        if $b2 <= 0 goto label1;
+
+        l0 = r0.<com.ichi2.libanki.sync.HttpSyncer: long mNextSendS>;
+
+        l1 = r0.<com.ichi2.libanki.sync.HttpSyncer: long bytesSent>;
+
+        $b2 = l0 cmp l1;
+
+        if $b2 > 0 goto label2;
+
+     label1:
+        l1 = r0.<com.ichi2.libanki.sync.HttpSyncer: long bytesReceived>;
+
+        l0 = r0.<com.ichi2.libanki.sync.HttpSyncer: long bytesSent>;
+
+        $l3 = l1 / 1024L;
+
+        $l3 = $l3 + 1L;
+
+        $l3 = $l3 * 1024L;
+
+        r0.<com.ichi2.libanki.sync.HttpSyncer: long mNextSendR> = $l3;
+
+        $l3 = l0 / 1024L;
+
+        $l3 = $l3 + 1L;
+
+        $l3 = $l3 * 1024L;
+
+        r0.<com.ichi2.libanki.sync.HttpSyncer: long mNextSendS> = $l3;
+
+        $r1 = r0.<com.ichi2.libanki.sync.HttpSyncer: com.ichi2.async.Connection mCon>;
+
+        virtualinvoke $r1.<com.ichi2.async.Connection: void publishProgress(int,long,long)>(0, l0, l1);
+
+     label2:
+        return;
+    }
+    public void abort() throws com.ichi2.anki.exception.UnknownHttpResponseException
+    {
+        com.ichi2.libanki.sync.HttpSyncer r0;
+
+        r0 := @this: com.ichi2.libanki.sync.HttpSyncer;
+
+        return;
+    }
+    public org.json.JSONObject applyChanges(org.json.JSONObject) throws com.ichi2.anki.exception.UnknownHttpResponseException
+    {
+        com.ichi2.libanki.sync.HttpSyncer r0;
+        org.json.JSONObject $r1;
+
+        r0 := @this: com.ichi2.libanki.sync.HttpSyncer;
+
+        $r1 := @parameter0: org.json.JSONObject;
+
+        return null;
+    }
+    public void applyChunk(org.json.JSONObject) throws com.ichi2.anki.exception.UnknownHttpResponseException
+    {
+        com.ichi2.libanki.sync.HttpSyncer r0;
+        org.json.JSONObject $r1;
+
+        r0 := @this: com.ichi2.libanki.sync.HttpSyncer;
+
+        $r1 := @parameter0: org.json.JSONObject;
+
+        return;
+    }
+    public void assertOk(org.apache.http.HttpResponse) throws com.ichi2.anki.exception.UnknownHttpResponseException
+    {
+        com.ichi2.libanki.sync.HttpSyncer r0;
+        org.apache.http.HttpResponse $r1;
+        com.ichi2.anki.exception.UnknownHttpResponseException $r2;
+        java.lang.Integer $r3;
+        org.apache.http.StatusLine $r4;
+        int $i0;
+        java.lang.String $r5;
+
+        r0 := @this: com.ichi2.libanki.sync.HttpSyncer;
+
+        $r1 := @parameter0: org.apache.http.HttpResponse;
+
+        if $r1 != null goto label1;
+
+        $r2 = new com.ichi2.anki.exception.UnknownHttpResponseException;
+
+        $r3 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(-2);
+
+        specialinvoke $r2.<com.ichi2.anki.exception.UnknownHttpResponseException: void <init>(java.lang.String,java.lang.Integer)>("Null HttpResponse", $r3);
+
+        throw $r2;
+
+     label1:
+        $r4 = interfaceinvoke $r1.<org.apache.http.HttpResponse: org.apache.http.StatusLine getStatusLine()>();
+
+        $i0 = interfaceinvoke $r4.<org.apache.http.StatusLine: int getStatusCode()>();
+
+        if $i0 == 200 goto label2;
+
+        if $i0 == 403 goto label2;
+
+        $r4 = interfaceinvoke $r1.<org.apache.http.HttpResponse: org.apache.http.StatusLine getStatusLine()>();
+
+        $r5 = interfaceinvoke $r4.<org.apache.http.StatusLine: java.lang.String getReasonPhrase()>();
+
+        $r2 = new com.ichi2.anki.exception.UnknownHttpResponseException;
+
+        $r3 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($i0);
+
+        specialinvoke $r2.<com.ichi2.anki.exception.UnknownHttpResponseException: void <init>(java.lang.String,java.lang.Integer)>($r5, $r3);
+
+        throw $r2;
+
+     label2:
+        return;
+    }
+    public org.json.JSONObject chunk() throws com.ichi2.anki.exception.UnknownHttpResponseException
+    {
+        com.ichi2.libanki.sync.HttpSyncer r0;
+
+        r0 := @this: com.ichi2.libanki.sync.HttpSyncer;
+
+        return null;
+    }
+    public org.json.JSONObject chunk(org.json.JSONObject) throws com.ichi2.anki.exception.UnknownHttpResponseException
+    {
+        com.ichi2.libanki.sync.HttpSyncer r0;
+        org.json.JSONObject $r1;
+
+        r0 := @this: com.ichi2.libanki.sync.HttpSyncer;
+
+        $r1 := @parameter0: org.json.JSONObject;
+
+        return null;
+    }
+    public java.lang.Object[] download() throws com.ichi2.anki.exception.UnknownHttpResponseException
+    {
+        com.ichi2.libanki.sync.HttpSyncer r0;
+
+        r0 := @this: com.ichi2.libanki.sync.HttpSyncer;
+
+        return null;
+    }
+    public long finish() throws com.ichi2.anki.exception.UnknownHttpResponseException
+    {
+        com.ichi2.libanki.sync.HttpSyncer r0;
+
+        r0 := @this: com.ichi2.libanki.sync.HttpSyncer;
+
+        return 0L;
+    }
+    public org.apache.http.HttpResponse hostKey(java.lang.String, java.lang.String) throws com.ichi2.anki.exception.UnknownHttpResponseException
+    {
+        com.ichi2.libanki.sync.HttpSyncer r0;
+        java.lang.String $r1, $r2;
+
+        r0 := @this: com.ichi2.libanki.sync.HttpSyncer;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.lang.String;
+
+        return null;
+    }
+    public org.apache.http.HttpResponse meta() throws com.ichi2.anki.exception.UnknownHttpResponseException
+    {
+        com.ichi2.libanki.sync.HttpSyncer r0;
+
+        r0 := @this: com.ichi2.libanki.sync.HttpSyncer;
+
+        return null;
+    }
+    public org.apache.http.HttpResponse register(java.lang.String, java.lang.String) throws com.ichi2.anki.exception.UnknownHttpResponseException
+    {
+        com.ichi2.libanki.sync.HttpSyncer r0;
+        java.lang.String $r1, $r2;
+
+        r0 := @this: com.ichi2.libanki.sync.HttpSyncer;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.lang.String;
+
+        return null;
+    }
+    public org.apache.http.HttpResponse req(java.lang.String) throws com.ichi2.anki.exception.UnknownHttpResponseException
+    {
+        com.ichi2.libanki.sync.HttpSyncer r0;
+        java.lang.String $r1;
+        org.apache.http.HttpResponse $r2;
+
+        r0 := @this: com.ichi2.libanki.sync.HttpSyncer;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = virtualinvoke r0.<com.ichi2.libanki.sync.HttpSyncer: org.apache.http.HttpResponse req(java.lang.String,java.io.InputStream)>($r1, null);
+
+        return $r2;
+    }
+    public org.apache.http.HttpResponse req(java.lang.String, int, java.io.InputStream) throws com.ichi2.anki.exception.UnknownHttpResponseException
+    {
+        com.ichi2.libanki.sync.HttpSyncer r0;
+        java.lang.String $r1;
+        int $i0;
+        java.io.InputStream $r2;
+        org.apache.http.HttpResponse $r3;
+
+        r0 := @this: com.ichi2.libanki.sync.HttpSyncer;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $i0 := @parameter1: int;
+
+        $r2 := @parameter2: java.io.InputStream;
+
+        $r3 = virtualinvoke r0.<com.ichi2.libanki.sync.HttpSyncer: org.apache.http.HttpResponse req(java.lang.String,java.io.InputStream,int)>($r1, $r2, $i0);
+
+        return $r3;
+    }
+    public org.apache.http.HttpResponse req(java.lang.String, java.io.InputStream) throws com.ichi2.anki.exception.UnknownHttpResponseException
+    {
+        com.ichi2.libanki.sync.HttpSyncer r0;
+        java.lang.String $r1;
+        java.io.InputStream $r2;
+        org.apache.http.HttpResponse $r3;
+
+        r0 := @this: com.ichi2.libanki.sync.HttpSyncer;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.io.InputStream;
+
+        $r3 = virtualinvoke r0.<com.ichi2.libanki.sync.HttpSyncer: org.apache.http.HttpResponse req(java.lang.String,java.io.InputStream,int)>($r1, $r2, 6);
+
+        return $r3;
+    }
+    public org.apache.http.HttpResponse req(java.lang.String, java.io.InputStream, int) throws com.ichi2.anki.exception.UnknownHttpResponseException
+    {
+        com.ichi2.libanki.sync.HttpSyncer r0;
+        java.lang.String $r1;
+        java.io.InputStream $r2;
+        int $i0;
+        org.apache.http.HttpResponse $r3;
+
+        r0 := @this: com.ichi2.libanki.sync.HttpSyncer;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.io.InputStream;
+
+        $i0 := @parameter2: int;
+
+        $r3 = virtualinvoke r0.<com.ichi2.libanki.sync.HttpSyncer: org.apache.http.HttpResponse req(java.lang.String,java.io.InputStream,int,org.json.JSONObject)>($r1, $r2, $i0, null);
+
+        return $r3;
+    }
+    public org.apache.http.HttpResponse req(java.lang.String, java.io.InputStream, int, org.json.JSONObject) throws com.ichi2.anki.exception.UnknownHttpResponseException
+    {
+        com.ichi2.libanki.sync.HttpSyncer r0;
+        java.lang.String $r1;
+        java.io.InputStream $r2;
+        int $i0;
+        org.json.JSONObject $r3;
+        org.apache.http.HttpResponse $r4;
+
+        r0 := @this: com.ichi2.libanki.sync.HttpSyncer;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.io.InputStream;
+
+        $i0 := @parameter2: int;
+
+        $r3 := @parameter3: org.json.JSONObject;
+
+        $r4 = virtualinvoke r0.<com.ichi2.libanki.sync.HttpSyncer: org.apache.http.HttpResponse req(java.lang.String,java.io.InputStream,int,org.json.JSONObject,com.ichi2.async.Connection$CancelCallback)>($r1, $r2, $i0, $r3, null);
+
+        return $r4;
+    }
+    public org.apache.http.HttpResponse req(java.lang.String, java.io.InputStream, int, org.json.JSONObject, com.ichi2.async.Connection$CancelCallback) throws com.ichi2.anki.exception.UnknownHttpResponseException
+    {
+        com.ichi2.libanki.sync.HttpSyncer r0;
+        java.lang.String $r1, r22, $r24;
+        java.io.InputStream $r2;
+        int $i0;
+        org.json.JSONObject $r3;
+        com.ichi2.async.Connection$CancelCallback $r4;
+        byte[] r7;
+        java.io.File r16, $r31, $r46;
+        java.util.Map $r17;
+        byte $b1;
+        java.lang.Integer $r18;
+        java.util.Set $r19;
+        java.util.Iterator $r20;
+        boolean $z0;
+        java.lang.Object $r21;
+        java.lang.StringBuilder $r23, $r44;
+        java.util.Locale $r25;
+        java.lang.Object[] $r26;
+        java.io.UnsupportedEncodingException $r27;
+        java.lang.Exception r28;
+        java.lang.Throwable $r30;
+        java.io.BufferedOutputStream r32, $r48;
+        org.json.JSONException $r33;
+        java.lang.Boolean $r35;
+        org.apache.http.HttpVersion $r36;
+        org.apache.http.conn.scheme.PlainSocketFactory $r38;
+        org.apache.http.HttpResponse $r40;
+        java.io.IOException r41;
+        javax.net.ssl.SSLException r42;
+        java.io.StringWriter $r43;
+        java.lang.RuntimeException $r45;
+        java.io.FileOutputStream $r47;
+        java.io.BufferedInputStream $r49;
+        java.util.zip.GZIPOutputStream $r50;
+        org.apache.http.client.methods.HttpPost $r51;
+        com.ichi2.libanki.sync.HttpSyncer$ProgressByteEntity $r52;
+        org.apache.http.params.BasicHttpParams $r53;
+        org.apache.http.conn.params.ConnPerRouteBean $r54;
+        org.apache.http.conn.scheme.SchemeRegistry $r55;
+        org.apache.http.conn.scheme.Scheme $r56;
+        org.apache.commons.httpclient.contrib.ssl.EasySSLSocketFactory $r57;
+        org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager $r58;
+        org.apache.http.impl.client.DefaultHttpClient $r59;
+        org.apache.http.HttpEntity $r60;
+        org.apache.http.params.HttpParams $r61;
+        org.apache.http.ProtocolVersion $r62;
+        org.apache.http.conn.scheme.SocketFactory $r63;
+        org.apache.http.conn.ClientConnectionManager $r64;
+        org.apache.http.client.HttpClient $r65;
+        org.apache.http.client.methods.HttpUriRequest $r66;
+
+        r0 := @this: com.ichi2.libanki.sync.HttpSyncer;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.io.InputStream;
+
+        $i0 := @parameter2: int;
+
+        $r3 := @parameter3: org.json.JSONObject;
+
+        $r4 := @parameter4: com.ichi2.async.Connection$CancelCallback;
+
+        r16 = null;
+
+     label001:
+        $r43 = new java.io.StringWriter;
+
+     label002:
+        specialinvoke $r43.<java.io.StringWriter: void <init>()>();
+
+     label003:
+        $r17 = r0.<com.ichi2.libanki.sync.HttpSyncer: java.util.Map mPostVars>;
+
+     label004:
+        if $i0 == 0 goto label023;
+
+        $b1 = 1;
+
+     label005:
+        $r18 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>($b1);
+
+        interfaceinvoke $r17.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>("c", $r18);
+
+     label006:
+        $r17 = r0.<com.ichi2.libanki.sync.HttpSyncer: java.util.Map mPostVars>;
+
+     label007:
+        $r19 = interfaceinvoke $r17.<java.util.Map: java.util.Set keySet()>();
+
+        $r20 = interfaceinvoke $r19.<java.util.Set: java.util.Iterator iterator()>();
+
+     label008:
+        $z0 = interfaceinvoke $r20.<java.util.Iterator: boolean hasNext()>();
+
+     label009:
+        if $z0 == 0 goto label024;
+
+     label010:
+        $r21 = interfaceinvoke $r20.<java.util.Iterator: java.lang.Object next()>();
+
+     label011:
+        r22 = (java.lang.String) $r21;
+
+        $r44 = new java.lang.StringBuilder;
+
+     label012:
+        specialinvoke $r44.<java.lang.StringBuilder: void <init>()>();
+
+        $r23 = virtualinvoke $r44.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("--Anki-sync-boundary");
+
+        $r23 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\r\n");
+
+        $r24 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r43.<java.io.StringWriter: void write(java.lang.String)>($r24);
+
+     label013:
+        $r25 = <java.util.Locale: java.util.Locale US>;
+
+        $r26 = newarray (java.lang.Object)[2];
+
+        $r26[0] = r22;
+
+        $r17 = r0.<com.ichi2.libanki.sync.HttpSyncer: java.util.Map mPostVars>;
+
+     label014:
+        $r21 = interfaceinvoke $r17.<java.util.Map: java.lang.Object get(java.lang.Object)>(r22);
+
+     label015:
+        $r26[1] = $r21;
+
+     label016:
+        r22 = staticinvoke <java.lang.String: java.lang.String format(java.util.Locale,java.lang.String,java.lang.Object[])>($r25, "Content-Disposition: form-data; name=\"%s\"\r\n\r\n%s\r\n", $r26);
+
+        virtualinvoke $r43.<java.io.StringWriter: void write(java.lang.String)>(r22);
+
+     label017:
+        goto label008;
+
+     label018:
+        $r27 := @caughtexception;
+
+        r28 = $r27;
+
+     label019:
+        $r45 = new java.lang.RuntimeException;
+
+     label020:
+        specialinvoke $r45.<java.lang.RuntimeException: void <init>(java.lang.Throwable)>(r28);
+
+        throw $r45;
+
+     label021:
+        $r30 := @caughtexception;
+
+        if r16 == null goto label022;
+
+        $z0 = virtualinvoke r16.<java.io.File: boolean exists()>();
+
+        if $z0 == 0 goto label022;
+
+        virtualinvoke r16.<java.io.File: boolean delete()>();
+
+     label022:
+        throw $r30;
+
+     label023:
+        $b1 = 0;
+
+        goto label005;
+
+     label024:
+        $r46 = new java.io.File;
+
+     label025:
+        r22 = staticinvoke <com.ichi2.anki.AnkiDroidApp: java.lang.String getCacheStorageDirectory()>();
+
+        specialinvoke $r46.<java.io.File: void <init>(java.lang.String)>(r22);
+
+        $r31 = staticinvoke <java.io.File: java.io.File createTempFile(java.lang.String,java.lang.String,java.io.File)>("syncer", ".tmp", $r46);
+
+     label026:
+        r16 = $r31;
+
+     label027:
+        $r47 = new java.io.FileOutputStream;
+
+     label028:
+        specialinvoke $r47.<java.io.FileOutputStream: void <init>(java.io.File)>($r31);
+
+     label029:
+        $r48 = new java.io.BufferedOutputStream;
+
+     label030:
+        r32 = $r48;
+
+     label031:
+        specialinvoke $r48.<java.io.BufferedOutputStream: void <init>(java.io.OutputStream)>($r47);
+
+     label032:
+        if $r2 == null goto label108;
+
+     label033:
+        $r44 = new java.lang.StringBuilder;
+
+     label034:
+        specialinvoke $r44.<java.lang.StringBuilder: void <init>()>();
+
+        $r23 = virtualinvoke $r44.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("--Anki-sync-boundary");
+
+        $r23 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\r\n");
+
+        r22 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke $r43.<java.io.StringWriter: void write(java.lang.String)>(r22);
+
+        virtualinvoke $r43.<java.io.StringWriter: void write(java.lang.String)>("Content-Disposition: form-data; name=\"data\"; filename=\"data\"\r\nContent-Type: application/octet-stream\r\n\r\n");
+
+        virtualinvoke $r43.<java.io.StringWriter: void close()>();
+
+        r22 = virtualinvoke $r43.<java.io.StringWriter: java.lang.String toString()>();
+
+        r7 = virtualinvoke r22.<java.lang.String: byte[] getBytes(java.lang.String)>("UTF-8");
+
+        virtualinvoke $r48.<java.io.BufferedOutputStream: void write(byte[])>(r7);
+
+     label035:
+        $r49 = new java.io.BufferedInputStream;
+
+     label036:
+        specialinvoke $r49.<java.io.BufferedInputStream: void <init>(java.io.InputStream)>($r2);
+
+     label037:
+        r7 = newarray (byte)[65536];
+
+     label038:
+        if $i0 == 0 goto label101;
+
+     label039:
+        $r50 = new java.util.zip.GZIPOutputStream;
+
+     label040:
+        specialinvoke $r50.<java.util.zip.GZIPOutputStream: void <init>(java.io.OutputStream)>($r48);
+
+     label041:
+        $i0 = virtualinvoke $r49.<java.io.BufferedInputStream: int read(byte[])>(r7);
+
+     label042:
+        if $i0 < 0 goto label046;
+
+     label043:
+        virtualinvoke $r50.<java.util.zip.GZIPOutputStream: void write(byte[],int,int)>(r7, 0, $i0);
+
+     label044:
+        goto label041;
+
+     label045:
+        $r33 := @caughtexception;
+
+        r28 = $r33;
+
+        goto label019;
+
+     label046:
+        virtualinvoke $r50.<java.util.zip.GZIPOutputStream: void close()>();
+
+     label047:
+        $r48 = new java.io.BufferedOutputStream;
+
+     label048:
+        r32 = $r48;
+
+     label049:
+        $r47 = new java.io.FileOutputStream;
+
+     label050:
+        specialinvoke $r47.<java.io.FileOutputStream: void <init>(java.io.File,boolean)>($r31, 1);
+
+        specialinvoke $r48.<java.io.BufferedOutputStream: void <init>(java.io.OutputStream)>($r47);
+
+     label051:
+        $r44 = new java.lang.StringBuilder;
+
+     label052:
+        specialinvoke $r44.<java.lang.StringBuilder: void <init>()>();
+
+        $r23 = virtualinvoke $r44.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("\r\n");
+
+        $r23 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("--Anki-sync-boundary");
+
+        $r23 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("--\r\n");
+
+        r22 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        r7 = virtualinvoke r22.<java.lang.String: byte[] getBytes(java.lang.String)>("UTF-8");
+
+        virtualinvoke r32.<java.io.BufferedOutputStream: void write(byte[])>(r7);
+
+     label053:
+        virtualinvoke r32.<java.io.BufferedOutputStream: void flush()>();
+
+        virtualinvoke r32.<java.io.BufferedOutputStream: void close()>();
+
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean equals(java.lang.Object)>("register");
+
+     label054:
+        if $z0 == 0 goto label110;
+
+     label055:
+        $r44 = new java.lang.StringBuilder;
+
+     label056:
+        specialinvoke $r44.<java.lang.StringBuilder: void <init>()>();
+
+        $r23 = virtualinvoke $r44.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("https://sync.ankiweb.net/");
+
+        $r23 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("account/signup?username=");
+
+        $r1 = virtualinvoke $r3.<org.json.JSONObject: java.lang.String getString(java.lang.String)>("u");
+
+        $r23 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r23 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("&password=");
+
+        $r1 = virtualinvoke $r3.<org.json.JSONObject: java.lang.String getString(java.lang.String)>("p");
+
+        $r23 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r1 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label057:
+        $r51 = new org.apache.http.client.methods.HttpPost;
+
+     label058:
+        specialinvoke $r51.<org.apache.http.client.methods.HttpPost: void <init>(java.lang.String)>($r1);
+
+     label059:
+        $r52 = new com.ichi2.libanki.sync.HttpSyncer$ProgressByteEntity;
+
+     label060:
+        specialinvoke $r52.<com.ichi2.libanki.sync.HttpSyncer$ProgressByteEntity: void <init>(com.ichi2.libanki.sync.HttpSyncer,java.io.File)>(r0, $r31);
+
+     label061:
+        $r60 = (org.apache.http.HttpEntity) $r52;
+
+     label062:
+        virtualinvoke $r51.<org.apache.http.client.methods.HttpPost: void setEntity(org.apache.http.HttpEntity)>($r60);
+
+        virtualinvoke $r51.<org.apache.http.client.methods.HttpPost: void setHeader(java.lang.String,java.lang.String)>("Content-type", "multipart/form-data; boundary=Anki-sync-boundary");
+
+     label063:
+        $r53 = new org.apache.http.params.BasicHttpParams;
+
+     label064:
+        specialinvoke $r53.<org.apache.http.params.BasicHttpParams: void <init>()>();
+
+        $r18 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(30);
+
+     label065:
+        $r61 = (org.apache.http.params.HttpParams) $r53;
+
+     label066:
+        interfaceinvoke $r61.<org.apache.http.params.HttpParams: org.apache.http.params.HttpParams setParameter(java.lang.String,java.lang.Object)>("http.conn-manager.max-total", $r18);
+
+     label067:
+        $r54 = new org.apache.http.conn.params.ConnPerRouteBean;
+
+     label068:
+        specialinvoke $r54.<org.apache.http.conn.params.ConnPerRouteBean: void <init>(int)>(30);
+
+     label069:
+        $r61 = (org.apache.http.params.HttpParams) $r53;
+
+     label070:
+        interfaceinvoke $r61.<org.apache.http.params.HttpParams: org.apache.http.params.HttpParams setParameter(java.lang.String,java.lang.Object)>("http.conn-manager.max-per-route", $r54);
+
+        $r35 = staticinvoke <java.lang.Boolean: java.lang.Boolean valueOf(boolean)>(0);
+
+     label071:
+        $r61 = (org.apache.http.params.HttpParams) $r53;
+
+     label072:
+        interfaceinvoke $r61.<org.apache.http.params.HttpParams: org.apache.http.params.HttpParams setParameter(java.lang.String,java.lang.Object)>("http.protocol.expect-continue", $r35);
+
+     label073:
+        $r44 = new java.lang.StringBuilder;
+
+     label074:
+        specialinvoke $r44.<java.lang.StringBuilder: void <init>()>();
+
+        $r23 = virtualinvoke $r44.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("AnkiDroid-");
+
+        $r1 = staticinvoke <com.ichi2.utils.VersionUtils: java.lang.String getPkgVersionName()>();
+
+        $r23 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r1 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label075:
+        $r61 = (org.apache.http.params.HttpParams) $r53;
+
+     label076:
+        interfaceinvoke $r61.<org.apache.http.params.HttpParams: org.apache.http.params.HttpParams setParameter(java.lang.String,java.lang.Object)>("http.useragent", $r1);
+
+     label077:
+        $r36 = <org.apache.http.HttpVersion: org.apache.http.HttpVersion HTTP_1_1>;
+
+        $r61 = (org.apache.http.params.HttpParams) $r53;
+
+        $r62 = (org.apache.http.ProtocolVersion) $r36;
+
+     label078:
+        staticinvoke <org.apache.http.params.HttpProtocolParams: void setVersion(org.apache.http.params.HttpParams,org.apache.http.ProtocolVersion)>($r61, $r62);
+
+     label079:
+        $r61 = (org.apache.http.params.HttpParams) $r53;
+
+     label080:
+        staticinvoke <org.apache.http.params.HttpConnectionParams: void setSoTimeout(org.apache.http.params.HttpParams,int)>($r61, 30000);
+
+     label081:
+        $r55 = new org.apache.http.conn.scheme.SchemeRegistry;
+
+     label082:
+        specialinvoke $r55.<org.apache.http.conn.scheme.SchemeRegistry: void <init>()>();
+
+     label083:
+        $r56 = new org.apache.http.conn.scheme.Scheme;
+
+     label084:
+        $r38 = staticinvoke <org.apache.http.conn.scheme.PlainSocketFactory: org.apache.http.conn.scheme.PlainSocketFactory getSocketFactory()>();
+
+     label085:
+        $r63 = (org.apache.http.conn.scheme.SocketFactory) $r38;
+
+     label086:
+        specialinvoke $r56.<org.apache.http.conn.scheme.Scheme: void <init>(java.lang.String,org.apache.http.conn.scheme.SocketFactory,int)>("http", $r63, 80);
+
+        virtualinvoke $r55.<org.apache.http.conn.scheme.SchemeRegistry: org.apache.http.conn.scheme.Scheme register(org.apache.http.conn.scheme.Scheme)>($r56);
+
+     label087:
+        $r56 = new org.apache.http.conn.scheme.Scheme;
+
+     label088:
+        $r57 = new org.apache.commons.httpclient.contrib.ssl.EasySSLSocketFactory;
+
+     label089:
+        specialinvoke $r57.<org.apache.commons.httpclient.contrib.ssl.EasySSLSocketFactory: void <init>()>();
+
+        specialinvoke $r56.<org.apache.http.conn.scheme.Scheme: void <init>(java.lang.String,org.apache.http.conn.scheme.SocketFactory,int)>("https", $r57, 443);
+
+        virtualinvoke $r55.<org.apache.http.conn.scheme.SchemeRegistry: org.apache.http.conn.scheme.Scheme register(org.apache.http.conn.scheme.Scheme)>($r56);
+
+     label090:
+        $r58 = new org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
+
+     label091:
+        $r61 = (org.apache.http.params.HttpParams) $r53;
+
+     label092:
+        specialinvoke $r58.<org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager: void <init>(org.apache.http.params.HttpParams,org.apache.http.conn.scheme.SchemeRegistry)>($r61, $r55);
+
+     label093:
+        if $r4 == null goto label095;
+
+     label094:
+        virtualinvoke $r4.<com.ichi2.async.Connection$CancelCallback: void setConnectionManager(org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager)>($r58);
+
+     label095:
+        $r59 = new org.apache.http.impl.client.DefaultHttpClient;
+
+     label096:
+        $r64 = (org.apache.http.conn.ClientConnectionManager) $r58;
+
+        $r61 = (org.apache.http.params.HttpParams) $r53;
+
+     label097:
+        specialinvoke $r59.<org.apache.http.impl.client.DefaultHttpClient: void <init>(org.apache.http.conn.ClientConnectionManager,org.apache.http.params.HttpParams)>($r64, $r61);
+
+     label098:
+        $r65 = (org.apache.http.client.HttpClient) $r59;
+
+        $r66 = (org.apache.http.client.methods.HttpUriRequest) $r51;
+
+     label099:
+        $r40 = interfaceinvoke $r65.<org.apache.http.client.HttpClient: org.apache.http.HttpResponse execute(org.apache.http.client.methods.HttpUriRequest)>($r66);
+
+        virtualinvoke r0.<com.ichi2.libanki.sync.HttpSyncer: void assertOk(org.apache.http.HttpResponse)>($r40);
+
+     label100:
+        if $r31 == null goto label124;
+
+        $z0 = virtualinvoke $r31.<java.io.File: boolean exists()>();
+
+        if $z0 == 0 goto label124;
+
+        virtualinvoke $r31.<java.io.File: boolean delete()>();
+
+        return $r40;
+
+     label101:
+        $i0 = virtualinvoke $r49.<java.io.BufferedInputStream: int read(byte[])>(r7);
+
+     label102:
+        if $i0 < 0 goto label051;
+
+     label103:
+        virtualinvoke r32.<java.io.BufferedOutputStream: void write(byte[],int,int)>(r7, 0, $i0);
+
+     label104:
+        goto label101;
+
+     label105:
+        r41 := @caughtexception;
+
+     label106:
+        $r26 = newarray (java.lang.Object)[0];
+
+        staticinvoke <timber.log.Timber: void e(java.lang.Throwable,java.lang.String,java.lang.Object[])>(r41, "BasicHttpSyncer.sync: IOException", $r26);
+
+        $r45 = new java.lang.RuntimeException;
+
+     label107:
+        specialinvoke $r45.<java.lang.RuntimeException: void <init>(java.lang.Throwable)>(r41);
+
+        throw $r45;
+
+     label108:
+        virtualinvoke $r43.<java.io.StringWriter: void close()>();
+
+        r22 = virtualinvoke $r43.<java.io.StringWriter: java.lang.String toString()>();
+
+        r7 = virtualinvoke r22.<java.lang.String: byte[] getBytes(java.lang.String)>("UTF-8");
+
+        virtualinvoke $r48.<java.io.BufferedOutputStream: void write(byte[])>(r7);
+
+     label109:
+        goto label053;
+
+     label110:
+        $z0 = virtualinvoke $r1.<java.lang.String: boolean startsWith(java.lang.String)>("upgrade");
+
+     label111:
+        if $z0 == 0 goto label115;
+
+     label112:
+        $r44 = new java.lang.StringBuilder;
+
+     label113:
+        specialinvoke $r44.<java.lang.StringBuilder: void <init>()>();
+
+        $r23 = virtualinvoke $r44.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("https://sync.ankiweb.net/");
+
+        $r23 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r1 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label114:
+        goto label057;
+
+     label115:
+        $r44 = new java.lang.StringBuilder;
+
+     label116:
+        specialinvoke $r44.<java.lang.StringBuilder: void <init>()>();
+
+        r22 = virtualinvoke r0.<com.ichi2.libanki.sync.HttpSyncer: java.lang.String syncURL()>();
+
+        $r23 = virtualinvoke $r44.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r22);
+
+        $r23 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r1 = virtualinvoke $r23.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label117:
+        goto label057;
+
+     label118:
+        r42 := @caughtexception;
+
+     label119:
+        $r26 = newarray (java.lang.Object)[0];
+
+     label120:
+        staticinvoke <timber.log.Timber: void e(java.lang.Throwable,java.lang.String,java.lang.Object[])>(r42, "SSLException while building HttpClient", $r26);
+
+     label121:
+        $r45 = new java.lang.RuntimeException;
+
+     label122:
+        specialinvoke $r45.<java.lang.RuntimeException: void <init>(java.lang.String)>("SSLException while building HttpClient");
+
+     label123:
+        throw $r45;
+
+     label124:
+        return $r40;
+
+        catch java.io.UnsupportedEncodingException from label002 to label003 with label018;
+        catch java.io.UnsupportedEncodingException from label005 to label006 with label018;
+        catch java.io.UnsupportedEncodingException from label007 to label009 with label018;
+        catch java.io.UnsupportedEncodingException from label010 to label011 with label018;
+        catch java.io.UnsupportedEncodingException from label012 to label013 with label018;
+        catch java.io.UnsupportedEncodingException from label014 to label015 with label018;
+        catch java.io.UnsupportedEncodingException from label016 to label017 with label018;
+        catch org.json.JSONException from label002 to label003 with label045;
+        catch org.json.JSONException from label005 to label006 with label045;
+        catch org.json.JSONException from label007 to label009 with label045;
+        catch org.json.JSONException from label010 to label011 with label045;
+        catch org.json.JSONException from label012 to label013 with label045;
+        catch org.json.JSONException from label014 to label015 with label045;
+        catch org.json.JSONException from label016 to label017 with label045;
+        catch java.io.IOException from label002 to label003 with label105;
+        catch java.io.IOException from label005 to label006 with label105;
+        catch java.io.IOException from label007 to label009 with label105;
+        catch java.io.IOException from label010 to label011 with label105;
+        catch java.io.IOException from label012 to label013 with label105;
+        catch java.io.IOException from label014 to label015 with label105;
+        catch java.io.IOException from label016 to label017 with label105;
+        catch java.lang.Throwable from label001 to label002 with label021;
+        catch java.lang.Throwable from label002 to label004 with label021;
+        catch java.lang.Throwable from label005 to label009 with label021;
+        catch java.lang.Throwable from label010 to label012 with label021;
+        catch java.lang.Throwable from label012 to label017 with label021;
+        catch java.lang.Throwable from label019 to label020 with label021;
+        catch java.lang.Throwable from label020 to label021 with label021;
+        catch java.io.UnsupportedEncodingException from label025 to label026 with label018;
+        catch java.io.UnsupportedEncodingException from label028 to label029 with label018;
+        catch java.io.UnsupportedEncodingException from label031 to label032 with label018;
+        catch java.io.UnsupportedEncodingException from label034 to label035 with label018;
+        catch java.io.UnsupportedEncodingException from label036 to label037 with label018;
+        catch java.io.UnsupportedEncodingException from label040 to label042 with label018;
+        catch java.io.UnsupportedEncodingException from label043 to label044 with label018;
+        catch java.io.UnsupportedEncodingException from label046 to label047 with label018;
+        catch java.io.UnsupportedEncodingException from label050 to label051 with label018;
+        catch java.io.UnsupportedEncodingException from label052 to label054 with label018;
+        catch java.io.UnsupportedEncodingException from label056 to label057 with label018;
+        catch java.io.UnsupportedEncodingException from label058 to label059 with label018;
+        catch java.io.UnsupportedEncodingException from label060 to label061 with label018;
+        catch java.io.UnsupportedEncodingException from label062 to label063 with label018;
+        catch java.io.UnsupportedEncodingException from label064 to label065 with label018;
+        catch java.io.UnsupportedEncodingException from label066 to label067 with label018;
+        catch java.io.UnsupportedEncodingException from label068 to label069 with label018;
+        catch java.io.UnsupportedEncodingException from label070 to label071 with label018;
+        catch java.io.UnsupportedEncodingException from label072 to label073 with label018;
+        catch java.io.UnsupportedEncodingException from label074 to label075 with label018;
+        catch java.io.UnsupportedEncodingException from label076 to label077 with label018;
+        catch java.io.UnsupportedEncodingException from label078 to label079 with label018;
+        catch java.io.UnsupportedEncodingException from label080 to label081 with label018;
+        catch java.io.UnsupportedEncodingException from label082 to label083 with label018;
+        catch java.io.UnsupportedEncodingException from label084 to label085 with label018;
+        catch java.io.UnsupportedEncodingException from label086 to label087 with label018;
+        catch java.io.UnsupportedEncodingException from label089 to label090 with label018;
+        catch java.io.UnsupportedEncodingException from label092 to label093 with label018;
+        catch java.io.UnsupportedEncodingException from label094 to label095 with label018;
+        catch org.json.JSONException from label025 to label026 with label045;
+        catch org.json.JSONException from label028 to label029 with label045;
+        catch org.json.JSONException from label031 to label032 with label045;
+        catch org.json.JSONException from label034 to label035 with label045;
+        catch org.json.JSONException from label036 to label037 with label045;
+        catch org.json.JSONException from label040 to label042 with label045;
+        catch org.json.JSONException from label043 to label044 with label045;
+        catch org.json.JSONException from label046 to label047 with label045;
+        catch org.json.JSONException from label050 to label051 with label045;
+        catch org.json.JSONException from label052 to label054 with label045;
+        catch org.json.JSONException from label056 to label057 with label045;
+        catch org.json.JSONException from label058 to label059 with label045;
+        catch org.json.JSONException from label060 to label061 with label045;
+        catch org.json.JSONException from label062 to label063 with label045;
+        catch org.json.JSONException from label064 to label065 with label045;
+        catch org.json.JSONException from label066 to label067 with label045;
+        catch org.json.JSONException from label068 to label069 with label045;
+        catch org.json.JSONException from label070 to label071 with label045;
+        catch org.json.JSONException from label072 to label073 with label045;
+        catch org.json.JSONException from label074 to label075 with label045;
+        catch org.json.JSONException from label076 to label077 with label045;
+        catch org.json.JSONException from label078 to label079 with label045;
+        catch org.json.JSONException from label080 to label081 with label045;
+        catch org.json.JSONException from label082 to label083 with label045;
+        catch org.json.JSONException from label084 to label085 with label045;
+        catch org.json.JSONException from label086 to label087 with label045;
+        catch org.json.JSONException from label089 to label090 with label045;
+        catch org.json.JSONException from label092 to label093 with label045;
+        catch org.json.JSONException from label094 to label095 with label045;
+        catch java.io.IOException from label025 to label026 with label105;
+        catch java.io.IOException from label028 to label029 with label105;
+        catch java.io.IOException from label031 to label032 with label105;
+        catch java.io.IOException from label034 to label035 with label105;
+        catch java.io.IOException from label036 to label037 with label105;
+        catch java.io.IOException from label040 to label042 with label105;
+        catch java.io.IOException from label043 to label044 with label105;
+        catch java.io.IOException from label046 to label047 with label105;
+        catch java.io.IOException from label050 to label051 with label105;
+        catch java.io.IOException from label052 to label054 with label105;
+        catch java.io.IOException from label056 to label057 with label105;
+        catch java.io.IOException from label058 to label059 with label105;
+        catch java.io.IOException from label060 to label061 with label105;
+        catch java.io.IOException from label062 to label063 with label105;
+        catch java.io.IOException from label064 to label065 with label105;
+        catch java.io.IOException from label066 to label067 with label105;
+        catch java.io.IOException from label068 to label069 with label105;
+        catch java.io.IOException from label070 to label071 with label105;
+        catch java.io.IOException from label072 to label073 with label105;
+        catch java.io.IOException from label074 to label075 with label105;
+        catch java.io.IOException from label076 to label077 with label105;
+        catch java.io.IOException from label078 to label079 with label105;
+        catch java.io.IOException from label080 to label081 with label105;
+        catch java.io.IOException from label082 to label083 with label105;
+        catch java.io.IOException from label084 to label085 with label105;
+        catch java.io.IOException from label086 to label087 with label105;
+        catch java.io.IOException from label089 to label090 with label105;
+        catch java.io.IOException from label092 to label093 with label105;
+        catch java.io.IOException from label094 to label095 with label105;
+        catch java.lang.Throwable from label024 to label025 with label021;
+        catch java.lang.Throwable from label025 to label026 with label021;
+        catch java.lang.Throwable from label027 to label028 with label021;
+        catch java.lang.Throwable from label028 to label030 with label021;
+        catch java.lang.Throwable from label031 to label032 with label021;
+        catch java.lang.Throwable from label033 to label034 with label021;
+        catch java.lang.Throwable from label034 to label036 with label021;
+        catch java.lang.Throwable from label036 to label038 with label021;
+        catch java.lang.Throwable from label039 to label040 with label021;
+        catch java.lang.Throwable from label040 to label042 with label021;
+        catch java.lang.Throwable from label043 to label044 with label021;
+        catch java.lang.Throwable from label046 to label048 with label021;
+        catch java.lang.Throwable from label049 to label050 with label021;
+        catch java.lang.Throwable from label050 to label052 with label021;
+        catch java.lang.Throwable from label052 to label054 with label021;
+        catch java.lang.Throwable from label055 to label056 with label021;
+        catch java.lang.Throwable from label056 to label057 with label021;
+        catch java.lang.Throwable from label057 to label058 with label021;
+        catch java.lang.Throwable from label058 to label060 with label021;
+        catch java.lang.Throwable from label060 to label064 with label021;
+        catch java.lang.Throwable from label064 to label068 with label021;
+        catch java.lang.Throwable from label068 to label074 with label021;
+        catch java.lang.Throwable from label074 to label082 with label021;
+        catch java.lang.Throwable from label082 to label084 with label021;
+        catch java.lang.Throwable from label084 to label088 with label021;
+        catch java.lang.Throwable from label088 to label089 with label021;
+        catch java.lang.Throwable from label089 to label091 with label021;
+        catch java.lang.Throwable from label091 to label093 with label021;
+        catch java.lang.Throwable from label094 to label095 with label021;
+        catch javax.net.ssl.SSLException from label097 to label098 with label118;
+        catch javax.net.ssl.SSLException from label099 to label100 with label118;
+        catch java.io.UnsupportedEncodingException from label097 to label098 with label018;
+        catch java.io.UnsupportedEncodingException from label099 to label100 with label018;
+        catch org.json.JSONException from label097 to label098 with label045;
+        catch org.json.JSONException from label099 to label100 with label045;
+        catch java.io.IOException from label097 to label098 with label105;
+        catch java.io.IOException from label099 to label100 with label105;
+        catch java.lang.Throwable from label095 to label096 with label021;
+        catch java.lang.Throwable from label096 to label100 with label021;
+        catch java.io.UnsupportedEncodingException from label101 to label102 with label018;
+        catch java.io.UnsupportedEncodingException from label103 to label104 with label018;
+        catch org.json.JSONException from label101 to label102 with label045;
+        catch org.json.JSONException from label103 to label104 with label045;
+        catch java.io.IOException from label101 to label102 with label105;
+        catch java.io.IOException from label103 to label104 with label105;
+        catch java.lang.Throwable from label101 to label102 with label021;
+        catch java.lang.Throwable from label103 to label104 with label021;
+        catch java.lang.Throwable from label106 to label107 with label021;
+        catch java.lang.Throwable from label107 to label108 with label021;
+        catch java.io.UnsupportedEncodingException from label108 to label109 with label018;
+        catch java.io.UnsupportedEncodingException from label110 to label111 with label018;
+        catch java.io.UnsupportedEncodingException from label113 to label114 with label018;
+        catch java.io.UnsupportedEncodingException from label116 to label117 with label018;
+        catch java.io.UnsupportedEncodingException from label120 to label121 with label018;
+        catch java.io.UnsupportedEncodingException from label122 to label123 with label018;
+        catch org.json.JSONException from label108 to label109 with label045;
+        catch org.json.JSONException from label110 to label111 with label045;
+        catch org.json.JSONException from label113 to label114 with label045;
+        catch org.json.JSONException from label116 to label117 with label045;
+        catch org.json.JSONException from label120 to label121 with label045;
+        catch org.json.JSONException from label122 to label123 with label045;
+        catch java.io.IOException from label108 to label109 with label105;
+        catch java.io.IOException from label110 to label111 with label105;
+        catch java.io.IOException from label113 to label114 with label105;
+        catch java.io.IOException from label116 to label117 with label105;
+        catch java.io.IOException from label120 to label121 with label105;
+        catch java.io.IOException from label122 to label123 with label105;
+        catch java.lang.Throwable from label108 to label109 with label021;
+        catch java.lang.Throwable from label110 to label111 with label021;
+        catch java.lang.Throwable from label112 to label113 with label021;
+        catch java.lang.Throwable from label113 to label114 with label021;
+        catch java.lang.Throwable from label115 to label116 with label021;
+        catch java.lang.Throwable from label116 to label117 with label021;
+        catch java.lang.Throwable from label119 to label122 with label021;
+        catch java.lang.Throwable from label122 to label124 with label021;
+    }
+    public org.json.JSONObject sanityCheck2(org.json.JSONObject) throws com.ichi2.anki.exception.UnknownHttpResponseException
+    {
+        com.ichi2.libanki.sync.HttpSyncer r0;
+        org.json.JSONObject $r1;
+
+        r0 := @this: com.ichi2.libanki.sync.HttpSyncer;
+
+        $r1 := @parameter0: org.json.JSONObject;
+
+        return null;
+    }
+    public org.json.JSONObject start(org.json.JSONObject) throws com.ichi2.anki.exception.UnknownHttpResponseException
+    {
+        com.ichi2.libanki.sync.HttpSyncer r0;
+        org.json.JSONObject $r1;
+
+        r0 := @this: com.ichi2.libanki.sync.HttpSyncer;
+
+        $r1 := @parameter0: org.json.JSONObject;
+
+        return null;
+    }
+    public java.lang.String stream2String(java.io.InputStream)
+    {
+        com.ichi2.libanki.sync.HttpSyncer r0;
+        java.io.InputStream $r1;
+        java.lang.String $r2;
+
+        r0 := @this: com.ichi2.libanki.sync.HttpSyncer;
+
+        $r1 := @parameter0: java.io.InputStream;
+
+        $r2 = virtualinvoke r0.<com.ichi2.libanki.sync.HttpSyncer: java.lang.String stream2String(java.io.InputStream,int)>($r1, -1);
+
+        return $r2;
+    }
+    public java.lang.String stream2String(java.io.InputStream, int)
+    {
+        com.ichi2.libanki.sync.HttpSyncer r0;
+        java.io.InputStream $r1;
+        int $i0, $i1;
+        java.io.IOException r2;
+        java.io.BufferedReader r3;
+        java.lang.StringBuilder r4;
+        java.io.InputStreamReader $r5;
+        java.lang.String $r6;
+        long $l2, $l3;
+        java.lang.RuntimeException $r7;
+
+        r0 := @this: com.ichi2.libanki.sync.HttpSyncer;
+
+        $r1 := @parameter0: java.io.InputStream;
+
+        $i0 := @parameter1: int;
+
+        $i1 = 4096;
+
+        r3 = new java.io.BufferedReader;
+
+        $r5 = new java.io.InputStreamReader;
+
+     label01:
+        specialinvoke $r5.<java.io.InputStreamReader: void <init>(java.io.InputStream,java.lang.String)>($r1, "UTF-8");
+
+     label02:
+        if $i0 != -1 goto label17;
+
+     label03:
+        specialinvoke r3.<java.io.BufferedReader: void <init>(java.io.Reader,int)>($r5, $i1);
+
+     label04:
+        r4 = new java.lang.StringBuilder;
+
+     label05:
+        specialinvoke r4.<java.lang.StringBuilder: void <init>()>();
+
+     label06:
+        $r6 = virtualinvoke r3.<java.io.BufferedReader: java.lang.String readLine()>();
+
+     label07:
+        if $r6 == null goto label19;
+
+        if $i0 == -1 goto label10;
+
+     label08:
+        $i1 = virtualinvoke r4.<java.lang.StringBuilder: int length()>();
+
+     label09:
+        if $i1 >= $i0 goto label19;
+
+     label10:
+        virtualinvoke r4.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r6);
+
+     label11:
+        $l2 = r0.<com.ichi2.libanki.sync.HttpSyncer: long bytesReceived>;
+
+     label12:
+        $i1 = virtualinvoke $r6.<java.lang.String: int length()>();
+
+     label13:
+        $l3 = (long) $i1;
+
+        $l2 = $l2 + $l3;
+
+        r0.<com.ichi2.libanki.sync.HttpSyncer: long bytesReceived> = $l2;
+
+     label14:
+        specialinvoke r0.<com.ichi2.libanki.sync.HttpSyncer: void publishProgress()>();
+
+     label15:
+        goto label06;
+
+     label16:
+        r2 := @caughtexception;
+
+        $r7 = new java.lang.RuntimeException;
+
+        specialinvoke $r7.<java.lang.RuntimeException: void <init>(java.lang.Throwable)>(r2);
+
+        throw $r7;
+
+     label17:
+        $i1 = staticinvoke <java.lang.Math: int min(int,int)>(4096, $i0);
+
+     label18:
+        goto label03;
+
+     label19:
+        virtualinvoke r3.<java.io.BufferedReader: void close()>();
+
+        $r6 = virtualinvoke r4.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label20:
+        return $r6;
+
+        catch java.io.IOException from label01 to label02 with label16;
+        catch java.io.IOException from label03 to label04 with label16;
+        catch java.io.IOException from label05 to label07 with label16;
+        catch java.io.IOException from label08 to label09 with label16;
+        catch java.io.IOException from label10 to label11 with label16;
+        catch java.io.IOException from label12 to label13 with label16;
+        catch java.io.IOException from label14 to label15 with label16;
+        catch java.io.IOException from label17 to label18 with label16;
+        catch java.io.IOException from label19 to label20 with label16;
+    }
+    public java.lang.String syncURL()
+    {
+        com.ichi2.libanki.sync.HttpSyncer r0;
+        com.ichi2.anki.AnkiDroidApp $r1;
+        android.content.SharedPreferences $r2;
+        boolean $z0;
+        java.lang.String $r3;
+        android.net.Uri $r4;
+        java.lang.StringBuilder $r5;
+        android.net.Uri$Builder $r6;
+
+        r0 := @this: com.ichi2.libanki.sync.HttpSyncer;
+
+        $r1 = staticinvoke <com.ichi2.anki.AnkiDroidApp: com.ichi2.anki.AnkiDroidApp getInstance()>();
+
+        $r2 = staticinvoke <com.ichi2.anki.AnkiDroidApp: android.content.SharedPreferences getSharedPrefs(android.content.Context)>($r1);
+
+        if $r2 == null goto label1;
+
+        $z0 = interfaceinvoke $r2.<android.content.SharedPreferences: boolean getBoolean(java.lang.String,boolean)>("useCustomSyncServer", 0);
+
+        if $z0 == 0 goto label1;
+
+        $r3 = interfaceinvoke $r2.<android.content.SharedPreferences: java.lang.String getString(java.lang.String,java.lang.String)>("syncBaseUrl", "https://sync.ankiweb.net/");
+
+        $r4 = staticinvoke <android.net.Uri: android.net.Uri parse(java.lang.String)>($r3);
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r6 = virtualinvoke $r4.<android.net.Uri: android.net.Uri$Builder buildUpon()>();
+
+        $r6 = virtualinvoke $r6.<android.net.Uri$Builder: android.net.Uri$Builder appendPath(java.lang.String)>("sync");
+
+        $r3 = virtualinvoke $r6.<android.net.Uri$Builder: java.lang.String toString()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("/");
+
+        $r3 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        return $r3;
+
+     label1:
+        return "https://sync.ankiweb.net/sync/";
+    }
+    public java.lang.Object[] upload() throws com.ichi2.anki.exception.UnknownHttpResponseException
+    {
+        com.ichi2.libanki.sync.HttpSyncer r0;
+
+        r0 := @this: com.ichi2.libanki.sync.HttpSyncer;
+
+        return null;
+    }
+    public void writeToFile(java.io.InputStream, java.lang.String) throws java.io.IOException
+    {
+        com.ichi2.libanki.sync.HttpSyncer r0;
+        java.io.InputStream $r1;
+        java.lang.String $r2;
+        byte[] r3;
+        java.io.File r4;
+        java.io.BufferedOutputStream r5, r6;
+        long $l0, $l2;
+        java.io.FileOutputStream $r7;
+        int $i1;
+        java.io.IOException r8;
+        boolean $z0;
+        java.lang.Throwable $r9;
+
+        r0 := @this: com.ichi2.libanki.sync.HttpSyncer;
+
+        $r1 := @parameter0: java.io.InputStream;
+
+        $r2 := @parameter1: java.lang.String;
+
+        r4 = new java.io.File;
+
+        specialinvoke r4.<java.io.File: void <init>(java.lang.String)>($r2);
+
+        r6 = null;
+
+     label01:
+        virtualinvoke r4.<java.io.File: boolean createNewFile()>();
+
+     label02:
+        r5 = new java.io.BufferedOutputStream;
+
+        $r7 = new java.io.FileOutputStream;
+
+     label03:
+        specialinvoke $r7.<java.io.FileOutputStream: void <init>(java.io.File)>(r4);
+
+        specialinvoke r5.<java.io.BufferedOutputStream: void <init>(java.io.OutputStream)>($r7);
+
+     label04:
+        r3 = newarray (byte)[32768];
+
+     label05:
+        $i1 = virtualinvoke $r1.<java.io.InputStream: int read(byte[])>(r3);
+
+     label06:
+        if $i1 < 0 goto label21;
+
+     label07:
+        virtualinvoke r5.<java.io.OutputStream: void write(byte[],int,int)>(r3, 0, $i1);
+
+     label08:
+        $l2 = r0.<com.ichi2.libanki.sync.HttpSyncer: long bytesReceived>;
+
+     label09:
+        $l0 = (long) $i1;
+
+        $l0 = $l2 + $l0;
+
+     label10:
+        r0.<com.ichi2.libanki.sync.HttpSyncer: long bytesReceived> = $l0;
+
+     label11:
+        specialinvoke r0.<com.ichi2.libanki.sync.HttpSyncer: void publishProgress()>();
+
+     label12:
+        goto label05;
+
+     label13:
+        r8 := @caughtexception;
+
+        r6 = r5;
+
+     label14:
+        $z0 = virtualinvoke r4.<java.io.File: boolean exists()>();
+
+     label15:
+        if $z0 == 0 goto label17;
+
+     label16:
+        virtualinvoke r4.<java.io.File: boolean delete()>();
+
+     label17:
+        throw r8;
+
+     label18:
+        $r9 := @caughtexception;
+
+     label19:
+        if r6 == null goto label20;
+
+        virtualinvoke r6.<java.io.OutputStream: void close()>();
+
+     label20:
+        throw $r9;
+
+     label21:
+        if r5 == null goto label24;
+
+        virtualinvoke r5.<java.io.OutputStream: void close()>();
+
+        return;
+
+     label22:
+        $r9 := @caughtexception;
+
+        r6 = r5;
+
+        goto label19;
+
+     label23:
+        r8 := @caughtexception;
+
+        goto label14;
+
+     label24:
+        return;
+
+        catch java.io.IOException from label01 to label02 with label23;
+        catch java.io.IOException from label03 to label04 with label23;
+        catch java.lang.Throwable from label01 to label04 with label18;
+        catch java.io.IOException from label05 to label06 with label13;
+        catch java.io.IOException from label07 to label08 with label13;
+        catch java.io.IOException from label11 to label12 with label13;
+        catch java.lang.Throwable from label04 to label06 with label22;
+        catch java.lang.Throwable from label07 to label09 with label22;
+        catch java.lang.Throwable from label10 to label12 with label22;
+        catch java.lang.Throwable from label14 to label15 with label18;
+        catch java.lang.Throwable from label16 to label18 with label18;
+    }

@@ -1,0 +1,182 @@
+org.spongycastle.crypto.tls.URLAndHash extends java.lang.Object
+protected byte[] sha1Hash
+protected java.lang.String url
+    public void <init>(java.lang.String, byte[])
+    {
+        org.spongycastle.crypto.tls.URLAndHash r0;
+        java.lang.String $r1;
+        byte[] $r2;
+        int $i0;
+        java.lang.IllegalArgumentException $r3;
+
+        r0 := @this: org.spongycastle.crypto.tls.URLAndHash;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: byte[];
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        if $r1 == null goto label1;
+
+        $i0 = virtualinvoke $r1.<java.lang.String: int length()>();
+
+        if $i0 < 1 goto label1;
+
+        $i0 = virtualinvoke $r1.<java.lang.String: int length()>();
+
+        if $i0 < 65536 goto label2;
+
+     label1:
+        $r3 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r3.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("\'url\' must have length from 1 to (2^16 - 1)");
+
+        throw $r3;
+
+     label2:
+        if $r2 == null goto label3;
+
+        $i0 = lengthof $r2;
+
+        if $i0 == 20 goto label3;
+
+        $r3 = new java.lang.IllegalArgumentException;
+
+        specialinvoke $r3.<java.lang.IllegalArgumentException: void <init>(java.lang.String)>("\'sha1Hash\' must have length == 20, if present");
+
+        throw $r3;
+
+     label3:
+        r0.<org.spongycastle.crypto.tls.URLAndHash: java.lang.String url> = $r1;
+
+        r0.<org.spongycastle.crypto.tls.URLAndHash: byte[] sha1Hash> = $r2;
+
+        return;
+    }
+    public static org.spongycastle.crypto.tls.URLAndHash parse(org.spongycastle.crypto.tls.TlsContext, java.io.InputStream) throws java.io.IOException
+    {
+        org.spongycastle.crypto.tls.TlsContext $r0;
+        java.io.InputStream $r1;
+        byte[] $r2;
+        int $i0;
+        org.spongycastle.crypto.tls.TlsFatalAlert $r3;
+        java.lang.String $r4;
+        short $s1;
+        boolean $z0;
+        org.spongycastle.crypto.tls.URLAndHash $r5;
+
+        $r0 := @parameter0: org.spongycastle.crypto.tls.TlsContext;
+
+        $r1 := @parameter1: java.io.InputStream;
+
+        $r2 = staticinvoke <org.spongycastle.crypto.tls.TlsUtils: byte[] readOpaque16(java.io.InputStream)>($r1);
+
+        $i0 = lengthof $r2;
+
+        if $i0 >= 1 goto label1;
+
+        $r3 = new org.spongycastle.crypto.tls.TlsFatalAlert;
+
+        specialinvoke $r3.<org.spongycastle.crypto.tls.TlsFatalAlert: void <init>(short)>(47);
+
+        throw $r3;
+
+     label1:
+        $r4 = staticinvoke <org.spongycastle.util.Strings: java.lang.String fromByteArray(byte[])>($r2);
+
+        $r2 = null;
+
+        $s1 = staticinvoke <org.spongycastle.crypto.tls.TlsUtils: short readUint8(java.io.InputStream)>($r1);
+
+        lookupswitch($s1)
+        {
+            case 0: goto label3;
+            case 1: goto label4;
+            default: goto label2;
+        };
+
+     label2:
+        $r3 = new org.spongycastle.crypto.tls.TlsFatalAlert;
+
+        specialinvoke $r3.<org.spongycastle.crypto.tls.TlsFatalAlert: void <init>(short)>(47);
+
+        throw $r3;
+
+     label3:
+        $z0 = staticinvoke <org.spongycastle.crypto.tls.TlsUtils: boolean isTLSv12(org.spongycastle.crypto.tls.TlsContext)>($r0);
+
+        if $z0 == 0 goto label5;
+
+        $r3 = new org.spongycastle.crypto.tls.TlsFatalAlert;
+
+        specialinvoke $r3.<org.spongycastle.crypto.tls.TlsFatalAlert: void <init>(short)>(47);
+
+        throw $r3;
+
+     label4:
+        $r2 = staticinvoke <org.spongycastle.crypto.tls.TlsUtils: byte[] readFully(int,java.io.InputStream)>(20, $r1);
+
+     label5:
+        $r5 = new org.spongycastle.crypto.tls.URLAndHash;
+
+        specialinvoke $r5.<org.spongycastle.crypto.tls.URLAndHash: void <init>(java.lang.String,byte[])>($r4, $r2);
+
+        return $r5;
+    }
+    public void encode(java.io.OutputStream) throws java.io.IOException
+    {
+        org.spongycastle.crypto.tls.URLAndHash r0;
+        java.io.OutputStream $r1;
+        byte[] $r2;
+        java.lang.String $r3;
+
+        r0 := @this: org.spongycastle.crypto.tls.URLAndHash;
+
+        $r1 := @parameter0: java.io.OutputStream;
+
+        $r3 = r0.<org.spongycastle.crypto.tls.URLAndHash: java.lang.String url>;
+
+        $r2 = staticinvoke <org.spongycastle.util.Strings: byte[] toByteArray(java.lang.String)>($r3);
+
+        staticinvoke <org.spongycastle.crypto.tls.TlsUtils: void writeOpaque16(byte[],java.io.OutputStream)>($r2, $r1);
+
+        $r2 = r0.<org.spongycastle.crypto.tls.URLAndHash: byte[] sha1Hash>;
+
+        if $r2 != null goto label1;
+
+        staticinvoke <org.spongycastle.crypto.tls.TlsUtils: void writeUint8(int,java.io.OutputStream)>(0, $r1);
+
+        return;
+
+     label1:
+        staticinvoke <org.spongycastle.crypto.tls.TlsUtils: void writeUint8(int,java.io.OutputStream)>(1, $r1);
+
+        $r2 = r0.<org.spongycastle.crypto.tls.URLAndHash: byte[] sha1Hash>;
+
+        virtualinvoke $r1.<java.io.OutputStream: void write(byte[])>($r2);
+
+        return;
+    }
+    public byte[] getSHA1Hash()
+    {
+        org.spongycastle.crypto.tls.URLAndHash r0;
+        byte[] r1;
+
+        r0 := @this: org.spongycastle.crypto.tls.URLAndHash;
+
+        r1 = r0.<org.spongycastle.crypto.tls.URLAndHash: byte[] sha1Hash>;
+
+        return r1;
+    }
+    public java.lang.String getURL()
+    {
+        org.spongycastle.crypto.tls.URLAndHash r0;
+        java.lang.String r1;
+
+        r0 := @this: org.spongycastle.crypto.tls.URLAndHash;
+
+        r1 = r0.<org.spongycastle.crypto.tls.URLAndHash: java.lang.String url>;
+
+        return r1;
+    }

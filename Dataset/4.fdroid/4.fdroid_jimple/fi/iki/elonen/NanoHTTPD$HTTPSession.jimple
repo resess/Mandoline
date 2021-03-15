@@ -1,0 +1,2069 @@
+fi.iki.elonen.NanoHTTPD$HTTPSession extends java.lang.Object implements fi.iki.elonen.NanoHTTPD$IHTTPSession
+private fi.iki.elonen.NanoHTTPD$CookieHandler cookies
+private java.util.Map headers
+private java.io.PushbackInputStream inputStream
+private fi.iki.elonen.NanoHTTPD$Method method
+private final java.io.OutputStream outputStream
+private java.util.Map parms
+private java.lang.String queryParameterString
+private int rlen
+private int splitbyte
+private final fi.iki.elonen.NanoHTTPD$TempFileManager tempFileManager
+final fi.iki.elonen.NanoHTTPD this$0
+private java.lang.String uri
+    public void <init>(fi.iki.elonen.NanoHTTPD, fi.iki.elonen.NanoHTTPD$TempFileManager, java.io.InputStream, java.io.OutputStream, java.net.InetAddress)
+    {
+        fi.iki.elonen.NanoHTTPD$HTTPSession r0;
+        fi.iki.elonen.NanoHTTPD $r1;
+        fi.iki.elonen.NanoHTTPD$TempFileManager $r2;
+        java.io.InputStream $r3;
+        java.io.OutputStream $r4;
+        java.net.InetAddress $r5;
+        java.io.PushbackInputStream $r6;
+        boolean $z0;
+        java.lang.String r7;
+        java.util.HashMap $r8;
+        java.util.Map $r9;
+
+        r0 := @this: fi.iki.elonen.NanoHTTPD$HTTPSession;
+
+        $r1 := @parameter0: fi.iki.elonen.NanoHTTPD;
+
+        $r2 := @parameter1: fi.iki.elonen.NanoHTTPD$TempFileManager;
+
+        $r3 := @parameter2: java.io.InputStream;
+
+        $r4 := @parameter3: java.io.OutputStream;
+
+        $r5 := @parameter4: java.net.InetAddress;
+
+        r0.<fi.iki.elonen.NanoHTTPD$HTTPSession: fi.iki.elonen.NanoHTTPD this$0> = $r1;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<fi.iki.elonen.NanoHTTPD$HTTPSession: fi.iki.elonen.NanoHTTPD$TempFileManager tempFileManager> = $r2;
+
+        $r6 = new java.io.PushbackInputStream;
+
+        specialinvoke $r6.<java.io.PushbackInputStream: void <init>(java.io.InputStream,int)>($r3, 8192);
+
+        r0.<fi.iki.elonen.NanoHTTPD$HTTPSession: java.io.PushbackInputStream inputStream> = $r6;
+
+        r0.<fi.iki.elonen.NanoHTTPD$HTTPSession: java.io.OutputStream outputStream> = $r4;
+
+        $z0 = virtualinvoke $r5.<java.net.InetAddress: boolean isLoopbackAddress()>();
+
+        if $z0 != 0 goto label1;
+
+        $z0 = virtualinvoke $r5.<java.net.InetAddress: boolean isAnyLocalAddress()>();
+
+        if $z0 == 0 goto label3;
+
+     label1:
+        r7 = "127.0.0.1";
+
+     label2:
+        $r8 = new java.util.HashMap;
+
+        specialinvoke $r8.<java.util.HashMap: void <init>()>();
+
+        r0.<fi.iki.elonen.NanoHTTPD$HTTPSession: java.util.Map headers> = $r8;
+
+        $r9 = r0.<fi.iki.elonen.NanoHTTPD$HTTPSession: java.util.Map headers>;
+
+        interfaceinvoke $r9.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>("remote-addr", r7);
+
+        $r9 = r0.<fi.iki.elonen.NanoHTTPD$HTTPSession: java.util.Map headers>;
+
+        interfaceinvoke $r9.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>("http-client-ip", r7);
+
+        return;
+
+     label3:
+        r7 = virtualinvoke $r5.<java.net.InetAddress: java.lang.String getHostAddress()>();
+
+        r7 = virtualinvoke r7.<java.lang.String: java.lang.String toString()>();
+
+        goto label2;
+    }
+    private void decodeHeader(java.io.BufferedReader, java.util.Map, java.util.Map, java.util.Map) throws fi.iki.elonen.NanoHTTPD$ResponseException
+    {
+        fi.iki.elonen.NanoHTTPD$HTTPSession r0;
+        java.io.BufferedReader $r1;
+        java.util.Map r2, r3, r4;
+        java.io.IOException r5;
+        java.util.StringTokenizer r6;
+        java.lang.String $r7, $r11, $r13;
+        boolean $z0;
+        fi.iki.elonen.NanoHTTPD$ResponseException $r8;
+        fi.iki.elonen.NanoHTTPD$Response$Status $r9;
+        java.lang.StringBuilder $r10;
+        int $i0, $i1;
+        fi.iki.elonen.NanoHTTPD $r12;
+        java.util.Locale $r14;
+
+        r0 := @this: fi.iki.elonen.NanoHTTPD$HTTPSession;
+
+        $r1 := @parameter0: java.io.BufferedReader;
+
+        r2 := @parameter1: java.util.Map;
+
+        r3 := @parameter2: java.util.Map;
+
+        r4 := @parameter3: java.util.Map;
+
+     label01:
+        $r7 = virtualinvoke $r1.<java.io.BufferedReader: java.lang.String readLine()>();
+
+     label02:
+        if $r7 != null goto label03;
+
+        return;
+
+     label03:
+        r6 = new java.util.StringTokenizer;
+
+     label04:
+        specialinvoke r6.<java.util.StringTokenizer: void <init>(java.lang.String)>($r7);
+
+        $z0 = virtualinvoke r6.<java.util.StringTokenizer: boolean hasMoreTokens()>();
+
+     label05:
+        if $z0 != 0 goto label09;
+
+        $r8 = new fi.iki.elonen.NanoHTTPD$ResponseException;
+
+        $r9 = <fi.iki.elonen.NanoHTTPD$Response$Status: fi.iki.elonen.NanoHTTPD$Response$Status BAD_REQUEST>;
+
+     label06:
+        specialinvoke $r8.<fi.iki.elonen.NanoHTTPD$ResponseException: void <init>(fi.iki.elonen.NanoHTTPD$Response$Status,java.lang.String)>($r9, "BAD REQUEST: Syntax error. Usage: GET /example/file.html");
+
+     label07:
+        throw $r8;
+
+     label08:
+        r5 := @caughtexception;
+
+        $r8 = new fi.iki.elonen.NanoHTTPD$ResponseException;
+
+        $r9 = <fi.iki.elonen.NanoHTTPD$Response$Status: fi.iki.elonen.NanoHTTPD$Response$Status INTERNAL_ERROR>;
+
+        $r10 = new java.lang.StringBuilder;
+
+        specialinvoke $r10.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("SERVER INTERNAL ERROR: IOException: ");
+
+        $r7 = virtualinvoke r5.<java.io.IOException: java.lang.String getMessage()>();
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r7);
+
+        $r7 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r8.<fi.iki.elonen.NanoHTTPD$ResponseException: void <init>(fi.iki.elonen.NanoHTTPD$Response$Status,java.lang.String,java.lang.Exception)>($r9, $r7, r5);
+
+        throw $r8;
+
+     label09:
+        $r7 = virtualinvoke r6.<java.util.StringTokenizer: java.lang.String nextToken()>();
+
+        interfaceinvoke r2.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>("method", $r7);
+
+        $z0 = virtualinvoke r6.<java.util.StringTokenizer: boolean hasMoreTokens()>();
+
+     label10:
+        if $z0 != 0 goto label13;
+
+        $r8 = new fi.iki.elonen.NanoHTTPD$ResponseException;
+
+        $r9 = <fi.iki.elonen.NanoHTTPD$Response$Status: fi.iki.elonen.NanoHTTPD$Response$Status BAD_REQUEST>;
+
+     label11:
+        specialinvoke $r8.<fi.iki.elonen.NanoHTTPD$ResponseException: void <init>(fi.iki.elonen.NanoHTTPD$Response$Status,java.lang.String)>($r9, "BAD REQUEST: Missing URI. Usage: GET /example/file.html");
+
+     label12:
+        throw $r8;
+
+     label13:
+        $r7 = virtualinvoke r6.<java.util.StringTokenizer: java.lang.String nextToken()>();
+
+        $i0 = virtualinvoke $r7.<java.lang.String: int indexOf(int)>(63);
+
+     label14:
+        if $i0 < 0 goto label33;
+
+        $i1 = $i0 + 1;
+
+     label15:
+        $r11 = virtualinvoke $r7.<java.lang.String: java.lang.String substring(int)>($i1);
+
+        specialinvoke r0.<fi.iki.elonen.NanoHTTPD$HTTPSession: void decodeParms(java.lang.String,java.util.Map)>($r11, r3);
+
+     label16:
+        $r12 = r0.<fi.iki.elonen.NanoHTTPD$HTTPSession: fi.iki.elonen.NanoHTTPD this$0>;
+
+     label17:
+        $r7 = virtualinvoke $r7.<java.lang.String: java.lang.String substring(int,int)>(0, $i0);
+
+        $r7 = virtualinvoke $r12.<fi.iki.elonen.NanoHTTPD: java.lang.String decodePercent(java.lang.String)>($r7);
+
+     label18:
+        $z0 = virtualinvoke r6.<java.util.StringTokenizer: boolean hasMoreTokens()>();
+
+     label19:
+        if $z0 == 0 goto label36;
+
+     label20:
+        $r11 = virtualinvoke $r1.<java.io.BufferedReader: java.lang.String readLine()>();
+
+     label21:
+        if $r11 == null goto label36;
+
+     label22:
+        $r13 = virtualinvoke $r11.<java.lang.String: java.lang.String trim()>();
+
+        $i0 = virtualinvoke $r13.<java.lang.String: int length()>();
+
+     label23:
+        if $i0 <= 0 goto label36;
+
+     label24:
+        $i0 = virtualinvoke $r11.<java.lang.String: int indexOf(int)>(58);
+
+     label25:
+        if $i0 < 0 goto label31;
+
+     label26:
+        $r13 = virtualinvoke $r11.<java.lang.String: java.lang.String substring(int,int)>(0, $i0);
+
+        $r13 = virtualinvoke $r13.<java.lang.String: java.lang.String trim()>();
+
+     label27:
+        $r14 = <java.util.Locale: java.util.Locale US>;
+
+     label28:
+        $r13 = virtualinvoke $r13.<java.lang.String: java.lang.String toLowerCase(java.util.Locale)>($r14);
+
+     label29:
+        $i0 = $i0 + 1;
+
+     label30:
+        $r11 = virtualinvoke $r11.<java.lang.String: java.lang.String substring(int)>($i0);
+
+        $r11 = virtualinvoke $r11.<java.lang.String: java.lang.String trim()>();
+
+        interfaceinvoke r4.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r13, $r11);
+
+     label31:
+        $r11 = virtualinvoke $r1.<java.io.BufferedReader: java.lang.String readLine()>();
+
+     label32:
+        goto label21;
+
+     label33:
+        $r12 = r0.<fi.iki.elonen.NanoHTTPD$HTTPSession: fi.iki.elonen.NanoHTTPD this$0>;
+
+     label34:
+        $r7 = virtualinvoke $r12.<fi.iki.elonen.NanoHTTPD: java.lang.String decodePercent(java.lang.String)>($r7);
+
+     label35:
+        goto label18;
+
+     label36:
+        interfaceinvoke r2.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>("uri", $r7);
+
+     label37:
+        return;
+
+        catch java.io.IOException from label01 to label02 with label08;
+        catch java.io.IOException from label04 to label05 with label08;
+        catch java.io.IOException from label06 to label07 with label08;
+        catch java.io.IOException from label09 to label10 with label08;
+        catch java.io.IOException from label11 to label12 with label08;
+        catch java.io.IOException from label13 to label14 with label08;
+        catch java.io.IOException from label15 to label16 with label08;
+        catch java.io.IOException from label17 to label18 with label08;
+        catch java.io.IOException from label18 to label19 with label08;
+        catch java.io.IOException from label20 to label21 with label08;
+        catch java.io.IOException from label22 to label23 with label08;
+        catch java.io.IOException from label24 to label25 with label08;
+        catch java.io.IOException from label26 to label27 with label08;
+        catch java.io.IOException from label28 to label29 with label08;
+        catch java.io.IOException from label30 to label32 with label08;
+        catch java.io.IOException from label34 to label35 with label08;
+        catch java.io.IOException from label36 to label37 with label08;
+    }
+    private void decodeMultipartData(java.lang.String, java.nio.ByteBuffer, java.io.BufferedReader, java.util.Map, java.util.Map) throws fi.iki.elonen.NanoHTTPD$ResponseException
+    {
+        fi.iki.elonen.NanoHTTPD$HTTPSession r0;
+        java.lang.String $r1, $r12, $r16, $r19, $r20;
+        java.nio.ByteBuffer $r2;
+        java.io.BufferedReader $r3;
+        java.util.Map r4, r5;
+        java.util.HashMap r6, r8;
+        java.io.IOException r7;
+        java.util.StringTokenizer r9;
+        byte[] $r10;
+        int[] $r11;
+        int i0, $i1, $i2;
+        boolean $z0;
+        fi.iki.elonen.NanoHTTPD$ResponseException $r13;
+        fi.iki.elonen.NanoHTTPD$Response$Status $r14;
+        java.lang.StringBuilder $r15;
+        java.util.Locale $r17;
+        java.lang.Object $r18;
+
+        r0 := @this: fi.iki.elonen.NanoHTTPD$HTTPSession;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.nio.ByteBuffer;
+
+        $r3 := @parameter2: java.io.BufferedReader;
+
+        r4 := @parameter3: java.util.Map;
+
+        r5 := @parameter4: java.util.Map;
+
+     label01:
+        $r10 = virtualinvoke $r1.<java.lang.String: byte[] getBytes()>();
+
+        $r11 = specialinvoke r0.<fi.iki.elonen.NanoHTTPD$HTTPSession: int[] getBoundaryPositions(java.nio.ByteBuffer,byte[])>($r2, $r10);
+
+     label02:
+        i0 = 1;
+
+     label03:
+        $r12 = virtualinvoke $r3.<java.io.BufferedReader: java.lang.String readLine()>();
+
+     label04:
+        if $r12 == null goto label83;
+
+     label05:
+        $z0 = virtualinvoke $r12.<java.lang.String: boolean contains(java.lang.CharSequence)>($r1);
+
+     label06:
+        if $z0 != 0 goto label10;
+
+        $r13 = new fi.iki.elonen.NanoHTTPD$ResponseException;
+
+        $r14 = <fi.iki.elonen.NanoHTTPD$Response$Status: fi.iki.elonen.NanoHTTPD$Response$Status BAD_REQUEST>;
+
+     label07:
+        specialinvoke $r13.<fi.iki.elonen.NanoHTTPD$ResponseException: void <init>(fi.iki.elonen.NanoHTTPD$Response$Status,java.lang.String)>($r14, "BAD REQUEST: Content type is multipart/form-data but next chunk does not start with boundary. Usage: GET /example/file.html");
+
+     label08:
+        throw $r13;
+
+     label09:
+        r7 := @caughtexception;
+
+        $r13 = new fi.iki.elonen.NanoHTTPD$ResponseException;
+
+        $r14 = <fi.iki.elonen.NanoHTTPD$Response$Status: fi.iki.elonen.NanoHTTPD$Response$Status INTERNAL_ERROR>;
+
+        $r15 = new java.lang.StringBuilder;
+
+        specialinvoke $r15.<java.lang.StringBuilder: void <init>()>();
+
+        $r15 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("SERVER INTERNAL ERROR: IOException: ");
+
+        $r1 = virtualinvoke r7.<java.io.IOException: java.lang.String getMessage()>();
+
+        $r15 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r1);
+
+        $r1 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r13.<fi.iki.elonen.NanoHTTPD$ResponseException: void <init>(fi.iki.elonen.NanoHTTPD$Response$Status,java.lang.String,java.lang.Exception)>($r14, $r1, r7);
+
+        throw $r13;
+
+     label10:
+        i0 = i0 + 1;
+
+        r8 = new java.util.HashMap;
+
+     label11:
+        specialinvoke r8.<java.util.HashMap: void <init>()>();
+
+        $r12 = virtualinvoke $r3.<java.io.BufferedReader: java.lang.String readLine()>();
+
+     label12:
+        if $r12 == null goto label24;
+
+     label13:
+        $r16 = virtualinvoke $r12.<java.lang.String: java.lang.String trim()>();
+
+        $i1 = virtualinvoke $r16.<java.lang.String: int length()>();
+
+     label14:
+        if $i1 <= 0 goto label24;
+
+     label15:
+        $i1 = virtualinvoke $r12.<java.lang.String: int indexOf(int)>(58);
+
+     label16:
+        if $i1 == -1 goto label22;
+
+     label17:
+        $r16 = virtualinvoke $r12.<java.lang.String: java.lang.String substring(int,int)>(0, $i1);
+
+        $r16 = virtualinvoke $r16.<java.lang.String: java.lang.String trim()>();
+
+     label18:
+        $r17 = <java.util.Locale: java.util.Locale US>;
+
+     label19:
+        $r16 = virtualinvoke $r16.<java.lang.String: java.lang.String toLowerCase(java.util.Locale)>($r17);
+
+     label20:
+        $i1 = $i1 + 1;
+
+     label21:
+        $r12 = virtualinvoke $r12.<java.lang.String: java.lang.String substring(int)>($i1);
+
+        $r12 = virtualinvoke $r12.<java.lang.String: java.lang.String trim()>();
+
+        interfaceinvoke r8.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r16, $r12);
+
+     label22:
+        $r12 = virtualinvoke $r3.<java.io.BufferedReader: java.lang.String readLine()>();
+
+     label23:
+        goto label12;
+
+     label24:
+        if $r12 == null goto label04;
+
+     label25:
+        $r18 = interfaceinvoke r8.<java.util.Map: java.lang.Object get(java.lang.Object)>("content-disposition");
+
+     label26:
+        $r16 = (java.lang.String) $r18;
+
+        if $r16 != null goto label29;
+
+        $r13 = new fi.iki.elonen.NanoHTTPD$ResponseException;
+
+        $r14 = <fi.iki.elonen.NanoHTTPD$Response$Status: fi.iki.elonen.NanoHTTPD$Response$Status BAD_REQUEST>;
+
+     label27:
+        specialinvoke $r13.<fi.iki.elonen.NanoHTTPD$ResponseException: void <init>(fi.iki.elonen.NanoHTTPD$Response$Status,java.lang.String)>($r14, "BAD REQUEST: Content type is multipart/form-data but no content-disposition info found. Usage: GET /example/file.html");
+
+     label28:
+        throw $r13;
+
+     label29:
+        r9 = new java.util.StringTokenizer;
+
+     label30:
+        specialinvoke r9.<java.util.StringTokenizer: void <init>(java.lang.String,java.lang.String)>($r16, ";");
+
+     label31:
+        r6 = new java.util.HashMap;
+
+     label32:
+        specialinvoke r6.<java.util.HashMap: void <init>()>();
+
+     label33:
+        $z0 = virtualinvoke r9.<java.util.StringTokenizer: boolean hasMoreTokens()>();
+
+     label34:
+        if $z0 == 0 goto label43;
+
+     label35:
+        $r16 = virtualinvoke r9.<java.util.StringTokenizer: java.lang.String nextToken()>();
+
+        $r16 = virtualinvoke $r16.<java.lang.String: java.lang.String trim()>();
+
+        $i1 = virtualinvoke $r16.<java.lang.String: int indexOf(int)>(61);
+
+     label36:
+        if $i1 == -1 goto label33;
+
+     label37:
+        $r19 = virtualinvoke $r16.<java.lang.String: java.lang.String substring(int,int)>(0, $i1);
+
+        $r19 = virtualinvoke $r19.<java.lang.String: java.lang.String trim()>();
+
+     label38:
+        $r17 = <java.util.Locale: java.util.Locale US>;
+
+     label39:
+        $r19 = virtualinvoke $r19.<java.lang.String: java.lang.String toLowerCase(java.util.Locale)>($r17);
+
+     label40:
+        $i1 = $i1 + 1;
+
+     label41:
+        $r16 = virtualinvoke $r16.<java.lang.String: java.lang.String substring(int)>($i1);
+
+        $r16 = virtualinvoke $r16.<java.lang.String: java.lang.String trim()>();
+
+        interfaceinvoke r6.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r19, $r16);
+
+     label42:
+        goto label33;
+
+     label43:
+        $r18 = interfaceinvoke r6.<java.util.Map: java.lang.Object get(java.lang.Object)>("name");
+
+     label44:
+        $r16 = (java.lang.String) $r18;
+
+     label45:
+        $i1 = virtualinvoke $r16.<java.lang.String: int length()>();
+
+     label46:
+        $i1 = $i1 + -1;
+
+     label47:
+        $r16 = virtualinvoke $r16.<java.lang.String: java.lang.String substring(int,int)>(1, $i1);
+
+     label48:
+        $r19 = "";
+
+     label49:
+        $r18 = interfaceinvoke r8.<java.util.Map: java.lang.Object get(java.lang.Object)>("content-type");
+
+     label50:
+        if $r18 != null goto label65;
+
+     label51:
+        if $r12 == null goto label81;
+
+     label52:
+        $z0 = virtualinvoke $r12.<java.lang.String: boolean contains(java.lang.CharSequence)>($r1);
+
+     label53:
+        if $z0 != 0 goto label81;
+
+     label54:
+        $r20 = virtualinvoke $r3.<java.io.BufferedReader: java.lang.String readLine()>();
+
+     label55:
+        $r12 = $r20;
+
+        if $r20 == null goto label51;
+
+     label56:
+        $i1 = virtualinvoke $r20.<java.lang.String: int indexOf(java.lang.String)>($r1);
+
+     label57:
+        if $i1 != -1 goto label60;
+
+        $r15 = new java.lang.StringBuilder;
+
+     label58:
+        specialinvoke $r15.<java.lang.StringBuilder: void <init>()>();
+
+        $r15 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r19);
+
+        $r15 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r20);
+
+        $r19 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label59:
+        goto label51;
+
+     label60:
+        $r15 = new java.lang.StringBuilder;
+
+     label61:
+        specialinvoke $r15.<java.lang.StringBuilder: void <init>()>();
+
+        $r15 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r19);
+
+     label62:
+        $i1 = $i1 + -2;
+
+     label63:
+        $r19 = virtualinvoke $r20.<java.lang.String: java.lang.String substring(int,int)>(0, $i1);
+
+        $r15 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r19);
+
+        $r19 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label64:
+        goto label51;
+
+     label65:
+        $i1 = lengthof $r11;
+
+        if i0 <= $i1 goto label68;
+
+        $r13 = new fi.iki.elonen.NanoHTTPD$ResponseException;
+
+        $r14 = <fi.iki.elonen.NanoHTTPD$Response$Status: fi.iki.elonen.NanoHTTPD$Response$Status INTERNAL_ERROR>;
+
+     label66:
+        specialinvoke $r13.<fi.iki.elonen.NanoHTTPD$ResponseException: void <init>(fi.iki.elonen.NanoHTTPD$Response$Status,java.lang.String)>($r14, "Error processing request");
+
+     label67:
+        throw $r13;
+
+     label68:
+        $i1 = i0 + -2;
+
+        $i1 = $r11[$i1];
+
+     label69:
+        $i1 = specialinvoke r0.<fi.iki.elonen.NanoHTTPD$HTTPSession: int stripMultipartHeaders(java.nio.ByteBuffer,int)>($r2, $i1);
+
+     label70:
+        $i2 = i0 + -1;
+
+        $i2 = $r11[$i2];
+
+        $i2 = $i2 - $i1;
+
+        $i2 = $i2 + -4;
+
+     label71:
+        $r12 = specialinvoke r0.<fi.iki.elonen.NanoHTTPD$HTTPSession: java.lang.String saveTmpFile(java.nio.ByteBuffer,int,int)>($r2, $i1, $i2);
+
+        interfaceinvoke r5.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r16, $r12);
+
+        $r18 = interfaceinvoke r6.<java.util.Map: java.lang.Object get(java.lang.Object)>("filename");
+
+     label72:
+        $r12 = (java.lang.String) $r18;
+
+     label73:
+        $i1 = virtualinvoke $r12.<java.lang.String: int length()>();
+
+     label74:
+        $i1 = $i1 + -1;
+
+     label75:
+        $r12 = virtualinvoke $r12.<java.lang.String: java.lang.String substring(int,int)>(1, $i1);
+
+     label76:
+        $r19 = $r12;
+
+     label77:
+        $r20 = virtualinvoke $r3.<java.io.BufferedReader: java.lang.String readLine()>();
+
+     label78:
+        $r12 = $r20;
+
+        if $r20 == null goto label81;
+
+     label79:
+        $z0 = virtualinvoke $r20.<java.lang.String: boolean contains(java.lang.CharSequence)>($r1);
+
+     label80:
+        if $z0 == 0 goto label77;
+
+     label81:
+        interfaceinvoke r4.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r16, $r19);
+
+     label82:
+        goto label04;
+
+     label83:
+        return;
+
+        catch java.io.IOException from label01 to label02 with label09;
+        catch java.io.IOException from label03 to label04 with label09;
+        catch java.io.IOException from label05 to label06 with label09;
+        catch java.io.IOException from label07 to label08 with label09;
+        catch java.io.IOException from label11 to label12 with label09;
+        catch java.io.IOException from label13 to label14 with label09;
+        catch java.io.IOException from label15 to label16 with label09;
+        catch java.io.IOException from label17 to label18 with label09;
+        catch java.io.IOException from label19 to label20 with label09;
+        catch java.io.IOException from label21 to label23 with label09;
+        catch java.io.IOException from label25 to label26 with label09;
+        catch java.io.IOException from label27 to label28 with label09;
+        catch java.io.IOException from label30 to label31 with label09;
+        catch java.io.IOException from label32 to label34 with label09;
+        catch java.io.IOException from label35 to label36 with label09;
+        catch java.io.IOException from label37 to label38 with label09;
+        catch java.io.IOException from label39 to label40 with label09;
+        catch java.io.IOException from label41 to label42 with label09;
+        catch java.io.IOException from label43 to label44 with label09;
+        catch java.io.IOException from label45 to label46 with label09;
+        catch java.io.IOException from label47 to label48 with label09;
+        catch java.io.IOException from label49 to label50 with label09;
+        catch java.io.IOException from label52 to label53 with label09;
+        catch java.io.IOException from label54 to label55 with label09;
+        catch java.io.IOException from label56 to label57 with label09;
+        catch java.io.IOException from label58 to label59 with label09;
+        catch java.io.IOException from label61 to label62 with label09;
+        catch java.io.IOException from label63 to label64 with label09;
+        catch java.io.IOException from label66 to label67 with label09;
+        catch java.io.IOException from label69 to label70 with label09;
+        catch java.io.IOException from label71 to label72 with label09;
+        catch java.io.IOException from label73 to label74 with label09;
+        catch java.io.IOException from label75 to label76 with label09;
+        catch java.io.IOException from label77 to label78 with label09;
+        catch java.io.IOException from label79 to label80 with label09;
+        catch java.io.IOException from label81 to label82 with label09;
+    }
+    private void decodeParms(java.lang.String, java.util.Map)
+    {
+        fi.iki.elonen.NanoHTTPD$HTTPSession r0;
+        java.lang.String $r1, $r5;
+        java.util.Map r2;
+        java.util.StringTokenizer r3;
+        boolean $z0;
+        int $i0;
+        fi.iki.elonen.NanoHTTPD $r4;
+
+        r0 := @this: fi.iki.elonen.NanoHTTPD$HTTPSession;
+
+        $r1 := @parameter0: java.lang.String;
+
+        r2 := @parameter1: java.util.Map;
+
+        if $r1 != null goto label1;
+
+        r0.<fi.iki.elonen.NanoHTTPD$HTTPSession: java.lang.String queryParameterString> = "";
+
+        return;
+
+     label1:
+        r0.<fi.iki.elonen.NanoHTTPD$HTTPSession: java.lang.String queryParameterString> = $r1;
+
+        r3 = new java.util.StringTokenizer;
+
+        specialinvoke r3.<java.util.StringTokenizer: void <init>(java.lang.String,java.lang.String)>($r1, "&");
+
+     label2:
+        $z0 = virtualinvoke r3.<java.util.StringTokenizer: boolean hasMoreTokens()>();
+
+        if $z0 == 0 goto label4;
+
+        $r1 = virtualinvoke r3.<java.util.StringTokenizer: java.lang.String nextToken()>();
+
+        $i0 = virtualinvoke $r1.<java.lang.String: int indexOf(int)>(61);
+
+        if $i0 < 0 goto label3;
+
+        $r4 = r0.<fi.iki.elonen.NanoHTTPD$HTTPSession: fi.iki.elonen.NanoHTTPD this$0>;
+
+        $r5 = virtualinvoke $r1.<java.lang.String: java.lang.String substring(int,int)>(0, $i0);
+
+        $r5 = virtualinvoke $r4.<fi.iki.elonen.NanoHTTPD: java.lang.String decodePercent(java.lang.String)>($r5);
+
+        $r5 = virtualinvoke $r5.<java.lang.String: java.lang.String trim()>();
+
+        $r4 = r0.<fi.iki.elonen.NanoHTTPD$HTTPSession: fi.iki.elonen.NanoHTTPD this$0>;
+
+        $i0 = $i0 + 1;
+
+        $r1 = virtualinvoke $r1.<java.lang.String: java.lang.String substring(int)>($i0);
+
+        $r1 = virtualinvoke $r4.<fi.iki.elonen.NanoHTTPD: java.lang.String decodePercent(java.lang.String)>($r1);
+
+        interfaceinvoke r2.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r5, $r1);
+
+        goto label2;
+
+     label3:
+        $r4 = r0.<fi.iki.elonen.NanoHTTPD$HTTPSession: fi.iki.elonen.NanoHTTPD this$0>;
+
+        $r1 = virtualinvoke $r4.<fi.iki.elonen.NanoHTTPD: java.lang.String decodePercent(java.lang.String)>($r1);
+
+        $r1 = virtualinvoke $r1.<java.lang.String: java.lang.String trim()>();
+
+        interfaceinvoke r2.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>($r1, "");
+
+        goto label2;
+
+     label4:
+        return;
+    }
+    private int findHeaderEnd(byte[], int)
+    {
+        fi.iki.elonen.NanoHTTPD$HTTPSession r0;
+        byte[] $r1;
+        int $i0, i1, $i2;
+        byte $b3;
+
+        r0 := @this: fi.iki.elonen.NanoHTTPD$HTTPSession;
+
+        $r1 := @parameter0: byte[];
+
+        $i0 := @parameter1: int;
+
+        i1 = 0;
+
+     label1:
+        $i2 = i1 + 3;
+
+        if $i2 >= $i0 goto label3;
+
+        $b3 = $r1[i1];
+
+        if $b3 != 13 goto label2;
+
+        $i2 = i1 + 1;
+
+        $b3 = $r1[$i2];
+
+        if $b3 != 10 goto label2;
+
+        $i2 = i1 + 2;
+
+        $b3 = $r1[$i2];
+
+        if $b3 != 13 goto label2;
+
+        $i2 = i1 + 3;
+
+        $b3 = $r1[$i2];
+
+        if $b3 != 10 goto label2;
+
+        $i0 = i1 + 4;
+
+        return $i0;
+
+     label2:
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label3:
+        return 0;
+    }
+    private int[] getBoundaryPositions(java.nio.ByteBuffer, byte[])
+    {
+        fi.iki.elonen.NanoHTTPD$HTTPSession r0;
+        java.nio.ByteBuffer $r1;
+        byte[] $r2;
+        java.util.ArrayList r3;
+        int[] r4;
+        byte $b0, $b5;
+        int i1, i2, i3, $i4;
+        java.lang.Integer $r5;
+        java.lang.Object $r6;
+
+        r0 := @this: fi.iki.elonen.NanoHTTPD$HTTPSession;
+
+        $r1 := @parameter0: java.nio.ByteBuffer;
+
+        $r2 := @parameter1: byte[];
+
+        i1 = 0;
+
+        i2 = -1;
+
+        r3 = new java.util.ArrayList;
+
+        specialinvoke r3.<java.util.ArrayList: void <init>()>();
+
+        i3 = 0;
+
+     label1:
+        $i4 = virtualinvoke $r1.<java.nio.ByteBuffer: int limit()>();
+
+        if i3 >= $i4 goto label5;
+
+        $b5 = virtualinvoke $r1.<java.nio.ByteBuffer: byte get(int)>(i3);
+
+        $b0 = $r2[i1];
+
+        if $b5 != $b0 goto label4;
+
+        if i1 != 0 goto label2;
+
+        i2 = i3;
+
+     label2:
+        i1 = i1 + 1;
+
+        $i4 = lengthof $r2;
+
+        if i1 != $i4 goto label3;
+
+        $r5 = staticinvoke <java.lang.Integer: java.lang.Integer valueOf(int)>(i2);
+
+        interfaceinvoke r3.<java.util.List: boolean add(java.lang.Object)>($r5);
+
+        i1 = 0;
+
+        i2 = -1;
+
+     label3:
+        i3 = i3 + 1;
+
+        goto label1;
+
+     label4:
+        i3 = i3 - i1;
+
+        i1 = 0;
+
+        i2 = -1;
+
+        goto label3;
+
+     label5:
+        i1 = interfaceinvoke r3.<java.util.List: int size()>();
+
+        r4 = newarray (int)[i1];
+
+        i1 = 0;
+
+     label6:
+        i2 = lengthof r4;
+
+        if i1 >= i2 goto label7;
+
+        $r6 = interfaceinvoke r3.<java.util.List: java.lang.Object get(int)>(i1);
+
+        $r5 = (java.lang.Integer) $r6;
+
+        i2 = virtualinvoke $r5.<java.lang.Integer: int intValue()>();
+
+        r4[i1] = i2;
+
+        i1 = i1 + 1;
+
+        goto label6;
+
+     label7:
+        return r4;
+    }
+    private java.io.RandomAccessFile getTmpBucket()
+    {
+        fi.iki.elonen.NanoHTTPD$HTTPSession r0;
+        java.lang.Exception r1;
+        fi.iki.elonen.NanoHTTPD$TempFileManager $r2;
+        fi.iki.elonen.NanoHTTPD$TempFile $r3;
+        java.io.RandomAccessFile $r4;
+        java.lang.String $r5;
+        java.lang.Error $r6;
+
+        r0 := @this: fi.iki.elonen.NanoHTTPD$HTTPSession;
+
+     label1:
+        $r2 = r0.<fi.iki.elonen.NanoHTTPD$HTTPSession: fi.iki.elonen.NanoHTTPD$TempFileManager tempFileManager>;
+
+        $r3 = interfaceinvoke $r2.<fi.iki.elonen.NanoHTTPD$TempFileManager: fi.iki.elonen.NanoHTTPD$TempFile createTempFile()>();
+
+     label2:
+        $r4 = new java.io.RandomAccessFile;
+
+     label3:
+        $r5 = interfaceinvoke $r3.<fi.iki.elonen.NanoHTTPD$TempFile: java.lang.String getName()>();
+
+        specialinvoke $r4.<java.io.RandomAccessFile: void <init>(java.lang.String,java.lang.String)>($r5, "rw");
+
+     label4:
+        return $r4;
+
+     label5:
+        r1 := @caughtexception;
+
+        $r6 = new java.lang.Error;
+
+        specialinvoke $r6.<java.lang.Error: void <init>(java.lang.Throwable)>(r1);
+
+        throw $r6;
+
+        catch java.lang.Exception from label1 to label2 with label5;
+        catch java.lang.Exception from label3 to label4 with label5;
+    }
+    private java.lang.String saveTmpFile(java.nio.ByteBuffer, int, int)
+    {
+        fi.iki.elonen.NanoHTTPD$HTTPSession r0;
+        java.nio.ByteBuffer $r1;
+        int $i0, $i1;
+        java.io.FileOutputStream r2, r3;
+        fi.iki.elonen.NanoHTTPD$TempFileManager $r4;
+        fi.iki.elonen.NanoHTTPD$TempFile $r5;
+        java.lang.String $r6;
+        java.nio.channels.FileChannel $r7;
+        java.nio.Buffer $r8;
+        java.lang.Exception r9;
+        java.lang.Error $r10;
+        java.lang.Throwable $r11;
+
+        r0 := @this: fi.iki.elonen.NanoHTTPD$HTTPSession;
+
+        $r1 := @parameter0: java.nio.ByteBuffer;
+
+        $i0 := @parameter1: int;
+
+        $i1 := @parameter2: int;
+
+        if $i1 <= 0 goto label14;
+
+        r3 = null;
+
+     label01:
+        $r4 = r0.<fi.iki.elonen.NanoHTTPD$HTTPSession: fi.iki.elonen.NanoHTTPD$TempFileManager tempFileManager>;
+
+        $r5 = interfaceinvoke $r4.<fi.iki.elonen.NanoHTTPD$TempFileManager: fi.iki.elonen.NanoHTTPD$TempFile createTempFile()>();
+
+        $r1 = virtualinvoke $r1.<java.nio.ByteBuffer: java.nio.ByteBuffer duplicate()>();
+
+     label02:
+        r2 = new java.io.FileOutputStream;
+
+     label03:
+        $r6 = interfaceinvoke $r5.<fi.iki.elonen.NanoHTTPD$TempFile: java.lang.String getName()>();
+
+        specialinvoke r2.<java.io.FileOutputStream: void <init>(java.lang.String)>($r6);
+
+     label04:
+        $r7 = virtualinvoke r2.<java.io.FileOutputStream: java.nio.channels.FileChannel getChannel()>();
+
+        $r8 = virtualinvoke $r1.<java.nio.ByteBuffer: java.nio.Buffer position(int)>($i0);
+
+     label05:
+        $i0 = $i0 + $i1;
+
+     label06:
+        virtualinvoke $r8.<java.nio.Buffer: java.nio.Buffer limit(int)>($i0);
+
+        $r1 = virtualinvoke $r1.<java.nio.ByteBuffer: java.nio.ByteBuffer slice()>();
+
+        virtualinvoke $r7.<java.nio.channels.FileChannel: int write(java.nio.ByteBuffer)>($r1);
+
+        $r6 = interfaceinvoke $r5.<fi.iki.elonen.NanoHTTPD$TempFile: java.lang.String getName()>();
+
+     label07:
+        staticinvoke <fi.iki.elonen.NanoHTTPD: void access$300(java.io.Closeable)>(r2);
+
+        return $r6;
+
+     label08:
+        r9 := @caughtexception;
+
+     label09:
+        $r10 = new java.lang.Error;
+
+        specialinvoke $r10.<java.lang.Error: void <init>(java.lang.Throwable)>(r9);
+
+        throw $r10;
+
+     label10:
+        $r11 := @caughtexception;
+
+     label11:
+        staticinvoke <fi.iki.elonen.NanoHTTPD: void access$300(java.io.Closeable)>(r3);
+
+        throw $r11;
+
+     label12:
+        $r11 := @caughtexception;
+
+        r3 = r2;
+
+        goto label11;
+
+     label13:
+        r9 := @caughtexception;
+
+        r3 = r2;
+
+        goto label09;
+
+     label14:
+        return "";
+
+        catch java.lang.Exception from label01 to label02 with label08;
+        catch java.lang.Exception from label03 to label04 with label08;
+        catch java.lang.Throwable from label01 to label04 with label10;
+        catch java.lang.Exception from label04 to label05 with label13;
+        catch java.lang.Exception from label06 to label07 with label13;
+        catch java.lang.Throwable from label04 to label05 with label12;
+        catch java.lang.Throwable from label06 to label07 with label12;
+        catch java.lang.Throwable from label09 to label10 with label10;
+    }
+    private int stripMultipartHeaders(java.nio.ByteBuffer, int)
+    {
+        fi.iki.elonen.NanoHTTPD$HTTPSession r0;
+        java.nio.ByteBuffer $r1;
+        int $i0, $i1;
+        byte $b2;
+
+        r0 := @this: fi.iki.elonen.NanoHTTPD$HTTPSession;
+
+        $r1 := @parameter0: java.nio.ByteBuffer;
+
+        $i0 := @parameter1: int;
+
+     label1:
+        $i1 = virtualinvoke $r1.<java.nio.ByteBuffer: int limit()>();
+
+        if $i0 >= $i1 goto label2;
+
+        $b2 = virtualinvoke $r1.<java.nio.ByteBuffer: byte get(int)>($i0);
+
+        if $b2 != 13 goto label3;
+
+        $i0 = $i0 + 1;
+
+        $b2 = virtualinvoke $r1.<java.nio.ByteBuffer: byte get(int)>($i0);
+
+        if $b2 != 10 goto label3;
+
+        $i0 = $i0 + 1;
+
+        $b2 = virtualinvoke $r1.<java.nio.ByteBuffer: byte get(int)>($i0);
+
+        if $b2 != 13 goto label3;
+
+        $i0 = $i0 + 1;
+
+        $b2 = virtualinvoke $r1.<java.nio.ByteBuffer: byte get(int)>($i0);
+
+        if $b2 != 10 goto label3;
+
+     label2:
+        $i0 = $i0 + 1;
+
+        return $i0;
+
+     label3:
+        $i0 = $i0 + 1;
+
+        goto label1;
+    }
+    public void execute() throws java.io.IOException
+    {
+        fi.iki.elonen.NanoHTTPD$HTTPSession r0;
+        byte[] r1;
+        java.io.BufferedReader r2;
+        java.io.IOException r3;
+        java.util.HashMap r4;
+        fi.iki.elonen.NanoHTTPD$ResponseException r5;
+        java.net.SocketTimeoutException r6;
+        java.io.PushbackInputStream $r7;
+        int $i0, i1, $i2;
+        java.io.OutputStream $r8;
+        java.net.SocketException $r9;
+        java.lang.Throwable $r10;
+        fi.iki.elonen.NanoHTTPD$TempFileManager $r11;
+        java.lang.Exception r12;
+        java.util.Map $r13, $r16;
+        java.io.InputStreamReader $r14;
+        java.io.ByteArrayInputStream $r15;
+        java.lang.Object $r17;
+        java.lang.String $r18;
+        fi.iki.elonen.NanoHTTPD$Method $r19;
+        fi.iki.elonen.NanoHTTPD$Response$Status $r20;
+        fi.iki.elonen.NanoHTTPD$Response r21;
+        java.lang.StringBuilder $r22;
+        fi.iki.elonen.NanoHTTPD$CookieHandler $r23;
+        fi.iki.elonen.NanoHTTPD $r24;
+
+        r0 := @this: fi.iki.elonen.NanoHTTPD$HTTPSession;
+
+     label01:
+        r1 = newarray (byte)[8192];
+
+        r0.<fi.iki.elonen.NanoHTTPD$HTTPSession: int splitbyte> = 0;
+
+        r0.<fi.iki.elonen.NanoHTTPD$HTTPSession: int rlen> = 0;
+
+     label02:
+        $r7 = r0.<fi.iki.elonen.NanoHTTPD$HTTPSession: java.io.PushbackInputStream inputStream>;
+
+        $i0 = virtualinvoke $r7.<java.io.PushbackInputStream: int read(byte[],int,int)>(r1, 0, 8192);
+
+     label03:
+        i1 = $i0;
+
+        if $i0 != -1 goto label27;
+
+     label04:
+        $r7 = r0.<fi.iki.elonen.NanoHTTPD$HTTPSession: java.io.PushbackInputStream inputStream>;
+
+     label05:
+        staticinvoke <fi.iki.elonen.NanoHTTPD: void access$300(java.io.Closeable)>($r7);
+
+     label06:
+        $r8 = r0.<fi.iki.elonen.NanoHTTPD$HTTPSession: java.io.OutputStream outputStream>;
+
+     label07:
+        staticinvoke <fi.iki.elonen.NanoHTTPD: void access$300(java.io.Closeable)>($r8);
+
+     label08:
+        $r9 = new java.net.SocketException;
+
+     label09:
+        specialinvoke $r9.<java.net.SocketException: void <init>(java.lang.String)>("NanoHttpd Shutdown");
+
+     label10:
+        throw $r9;
+
+     label11:
+        $r9 := @caughtexception;
+
+     label12:
+        throw $r9;
+
+     label13:
+        $r10 := @caughtexception;
+
+        $r11 = r0.<fi.iki.elonen.NanoHTTPD$HTTPSession: fi.iki.elonen.NanoHTTPD$TempFileManager tempFileManager>;
+
+        interfaceinvoke $r11.<fi.iki.elonen.NanoHTTPD$TempFileManager: void clear()>();
+
+        throw $r10;
+
+     label14:
+        r12 := @caughtexception;
+
+     label15:
+        $r7 = r0.<fi.iki.elonen.NanoHTTPD$HTTPSession: java.io.PushbackInputStream inputStream>;
+
+     label16:
+        staticinvoke <fi.iki.elonen.NanoHTTPD: void access$300(java.io.Closeable)>($r7);
+
+     label17:
+        $r8 = r0.<fi.iki.elonen.NanoHTTPD$HTTPSession: java.io.OutputStream outputStream>;
+
+     label18:
+        staticinvoke <fi.iki.elonen.NanoHTTPD: void access$300(java.io.Closeable)>($r8);
+
+     label19:
+        $r9 = new java.net.SocketException;
+
+     label20:
+        specialinvoke $r9.<java.net.SocketException: void <init>(java.lang.String)>("NanoHttpd Shutdown");
+
+     label21:
+        throw $r9;
+
+     label22:
+        r6 := @caughtexception;
+
+     label23:
+        throw r6;
+
+     label24:
+        $r7 = r0.<fi.iki.elonen.NanoHTTPD$HTTPSession: java.io.PushbackInputStream inputStream>;
+
+        i1 = r0.<fi.iki.elonen.NanoHTTPD$HTTPSession: int rlen>;
+
+        $i0 = r0.<fi.iki.elonen.NanoHTTPD$HTTPSession: int rlen>;
+
+     label25:
+        $i0 = 8192 - $i0;
+
+     label26:
+        i1 = virtualinvoke $r7.<java.io.PushbackInputStream: int read(byte[],int,int)>(r1, i1, $i0);
+
+     label27:
+        if i1 <= 0 goto label34;
+
+     label28:
+        $i0 = r0.<fi.iki.elonen.NanoHTTPD$HTTPSession: int rlen>;
+
+     label29:
+        i1 = $i0 + i1;
+
+     label30:
+        r0.<fi.iki.elonen.NanoHTTPD$HTTPSession: int rlen> = i1;
+
+        i1 = r0.<fi.iki.elonen.NanoHTTPD$HTTPSession: int rlen>;
+
+     label31:
+        i1 = specialinvoke r0.<fi.iki.elonen.NanoHTTPD$HTTPSession: int findHeaderEnd(byte[],int)>(r1, i1);
+
+     label32:
+        r0.<fi.iki.elonen.NanoHTTPD$HTTPSession: int splitbyte> = i1;
+
+        i1 = r0.<fi.iki.elonen.NanoHTTPD$HTTPSession: int splitbyte>;
+
+     label33:
+        if i1 <= 0 goto label24;
+
+     label34:
+        i1 = r0.<fi.iki.elonen.NanoHTTPD$HTTPSession: int splitbyte>;
+
+        $i0 = r0.<fi.iki.elonen.NanoHTTPD$HTTPSession: int rlen>;
+
+     label35:
+        if i1 >= $i0 goto label39;
+
+     label36:
+        $r7 = r0.<fi.iki.elonen.NanoHTTPD$HTTPSession: java.io.PushbackInputStream inputStream>;
+
+        i1 = r0.<fi.iki.elonen.NanoHTTPD$HTTPSession: int splitbyte>;
+
+        $i0 = r0.<fi.iki.elonen.NanoHTTPD$HTTPSession: int rlen>;
+
+        $i2 = r0.<fi.iki.elonen.NanoHTTPD$HTTPSession: int splitbyte>;
+
+     label37:
+        $i0 = $i0 - $i2;
+
+     label38:
+        virtualinvoke $r7.<java.io.PushbackInputStream: void unread(byte[],int,int)>(r1, i1, $i0);
+
+     label39:
+        r4 = new java.util.HashMap;
+
+     label40:
+        specialinvoke r4.<java.util.HashMap: void <init>()>();
+
+     label41:
+        r0.<fi.iki.elonen.NanoHTTPD$HTTPSession: java.util.Map parms> = r4;
+
+        $r13 = r0.<fi.iki.elonen.NanoHTTPD$HTTPSession: java.util.Map headers>;
+
+     label42:
+        if $r13 != null goto label46;
+
+     label43:
+        r4 = new java.util.HashMap;
+
+     label44:
+        specialinvoke r4.<java.util.HashMap: void <init>()>();
+
+     label45:
+        r0.<fi.iki.elonen.NanoHTTPD$HTTPSession: java.util.Map headers> = r4;
+
+     label46:
+        r2 = new java.io.BufferedReader;
+
+        $r14 = new java.io.InputStreamReader;
+
+        $r15 = new java.io.ByteArrayInputStream;
+
+        i1 = r0.<fi.iki.elonen.NanoHTTPD$HTTPSession: int rlen>;
+
+     label47:
+        specialinvoke $r15.<java.io.ByteArrayInputStream: void <init>(byte[],int,int)>(r1, 0, i1);
+
+        specialinvoke $r14.<java.io.InputStreamReader: void <init>(java.io.InputStream)>($r15);
+
+        specialinvoke r2.<java.io.BufferedReader: void <init>(java.io.Reader)>($r14);
+
+     label48:
+        r4 = new java.util.HashMap;
+
+     label49:
+        specialinvoke r4.<java.util.HashMap: void <init>()>();
+
+     label50:
+        $r13 = r0.<fi.iki.elonen.NanoHTTPD$HTTPSession: java.util.Map parms>;
+
+        $r16 = r0.<fi.iki.elonen.NanoHTTPD$HTTPSession: java.util.Map headers>;
+
+     label51:
+        specialinvoke r0.<fi.iki.elonen.NanoHTTPD$HTTPSession: void decodeHeader(java.io.BufferedReader,java.util.Map,java.util.Map,java.util.Map)>(r2, r4, $r13, $r16);
+
+        $r17 = interfaceinvoke r4.<java.util.Map: java.lang.Object get(java.lang.Object)>("method");
+
+     label52:
+        $r18 = (java.lang.String) $r17;
+
+     label53:
+        $r19 = staticinvoke <fi.iki.elonen.NanoHTTPD$Method: fi.iki.elonen.NanoHTTPD$Method lookup(java.lang.String)>($r18);
+
+     label54:
+        r0.<fi.iki.elonen.NanoHTTPD$HTTPSession: fi.iki.elonen.NanoHTTPD$Method method> = $r19;
+
+        $r19 = r0.<fi.iki.elonen.NanoHTTPD$HTTPSession: fi.iki.elonen.NanoHTTPD$Method method>;
+
+     label55:
+        if $r19 != null goto label62;
+
+     label56:
+        r5 = new fi.iki.elonen.NanoHTTPD$ResponseException;
+
+        $r20 = <fi.iki.elonen.NanoHTTPD$Response$Status: fi.iki.elonen.NanoHTTPD$Response$Status BAD_REQUEST>;
+
+     label57:
+        specialinvoke r5.<fi.iki.elonen.NanoHTTPD$ResponseException: void <init>(fi.iki.elonen.NanoHTTPD$Response$Status,java.lang.String)>($r20, "BAD REQUEST: Syntax error.");
+
+     label58:
+        throw r5;
+
+     label59:
+        r3 := @caughtexception;
+
+     label60:
+        r21 = new fi.iki.elonen.NanoHTTPD$Response;
+
+        $r20 = <fi.iki.elonen.NanoHTTPD$Response$Status: fi.iki.elonen.NanoHTTPD$Response$Status INTERNAL_ERROR>;
+
+        $r22 = new java.lang.StringBuilder;
+
+        specialinvoke $r22.<java.lang.StringBuilder: void <init>()>();
+
+        $r22 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("SERVER INTERNAL ERROR: IOException: ");
+
+        $r18 = virtualinvoke r3.<java.io.IOException: java.lang.String getMessage()>();
+
+        $r22 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r18);
+
+        $r18 = virtualinvoke $r22.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke r21.<fi.iki.elonen.NanoHTTPD$Response: void <init>(fi.iki.elonen.NanoHTTPD$Response$IStatus,java.lang.String,java.lang.String)>($r20, "text/plain", $r18);
+
+        $r8 = r0.<fi.iki.elonen.NanoHTTPD$HTTPSession: java.io.OutputStream outputStream>;
+
+        virtualinvoke r21.<fi.iki.elonen.NanoHTTPD$Response: void send(java.io.OutputStream)>($r8);
+
+        $r8 = r0.<fi.iki.elonen.NanoHTTPD$HTTPSession: java.io.OutputStream outputStream>;
+
+        staticinvoke <fi.iki.elonen.NanoHTTPD: void access$300(java.io.Closeable)>($r8);
+
+     label61:
+        $r11 = r0.<fi.iki.elonen.NanoHTTPD$HTTPSession: fi.iki.elonen.NanoHTTPD$TempFileManager tempFileManager>;
+
+        interfaceinvoke $r11.<fi.iki.elonen.NanoHTTPD$TempFileManager: void clear()>();
+
+        return;
+
+     label62:
+        $r17 = interfaceinvoke r4.<java.util.Map: java.lang.Object get(java.lang.Object)>("uri");
+
+     label63:
+        $r18 = (java.lang.String) $r17;
+
+        r0.<fi.iki.elonen.NanoHTTPD$HTTPSession: java.lang.String uri> = $r18;
+
+        $r23 = new fi.iki.elonen.NanoHTTPD$CookieHandler;
+
+        $r24 = r0.<fi.iki.elonen.NanoHTTPD$HTTPSession: fi.iki.elonen.NanoHTTPD this$0>;
+
+        $r13 = r0.<fi.iki.elonen.NanoHTTPD$HTTPSession: java.util.Map headers>;
+
+     label64:
+        specialinvoke $r23.<fi.iki.elonen.NanoHTTPD$CookieHandler: void <init>(fi.iki.elonen.NanoHTTPD,java.util.Map)>($r24, $r13);
+
+     label65:
+        r0.<fi.iki.elonen.NanoHTTPD$HTTPSession: fi.iki.elonen.NanoHTTPD$CookieHandler cookies> = $r23;
+
+        $r24 = r0.<fi.iki.elonen.NanoHTTPD$HTTPSession: fi.iki.elonen.NanoHTTPD this$0>;
+
+     label66:
+        r21 = virtualinvoke $r24.<fi.iki.elonen.NanoHTTPD: fi.iki.elonen.NanoHTTPD$Response serve(fi.iki.elonen.NanoHTTPD$IHTTPSession)>(r0);
+
+     label67:
+        if r21 != null goto label74;
+
+     label68:
+        r5 = new fi.iki.elonen.NanoHTTPD$ResponseException;
+
+        $r20 = <fi.iki.elonen.NanoHTTPD$Response$Status: fi.iki.elonen.NanoHTTPD$Response$Status INTERNAL_ERROR>;
+
+     label69:
+        specialinvoke r5.<fi.iki.elonen.NanoHTTPD$ResponseException: void <init>(fi.iki.elonen.NanoHTTPD$Response$Status,java.lang.String)>($r20, "SERVER INTERNAL ERROR: Serve() returned a null response.");
+
+     label70:
+        throw r5;
+
+     label71:
+        r5 := @caughtexception;
+
+     label72:
+        r21 = new fi.iki.elonen.NanoHTTPD$Response;
+
+        $r20 = virtualinvoke r5.<fi.iki.elonen.NanoHTTPD$ResponseException: fi.iki.elonen.NanoHTTPD$Response$Status getStatus()>();
+
+        $r18 = virtualinvoke r5.<fi.iki.elonen.NanoHTTPD$ResponseException: java.lang.String getMessage()>();
+
+        specialinvoke r21.<fi.iki.elonen.NanoHTTPD$Response: void <init>(fi.iki.elonen.NanoHTTPD$Response$IStatus,java.lang.String,java.lang.String)>($r20, "text/plain", $r18);
+
+        $r8 = r0.<fi.iki.elonen.NanoHTTPD$HTTPSession: java.io.OutputStream outputStream>;
+
+        virtualinvoke r21.<fi.iki.elonen.NanoHTTPD$Response: void send(java.io.OutputStream)>($r8);
+
+        $r8 = r0.<fi.iki.elonen.NanoHTTPD$HTTPSession: java.io.OutputStream outputStream>;
+
+        staticinvoke <fi.iki.elonen.NanoHTTPD: void access$300(java.io.Closeable)>($r8);
+
+     label73:
+        $r11 = r0.<fi.iki.elonen.NanoHTTPD$HTTPSession: fi.iki.elonen.NanoHTTPD$TempFileManager tempFileManager>;
+
+        interfaceinvoke $r11.<fi.iki.elonen.NanoHTTPD$TempFileManager: void clear()>();
+
+        return;
+
+     label74:
+        $r23 = r0.<fi.iki.elonen.NanoHTTPD$HTTPSession: fi.iki.elonen.NanoHTTPD$CookieHandler cookies>;
+
+     label75:
+        virtualinvoke $r23.<fi.iki.elonen.NanoHTTPD$CookieHandler: void unloadQueue(fi.iki.elonen.NanoHTTPD$Response)>(r21);
+
+     label76:
+        $r19 = r0.<fi.iki.elonen.NanoHTTPD$HTTPSession: fi.iki.elonen.NanoHTTPD$Method method>;
+
+     label77:
+        virtualinvoke r21.<fi.iki.elonen.NanoHTTPD$Response: void setRequestMethod(fi.iki.elonen.NanoHTTPD$Method)>($r19);
+
+     label78:
+        $r8 = r0.<fi.iki.elonen.NanoHTTPD$HTTPSession: java.io.OutputStream outputStream>;
+
+     label79:
+        virtualinvoke r21.<fi.iki.elonen.NanoHTTPD$Response: void send(java.io.OutputStream)>($r8);
+
+     label80:
+        $r11 = r0.<fi.iki.elonen.NanoHTTPD$HTTPSession: fi.iki.elonen.NanoHTTPD$TempFileManager tempFileManager>;
+
+        interfaceinvoke $r11.<fi.iki.elonen.NanoHTTPD$TempFileManager: void clear()>();
+
+        return;
+
+        catch java.lang.Throwable from label01 to label02 with label13;
+        catch java.lang.Exception from label02 to label03 with label14;
+        catch java.lang.Throwable from label02 to label03 with label13;
+        catch java.net.SocketException from label05 to label06 with label11;
+        catch java.net.SocketException from label07 to label08 with label11;
+        catch java.net.SocketException from label09 to label11 with label11;
+        catch java.net.SocketTimeoutException from label05 to label06 with label22;
+        catch java.net.SocketTimeoutException from label07 to label08 with label22;
+        catch java.net.SocketTimeoutException from label09 to label10 with label22;
+        catch java.io.IOException from label05 to label06 with label59;
+        catch java.io.IOException from label07 to label08 with label59;
+        catch java.io.IOException from label09 to label10 with label59;
+        catch fi.iki.elonen.NanoHTTPD$ResponseException from label05 to label06 with label71;
+        catch fi.iki.elonen.NanoHTTPD$ResponseException from label07 to label08 with label71;
+        catch fi.iki.elonen.NanoHTTPD$ResponseException from label09 to label10 with label71;
+        catch java.lang.Throwable from label04 to label11 with label13;
+        catch java.lang.Throwable from label12 to label13 with label13;
+        catch java.net.SocketException from label16 to label17 with label11;
+        catch java.net.SocketException from label18 to label19 with label11;
+        catch java.net.SocketException from label20 to label22 with label11;
+        catch java.net.SocketTimeoutException from label16 to label17 with label22;
+        catch java.net.SocketTimeoutException from label18 to label19 with label22;
+        catch java.net.SocketTimeoutException from label20 to label21 with label22;
+        catch java.io.IOException from label16 to label17 with label59;
+        catch java.io.IOException from label18 to label19 with label59;
+        catch java.io.IOException from label20 to label21 with label59;
+        catch fi.iki.elonen.NanoHTTPD$ResponseException from label16 to label17 with label71;
+        catch fi.iki.elonen.NanoHTTPD$ResponseException from label18 to label19 with label71;
+        catch fi.iki.elonen.NanoHTTPD$ResponseException from label20 to label21 with label71;
+        catch java.lang.Throwable from label15 to label22 with label13;
+        catch java.lang.Throwable from label23 to label24 with label13;
+        catch java.net.SocketException from label26 to label27 with label11;
+        catch java.net.SocketException from label31 to label32 with label11;
+        catch java.net.SocketException from label38 to label39 with label11;
+        catch java.net.SocketException from label40 to label41 with label11;
+        catch java.net.SocketException from label44 to label45 with label11;
+        catch java.net.SocketException from label47 to label48 with label11;
+        catch java.net.SocketException from label49 to label50 with label11;
+        catch java.net.SocketException from label51 to label52 with label11;
+        catch java.net.SocketException from label53 to label54 with label11;
+        catch java.net.SocketException from label57 to label58 with label11;
+        catch java.net.SocketTimeoutException from label26 to label27 with label22;
+        catch java.net.SocketTimeoutException from label31 to label32 with label22;
+        catch java.net.SocketTimeoutException from label38 to label39 with label22;
+        catch java.net.SocketTimeoutException from label40 to label41 with label22;
+        catch java.net.SocketTimeoutException from label44 to label45 with label22;
+        catch java.net.SocketTimeoutException from label47 to label48 with label22;
+        catch java.net.SocketTimeoutException from label49 to label50 with label22;
+        catch java.net.SocketTimeoutException from label51 to label52 with label22;
+        catch java.net.SocketTimeoutException from label53 to label54 with label22;
+        catch java.net.SocketTimeoutException from label57 to label58 with label22;
+        catch java.io.IOException from label26 to label27 with label59;
+        catch java.io.IOException from label31 to label32 with label59;
+        catch java.io.IOException from label38 to label39 with label59;
+        catch java.io.IOException from label40 to label41 with label59;
+        catch java.io.IOException from label44 to label45 with label59;
+        catch java.io.IOException from label47 to label48 with label59;
+        catch java.io.IOException from label49 to label50 with label59;
+        catch java.io.IOException from label51 to label52 with label59;
+        catch java.io.IOException from label53 to label54 with label59;
+        catch java.io.IOException from label57 to label58 with label59;
+        catch fi.iki.elonen.NanoHTTPD$ResponseException from label26 to label27 with label71;
+        catch fi.iki.elonen.NanoHTTPD$ResponseException from label31 to label32 with label71;
+        catch fi.iki.elonen.NanoHTTPD$ResponseException from label38 to label39 with label71;
+        catch fi.iki.elonen.NanoHTTPD$ResponseException from label40 to label41 with label71;
+        catch fi.iki.elonen.NanoHTTPD$ResponseException from label44 to label45 with label71;
+        catch fi.iki.elonen.NanoHTTPD$ResponseException from label47 to label48 with label71;
+        catch fi.iki.elonen.NanoHTTPD$ResponseException from label49 to label50 with label71;
+        catch fi.iki.elonen.NanoHTTPD$ResponseException from label51 to label52 with label71;
+        catch fi.iki.elonen.NanoHTTPD$ResponseException from label53 to label54 with label71;
+        catch fi.iki.elonen.NanoHTTPD$ResponseException from label57 to label59 with label71;
+        catch java.lang.Throwable from label24 to label25 with label13;
+        catch java.lang.Throwable from label26 to label27 with label13;
+        catch java.lang.Throwable from label28 to label29 with label13;
+        catch java.lang.Throwable from label30 to label33 with label13;
+        catch java.lang.Throwable from label34 to label35 with label13;
+        catch java.lang.Throwable from label36 to label37 with label13;
+        catch java.lang.Throwable from label38 to label42 with label13;
+        catch java.lang.Throwable from label43 to label55 with label13;
+        catch java.lang.Throwable from label56 to label59 with label13;
+        catch java.lang.Throwable from label60 to label61 with label13;
+        catch java.net.SocketException from label62 to label63 with label11;
+        catch java.net.SocketException from label64 to label65 with label11;
+        catch java.net.SocketException from label66 to label67 with label11;
+        catch java.net.SocketException from label69 to label70 with label11;
+        catch java.net.SocketTimeoutException from label62 to label63 with label22;
+        catch java.net.SocketTimeoutException from label64 to label65 with label22;
+        catch java.net.SocketTimeoutException from label66 to label67 with label22;
+        catch java.net.SocketTimeoutException from label69 to label70 with label22;
+        catch java.io.IOException from label62 to label63 with label59;
+        catch java.io.IOException from label64 to label65 with label59;
+        catch java.io.IOException from label66 to label67 with label59;
+        catch java.io.IOException from label69 to label70 with label59;
+        catch fi.iki.elonen.NanoHTTPD$ResponseException from label62 to label63 with label71;
+        catch fi.iki.elonen.NanoHTTPD$ResponseException from label64 to label65 with label71;
+        catch fi.iki.elonen.NanoHTTPD$ResponseException from label66 to label67 with label71;
+        catch fi.iki.elonen.NanoHTTPD$ResponseException from label69 to label71 with label71;
+        catch java.lang.Throwable from label62 to label67 with label13;
+        catch java.lang.Throwable from label68 to label71 with label13;
+        catch java.lang.Throwable from label72 to label73 with label13;
+        catch java.net.SocketException from label75 to label76 with label11;
+        catch java.net.SocketException from label77 to label78 with label11;
+        catch java.net.SocketException from label79 to label80 with label11;
+        catch java.net.SocketTimeoutException from label75 to label76 with label22;
+        catch java.net.SocketTimeoutException from label77 to label78 with label22;
+        catch java.net.SocketTimeoutException from label79 to label80 with label22;
+        catch java.io.IOException from label75 to label76 with label59;
+        catch java.io.IOException from label77 to label78 with label59;
+        catch java.io.IOException from label79 to label80 with label59;
+        catch fi.iki.elonen.NanoHTTPD$ResponseException from label75 to label76 with label71;
+        catch fi.iki.elonen.NanoHTTPD$ResponseException from label77 to label78 with label71;
+        catch fi.iki.elonen.NanoHTTPD$ResponseException from label79 to label80 with label71;
+        catch java.lang.Throwable from label74 to label80 with label13;
+    }
+    public final java.util.Map getHeaders()
+    {
+        fi.iki.elonen.NanoHTTPD$HTTPSession r0;
+        java.util.Map r1;
+
+        r0 := @this: fi.iki.elonen.NanoHTTPD$HTTPSession;
+
+        r1 = r0.<fi.iki.elonen.NanoHTTPD$HTTPSession: java.util.Map headers>;
+
+        return r1;
+    }
+    public final fi.iki.elonen.NanoHTTPD$Method getMethod()
+    {
+        fi.iki.elonen.NanoHTTPD$HTTPSession r0;
+        fi.iki.elonen.NanoHTTPD$Method r1;
+
+        r0 := @this: fi.iki.elonen.NanoHTTPD$HTTPSession;
+
+        r1 = r0.<fi.iki.elonen.NanoHTTPD$HTTPSession: fi.iki.elonen.NanoHTTPD$Method method>;
+
+        return r1;
+    }
+    public final java.util.Map getParms()
+    {
+        fi.iki.elonen.NanoHTTPD$HTTPSession r0;
+        java.util.Map r1;
+
+        r0 := @this: fi.iki.elonen.NanoHTTPD$HTTPSession;
+
+        r1 = r0.<fi.iki.elonen.NanoHTTPD$HTTPSession: java.util.Map parms>;
+
+        return r1;
+    }
+    public java.lang.String getQueryParameterString()
+    {
+        fi.iki.elonen.NanoHTTPD$HTTPSession r0;
+        java.lang.String r1;
+
+        r0 := @this: fi.iki.elonen.NanoHTTPD$HTTPSession;
+
+        r1 = r0.<fi.iki.elonen.NanoHTTPD$HTTPSession: java.lang.String queryParameterString>;
+
+        return r1;
+    }
+    public final java.lang.String getUri()
+    {
+        fi.iki.elonen.NanoHTTPD$HTTPSession r0;
+        java.lang.String r1;
+
+        r0 := @this: fi.iki.elonen.NanoHTTPD$HTTPSession;
+
+        r1 = r0.<fi.iki.elonen.NanoHTTPD$HTTPSession: java.lang.String uri>;
+
+        return r1;
+    }
+    public void parseBody(java.util.Map) throws java.io.IOException, fi.iki.elonen.NanoHTTPD$ResponseException
+    {
+        fi.iki.elonen.NanoHTTPD$HTTPSession r0;
+        java.util.Map r1, $r8;
+        java.io.FileInputStream r2;
+        int i0, $i4;
+        java.lang.String r3, $r10, $r22;
+        byte[] r4;
+        java.lang.StringBuilder r5;
+        java.io.RandomAccessFile r6, $r7;
+        boolean $z0;
+        java.lang.Object $r9;
+        long $l1, $l3;
+        byte $b2;
+        java.io.PushbackInputStream $r11;
+        java.lang.Throwable $r12;
+        java.io.BufferedReader r13;
+        java.nio.channels.FileChannel $r14;
+        java.nio.channels.FileChannel$MapMode r15;
+        java.nio.MappedByteBuffer $r16;
+        java.io.FileDescriptor $r17;
+        java.io.InputStreamReader $r18;
+        fi.iki.elonen.NanoHTTPD$Method $r19, $r20;
+        java.util.StringTokenizer r21;
+        fi.iki.elonen.NanoHTTPD$ResponseException $r23;
+        fi.iki.elonen.NanoHTTPD$Response$Status $r24;
+        char[] $r25;
+
+        r0 := @this: fi.iki.elonen.NanoHTTPD$HTTPSession;
+
+        r1 := @parameter0: java.util.Map;
+
+        r6 = null;
+
+     label01:
+        $r7 = specialinvoke r0.<fi.iki.elonen.NanoHTTPD$HTTPSession: java.io.RandomAccessFile getTmpBucket()>();
+
+     label02:
+        r6 = $r7;
+
+     label03:
+        $r8 = r0.<fi.iki.elonen.NanoHTTPD$HTTPSession: java.util.Map headers>;
+
+        $z0 = interfaceinvoke $r8.<java.util.Map: boolean containsKey(java.lang.Object)>("content-length");
+
+     label04:
+        if $z0 == 0 goto label20;
+
+     label05:
+        $r8 = r0.<fi.iki.elonen.NanoHTTPD$HTTPSession: java.util.Map headers>;
+
+        $r9 = interfaceinvoke $r8.<java.util.Map: java.lang.Object get(java.lang.Object)>("content-length");
+
+        $r10 = (java.lang.String) $r9;
+
+        i0 = staticinvoke <java.lang.Integer: int parseInt(java.lang.String)>($r10);
+
+     label06:
+        $l1 = (long) i0;
+
+     label07:
+        r4 = newarray (byte)[512];
+
+     label08:
+        i0 = r0.<fi.iki.elonen.NanoHTTPD$HTTPSession: int rlen>;
+
+     label09:
+        if i0 < 0 goto label25;
+
+        $b2 = $l1 cmp 0L;
+
+        if $b2 <= 0 goto label25;
+
+     label10:
+        $r11 = r0.<fi.iki.elonen.NanoHTTPD$HTTPSession: java.io.PushbackInputStream inputStream>;
+
+        $l3 = staticinvoke <java.lang.Math: long min(long,long)>($l1, 512L);
+
+     label11:
+        i0 = (int) $l3;
+
+     label12:
+        i0 = virtualinvoke $r11.<java.io.PushbackInputStream: int read(byte[],int,int)>(r4, 0, i0);
+
+        r0.<fi.iki.elonen.NanoHTTPD$HTTPSession: int rlen> = i0;
+
+        i0 = r0.<fi.iki.elonen.NanoHTTPD$HTTPSession: int rlen>;
+
+     label13:
+        $l3 = (long) i0;
+
+        $l1 = $l1 - $l3;
+
+     label14:
+        i0 = r0.<fi.iki.elonen.NanoHTTPD$HTTPSession: int rlen>;
+
+     label15:
+        if i0 <= 0 goto label08;
+
+     label16:
+        i0 = r0.<fi.iki.elonen.NanoHTTPD$HTTPSession: int rlen>;
+
+        virtualinvoke $r7.<java.io.RandomAccessFile: void write(byte[],int,int)>(r4, 0, i0);
+
+     label17:
+        goto label08;
+
+     label18:
+        $r12 := @caughtexception;
+
+        r13 = null;
+
+     label19:
+        staticinvoke <fi.iki.elonen.NanoHTTPD: void access$300(java.io.Closeable)>(r6);
+
+        staticinvoke <fi.iki.elonen.NanoHTTPD: void access$300(java.io.Closeable)>(r13);
+
+        throw $r12;
+
+     label20:
+        i0 = r0.<fi.iki.elonen.NanoHTTPD$HTTPSession: int splitbyte>;
+
+        $i4 = r0.<fi.iki.elonen.NanoHTTPD$HTTPSession: int rlen>;
+
+     label21:
+        if i0 >= $i4 goto label24;
+
+     label22:
+        i0 = r0.<fi.iki.elonen.NanoHTTPD$HTTPSession: int rlen>;
+
+        $i4 = r0.<fi.iki.elonen.NanoHTTPD$HTTPSession: int splitbyte>;
+
+     label23:
+        i0 = i0 - $i4;
+
+        $l1 = (long) i0;
+
+        goto label07;
+
+     label24:
+        $l1 = 0L;
+
+        goto label07;
+
+     label25:
+        $r14 = virtualinvoke $r7.<java.io.RandomAccessFile: java.nio.channels.FileChannel getChannel()>();
+
+        r15 = <java.nio.channels.FileChannel$MapMode: java.nio.channels.FileChannel$MapMode READ_ONLY>;
+
+        $l1 = virtualinvoke $r7.<java.io.RandomAccessFile: long length()>();
+
+        $r16 = virtualinvoke $r14.<java.nio.channels.FileChannel: java.nio.MappedByteBuffer map(java.nio.channels.FileChannel$MapMode,long,long)>(r15, 0L, $l1);
+
+        virtualinvoke $r7.<java.io.RandomAccessFile: void seek(long)>(0L);
+
+        r2 = new java.io.FileInputStream;
+
+        $r17 = virtualinvoke $r7.<java.io.RandomAccessFile: java.io.FileDescriptor getFD()>();
+
+        specialinvoke r2.<java.io.FileInputStream: void <init>(java.io.FileDescriptor)>($r17);
+
+        r13 = new java.io.BufferedReader;
+
+        $r18 = new java.io.InputStreamReader;
+
+        specialinvoke $r18.<java.io.InputStreamReader: void <init>(java.io.InputStream)>(r2);
+
+        specialinvoke r13.<java.io.BufferedReader: void <init>(java.io.Reader)>($r18);
+
+     label26:
+        $r19 = <fi.iki.elonen.NanoHTTPD$Method: fi.iki.elonen.NanoHTTPD$Method POST>;
+
+        $r20 = r0.<fi.iki.elonen.NanoHTTPD$HTTPSession: fi.iki.elonen.NanoHTTPD$Method method>;
+
+        $z0 = virtualinvoke $r19.<fi.iki.elonen.NanoHTTPD$Method: boolean equals(java.lang.Object)>($r20);
+
+     label27:
+        if $z0 == 0 goto label66;
+
+        r3 = "";
+
+     label28:
+        $r8 = r0.<fi.iki.elonen.NanoHTTPD$HTTPSession: java.util.Map headers>;
+
+        $r9 = interfaceinvoke $r8.<java.util.Map: java.lang.Object get(java.lang.Object)>("content-type");
+
+        $r10 = (java.lang.String) $r9;
+
+     label29:
+        r21 = null;
+
+        if $r10 == null goto label33;
+
+     label30:
+        r21 = new java.util.StringTokenizer;
+
+        specialinvoke r21.<java.util.StringTokenizer: void <init>(java.lang.String,java.lang.String)>($r10, ",; ");
+
+        $z0 = virtualinvoke r21.<java.util.StringTokenizer: boolean hasMoreTokens()>();
+
+     label31:
+        if $z0 == 0 goto label33;
+
+     label32:
+        r3 = virtualinvoke r21.<java.util.StringTokenizer: java.lang.String nextToken()>();
+
+     label33:
+        $r22 = "multipart/form-data";
+
+     label34:
+        $z0 = virtualinvoke $r22.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>(r3);
+
+     label35:
+        if $z0 == 0 goto label55;
+
+     label36:
+        $z0 = virtualinvoke r21.<java.util.StringTokenizer: boolean hasMoreTokens()>();
+
+     label37:
+        if $z0 != 0 goto label40;
+
+     label38:
+        $r23 = new fi.iki.elonen.NanoHTTPD$ResponseException;
+
+        $r24 = <fi.iki.elonen.NanoHTTPD$Response$Status: fi.iki.elonen.NanoHTTPD$Response$Status BAD_REQUEST>;
+
+        specialinvoke $r23.<fi.iki.elonen.NanoHTTPD$ResponseException: void <init>(fi.iki.elonen.NanoHTTPD$Response$Status,java.lang.String)>($r24, "BAD REQUEST: Content type is multipart/form-data but boundary missing. Usage: GET /example/file.html");
+
+        throw $r23;
+
+     label39:
+        $r12 := @caughtexception;
+
+        goto label19;
+
+     label40:
+        r3 = "boundary=";
+
+     label41:
+        i0 = virtualinvoke $r10.<java.lang.String: int indexOf(java.lang.String)>("boundary=");
+
+        $i4 = virtualinvoke r3.<java.lang.String: int length()>();
+
+     label42:
+        i0 = i0 + $i4;
+
+     label43:
+        $i4 = virtualinvoke $r10.<java.lang.String: int length()>();
+
+        $r10 = virtualinvoke $r10.<java.lang.String: java.lang.String substring(int,int)>(i0, $i4);
+
+     label44:
+        r3 = $r10;
+
+     label45:
+        $z0 = virtualinvoke $r10.<java.lang.String: boolean startsWith(java.lang.String)>("\"");
+
+     label46:
+        if $z0 == 0 goto label53;
+
+     label47:
+        $z0 = virtualinvoke $r10.<java.lang.String: boolean endsWith(java.lang.String)>("\"");
+
+     label48:
+        if $z0 == 0 goto label53;
+
+     label49:
+        i0 = virtualinvoke $r10.<java.lang.String: int length()>();
+
+     label50:
+        i0 = i0 + -1;
+
+     label51:
+        $r10 = virtualinvoke $r10.<java.lang.String: java.lang.String substring(int,int)>(1, i0);
+
+     label52:
+        r3 = $r10;
+
+     label53:
+        $r8 = r0.<fi.iki.elonen.NanoHTTPD$HTTPSession: java.util.Map parms>;
+
+        specialinvoke r0.<fi.iki.elonen.NanoHTTPD$HTTPSession: void decodeMultipartData(java.lang.String,java.nio.ByteBuffer,java.io.BufferedReader,java.util.Map,java.util.Map)>(r3, $r16, r13, $r8, r1);
+
+     label54:
+        staticinvoke <fi.iki.elonen.NanoHTTPD: void access$300(java.io.Closeable)>($r7);
+
+        staticinvoke <fi.iki.elonen.NanoHTTPD: void access$300(java.io.Closeable)>(r13);
+
+        return;
+
+     label55:
+        $r10 = "";
+
+     label56:
+        r5 = new java.lang.StringBuilder;
+
+        specialinvoke r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r25 = newarray (char)[512];
+
+        i0 = virtualinvoke r13.<java.io.BufferedReader: int read(char[])>($r25);
+
+     label57:
+        if i0 < 0 goto label64;
+
+     label58:
+        $z0 = virtualinvoke $r10.<java.lang.String: boolean endsWith(java.lang.String)>("\r\n");
+
+     label59:
+        if $z0 != 0 goto label64;
+
+     label60:
+        r3 = staticinvoke <java.lang.String: java.lang.String valueOf(char[],int,int)>($r25, 0, i0);
+
+     label61:
+        $r10 = r3;
+
+     label62:
+        virtualinvoke r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r3);
+
+        i0 = virtualinvoke r13.<java.io.BufferedReader: int read(char[])>($r25);
+
+     label63:
+        goto label57;
+
+     label64:
+        $r10 = virtualinvoke r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r10 = virtualinvoke $r10.<java.lang.String: java.lang.String trim()>();
+
+        r1 = r0.<fi.iki.elonen.NanoHTTPD$HTTPSession: java.util.Map parms>;
+
+        specialinvoke r0.<fi.iki.elonen.NanoHTTPD$HTTPSession: void decodeParms(java.lang.String,java.util.Map)>($r10, r1);
+
+     label65:
+        goto label54;
+
+     label66:
+        $r19 = <fi.iki.elonen.NanoHTTPD$Method: fi.iki.elonen.NanoHTTPD$Method PUT>;
+
+        $r20 = r0.<fi.iki.elonen.NanoHTTPD$HTTPSession: fi.iki.elonen.NanoHTTPD$Method method>;
+
+        $z0 = virtualinvoke $r19.<fi.iki.elonen.NanoHTTPD$Method: boolean equals(java.lang.Object)>($r20);
+
+     label67:
+        if $z0 == 0 goto label54;
+
+     label68:
+        i0 = virtualinvoke $r16.<java.nio.ByteBuffer: int limit()>();
+
+        $r10 = specialinvoke r0.<fi.iki.elonen.NanoHTTPD$HTTPSession: java.lang.String saveTmpFile(java.nio.ByteBuffer,int,int)>($r16, 0, i0);
+
+        interfaceinvoke r1.<java.util.Map: java.lang.Object put(java.lang.Object,java.lang.Object)>("content", $r10);
+
+     label69:
+        goto label54;
+
+        catch java.lang.Throwable from label01 to label02 with label18;
+        catch java.lang.Throwable from label03 to label04 with label18;
+        catch java.lang.Throwable from label05 to label06 with label18;
+        catch java.lang.Throwable from label07 to label09 with label18;
+        catch java.lang.Throwable from label10 to label11 with label18;
+        catch java.lang.Throwable from label12 to label13 with label18;
+        catch java.lang.Throwable from label14 to label15 with label18;
+        catch java.lang.Throwable from label16 to label17 with label18;
+        catch java.lang.Throwable from label20 to label21 with label18;
+        catch java.lang.Throwable from label22 to label23 with label18;
+        catch java.lang.Throwable from label25 to label26 with label18;
+        catch java.lang.Throwable from label26 to label27 with label39;
+        catch java.lang.Throwable from label28 to label29 with label39;
+        catch java.lang.Throwable from label30 to label31 with label39;
+        catch java.lang.Throwable from label32 to label33 with label39;
+        catch java.lang.Throwable from label34 to label35 with label39;
+        catch java.lang.Throwable from label36 to label37 with label39;
+        catch java.lang.Throwable from label38 to label39 with label39;
+        catch java.lang.Throwable from label41 to label42 with label39;
+        catch java.lang.Throwable from label43 to label44 with label39;
+        catch java.lang.Throwable from label45 to label46 with label39;
+        catch java.lang.Throwable from label47 to label48 with label39;
+        catch java.lang.Throwable from label49 to label50 with label39;
+        catch java.lang.Throwable from label51 to label52 with label39;
+        catch java.lang.Throwable from label53 to label54 with label39;
+        catch java.lang.Throwable from label56 to label57 with label39;
+        catch java.lang.Throwable from label58 to label59 with label39;
+        catch java.lang.Throwable from label60 to label61 with label39;
+        catch java.lang.Throwable from label62 to label63 with label39;
+        catch java.lang.Throwable from label64 to label65 with label39;
+        catch java.lang.Throwable from label66 to label67 with label39;
+        catch java.lang.Throwable from label68 to label69 with label39;
+    }

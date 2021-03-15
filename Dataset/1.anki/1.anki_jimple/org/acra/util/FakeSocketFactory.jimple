@@ -1,0 +1,197 @@
+org.acra.util.FakeSocketFactory extends java.lang.Object implements org.apache.http.conn.scheme.LayeredSocketFactory org.apache.http.conn.scheme.SocketFactory
+private javax.net.ssl.SSLContext sslcontext
+    public void <init>()
+    {
+        org.acra.util.FakeSocketFactory r0;
+
+        r0 := @this: org.acra.util.FakeSocketFactory;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<org.acra.util.FakeSocketFactory: javax.net.ssl.SSLContext sslcontext> = null;
+
+        return;
+    }
+    private static javax.net.ssl.SSLContext createEasySSLContext() throws java.io.IOException
+    {
+        java.lang.Exception r0;
+        org.acra.util.NaiveTrustManager $r1;
+        javax.net.ssl.SSLContext $r2;
+        javax.net.ssl.TrustManager[] $r3;
+        java.io.IOException $r4;
+        java.lang.String $r5;
+
+     label1:
+        $r2 = staticinvoke <javax.net.ssl.SSLContext: javax.net.ssl.SSLContext getInstance(java.lang.String)>("TLS");
+
+        $r3 = newarray (javax.net.ssl.TrustManager)[1];
+
+     label2:
+        $r1 = new org.acra.util.NaiveTrustManager;
+
+     label3:
+        specialinvoke $r1.<org.acra.util.NaiveTrustManager: void <init>()>();
+
+        $r3[0] = $r1;
+
+        virtualinvoke $r2.<javax.net.ssl.SSLContext: void init(javax.net.ssl.KeyManager[],javax.net.ssl.TrustManager[],java.security.SecureRandom)>(null, $r3, null);
+
+     label4:
+        return $r2;
+
+     label5:
+        r0 := @caughtexception;
+
+        $r4 = new java.io.IOException;
+
+        $r5 = virtualinvoke r0.<java.lang.Exception: java.lang.String getMessage()>();
+
+        specialinvoke $r4.<java.io.IOException: void <init>(java.lang.String)>($r5);
+
+        throw $r4;
+
+        catch java.lang.Exception from label1 to label2 with label5;
+        catch java.lang.Exception from label3 to label4 with label5;
+    }
+    private javax.net.ssl.SSLContext getSSLContext() throws java.io.IOException
+    {
+        org.acra.util.FakeSocketFactory r0;
+        javax.net.ssl.SSLContext $r1;
+
+        r0 := @this: org.acra.util.FakeSocketFactory;
+
+        $r1 = r0.<org.acra.util.FakeSocketFactory: javax.net.ssl.SSLContext sslcontext>;
+
+        if $r1 != null goto label1;
+
+        $r1 = staticinvoke <org.acra.util.FakeSocketFactory: javax.net.ssl.SSLContext createEasySSLContext()>();
+
+        r0.<org.acra.util.FakeSocketFactory: javax.net.ssl.SSLContext sslcontext> = $r1;
+
+     label1:
+        $r1 = r0.<org.acra.util.FakeSocketFactory: javax.net.ssl.SSLContext sslcontext>;
+
+        return $r1;
+    }
+    public java.net.Socket connectSocket(java.net.Socket, java.lang.String, int, java.net.InetAddress, int, org.apache.http.params.HttpParams) throws java.io.IOException
+    {
+        org.acra.util.FakeSocketFactory r0;
+        java.net.Socket $r1;
+        java.lang.String $r2;
+        int $i0, $i1, $i2, $i3;
+        java.net.InetAddress $r3;
+        org.apache.http.params.HttpParams $r4;
+        java.net.InetSocketAddress r5, r6;
+        javax.net.ssl.SSLSocket $r7;
+
+        r0 := @this: org.acra.util.FakeSocketFactory;
+
+        $r1 := @parameter0: java.net.Socket;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $i0 := @parameter2: int;
+
+        $r3 := @parameter3: java.net.InetAddress;
+
+        $i1 := @parameter4: int;
+
+        $r4 := @parameter5: org.apache.http.params.HttpParams;
+
+        $i2 = staticinvoke <org.apache.http.params.HttpConnectionParams: int getConnectionTimeout(org.apache.http.params.HttpParams)>($r4);
+
+        $i3 = staticinvoke <org.apache.http.params.HttpConnectionParams: int getSoTimeout(org.apache.http.params.HttpParams)>($r4);
+
+        r6 = new java.net.InetSocketAddress;
+
+        specialinvoke r6.<java.net.InetSocketAddress: void <init>(java.lang.String,int)>($r2, $i0);
+
+        if $r1 == null goto label5;
+
+     label1:
+        $r7 = (javax.net.ssl.SSLSocket) $r1;
+
+        if $r3 != null goto label2;
+
+        if $i1 <= 0 goto label4;
+
+     label2:
+        if $i1 >= 0 goto label3;
+
+        $i1 = 0;
+
+     label3:
+        r5 = new java.net.InetSocketAddress;
+
+        specialinvoke r5.<java.net.InetSocketAddress: void <init>(java.net.InetAddress,int)>($r3, $i1);
+
+        virtualinvoke $r7.<javax.net.ssl.SSLSocket: void bind(java.net.SocketAddress)>(r5);
+
+     label4:
+        virtualinvoke $r7.<javax.net.ssl.SSLSocket: void connect(java.net.SocketAddress,int)>(r6, $i2);
+
+        virtualinvoke $r7.<javax.net.ssl.SSLSocket: void setSoTimeout(int)>($i3);
+
+        return $r7;
+
+     label5:
+        $r1 = virtualinvoke r0.<org.acra.util.FakeSocketFactory: java.net.Socket createSocket()>();
+
+        goto label1;
+    }
+    public java.net.Socket createSocket() throws java.io.IOException
+    {
+        org.acra.util.FakeSocketFactory r0;
+        javax.net.ssl.SSLContext $r1;
+        javax.net.ssl.SSLSocketFactory $r2;
+        java.net.Socket $r3;
+
+        r0 := @this: org.acra.util.FakeSocketFactory;
+
+        $r1 = specialinvoke r0.<org.acra.util.FakeSocketFactory: javax.net.ssl.SSLContext getSSLContext()>();
+
+        $r2 = virtualinvoke $r1.<javax.net.ssl.SSLContext: javax.net.ssl.SSLSocketFactory getSocketFactory()>();
+
+        $r3 = virtualinvoke $r2.<javax.net.ssl.SSLSocketFactory: java.net.Socket createSocket()>();
+
+        return $r3;
+    }
+    public java.net.Socket createSocket(java.net.Socket, java.lang.String, int, boolean) throws java.io.IOException
+    {
+        org.acra.util.FakeSocketFactory r0;
+        java.net.Socket $r1;
+        java.lang.String $r2;
+        int $i0;
+        boolean $z0;
+        javax.net.ssl.SSLContext $r3;
+        javax.net.ssl.SSLSocketFactory $r4;
+
+        r0 := @this: org.acra.util.FakeSocketFactory;
+
+        $r1 := @parameter0: java.net.Socket;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $i0 := @parameter2: int;
+
+        $z0 := @parameter3: boolean;
+
+        $r3 = specialinvoke r0.<org.acra.util.FakeSocketFactory: javax.net.ssl.SSLContext getSSLContext()>();
+
+        $r4 = virtualinvoke $r3.<javax.net.ssl.SSLContext: javax.net.ssl.SSLSocketFactory getSocketFactory()>();
+
+        $r1 = virtualinvoke $r4.<javax.net.ssl.SSLSocketFactory: java.net.Socket createSocket(java.net.Socket,java.lang.String,int,boolean)>($r1, $r2, $i0, $z0);
+
+        return $r1;
+    }
+    public boolean isSecure(java.net.Socket) throws java.lang.IllegalArgumentException
+    {
+        org.acra.util.FakeSocketFactory r0;
+        java.net.Socket $r1;
+
+        r0 := @this: org.acra.util.FakeSocketFactory;
+
+        $r1 := @parameter0: java.net.Socket;
+
+        return 1;
+    }

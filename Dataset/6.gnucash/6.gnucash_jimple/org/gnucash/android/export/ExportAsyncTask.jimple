@@ -1,0 +1,1675 @@
+org.gnucash.android.export.ExportAsyncTask extends android.os.AsyncTask
+public static final java.lang.String TAG
+private final android.content.Context mContext
+private android.database.sqlite.SQLiteDatabase mDb
+private org.gnucash.android.export.ExportParams mExportParams
+private java.util.List mExportedFiles
+private org.gnucash.android.export.Exporter mExporter
+private android.app.ProgressDialog mProgressDialog
+    public void <init>(android.content.Context, android.database.sqlite.SQLiteDatabase)
+    {
+        org.gnucash.android.export.ExportAsyncTask r0;
+        android.content.Context $r1;
+        android.database.sqlite.SQLiteDatabase $r2;
+
+        r0 := @this: org.gnucash.android.export.ExportAsyncTask;
+
+        $r1 := @parameter0: android.content.Context;
+
+        $r2 := @parameter1: android.database.sqlite.SQLiteDatabase;
+
+        specialinvoke r0.<android.os.AsyncTask: void <init>()>();
+
+        r0.<org.gnucash.android.export.ExportAsyncTask: android.content.Context mContext> = $r1;
+
+        r0.<org.gnucash.android.export.ExportAsyncTask: android.database.sqlite.SQLiteDatabase mDb> = $r2;
+
+        return;
+    }
+    static android.content.Context access$000(org.gnucash.android.export.ExportAsyncTask)
+    {
+        org.gnucash.android.export.ExportAsyncTask $r0;
+        android.content.Context r1;
+
+        $r0 := @parameter0: org.gnucash.android.export.ExportAsyncTask;
+
+        r1 = $r0.<org.gnucash.android.export.ExportAsyncTask: android.content.Context mContext>;
+
+        return r1;
+    }
+    static org.gnucash.android.export.ExportParams access$100(org.gnucash.android.export.ExportAsyncTask)
+    {
+        org.gnucash.android.export.ExportAsyncTask $r0;
+        org.gnucash.android.export.ExportParams r1;
+
+        $r0 := @parameter0: org.gnucash.android.export.ExportAsyncTask;
+
+        r1 = $r0.<org.gnucash.android.export.ExportAsyncTask: org.gnucash.android.export.ExportParams mExportParams>;
+
+        return r1;
+    }
+    private void backupAndDeleteTransactions()
+    {
+        org.gnucash.android.export.ExportAsyncTask r0;
+        android.database.sqlite.SQLiteDatabase $r2, $r4;
+        java.util.List r3;
+        boolean $z0;
+        org.gnucash.android.db.adapter.DatabaseAdapter$UpdateMethod $r5;
+        java.util.ArrayList $r6;
+        org.gnucash.android.db.adapter.SplitsDbAdapter $r7;
+        org.gnucash.android.db.adapter.TransactionsDbAdapter $r8;
+        org.gnucash.android.db.adapter.AccountsDbAdapter $r9;
+
+        r0 := @this: org.gnucash.android.export.ExportAsyncTask;
+
+        staticinvoke <android.util.Log: int i(java.lang.String,java.lang.String)>("ExportAsyncTask", "Backup and deleting transactions after export");
+
+        staticinvoke <org.gnucash.android.export.xml.GncXmlExporter: boolean createBackup()>();
+
+        $r6 = new java.util.ArrayList;
+
+        r3 = $r6;
+
+        specialinvoke $r6.<java.util.ArrayList: void <init>()>();
+
+        $z0 = staticinvoke <org.gnucash.android.app.GnuCashApplication: boolean shouldSaveOpeningBalances(boolean)>(0);
+
+        $r8 = new org.gnucash.android.db.adapter.TransactionsDbAdapter;
+
+        $r4 = r0.<org.gnucash.android.export.ExportAsyncTask: android.database.sqlite.SQLiteDatabase mDb>;
+
+        $r7 = new org.gnucash.android.db.adapter.SplitsDbAdapter;
+
+        $r2 = r0.<org.gnucash.android.export.ExportAsyncTask: android.database.sqlite.SQLiteDatabase mDb>;
+
+        specialinvoke $r7.<org.gnucash.android.db.adapter.SplitsDbAdapter: void <init>(android.database.sqlite.SQLiteDatabase)>($r2);
+
+        specialinvoke $r8.<org.gnucash.android.db.adapter.TransactionsDbAdapter: void <init>(android.database.sqlite.SQLiteDatabase,org.gnucash.android.db.adapter.SplitsDbAdapter)>($r4, $r7);
+
+        if $z0 == 0 goto label1;
+
+        $r9 = new org.gnucash.android.db.adapter.AccountsDbAdapter;
+
+        $r2 = r0.<org.gnucash.android.export.ExportAsyncTask: android.database.sqlite.SQLiteDatabase mDb>;
+
+        specialinvoke $r9.<org.gnucash.android.db.adapter.AccountsDbAdapter: void <init>(android.database.sqlite.SQLiteDatabase,org.gnucash.android.db.adapter.TransactionsDbAdapter)>($r2, $r8);
+
+        r3 = virtualinvoke $r9.<org.gnucash.android.db.adapter.AccountsDbAdapter: java.util.List getAllOpeningBalanceTransactions()>();
+
+     label1:
+        virtualinvoke $r8.<org.gnucash.android.db.adapter.TransactionsDbAdapter: int deleteAllNonTemplateTransactions()>();
+
+        if $z0 == 0 goto label2;
+
+        $r5 = <org.gnucash.android.db.adapter.DatabaseAdapter$UpdateMethod: org.gnucash.android.db.adapter.DatabaseAdapter$UpdateMethod insert>;
+
+        virtualinvoke $r8.<org.gnucash.android.db.adapter.TransactionsDbAdapter: long bulkAddRecords(java.util.List,org.gnucash.android.db.adapter.DatabaseAdapter$UpdateMethod)>(r3, $r5);
+
+     label2:
+        return;
+    }
+    private java.util.ArrayList convertFilePathsToUris(java.util.List)
+    {
+        org.gnucash.android.export.ExportAsyncTask r0;
+        java.util.List r1;
+        java.util.ArrayList r2;
+        java.io.File r3;
+        java.util.Iterator $r4;
+        boolean $z0;
+        java.lang.Object $r5;
+        java.lang.String r6;
+        android.net.Uri $r7;
+
+        r0 := @this: org.gnucash.android.export.ExportAsyncTask;
+
+        r1 := @parameter0: java.util.List;
+
+        r2 = new java.util.ArrayList;
+
+        specialinvoke r2.<java.util.ArrayList: void <init>()>();
+
+        $r4 = interfaceinvoke r1.<java.util.List: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r4.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label2;
+
+        $r5 = interfaceinvoke $r4.<java.util.Iterator: java.lang.Object next()>();
+
+        r6 = (java.lang.String) $r5;
+
+        r3 = new java.io.File;
+
+        specialinvoke r3.<java.io.File: void <init>(java.lang.String)>(r6);
+
+        virtualinvoke r3.<java.io.File: boolean setReadable(boolean,boolean)>(1, 0);
+
+        $r7 = staticinvoke <android.net.Uri: android.net.Uri fromFile(java.io.File)>(r3);
+
+        virtualinvoke r2.<java.util.ArrayList: boolean add(java.lang.Object)>($r7);
+
+        goto label1;
+
+     label2:
+        return r2;
+    }
+    private org.gnucash.android.export.Exporter getExporter()
+    {
+        org.gnucash.android.export.ExportAsyncTask r0;
+        int[] $r1;
+        org.gnucash.android.export.ExportParams $r2;
+        org.gnucash.android.export.ExportFormat $r3;
+        int $i0;
+        org.gnucash.android.export.xml.GncXmlExporter $r4;
+        android.database.sqlite.SQLiteDatabase $r5;
+        org.gnucash.android.export.qif.QifExporter $r6;
+        org.gnucash.android.export.ofx.OfxExporter $r7;
+
+        r0 := @this: org.gnucash.android.export.ExportAsyncTask;
+
+        $r1 = <org.gnucash.android.export.ExportAsyncTask$2: int[] $SwitchMap$org$gnucash$android$export$ExportFormat>;
+
+        $r2 = r0.<org.gnucash.android.export.ExportAsyncTask: org.gnucash.android.export.ExportParams mExportParams>;
+
+        $r3 = virtualinvoke $r2.<org.gnucash.android.export.ExportParams: org.gnucash.android.export.ExportFormat getExportFormat()>();
+
+        $i0 = virtualinvoke $r3.<org.gnucash.android.export.ExportFormat: int ordinal()>();
+
+        $i0 = $r1[$i0];
+
+        lookupswitch($i0)
+        {
+            case 1: goto label2;
+            case 2: goto label3;
+            default: goto label1;
+        };
+
+     label1:
+        $r4 = new org.gnucash.android.export.xml.GncXmlExporter;
+
+        $r2 = r0.<org.gnucash.android.export.ExportAsyncTask: org.gnucash.android.export.ExportParams mExportParams>;
+
+        $r5 = r0.<org.gnucash.android.export.ExportAsyncTask: android.database.sqlite.SQLiteDatabase mDb>;
+
+        specialinvoke $r4.<org.gnucash.android.export.xml.GncXmlExporter: void <init>(org.gnucash.android.export.ExportParams,android.database.sqlite.SQLiteDatabase)>($r2, $r5);
+
+        return $r4;
+
+     label2:
+        $r6 = new org.gnucash.android.export.qif.QifExporter;
+
+        $r2 = r0.<org.gnucash.android.export.ExportAsyncTask: org.gnucash.android.export.ExportParams mExportParams>;
+
+        $r5 = r0.<org.gnucash.android.export.ExportAsyncTask: android.database.sqlite.SQLiteDatabase mDb>;
+
+        specialinvoke $r6.<org.gnucash.android.export.qif.QifExporter: void <init>(org.gnucash.android.export.ExportParams,android.database.sqlite.SQLiteDatabase)>($r2, $r5);
+
+        return $r6;
+
+     label3:
+        $r7 = new org.gnucash.android.export.ofx.OfxExporter;
+
+        $r2 = r0.<org.gnucash.android.export.ExportAsyncTask: org.gnucash.android.export.ExportParams mExportParams>;
+
+        $r5 = r0.<org.gnucash.android.export.ExportAsyncTask: android.database.sqlite.SQLiteDatabase mDb>;
+
+        specialinvoke $r7.<org.gnucash.android.export.ofx.OfxExporter: void <init>(org.gnucash.android.export.ExportParams,android.database.sqlite.SQLiteDatabase)>($r2, $r5);
+
+        return $r7;
+    }
+    private void moveExportToDropbox() throws org.gnucash.android.export.Exporter$ExporterException
+    {
+        org.gnucash.android.export.ExportAsyncTask r0;
+        java.io.IOException r1;
+        java.io.File r2;
+        android.content.Context $r3;
+        java.lang.Object[] $r4;
+        java.lang.String $r5, $r6;
+        com.dropbox.sync.android.DbxAccountManager $r7;
+        com.dropbox.sync.android.DbxFile r8, $r15;
+        com.dropbox.sync.android.DbxAccount $r9;
+        com.dropbox.sync.android.DbxFileSystem $r10;
+        java.util.List $r11;
+        java.util.Iterator $r12;
+        boolean $z0;
+        java.lang.Object $r13;
+        com.dropbox.sync.android.DbxPath $r14;
+        org.gnucash.android.export.Exporter$ExporterException $r16;
+        org.gnucash.android.export.ExportParams $r17;
+        java.lang.Throwable $r18;
+
+        r0 := @this: org.gnucash.android.export.ExportAsyncTask;
+
+        staticinvoke <android.util.Log: int i(java.lang.String,java.lang.String)>("ExportAsyncTask", "Copying exported file to DropBox");
+
+        $r3 = r0.<org.gnucash.android.export.ExportAsyncTask: android.content.Context mContext>;
+
+        $r4 = newarray (java.lang.Object)[1];
+
+        $r4[0] = "dhjh8ke9wf05948";
+
+        $r5 = virtualinvoke $r3.<android.content.Context: java.lang.String getString(int,java.lang.Object[])>(2131296846, $r4);
+
+        $r3 = r0.<org.gnucash.android.export.ExportAsyncTask: android.content.Context mContext>;
+
+        $r4 = newarray (java.lang.Object)[1];
+
+        $r4[0] = "h2t9fphj3nr4wkw";
+
+        $r6 = virtualinvoke $r3.<android.content.Context: java.lang.String getString(int,java.lang.Object[])>(2131296847, $r4);
+
+        $r3 = r0.<org.gnucash.android.export.ExportAsyncTask: android.content.Context mContext>;
+
+        $r3 = virtualinvoke $r3.<android.content.Context: android.content.Context getApplicationContext()>();
+
+        $r7 = staticinvoke <com.dropbox.sync.android.DbxAccountManager: com.dropbox.sync.android.DbxAccountManager getInstance(android.content.Context,java.lang.String,java.lang.String)>($r3, $r5, $r6);
+
+        r8 = null;
+
+     label01:
+        $r9 = virtualinvoke $r7.<com.dropbox.sync.android.DbxAccountManager: com.dropbox.sync.android.DbxAccount getLinkedAccount()>();
+
+        $r10 = staticinvoke <com.dropbox.sync.android.DbxFileSystem: com.dropbox.sync.android.DbxFileSystem forAccount(com.dropbox.sync.android.DbxAccount)>($r9);
+
+     label02:
+        $r11 = r0.<org.gnucash.android.export.ExportAsyncTask: java.util.List mExportedFiles>;
+
+     label03:
+        $r12 = interfaceinvoke $r11.<java.util.List: java.util.Iterator iterator()>();
+
+     label04:
+        $z0 = interfaceinvoke $r12.<java.util.Iterator: boolean hasNext()>();
+
+     label05:
+        if $z0 == 0 goto label18;
+
+     label06:
+        $r13 = interfaceinvoke $r12.<java.util.Iterator: java.lang.Object next()>();
+
+     label07:
+        $r5 = (java.lang.String) $r13;
+
+        r2 = new java.io.File;
+
+     label08:
+        specialinvoke r2.<java.io.File: void <init>(java.lang.String)>($r5);
+
+     label09:
+        $r14 = new com.dropbox.sync.android.DbxPath;
+
+     label10:
+        $r5 = virtualinvoke r2.<java.io.File: java.lang.String getName()>();
+
+        specialinvoke $r14.<com.dropbox.sync.android.DbxPath: void <init>(java.lang.String)>($r5);
+
+        $r15 = virtualinvoke $r10.<com.dropbox.sync.android.DbxFileSystem: com.dropbox.sync.android.DbxFile create(com.dropbox.sync.android.DbxPath)>($r14);
+
+     label11:
+        r8 = $r15;
+
+     label12:
+        virtualinvoke $r15.<com.dropbox.sync.android.DbxFile: void writeFromExistingFile(java.io.File,boolean)>(r2, 0);
+
+        virtualinvoke r2.<java.io.File: boolean delete()>();
+
+     label13:
+        goto label04;
+
+     label14:
+        r1 := @caughtexception;
+
+     label15:
+        $r16 = new org.gnucash.android.export.Exporter$ExporterException;
+
+        $r17 = r0.<org.gnucash.android.export.ExportAsyncTask: org.gnucash.android.export.ExportParams mExportParams>;
+
+        specialinvoke $r16.<org.gnucash.android.export.Exporter$ExporterException: void <init>(org.gnucash.android.export.ExportParams)>($r17);
+
+        throw $r16;
+
+     label16:
+        $r18 := @caughtexception;
+
+        if r8 == null goto label17;
+
+        virtualinvoke r8.<com.dropbox.sync.android.DbxFile: void close()>();
+
+     label17:
+        throw $r18;
+
+     label18:
+        if r8 == null goto label19;
+
+        virtualinvoke r8.<com.dropbox.sync.android.DbxFile: void close()>();
+
+     label19:
+        return;
+
+        catch java.io.IOException from label01 to label02 with label14;
+        catch java.io.IOException from label03 to label05 with label14;
+        catch java.io.IOException from label06 to label07 with label14;
+        catch java.io.IOException from label08 to label09 with label14;
+        catch java.io.IOException from label10 to label11 with label14;
+        catch java.io.IOException from label12 to label13 with label14;
+        catch java.lang.Throwable from label01 to label05 with label16;
+        catch java.lang.Throwable from label06 to label11 with label16;
+        catch java.lang.Throwable from label12 to label13 with label16;
+        catch java.lang.Throwable from label15 to label16 with label16;
+    }
+    private void moveExportToGoogleDrive() throws org.gnucash.android.export.Exporter$ExporterException
+    {
+        org.gnucash.android.export.ExportAsyncTask r0;
+        byte[] r1;
+        java.io.IOException r2;
+        java.io.File r3;
+        java.io.FileInputStream r4;
+        android.content.Context $r5;
+        com.google.android.gms.common.api.GoogleApiClient $r6;
+        com.google.android.gms.drive.DriveApi $r7;
+        com.google.android.gms.common.api.PendingResult $r8;
+        java.util.concurrent.TimeUnit $r9;
+        com.google.android.gms.common.api.Result $r10;
+        com.google.android.gms.drive.DriveApi$DriveContentsResult r11;
+        com.google.android.gms.common.api.Status $r12;
+        boolean $z0;
+        org.gnucash.android.export.Exporter$ExporterException $r13;
+        org.gnucash.android.export.ExportParams $r14;
+        com.google.android.gms.drive.DriveContents $r15;
+        com.google.android.gms.drive.DriveFolder$DriveFileResult r16;
+        java.io.OutputStream $r17;
+        java.util.List $r18;
+        java.util.Iterator $r19;
+        java.lang.Object $r20;
+        java.lang.String r21;
+        int $i0;
+        com.google.android.gms.drive.MetadataChangeSet$Builder $r22;
+        org.gnucash.android.export.Exporter $r23;
+        com.google.android.gms.drive.MetadataChangeSet $r24;
+        android.content.SharedPreferences $r25;
+        com.google.android.gms.drive.DriveId $r26;
+        com.google.android.gms.drive.DriveFolder $r27;
+        java.lang.StringBuilder $r28;
+        com.google.android.gms.drive.DriveFile $r29;
+
+        r0 := @this: org.gnucash.android.export.ExportAsyncTask;
+
+        staticinvoke <android.util.Log: int i(java.lang.String,java.lang.String)>("ExportAsyncTask", "Moving exported file to Google Drive");
+
+        $r5 = staticinvoke <org.gnucash.android.app.GnuCashApplication: android.content.Context getAppContext()>();
+
+        $r6 = staticinvoke <org.gnucash.android.ui.settings.BackupPreferenceFragment: com.google.android.gms.common.api.GoogleApiClient getGoogleApiClient(android.content.Context)>($r5);
+
+        virtualinvoke $r6.<com.google.android.gms.common.api.GoogleApiClient: com.google.android.gms.common.ConnectionResult blockingConnect()>();
+
+        $r7 = <com.google.android.gms.drive.Drive: com.google.android.gms.drive.DriveApi DriveApi>;
+
+        $r8 = interfaceinvoke $r7.<com.google.android.gms.drive.DriveApi: com.google.android.gms.common.api.PendingResult newDriveContents(com.google.android.gms.common.api.GoogleApiClient)>($r6);
+
+        $r9 = <java.util.concurrent.TimeUnit: java.util.concurrent.TimeUnit MINUTES>;
+
+        $r10 = virtualinvoke $r8.<com.google.android.gms.common.api.PendingResult: com.google.android.gms.common.api.Result await(long,java.util.concurrent.TimeUnit)>(1L, $r9);
+
+        r11 = (com.google.android.gms.drive.DriveApi$DriveContentsResult) $r10;
+
+        $r12 = interfaceinvoke r11.<com.google.android.gms.drive.DriveApi$DriveContentsResult: com.google.android.gms.common.api.Status getStatus()>();
+
+        $z0 = virtualinvoke $r12.<com.google.android.gms.common.api.Status: boolean isSuccess()>();
+
+        if $z0 != 0 goto label01;
+
+        $r13 = new org.gnucash.android.export.Exporter$ExporterException;
+
+        $r14 = r0.<org.gnucash.android.export.ExportAsyncTask: org.gnucash.android.export.ExportParams mExportParams>;
+
+        specialinvoke $r13.<org.gnucash.android.export.Exporter$ExporterException: void <init>(org.gnucash.android.export.ExportParams,java.lang.String)>($r14, "Error while trying to create new file contents");
+
+        throw $r13;
+
+     label01:
+        $r15 = interfaceinvoke r11.<com.google.android.gms.drive.DriveApi$DriveContentsResult: com.google.android.gms.drive.DriveContents getDriveContents()>();
+
+        r16 = null;
+
+     label02:
+        $r17 = interfaceinvoke $r15.<com.google.android.gms.drive.DriveContents: java.io.OutputStream getOutputStream()>();
+
+     label03:
+        $r18 = r0.<org.gnucash.android.export.ExportAsyncTask: java.util.List mExportedFiles>;
+
+     label04:
+        $r19 = interfaceinvoke $r18.<java.util.List: java.util.Iterator iterator()>();
+
+     label05:
+        $z0 = interfaceinvoke $r19.<java.util.Iterator: boolean hasNext()>();
+
+     label06:
+        if $z0 == 0 goto label32;
+
+     label07:
+        $r20 = interfaceinvoke $r19.<java.util.Iterator: java.lang.Object next()>();
+
+     label08:
+        r21 = (java.lang.String) $r20;
+
+        r3 = new java.io.File;
+
+     label09:
+        specialinvoke r3.<java.io.File: void <init>(java.lang.String)>(r21);
+
+     label10:
+        r4 = new java.io.FileInputStream;
+
+     label11:
+        specialinvoke r4.<java.io.FileInputStream: void <init>(java.io.File)>(r3);
+
+     label12:
+        r1 = newarray (byte)[1024];
+
+     label13:
+        $i0 = virtualinvoke r4.<java.io.FileInputStream: int read(byte[])>(r1);
+
+     label14:
+        if $i0 < 0 goto label18;
+
+     label15:
+        virtualinvoke $r17.<java.io.OutputStream: void write(byte[],int,int)>(r1, 0, $i0);
+
+     label16:
+        goto label13;
+
+     label17:
+        r2 := @caughtexception;
+
+        $r13 = new org.gnucash.android.export.Exporter$ExporterException;
+
+        $r14 = r0.<org.gnucash.android.export.ExportAsyncTask: org.gnucash.android.export.ExportParams mExportParams>;
+
+        specialinvoke $r13.<org.gnucash.android.export.Exporter$ExporterException: void <init>(org.gnucash.android.export.ExportParams,java.lang.Throwable)>($r14, r2);
+
+        throw $r13;
+
+     label18:
+        virtualinvoke r4.<java.io.FileInputStream: void close()>();
+
+        virtualinvoke $r17.<java.io.OutputStream: void flush()>();
+
+        virtualinvoke r3.<java.io.File: boolean delete()>();
+
+     label19:
+        $r22 = new com.google.android.gms.drive.MetadataChangeSet$Builder;
+
+     label20:
+        specialinvoke $r22.<com.google.android.gms.drive.MetadataChangeSet$Builder: void <init>()>();
+
+        r21 = virtualinvoke r3.<java.io.File: java.lang.String getName()>();
+
+        $r22 = virtualinvoke $r22.<com.google.android.gms.drive.MetadataChangeSet$Builder: com.google.android.gms.drive.MetadataChangeSet$Builder setTitle(java.lang.String)>(r21);
+
+     label21:
+        $r23 = r0.<org.gnucash.android.export.ExportAsyncTask: org.gnucash.android.export.Exporter mExporter>;
+
+     label22:
+        r21 = virtualinvoke $r23.<org.gnucash.android.export.Exporter: java.lang.String getExportMimeType()>();
+
+        $r22 = virtualinvoke $r22.<com.google.android.gms.drive.MetadataChangeSet$Builder: com.google.android.gms.drive.MetadataChangeSet$Builder setMimeType(java.lang.String)>(r21);
+
+        $r24 = virtualinvoke $r22.<com.google.android.gms.drive.MetadataChangeSet$Builder: com.google.android.gms.drive.MetadataChangeSet build()>();
+
+     label23:
+        $r5 = r0.<org.gnucash.android.export.ExportAsyncTask: android.content.Context mContext>;
+
+     label24:
+        $r25 = staticinvoke <android.preference.PreferenceManager: android.content.SharedPreferences getDefaultSharedPreferences(android.content.Context)>($r5);
+
+     label25:
+        $r5 = r0.<org.gnucash.android.export.ExportAsyncTask: android.content.Context mContext>;
+
+     label26:
+        r21 = virtualinvoke $r5.<android.content.Context: java.lang.String getString(int)>(2131296869);
+
+        r21 = interfaceinvoke $r25.<android.content.SharedPreferences: java.lang.String getString(java.lang.String,java.lang.String)>(r21, "");
+
+     label27:
+        $r7 = <com.google.android.gms.drive.Drive: com.google.android.gms.drive.DriveApi DriveApi>;
+
+     label28:
+        $r26 = staticinvoke <com.google.android.gms.drive.DriveId: com.google.android.gms.drive.DriveId decodeFromString(java.lang.String)>(r21);
+
+        $r27 = interfaceinvoke $r7.<com.google.android.gms.drive.DriveApi: com.google.android.gms.drive.DriveFolder getFolder(com.google.android.gms.common.api.GoogleApiClient,com.google.android.gms.drive.DriveId)>($r6, $r26);
+
+        $r8 = interfaceinvoke $r27.<com.google.android.gms.drive.DriveFolder: com.google.android.gms.common.api.PendingResult createFile(com.google.android.gms.common.api.GoogleApiClient,com.google.android.gms.drive.MetadataChangeSet,com.google.android.gms.drive.DriveContents)>($r6, $r24, $r15);
+
+     label29:
+        $r9 = <java.util.concurrent.TimeUnit: java.util.concurrent.TimeUnit MINUTES>;
+
+     label30:
+        $r10 = virtualinvoke $r8.<com.google.android.gms.common.api.PendingResult: com.google.android.gms.common.api.Result await(long,java.util.concurrent.TimeUnit)>(1L, $r9);
+
+     label31:
+        r16 = (com.google.android.gms.drive.DriveFolder$DriveFileResult) $r10;
+
+        goto label05;
+
+     label32:
+        if r16 != null goto label33;
+
+        $r13 = new org.gnucash.android.export.Exporter$ExporterException;
+
+        $r14 = r0.<org.gnucash.android.export.ExportAsyncTask: org.gnucash.android.export.ExportParams mExportParams>;
+
+        specialinvoke $r13.<org.gnucash.android.export.Exporter$ExporterException: void <init>(org.gnucash.android.export.ExportParams,java.lang.String)>($r14, "No result received");
+
+        throw $r13;
+
+     label33:
+        $r12 = interfaceinvoke r16.<com.google.android.gms.drive.DriveFolder$DriveFileResult: com.google.android.gms.common.api.Status getStatus()>();
+
+        $z0 = virtualinvoke $r12.<com.google.android.gms.common.api.Status: boolean isSuccess()>();
+
+        if $z0 != 0 goto label34;
+
+        $r13 = new org.gnucash.android.export.Exporter$ExporterException;
+
+        $r14 = r0.<org.gnucash.android.export.ExportAsyncTask: org.gnucash.android.export.ExportParams mExportParams>;
+
+        specialinvoke $r13.<org.gnucash.android.export.Exporter$ExporterException: void <init>(org.gnucash.android.export.ExportParams,java.lang.String)>($r14, "Error creating file in Google Drive");
+
+        throw $r13;
+
+     label34:
+        $r28 = new java.lang.StringBuilder;
+
+        specialinvoke $r28.<java.lang.StringBuilder: void <init>()>();
+
+        $r28 = virtualinvoke $r28.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Created file with id: ");
+
+        $r29 = interfaceinvoke r16.<com.google.android.gms.drive.DriveFolder$DriveFileResult: com.google.android.gms.drive.DriveFile getDriveFile()>();
+
+        $r26 = interfaceinvoke $r29.<com.google.android.gms.drive.DriveFile: com.google.android.gms.drive.DriveId getDriveId()>();
+
+        $r28 = virtualinvoke $r28.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>($r26);
+
+        r21 = virtualinvoke $r28.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int i(java.lang.String,java.lang.String)>("ExportAsyncTask", r21);
+
+        return;
+
+        catch java.io.IOException from label02 to label03 with label17;
+        catch java.io.IOException from label04 to label06 with label17;
+        catch java.io.IOException from label07 to label08 with label17;
+        catch java.io.IOException from label09 to label10 with label17;
+        catch java.io.IOException from label11 to label12 with label17;
+        catch java.io.IOException from label13 to label14 with label17;
+        catch java.io.IOException from label15 to label16 with label17;
+        catch java.io.IOException from label18 to label19 with label17;
+        catch java.io.IOException from label20 to label21 with label17;
+        catch java.io.IOException from label22 to label23 with label17;
+        catch java.io.IOException from label24 to label25 with label17;
+        catch java.io.IOException from label26 to label27 with label17;
+        catch java.io.IOException from label28 to label29 with label17;
+        catch java.io.IOException from label30 to label31 with label17;
+    }
+    private void moveExportToOwnCloud() throws org.gnucash.android.export.Exporter$ExporterException
+    {
+        org.gnucash.android.export.ExportAsyncTask r0;
+        android.content.Context $r1, $r2;
+        java.lang.String $r3, $r8, $r9, $r10;
+        android.content.SharedPreferences $r4;
+        boolean $z0;
+        java.lang.Boolean $r5;
+        org.gnucash.android.export.Exporter$ExporterException $r6;
+        org.gnucash.android.export.ExportParams $r7;
+        android.net.Uri $r11;
+        com.owncloud.android.lib.common.OwnCloudClient $r12;
+        com.owncloud.android.lib.common.OwnCloudCredentials $r13;
+        int $i0;
+        com.owncloud.android.lib.resources.files.CreateRemoteFolderOperation $r14;
+        com.owncloud.android.lib.common.operations.RemoteOperationResult $r15;
+        java.lang.StringBuilder $r16;
+        java.util.List $r17;
+        java.util.Iterator $r18;
+        java.lang.Object $r19;
+        org.gnucash.android.export.Exporter $r20;
+        com.owncloud.android.lib.resources.files.UploadRemoteFileOperation $r21;
+        java.io.File $r22;
+
+        r0 := @this: org.gnucash.android.export.ExportAsyncTask;
+
+        staticinvoke <android.util.Log: int i(java.lang.String,java.lang.String)>("ExportAsyncTask", "Copying exported file to ownCloud");
+
+        $r1 = r0.<org.gnucash.android.export.ExportAsyncTask: android.content.Context mContext>;
+
+        $r2 = r0.<org.gnucash.android.export.ExportAsyncTask: android.content.Context mContext>;
+
+        $r3 = virtualinvoke $r2.<android.content.Context: java.lang.String getString(int)>(2131296460);
+
+        $r4 = virtualinvoke $r1.<android.content.Context: android.content.SharedPreferences getSharedPreferences(java.lang.String,int)>($r3, 0);
+
+        $r1 = r0.<org.gnucash.android.export.ExportAsyncTask: android.content.Context mContext>;
+
+        $r3 = virtualinvoke $r1.<android.content.Context: java.lang.String getString(int)>(2131296894);
+
+        $z0 = interfaceinvoke $r4.<android.content.SharedPreferences: boolean getBoolean(java.lang.String,boolean)>($r3, 0);
+
+        $r5 = staticinvoke <java.lang.Boolean: java.lang.Boolean valueOf(boolean)>($z0);
+
+        $z0 = virtualinvoke $r5.<java.lang.Boolean: boolean booleanValue()>();
+
+        if $z0 != 0 goto label1;
+
+        $r6 = new org.gnucash.android.export.Exporter$ExporterException;
+
+        $r7 = r0.<org.gnucash.android.export.ExportAsyncTask: org.gnucash.android.export.ExportParams mExportParams>;
+
+        specialinvoke $r6.<org.gnucash.android.export.Exporter$ExporterException: void <init>(org.gnucash.android.export.ExportParams,java.lang.String)>($r7, "ownCloud not enabled.");
+
+        throw $r6;
+
+     label1:
+        $r1 = r0.<org.gnucash.android.export.ExportAsyncTask: android.content.Context mContext>;
+
+        $r3 = virtualinvoke $r1.<android.content.Context: java.lang.String getString(int)>(2131296876);
+
+        $r8 = interfaceinvoke $r4.<android.content.SharedPreferences: java.lang.String getString(java.lang.String,java.lang.String)>($r3, null);
+
+        $r1 = r0.<org.gnucash.android.export.ExportAsyncTask: android.content.Context mContext>;
+
+        $r3 = virtualinvoke $r1.<android.content.Context: java.lang.String getString(int)>(2131296878);
+
+        $r9 = interfaceinvoke $r4.<android.content.SharedPreferences: java.lang.String getString(java.lang.String,java.lang.String)>($r3, null);
+
+        $r1 = r0.<org.gnucash.android.export.ExportAsyncTask: android.content.Context mContext>;
+
+        $r3 = virtualinvoke $r1.<android.content.Context: java.lang.String getString(int)>(2131296875);
+
+        $r10 = interfaceinvoke $r4.<android.content.SharedPreferences: java.lang.String getString(java.lang.String,java.lang.String)>($r3, null);
+
+        $r1 = r0.<org.gnucash.android.export.ExportAsyncTask: android.content.Context mContext>;
+
+        $r3 = virtualinvoke $r1.<android.content.Context: java.lang.String getString(int)>(2131296874);
+
+        $r3 = interfaceinvoke $r4.<android.content.SharedPreferences: java.lang.String getString(java.lang.String,java.lang.String)>($r3, null);
+
+        $r11 = staticinvoke <android.net.Uri: android.net.Uri parse(java.lang.String)>($r8);
+
+        $r1 = r0.<org.gnucash.android.export.ExportAsyncTask: android.content.Context mContext>;
+
+        $r12 = staticinvoke <com.owncloud.android.lib.common.OwnCloudClientFactory: com.owncloud.android.lib.common.OwnCloudClient createOwnCloudClient(android.net.Uri,android.content.Context,boolean)>($r11, $r1, 1);
+
+        $r13 = staticinvoke <com.owncloud.android.lib.common.OwnCloudCredentialsFactory: com.owncloud.android.lib.common.OwnCloudCredentials newBasicCredentials(java.lang.String,java.lang.String)>($r9, $r10);
+
+        virtualinvoke $r12.<com.owncloud.android.lib.common.OwnCloudClient: void setCredentials(com.owncloud.android.lib.common.OwnCloudCredentials)>($r13);
+
+        $i0 = virtualinvoke $r3.<java.lang.String: int length()>();
+
+        if $i0 == 0 goto label2;
+
+        $r14 = new com.owncloud.android.lib.resources.files.CreateRemoteFolderOperation;
+
+        specialinvoke $r14.<com.owncloud.android.lib.resources.files.CreateRemoteFolderOperation: void <init>(java.lang.String,boolean)>($r3, 1);
+
+        $r15 = virtualinvoke $r14.<com.owncloud.android.lib.resources.files.CreateRemoteFolderOperation: com.owncloud.android.lib.common.operations.RemoteOperationResult execute(com.owncloud.android.lib.common.OwnCloudClient)>($r12);
+
+        $z0 = virtualinvoke $r15.<com.owncloud.android.lib.common.operations.RemoteOperationResult: boolean isSuccess()>();
+
+        if $z0 != 0 goto label2;
+
+        $r16 = new java.lang.StringBuilder;
+
+        specialinvoke $r16.<java.lang.StringBuilder: void <init>()>();
+
+        $r16 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Error creating folder (it may happen if it already exists): ");
+
+        $r8 = virtualinvoke $r15.<com.owncloud.android.lib.common.operations.RemoteOperationResult: java.lang.String getLogMessage()>();
+
+        $r16 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r8);
+
+        $r8 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int w(java.lang.String,java.lang.String)>("ExportAsyncTask", $r8);
+
+     label2:
+        $r17 = r0.<org.gnucash.android.export.ExportAsyncTask: java.util.List mExportedFiles>;
+
+        $r18 = interfaceinvoke $r17.<java.util.List: java.util.Iterator iterator()>();
+
+     label3:
+        $z0 = interfaceinvoke $r18.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label5;
+
+        $r19 = interfaceinvoke $r18.<java.util.Iterator: java.lang.Object next()>();
+
+        $r8 = (java.lang.String) $r19;
+
+        $r16 = new java.lang.StringBuilder;
+
+        specialinvoke $r16.<java.lang.StringBuilder: void <init>()>();
+
+        $r16 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r16 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("/");
+
+        $r9 = specialinvoke r0.<org.gnucash.android.export.ExportAsyncTask: java.lang.String stripPathPart(java.lang.String)>($r8);
+
+        $r16 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r9);
+
+        $r9 = virtualinvoke $r16.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        $r20 = r0.<org.gnucash.android.export.ExportAsyncTask: org.gnucash.android.export.Exporter mExporter>;
+
+        $r10 = virtualinvoke $r20.<org.gnucash.android.export.Exporter: java.lang.String getExportMimeType()>();
+
+        $r21 = new com.owncloud.android.lib.resources.files.UploadRemoteFileOperation;
+
+        specialinvoke $r21.<com.owncloud.android.lib.resources.files.UploadRemoteFileOperation: void <init>(java.lang.String,java.lang.String,java.lang.String)>($r8, $r9, $r10);
+
+        $r15 = virtualinvoke $r21.<com.owncloud.android.lib.resources.files.UploadRemoteFileOperation: com.owncloud.android.lib.common.operations.RemoteOperationResult execute(com.owncloud.android.lib.common.OwnCloudClient)>($r12);
+
+        $z0 = virtualinvoke $r15.<com.owncloud.android.lib.common.operations.RemoteOperationResult: boolean isSuccess()>();
+
+        if $z0 != 0 goto label4;
+
+        $r6 = new org.gnucash.android.export.Exporter$ExporterException;
+
+        $r7 = r0.<org.gnucash.android.export.ExportAsyncTask: org.gnucash.android.export.ExportParams mExportParams>;
+
+        $r3 = virtualinvoke $r15.<com.owncloud.android.lib.common.operations.RemoteOperationResult: java.lang.String getLogMessage()>();
+
+        specialinvoke $r6.<org.gnucash.android.export.Exporter$ExporterException: void <init>(org.gnucash.android.export.ExportParams,java.lang.String)>($r7, $r3);
+
+        throw $r6;
+
+     label4:
+        $r22 = new java.io.File;
+
+        specialinvoke $r22.<java.io.File: void <init>(java.lang.String)>($r8);
+
+        virtualinvoke $r22.<java.io.File: boolean delete()>();
+
+        goto label3;
+
+     label5:
+        return;
+    }
+    private java.util.List moveExportToSDCard() throws org.gnucash.android.export.Exporter$ExporterException
+    {
+        org.gnucash.android.export.ExportAsyncTask r0;
+        java.util.ArrayList r1;
+        java.io.IOException r2;
+        java.io.File $r3;
+        org.gnucash.android.export.Exporter $r4;
+        java.lang.String $r5, $r10;
+        java.util.List $r6;
+        java.util.Iterator $r7;
+        boolean $z0;
+        java.lang.Object $r8;
+        java.lang.StringBuilder $r9;
+        org.gnucash.android.export.Exporter$ExporterException $r11;
+        org.gnucash.android.export.ExportParams $r12;
+
+        r0 := @this: org.gnucash.android.export.ExportAsyncTask;
+
+        staticinvoke <android.util.Log: int i(java.lang.String,java.lang.String)>("ExportAsyncTask", "Moving exported file to external storage");
+
+        $r3 = new java.io.File;
+
+        $r4 = r0.<org.gnucash.android.export.ExportAsyncTask: org.gnucash.android.export.Exporter mExporter>;
+
+        $r5 = $r4.<org.gnucash.android.export.Exporter: java.lang.String mBookUID>;
+
+        $r5 = staticinvoke <org.gnucash.android.export.Exporter: java.lang.String getExportFolderPath(java.lang.String)>($r5);
+
+        specialinvoke $r3.<java.io.File: void <init>(java.lang.String)>($r5);
+
+        r1 = new java.util.ArrayList;
+
+        specialinvoke r1.<java.util.ArrayList: void <init>()>();
+
+        $r6 = r0.<org.gnucash.android.export.ExportAsyncTask: java.util.List mExportedFiles>;
+
+        $r7 = interfaceinvoke $r6.<java.util.List: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r7.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label5;
+
+        $r8 = interfaceinvoke $r7.<java.util.Iterator: java.lang.Object next()>();
+
+        $r5 = (java.lang.String) $r8;
+
+        $r9 = new java.lang.StringBuilder;
+
+        specialinvoke $r9.<java.lang.StringBuilder: void <init>()>();
+
+        $r4 = r0.<org.gnucash.android.export.ExportAsyncTask: org.gnucash.android.export.Exporter mExporter>;
+
+        $r10 = $r4.<org.gnucash.android.export.Exporter: java.lang.String mBookUID>;
+
+        $r10 = staticinvoke <org.gnucash.android.export.Exporter: java.lang.String getExportFolderPath(java.lang.String)>($r10);
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r10);
+
+        $r10 = specialinvoke r0.<org.gnucash.android.export.ExportAsyncTask: java.lang.String stripPathPart(java.lang.String)>($r5);
+
+        $r9 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r10);
+
+        $r10 = virtualinvoke $r9.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label2:
+        virtualinvoke r0.<org.gnucash.android.export.ExportAsyncTask: void moveFile(java.lang.String,java.lang.String)>($r5, $r10);
+
+        interfaceinvoke r1.<java.util.List: boolean add(java.lang.Object)>($r10);
+
+     label3:
+        goto label1;
+
+     label4:
+        r2 := @caughtexception;
+
+        $r11 = new org.gnucash.android.export.Exporter$ExporterException;
+
+        $r12 = r0.<org.gnucash.android.export.ExportAsyncTask: org.gnucash.android.export.ExportParams mExportParams>;
+
+        specialinvoke $r11.<org.gnucash.android.export.Exporter$ExporterException: void <init>(org.gnucash.android.export.ExportParams,java.lang.Throwable)>($r12, r2);
+
+        throw $r11;
+
+     label5:
+        return r1;
+
+        catch java.io.IOException from label2 to label3 with label4;
+    }
+    private void moveToTarget() throws org.gnucash.android.export.Exporter$ExporterException
+    {
+        org.gnucash.android.export.ExportAsyncTask r0;
+        int[] $r1;
+        org.gnucash.android.export.ExportParams $r2;
+        org.gnucash.android.export.ExportParams$ExportTarget $r3;
+        int $i0;
+        org.gnucash.android.export.Exporter$ExporterException $r4;
+        java.util.List $r5;
+
+        r0 := @this: org.gnucash.android.export.ExportAsyncTask;
+
+        $r1 = <org.gnucash.android.export.ExportAsyncTask$2: int[] $SwitchMap$org$gnucash$android$export$ExportParams$ExportTarget>;
+
+        $r2 = r0.<org.gnucash.android.export.ExportAsyncTask: org.gnucash.android.export.ExportParams mExportParams>;
+
+        $r3 = virtualinvoke $r2.<org.gnucash.android.export.ExportParams: org.gnucash.android.export.ExportParams$ExportTarget getExportTarget()>();
+
+        $i0 = virtualinvoke $r3.<org.gnucash.android.export.ExportParams$ExportTarget: int ordinal()>();
+
+        $i0 = $r1[$i0];
+
+        lookupswitch($i0)
+        {
+            case 1: goto label2;
+            case 2: goto label3;
+            case 3: goto label4;
+            case 4: goto label5;
+            case 5: goto label6;
+            default: goto label1;
+        };
+
+     label1:
+        $r4 = new org.gnucash.android.export.Exporter$ExporterException;
+
+        $r2 = r0.<org.gnucash.android.export.ExportAsyncTask: org.gnucash.android.export.ExportParams mExportParams>;
+
+        specialinvoke $r4.<org.gnucash.android.export.Exporter$ExporterException: void <init>(org.gnucash.android.export.ExportParams,java.lang.String)>($r2, "Invalid target");
+
+        throw $r4;
+
+     label2:
+        $r5 = specialinvoke r0.<org.gnucash.android.export.ExportAsyncTask: java.util.List moveExportToSDCard()>();
+
+        specialinvoke r0.<org.gnucash.android.export.ExportAsyncTask: void shareFiles(java.util.List)>($r5);
+
+        return;
+
+     label3:
+        specialinvoke r0.<org.gnucash.android.export.ExportAsyncTask: void moveExportToDropbox()>();
+
+        return;
+
+     label4:
+        specialinvoke r0.<org.gnucash.android.export.ExportAsyncTask: void moveExportToGoogleDrive()>();
+
+        return;
+
+     label5:
+        specialinvoke r0.<org.gnucash.android.export.ExportAsyncTask: void moveExportToOwnCloud()>();
+
+        return;
+
+     label6:
+        specialinvoke r0.<org.gnucash.android.export.ExportAsyncTask: java.util.List moveExportToSDCard()>();
+
+        return;
+    }
+    private void refreshViews()
+    {
+        org.gnucash.android.export.ExportAsyncTask r0;
+        org.gnucash.android.ui.account.AccountsListFragment $r1;
+        android.content.Context $r2;
+        boolean $z0;
+        org.gnucash.android.ui.account.AccountsActivity $r3;
+        org.gnucash.android.ui.transaction.TransactionsActivity $r4;
+
+        r0 := @this: org.gnucash.android.export.ExportAsyncTask;
+
+        $r2 = r0.<org.gnucash.android.export.ExportAsyncTask: android.content.Context mContext>;
+
+        $z0 = $r2 instanceof org.gnucash.android.ui.account.AccountsActivity;
+
+        if $z0 == 0 goto label1;
+
+        $r2 = r0.<org.gnucash.android.export.ExportAsyncTask: android.content.Context mContext>;
+
+        $r3 = (org.gnucash.android.ui.account.AccountsActivity) $r2;
+
+        $r1 = virtualinvoke $r3.<org.gnucash.android.ui.account.AccountsActivity: org.gnucash.android.ui.account.AccountsListFragment getCurrentAccountListFragment()>();
+
+        if $r1 == null goto label1;
+
+        virtualinvoke $r1.<org.gnucash.android.ui.account.AccountsListFragment: void refresh()>();
+
+     label1:
+        $r2 = r0.<org.gnucash.android.export.ExportAsyncTask: android.content.Context mContext>;
+
+        $z0 = $r2 instanceof org.gnucash.android.ui.transaction.TransactionsActivity;
+
+        if $z0 == 0 goto label2;
+
+        $r2 = r0.<org.gnucash.android.export.ExportAsyncTask: android.content.Context mContext>;
+
+        $r4 = (org.gnucash.android.ui.transaction.TransactionsActivity) $r2;
+
+        virtualinvoke $r4.<org.gnucash.android.ui.transaction.TransactionsActivity: void refresh()>();
+
+     label2:
+        return;
+    }
+    private void reportSuccess()
+    {
+        org.gnucash.android.export.ExportAsyncTask r0;
+        int[] $r1;
+        org.gnucash.android.export.ExportParams $r2;
+        org.gnucash.android.export.ExportParams$ExportTarget $r3;
+        int $i0;
+        android.content.Context $r4, $r6;
+        java.lang.String $r5, $r7;
+        java.lang.Object[] $r8;
+        android.widget.Toast $r9;
+        java.lang.StringBuilder $r10;
+        android.content.SharedPreferences $r11;
+        boolean $z0;
+
+        r0 := @this: org.gnucash.android.export.ExportAsyncTask;
+
+        $r1 = <org.gnucash.android.export.ExportAsyncTask$2: int[] $SwitchMap$org$gnucash$android$export$ExportParams$ExportTarget>;
+
+        $r2 = r0.<org.gnucash.android.export.ExportAsyncTask: org.gnucash.android.export.ExportParams mExportParams>;
+
+        $r3 = virtualinvoke $r2.<org.gnucash.android.export.ExportParams: org.gnucash.android.export.ExportParams$ExportTarget getExportTarget()>();
+
+        $i0 = virtualinvoke $r3.<org.gnucash.android.export.ExportParams$ExportTarget: int ordinal()>();
+
+        $i0 = $r1[$i0];
+
+        lookupswitch($i0)
+        {
+            case 2: goto label4;
+            case 3: goto label5;
+            case 4: goto label6;
+            case 5: goto label3;
+            default: goto label1;
+        };
+
+     label1:
+        $r4 = r0.<org.gnucash.android.export.ExportAsyncTask: android.content.Context mContext>;
+
+        $r5 = virtualinvoke $r4.<android.content.Context: java.lang.String getString(int)>(2131296359);
+
+     label2:
+        $r4 = r0.<org.gnucash.android.export.ExportAsyncTask: android.content.Context mContext>;
+
+        $r6 = r0.<org.gnucash.android.export.ExportAsyncTask: android.content.Context mContext>;
+
+        $r7 = virtualinvoke $r6.<android.content.Context: java.lang.String getString(int)>(2131296591);
+
+        $r8 = newarray (java.lang.Object)[1];
+
+        $r8[0] = $r5;
+
+        $r5 = staticinvoke <java.lang.String: java.lang.String format(java.lang.String,java.lang.Object[])>($r7, $r8);
+
+        $r9 = staticinvoke <android.widget.Toast: android.widget.Toast makeText(android.content.Context,java.lang.CharSequence,int)>($r4, $r5, 1);
+
+        virtualinvoke $r9.<android.widget.Toast: void show()>();
+
+        return;
+
+     label3:
+        $r5 = "SD card";
+
+        goto label2;
+
+     label4:
+        $r5 = "DropBox -> Apps -> GnuCash";
+
+        goto label2;
+
+     label5:
+        $r10 = new java.lang.StringBuilder;
+
+        specialinvoke $r10.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Google Drive -> ");
+
+        $r4 = r0.<org.gnucash.android.export.ExportAsyncTask: android.content.Context mContext>;
+
+        $r5 = virtualinvoke $r4.<android.content.Context: java.lang.String getString(int)>(2131296830);
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r5 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        goto label2;
+
+     label6:
+        $r4 = r0.<org.gnucash.android.export.ExportAsyncTask: android.content.Context mContext>;
+
+        $r6 = r0.<org.gnucash.android.export.ExportAsyncTask: android.content.Context mContext>;
+
+        $r5 = virtualinvoke $r6.<android.content.Context: java.lang.String getString(int)>(2131296460);
+
+        $r11 = virtualinvoke $r4.<android.content.Context: android.content.SharedPreferences getSharedPreferences(java.lang.String,int)>($r5, 0);
+
+        $r4 = r0.<org.gnucash.android.export.ExportAsyncTask: android.content.Context mContext>;
+
+        $r5 = virtualinvoke $r4.<android.content.Context: java.lang.String getString(int)>(2131296894);
+
+        $z0 = interfaceinvoke $r11.<android.content.SharedPreferences: boolean getBoolean(java.lang.String,boolean)>($r5, 0);
+
+        if $z0 == 0 goto label7;
+
+        $r10 = new java.lang.StringBuilder;
+
+        specialinvoke $r10.<java.lang.StringBuilder: void <init>()>();
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("ownCloud -> ");
+
+        $r4 = r0.<org.gnucash.android.export.ExportAsyncTask: android.content.Context mContext>;
+
+        $r6 = r0.<org.gnucash.android.export.ExportAsyncTask: android.content.Context mContext>;
+
+        $r5 = virtualinvoke $r6.<android.content.Context: java.lang.String getString(int)>(2131296460);
+
+        $r11 = virtualinvoke $r4.<android.content.Context: android.content.SharedPreferences getSharedPreferences(java.lang.String,int)>($r5, 0);
+
+        $r4 = r0.<org.gnucash.android.export.ExportAsyncTask: android.content.Context mContext>;
+
+        $r5 = virtualinvoke $r4.<android.content.Context: java.lang.String getString(int)>(2131296874);
+
+        $r5 = interfaceinvoke $r11.<android.content.SharedPreferences: java.lang.String getString(java.lang.String,java.lang.String)>($r5, null);
+
+        $r10 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r5);
+
+        $r5 = virtualinvoke $r10.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        goto label2;
+
+     label7:
+        $r5 = "ownCloud sync not enabled";
+
+        goto label2;
+    }
+    private void shareFiles(java.util.List)
+    {
+        org.gnucash.android.export.ExportAsyncTask r0;
+        java.util.List r1;
+        java.util.ArrayList r2;
+        android.content.Intent r3;
+        java.lang.Object[] $r4;
+        android.content.Context $r5, $r17;
+        org.gnucash.android.export.ExportParams $r6;
+        org.gnucash.android.export.ExportFormat $r7;
+        java.lang.String $r8, $r10;
+        android.content.SharedPreferences $r9;
+        int $i0;
+        java.lang.String[] $r11;
+        java.text.DateFormat $r12;
+        java.text.SimpleDateFormat r13;
+        java.lang.StringBuilder $r14;
+        java.util.Date $r15;
+        long $l1;
+        boolean $z0;
+        android.content.pm.PackageManager $r16;
+        android.widget.Toast $r18;
+
+        r0 := @this: org.gnucash.android.export.ExportAsyncTask;
+
+        r1 := @parameter0: java.util.List;
+
+        r3 = new android.content.Intent;
+
+        specialinvoke r3.<android.content.Intent: void <init>(java.lang.String)>("android.intent.action.SEND_MULTIPLE");
+
+        virtualinvoke r3.<android.content.Intent: android.content.Intent setType(java.lang.String)>("text/xml");
+
+        r2 = specialinvoke r0.<org.gnucash.android.export.ExportAsyncTask: java.util.ArrayList convertFilePathsToUris(java.util.List)>(r1);
+
+        virtualinvoke r3.<android.content.Intent: android.content.Intent putParcelableArrayListExtra(java.lang.String,java.util.ArrayList)>("android.intent.extra.STREAM", r2);
+
+        $r5 = r0.<org.gnucash.android.export.ExportAsyncTask: android.content.Context mContext>;
+
+        $r4 = newarray (java.lang.Object)[1];
+
+        $r6 = r0.<org.gnucash.android.export.ExportAsyncTask: org.gnucash.android.export.ExportParams mExportParams>;
+
+        $r7 = virtualinvoke $r6.<org.gnucash.android.export.ExportParams: org.gnucash.android.export.ExportFormat getExportFormat()>();
+
+        $r8 = virtualinvoke $r7.<org.gnucash.android.export.ExportFormat: java.lang.String name()>();
+
+        $r4[0] = $r8;
+
+        $r8 = virtualinvoke $r5.<android.content.Context: java.lang.String getString(int,java.lang.Object[])>(2131296533, $r4);
+
+        virtualinvoke r3.<android.content.Intent: android.content.Intent putExtra(java.lang.String,java.lang.String)>("android.intent.extra.SUBJECT", $r8);
+
+        $r5 = r0.<org.gnucash.android.export.ExportAsyncTask: android.content.Context mContext>;
+
+        $r9 = staticinvoke <android.preference.PreferenceManager: android.content.SharedPreferences getDefaultSharedPreferences(android.content.Context)>($r5);
+
+        $r5 = r0.<org.gnucash.android.export.ExportAsyncTask: android.content.Context mContext>;
+
+        $r8 = virtualinvoke $r5.<android.content.Context: java.lang.String getString(int)>(2131296858);
+
+        $r8 = interfaceinvoke $r9.<android.content.SharedPreferences: java.lang.String getString(java.lang.String,java.lang.String)>($r8, null);
+
+        if $r8 == null goto label1;
+
+        $r10 = virtualinvoke $r8.<java.lang.String: java.lang.String trim()>();
+
+        $i0 = virtualinvoke $r10.<java.lang.String: int length()>();
+
+        if $i0 <= 0 goto label1;
+
+        $r11 = newarray (java.lang.String)[1];
+
+        $r11[0] = $r8;
+
+        virtualinvoke r3.<android.content.Intent: android.content.Intent putExtra(java.lang.String,java.lang.String[])>("android.intent.extra.EMAIL", $r11);
+
+     label1:
+        $r12 = staticinvoke <java.text.SimpleDateFormat: java.text.DateFormat getDateTimeInstance()>();
+
+        r13 = (java.text.SimpleDateFormat) $r12;
+
+        r2 = new java.util.ArrayList;
+
+        specialinvoke r2.<java.util.ArrayList: void <init>()>();
+
+        $r14 = new java.lang.StringBuilder;
+
+        specialinvoke $r14.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = r0.<org.gnucash.android.export.ExportAsyncTask: android.content.Context mContext>;
+
+        $r8 = virtualinvoke $r5.<android.content.Context: java.lang.String getString(int)>(2131296278);
+
+        $r14 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r8);
+
+        $r14 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" ");
+
+        $r15 = new java.util.Date;
+
+        $l1 = staticinvoke <java.lang.System: long currentTimeMillis()>();
+
+        specialinvoke $r15.<java.util.Date: void <init>(long)>($l1);
+
+        $r8 = virtualinvoke r13.<java.text.SimpleDateFormat: java.lang.String format(java.util.Date)>($r15);
+
+        $r14 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r8);
+
+        $r8 = virtualinvoke $r14.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        virtualinvoke r2.<java.util.ArrayList: boolean add(java.lang.Object)>($r8);
+
+        virtualinvoke r3.<android.content.Intent: android.content.Intent putExtra(java.lang.String,java.io.Serializable)>("android.intent.extra.TEXT", r2);
+
+        $r5 = r0.<org.gnucash.android.export.ExportAsyncTask: android.content.Context mContext>;
+
+        $z0 = $r5 instanceof android.app.Activity;
+
+        if $z0 == 0 goto label3;
+
+        $r5 = r0.<org.gnucash.android.export.ExportAsyncTask: android.content.Context mContext>;
+
+        $r16 = virtualinvoke $r5.<android.content.Context: android.content.pm.PackageManager getPackageManager()>();
+
+        r1 = virtualinvoke $r16.<android.content.pm.PackageManager: java.util.List queryIntentActivities(android.content.Intent,int)>(r3, 0);
+
+        if r1 == null goto label2;
+
+        $z0 = interfaceinvoke r1.<java.util.List: boolean isEmpty()>();
+
+        if $z0 != 0 goto label2;
+
+        $r5 = r0.<org.gnucash.android.export.ExportAsyncTask: android.content.Context mContext>;
+
+        $r17 = r0.<org.gnucash.android.export.ExportAsyncTask: android.content.Context mContext>;
+
+        $r8 = virtualinvoke $r17.<android.content.Context: java.lang.String getString(int)>(2131296560);
+
+        r3 = staticinvoke <android.content.Intent: android.content.Intent createChooser(android.content.Intent,java.lang.CharSequence)>(r3, $r8);
+
+        virtualinvoke $r5.<android.content.Context: void startActivity(android.content.Intent)>(r3);
+
+        return;
+
+     label2:
+        $r5 = r0.<org.gnucash.android.export.ExportAsyncTask: android.content.Context mContext>;
+
+        $r18 = staticinvoke <android.widget.Toast: android.widget.Toast makeText(android.content.Context,int,int)>($r5, 2131296598, 1);
+
+        virtualinvoke $r18.<android.widget.Toast: void show()>();
+
+     label3:
+        return;
+    }
+    private java.lang.String stripPathPart(java.lang.String)
+    {
+        org.gnucash.android.export.ExportAsyncTask r0;
+        java.lang.String $r1;
+        java.io.File $r2;
+
+        r0 := @this: org.gnucash.android.export.ExportAsyncTask;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = new java.io.File;
+
+        specialinvoke $r2.<java.io.File: void <init>(java.lang.String)>($r1);
+
+        $r1 = virtualinvoke $r2.<java.io.File: java.lang.String getName()>();
+
+        return $r1;
+    }
+    protected transient java.lang.Boolean doInBackground(org.gnucash.android.export.ExportParams[])
+    {
+        org.gnucash.android.export.ExportAsyncTask r0;
+        org.gnucash.android.export.ExportParams[] $r1;
+        org.gnucash.android.export.ExportParams $r2;
+        org.gnucash.android.export.Exporter $r3;
+        java.util.List $r4;
+        java.lang.Boolean $r5;
+        java.lang.Exception r6;
+        java.lang.StringBuilder $r7;
+        java.lang.String $r8;
+        android.content.Context $r9;
+        boolean $z0;
+        android.app.Activity $r10;
+        org.gnucash.android.export.ExportAsyncTask$1 $r11;
+        org.gnucash.android.export.Exporter$ExporterException r12;
+
+        r0 := @this: org.gnucash.android.export.ExportAsyncTask;
+
+        $r1 := @parameter0: org.gnucash.android.export.ExportParams[];
+
+        $r2 = $r1[0];
+
+        r0.<org.gnucash.android.export.ExportAsyncTask: org.gnucash.android.export.ExportParams mExportParams> = $r2;
+
+        $r3 = specialinvoke r0.<org.gnucash.android.export.ExportAsyncTask: org.gnucash.android.export.Exporter getExporter()>();
+
+        r0.<org.gnucash.android.export.ExportAsyncTask: org.gnucash.android.export.Exporter mExporter> = $r3;
+
+     label1:
+        $r3 = r0.<org.gnucash.android.export.ExportAsyncTask: org.gnucash.android.export.Exporter mExporter>;
+
+        $r4 = virtualinvoke $r3.<org.gnucash.android.export.Exporter: java.util.List generateExport()>();
+
+        r0.<org.gnucash.android.export.ExportAsyncTask: java.util.List mExportedFiles> = $r4;
+
+     label2:
+        specialinvoke r0.<org.gnucash.android.export.ExportAsyncTask: void moveToTarget()>();
+
+     label3:
+        $r5 = staticinvoke <java.lang.Boolean: java.lang.Boolean valueOf(boolean)>(1);
+
+        return $r5;
+
+     label4:
+        r6 := @caughtexception;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Error exporting: ");
+
+        $r8 = virtualinvoke r6.<java.lang.Exception: java.lang.String getMessage()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r8);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String)>("ExportAsyncTask", $r8);
+
+        staticinvoke <com.crashlytics.android.Crashlytics: void logException(java.lang.Throwable)>(r6);
+
+        virtualinvoke r6.<java.lang.Exception: void printStackTrace()>();
+
+        $r9 = r0.<org.gnucash.android.export.ExportAsyncTask: android.content.Context mContext>;
+
+        $z0 = $r9 instanceof android.app.Activity;
+
+        if $z0 == 0 goto label5;
+
+        $r9 = r0.<org.gnucash.android.export.ExportAsyncTask: android.content.Context mContext>;
+
+        $r10 = (android.app.Activity) $r9;
+
+        $r11 = new org.gnucash.android.export.ExportAsyncTask$1;
+
+        specialinvoke $r11.<org.gnucash.android.export.ExportAsyncTask$1: void <init>(org.gnucash.android.export.ExportAsyncTask,java.lang.Exception)>(r0, r6);
+
+        virtualinvoke $r10.<android.app.Activity: void runOnUiThread(java.lang.Runnable)>($r11);
+
+     label5:
+        $r5 = staticinvoke <java.lang.Boolean: java.lang.Boolean valueOf(boolean)>(0);
+
+        return $r5;
+
+     label6:
+        r12 := @caughtexception;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Error sending exported files to target: ");
+
+        $r8 = virtualinvoke r12.<org.gnucash.android.export.Exporter$ExporterException: java.lang.String getMessage()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r8);
+
+        $r8 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <com.crashlytics.android.Crashlytics: void log(int,java.lang.String,java.lang.String)>(6, "ExportAsyncTask", $r8);
+
+        $r5 = staticinvoke <java.lang.Boolean: java.lang.Boolean valueOf(boolean)>(0);
+
+        return $r5;
+
+        catch java.lang.Exception from label1 to label2 with label4;
+        catch org.gnucash.android.export.Exporter$ExporterException from label2 to label3 with label6;
+    }
+    protected volatile java.lang.Object doInBackground(java.lang.Object[])
+    {
+        org.gnucash.android.export.ExportAsyncTask r0;
+        java.lang.Boolean $r1;
+        java.lang.Object[] $r2;
+        org.gnucash.android.export.ExportParams[] $r3;
+
+        r0 := @this: org.gnucash.android.export.ExportAsyncTask;
+
+        $r2 := @parameter0: java.lang.Object[];
+
+        $r3 = (org.gnucash.android.export.ExportParams[]) $r2;
+
+        $r1 = virtualinvoke r0.<org.gnucash.android.export.ExportAsyncTask: java.lang.Boolean doInBackground(org.gnucash.android.export.ExportParams[])>($r3);
+
+        return $r1;
+    }
+    public void moveFile(java.lang.String, java.lang.String) throws java.io.IOException
+    {
+        org.gnucash.android.export.ExportAsyncTask r0;
+        java.lang.String $r1, $r2;
+        java.io.File r3, r4;
+        java.io.FileInputStream $r5;
+        java.nio.channels.FileChannel $r6, $r8;
+        java.io.FileOutputStream $r7;
+        long $l0;
+        java.lang.Throwable $r9;
+
+        r0 := @this: org.gnucash.android.export.ExportAsyncTask;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.lang.String;
+
+        r4 = new java.io.File;
+
+        specialinvoke r4.<java.io.File: void <init>(java.lang.String)>($r1);
+
+        r3 = new java.io.File;
+
+        specialinvoke r3.<java.io.File: void <init>(java.lang.String)>($r2);
+
+        $r5 = new java.io.FileInputStream;
+
+        specialinvoke $r5.<java.io.FileInputStream: void <init>(java.io.File)>(r4);
+
+        $r6 = virtualinvoke $r5.<java.io.FileInputStream: java.nio.channels.FileChannel getChannel()>();
+
+        $r7 = new java.io.FileOutputStream;
+
+        specialinvoke $r7.<java.io.FileOutputStream: void <init>(java.io.File)>(r3);
+
+        $r8 = virtualinvoke $r7.<java.io.FileOutputStream: java.nio.channels.FileChannel getChannel()>();
+
+     label1:
+        $l0 = virtualinvoke $r6.<java.nio.channels.FileChannel: long size()>();
+
+        virtualinvoke $r6.<java.nio.channels.FileChannel: long transferTo(long,long,java.nio.channels.WritableByteChannel)>(0L, $l0, $r8);
+
+     label2:
+        if $r6 == null goto label3;
+
+        virtualinvoke $r6.<java.nio.channels.FileChannel: void close()>();
+
+     label3:
+        virtualinvoke $r8.<java.nio.channels.FileChannel: void close()>();
+
+        virtualinvoke r4.<java.io.File: boolean delete()>();
+
+        return;
+
+     label4:
+        $r9 := @caughtexception;
+
+        if $r6 == null goto label5;
+
+        virtualinvoke $r6.<java.nio.channels.FileChannel: void close()>();
+
+     label5:
+        virtualinvoke $r8.<java.nio.channels.FileChannel: void close()>();
+
+        throw $r9;
+
+        catch java.lang.Throwable from label1 to label2 with label4;
+    }
+    protected void onPostExecute(java.lang.Boolean)
+    {
+        org.gnucash.android.export.ExportAsyncTask r0;
+        java.lang.Boolean $r1;
+        java.lang.Object[] $r2;
+        boolean $z0;
+        android.content.Context $r3, $r7;
+        org.gnucash.android.export.ExportParams $r4;
+        android.app.ProgressDialog $r5;
+        android.app.Activity $r6;
+        org.gnucash.android.export.ExportFormat $r8;
+        java.lang.String $r9;
+        android.widget.Toast $r10;
+
+        r0 := @this: org.gnucash.android.export.ExportAsyncTask;
+
+        $r1 := @parameter0: java.lang.Boolean;
+
+        $z0 = virtualinvoke $r1.<java.lang.Boolean: boolean booleanValue()>();
+
+        if $z0 == 0 goto label4;
+
+        $r3 = r0.<org.gnucash.android.export.ExportAsyncTask: android.content.Context mContext>;
+
+        $z0 = $r3 instanceof android.app.Activity;
+
+        if $z0 == 0 goto label1;
+
+        specialinvoke r0.<org.gnucash.android.export.ExportAsyncTask: void reportSuccess()>();
+
+     label1:
+        $r4 = r0.<org.gnucash.android.export.ExportAsyncTask: org.gnucash.android.export.ExportParams mExportParams>;
+
+        $z0 = virtualinvoke $r4.<org.gnucash.android.export.ExportParams: boolean shouldDeleteTransactionsAfterExport()>();
+
+        if $z0 == 0 goto label2;
+
+        specialinvoke r0.<org.gnucash.android.export.ExportAsyncTask: void backupAndDeleteTransactions()>();
+
+        specialinvoke r0.<org.gnucash.android.export.ExportAsyncTask: void refreshViews()>();
+
+     label2:
+        $r3 = r0.<org.gnucash.android.export.ExportAsyncTask: android.content.Context mContext>;
+
+        $z0 = $r3 instanceof android.app.Activity;
+
+        if $z0 == 0 goto label5;
+
+        $r5 = r0.<org.gnucash.android.export.ExportAsyncTask: android.app.ProgressDialog mProgressDialog>;
+
+        if $r5 == null goto label3;
+
+        $r5 = r0.<org.gnucash.android.export.ExportAsyncTask: android.app.ProgressDialog mProgressDialog>;
+
+        $z0 = virtualinvoke $r5.<android.app.ProgressDialog: boolean isShowing()>();
+
+        if $z0 == 0 goto label3;
+
+        $r5 = r0.<org.gnucash.android.export.ExportAsyncTask: android.app.ProgressDialog mProgressDialog>;
+
+        virtualinvoke $r5.<android.app.ProgressDialog: void dismiss()>();
+
+     label3:
+        $r3 = r0.<org.gnucash.android.export.ExportAsyncTask: android.content.Context mContext>;
+
+        $r6 = (android.app.Activity) $r3;
+
+        virtualinvoke $r6.<android.app.Activity: void finish()>();
+
+        return;
+
+     label4:
+        $r3 = r0.<org.gnucash.android.export.ExportAsyncTask: android.content.Context mContext>;
+
+        $z0 = $r3 instanceof android.app.Activity;
+
+        if $z0 == 0 goto label2;
+
+        $r3 = r0.<org.gnucash.android.export.ExportAsyncTask: android.content.Context mContext>;
+
+        $r7 = r0.<org.gnucash.android.export.ExportAsyncTask: android.content.Context mContext>;
+
+        $r2 = newarray (java.lang.Object)[1];
+
+        $r4 = r0.<org.gnucash.android.export.ExportAsyncTask: org.gnucash.android.export.ExportParams mExportParams>;
+
+        $r8 = virtualinvoke $r4.<org.gnucash.android.export.ExportParams: org.gnucash.android.export.ExportFormat getExportFormat()>();
+
+        $r9 = virtualinvoke $r8.<org.gnucash.android.export.ExportFormat: java.lang.String name()>();
+
+        $r2[0] = $r9;
+
+        $r9 = virtualinvoke $r7.<android.content.Context: java.lang.String getString(int,java.lang.Object[])>(2131296590, $r2);
+
+        $r10 = staticinvoke <android.widget.Toast: android.widget.Toast makeText(android.content.Context,java.lang.CharSequence,int)>($r3, $r9, 1);
+
+        virtualinvoke $r10.<android.widget.Toast: void show()>();
+
+        goto label2;
+
+     label5:
+        return;
+    }
+    protected volatile void onPostExecute(java.lang.Object)
+    {
+        org.gnucash.android.export.ExportAsyncTask r0;
+        java.lang.Object $r1;
+        java.lang.Boolean $r2;
+
+        r0 := @this: org.gnucash.android.export.ExportAsyncTask;
+
+        $r1 := @parameter0: java.lang.Object;
+
+        $r2 = (java.lang.Boolean) $r1;
+
+        virtualinvoke r0.<org.gnucash.android.export.ExportAsyncTask: void onPostExecute(java.lang.Boolean)>($r2);
+
+        return;
+    }
+    protected void onPreExecute()
+    {
+        org.gnucash.android.export.ExportAsyncTask r0;
+        android.content.Context $r1;
+        boolean $z0;
+        android.app.ProgressDialog $r2;
+        int $i0;
+
+        r0 := @this: org.gnucash.android.export.ExportAsyncTask;
+
+        specialinvoke r0.<android.os.AsyncTask: void onPreExecute()>();
+
+        $r1 = r0.<org.gnucash.android.export.ExportAsyncTask: android.content.Context mContext>;
+
+        $z0 = $r1 instanceof android.app.Activity;
+
+        if $z0 == 0 goto label2;
+
+        $r2 = new android.app.ProgressDialog;
+
+        $r1 = r0.<org.gnucash.android.export.ExportAsyncTask: android.content.Context mContext>;
+
+        specialinvoke $r2.<android.app.ProgressDialog: void <init>(android.content.Context)>($r1);
+
+        r0.<org.gnucash.android.export.ExportAsyncTask: android.app.ProgressDialog mProgressDialog> = $r2;
+
+        $r2 = r0.<org.gnucash.android.export.ExportAsyncTask: android.app.ProgressDialog mProgressDialog>;
+
+        virtualinvoke $r2.<android.app.ProgressDialog: void setTitle(int)>(2131296549);
+
+        $r2 = r0.<org.gnucash.android.export.ExportAsyncTask: android.app.ProgressDialog mProgressDialog>;
+
+        virtualinvoke $r2.<android.app.ProgressDialog: void setIndeterminate(boolean)>(1);
+
+        $r2 = r0.<org.gnucash.android.export.ExportAsyncTask: android.app.ProgressDialog mProgressDialog>;
+
+        virtualinvoke $r2.<android.app.ProgressDialog: void setProgressStyle(int)>(1);
+
+        $i0 = <android.os.Build$VERSION: int SDK_INT>;
+
+        if $i0 <= 11 goto label1;
+
+        $r2 = r0.<org.gnucash.android.export.ExportAsyncTask: android.app.ProgressDialog mProgressDialog>;
+
+        virtualinvoke $r2.<android.app.ProgressDialog: void setProgressNumberFormat(java.lang.String)>(null);
+
+        $r2 = r0.<org.gnucash.android.export.ExportAsyncTask: android.app.ProgressDialog mProgressDialog>;
+
+        virtualinvoke $r2.<android.app.ProgressDialog: void setProgressPercentFormat(java.text.NumberFormat)>(null);
+
+     label1:
+        $r2 = r0.<org.gnucash.android.export.ExportAsyncTask: android.app.ProgressDialog mProgressDialog>;
+
+        virtualinvoke $r2.<android.app.ProgressDialog: void show()>();
+
+     label2:
+        return;
+    }

@@ -1,0 +1,551 @@
+com.fsck.k9.provider.DecryptedFileProvider extends android.support.v4.content.FileProvider
+private static final java.lang.String AUTHORITY
+private static final java.lang.String DECRYPTED_CACHE_DIRECTORY
+private static final long FILE_DELETE_THRESHOLD_MILLISECONDS
+private static com.fsck.k9.provider.DecryptedFileProvider$DecryptedFileProviderCleanupReceiver cleanupReceiver
+private static final java.lang.Object cleanupReceiverMonitor
+    static void <clinit>()
+    {
+        java.lang.Object $r0;
+
+        $r0 = new java.lang.Object;
+
+        specialinvoke $r0.<java.lang.Object: void <init>()>();
+
+        <com.fsck.k9.provider.DecryptedFileProvider: java.lang.Object cleanupReceiverMonitor> = $r0;
+
+        <com.fsck.k9.provider.DecryptedFileProvider: com.fsck.k9.provider.DecryptedFileProvider$DecryptedFileProviderCleanupReceiver cleanupReceiver> = null;
+
+        return;
+    }
+    public void <init>()
+    {
+        com.fsck.k9.provider.DecryptedFileProvider r0;
+
+        r0 := @this: com.fsck.k9.provider.DecryptedFileProvider;
+
+        specialinvoke r0.<android.support.v4.content.FileProvider: void <init>()>();
+
+        return;
+    }
+    static void access$000(android.content.Context)
+    {
+        android.content.Context $r0;
+
+        $r0 := @parameter0: android.content.Context;
+
+        staticinvoke <com.fsck.k9.provider.DecryptedFileProvider: void registerFileCleanupReceiver(android.content.Context)>($r0);
+
+        return;
+    }
+    static java.io.File access$100(android.content.Context)
+    {
+        android.content.Context $r0;
+        java.io.File $r1;
+
+        $r0 := @parameter0: android.content.Context;
+
+        $r1 = staticinvoke <com.fsck.k9.provider.DecryptedFileProvider: java.io.File getDecryptedTempDirectory(android.content.Context)>($r0);
+
+        return $r1;
+    }
+    static void access$300(android.content.Context)
+    {
+        android.content.Context $r0;
+
+        $r0 := @parameter0: android.content.Context;
+
+        staticinvoke <com.fsck.k9.provider.DecryptedFileProvider: void unregisterFileCleanupReceiver(android.content.Context)>($r0);
+
+        return;
+    }
+    public static boolean deleteOldTemporaryFiles(android.content.Context)
+    {
+        android.content.Context $r0;
+        long l0, $l3;
+        java.io.File r1;
+        int $i1, $i2;
+        boolean z0, $z1;
+        java.util.Date $r2;
+        java.io.File[] $r3;
+        byte $b4;
+        java.util.Locale $r4;
+        java.lang.Object[] $r5;
+        double $d0;
+        java.lang.Double $r6;
+        java.lang.String $r7;
+        java.lang.StringBuilder $r8;
+
+        $r0 := @parameter0: android.content.Context;
+
+        r1 = staticinvoke <com.fsck.k9.provider.DecryptedFileProvider: java.io.File getDecryptedTempDirectory(android.content.Context)>($r0);
+
+        z0 = 1;
+
+        $r2 = new java.util.Date;
+
+        specialinvoke $r2.<java.util.Date: void <init>()>();
+
+        l0 = virtualinvoke $r2.<java.util.Date: long getTime()>();
+
+        l0 = l0 - 180000L;
+
+        $r3 = virtualinvoke r1.<java.io.File: java.io.File[] listFiles()>();
+
+        $i1 = lengthof $r3;
+
+        $i2 = 0;
+
+     label1:
+        if $i2 >= $i1 goto label5;
+
+        r1 = $r3[$i2];
+
+        $l3 = virtualinvoke r1.<java.io.File: long lastModified()>();
+
+        $b4 = $l3 cmp l0;
+
+        if $b4 >= 0 goto label3;
+
+        $z1 = virtualinvoke r1.<java.io.File: boolean delete()>();
+
+        if $z1 != 0 goto label2;
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String)>("k9", "Failed to delete temporary file");
+
+        z0 = 0;
+
+     label2:
+        $i2 = $i2 + 1;
+
+        goto label1;
+
+     label3:
+        z0 = <com.fsck.k9.K9: boolean DEBUG>;
+
+        if z0 == 0 goto label4;
+
+        $r4 = <java.util.Locale: java.util.Locale ENGLISH>;
+
+        $r5 = newarray (java.lang.Object)[1];
+
+        $l3 = $l3 - l0;
+
+        $l3 = $l3 / 1000L;
+
+        $d0 = (double) $l3;
+
+        $d0 = $d0 / 60.0;
+
+        $r6 = staticinvoke <java.lang.Double: java.lang.Double valueOf(double)>($d0);
+
+        $r5[0] = $r6;
+
+        $r7 = staticinvoke <java.lang.String: java.lang.String format(java.util.Locale,java.lang.String,java.lang.Object[])>($r4, "%.2f", $r5);
+
+        $r8 = new java.lang.StringBuilder;
+
+        specialinvoke $r8.<java.lang.StringBuilder: void <init>()>();
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Not deleting temp file (for another ");
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r7);
+
+        $r8 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" minutes)");
+
+        $r7 = virtualinvoke $r8.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String)>("k9", $r7);
+
+     label4:
+        z0 = 0;
+
+        goto label2;
+
+     label5:
+        return z0;
+    }
+    private static java.io.File getDecryptedTempDirectory(android.content.Context)
+    {
+        android.content.Context $r0;
+        java.io.File r1, $r2;
+        boolean $z0;
+        java.lang.StringBuilder $r3;
+        java.lang.String $r4;
+
+        $r0 := @parameter0: android.content.Context;
+
+        r1 = new java.io.File;
+
+        $r2 = virtualinvoke $r0.<android.content.Context: java.io.File getCacheDir()>();
+
+        specialinvoke r1.<java.io.File: void <init>(java.io.File,java.lang.String)>($r2, "decrypted");
+
+        $z0 = virtualinvoke r1.<java.io.File: boolean exists()>();
+
+        if $z0 != 0 goto label1;
+
+        $z0 = virtualinvoke r1.<java.io.File: boolean mkdir()>();
+
+        if $z0 != 0 goto label1;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Error creating directory: ");
+
+        $r4 = virtualinvoke r1.<java.io.File: java.lang.String getAbsolutePath()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r4);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String)>("k9", $r4);
+
+     label1:
+        return r1;
+    }
+    public static com.fsck.k9.mailstore.util.FileFactory getFileFactory(android.content.Context)
+    {
+        android.content.Context $r0;
+        com.fsck.k9.provider.DecryptedFileProvider$1 $r1;
+
+        $r0 := @parameter0: android.content.Context;
+
+        $r0 = virtualinvoke $r0.<android.content.Context: android.content.Context getApplicationContext()>();
+
+        $r1 = new com.fsck.k9.provider.DecryptedFileProvider$1;
+
+        specialinvoke $r1.<com.fsck.k9.provider.DecryptedFileProvider$1: void <init>(android.content.Context)>($r0);
+
+        return $r1;
+    }
+    public static android.net.Uri getUriForProvidedFile(android.content.Context, java.io.File, java.lang.String, java.lang.String) throws java.io.IOException
+    {
+        android.content.Context $r0;
+        java.io.File $r1;
+        java.lang.String $r2, $r3;
+        java.lang.IllegalArgumentException r4;
+        android.net.Uri $r5;
+        android.net.Uri$Builder $r6;
+
+        $r0 := @parameter0: android.content.Context;
+
+        $r1 := @parameter1: java.io.File;
+
+        $r2 := @parameter2: java.lang.String;
+
+        $r3 := @parameter3: java.lang.String;
+
+     label1:
+        $r5 = staticinvoke <android.support.v4.content.FileProvider: android.net.Uri getUriForFile(android.content.Context,java.lang.String,java.io.File)>($r0, "com.fsck.k9.decryptedfileprovider", $r1);
+
+        $r6 = virtualinvoke $r5.<android.net.Uri: android.net.Uri$Builder buildUpon()>();
+
+     label2:
+        if $r3 == null goto label4;
+
+     label3:
+        virtualinvoke $r6.<android.net.Uri$Builder: android.net.Uri$Builder appendQueryParameter(java.lang.String,java.lang.String)>("mime_type", $r3);
+
+     label4:
+        if $r2 == null goto label6;
+
+     label5:
+        virtualinvoke $r6.<android.net.Uri$Builder: android.net.Uri$Builder appendQueryParameter(java.lang.String,java.lang.String)>("encoding", $r2);
+
+     label6:
+        $r5 = virtualinvoke $r6.<android.net.Uri$Builder: android.net.Uri build()>();
+
+     label7:
+        return $r5;
+
+     label8:
+        r4 := @caughtexception;
+
+        return null;
+
+        catch java.lang.IllegalArgumentException from label1 to label2 with label8;
+        catch java.lang.IllegalArgumentException from label3 to label4 with label8;
+        catch java.lang.IllegalArgumentException from label5 to label7 with label8;
+    }
+    private static void registerFileCleanupReceiver(android.content.Context)
+    {
+        android.content.Context $r0;
+        android.content.IntentFilter r1;
+        java.lang.Object $r2;
+        com.fsck.k9.provider.DecryptedFileProvider$DecryptedFileProviderCleanupReceiver $r3;
+        boolean $z0;
+        java.lang.Throwable $r4;
+
+        $r0 := @parameter0: android.content.Context;
+
+        $r2 = <com.fsck.k9.provider.DecryptedFileProvider: java.lang.Object cleanupReceiverMonitor>;
+
+        entermonitor $r2;
+
+     label1:
+        $r3 = <com.fsck.k9.provider.DecryptedFileProvider: com.fsck.k9.provider.DecryptedFileProvider$DecryptedFileProviderCleanupReceiver cleanupReceiver>;
+
+        if $r3 == null goto label3;
+
+        exitmonitor $r2;
+
+     label2:
+        return;
+
+     label3:
+        $z0 = <com.fsck.k9.K9: boolean DEBUG>;
+
+        if $z0 == 0 goto label4;
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("k9", "Registering temp file cleanup receiver");
+
+     label4:
+        $r3 = new com.fsck.k9.provider.DecryptedFileProvider$DecryptedFileProviderCleanupReceiver;
+
+        specialinvoke $r3.<com.fsck.k9.provider.DecryptedFileProvider$DecryptedFileProviderCleanupReceiver: void <init>(com.fsck.k9.provider.DecryptedFileProvider$1)>(null);
+
+        <com.fsck.k9.provider.DecryptedFileProvider: com.fsck.k9.provider.DecryptedFileProvider$DecryptedFileProviderCleanupReceiver cleanupReceiver> = $r3;
+
+        r1 = new android.content.IntentFilter;
+
+        specialinvoke r1.<android.content.IntentFilter: void <init>()>();
+
+        virtualinvoke r1.<android.content.IntentFilter: void addAction(java.lang.String)>("android.intent.action.SCREEN_OFF");
+
+        $r3 = <com.fsck.k9.provider.DecryptedFileProvider: com.fsck.k9.provider.DecryptedFileProvider$DecryptedFileProviderCleanupReceiver cleanupReceiver>;
+
+        virtualinvoke $r0.<android.content.Context: android.content.Intent registerReceiver(android.content.BroadcastReceiver,android.content.IntentFilter)>($r3, r1);
+
+        exitmonitor $r2;
+
+     label5:
+        return;
+
+     label6:
+        $r4 := @caughtexception;
+
+        exitmonitor $r2;
+
+     label7:
+        throw $r4;
+
+        catch java.lang.Throwable from label1 to label2 with label6;
+        catch java.lang.Throwable from label3 to label5 with label6;
+        catch java.lang.Throwable from label6 to label7 with label6;
+    }
+    private static void unregisterFileCleanupReceiver(android.content.Context)
+    {
+        android.content.Context $r0;
+        java.lang.Object $r1;
+        com.fsck.k9.provider.DecryptedFileProvider$DecryptedFileProviderCleanupReceiver $r2;
+        boolean $z0;
+        java.lang.Throwable $r3;
+
+        $r0 := @parameter0: android.content.Context;
+
+        $r1 = <com.fsck.k9.provider.DecryptedFileProvider: java.lang.Object cleanupReceiverMonitor>;
+
+        entermonitor $r1;
+
+     label1:
+        $r2 = <com.fsck.k9.provider.DecryptedFileProvider: com.fsck.k9.provider.DecryptedFileProvider$DecryptedFileProviderCleanupReceiver cleanupReceiver>;
+
+        if $r2 != null goto label3;
+
+        exitmonitor $r1;
+
+     label2:
+        return;
+
+     label3:
+        $z0 = <com.fsck.k9.K9: boolean DEBUG>;
+
+        if $z0 == 0 goto label4;
+
+        staticinvoke <android.util.Log: int d(java.lang.String,java.lang.String)>("k9", "Unregistering temp file cleanup receiver");
+
+     label4:
+        $r2 = <com.fsck.k9.provider.DecryptedFileProvider: com.fsck.k9.provider.DecryptedFileProvider$DecryptedFileProviderCleanupReceiver cleanupReceiver>;
+
+        virtualinvoke $r0.<android.content.Context: void unregisterReceiver(android.content.BroadcastReceiver)>($r2);
+
+        <com.fsck.k9.provider.DecryptedFileProvider: com.fsck.k9.provider.DecryptedFileProvider$DecryptedFileProviderCleanupReceiver cleanupReceiver> = null;
+
+        exitmonitor $r1;
+
+     label5:
+        return;
+
+     label6:
+        $r3 := @caughtexception;
+
+        exitmonitor $r1;
+
+     label7:
+        throw $r3;
+
+        catch java.lang.Throwable from label1 to label2 with label6;
+        catch java.lang.Throwable from label3 to label5 with label6;
+        catch java.lang.Throwable from label6 to label7 with label6;
+    }
+    public int delete(android.net.Uri, java.lang.String, java.lang.String[])
+    {
+        com.fsck.k9.provider.DecryptedFileProvider r0;
+        android.net.Uri $r1;
+        java.lang.String $r2;
+        java.lang.String[] $r3;
+        java.lang.UnsupportedOperationException $r4;
+
+        r0 := @this: com.fsck.k9.provider.DecryptedFileProvider;
+
+        $r1 := @parameter0: android.net.Uri;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $r3 := @parameter2: java.lang.String[];
+
+        $r4 = new java.lang.UnsupportedOperationException;
+
+        specialinvoke $r4.<java.lang.UnsupportedOperationException: void <init>()>();
+
+        throw $r4;
+    }
+    public java.lang.String getType(android.net.Uri)
+    {
+        com.fsck.k9.provider.DecryptedFileProvider r0;
+        android.net.Uri $r1;
+        java.lang.String $r2;
+
+        r0 := @this: com.fsck.k9.provider.DecryptedFileProvider;
+
+        $r1 := @parameter0: android.net.Uri;
+
+        $r2 = virtualinvoke $r1.<android.net.Uri: java.lang.String getQueryParameter(java.lang.String)>("mime_type");
+
+        return $r2;
+    }
+    public void onTrimMemory(int)
+    {
+        com.fsck.k9.provider.DecryptedFileProvider r0;
+        int $i0;
+        android.content.Context $r1;
+        com.fsck.k9.provider.DecryptedFileProvider$2 $r2;
+        java.lang.Void[] $r3;
+
+        r0 := @this: com.fsck.k9.provider.DecryptedFileProvider;
+
+        $i0 := @parameter0: int;
+
+        if $i0 >= 80 goto label1;
+
+        return;
+
+     label1:
+        $r1 = virtualinvoke r0.<com.fsck.k9.provider.DecryptedFileProvider: android.content.Context getContext()>();
+
+        if $r1 == null goto label2;
+
+        $r2 = new com.fsck.k9.provider.DecryptedFileProvider$2;
+
+        specialinvoke $r2.<com.fsck.k9.provider.DecryptedFileProvider$2: void <init>(com.fsck.k9.provider.DecryptedFileProvider,android.content.Context)>(r0, $r1);
+
+        $r3 = newarray (java.lang.Void)[0];
+
+        virtualinvoke $r2.<com.fsck.k9.provider.DecryptedFileProvider$2: android.os.AsyncTask execute(java.lang.Object[])>($r3);
+
+        staticinvoke <com.fsck.k9.provider.DecryptedFileProvider: void unregisterFileCleanupReceiver(android.content.Context)>($r1);
+
+     label2:
+        return;
+    }
+    public android.os.ParcelFileDescriptor openFile(android.net.Uri, java.lang.String) throws java.io.FileNotFoundException
+    {
+        com.fsck.k9.provider.DecryptedFileProvider r0;
+        android.net.Uri $r1;
+        java.lang.String $r2;
+        java.io.IOException r3;
+        android.os.ParcelFileDescriptor $r4;
+        boolean $z0;
+        java.io.InputStream r5;
+        android.os.ParcelFileDescriptor$AutoCloseInputStream $r6;
+        org.apache.james.mime4j.codec.Base64InputStream $r7;
+        org.apache.james.mime4j.codec.QuotedPrintableInputStream $r8;
+        java.io.FileNotFoundException $r9;
+
+        r0 := @this: com.fsck.k9.provider.DecryptedFileProvider;
+
+        $r1 := @parameter0: android.net.Uri;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $r4 = specialinvoke r0.<android.support.v4.content.FileProvider: android.os.ParcelFileDescriptor openFile(android.net.Uri,java.lang.String)>($r1, "r");
+
+        $r2 = virtualinvoke $r1.<android.net.Uri: java.lang.String getQueryParameter(java.lang.String)>("encoding");
+
+        $z0 = staticinvoke <org.apache.james.mime4j.util.MimeUtil: boolean isBase64Encoding(java.lang.String)>($r2);
+
+        if $z0 == 0 goto label3;
+
+        $r6 = new android.os.ParcelFileDescriptor$AutoCloseInputStream;
+
+        specialinvoke $r6.<android.os.ParcelFileDescriptor$AutoCloseInputStream: void <init>(android.os.ParcelFileDescriptor)>($r4);
+
+        $r7 = new org.apache.james.mime4j.codec.Base64InputStream;
+
+        r5 = $r7;
+
+        specialinvoke $r7.<org.apache.james.mime4j.codec.Base64InputStream: void <init>(java.io.InputStream)>($r6);
+
+     label1:
+        $r4 = staticinvoke <org.openintents.openpgp.util.ParcelFileDescriptorUtil: android.os.ParcelFileDescriptor pipeFrom(java.io.InputStream)>(r5);
+
+     label2:
+        return $r4;
+
+     label3:
+        $z0 = staticinvoke <org.apache.james.mime4j.util.MimeUtil: boolean isQuotedPrintableEncoded(java.lang.String)>($r2);
+
+        if $z0 == 0 goto label4;
+
+        $r6 = new android.os.ParcelFileDescriptor$AutoCloseInputStream;
+
+        specialinvoke $r6.<android.os.ParcelFileDescriptor$AutoCloseInputStream: void <init>(android.os.ParcelFileDescriptor)>($r4);
+
+        $r8 = new org.apache.james.mime4j.codec.QuotedPrintableInputStream;
+
+        r5 = $r8;
+
+        specialinvoke $r8.<org.apache.james.mime4j.codec.QuotedPrintableInputStream: void <init>(java.io.InputStream)>($r6);
+
+        goto label1;
+
+     label4:
+        $z0 = <com.fsck.k9.K9: boolean DEBUG>;
+
+        if $z0 == 0 goto label6;
+
+        $z0 = staticinvoke <android.text.TextUtils: boolean isEmpty(java.lang.CharSequence)>($r2);
+
+        if $z0 != 0 goto label6;
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String)>("k9", "unsupported encoding, returning raw stream");
+
+        return $r4;
+
+     label5:
+        r3 := @caughtexception;
+
+        $r9 = new java.io.FileNotFoundException;
+
+        specialinvoke $r9.<java.io.FileNotFoundException: void <init>()>();
+
+        throw $r9;
+
+     label6:
+        return $r4;
+
+        catch java.io.IOException from label1 to label2 with label5;
+    }

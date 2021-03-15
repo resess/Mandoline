@@ -1,0 +1,358 @@
+com.fsck.k9.service.DatabaseUpgradeService extends android.app.Service
+private static final java.lang.String ACTION_START_SERVICE
+public static final java.lang.String ACTION_UPGRADE_COMPLETE
+public static final java.lang.String ACTION_UPGRADE_PROGRESS
+public static final java.lang.String EXTRA_ACCOUNT_UUID
+public static final java.lang.String EXTRA_PROGRESS
+public static final java.lang.String EXTRA_PROGRESS_END
+private static final java.lang.String WAKELOCK_TAG
+private static final long WAKELOCK_TIMEOUT
+private java.lang.String mAccountUuid
+private android.support.v4.content.LocalBroadcastManager mLocalBroadcastManager
+private int mProgress
+private int mProgressEnd
+private java.util.concurrent.atomic.AtomicBoolean mRunning
+private com.fsck.k9.mail.power.TracingPowerManager$TracingWakeLock mWakeLock
+    public void <init>()
+    {
+        com.fsck.k9.service.DatabaseUpgradeService r0;
+        java.util.concurrent.atomic.AtomicBoolean $r1;
+
+        r0 := @this: com.fsck.k9.service.DatabaseUpgradeService;
+
+        specialinvoke r0.<android.app.Service: void <init>()>();
+
+        $r1 = new java.util.concurrent.atomic.AtomicBoolean;
+
+        specialinvoke $r1.<java.util.concurrent.atomic.AtomicBoolean: void <init>(boolean)>(0);
+
+        r0.<com.fsck.k9.service.DatabaseUpgradeService: java.util.concurrent.atomic.AtomicBoolean mRunning> = $r1;
+
+        return;
+    }
+    static void access$000(com.fsck.k9.service.DatabaseUpgradeService)
+    {
+        com.fsck.k9.service.DatabaseUpgradeService $r0;
+
+        $r0 := @parameter0: com.fsck.k9.service.DatabaseUpgradeService;
+
+        specialinvoke $r0.<com.fsck.k9.service.DatabaseUpgradeService: void upgradeDatabases()>();
+
+        return;
+    }
+    static void access$100(com.fsck.k9.service.DatabaseUpgradeService)
+    {
+        com.fsck.k9.service.DatabaseUpgradeService $r0;
+
+        $r0 := @parameter0: com.fsck.k9.service.DatabaseUpgradeService;
+
+        specialinvoke $r0.<com.fsck.k9.service.DatabaseUpgradeService: void stopService()>();
+
+        return;
+    }
+    private void acquireWakelock()
+    {
+        com.fsck.k9.service.DatabaseUpgradeService r0;
+        com.fsck.k9.mail.power.TracingPowerManager $r1;
+        com.fsck.k9.mail.power.TracingPowerManager$TracingWakeLock $r2;
+
+        r0 := @this: com.fsck.k9.service.DatabaseUpgradeService;
+
+        $r1 = staticinvoke <com.fsck.k9.mail.power.TracingPowerManager: com.fsck.k9.mail.power.TracingPowerManager getPowerManager(android.content.Context)>(r0);
+
+        $r2 = virtualinvoke $r1.<com.fsck.k9.mail.power.TracingPowerManager: com.fsck.k9.mail.power.TracingPowerManager$TracingWakeLock newWakeLock(int,java.lang.String)>(1, "DatabaseUpgradeService");
+
+        r0.<com.fsck.k9.service.DatabaseUpgradeService: com.fsck.k9.mail.power.TracingPowerManager$TracingWakeLock mWakeLock> = $r2;
+
+        $r2 = r0.<com.fsck.k9.service.DatabaseUpgradeService: com.fsck.k9.mail.power.TracingPowerManager$TracingWakeLock mWakeLock>;
+
+        virtualinvoke $r2.<com.fsck.k9.mail.power.TracingPowerManager$TracingWakeLock: void setReferenceCounted(boolean)>(0);
+
+        $r2 = r0.<com.fsck.k9.service.DatabaseUpgradeService: com.fsck.k9.mail.power.TracingPowerManager$TracingWakeLock mWakeLock>;
+
+        virtualinvoke $r2.<com.fsck.k9.mail.power.TracingPowerManager$TracingWakeLock: void acquire(long)>(600000L);
+
+        return;
+    }
+    private void releaseWakelock()
+    {
+        com.fsck.k9.service.DatabaseUpgradeService r0;
+        com.fsck.k9.mail.power.TracingPowerManager$TracingWakeLock $r1;
+
+        r0 := @this: com.fsck.k9.service.DatabaseUpgradeService;
+
+        $r1 = r0.<com.fsck.k9.service.DatabaseUpgradeService: com.fsck.k9.mail.power.TracingPowerManager$TracingWakeLock mWakeLock>;
+
+        virtualinvoke $r1.<com.fsck.k9.mail.power.TracingPowerManager$TracingWakeLock: void release()>();
+
+        return;
+    }
+    private void sendProgressBroadcast(java.lang.String, int, int)
+    {
+        com.fsck.k9.service.DatabaseUpgradeService r0;
+        java.lang.String $r1;
+        int $i0, $i1;
+        android.content.Intent r2;
+        android.support.v4.content.LocalBroadcastManager $r3;
+
+        r0 := @this: com.fsck.k9.service.DatabaseUpgradeService;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $i0 := @parameter1: int;
+
+        $i1 := @parameter2: int;
+
+        r2 = new android.content.Intent;
+
+        specialinvoke r2.<android.content.Intent: void <init>()>();
+
+        virtualinvoke r2.<android.content.Intent: android.content.Intent setAction(java.lang.String)>("DatabaseUpgradeService.upgradeProgress");
+
+        virtualinvoke r2.<android.content.Intent: android.content.Intent putExtra(java.lang.String,java.lang.String)>("account_uuid", $r1);
+
+        virtualinvoke r2.<android.content.Intent: android.content.Intent putExtra(java.lang.String,int)>("progress", $i0);
+
+        virtualinvoke r2.<android.content.Intent: android.content.Intent putExtra(java.lang.String,int)>("progress_end", $i1);
+
+        $r3 = r0.<com.fsck.k9.service.DatabaseUpgradeService: android.support.v4.content.LocalBroadcastManager mLocalBroadcastManager>;
+
+        virtualinvoke $r3.<android.support.v4.content.LocalBroadcastManager: boolean sendBroadcast(android.content.Intent)>(r2);
+
+        return;
+    }
+    private void sendUpgradeCompleteBroadcast()
+    {
+        com.fsck.k9.service.DatabaseUpgradeService r0;
+        android.content.Intent r1;
+        android.support.v4.content.LocalBroadcastManager $r2;
+
+        r0 := @this: com.fsck.k9.service.DatabaseUpgradeService;
+
+        r1 = new android.content.Intent;
+
+        specialinvoke r1.<android.content.Intent: void <init>()>();
+
+        virtualinvoke r1.<android.content.Intent: android.content.Intent setAction(java.lang.String)>("DatabaseUpgradeService.upgradeComplete");
+
+        $r2 = r0.<com.fsck.k9.service.DatabaseUpgradeService: android.support.v4.content.LocalBroadcastManager mLocalBroadcastManager>;
+
+        virtualinvoke $r2.<android.support.v4.content.LocalBroadcastManager: boolean sendBroadcast(android.content.Intent)>(r1);
+
+        return;
+    }
+    public static void startService(android.content.Context)
+    {
+        android.content.Context $r0;
+        android.content.Intent r1;
+
+        $r0 := @parameter0: android.content.Context;
+
+        r1 = new android.content.Intent;
+
+        specialinvoke r1.<android.content.Intent: void <init>()>();
+
+        virtualinvoke r1.<android.content.Intent: android.content.Intent setClass(android.content.Context,java.lang.Class)>($r0, class "Lcom/fsck/k9/service/DatabaseUpgradeService;");
+
+        virtualinvoke r1.<android.content.Intent: android.content.Intent setAction(java.lang.String)>("com.fsck.k9.service.DatabaseUpgradeService.startService");
+
+        virtualinvoke $r0.<android.content.Context: android.content.ComponentName startService(android.content.Intent)>(r1);
+
+        return;
+    }
+    private void startUpgradeInBackground()
+    {
+        com.fsck.k9.service.DatabaseUpgradeService r0;
+        com.fsck.k9.service.DatabaseUpgradeService$1 $r1;
+
+        r0 := @this: com.fsck.k9.service.DatabaseUpgradeService;
+
+        $r1 = new com.fsck.k9.service.DatabaseUpgradeService$1;
+
+        specialinvoke $r1.<com.fsck.k9.service.DatabaseUpgradeService$1: void <init>(com.fsck.k9.service.DatabaseUpgradeService,java.lang.String)>(r0, "DatabaseUpgradeService");
+
+        virtualinvoke $r1.<com.fsck.k9.service.DatabaseUpgradeService$1: void start()>();
+
+        return;
+    }
+    private void stopService()
+    {
+        com.fsck.k9.service.DatabaseUpgradeService r0;
+        boolean $z0;
+        java.util.concurrent.atomic.AtomicBoolean $r1;
+
+        r0 := @this: com.fsck.k9.service.DatabaseUpgradeService;
+
+        virtualinvoke r0.<com.fsck.k9.service.DatabaseUpgradeService: void stopSelf()>();
+
+        $z0 = <com.fsck.k9.K9: boolean DEBUG>;
+
+        if $z0 == 0 goto label1;
+
+        staticinvoke <android.util.Log: int i(java.lang.String,java.lang.String)>("k9", "DatabaseUpgradeService stopped");
+
+     label1:
+        specialinvoke r0.<com.fsck.k9.service.DatabaseUpgradeService: void releaseWakelock()>();
+
+        $r1 = r0.<com.fsck.k9.service.DatabaseUpgradeService: java.util.concurrent.atomic.AtomicBoolean mRunning>;
+
+        virtualinvoke $r1.<java.util.concurrent.atomic.AtomicBoolean: void set(boolean)>(0);
+
+        return;
+    }
+    private void upgradeDatabases()
+    {
+        com.fsck.k9.service.DatabaseUpgradeService r0;
+        int $i0, $i1;
+        com.fsck.k9.Preferences $r1;
+        java.util.List $r2;
+        java.util.Iterator $r3;
+        boolean $z0;
+        java.lang.Object $r4;
+        com.fsck.k9.Account r5;
+        java.lang.String $r6;
+        com.fsck.k9.mailstore.UnavailableStorageException r7;
+        java.lang.Exception r8;
+
+        r0 := @this: com.fsck.k9.service.DatabaseUpgradeService;
+
+        $r1 = staticinvoke <com.fsck.k9.Preferences: com.fsck.k9.Preferences getPreferences(android.content.Context)>(r0);
+
+        $r2 = virtualinvoke $r1.<com.fsck.k9.Preferences: java.util.List getAccounts()>();
+
+        $i0 = interfaceinvoke $r2.<java.util.List: int size()>();
+
+        r0.<com.fsck.k9.service.DatabaseUpgradeService: int mProgressEnd> = $i0;
+
+        r0.<com.fsck.k9.service.DatabaseUpgradeService: int mProgress> = 0;
+
+        $r3 = interfaceinvoke $r2.<java.util.List: java.util.Iterator iterator()>();
+
+     label1:
+        $z0 = interfaceinvoke $r3.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label6;
+
+        $r4 = interfaceinvoke $r3.<java.util.Iterator: java.lang.Object next()>();
+
+        r5 = (com.fsck.k9.Account) $r4;
+
+        $r6 = virtualinvoke r5.<com.fsck.k9.Account: java.lang.String getUuid()>();
+
+        r0.<com.fsck.k9.service.DatabaseUpgradeService: java.lang.String mAccountUuid> = $r6;
+
+        $r6 = r0.<com.fsck.k9.service.DatabaseUpgradeService: java.lang.String mAccountUuid>;
+
+        $i1 = r0.<com.fsck.k9.service.DatabaseUpgradeService: int mProgress>;
+
+        $i0 = r0.<com.fsck.k9.service.DatabaseUpgradeService: int mProgressEnd>;
+
+        specialinvoke r0.<com.fsck.k9.service.DatabaseUpgradeService: void sendProgressBroadcast(java.lang.String,int,int)>($r6, $i1, $i0);
+
+     label2:
+        virtualinvoke r5.<com.fsck.k9.Account: com.fsck.k9.mailstore.LocalStore getLocalStore()>();
+
+     label3:
+        $i0 = r0.<com.fsck.k9.service.DatabaseUpgradeService: int mProgress>;
+
+        $i0 = $i0 + 1;
+
+        r0.<com.fsck.k9.service.DatabaseUpgradeService: int mProgress> = $i0;
+
+        goto label1;
+
+     label4:
+        r7 := @caughtexception;
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String)>("k9", "Database unavailable");
+
+        goto label3;
+
+     label5:
+        r8 := @caughtexception;
+
+        staticinvoke <android.util.Log: int e(java.lang.String,java.lang.String,java.lang.Throwable)>("k9", "Error while upgrading database", r8);
+
+        goto label3;
+
+     label6:
+        staticinvoke <com.fsck.k9.K9: void setDatabasesUpToDate(boolean)>(1);
+
+        specialinvoke r0.<com.fsck.k9.service.DatabaseUpgradeService: void sendUpgradeCompleteBroadcast()>();
+
+        return;
+
+        catch com.fsck.k9.mailstore.UnavailableStorageException from label2 to label3 with label4;
+        catch java.lang.Exception from label2 to label3 with label5;
+    }
+    public android.os.IBinder onBind(android.content.Intent)
+    {
+        com.fsck.k9.service.DatabaseUpgradeService r0;
+        android.content.Intent $r1;
+
+        r0 := @this: com.fsck.k9.service.DatabaseUpgradeService;
+
+        $r1 := @parameter0: android.content.Intent;
+
+        return null;
+    }
+    public void onCreate()
+    {
+        com.fsck.k9.service.DatabaseUpgradeService r0;
+        android.support.v4.content.LocalBroadcastManager $r1;
+
+        r0 := @this: com.fsck.k9.service.DatabaseUpgradeService;
+
+        $r1 = staticinvoke <android.support.v4.content.LocalBroadcastManager: android.support.v4.content.LocalBroadcastManager getInstance(android.content.Context)>(r0);
+
+        r0.<com.fsck.k9.service.DatabaseUpgradeService: android.support.v4.content.LocalBroadcastManager mLocalBroadcastManager> = $r1;
+
+        return;
+    }
+    public final int onStartCommand(android.content.Intent, int, int)
+    {
+        com.fsck.k9.service.DatabaseUpgradeService r0;
+        android.content.Intent $r1;
+        int $i0, $i1;
+        boolean $z0;
+        java.util.concurrent.atomic.AtomicBoolean $r2;
+        java.lang.String $r3;
+
+        r0 := @this: com.fsck.k9.service.DatabaseUpgradeService;
+
+        $r1 := @parameter0: android.content.Intent;
+
+        $i0 := @parameter1: int;
+
+        $i1 := @parameter2: int;
+
+        $r2 = r0.<com.fsck.k9.service.DatabaseUpgradeService: java.util.concurrent.atomic.AtomicBoolean mRunning>;
+
+        $z0 = virtualinvoke $r2.<java.util.concurrent.atomic.AtomicBoolean: boolean compareAndSet(boolean,boolean)>(0, 1);
+
+        if $z0 == 0 goto label2;
+
+        $z0 = <com.fsck.k9.K9: boolean DEBUG>;
+
+        if $z0 == 0 goto label1;
+
+        staticinvoke <android.util.Log: int i(java.lang.String,java.lang.String)>("k9", "DatabaseUpgradeService started");
+
+     label1:
+        specialinvoke r0.<com.fsck.k9.service.DatabaseUpgradeService: void acquireWakelock()>();
+
+        specialinvoke r0.<com.fsck.k9.service.DatabaseUpgradeService: void startUpgradeInBackground()>();
+
+        return 1;
+
+     label2:
+        $r3 = r0.<com.fsck.k9.service.DatabaseUpgradeService: java.lang.String mAccountUuid>;
+
+        $i1 = r0.<com.fsck.k9.service.DatabaseUpgradeService: int mProgress>;
+
+        $i0 = r0.<com.fsck.k9.service.DatabaseUpgradeService: int mProgressEnd>;
+
+        specialinvoke r0.<com.fsck.k9.service.DatabaseUpgradeService: void sendProgressBroadcast(java.lang.String,int,int)>($r3, $i1, $i0);
+
+        return 1;
+    }

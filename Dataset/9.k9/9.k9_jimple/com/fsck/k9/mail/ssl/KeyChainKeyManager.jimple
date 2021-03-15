@@ -1,0 +1,579 @@
+com.fsck.k9.mail.ssl.KeyChainKeyManager extends javax.net.ssl.X509ExtendedKeyManager
+private static java.security.PrivateKey sClientCertificateReferenceWorkaround
+private final java.lang.String mAlias
+private final java.security.cert.X509Certificate[] mChain
+private final java.security.PrivateKey mPrivateKey
+    public void <init>(android.content.Context, java.lang.String) throws com.fsck.k9.mail.MessagingException
+    {
+        com.fsck.k9.mail.ssl.KeyChainKeyManager r0;
+        android.content.Context $r1;
+        java.lang.String $r2, $r7;
+        java.security.cert.X509Certificate[] $r3;
+        java.security.PrivateKey $r4;
+        android.security.KeyChainException r5;
+        com.fsck.k9.mail.CertificateValidationException $r6;
+        com.fsck.k9.mail.CertificateValidationException$Reason $r8;
+        java.lang.InterruptedException r9;
+
+        r0 := @this: com.fsck.k9.mail.ssl.KeyChainKeyManager;
+
+        $r1 := @parameter0: android.content.Context;
+
+        $r2 := @parameter1: java.lang.String;
+
+        specialinvoke r0.<javax.net.ssl.X509ExtendedKeyManager: void <init>()>();
+
+        r0.<com.fsck.k9.mail.ssl.KeyChainKeyManager: java.lang.String mAlias> = $r2;
+
+     label1:
+        $r3 = specialinvoke r0.<com.fsck.k9.mail.ssl.KeyChainKeyManager: java.security.cert.X509Certificate[] fetchCertificateChain(android.content.Context,java.lang.String)>($r1, $r2);
+
+     label2:
+        r0.<com.fsck.k9.mail.ssl.KeyChainKeyManager: java.security.cert.X509Certificate[] mChain> = $r3;
+
+     label3:
+        $r4 = specialinvoke r0.<com.fsck.k9.mail.ssl.KeyChainKeyManager: java.security.PrivateKey fetchPrivateKey(android.content.Context,java.lang.String)>($r1, $r2);
+
+     label4:
+        r0.<com.fsck.k9.mail.ssl.KeyChainKeyManager: java.security.PrivateKey mPrivateKey> = $r4;
+
+        return;
+
+     label5:
+        r5 := @caughtexception;
+
+        $r6 = new com.fsck.k9.mail.CertificateValidationException;
+
+        $r7 = virtualinvoke r5.<android.security.KeyChainException: java.lang.String getMessage()>();
+
+        $r8 = <com.fsck.k9.mail.CertificateValidationException$Reason: com.fsck.k9.mail.CertificateValidationException$Reason RetrievalFailure>;
+
+        specialinvoke $r6.<com.fsck.k9.mail.CertificateValidationException: void <init>(java.lang.String,com.fsck.k9.mail.CertificateValidationException$Reason,java.lang.String)>($r7, $r8, $r2);
+
+        throw $r6;
+
+     label6:
+        r9 := @caughtexception;
+
+        $r6 = new com.fsck.k9.mail.CertificateValidationException;
+
+        $r7 = virtualinvoke r9.<java.lang.InterruptedException: java.lang.String getMessage()>();
+
+        $r8 = <com.fsck.k9.mail.CertificateValidationException$Reason: com.fsck.k9.mail.CertificateValidationException$Reason RetrievalFailure>;
+
+        specialinvoke $r6.<com.fsck.k9.mail.CertificateValidationException: void <init>(java.lang.String,com.fsck.k9.mail.CertificateValidationException$Reason,java.lang.String)>($r7, $r8, $r2);
+
+        throw $r6;
+
+        catch android.security.KeyChainException from label1 to label2 with label5;
+        catch android.security.KeyChainException from label3 to label4 with label5;
+        catch java.lang.InterruptedException from label1 to label2 with label6;
+        catch java.lang.InterruptedException from label3 to label4 with label6;
+    }
+    private java.lang.String chooseAlias(java.lang.String[], java.security.Principal[])
+    {
+        com.fsck.k9.mail.ssl.KeyChainKeyManager r0;
+        java.lang.String[] $r1;
+        java.security.Principal[] $r2;
+        java.security.cert.X509Certificate r3;
+        int $i0, $i1, $i2, $i3;
+        java.security.cert.X509Certificate[] $r4;
+        java.security.PublicKey $r5;
+        java.lang.String $r6, $r7, r9, r10;
+        java.util.Locale $r8;
+        boolean $z0;
+        java.util.List $r11;
+        javax.security.auth.x500.X500Principal $r12;
+        java.lang.Object[] $r13;
+
+        r0 := @this: com.fsck.k9.mail.ssl.KeyChainKeyManager;
+
+        $r1 := @parameter0: java.lang.String[];
+
+        $r2 := @parameter1: java.security.Principal[];
+
+        if $r1 == null goto label01;
+
+        $i0 = lengthof $r1;
+
+        if $i0 != 0 goto label02;
+
+     label01:
+        return null;
+
+     label02:
+        $r4 = r0.<com.fsck.k9.mail.ssl.KeyChainKeyManager: java.security.cert.X509Certificate[] mChain>;
+
+        r3 = $r4[0];
+
+        $r5 = virtualinvoke r3.<java.security.cert.X509Certificate: java.security.PublicKey getPublicKey()>();
+
+        $r6 = interfaceinvoke $r5.<java.security.PublicKey: java.lang.String getAlgorithm()>();
+
+        $r7 = virtualinvoke r3.<java.security.cert.X509Certificate: java.lang.String getSigAlgName()>();
+
+        $r8 = <java.util.Locale: java.util.Locale US>;
+
+        $r7 = virtualinvoke $r7.<java.lang.String: java.lang.String toUpperCase(java.util.Locale)>($r8);
+
+        $i0 = lengthof $r1;
+
+        $i1 = 0;
+
+     label03:
+        if $i1 >= $i0 goto label14;
+
+        r9 = $r1[$i1];
+
+        if r9 != null goto label05;
+
+     label04:
+        $i1 = $i1 + 1;
+
+        goto label03;
+
+     label05:
+        $i2 = virtualinvoke r9.<java.lang.String: int indexOf(int)>(95);
+
+        if $i2 != -1 goto label09;
+
+        r10 = null;
+
+     label06:
+        $z0 = virtualinvoke $r6.<java.lang.String: boolean equals(java.lang.Object)>(r9);
+
+        if $z0 == 0 goto label04;
+
+        if r10 == null goto label07;
+
+        if $r7 == null goto label07;
+
+        $z0 = virtualinvoke $r7.<java.lang.String: boolean contains(java.lang.CharSequence)>(r10);
+
+        if $z0 == 0 goto label04;
+
+     label07:
+        if $r2 == null goto label08;
+
+        $i0 = lengthof $r2;
+
+        if $i0 != 0 goto label10;
+
+     label08:
+        $r6 = r0.<com.fsck.k9.mail.ssl.KeyChainKeyManager: java.lang.String mAlias>;
+
+        return $r6;
+
+     label09:
+        $i3 = $i2 + 1;
+
+        r10 = virtualinvoke r9.<java.lang.String: java.lang.String substring(int)>($i3);
+
+        r9 = virtualinvoke r9.<java.lang.String: java.lang.String substring(int,int)>(0, $i2);
+
+        goto label06;
+
+     label10:
+        $r11 = staticinvoke <java.util.Arrays: java.util.List asList(java.lang.Object[])>($r2);
+
+        $r4 = r0.<com.fsck.k9.mail.ssl.KeyChainKeyManager: java.security.cert.X509Certificate[] mChain>;
+
+        $i0 = lengthof $r4;
+
+        $i1 = 0;
+
+     label11:
+        if $i1 >= $i0 goto label13;
+
+        r3 = $r4[$i1];
+
+        $r12 = virtualinvoke r3.<java.security.cert.X509Certificate: javax.security.auth.x500.X500Principal getIssuerX500Principal()>();
+
+        $z0 = interfaceinvoke $r11.<java.util.List: boolean contains(java.lang.Object)>($r12);
+
+        if $z0 == 0 goto label12;
+
+        $r6 = r0.<com.fsck.k9.mail.ssl.KeyChainKeyManager: java.lang.String mAlias>;
+
+        return $r6;
+
+     label12:
+        $i1 = $i1 + 1;
+
+        goto label11;
+
+     label13:
+        $r13 = newarray (java.lang.Object)[1];
+
+        $r6 = r0.<com.fsck.k9.mail.ssl.KeyChainKeyManager: java.lang.String mAlias>;
+
+        $r13[0] = $r6;
+
+        staticinvoke <timber.log.Timber: void w(java.lang.String,java.lang.Object[])>("Client certificate %s not issued by any of the requested issuers", $r13);
+
+        return null;
+
+     label14:
+        $r13 = newarray (java.lang.Object)[1];
+
+        $r6 = r0.<com.fsck.k9.mail.ssl.KeyChainKeyManager: java.lang.String mAlias>;
+
+        $r13[0] = $r6;
+
+        staticinvoke <timber.log.Timber: void w(java.lang.String,java.lang.Object[])>("Client certificate %s does not match any of the requested key types", $r13);
+
+        return null;
+    }
+    private java.security.cert.X509Certificate[] fetchCertificateChain(android.content.Context, java.lang.String) throws android.security.KeyChainException, java.lang.InterruptedException, com.fsck.k9.mail.MessagingException
+    {
+        com.fsck.k9.mail.ssl.KeyChainKeyManager r0;
+        android.content.Context $r1;
+        java.lang.String $r2, $r9;
+        java.security.cert.X509Certificate r3;
+        java.security.cert.CertificateException r4;
+        java.security.cert.X509Certificate[] $r5;
+        int $i0, $i1;
+        com.fsck.k9.mail.MessagingException $r6;
+        java.lang.StringBuilder $r7;
+        com.fsck.k9.mail.CertificateValidationException $r8;
+        com.fsck.k9.mail.CertificateValidationException$Reason $r10;
+
+        r0 := @this: com.fsck.k9.mail.ssl.KeyChainKeyManager;
+
+        $r1 := @parameter0: android.content.Context;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $r5 = staticinvoke <android.security.KeyChain: java.security.cert.X509Certificate[] getCertificateChain(android.content.Context,java.lang.String)>($r1, $r2);
+
+        if $r5 == null goto label1;
+
+        $i0 = lengthof $r5;
+
+        if $i0 != 0 goto label2;
+
+     label1:
+        $r6 = new com.fsck.k9.mail.MessagingException;
+
+        $r7 = new java.lang.StringBuilder;
+
+        specialinvoke $r7.<java.lang.StringBuilder: void <init>()>();
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("No certificate chain found for: ");
+
+        $r7 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r2 = virtualinvoke $r7.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r6.<com.fsck.k9.mail.MessagingException: void <init>(java.lang.String)>($r2);
+
+        throw $r6;
+
+     label2:
+        $i0 = lengthof $r5;
+
+        $i1 = 0;
+
+     label3:
+        if $i1 >= $i0 goto label7;
+
+        r3 = $r5[$i1];
+
+     label4:
+        virtualinvoke r3.<java.security.cert.X509Certificate: void checkValidity()>();
+
+     label5:
+        $i1 = $i1 + 1;
+
+        goto label3;
+
+     label6:
+        r4 := @caughtexception;
+
+        $r8 = new com.fsck.k9.mail.CertificateValidationException;
+
+        $r9 = virtualinvoke r4.<java.security.cert.CertificateException: java.lang.String getMessage()>();
+
+        $r10 = <com.fsck.k9.mail.CertificateValidationException$Reason: com.fsck.k9.mail.CertificateValidationException$Reason Expired>;
+
+        specialinvoke $r8.<com.fsck.k9.mail.CertificateValidationException: void <init>(java.lang.String,com.fsck.k9.mail.CertificateValidationException$Reason,java.lang.String)>($r9, $r10, $r2);
+
+        throw $r8;
+
+     label7:
+        return $r5;
+
+        catch java.security.cert.CertificateException from label4 to label5 with label6;
+    }
+    private java.security.PrivateKey fetchPrivateKey(android.content.Context, java.lang.String) throws android.security.KeyChainException, java.lang.InterruptedException, com.fsck.k9.mail.MessagingException
+    {
+        com.fsck.k9.mail.ssl.KeyChainKeyManager r0;
+        android.content.Context $r1;
+        java.lang.String $r2;
+        java.security.PrivateKey $r3;
+        com.fsck.k9.mail.MessagingException $r4;
+        java.lang.StringBuilder $r5;
+        int $i0;
+
+        r0 := @this: com.fsck.k9.mail.ssl.KeyChainKeyManager;
+
+        $r1 := @parameter0: android.content.Context;
+
+        $r2 := @parameter1: java.lang.String;
+
+        $r3 = staticinvoke <android.security.KeyChain: java.security.PrivateKey getPrivateKey(android.content.Context,java.lang.String)>($r1, $r2);
+
+        if $r3 != null goto label1;
+
+        $r4 = new com.fsck.k9.mail.MessagingException;
+
+        $r5 = new java.lang.StringBuilder;
+
+        specialinvoke $r5.<java.lang.StringBuilder: void <init>()>();
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("No private key found for: ");
+
+        $r5 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r2);
+
+        $r2 = virtualinvoke $r5.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r4.<com.fsck.k9.mail.MessagingException: void <init>(java.lang.String)>($r2);
+
+        throw $r4;
+
+     label1:
+        $i0 = <android.os.Build$VERSION: int SDK_INT>;
+
+        if $i0 >= 17 goto label2;
+
+        staticinvoke <com.fsck.k9.mail.ssl.KeyChainKeyManager: void savePrivateKeyReference(java.security.PrivateKey)>($r3);
+
+     label2:
+        return $r3;
+    }
+    private static void savePrivateKeyReference(java.security.PrivateKey)
+    {
+        java.security.PrivateKey $r0, $r1;
+        java.lang.Throwable $r2;
+
+        $r0 := @parameter0: java.security.PrivateKey;
+
+        entermonitor class "Lcom/fsck/k9/mail/ssl/KeyChainKeyManager;";
+
+     label1:
+        $r1 = <com.fsck.k9.mail.ssl.KeyChainKeyManager: java.security.PrivateKey sClientCertificateReferenceWorkaround>;
+
+        if $r1 != null goto label2;
+
+        <com.fsck.k9.mail.ssl.KeyChainKeyManager: java.security.PrivateKey sClientCertificateReferenceWorkaround> = $r0;
+
+     label2:
+        exitmonitor class "Lcom/fsck/k9/mail/ssl/KeyChainKeyManager;";
+
+        return;
+
+     label3:
+        $r2 := @caughtexception;
+
+        exitmonitor class "Lcom/fsck/k9/mail/ssl/KeyChainKeyManager;";
+
+        throw $r2;
+
+        catch java.lang.Throwable from label1 to label2 with label3;
+    }
+    public java.lang.String chooseClientAlias(java.lang.String[], java.security.Principal[], java.net.Socket)
+    {
+        com.fsck.k9.mail.ssl.KeyChainKeyManager r0;
+        java.lang.String[] $r1;
+        java.security.Principal[] $r2;
+        java.net.Socket $r3;
+        java.lang.String $r4;
+
+        r0 := @this: com.fsck.k9.mail.ssl.KeyChainKeyManager;
+
+        $r1 := @parameter0: java.lang.String[];
+
+        $r2 := @parameter1: java.security.Principal[];
+
+        $r3 := @parameter2: java.net.Socket;
+
+        $r4 = specialinvoke r0.<com.fsck.k9.mail.ssl.KeyChainKeyManager: java.lang.String chooseAlias(java.lang.String[],java.security.Principal[])>($r1, $r2);
+
+        return $r4;
+    }
+    public java.lang.String chooseEngineClientAlias(java.lang.String[], java.security.Principal[], javax.net.ssl.SSLEngine)
+    {
+        com.fsck.k9.mail.ssl.KeyChainKeyManager r0;
+        java.lang.String[] $r1;
+        java.security.Principal[] $r2;
+        javax.net.ssl.SSLEngine $r3;
+        java.lang.String $r4;
+
+        r0 := @this: com.fsck.k9.mail.ssl.KeyChainKeyManager;
+
+        $r1 := @parameter0: java.lang.String[];
+
+        $r2 := @parameter1: java.security.Principal[];
+
+        $r3 := @parameter2: javax.net.ssl.SSLEngine;
+
+        $r4 = specialinvoke r0.<com.fsck.k9.mail.ssl.KeyChainKeyManager: java.lang.String chooseAlias(java.lang.String[],java.security.Principal[])>($r1, $r2);
+
+        return $r4;
+    }
+    public java.lang.String chooseEngineServerAlias(java.lang.String, java.security.Principal[], javax.net.ssl.SSLEngine)
+    {
+        com.fsck.k9.mail.ssl.KeyChainKeyManager r0;
+        java.lang.String $r1;
+        java.security.Principal[] $r2;
+        javax.net.ssl.SSLEngine $r3;
+        java.lang.String[] $r4;
+
+        r0 := @this: com.fsck.k9.mail.ssl.KeyChainKeyManager;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.security.Principal[];
+
+        $r3 := @parameter2: javax.net.ssl.SSLEngine;
+
+        $r4 = newarray (java.lang.String)[1];
+
+        $r4[0] = $r1;
+
+        $r1 = specialinvoke r0.<com.fsck.k9.mail.ssl.KeyChainKeyManager: java.lang.String chooseAlias(java.lang.String[],java.security.Principal[])>($r4, $r2);
+
+        return $r1;
+    }
+    public java.lang.String chooseServerAlias(java.lang.String, java.security.Principal[], java.net.Socket)
+    {
+        com.fsck.k9.mail.ssl.KeyChainKeyManager r0;
+        java.lang.String $r1;
+        java.security.Principal[] $r2;
+        java.net.Socket $r3;
+        java.lang.String[] $r4;
+
+        r0 := @this: com.fsck.k9.mail.ssl.KeyChainKeyManager;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.security.Principal[];
+
+        $r3 := @parameter2: java.net.Socket;
+
+        $r4 = newarray (java.lang.String)[1];
+
+        $r4[0] = $r1;
+
+        $r1 = specialinvoke r0.<com.fsck.k9.mail.ssl.KeyChainKeyManager: java.lang.String chooseAlias(java.lang.String[],java.security.Principal[])>($r4, $r2);
+
+        return $r1;
+    }
+    public java.security.cert.X509Certificate[] getCertificateChain(java.lang.String)
+    {
+        com.fsck.k9.mail.ssl.KeyChainKeyManager r0;
+        java.lang.String $r1, $r2;
+        boolean $z0;
+        java.security.cert.X509Certificate[] r3;
+
+        r0 := @this: com.fsck.k9.mail.ssl.KeyChainKeyManager;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = r0.<com.fsck.k9.mail.ssl.KeyChainKeyManager: java.lang.String mAlias>;
+
+        $z0 = virtualinvoke $r2.<java.lang.String: boolean equals(java.lang.Object)>($r1);
+
+        if $z0 == 0 goto label1;
+
+        r3 = r0.<com.fsck.k9.mail.ssl.KeyChainKeyManager: java.security.cert.X509Certificate[] mChain>;
+
+        return r3;
+
+     label1:
+        return null;
+    }
+    public java.lang.String[] getClientAliases(java.lang.String, java.security.Principal[])
+    {
+        com.fsck.k9.mail.ssl.KeyChainKeyManager r0;
+        java.lang.String $r1;
+        java.security.Principal[] $r2;
+        java.lang.String[] $r3;
+
+        r0 := @this: com.fsck.k9.mail.ssl.KeyChainKeyManager;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.security.Principal[];
+
+        $r3 = newarray (java.lang.String)[1];
+
+        $r3[0] = $r1;
+
+        $r1 = specialinvoke r0.<com.fsck.k9.mail.ssl.KeyChainKeyManager: java.lang.String chooseAlias(java.lang.String[],java.security.Principal[])>($r3, $r2);
+
+        if $r1 != null goto label1;
+
+        return null;
+
+     label1:
+        $r3 = newarray (java.lang.String)[1];
+
+        $r3[0] = $r1;
+
+        return $r3;
+    }
+    public java.security.PrivateKey getPrivateKey(java.lang.String)
+    {
+        com.fsck.k9.mail.ssl.KeyChainKeyManager r0;
+        java.lang.String $r1, $r2;
+        boolean $z0;
+        java.security.PrivateKey r3;
+
+        r0 := @this: com.fsck.k9.mail.ssl.KeyChainKeyManager;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 = r0.<com.fsck.k9.mail.ssl.KeyChainKeyManager: java.lang.String mAlias>;
+
+        $z0 = virtualinvoke $r2.<java.lang.String: boolean equals(java.lang.Object)>($r1);
+
+        if $z0 == 0 goto label1;
+
+        r3 = r0.<com.fsck.k9.mail.ssl.KeyChainKeyManager: java.security.PrivateKey mPrivateKey>;
+
+        return r3;
+
+     label1:
+        return null;
+    }
+    public java.lang.String[] getServerAliases(java.lang.String, java.security.Principal[])
+    {
+        com.fsck.k9.mail.ssl.KeyChainKeyManager r0;
+        java.lang.String $r1;
+        java.security.Principal[] $r2;
+        java.lang.String[] $r3;
+
+        r0 := @this: com.fsck.k9.mail.ssl.KeyChainKeyManager;
+
+        $r1 := @parameter0: java.lang.String;
+
+        $r2 := @parameter1: java.security.Principal[];
+
+        $r3 = newarray (java.lang.String)[1];
+
+        $r3[0] = $r1;
+
+        $r1 = specialinvoke r0.<com.fsck.k9.mail.ssl.KeyChainKeyManager: java.lang.String chooseAlias(java.lang.String[],java.security.Principal[])>($r3, $r2);
+
+        if $r1 != null goto label1;
+
+        return null;
+
+     label1:
+        $r3 = newarray (java.lang.String)[1];
+
+        $r3[0] = $r1;
+
+        return $r3;
+    }

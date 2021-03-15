@@ -1,0 +1,480 @@
+com.getkeepsafe.relinker.ApkLibraryInstaller extends java.lang.Object implements com.getkeepsafe.relinker.ReLinker$LibraryInstaller
+private static final int COPY_BUFFER_SIZE
+private static final int MAX_TRIES
+    public void <init>()
+    {
+        com.getkeepsafe.relinker.ApkLibraryInstaller r0;
+
+        r0 := @this: com.getkeepsafe.relinker.ApkLibraryInstaller;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+    private void closeSilently(java.io.Closeable)
+    {
+        com.getkeepsafe.relinker.ApkLibraryInstaller r0;
+        java.io.Closeable $r1;
+        java.io.IOException $r2;
+
+        r0 := @this: com.getkeepsafe.relinker.ApkLibraryInstaller;
+
+        $r1 := @parameter0: java.io.Closeable;
+
+        if $r1 == null goto label4;
+
+     label1:
+        interfaceinvoke $r1.<java.io.Closeable: void close()>();
+
+     label2:
+        return;
+
+     label3:
+        $r2 := @caughtexception;
+
+     label4:
+        return;
+
+        catch java.io.IOException from label1 to label2 with label3;
+    }
+    private long copy(java.io.InputStream, java.io.OutputStream) throws java.io.IOException
+    {
+        com.getkeepsafe.relinker.ApkLibraryInstaller r0;
+        java.io.InputStream $r1;
+        java.io.OutputStream $r2;
+        byte[] r3;
+        int $i0;
+        long l1, $l2;
+
+        r0 := @this: com.getkeepsafe.relinker.ApkLibraryInstaller;
+
+        $r1 := @parameter0: java.io.InputStream;
+
+        $r2 := @parameter1: java.io.OutputStream;
+
+        l1 = 0L;
+
+        r3 = newarray (byte)[4096];
+
+     label1:
+        $i0 = virtualinvoke $r1.<java.io.InputStream: int read(byte[])>(r3);
+
+        if $i0 != -1 goto label2;
+
+        virtualinvoke $r2.<java.io.OutputStream: void flush()>();
+
+        return l1;
+
+     label2:
+        virtualinvoke $r2.<java.io.OutputStream: void write(byte[],int,int)>(r3, 0, $i0);
+
+        $l2 = (long) $i0;
+
+        l1 = l1 + $l2;
+
+        goto label1;
+    }
+    public void installLibrary(android.content.Context, java.lang.String[], java.lang.String, java.io.File, com.getkeepsafe.relinker.ReLinkerInstance)
+    {
+        com.getkeepsafe.relinker.ApkLibraryInstaller r0;
+        android.content.Context $r1;
+        java.lang.String[] $r2;
+        java.lang.String $r3, r6, $r16;
+        java.io.File $r4, $r12;
+        com.getkeepsafe.relinker.ReLinkerInstance $r5;
+        java.io.FileOutputStream r7, r22;
+        java.io.IOException r8, $r13, $r25, r27, $r29, $r30, $r31, r32;
+        int i0, i1, i2;
+        java.util.zip.ZipFile r9, r10;
+        android.content.pm.ApplicationInfo $r11;
+        java.util.zip.ZipEntry r14, $r17;
+        java.lang.StringBuilder $r15;
+        char $c3;
+        java.lang.Object[] $r18;
+        com.getkeepsafe.relinker.MissingLibraryException $r19;
+        java.lang.Throwable $r20, $r28;
+        boolean $z0;
+        java.io.InputStream r21, $r23;
+        long $l4, $l5;
+        java.io.FileDescriptor $r24;
+        byte $b6;
+        java.io.FileNotFoundException r26, r33;
+
+        r0 := @this: com.getkeepsafe.relinker.ApkLibraryInstaller;
+
+        $r1 := @parameter0: android.content.Context;
+
+        $r2 := @parameter1: java.lang.String[];
+
+        $r3 := @parameter2: java.lang.String;
+
+        $r4 := @parameter3: java.io.File;
+
+        $r5 := @parameter4: com.getkeepsafe.relinker.ReLinkerInstance;
+
+        r10 = null;
+
+     label01:
+        $r11 = virtualinvoke $r1.<android.content.Context: android.content.pm.ApplicationInfo getApplicationInfo()>();
+
+     label02:
+        i1 = 0;
+
+     label03:
+        i0 = i1 + 1;
+
+        if i1 >= 5 goto label07;
+
+     label04:
+        r9 = new java.util.zip.ZipFile;
+
+        $r12 = new java.io.File;
+
+        r6 = $r11.<android.content.pm.ApplicationInfo: java.lang.String sourceDir>;
+
+     label05:
+        specialinvoke $r12.<java.io.File: void <init>(java.lang.String)>(r6);
+
+        specialinvoke r9.<java.util.zip.ZipFile: void <init>(java.io.File,int)>($r12, 1);
+
+     label06:
+        r10 = r9;
+
+     label07:
+        if r10 != null goto label13;
+
+     label08:
+        virtualinvoke $r5.<com.getkeepsafe.relinker.ReLinkerInstance: void log(java.lang.String)>("FATAL! Couldn\'t find application APK!");
+
+     label09:
+        if r10 == null goto label69;
+
+     label10:
+        virtualinvoke r10.<java.util.zip.ZipFile: void close()>();
+
+     label11:
+        return;
+
+     label12:
+        $r13 := @caughtexception;
+
+        i1 = i0;
+
+        goto label03;
+
+     label13:
+        i0 = 0;
+
+     label14:
+        i1 = i0 + 1;
+
+        if i0 >= 5 goto label59;
+
+        r6 = null;
+
+        r14 = null;
+
+     label15:
+        i0 = lengthof $r2;
+
+     label16:
+        i2 = 0;
+
+     label17:
+        if i2 >= i0 goto label22;
+
+     label18:
+        r6 = $r2[i2];
+
+        $r15 = new java.lang.StringBuilder;
+
+        specialinvoke $r15.<java.lang.StringBuilder: void <init>()>();
+
+        $r15 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("lib");
+
+        $c3 = <java.io.File: char separatorChar>;
+
+        $r15 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>($c3);
+
+        $r15 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(r6);
+
+        $c3 = <java.io.File: char separatorChar>;
+
+        $r15 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(char)>($c3);
+
+        $r15 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r3);
+
+        $r16 = virtualinvoke $r15.<java.lang.StringBuilder: java.lang.String toString()>();
+
+     label19:
+        r6 = $r16;
+
+     label20:
+        $r17 = virtualinvoke r10.<java.util.zip.ZipFile: java.util.zip.ZipEntry getEntry(java.lang.String)>($r16);
+
+     label21:
+        r14 = $r17;
+
+        if $r17 == null goto label29;
+
+     label22:
+        if r6 == null goto label24;
+
+     label23:
+        $r18 = newarray (java.lang.Object)[1];
+
+        $r18[0] = r6;
+
+        virtualinvoke $r5.<com.getkeepsafe.relinker.ReLinkerInstance: void log(java.lang.String,java.lang.Object[])>("Looking for %s in APK...", $r18);
+
+     label24:
+        if r14 != null goto label31;
+
+        if r6 == null goto label30;
+
+     label25:
+        $r19 = new com.getkeepsafe.relinker.MissingLibraryException;
+
+        specialinvoke $r19.<com.getkeepsafe.relinker.MissingLibraryException: void <init>(java.lang.String)>(r6);
+
+        throw $r19;
+
+     label26:
+        $r20 := @caughtexception;
+
+        if r10 == null goto label28;
+
+     label27:
+        virtualinvoke r10.<java.util.zip.ZipFile: void close()>();
+
+     label28:
+        throw $r20;
+
+     label29:
+        i2 = i2 + 1;
+
+        goto label17;
+
+     label30:
+        $r19 = new com.getkeepsafe.relinker.MissingLibraryException;
+
+        specialinvoke $r19.<com.getkeepsafe.relinker.MissingLibraryException: void <init>(java.lang.String)>($r3);
+
+        throw $r19;
+
+     label31:
+        $r18 = newarray (java.lang.Object)[1];
+
+        $r18[0] = r6;
+
+        virtualinvoke $r5.<com.getkeepsafe.relinker.ReLinkerInstance: void log(java.lang.String,java.lang.Object[])>("Found %s! Extracting...", $r18);
+
+     label32:
+        $z0 = virtualinvoke $r4.<java.io.File: boolean exists()>();
+
+     label33:
+        if $z0 != 0 goto label37;
+
+     label34:
+        $z0 = virtualinvoke $r4.<java.io.File: boolean createNewFile()>();
+
+     label35:
+        if $z0 != 0 goto label37;
+
+        i0 = i1;
+
+        goto label14;
+
+     label36:
+        r8 := @caughtexception;
+
+        i0 = i1;
+
+        goto label14;
+
+     label37:
+        r21 = null;
+
+        r22 = null;
+
+     label38:
+        $r23 = virtualinvoke r10.<java.util.zip.ZipFile: java.io.InputStream getInputStream(java.util.zip.ZipEntry)>(r14);
+
+     label39:
+        r21 = $r23;
+
+     label40:
+        r7 = new java.io.FileOutputStream;
+
+     label41:
+        specialinvoke r7.<java.io.FileOutputStream: void <init>(java.io.File)>($r4);
+
+     label42:
+        $l4 = specialinvoke r0.<com.getkeepsafe.relinker.ApkLibraryInstaller: long copy(java.io.InputStream,java.io.OutputStream)>($r23, r7);
+
+        $r24 = virtualinvoke r7.<java.io.FileOutputStream: java.io.FileDescriptor getFD()>();
+
+        virtualinvoke $r24.<java.io.FileDescriptor: void sync()>();
+
+        $l5 = virtualinvoke $r4.<java.io.File: long length()>();
+
+     label43:
+        $b6 = $l4 cmp $l5;
+
+        if $b6 == 0 goto label46;
+
+     label44:
+        specialinvoke r0.<com.getkeepsafe.relinker.ApkLibraryInstaller: void closeSilently(java.io.Closeable)>($r23);
+
+        specialinvoke r0.<com.getkeepsafe.relinker.ApkLibraryInstaller: void closeSilently(java.io.Closeable)>(r7);
+
+     label45:
+        i0 = i1;
+
+        goto label14;
+
+     label46:
+        specialinvoke r0.<com.getkeepsafe.relinker.ApkLibraryInstaller: void closeSilently(java.io.Closeable)>($r23);
+
+        specialinvoke r0.<com.getkeepsafe.relinker.ApkLibraryInstaller: void closeSilently(java.io.Closeable)>(r7);
+
+        virtualinvoke $r4.<java.io.File: boolean setReadable(boolean,boolean)>(1, 0);
+
+        virtualinvoke $r4.<java.io.File: boolean setExecutable(boolean,boolean)>(1, 0);
+
+        virtualinvoke $r4.<java.io.File: boolean setWritable(boolean)>(1);
+
+     label47:
+        if r10 == null goto label69;
+
+     label48:
+        virtualinvoke r10.<java.util.zip.ZipFile: void close()>();
+
+     label49:
+        return;
+
+     label50:
+        $r25 := @caughtexception;
+
+        return;
+
+     label51:
+        r26 := @caughtexception;
+
+     label52:
+        specialinvoke r0.<com.getkeepsafe.relinker.ApkLibraryInstaller: void closeSilently(java.io.Closeable)>(r21);
+
+        specialinvoke r0.<com.getkeepsafe.relinker.ApkLibraryInstaller: void closeSilently(java.io.Closeable)>(r22);
+
+     label53:
+        i0 = i1;
+
+        goto label14;
+
+     label54:
+        r27 := @caughtexception;
+
+     label55:
+        specialinvoke r0.<com.getkeepsafe.relinker.ApkLibraryInstaller: void closeSilently(java.io.Closeable)>(r21);
+
+        specialinvoke r0.<com.getkeepsafe.relinker.ApkLibraryInstaller: void closeSilently(java.io.Closeable)>(r22);
+
+     label56:
+        i0 = i1;
+
+        goto label14;
+
+     label57:
+        $r28 := @caughtexception;
+
+     label58:
+        specialinvoke r0.<com.getkeepsafe.relinker.ApkLibraryInstaller: void closeSilently(java.io.Closeable)>(r21);
+
+        specialinvoke r0.<com.getkeepsafe.relinker.ApkLibraryInstaller: void closeSilently(java.io.Closeable)>(r22);
+
+        throw $r28;
+
+     label59:
+        virtualinvoke $r5.<com.getkeepsafe.relinker.ReLinkerInstance: void log(java.lang.String)>("FATAL! Couldn\'t extract the library from the APK!");
+
+     label60:
+        if r10 == null goto label69;
+
+     label61:
+        virtualinvoke r10.<java.util.zip.ZipFile: void close()>();
+
+     label62:
+        return;
+
+     label63:
+        $r29 := @caughtexception;
+
+        return;
+
+     label64:
+        $r30 := @caughtexception;
+
+        return;
+
+     label65:
+        $r31 := @caughtexception;
+
+        goto label28;
+
+     label66:
+        $r28 := @caughtexception;
+
+        r22 = r7;
+
+        goto label58;
+
+     label67:
+        r32 := @caughtexception;
+
+        r22 = r7;
+
+        goto label55;
+
+     label68:
+        r33 := @caughtexception;
+
+        r22 = r7;
+
+        goto label52;
+
+     label69:
+        return;
+
+        catch java.lang.Throwable from label01 to label02 with label26;
+        catch java.io.IOException from label05 to label06 with label12;
+        catch java.lang.Throwable from label04 to label06 with label26;
+        catch java.lang.Throwable from label08 to label09 with label26;
+        catch java.io.IOException from label10 to label11 with label64;
+        catch java.lang.Throwable from label15 to label16 with label26;
+        catch java.lang.Throwable from label18 to label19 with label26;
+        catch java.lang.Throwable from label20 to label21 with label26;
+        catch java.lang.Throwable from label23 to label24 with label26;
+        catch java.lang.Throwable from label25 to label26 with label26;
+        catch java.io.IOException from label27 to label28 with label65;
+        catch java.lang.Throwable from label30 to label32 with label26;
+        catch java.io.IOException from label32 to label33 with label36;
+        catch java.io.IOException from label34 to label35 with label36;
+        catch java.lang.Throwable from label32 to label33 with label26;
+        catch java.lang.Throwable from label34 to label35 with label26;
+        catch java.io.FileNotFoundException from label38 to label39 with label51;
+        catch java.io.FileNotFoundException from label41 to label42 with label51;
+        catch java.io.IOException from label38 to label39 with label54;
+        catch java.io.IOException from label41 to label42 with label54;
+        catch java.lang.Throwable from label38 to label39 with label57;
+        catch java.lang.Throwable from label40 to label42 with label57;
+        catch java.io.FileNotFoundException from label42 to label43 with label68;
+        catch java.io.IOException from label42 to label43 with label67;
+        catch java.lang.Throwable from label42 to label43 with label66;
+        catch java.lang.Throwable from label44 to label45 with label26;
+        catch java.lang.Throwable from label46 to label47 with label26;
+        catch java.io.IOException from label48 to label49 with label50;
+        catch java.lang.Throwable from label52 to label53 with label26;
+        catch java.lang.Throwable from label55 to label56 with label26;
+        catch java.lang.Throwable from label58 to label60 with label26;
+        catch java.io.IOException from label61 to label62 with label63;
+    }

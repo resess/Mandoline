@@ -1,0 +1,365 @@
+org.fdroid.fdroid.net.Downloader extends java.lang.Object
+public static final java.lang.String EXTRA_ADDRESS
+public static final java.lang.String EXTRA_BYTES_READ
+public static final java.lang.String EXTRA_TOTAL_BYTES
+public static final java.lang.String LOCAL_ACTION_PROGRESS
+private static final java.lang.String TAG
+protected int bytesRead
+protected java.lang.String cacheTag
+private final android.support.v4.content.LocalBroadcastManager localBroadcastManager
+private final java.io.File outputFile
+private final java.io.OutputStream outputStream
+protected final java.net.URL sourceUrl
+protected int totalBytes
+    void <init>(android.content.Context, java.net.URL, java.io.File) throws java.io.FileNotFoundException, java.net.MalformedURLException
+    {
+        org.fdroid.fdroid.net.Downloader r0;
+        android.content.Context $r1;
+        java.net.URL $r2;
+        java.io.File $r3;
+        android.support.v4.content.LocalBroadcastManager $r4;
+        java.io.FileOutputStream $r5;
+
+        r0 := @this: org.fdroid.fdroid.net.Downloader;
+
+        $r1 := @parameter0: android.content.Context;
+
+        $r2 := @parameter1: java.net.URL;
+
+        $r3 := @parameter2: java.io.File;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<org.fdroid.fdroid.net.Downloader: java.net.URL sourceUrl> = $r2;
+
+        r0.<org.fdroid.fdroid.net.Downloader: java.io.File outputFile> = $r3;
+
+        $r5 = new java.io.FileOutputStream;
+
+        $r3 = r0.<org.fdroid.fdroid.net.Downloader: java.io.File outputFile>;
+
+        specialinvoke $r5.<java.io.FileOutputStream: void <init>(java.io.File)>($r3);
+
+        r0.<org.fdroid.fdroid.net.Downloader: java.io.OutputStream outputStream> = $r5;
+
+        $r4 = staticinvoke <android.support.v4.content.LocalBroadcastManager: android.support.v4.content.LocalBroadcastManager getInstance(android.content.Context)>($r1);
+
+        r0.<org.fdroid.fdroid.net.Downloader: android.support.v4.content.LocalBroadcastManager localBroadcastManager> = $r4;
+
+        return;
+    }
+    private void throwExceptionIfInterrupted() throws java.lang.InterruptedException
+    {
+        org.fdroid.fdroid.net.Downloader r0;
+        boolean $z0;
+        java.lang.InterruptedException $r1;
+
+        r0 := @this: org.fdroid.fdroid.net.Downloader;
+
+        $z0 = staticinvoke <java.lang.Thread: boolean interrupted()>();
+
+        if $z0 == 0 goto label1;
+
+        staticinvoke <org.fdroid.fdroid.Utils: void debugLog(java.lang.String,java.lang.String)>("Downloader", "Received interrupt, cancelling download");
+
+        $r1 = new java.lang.InterruptedException;
+
+        specialinvoke $r1.<java.lang.InterruptedException: void <init>()>();
+
+        throw $r1;
+
+     label1:
+        return;
+    }
+protected abstract void close() throws java.io.IOException { 
+// no body
+} 
+    protected void copyInputToOutputStream(java.io.InputStream, int) throws java.io.IOException, java.lang.InterruptedException
+    {
+        org.fdroid.fdroid.net.Downloader r0;
+        java.io.InputStream $r1;
+        int $i0, i1, $i2;
+        byte[] r2;
+        java.io.OutputStream $r3;
+
+        r0 := @this: org.fdroid.fdroid.net.Downloader;
+
+        $r1 := @parameter0: java.io.InputStream;
+
+        $i0 := @parameter1: int;
+
+        i1 = 0;
+
+        $i2 = virtualinvoke r0.<org.fdroid.fdroid.net.Downloader: int totalDownloadSize()>();
+
+        r0.<org.fdroid.fdroid.net.Downloader: int totalBytes> = $i2;
+
+        r2 = newarray (byte)[$i0];
+
+        specialinvoke r0.<org.fdroid.fdroid.net.Downloader: void throwExceptionIfInterrupted()>();
+
+        $i0 = r0.<org.fdroid.fdroid.net.Downloader: int totalBytes>;
+
+        virtualinvoke r0.<org.fdroid.fdroid.net.Downloader: void sendProgress(int,int)>(0, $i0);
+
+     label1:
+        $i0 = virtualinvoke $r1.<java.io.InputStream: int available()>();
+
+        if $i0 <= 0 goto label3;
+
+        $i0 = virtualinvoke $r1.<java.io.InputStream: int available()>();
+
+        $i2 = lengthof r2;
+
+        $i0 = staticinvoke <java.lang.Math: int min(int,int)>($i0, $i2);
+
+        $i0 = virtualinvoke $r1.<java.io.InputStream: int read(byte[],int,int)>(r2, 0, $i0);
+
+     label2:
+        specialinvoke r0.<org.fdroid.fdroid.net.Downloader: void throwExceptionIfInterrupted()>();
+
+        if $i0 != -1 goto label4;
+
+        staticinvoke <org.fdroid.fdroid.Utils: void debugLog(java.lang.String,java.lang.String)>("Downloader", "Finished downloading from stream");
+
+        $r3 = r0.<org.fdroid.fdroid.net.Downloader: java.io.OutputStream outputStream>;
+
+        virtualinvoke $r3.<java.io.OutputStream: void flush()>();
+
+        $r3 = r0.<org.fdroid.fdroid.net.Downloader: java.io.OutputStream outputStream>;
+
+        virtualinvoke $r3.<java.io.OutputStream: void close()>();
+
+        return;
+
+     label3:
+        $i0 = virtualinvoke $r1.<java.io.InputStream: int read(byte[])>(r2);
+
+        goto label2;
+
+     label4:
+        i1 = i1 + $i0;
+
+        $i2 = r0.<org.fdroid.fdroid.net.Downloader: int totalBytes>;
+
+        virtualinvoke r0.<org.fdroid.fdroid.net.Downloader: void sendProgress(int,int)>(i1, $i2);
+
+        $r3 = r0.<org.fdroid.fdroid.net.Downloader: java.io.OutputStream outputStream>;
+
+        virtualinvoke $r3.<java.io.OutputStream: void write(byte[],int,int)>(r2, 0, $i0);
+
+        goto label1;
+    }
+public abstract void download() throws java.io.IOException, java.lang.InterruptedException { 
+// no body
+} 
+    protected void downloadFromStream(int) throws java.io.IOException, java.lang.InterruptedException
+    {
+        org.fdroid.fdroid.net.Downloader r0;
+        int $i0;
+        java.io.InputStream $r1, r2;
+        java.io.OutputStream $r3;
+        java.lang.Throwable $r4;
+
+        r0 := @this: org.fdroid.fdroid.net.Downloader;
+
+        $i0 := @parameter0: int;
+
+        staticinvoke <org.fdroid.fdroid.Utils: void debugLog(java.lang.String,java.lang.String)>("Downloader", "Downloading from stream");
+
+        r2 = null;
+
+     label1:
+        $r1 = virtualinvoke r0.<org.fdroid.fdroid.net.Downloader: java.io.InputStream getInputStream()>();
+
+     label2:
+        r2 = $r1;
+
+     label3:
+        specialinvoke r0.<org.fdroid.fdroid.net.Downloader: void throwExceptionIfInterrupted()>();
+
+        virtualinvoke r0.<org.fdroid.fdroid.net.Downloader: void copyInputToOutputStream(java.io.InputStream,int)>($r1, $i0);
+
+     label4:
+        $r3 = r0.<org.fdroid.fdroid.net.Downloader: java.io.OutputStream outputStream>;
+
+        staticinvoke <org.fdroid.fdroid.Utils: void closeQuietly(java.io.Closeable)>($r3);
+
+        staticinvoke <org.fdroid.fdroid.Utils: void closeQuietly(java.io.Closeable)>($r1);
+
+        specialinvoke r0.<org.fdroid.fdroid.net.Downloader: void throwExceptionIfInterrupted()>();
+
+        return;
+
+     label5:
+        $r4 := @caughtexception;
+
+        $r3 = r0.<org.fdroid.fdroid.net.Downloader: java.io.OutputStream outputStream>;
+
+        staticinvoke <org.fdroid.fdroid.Utils: void closeQuietly(java.io.Closeable)>($r3);
+
+        staticinvoke <org.fdroid.fdroid.Utils: void closeQuietly(java.io.Closeable)>(r2);
+
+        throw $r4;
+
+        catch java.lang.Throwable from label1 to label2 with label5;
+        catch java.lang.Throwable from label3 to label4 with label5;
+    }
+    public void downloadUninterrupted() throws java.io.IOException
+    {
+        org.fdroid.fdroid.net.Downloader r0;
+        java.lang.InterruptedException $r1;
+
+        r0 := @this: org.fdroid.fdroid.net.Downloader;
+
+     label1:
+        virtualinvoke r0.<org.fdroid.fdroid.net.Downloader: void download()>();
+
+     label2:
+        return;
+
+     label3:
+        $r1 := @caughtexception;
+
+        return;
+
+        catch java.lang.InterruptedException from label1 to label2 with label3;
+    }
+    public int getBytesRead()
+    {
+        org.fdroid.fdroid.net.Downloader r0;
+        int i0;
+
+        r0 := @this: org.fdroid.fdroid.net.Downloader;
+
+        i0 = r0.<org.fdroid.fdroid.net.Downloader: int bytesRead>;
+
+        return i0;
+    }
+    public java.lang.String getCacheTag()
+    {
+        org.fdroid.fdroid.net.Downloader r0;
+        java.lang.String r1;
+
+        r0 := @this: org.fdroid.fdroid.net.Downloader;
+
+        r1 = r0.<org.fdroid.fdroid.net.Downloader: java.lang.String cacheTag>;
+
+        return r1;
+    }
+protected abstract java.io.InputStream getDownloadersInputStream() throws java.io.IOException { 
+// no body
+} 
+    public java.io.File getFile()
+    {
+        org.fdroid.fdroid.net.Downloader r0;
+        java.io.File r1;
+
+        r0 := @this: org.fdroid.fdroid.net.Downloader;
+
+        r1 = r0.<org.fdroid.fdroid.net.Downloader: java.io.File outputFile>;
+
+        return r1;
+    }
+    public final java.io.InputStream getInputStream() throws java.io.IOException
+    {
+        org.fdroid.fdroid.net.Downloader r0;
+        org.fdroid.fdroid.net.Downloader$WrappedInputStream $r1;
+        java.io.InputStream $r2;
+
+        r0 := @this: org.fdroid.fdroid.net.Downloader;
+
+        $r1 = new org.fdroid.fdroid.net.Downloader$WrappedInputStream;
+
+        $r2 = virtualinvoke r0.<org.fdroid.fdroid.net.Downloader: java.io.InputStream getDownloadersInputStream()>();
+
+        specialinvoke $r1.<org.fdroid.fdroid.net.Downloader$WrappedInputStream: void <init>(org.fdroid.fdroid.net.Downloader,java.io.InputStream)>(r0, $r2);
+
+        return $r1;
+    }
+    public int getTotalBytes()
+    {
+        org.fdroid.fdroid.net.Downloader r0;
+        int i0;
+
+        r0 := @this: org.fdroid.fdroid.net.Downloader;
+
+        i0 = r0.<org.fdroid.fdroid.net.Downloader: int totalBytes>;
+
+        return i0;
+    }
+public abstract boolean hasChanged() { 
+// no body
+} 
+public abstract boolean isCached() { 
+// no body
+} 
+    protected void sendProgress(int, int)
+    {
+        org.fdroid.fdroid.net.Downloader r0;
+        int $i0, $i1;
+        android.content.Intent r1;
+        java.lang.String $r2;
+        java.net.URL $r3;
+        android.support.v4.content.LocalBroadcastManager $r4;
+
+        r0 := @this: org.fdroid.fdroid.net.Downloader;
+
+        $i0 := @parameter0: int;
+
+        $i1 := @parameter1: int;
+
+        r0.<org.fdroid.fdroid.net.Downloader: int bytesRead> = $i0;
+
+        r1 = new android.content.Intent;
+
+        specialinvoke r1.<android.content.Intent: void <init>(java.lang.String)>("Downloader.PROGRESS");
+
+        $r3 = r0.<org.fdroid.fdroid.net.Downloader: java.net.URL sourceUrl>;
+
+        $r2 = virtualinvoke $r3.<java.net.URL: java.lang.String toString()>();
+
+        virtualinvoke r1.<android.content.Intent: android.content.Intent putExtra(java.lang.String,java.lang.String)>("extraAddress", $r2);
+
+        virtualinvoke r1.<android.content.Intent: android.content.Intent putExtra(java.lang.String,int)>("extraBytesRead", $i0);
+
+        virtualinvoke r1.<android.content.Intent: android.content.Intent putExtra(java.lang.String,int)>("extraTotalBytes", $i1);
+
+        $r4 = r0.<org.fdroid.fdroid.net.Downloader: android.support.v4.content.LocalBroadcastManager localBroadcastManager>;
+
+        virtualinvoke $r4.<android.support.v4.content.LocalBroadcastManager: boolean sendBroadcast(android.content.Intent)>(r1);
+
+        return;
+    }
+    public void setCacheTag(java.lang.String)
+    {
+        org.fdroid.fdroid.net.Downloader r0;
+        java.lang.String $r1;
+
+        r0 := @this: org.fdroid.fdroid.net.Downloader;
+
+        $r1 := @parameter0: java.lang.String;
+
+        r0.<org.fdroid.fdroid.net.Downloader: java.lang.String cacheTag> = $r1;
+
+        return;
+    }
+public abstract int totalDownloadSize() { 
+// no body
+} 
+    protected boolean wantToCheckCache()
+    {
+        org.fdroid.fdroid.net.Downloader r0;
+        java.lang.String $r1;
+
+        r0 := @this: org.fdroid.fdroid.net.Downloader;
+
+        $r1 = r0.<org.fdroid.fdroid.net.Downloader: java.lang.String cacheTag>;
+
+        if $r1 == null goto label1;
+
+        return 1;
+
+     label1:
+        return 0;
+    }

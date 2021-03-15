@@ -1,0 +1,601 @@
+com.facebook.stetho.websocket.Frame extends java.lang.Object
+public static final byte OPCODE_BINARY_FRAME
+public static final byte OPCODE_CONNECTION_CLOSE
+public static final byte OPCODE_CONNECTION_PING
+public static final byte OPCODE_CONNECTION_PONG
+public static final byte OPCODE_TEXT_FRAME
+public boolean fin
+public boolean hasMask
+public byte[] maskingKey
+public byte opcode
+public byte[] payloadData
+public long payloadLen
+public boolean rsv1
+public boolean rsv2
+public boolean rsv3
+    void <init>()
+    {
+        com.facebook.stetho.websocket.Frame r0;
+
+        r0 := @this: com.facebook.stetho.websocket.Frame;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        return;
+    }
+    private void decodeFirstByte(byte)
+    {
+        com.facebook.stetho.websocket.Frame r0;
+        byte $b0;
+        boolean $z0, $z1;
+        int $i1;
+
+        r0 := @this: com.facebook.stetho.websocket.Frame;
+
+        $b0 := @parameter0: byte;
+
+        $z0 = 1;
+
+        $i1 = $b0 & 128;
+
+        if $i1 == 0 goto label5;
+
+        $z1 = 1;
+
+     label1:
+        r0.<com.facebook.stetho.websocket.Frame: boolean fin> = $z1;
+
+        $i1 = $b0 & 64;
+
+        if $i1 == 0 goto label6;
+
+        $z1 = 1;
+
+     label2:
+        r0.<com.facebook.stetho.websocket.Frame: boolean rsv1> = $z1;
+
+        $i1 = $b0 & 32;
+
+        if $i1 == 0 goto label7;
+
+        $z1 = 1;
+
+     label3:
+        r0.<com.facebook.stetho.websocket.Frame: boolean rsv2> = $z1;
+
+        $i1 = $b0 & 16;
+
+        if $i1 == 0 goto label8;
+
+     label4:
+        r0.<com.facebook.stetho.websocket.Frame: boolean rsv3> = $z0;
+
+        $i1 = $b0 & 15;
+
+        $b0 = (byte) $i1;
+
+        r0.<com.facebook.stetho.websocket.Frame: byte opcode> = $b0;
+
+        return;
+
+     label5:
+        $z1 = 0;
+
+        goto label1;
+
+     label6:
+        $z1 = 0;
+
+        goto label2;
+
+     label7:
+        $z1 = 0;
+
+        goto label3;
+
+     label8:
+        $z0 = 0;
+
+        goto label4;
+    }
+    private long decodeLength(byte, java.io.InputStream) throws java.io.IOException
+    {
+        com.facebook.stetho.websocket.Frame r0;
+        byte $b0;
+        java.io.InputStream $r1;
+        long l1, $l4;
+        int $i2, $i3;
+        java.io.IOException $r2;
+        java.lang.StringBuilder $r3;
+        java.lang.String $r4;
+
+        r0 := @this: com.facebook.stetho.websocket.Frame;
+
+        $b0 := @parameter0: byte;
+
+        $r1 := @parameter1: java.io.InputStream;
+
+        if $b0 > 125 goto label1;
+
+        l1 = (long) $b0;
+
+        return l1;
+
+     label1:
+        if $b0 != 126 goto label2;
+
+        $b0 = staticinvoke <com.facebook.stetho.websocket.Frame: byte readByteOrThrow(java.io.InputStream)>($r1);
+
+        $i2 = $b0 & 255;
+
+        $i2 = $i2 << 8;
+
+        $b0 = staticinvoke <com.facebook.stetho.websocket.Frame: byte readByteOrThrow(java.io.InputStream)>($r1);
+
+        $i3 = $b0 & 255;
+
+        $i2 = $i2 | $i3;
+
+        l1 = (long) $i2;
+
+        return l1;
+
+     label2:
+        if $b0 != 127 goto label4;
+
+        l1 = 0L;
+
+        $i2 = 0;
+
+     label3:
+        if $i2 >= 8 goto label5;
+
+        $b0 = staticinvoke <com.facebook.stetho.websocket.Frame: byte readByteOrThrow(java.io.InputStream)>($r1);
+
+        $i3 = $b0 & 255;
+
+        $l4 = (long) $i3;
+
+        l1 = l1 | $l4;
+
+        l1 = l1 << 8;
+
+        $i2 = $i2 + 1;
+
+        goto label3;
+
+     label4:
+        $r2 = new java.io.IOException;
+
+        $r3 = new java.lang.StringBuilder;
+
+        specialinvoke $r3.<java.lang.StringBuilder: void <init>()>();
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Unexpected length byte: ");
+
+        $r3 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($b0);
+
+        $r4 = virtualinvoke $r3.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r2.<java.io.IOException: void <init>(java.lang.String)>($r4);
+
+        throw $r2;
+
+     label5:
+        return l1;
+    }
+    private static byte[] decodeMaskingKey(java.io.InputStream) throws java.io.IOException
+    {
+        java.io.InputStream $r0;
+        byte[] r1;
+        int $i0;
+
+        $r0 := @parameter0: java.io.InputStream;
+
+        r1 = newarray (byte)[4];
+
+        $i0 = lengthof r1;
+
+        staticinvoke <com.facebook.stetho.websocket.Frame: void readBytesOrThrow(java.io.InputStream,byte[],int,int)>($r0, r1, 0, $i0);
+
+        return r1;
+    }
+    private byte encodeFirstByte()
+    {
+        com.facebook.stetho.websocket.Frame r0;
+        byte b0, $b2;
+        boolean $z0;
+        int $i1;
+
+        r0 := @this: com.facebook.stetho.websocket.Frame;
+
+        b0 = 0;
+
+        $z0 = r0.<com.facebook.stetho.websocket.Frame: boolean fin>;
+
+        if $z0 == 0 goto label1;
+
+        b0 = (byte) 128;
+
+     label1:
+        $z0 = r0.<com.facebook.stetho.websocket.Frame: boolean rsv1>;
+
+        if $z0 == 0 goto label2;
+
+        $i1 = b0 | 64;
+
+        b0 = (byte) $i1;
+
+     label2:
+        $z0 = r0.<com.facebook.stetho.websocket.Frame: boolean rsv2>;
+
+        if $z0 == 0 goto label3;
+
+        $i1 = b0 | 32;
+
+        b0 = (byte) $i1;
+
+     label3:
+        $z0 = r0.<com.facebook.stetho.websocket.Frame: boolean rsv3>;
+
+        if $z0 == 0 goto label4;
+
+        $i1 = b0 | 16;
+
+        b0 = (byte) $i1;
+
+     label4:
+        $b2 = r0.<com.facebook.stetho.websocket.Frame: byte opcode>;
+
+        $i1 = $b2 & 15;
+
+        $i1 = $i1 | b0;
+
+        b0 = (byte) $i1;
+
+        return b0;
+    }
+    private static byte[] encodeLength(long)
+    {
+        long $l0, $l3;
+        byte $b1;
+        byte[] $r0;
+        int $i2;
+
+        $l0 := @parameter0: long;
+
+        $b1 = $l0 cmp 125L;
+
+        if $b1 > 0 goto label1;
+
+        $r0 = newarray (byte)[1];
+
+        $i2 = (int) $l0;
+
+        $b1 = (byte) $i2;
+
+        $r0[0] = $b1;
+
+        return $r0;
+
+     label1:
+        $b1 = $l0 cmp 65535L;
+
+        if $b1 > 0 goto label2;
+
+        $r0 = newarray (byte)[3];
+
+        $r0[0] = 126;
+
+        $l3 = $l0 >> 8;
+
+        $l3 = $l3 & 255L;
+
+        $i2 = (int) $l3;
+
+        $b1 = (byte) $i2;
+
+        $r0[1] = $b1;
+
+        $l0 = $l0 & 255L;
+
+        $i2 = (int) $l0;
+
+        $b1 = (byte) $i2;
+
+        $r0[2] = $b1;
+
+        return $r0;
+
+     label2:
+        $r0 = newarray (byte)[9];
+
+        $r0[0] = 127;
+
+        $l3 = $l0 >> 56;
+
+        $l3 = $l3 & 255L;
+
+        $i2 = (int) $l3;
+
+        $b1 = (byte) $i2;
+
+        $r0[1] = $b1;
+
+        $l3 = $l0 >> 48;
+
+        $l3 = $l3 & 255L;
+
+        $i2 = (int) $l3;
+
+        $b1 = (byte) $i2;
+
+        $r0[2] = $b1;
+
+        $l3 = $l0 >> 40;
+
+        $l3 = $l3 & 255L;
+
+        $i2 = (int) $l3;
+
+        $b1 = (byte) $i2;
+
+        $r0[3] = $b1;
+
+        $l3 = $l0 >> 32;
+
+        $l3 = $l3 & 255L;
+
+        $i2 = (int) $l3;
+
+        $b1 = (byte) $i2;
+
+        $r0[4] = $b1;
+
+        $l3 = $l0 >> 24;
+
+        $l3 = $l3 & 255L;
+
+        $i2 = (int) $l3;
+
+        $b1 = (byte) $i2;
+
+        $r0[5] = $b1;
+
+        $l3 = $l0 >> 16;
+
+        $l3 = $l3 & 255L;
+
+        $i2 = (int) $l3;
+
+        $b1 = (byte) $i2;
+
+        $r0[6] = $b1;
+
+        $l3 = $l0 >> 8;
+
+        $l3 = $l3 & 255L;
+
+        $i2 = (int) $l3;
+
+        $b1 = (byte) $i2;
+
+        $r0[7] = $b1;
+
+        $l0 = $l0 & 255L;
+
+        $i2 = (int) $l0;
+
+        $b1 = (byte) $i2;
+
+        $r0[8] = $b1;
+
+        return $r0;
+    }
+    private static byte readByteOrThrow(java.io.InputStream) throws java.io.IOException
+    {
+        java.io.InputStream $r0;
+        int $i0;
+        java.io.EOFException $r1;
+        byte $b1;
+
+        $r0 := @parameter0: java.io.InputStream;
+
+        $i0 = virtualinvoke $r0.<java.io.InputStream: int read()>();
+
+        if $i0 != -1 goto label1;
+
+        $r1 = new java.io.EOFException;
+
+        specialinvoke $r1.<java.io.EOFException: void <init>()>();
+
+        throw $r1;
+
+     label1:
+        $b1 = (byte) $i0;
+
+        return $b1;
+    }
+    private static void readBytesOrThrow(java.io.InputStream, byte[], int, int) throws java.io.IOException
+    {
+        java.io.InputStream $r0;
+        byte[] $r1;
+        int $i0, $i1, $i2;
+        java.io.EOFException $r2;
+
+        $r0 := @parameter0: java.io.InputStream;
+
+        $r1 := @parameter1: byte[];
+
+        $i1 := @parameter2: int;
+
+        $i2 := @parameter3: int;
+
+     label1:
+        if $i2 <= 0 goto label3;
+
+        $i0 = virtualinvoke $r0.<java.io.InputStream: int read(byte[],int,int)>($r1, $i1, $i2);
+
+        if $i0 != -1 goto label2;
+
+        $r2 = new java.io.EOFException;
+
+        specialinvoke $r2.<java.io.EOFException: void <init>()>();
+
+        throw $r2;
+
+     label2:
+        $i2 = $i2 - $i0;
+
+        $i1 = $i1 + $i0;
+
+        goto label1;
+
+     label3:
+        return;
+    }
+    public void readFrom(java.io.BufferedInputStream) throws java.io.IOException
+    {
+        com.facebook.stetho.websocket.Frame r0;
+        java.io.BufferedInputStream $r1;
+        byte $b0;
+        int $i1;
+        boolean $z0;
+        long $l2;
+        byte[] $r2, $r3;
+
+        r0 := @this: com.facebook.stetho.websocket.Frame;
+
+        $r1 := @parameter0: java.io.BufferedInputStream;
+
+        $b0 = staticinvoke <com.facebook.stetho.websocket.Frame: byte readByteOrThrow(java.io.InputStream)>($r1);
+
+        specialinvoke r0.<com.facebook.stetho.websocket.Frame: void decodeFirstByte(byte)>($b0);
+
+        $b0 = staticinvoke <com.facebook.stetho.websocket.Frame: byte readByteOrThrow(java.io.InputStream)>($r1);
+
+        $i1 = $b0 & 128;
+
+        if $i1 == 0 goto label3;
+
+        $z0 = 1;
+
+     label1:
+        r0.<com.facebook.stetho.websocket.Frame: boolean hasMask> = $z0;
+
+        $i1 = $b0 & -129;
+
+        $b0 = (byte) $i1;
+
+        $l2 = specialinvoke r0.<com.facebook.stetho.websocket.Frame: long decodeLength(byte,java.io.InputStream)>($b0, $r1);
+
+        r0.<com.facebook.stetho.websocket.Frame: long payloadLen> = $l2;
+
+        $z0 = r0.<com.facebook.stetho.websocket.Frame: boolean hasMask>;
+
+        if $z0 == 0 goto label4;
+
+        $r2 = staticinvoke <com.facebook.stetho.websocket.Frame: byte[] decodeMaskingKey(java.io.InputStream)>($r1);
+
+     label2:
+        r0.<com.facebook.stetho.websocket.Frame: byte[] maskingKey> = $r2;
+
+        $l2 = r0.<com.facebook.stetho.websocket.Frame: long payloadLen>;
+
+        $i1 = (int) $l2;
+
+        $r2 = newarray (byte)[$i1];
+
+        r0.<com.facebook.stetho.websocket.Frame: byte[] payloadData> = $r2;
+
+        $r2 = r0.<com.facebook.stetho.websocket.Frame: byte[] payloadData>;
+
+        $l2 = r0.<com.facebook.stetho.websocket.Frame: long payloadLen>;
+
+        $i1 = (int) $l2;
+
+        staticinvoke <com.facebook.stetho.websocket.Frame: void readBytesOrThrow(java.io.InputStream,byte[],int,int)>($r1, $r2, 0, $i1);
+
+        $r2 = r0.<com.facebook.stetho.websocket.Frame: byte[] maskingKey>;
+
+        $r3 = r0.<com.facebook.stetho.websocket.Frame: byte[] payloadData>;
+
+        $l2 = r0.<com.facebook.stetho.websocket.Frame: long payloadLen>;
+
+        $i1 = (int) $l2;
+
+        staticinvoke <com.facebook.stetho.websocket.MaskingHelper: void unmask(byte[],byte[],int,int)>($r2, $r3, 0, $i1);
+
+        return;
+
+     label3:
+        $z0 = 0;
+
+        goto label1;
+
+     label4:
+        $r2 = null;
+
+        goto label2;
+    }
+    public void writeTo(java.io.BufferedOutputStream) throws java.io.IOException
+    {
+        com.facebook.stetho.websocket.Frame r0;
+        java.io.BufferedOutputStream $r1;
+        byte $b0;
+        long $l1;
+        byte[] $r2;
+        boolean $z0;
+        int $i2;
+        java.lang.UnsupportedOperationException $r3;
+
+        r0 := @this: com.facebook.stetho.websocket.Frame;
+
+        $r1 := @parameter0: java.io.BufferedOutputStream;
+
+        $b0 = specialinvoke r0.<com.facebook.stetho.websocket.Frame: byte encodeFirstByte()>();
+
+        virtualinvoke $r1.<java.io.BufferedOutputStream: void write(int)>($b0);
+
+        $l1 = r0.<com.facebook.stetho.websocket.Frame: long payloadLen>;
+
+        $r2 = staticinvoke <com.facebook.stetho.websocket.Frame: byte[] encodeLength(long)>($l1);
+
+        $z0 = r0.<com.facebook.stetho.websocket.Frame: boolean hasMask>;
+
+        if $z0 == 0 goto label1;
+
+        $b0 = $r2[0];
+
+        $i2 = $b0 | 128;
+
+        $b0 = (byte) $i2;
+
+        $r2[0] = $b0;
+
+     label1:
+        $i2 = lengthof $r2;
+
+        virtualinvoke $r1.<java.io.BufferedOutputStream: void write(byte[],int,int)>($r2, 0, $i2);
+
+        $z0 = r0.<com.facebook.stetho.websocket.Frame: boolean hasMask>;
+
+        if $z0 == 0 goto label2;
+
+        $r3 = new java.lang.UnsupportedOperationException;
+
+        specialinvoke $r3.<java.lang.UnsupportedOperationException: void <init>(java.lang.String)>("Writing masked data not implemented");
+
+        throw $r3;
+
+     label2:
+        $r2 = r0.<com.facebook.stetho.websocket.Frame: byte[] payloadData>;
+
+        $l1 = r0.<com.facebook.stetho.websocket.Frame: long payloadLen>;
+
+        $i2 = (int) $l1;
+
+        virtualinvoke $r1.<java.io.BufferedOutputStream: void write(byte[],int,int)>($r2, 0, $i2);
+
+        return;
+    }

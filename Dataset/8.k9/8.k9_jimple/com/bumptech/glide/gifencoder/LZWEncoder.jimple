@@ -1,0 +1,679 @@
+com.bumptech.glide.gifencoder.LZWEncoder extends java.lang.Object
+static final int BITS
+private static final int EOF
+static final int HSIZE
+int ClearCode
+int EOFCode
+int a_count
+byte[] accum
+boolean clear_flg
+int[] codetab
+private int curPixel
+int cur_accum
+int cur_bits
+int free_ent
+int g_init_bits
+int hsize
+int[] htab
+private int imgH
+private int imgW
+private int initCodeSize
+int[] masks
+int maxbits
+int maxcode
+int maxmaxcode
+int n_bits
+private byte[] pixAry
+private int remaining
+    void <init>(int, int, byte[], int)
+    {
+        com.bumptech.glide.gifencoder.LZWEncoder r0;
+        int $i0, $i1, $i2;
+        byte[] $r1, $r3;
+        int[] $r2;
+
+        r0 := @this: com.bumptech.glide.gifencoder.LZWEncoder;
+
+        $i0 := @parameter0: int;
+
+        $i1 := @parameter1: int;
+
+        $r1 := @parameter2: byte[];
+
+        $i2 := @parameter3: int;
+
+        specialinvoke r0.<java.lang.Object: void <init>()>();
+
+        r0.<com.bumptech.glide.gifencoder.LZWEncoder: int maxbits> = 12;
+
+        r0.<com.bumptech.glide.gifencoder.LZWEncoder: int maxmaxcode> = 4096;
+
+        $r2 = newarray (int)[5003];
+
+        r0.<com.bumptech.glide.gifencoder.LZWEncoder: int[] htab> = $r2;
+
+        $r2 = newarray (int)[5003];
+
+        r0.<com.bumptech.glide.gifencoder.LZWEncoder: int[] codetab> = $r2;
+
+        r0.<com.bumptech.glide.gifencoder.LZWEncoder: int hsize> = 5003;
+
+        r0.<com.bumptech.glide.gifencoder.LZWEncoder: int free_ent> = 0;
+
+        r0.<com.bumptech.glide.gifencoder.LZWEncoder: boolean clear_flg> = 0;
+
+        r0.<com.bumptech.glide.gifencoder.LZWEncoder: int cur_accum> = 0;
+
+        r0.<com.bumptech.glide.gifencoder.LZWEncoder: int cur_bits> = 0;
+
+        $r2 = newarray (int)[17];
+
+        $r2[0] = 0;
+
+        $r2[1] = 1;
+
+        $r2[2] = 3;
+
+        $r2[3] = 7;
+
+        $r2[4] = 15;
+
+        $r2[5] = 31;
+
+        $r2[6] = 63;
+
+        $r2[7] = 127;
+
+        $r2[8] = 255;
+
+        $r2[9] = 511;
+
+        $r2[10] = 1023;
+
+        $r2[11] = 2047;
+
+        $r2[12] = 4095;
+
+        $r2[13] = 8191;
+
+        $r2[14] = 16383;
+
+        $r2[15] = 32767;
+
+        $r2[16] = 65535;
+
+        r0.<com.bumptech.glide.gifencoder.LZWEncoder: int[] masks> = $r2;
+
+        $r3 = newarray (byte)[256];
+
+        r0.<com.bumptech.glide.gifencoder.LZWEncoder: byte[] accum> = $r3;
+
+        r0.<com.bumptech.glide.gifencoder.LZWEncoder: int imgW> = $i0;
+
+        r0.<com.bumptech.glide.gifencoder.LZWEncoder: int imgH> = $i1;
+
+        r0.<com.bumptech.glide.gifencoder.LZWEncoder: byte[] pixAry> = $r1;
+
+        $i0 = staticinvoke <java.lang.Math: int max(int,int)>(2, $i2);
+
+        r0.<com.bumptech.glide.gifencoder.LZWEncoder: int initCodeSize> = $i0;
+
+        return;
+    }
+    private int nextPixel()
+    {
+        com.bumptech.glide.gifencoder.LZWEncoder r0;
+        byte b0;
+        int $i1, $i2;
+        byte[] $r1;
+
+        r0 := @this: com.bumptech.glide.gifencoder.LZWEncoder;
+
+        $i1 = r0.<com.bumptech.glide.gifencoder.LZWEncoder: int remaining>;
+
+        if $i1 != 0 goto label1;
+
+        return -1;
+
+     label1:
+        $i1 = r0.<com.bumptech.glide.gifencoder.LZWEncoder: int remaining>;
+
+        $i1 = $i1 + -1;
+
+        r0.<com.bumptech.glide.gifencoder.LZWEncoder: int remaining> = $i1;
+
+        $r1 = r0.<com.bumptech.glide.gifencoder.LZWEncoder: byte[] pixAry>;
+
+        $i1 = r0.<com.bumptech.glide.gifencoder.LZWEncoder: int curPixel>;
+
+        $i2 = $i1 + 1;
+
+        r0.<com.bumptech.glide.gifencoder.LZWEncoder: int curPixel> = $i2;
+
+        b0 = $r1[$i1];
+
+        $i1 = b0 & 255;
+
+        return $i1;
+    }
+    final int MAXCODE(int)
+    {
+        com.bumptech.glide.gifencoder.LZWEncoder r0;
+        int $i0;
+
+        r0 := @this: com.bumptech.glide.gifencoder.LZWEncoder;
+
+        $i0 := @parameter0: int;
+
+        $i0 = 1 << $i0;
+
+        $i0 = $i0 + -1;
+
+        return $i0;
+    }
+    void char_out(byte, java.io.OutputStream) throws java.io.IOException
+    {
+        com.bumptech.glide.gifencoder.LZWEncoder r0;
+        byte $b0;
+        java.io.OutputStream $r1;
+        int $i1, $i2;
+        byte[] $r2;
+
+        r0 := @this: com.bumptech.glide.gifencoder.LZWEncoder;
+
+        $b0 := @parameter0: byte;
+
+        $r1 := @parameter1: java.io.OutputStream;
+
+        $r2 = r0.<com.bumptech.glide.gifencoder.LZWEncoder: byte[] accum>;
+
+        $i2 = r0.<com.bumptech.glide.gifencoder.LZWEncoder: int a_count>;
+
+        $i1 = $i2 + 1;
+
+        r0.<com.bumptech.glide.gifencoder.LZWEncoder: int a_count> = $i1;
+
+        $r2[$i2] = $b0;
+
+        $i1 = r0.<com.bumptech.glide.gifencoder.LZWEncoder: int a_count>;
+
+        if $i1 < 254 goto label1;
+
+        virtualinvoke r0.<com.bumptech.glide.gifencoder.LZWEncoder: void flush_char(java.io.OutputStream)>($r1);
+
+     label1:
+        return;
+    }
+    void cl_block(java.io.OutputStream) throws java.io.IOException
+    {
+        com.bumptech.glide.gifencoder.LZWEncoder r0;
+        java.io.OutputStream $r1;
+        int $i0;
+
+        r0 := @this: com.bumptech.glide.gifencoder.LZWEncoder;
+
+        $r1 := @parameter0: java.io.OutputStream;
+
+        $i0 = r0.<com.bumptech.glide.gifencoder.LZWEncoder: int hsize>;
+
+        virtualinvoke r0.<com.bumptech.glide.gifencoder.LZWEncoder: void cl_hash(int)>($i0);
+
+        $i0 = r0.<com.bumptech.glide.gifencoder.LZWEncoder: int ClearCode>;
+
+        $i0 = $i0 + 2;
+
+        r0.<com.bumptech.glide.gifencoder.LZWEncoder: int free_ent> = $i0;
+
+        r0.<com.bumptech.glide.gifencoder.LZWEncoder: boolean clear_flg> = 1;
+
+        $i0 = r0.<com.bumptech.glide.gifencoder.LZWEncoder: int ClearCode>;
+
+        virtualinvoke r0.<com.bumptech.glide.gifencoder.LZWEncoder: void output(int,java.io.OutputStream)>($i0, $r1);
+
+        return;
+    }
+    void cl_hash(int)
+    {
+        com.bumptech.glide.gifencoder.LZWEncoder r0;
+        int $i0, i1;
+        int[] $r1;
+
+        r0 := @this: com.bumptech.glide.gifencoder.LZWEncoder;
+
+        $i0 := @parameter0: int;
+
+        i1 = 0;
+
+     label1:
+        if i1 >= $i0 goto label2;
+
+        $r1 = r0.<com.bumptech.glide.gifencoder.LZWEncoder: int[] htab>;
+
+        $r1[i1] = -1;
+
+        i1 = i1 + 1;
+
+        goto label1;
+
+     label2:
+        return;
+    }
+    void compress(int, java.io.OutputStream) throws java.io.IOException
+    {
+        com.bumptech.glide.gifencoder.LZWEncoder r0;
+        int $i0, i1, i2, $i3, $i4, $i5, $i6, $i7;
+        java.io.OutputStream $r1;
+        int[] $r2;
+
+        r0 := @this: com.bumptech.glide.gifencoder.LZWEncoder;
+
+        $i0 := @parameter0: int;
+
+        $r1 := @parameter1: java.io.OutputStream;
+
+        r0.<com.bumptech.glide.gifencoder.LZWEncoder: int g_init_bits> = $i0;
+
+        r0.<com.bumptech.glide.gifencoder.LZWEncoder: boolean clear_flg> = 0;
+
+        i1 = r0.<com.bumptech.glide.gifencoder.LZWEncoder: int g_init_bits>;
+
+        r0.<com.bumptech.glide.gifencoder.LZWEncoder: int n_bits> = i1;
+
+        i1 = r0.<com.bumptech.glide.gifencoder.LZWEncoder: int n_bits>;
+
+        i1 = virtualinvoke r0.<com.bumptech.glide.gifencoder.LZWEncoder: int MAXCODE(int)>(i1);
+
+        r0.<com.bumptech.glide.gifencoder.LZWEncoder: int maxcode> = i1;
+
+        $i0 = $i0 + -1;
+
+        $i0 = 1 << $i0;
+
+        r0.<com.bumptech.glide.gifencoder.LZWEncoder: int ClearCode> = $i0;
+
+        $i0 = r0.<com.bumptech.glide.gifencoder.LZWEncoder: int ClearCode>;
+
+        $i0 = $i0 + 1;
+
+        r0.<com.bumptech.glide.gifencoder.LZWEncoder: int EOFCode> = $i0;
+
+        $i0 = r0.<com.bumptech.glide.gifencoder.LZWEncoder: int ClearCode>;
+
+        $i0 = $i0 + 2;
+
+        r0.<com.bumptech.glide.gifencoder.LZWEncoder: int free_ent> = $i0;
+
+        r0.<com.bumptech.glide.gifencoder.LZWEncoder: int a_count> = 0;
+
+        $i0 = specialinvoke r0.<com.bumptech.glide.gifencoder.LZWEncoder: int nextPixel()>();
+
+        i1 = 0;
+
+        i2 = r0.<com.bumptech.glide.gifencoder.LZWEncoder: int hsize>;
+
+     label01:
+        if i2 >= 65536 goto label02;
+
+        i1 = i1 + 1;
+
+        i2 = i2 * 2;
+
+        goto label01;
+
+     label02:
+        i2 = 8 - i1;
+
+        i1 = r0.<com.bumptech.glide.gifencoder.LZWEncoder: int hsize>;
+
+        virtualinvoke r0.<com.bumptech.glide.gifencoder.LZWEncoder: void cl_hash(int)>(i1);
+
+        $i3 = r0.<com.bumptech.glide.gifencoder.LZWEncoder: int ClearCode>;
+
+        virtualinvoke r0.<com.bumptech.glide.gifencoder.LZWEncoder: void output(int,java.io.OutputStream)>($i3, $r1);
+
+     label03:
+        $i4 = specialinvoke r0.<com.bumptech.glide.gifencoder.LZWEncoder: int nextPixel()>();
+
+        if $i4 == -1 goto label10;
+
+        $i3 = r0.<com.bumptech.glide.gifencoder.LZWEncoder: int maxbits>;
+
+        $i3 = $i4 << $i3;
+
+        $i3 = $i3 + $i0;
+
+        $i5 = $i4 << i2;
+
+        $i5 = $i5 ^ $i0;
+
+        $r2 = r0.<com.bumptech.glide.gifencoder.LZWEncoder: int[] htab>;
+
+        $i6 = $r2[$i5];
+
+        if $i6 != $i3 goto label04;
+
+        $r2 = r0.<com.bumptech.glide.gifencoder.LZWEncoder: int[] codetab>;
+
+        $i0 = $r2[$i5];
+
+        goto label03;
+
+     label04:
+        $r2 = r0.<com.bumptech.glide.gifencoder.LZWEncoder: int[] htab>;
+
+        $i6 = $r2[$i5];
+
+        if $i6 < 0 goto label08;
+
+        $i6 = i1 - $i5;
+
+        if $i5 != 0 goto label05;
+
+        $i6 = 1;
+
+     label05:
+        $i5 = $i5 - $i6;
+
+        if $i5 >= 0 goto label06;
+
+        $i5 = $i5 + i1;
+
+     label06:
+        $r2 = r0.<com.bumptech.glide.gifencoder.LZWEncoder: int[] htab>;
+
+        $i7 = $r2[$i5];
+
+        if $i7 != $i3 goto label07;
+
+        $r2 = r0.<com.bumptech.glide.gifencoder.LZWEncoder: int[] codetab>;
+
+        $i0 = $r2[$i5];
+
+        goto label03;
+
+     label07:
+        $r2 = r0.<com.bumptech.glide.gifencoder.LZWEncoder: int[] htab>;
+
+        $i7 = $r2[$i5];
+
+        if $i7 >= 0 goto label05;
+
+     label08:
+        virtualinvoke r0.<com.bumptech.glide.gifencoder.LZWEncoder: void output(int,java.io.OutputStream)>($i0, $r1);
+
+        $i0 = $i4;
+
+        $i4 = r0.<com.bumptech.glide.gifencoder.LZWEncoder: int free_ent>;
+
+        $i6 = r0.<com.bumptech.glide.gifencoder.LZWEncoder: int maxmaxcode>;
+
+        if $i4 >= $i6 goto label09;
+
+        $r2 = r0.<com.bumptech.glide.gifencoder.LZWEncoder: int[] codetab>;
+
+        $i4 = r0.<com.bumptech.glide.gifencoder.LZWEncoder: int free_ent>;
+
+        $i6 = $i4 + 1;
+
+        r0.<com.bumptech.glide.gifencoder.LZWEncoder: int free_ent> = $i6;
+
+        $r2[$i5] = $i4;
+
+        $r2 = r0.<com.bumptech.glide.gifencoder.LZWEncoder: int[] htab>;
+
+        $r2[$i5] = $i3;
+
+        goto label03;
+
+     label09:
+        virtualinvoke r0.<com.bumptech.glide.gifencoder.LZWEncoder: void cl_block(java.io.OutputStream)>($r1);
+
+        goto label03;
+
+     label10:
+        virtualinvoke r0.<com.bumptech.glide.gifencoder.LZWEncoder: void output(int,java.io.OutputStream)>($i0, $r1);
+
+        $i0 = r0.<com.bumptech.glide.gifencoder.LZWEncoder: int EOFCode>;
+
+        virtualinvoke r0.<com.bumptech.glide.gifencoder.LZWEncoder: void output(int,java.io.OutputStream)>($i0, $r1);
+
+        return;
+    }
+    void encode(java.io.OutputStream) throws java.io.IOException
+    {
+        com.bumptech.glide.gifencoder.LZWEncoder r0;
+        java.io.OutputStream $r1;
+        int $i0, $i1;
+
+        r0 := @this: com.bumptech.glide.gifencoder.LZWEncoder;
+
+        $r1 := @parameter0: java.io.OutputStream;
+
+        $i0 = r0.<com.bumptech.glide.gifencoder.LZWEncoder: int initCodeSize>;
+
+        virtualinvoke $r1.<java.io.OutputStream: void write(int)>($i0);
+
+        $i1 = r0.<com.bumptech.glide.gifencoder.LZWEncoder: int imgW>;
+
+        $i0 = r0.<com.bumptech.glide.gifencoder.LZWEncoder: int imgH>;
+
+        $i0 = $i1 * $i0;
+
+        r0.<com.bumptech.glide.gifencoder.LZWEncoder: int remaining> = $i0;
+
+        r0.<com.bumptech.glide.gifencoder.LZWEncoder: int curPixel> = 0;
+
+        $i0 = r0.<com.bumptech.glide.gifencoder.LZWEncoder: int initCodeSize>;
+
+        $i0 = $i0 + 1;
+
+        virtualinvoke r0.<com.bumptech.glide.gifencoder.LZWEncoder: void compress(int,java.io.OutputStream)>($i0, $r1);
+
+        virtualinvoke $r1.<java.io.OutputStream: void write(int)>(0);
+
+        return;
+    }
+    void flush_char(java.io.OutputStream) throws java.io.IOException
+    {
+        com.bumptech.glide.gifencoder.LZWEncoder r0;
+        java.io.OutputStream $r1;
+        int $i0;
+        byte[] $r2;
+
+        r0 := @this: com.bumptech.glide.gifencoder.LZWEncoder;
+
+        $r1 := @parameter0: java.io.OutputStream;
+
+        $i0 = r0.<com.bumptech.glide.gifencoder.LZWEncoder: int a_count>;
+
+        if $i0 <= 0 goto label1;
+
+        $i0 = r0.<com.bumptech.glide.gifencoder.LZWEncoder: int a_count>;
+
+        virtualinvoke $r1.<java.io.OutputStream: void write(int)>($i0);
+
+        $r2 = r0.<com.bumptech.glide.gifencoder.LZWEncoder: byte[] accum>;
+
+        $i0 = r0.<com.bumptech.glide.gifencoder.LZWEncoder: int a_count>;
+
+        virtualinvoke $r1.<java.io.OutputStream: void write(byte[],int,int)>($r2, 0, $i0);
+
+        r0.<com.bumptech.glide.gifencoder.LZWEncoder: int a_count> = 0;
+
+     label1:
+        return;
+    }
+    void output(int, java.io.OutputStream) throws java.io.IOException
+    {
+        com.bumptech.glide.gifencoder.LZWEncoder r0;
+        int $i0, $i1, $i2;
+        java.io.OutputStream $r1;
+        int[] $r2;
+        byte $b3;
+        boolean $z0;
+
+        r0 := @this: com.bumptech.glide.gifencoder.LZWEncoder;
+
+        $i0 := @parameter0: int;
+
+        $r1 := @parameter1: java.io.OutputStream;
+
+        $i2 = r0.<com.bumptech.glide.gifencoder.LZWEncoder: int cur_accum>;
+
+        $r2 = r0.<com.bumptech.glide.gifencoder.LZWEncoder: int[] masks>;
+
+        $i1 = r0.<com.bumptech.glide.gifencoder.LZWEncoder: int cur_bits>;
+
+        $i1 = $r2[$i1];
+
+        $i2 = $i2 & $i1;
+
+        r0.<com.bumptech.glide.gifencoder.LZWEncoder: int cur_accum> = $i2;
+
+        $i2 = r0.<com.bumptech.glide.gifencoder.LZWEncoder: int cur_bits>;
+
+        if $i2 <= 0 goto label03;
+
+        $i2 = r0.<com.bumptech.glide.gifencoder.LZWEncoder: int cur_accum>;
+
+        $i1 = r0.<com.bumptech.glide.gifencoder.LZWEncoder: int cur_bits>;
+
+        $i1 = $i0 << $i1;
+
+        $i2 = $i2 | $i1;
+
+        r0.<com.bumptech.glide.gifencoder.LZWEncoder: int cur_accum> = $i2;
+
+     label01:
+        $i2 = r0.<com.bumptech.glide.gifencoder.LZWEncoder: int cur_bits>;
+
+        $i1 = r0.<com.bumptech.glide.gifencoder.LZWEncoder: int n_bits>;
+
+        $i2 = $i2 + $i1;
+
+        r0.<com.bumptech.glide.gifencoder.LZWEncoder: int cur_bits> = $i2;
+
+     label02:
+        $i2 = r0.<com.bumptech.glide.gifencoder.LZWEncoder: int cur_bits>;
+
+        if $i2 < 8 goto label04;
+
+        $i2 = r0.<com.bumptech.glide.gifencoder.LZWEncoder: int cur_accum>;
+
+        $i2 = $i2 & 255;
+
+        $b3 = (byte) $i2;
+
+        virtualinvoke r0.<com.bumptech.glide.gifencoder.LZWEncoder: void char_out(byte,java.io.OutputStream)>($b3, $r1);
+
+        $i2 = r0.<com.bumptech.glide.gifencoder.LZWEncoder: int cur_accum>;
+
+        $i2 = $i2 >> 8;
+
+        r0.<com.bumptech.glide.gifencoder.LZWEncoder: int cur_accum> = $i2;
+
+        $i2 = r0.<com.bumptech.glide.gifencoder.LZWEncoder: int cur_bits>;
+
+        $i2 = $i2 + -8;
+
+        r0.<com.bumptech.glide.gifencoder.LZWEncoder: int cur_bits> = $i2;
+
+        goto label02;
+
+     label03:
+        r0.<com.bumptech.glide.gifencoder.LZWEncoder: int cur_accum> = $i0;
+
+        goto label01;
+
+     label04:
+        $i2 = r0.<com.bumptech.glide.gifencoder.LZWEncoder: int free_ent>;
+
+        $i1 = r0.<com.bumptech.glide.gifencoder.LZWEncoder: int maxcode>;
+
+        if $i2 > $i1 goto label05;
+
+        $z0 = r0.<com.bumptech.glide.gifencoder.LZWEncoder: boolean clear_flg>;
+
+        if $z0 == 0 goto label06;
+
+     label05:
+        $z0 = r0.<com.bumptech.glide.gifencoder.LZWEncoder: boolean clear_flg>;
+
+        if $z0 == 0 goto label08;
+
+        $i2 = r0.<com.bumptech.glide.gifencoder.LZWEncoder: int g_init_bits>;
+
+        r0.<com.bumptech.glide.gifencoder.LZWEncoder: int n_bits> = $i2;
+
+        $i2 = virtualinvoke r0.<com.bumptech.glide.gifencoder.LZWEncoder: int MAXCODE(int)>($i2);
+
+        r0.<com.bumptech.glide.gifencoder.LZWEncoder: int maxcode> = $i2;
+
+        r0.<com.bumptech.glide.gifencoder.LZWEncoder: boolean clear_flg> = 0;
+
+     label06:
+        $i2 = r0.<com.bumptech.glide.gifencoder.LZWEncoder: int EOFCode>;
+
+        if $i0 != $i2 goto label11;
+
+     label07:
+        $i0 = r0.<com.bumptech.glide.gifencoder.LZWEncoder: int cur_bits>;
+
+        if $i0 <= 0 goto label10;
+
+        $i0 = r0.<com.bumptech.glide.gifencoder.LZWEncoder: int cur_accum>;
+
+        $i0 = $i0 & 255;
+
+        $b3 = (byte) $i0;
+
+        virtualinvoke r0.<com.bumptech.glide.gifencoder.LZWEncoder: void char_out(byte,java.io.OutputStream)>($b3, $r1);
+
+        $i0 = r0.<com.bumptech.glide.gifencoder.LZWEncoder: int cur_accum>;
+
+        $i0 = $i0 >> 8;
+
+        r0.<com.bumptech.glide.gifencoder.LZWEncoder: int cur_accum> = $i0;
+
+        $i0 = r0.<com.bumptech.glide.gifencoder.LZWEncoder: int cur_bits>;
+
+        $i0 = $i0 + -8;
+
+        r0.<com.bumptech.glide.gifencoder.LZWEncoder: int cur_bits> = $i0;
+
+        goto label07;
+
+     label08:
+        $i2 = r0.<com.bumptech.glide.gifencoder.LZWEncoder: int n_bits>;
+
+        $i2 = $i2 + 1;
+
+        r0.<com.bumptech.glide.gifencoder.LZWEncoder: int n_bits> = $i2;
+
+        $i2 = r0.<com.bumptech.glide.gifencoder.LZWEncoder: int n_bits>;
+
+        $i1 = r0.<com.bumptech.glide.gifencoder.LZWEncoder: int maxbits>;
+
+        if $i2 != $i1 goto label09;
+
+        $i2 = r0.<com.bumptech.glide.gifencoder.LZWEncoder: int maxmaxcode>;
+
+        r0.<com.bumptech.glide.gifencoder.LZWEncoder: int maxcode> = $i2;
+
+        goto label06;
+
+     label09:
+        $i2 = r0.<com.bumptech.glide.gifencoder.LZWEncoder: int n_bits>;
+
+        $i2 = virtualinvoke r0.<com.bumptech.glide.gifencoder.LZWEncoder: int MAXCODE(int)>($i2);
+
+        r0.<com.bumptech.glide.gifencoder.LZWEncoder: int maxcode> = $i2;
+
+        goto label06;
+
+     label10:
+        virtualinvoke r0.<com.bumptech.glide.gifencoder.LZWEncoder: void flush_char(java.io.OutputStream)>($r1);
+
+     label11:
+        return;
+    }

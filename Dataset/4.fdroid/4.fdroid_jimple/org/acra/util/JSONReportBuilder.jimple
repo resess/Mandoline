@@ -1,0 +1,407 @@
+org.acra.util.JSONReportBuilder extends java.lang.Object
+    private static void addJSONFromProperty(org.json.JSONObject, java.lang.String) throws org.json.JSONException
+    {
+        org.json.JSONObject $r0;
+        java.lang.String $r1, $r2;
+        int $i0;
+        java.lang.Object $r3, r4;
+        boolean $z0;
+        java.lang.String[] $r5;
+
+        $r0 := @parameter0: org.json.JSONObject;
+
+        $r1 := @parameter1: java.lang.String;
+
+        $i0 = virtualinvoke $r1.<java.lang.String: int indexOf(int)>(61);
+
+        if $i0 <= 0 goto label3;
+
+        $r2 = virtualinvoke $r1.<java.lang.String: java.lang.String substring(int,int)>(0, $i0);
+
+        $r2 = virtualinvoke $r2.<java.lang.String: java.lang.String trim()>();
+
+        $i0 = $i0 + 1;
+
+        $r1 = virtualinvoke $r1.<java.lang.String: java.lang.String substring(int)>($i0);
+
+        $r1 = virtualinvoke $r1.<java.lang.String: java.lang.String trim()>();
+
+        $r3 = staticinvoke <org.acra.util.JSONReportBuilder: java.lang.Object guessType(java.lang.String)>($r1);
+
+        r4 = $r3;
+
+        $z0 = $r3 instanceof java.lang.String;
+
+        if $z0 == 0 goto label1;
+
+        $r1 = (java.lang.String) $r3;
+
+        r4 = virtualinvoke $r1.<java.lang.String: java.lang.String replaceAll(java.lang.String,java.lang.String)>("\\\\n", "\n");
+
+     label1:
+        $r5 = virtualinvoke $r2.<java.lang.String: java.lang.String[] split(java.lang.String)>("\\.");
+
+        $i0 = lengthof $r5;
+
+        if $i0 <= 1 goto label2;
+
+        staticinvoke <org.acra.util.JSONReportBuilder: void addJSONSubTree(org.json.JSONObject,java.lang.String[],java.lang.Object)>($r0, $r5, r4);
+
+        return;
+
+     label2:
+        virtualinvoke $r0.<org.json.JSONObject: org.json.JSONObject accumulate(java.lang.String,java.lang.Object)>($r2, r4);
+
+        return;
+
+     label3:
+        $r1 = virtualinvoke $r1.<java.lang.String: java.lang.String trim()>();
+
+        virtualinvoke $r0.<org.json.JSONObject: org.json.JSONObject put(java.lang.String,boolean)>($r1, 1);
+
+        return;
+    }
+    private static void addJSONSubTree(org.json.JSONObject, java.lang.String[], java.lang.Object) throws org.json.JSONException
+    {
+        java.lang.String[] $r0;
+        java.lang.Object $r1, $r5;
+        java.lang.String r2;
+        org.json.JSONObject $r3, r4;
+        int i0, $i1, $i2;
+        boolean $z0;
+        org.acra.log.ACRALog $r6;
+        org.json.JSONArray $r7;
+
+        $r3 := @parameter0: org.json.JSONObject;
+
+        $r0 := @parameter1: java.lang.String[];
+
+        $r1 := @parameter2: java.lang.Object;
+
+        i0 = 0;
+
+     label1:
+        $i1 = lengthof $r0;
+
+        if i0 >= $i1 goto label9;
+
+        r2 = $r0[i0];
+
+        $i1 = lengthof $r0;
+
+        $i1 = $i1 + -1;
+
+        if i0 >= $i1 goto label8;
+
+        r4 = null;
+
+        $z0 = virtualinvoke $r3.<org.json.JSONObject: boolean isNull(java.lang.String)>(r2);
+
+        if $z0 == 0 goto label4;
+
+        r4 = new org.json.JSONObject;
+
+        specialinvoke r4.<org.json.JSONObject: void <init>()>();
+
+        virtualinvoke $r3.<org.json.JSONObject: org.json.JSONObject accumulate(java.lang.String,java.lang.Object)>(r2, r4);
+
+     label2:
+        $r3 = r4;
+
+     label3:
+        i0 = i0 + 1;
+
+        goto label1;
+
+     label4:
+        $r5 = virtualinvoke $r3.<org.json.JSONObject: java.lang.Object get(java.lang.String)>(r2);
+
+        $z0 = $r5 instanceof org.json.JSONObject;
+
+        if $z0 == 0 goto label6;
+
+        r4 = virtualinvoke $r3.<org.json.JSONObject: org.json.JSONObject getJSONObject(java.lang.String)>(r2);
+
+     label5:
+        if r4 != null goto label2;
+
+        $r6 = <org.acra.ACRA: org.acra.log.ACRALog log>;
+
+        r2 = <org.acra.ACRA: java.lang.String LOG_TAG>;
+
+        interfaceinvoke $r6.<org.acra.log.ACRALog: int e(java.lang.String,java.lang.String)>(r2, "Unknown json subtree type, see issue #186");
+
+        return;
+
+     label6:
+        $z0 = $r5 instanceof org.json.JSONArray;
+
+        if $z0 == 0 goto label5;
+
+        $r7 = virtualinvoke $r3.<org.json.JSONObject: org.json.JSONArray getJSONArray(java.lang.String)>(r2);
+
+        $i1 = 0;
+
+     label7:
+        $i2 = virtualinvoke $r7.<org.json.JSONArray: int length()>();
+
+        if $i1 >= $i2 goto label5;
+
+        $r3 = virtualinvoke $r7.<org.json.JSONArray: org.json.JSONObject optJSONObject(int)>($i1);
+
+        r4 = $r3;
+
+        if $r3 != null goto label5;
+
+        $i1 = $i1 + 1;
+
+        goto label7;
+
+     label8:
+        virtualinvoke $r3.<org.json.JSONObject: org.json.JSONObject accumulate(java.lang.String,java.lang.Object)>(r2, $r1);
+
+        goto label3;
+
+     label9:
+        return;
+    }
+    public static org.json.JSONObject buildJSONReport(org.acra.collector.CrashReportData) throws org.acra.util.JSONReportBuilder$JSONReportException
+    {
+        org.acra.collector.CrashReportData $r0;
+        org.json.JSONObject r1, r3;
+        java.io.BufferedReader r2, r4;
+        java.util.Set $r5;
+        java.util.Iterator $r6;
+        boolean $z0;
+        java.lang.Object $r7;
+        org.acra.ReportField r8;
+        java.lang.String $r9, $r14;
+        java.io.StringReader $r10;
+        java.io.IOException r11;
+        org.acra.log.ACRALog $r12;
+        java.lang.StringBuilder $r13;
+        org.json.JSONException r15;
+        org.acra.util.JSONReportBuilder$JSONReportException $r16;
+        java.lang.Throwable $r17;
+
+        $r0 := @parameter0: org.acra.collector.CrashReportData;
+
+        r1 = new org.json.JSONObject;
+
+        specialinvoke r1.<org.json.JSONObject: void <init>()>();
+
+        r4 = null;
+
+        $r5 = virtualinvoke $r0.<org.acra.collector.CrashReportData: java.util.Set keySet()>();
+
+        $r6 = interfaceinvoke $r5.<java.util.Set: java.util.Iterator iterator()>();
+
+     label01:
+        $z0 = interfaceinvoke $r6.<java.util.Iterator: boolean hasNext()>();
+
+        if $z0 == 0 goto label26;
+
+        $r7 = interfaceinvoke $r6.<java.util.Iterator: java.lang.Object next()>();
+
+        r8 = (org.acra.ReportField) $r7;
+
+     label02:
+        $z0 = virtualinvoke r8.<org.acra.ReportField: boolean containsKeyValuePairs()>();
+
+     label03:
+        if $z0 == 0 goto label18;
+
+     label04:
+        r3 = new org.json.JSONObject;
+
+     label05:
+        specialinvoke r3.<org.json.JSONObject: void <init>()>();
+
+        $r9 = virtualinvoke $r0.<org.acra.collector.CrashReportData: java.lang.String getProperty(org.acra.ReportField)>(r8);
+
+     label06:
+        r2 = new java.io.BufferedReader;
+
+        $r10 = new java.io.StringReader;
+
+     label07:
+        specialinvoke $r10.<java.io.StringReader: void <init>(java.lang.String)>($r9);
+
+        specialinvoke r2.<java.io.BufferedReader: void <init>(java.io.Reader,int)>($r10, 1024);
+
+     label08:
+        $r9 = virtualinvoke r2.<java.io.BufferedReader: java.lang.String readLine()>();
+
+     label09:
+        if $r9 == null goto label15;
+
+     label10:
+        staticinvoke <org.acra.util.JSONReportBuilder: void addJSONFromProperty(org.json.JSONObject,java.lang.String)>(r3, $r9);
+
+     label11:
+        goto label08;
+
+     label12:
+        r11 := @caughtexception;
+
+     label13:
+        $r12 = <org.acra.ACRA: org.acra.log.ACRALog log>;
+
+        $r9 = <org.acra.ACRA: java.lang.String LOG_TAG>;
+
+        $r13 = new java.lang.StringBuilder;
+
+     label14:
+        specialinvoke $r13.<java.lang.StringBuilder: void <init>()>();
+
+        $r13 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Error while converting ");
+
+        $r14 = virtualinvoke r8.<org.acra.ReportField: java.lang.String name()>();
+
+        $r13 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($r14);
+
+        $r13 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" to JSON.");
+
+        $r14 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        interfaceinvoke $r12.<org.acra.log.ACRALog: int e(java.lang.String,java.lang.String,java.lang.Throwable)>($r9, $r14, r11);
+
+     label15:
+        $r9 = virtualinvoke r8.<org.acra.ReportField: java.lang.String name()>();
+
+        virtualinvoke r1.<org.json.JSONObject: org.json.JSONObject accumulate(java.lang.String,java.lang.Object)>($r9, r3);
+
+     label16:
+        r4 = r2;
+
+     label17:
+        staticinvoke <org.acra.collector.CollectorUtil: void safeClose(java.io.Reader)>(r4);
+
+        goto label01;
+
+     label18:
+        $r9 = virtualinvoke r8.<org.acra.ReportField: java.lang.String name()>();
+
+        $r14 = virtualinvoke $r0.<org.acra.collector.CrashReportData: java.lang.String getProperty(org.acra.ReportField)>(r8);
+
+        $r7 = staticinvoke <org.acra.util.JSONReportBuilder: java.lang.Object guessType(java.lang.String)>($r14);
+
+        virtualinvoke r1.<org.json.JSONObject: org.json.JSONObject accumulate(java.lang.String,java.lang.Object)>($r9, $r7);
+
+     label19:
+        goto label17;
+
+     label20:
+        r15 := @caughtexception;
+
+     label21:
+        $r16 = new org.acra.util.JSONReportBuilder$JSONReportException;
+
+        $r13 = new java.lang.StringBuilder;
+
+        specialinvoke $r13.<java.lang.StringBuilder: void <init>()>();
+
+        $r13 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("Could not create JSON object for key ");
+
+        $r13 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.Object)>(r8);
+
+        $r9 = virtualinvoke $r13.<java.lang.StringBuilder: java.lang.String toString()>();
+
+        specialinvoke $r16.<org.acra.util.JSONReportBuilder$JSONReportException: void <init>(java.lang.String,java.lang.Throwable)>($r9, r15);
+
+        throw $r16;
+
+     label22:
+        $r17 := @caughtexception;
+
+     label23:
+        staticinvoke <org.acra.collector.CollectorUtil: void safeClose(java.io.Reader)>(r4);
+
+        throw $r17;
+
+     label24:
+        $r17 := @caughtexception;
+
+        r4 = r2;
+
+        goto label23;
+
+     label25:
+        r15 := @caughtexception;
+
+        r4 = r2;
+
+        goto label21;
+
+     label26:
+        return r1;
+
+        catch org.json.JSONException from label02 to label03 with label20;
+        catch org.json.JSONException from label05 to label06 with label20;
+        catch org.json.JSONException from label07 to label08 with label20;
+        catch java.lang.Throwable from label02 to label03 with label22;
+        catch java.lang.Throwable from label04 to label08 with label22;
+        catch java.io.IOException from label08 to label09 with label12;
+        catch java.io.IOException from label10 to label11 with label12;
+        catch org.json.JSONException from label08 to label09 with label25;
+        catch org.json.JSONException from label10 to label11 with label25;
+        catch java.lang.Throwable from label08 to label09 with label24;
+        catch java.lang.Throwable from label10 to label11 with label24;
+        catch org.json.JSONException from label14 to label16 with label25;
+        catch java.lang.Throwable from label13 to label16 with label24;
+        catch org.json.JSONException from label18 to label19 with label20;
+        catch java.lang.Throwable from label18 to label19 with label22;
+        catch java.lang.Throwable from label21 to label22 with label22;
+    }
+    private static java.lang.Object guessType(java.lang.String)
+    {
+        java.lang.String $r0;
+        boolean $z0;
+        java.lang.Boolean $r1;
+        java.util.Locale $r2;
+        java.text.NumberFormat $r3;
+        java.lang.Number $r4;
+        java.text.ParseException $r5;
+
+        $r0 := @parameter0: java.lang.String;
+
+        $z0 = virtualinvoke $r0.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("true");
+
+        if $z0 == 0 goto label1;
+
+        $r1 = staticinvoke <java.lang.Boolean: java.lang.Boolean valueOf(boolean)>(1);
+
+        return $r1;
+
+     label1:
+        $z0 = virtualinvoke $r0.<java.lang.String: boolean equalsIgnoreCase(java.lang.String)>("false");
+
+        if $z0 == 0 goto label2;
+
+        $r1 = staticinvoke <java.lang.Boolean: java.lang.Boolean valueOf(boolean)>(0);
+
+        return $r1;
+
+     label2:
+        $z0 = virtualinvoke $r0.<java.lang.String: boolean matches(java.lang.String)>("(?:^|\\s)([1-9](?:\\d*|(?:\\d{0,2})(?:,\\d{3})*)(?:\\.\\d*[1-9])?|0?\\.\\d*[1-9]|0)(?:\\s|$)");
+
+        if $z0 == 0 goto label6;
+
+        $r2 = <java.util.Locale: java.util.Locale US>;
+
+        $r3 = staticinvoke <java.text.NumberFormat: java.text.NumberFormat getInstance(java.util.Locale)>($r2);
+
+     label3:
+        $r4 = virtualinvoke $r3.<java.text.NumberFormat: java.lang.Number parse(java.lang.String)>($r0);
+
+     label4:
+        return $r4;
+
+     label5:
+        $r5 := @caughtexception;
+
+     label6:
+        return $r0;
+
+        catch java.text.ParseException from label3 to label4 with label5;
+    }
