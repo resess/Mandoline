@@ -10,6 +10,11 @@ Mandoline automatically generates a backward dynamic slice from a user selected 
 
 This repository also hosts the ground truth that Mandoline is evaluated on. The ground truth consists of manually generated slices of 12 applications.
 
+
+If you use this tool, please cite:
+
+Khaled Ahmed, Mieszko Lis, and Julia Rubin. [MANDOLINE: Dynamic Slicing of Android Applications with Trace-Based Alias Analysis](https://www.ece.ubc.ca/~mjulia/publications/Mandoline_2021.pdf). IEEE International Conference on Software Testing, Verification and Validation (ICST), 2021
+
 ## Table of Contents
 1. [Pre-requisites](#pre-requisites)
 2. [Building The Tool](#Building-The-Tool)
@@ -204,13 +209,15 @@ Example:
 java -cp "Mandoline/target/mandoline-jar-with-dependencies.jar:Mandoline/target/lib/*" mandoline.slicer.Slicer -m m -a Dataset/1.anki/1.anki.apk -t outDir/trace.log -p $ANDROID_JARS -c FlowDroid/soot-infoflow-android/AndroidCallbacks.txt -o outDir/ -sd FlowDroid/soot-infoflow-summaries/summariesManual -tw FlowDroid/soot-infoflow/EasyTaintWrapperSource.txt -sp 450275 -sv r1-r2
 </pre>
 
+
 You can also run the script `scripts/run_app.sh*` to run all the steps. Just modify the first fiew lines: the environment variables, the output directory, full path to the APK, APK package name, and tool mode. Run the script for the project's base directory.
 
 ---
 
 # Publication
 
-MANDOLINE: Dynamic Slicing of Android Applications with Trace-Based Alias Analysis, ICST, 2021
+Khaled Ahmed, Mieszko Lis, and Julia Rubin. [MANDOLINE: Dynamic Slicing of Android Applications with Trace-Based Alias Analysis](https://www.ece.ubc.ca/~mjulia/publications/Mandoline_2021.pdf). IEEE International Conference on Software Testing, Verification and Validation (ICST), 2021
+
 # Contact
 
 If you experience any issues, please submit an issue or contact us at khaledea@ece.ub.ca
