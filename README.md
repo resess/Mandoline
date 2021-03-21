@@ -5,7 +5,7 @@
 
 
 This repository hosts Mandoline, an accurate, low-overhead dynamic slicer for Android. 
-Mandoline automatically generates a backward dynamic slice from a user selected executed statement and variables used in the statement. Mandoline first creates an Inter-Callback Dependency Graph (icdg) from an execution trace. The user selects a node in the icdg and used variables in the node to start slicing from (slicing criterion). Mandoline is the first dynamic slicer for Android apps that accounts for data flows through fields and framework methods.
+Mandoline automatically generates a backward dynamic slice from a user selected executed statement and variables used in the statement. Mandoline first creates an Inter-Callback Dependency Graph (ICDG) from an execution trace. The user selects a node in the ICDG and used variables in the node to start slicing from (slicing criterion). Mandoline is the first dynamic slicer for Android apps that accounts for data flows through fields and framework methods.
 
 
 This repository also hosts the ground truth that Mandoline is evaluated on. The ground truth consists of manually generated slices of 12 applications.
@@ -21,7 +21,7 @@ Khaled Ahmed, Mieszko Lis, and Julia Rubin. [MANDOLINE: Dynamic Slicing of Andro
 3. [Using The Tool](#Using-The-Tool)
     1. [Instrumenting](#Instrumenting)
     2. [Running apps](#Running-apps)
-    3. [Generating icdg](#Generating-icdg)
+    3. [Generating ICDG](#Generating-icdg)
     4. [Slicing](#Slicing)
 
 ---
@@ -167,7 +167,7 @@ java -cp "Mandoline/target/mandoline-jar-with-dependencies.jar:Mandoline/target/
 
 <b>path/to/output/directory: </b> same output directory where the instrumentation outputs are places
 
-The icdg is placed in outDir with the name path/to/trace<b>_icdg.log</b>
+The ICDG is placed in outDir with the name path/to/trace<b>_icdg.log</b>
 
 Example on the anki app:
 
@@ -180,7 +180,7 @@ java -cp "Mandoline/target/mandoline-jar-with-dependencies.jar:Mandoline/target/
 
 ## Slicing
 
-Select a statement to slice from in the icdg, the statements numbers are on the left of each line in the icdg file, before the ", " delimiter.
+Select a statement to slice from in the ICDG, the statements numbers are on the left of each line in the ICDG file, before the ", " delimiter.
 
 
 <pre>
