@@ -11,7 +11,7 @@ Mandoline automatically generates a backward dynamic slice from a user selected 
 This repository also hosts the ground truth that Mandoline is evaluated on. The ground truth consists of manually generated slices of 12 applications.
 
 
-If you use this tool, please cite:
+<b>If you use this tool, please cite:</b>
 
 Khaled Ahmed, Mieszko Lis, and Julia Rubin. [MANDOLINE: Dynamic Slicing of Android Applications with Trace-Based Alias Analysis](https://www.ece.ubc.ca/~mjulia/publications/Mandoline_2021.pdf). IEEE International Conference on Software Testing, Verification and Validation (ICST), 2021
 
