@@ -210,6 +210,7 @@ java -cp "Mandoline/target/mandoline-jar-with-dependencies.jar:Mandoline/target/
 </pre>
 
 
+
 You can also run the script `scripts/run_app.sh*` to run all the steps. Just modify the first fiew lines: the environment variables, the output directory, full path to the APK, APK package name, and tool mode. Run the script for the project's base directory.
 
 ---
