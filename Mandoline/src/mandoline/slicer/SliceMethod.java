@@ -228,11 +228,12 @@ public class SliceMethod {
         int callerPos = traversal.getCaller(iu.getLineNo());
         AliasSet apSet = new AliasSet();
         apSet.add(ap);
-        AliasSet taintedParams = traversal.changeScopeToCaller(icdg.getMapKeyUnits().get(icdg.getMapNoKey().get(callerPos)), apSet);
+        AliasSet taintedParams = traversal.changeScopeToCaller(iu, icdg.getMapKeyUnits().get(icdg.getMapNoKey().get(callerPos)), apSet);
         if (taintedParams == null || taintedParams.isEmpty()) {
             return defSet;
         }
         if (taintedParams.size() > 1) {
+            AnalysisLogger.log(true, "TaintedParams: {}", taintedParams);
             throw new Error("More than one definition of a local variable!");
         }
         StatementInstance nextCaller = null;

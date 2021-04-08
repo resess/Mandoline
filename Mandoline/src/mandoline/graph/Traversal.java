@@ -1,8 +1,10 @@
 package mandoline.graph;
 
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.jgrapht.Graphs;
@@ -423,18 +425,51 @@ public class Traversal {
 
 
     public AliasSet changeScope(AliasSet originalAliasSet, StatementInstance source, StatementInstance destination) {
+        // AnalysisLogger.log(true, "Changing scope: {}-{}", destination, originalAliasSet);
+        AliasSet translatedSet = originalAliasSet;
         if (!source.methodEquals(destination)) {
             if (source.getLineNo() > destination.getLineNo()) {
-                return changeScopeToCaller(destination, originalAliasSet);
+                translatedSet = changeScopeToCaller(source, destination, originalAliasSet);
             } else {
-                return changeScopeToCalled(source, originalAliasSet).getO1();
+                translatedSet = changeScopeToCalled(source, originalAliasSet).getO1();
             }
-        } else {
-            return originalAliasSet;
+        }
+        // AnalysisLogger.log(true, "Changed scope: {}-{}", translatedSet);
+        return translatedSet;
+    }
+
+
+    public Map<Integer, AccessPath> getArgParamMap(StatementInstance source, StatementInstance caller, AliasSet aliasSet) {
+        Map<Integer, AccessPath> argParamMap = new LinkedHashMap<>();
+        Integer argIndex = 0;
+        for (Unit uu: source.getMethod().getActiveBody().getUnits()) {
+            if (uu instanceof IdentityStmt) {
+                // AnalysisLogger.log(true, "Inspecting: {}", uu);
+                if (uu.toString().contains("@this") || uu.toString().contains("@parameter")) {
+                    addToParamMap(aliasSet, argParamMap, argIndex, uu);
+                    argIndex++;
+                }
+            } else {
+                break;
+            }
+        }
+
+        return argParamMap;
+    }
+
+    private void addToParamMap(AliasSet aliasSet, Map<Integer, AccessPath> argParamMap, Integer argIndex, Unit uu) {
+        String base = uu.getDefBoxes().get(0).getValue().toString();
+        // AnalysisLogger.log(true, "Type: {}", uu.getDefBoxes().get(0).getValue().getType());
+        for (AccessPath ap: aliasSet) {
+            // AnalysisLogger.log(true, "Comparing {} to {}", ap, base);
+            if (ap.startsWith(base)) {
+                argParamMap.put(argIndex, ap);
+            }
         }
     }
 
-    public synchronized AliasSet changeScopeToCaller(StatementInstance caller, AliasSet aliasSet) {
+
+    public synchronized AliasSet changeScopeToCaller(StatementInstance source, StatementInstance caller, AliasSet aliasSet) {
         AliasSet aliasedArgs = new AliasSet();
         if (caller == null) {
             return aliasedArgs;
@@ -445,12 +480,15 @@ public class Traversal {
         }
         
         List<Value> args = callerExp.getArgs();
+        // AnalysisLogger.log(true, "Args: {}", args);
         addReferenceVariableToArgs(callerExp, args);
-
+        // AnalysisLogger.log(true, "Args: {}", args);
         int inc = 0;
         if (icdg.getSetterCallbackMap().containsKey(new Pair<>(caller.getMethod(), caller.getUnit()))) {
             inc = 1;
         }
+        Map<Integer, AccessPath> argParamMap = getArgParamMap(source, caller, aliasSet);
+        // AnalysisLogger.log(true, "Params: {}", argParamMap);
         int argPos = 0;
         for(Value arg: args) {
             for (AccessPath ap: aliasSet) {
@@ -461,13 +499,42 @@ public class Traversal {
                     inc = 1;
                 }
                 String start = ap.getBase().getO1().substring(0, 1);
+                // AnalysisLogger.log(true, "Start: {}", start);
                 AccessPath p = new AccessPath(start+String.valueOf(argPos), arg.getType(), ap.getUsedLine(), ap.getDefinedLine(), caller);
+                // AnalysisLogger.log(true, "P: {}", p);
                 p.add(ap.getFields(), ap.getFieldsTypes(), caller);
+                // AnalysisLogger.log(true, "P: {}", p);
                 translateVaribleToCaller(caller, aliasedArgs, args, inc, argPos, ap, p);
-                
+                // AnalysisLogger.log(true, "AliasedArgs: {}", aliasedArgs);
             }
             argPos++;
         }
+
+        for (argPos = 0; argPos < args.size(); argPos++) {
+            AccessPath param = argParamMap.get(argPos);
+            if (param != null) {
+                AccessPath p = new AccessPath(args.get(argPos).toString(), args.get(argPos).getType(), param.getUsedLine(), param.getDefinedLine(), caller);
+                p.add(param.getFields(), param.getFieldsTypes(), caller);
+                aliasedArgs.add(p);
+            }
+        }
+        // AnalysisLogger.log(true, "AliasedArgs: {}", aliasedArgs);
+        // AliasSet removed = new AliasSet();
+        // for (AccessPath aliasedArg: aliasedArgs) {
+        //     boolean foundMatch = false;
+        //     for(Value arg: args) {
+                // AnalysisLogger.log(true, "Comparing: {} to {}", aliasedArg, arg);
+        //         if (aliasedArg.startsWith(arg.toString())) {
+        //             foundMatch = true;
+        //             break;
+        //         }
+        //     }
+        //     if (!foundMatch) {
+                // AnalysisLogger.log(true, "Will remove: {}", aliasedArg);
+        //         removed.add(aliasedArg);
+        //     }
+        // }
+        // aliasedArgs = aliasedArgs.subtract(removed);
         propagateStaticVariablesToCaller(aliasSet, aliasedArgs);
         return aliasedArgs;
     }

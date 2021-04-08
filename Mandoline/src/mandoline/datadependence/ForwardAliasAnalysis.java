@@ -169,7 +169,7 @@ public class ForwardAliasAnalysis extends AliasAnalysis {
         if (returnSite == caller) {
             return new AliasAnalysisResult(si, new AliasSet(), new AliasSet());
         }
-        AliasSet forwardAliasSet = traversal.changeScopeToCaller(icdg.mapNoUnits(caller), aliasSet);
+        AliasSet forwardAliasSet = traversal.changeScopeToCaller(si, icdg.mapNoUnits(caller), aliasSet);
         if (returnVar != null) {
             for (AccessPath v: aliasSet) {
                 if (v.startsWith(returnVar) && icdg.mapNoUnits(caller).getUnit() instanceof AssignStmt) {

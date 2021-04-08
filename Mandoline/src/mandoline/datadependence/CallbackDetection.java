@@ -235,7 +235,7 @@ public class CallbackDetection {
         callerContext.setCaller(icdg.mapNoUnits(caller));
         callerContext.setCallerChunk(traversal.getForwardChunk(caller));
         try {
-            callerContext.setAliasedArgs(traversal.changeScopeToCaller(callerContext.getCaller(), taintSet));
+            callerContext.setAliasedArgs(traversal.changeScopeToCaller(iu, callerContext.getCaller(), taintSet));
         } catch (NullPointerException | IndexOutOfBoundsException e) {
             return new LinkedHashSet<>();
         }
@@ -274,7 +274,7 @@ public class CallbackDetection {
         callerContext.setCaller(icdg.mapNoUnits(caller));
         callerContext.setCallerChunk(traversal.getChunk(caller));
         try {
-            callerContext.setAliasedArgs(traversal.changeScopeToCaller(callerContext.getCaller(), taintSet));
+            callerContext.setAliasedArgs(traversal.changeScopeToCaller(iu, callerContext.getCaller(), taintSet));
         } catch (NullPointerException | IndexOutOfBoundsException e) {
             return null;
         }
