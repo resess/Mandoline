@@ -41,12 +41,16 @@ public class SlicingWorkingSet extends ArrayDeque<Pair<StatementInstance, Access
         Pair<StatementInstance, AccessPath> frontier = new Pair<>(iu, var);
         if (!this.dynamicSlice.containsKey(frontier)) {
             this.add(frontier);
-            dynamicSlice.put(frontier, source);
         }
+        dynamicSlice.put(frontier, source);
     }
 
     void addStmtOnly (StatementInstance si, Pair<StatementInstance, AccessPath> source){
         this.add(si, new AccessPath(si.getLineNo(), AccessPath.NOT_DEFINED, si), source);
+    }
+
+    void addMethodOfStmt(StatementInstance si, Pair<StatementInstance, AccessPath> source){
+        dynamicSlice.addMethod(source.getO1().getLineNo(), si.getLineNo());
     }
 
     void addStmt(StatementInstance si, Pair<StatementInstance, AccessPath> source){

@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -25,7 +26,9 @@ import mandoline.framework.FrameworkModel;
 import mandoline.graph.ICDG;
 import mandoline.graph.Parser;
 import mandoline.graph.Traces;
-import mandoline.instrumenter.EfficientInstrumenter;
+import mandoline.instrumenter.AndroidInstrumenter;
+import mandoline.instrumenter.Instrumenter;
+import mandoline.instrumenter.JavaInstrumenter;
 import mandoline.instrumenter.JimpleWriter;
 import mandoline.sootcallgraphs.ThreadCalls;
 import mandoline.statements.StatementInstance;
@@ -33,6 +36,8 @@ import mandoline.utils.AnalysisCache;
 import mandoline.utils.AnalysisLogger;
 import mandoline.utils.CommandParser;
 import soot.Local;
+import soot.PackManager;
+import soot.Scene;
 import soot.SootClass;
 import soot.SootMethod;
 import soot.Type;
@@ -47,7 +52,7 @@ import soot.toolkits.scalar.Pair;
 import soot.jimple.toolkits.callgraph.VirtualCallSite;
 
 public class Slicer {
-    static final String SOOT_OUTPUT_STRING = "sootOutput/";
+    public static final String SOOT_OUTPUT_STRING = "sootOutput/";
     MultiMap<SootClass, AndroidCallbackDefinition> callbackMethods = new HashMultiMap<>();
     Map<Pair<SootMethod, Unit>, String> threadCallers = new HashMap<>();
     Map<Pair<SootMethod, Unit>, SootClass> setterCallbackMap = new HashMap<>();
@@ -107,7 +112,6 @@ public class Slicer {
             String staticLogFile = commands.get("sl");
             throwParseExceptionIfNull(staticLogFile, "Static log file path not provided");
 
-
             boolean instrumented = instrument(startTime, commands, mode, pathApk, platformPath, callbackFile, outDir,
                     staticLogFile);
 
@@ -161,6 +165,12 @@ public class Slicer {
                 variables.add("$"+split[i]);
             }
 
+            int forwSlicePos = -1;
+            if (commands.get("fw") != null) {
+                forwSlicePos = Integer.parseInt(commands.get("fw"));
+            }
+            
+
             boolean staticAnalysis = true;
             boolean dynamicAnalysis = false;
             boolean frameworkModel = true;
@@ -210,6 +220,9 @@ public class Slicer {
             }
             SliceMethod sliceMethod = new SliceMethod(icdg, staticAnalysis, dynamicAnalysis, frameworkModel);
             DynamicSlice dynamicSlice = sliceMethod.slice(stmt, accessPaths);
+            if (forwSlicePos != -1) {
+                dynamicSlice = dynamicSlice.chop(forwSlicePos, icdg);
+            }
             slicer.dynamicPrint = new LinkedHashSet<>();
             printSlices(slicer, dynamicSlice);
             DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy_MM_dd_HH_mm_ss");
@@ -278,15 +291,33 @@ public class Slicer {
             }
             String instrumentOptions = parseInstrumentationMode(instrumenterMode);
 
+
             Slicer slicer = new Slicer(pathApk, platformPath, callbackFile);
-            String[] instrumenterArgs = {instrumentOptions, staticLogFile, packageName, "-w", "-allow-phantom-refs", "-process-multiple-dex", "-android-jars", platformPath, "-src-prec", "apk", "-output-format", "dex", "-process-dir", pathApk, "-process-dir", mandolineLoggerJar};
+            String[] instrumenterArgs = new String[0];
+            if (pathApk.endsWith(".apk")) {
+                String[] instrumenterArgsTemp = {instrumentOptions, staticLogFile, packageName, "-w", "-allow-phantom-refs", "-process-multiple-dex", "-android-jars", platformPath, "-src-prec", "apk", "-output-format", "dex", "-process-dir", pathApk, "-process-dir", mandolineLoggerJar};
+                instrumenterArgs = instrumenterArgsTemp;
+            } else if (pathApk.endsWith(".jar")) {
+                String[] instrumenterArgsTemp = {instrumentOptions, staticLogFile, packageName, "-cp", ".", "-pp", "-process-dir", pathApk, "-process-dir", mandolineLoggerJar};
+                instrumenterArgs = instrumenterArgsTemp;
+            } else {
+                throwParseException("Not and apk or jar file!");
+            }
+            
             if (instrumentOptions.contains("jimple")) {
                 JimpleWriter jimpleWriter = new JimpleWriter(outDir);
                 jimpleWriter.start(instrumenterArgs);
                 terminate(outDir, instrumenterMode, startTime);
                 shouldTerminate = true;
             } else {
-                EfficientInstrumenter instrumenter = new EfficientInstrumenter(slicer.callbackMethods, slicer.threadCallers);
+                Instrumenter instrumenter = new Instrumenter();
+                if (pathApk.endsWith(".apk")) {
+                    instrumenter = new AndroidInstrumenter(slicer.callbackMethods, slicer.threadCallers);
+                } else if (pathApk.endsWith(".jar")) {
+                    instrumenter = new JavaInstrumenter(slicer.threadCallers);
+                } else {
+                    throwParseException("Not and apk or jar file!");
+                }
                 instrumenter.start(instrumenterArgs);
                 terminate(outDir, instrumenterMode, startTime);
                 shouldTerminate = true;
@@ -325,6 +356,8 @@ public class Slicer {
             for (File file : listOfFiles) {
                 if (file.isFile() && file.getName().contains(".apk")) {
                     filesToMove.put(file, new File(outDir + File.separator + file.getName().replace(".apk", "_" +mode + ".apk")));
+                } else if (file.isFile() && file.getName().contains(".jar")) {
+                    filesToMove.put(file, new File(outDir + File.separator + file.getName().replace(".jar", "_" +mode + ".jar")));
                 }
             }
             filesToMove.put(new File("apk-size.txt"), new File(outDir + File.separator + "apk-size.txt"));
@@ -355,6 +388,33 @@ public class Slicer {
 
     public Slicer(String apkPath, String platFormDir, String callbackFile) {
         AnalysisCache.reset();
+        if (apkPath.endsWith(".apk")) {
+            prepareProcessingApk(apkPath, platFormDir, callbackFile);
+        } else if (apkPath.endsWith(".jar")) {
+            prepareProcessingJAR(apkPath);
+        } else {
+            throwParseException("Not and apk or jar file!");
+        }
+        
+    }
+
+    private void prepareProcessingJAR(String apkPath) {
+        AnalysisLogger.log(true, "Processing JAR: {}", apkPath);
+        // String[] sootArgs = {"-cp", ".", "-pp", "-process-dir", apkPath};
+        // soot.Main.main(sootArgs);
+        soot.G.reset();
+        Options.v().set_process_dir(Arrays.asList(apkPath));
+        Options.v().set_output_format(Options.output_format_jimple);
+        // Options.v().set_whole_program(true);
+        // Options.v().set_allow_phantom_refs(true);
+        // Options.v().setPhaseOption("cg.spark", "on");
+        Scene.v().loadNecessaryClasses();
+        PackManager.v().runPacks();
+
+    }
+
+    private void prepareProcessingApk(String apkPath, String platFormDir, String callbackFile) {
+        AnalysisLogger.log(true, "Processing APK: {}", apkPath);
         InfoflowAndroidConfiguration config = new InfoflowAndroidConfiguration();
         config.getAnalysisFileConfig().setTargetAPKFile(apkPath);
         config.getAnalysisFileConfig().setAndroidPlatformDir(platFormDir);

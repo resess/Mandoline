@@ -159,6 +159,7 @@ public class SliceMethod {
             if (dom != null && ((Stmt) dom.getUnit()).containsInvokeExpr() && ((Stmt) dom.getUnit()).getInvokeExpr().getMethod().getName().equals(stmt.getMethod().getName()) ) {
                 AnalysisLogger.log(true, "Control-dom is {}", dom);
                 workingSet.addStmtOnly(dom, p);
+                workingSet.addMethodOfStmt(dom, p);
             }
         }
     }

@@ -1,5 +1,6 @@
 package mandoline.instrumenter;
 
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -13,6 +14,8 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
+
 import soot.Body;
 import soot.BodyTransformer;
 import soot.Local;
@@ -55,29 +58,33 @@ import soot.jimple.InstanceFieldRef;
 import soot.jimple.InvokeExpr;
 import soot.jimple.StaticFieldRef;
 import soot.jimple.Stmt;
-import soot.jimple.infoflow.android.callbacks.AndroidCallbackDefinition;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
+import fj.P;
+import mandoline.slicer.Slicer;
 import mandoline.utils.AnalysisLogger;
 
-
-public class EfficientInstrumenter {
-    Map<SootClass, SootMethod> callbackMethods = new HashMap<>();
+public class JavaInstrumenter extends Instrumenter {
     Set<String> threadMethods = new HashSet<>();
     private boolean fieldTracking = false;
     private boolean threadTracking = false;
     private boolean timeTracking = false;
-    private boolean isAndroidSlicer = false;
     private boolean isOriginal = false;
     private Long appSize = 0L;
     JSONObject staticLog = new JSONObject();
     GlobalCounter globalLineCounter = new GlobalCounter();
     Chain<SootClass> libClasses = null;
+
+
+    public JavaInstrumenter(Map<Pair<SootMethod,Unit>,String> tc) {
+        this.threadMethods.addAll(tc.values());
+    }
+
+
     void initialize(String pkgName2) {
-        Options.v().set_src_prec(Options.src_prec_apk);
         String pkgName = pkgName2.replace("'", "");
         if(pkgName.contains("/"))
         {
@@ -92,15 +99,7 @@ public class EfficientInstrumenter {
         Scene.v().addBasicClass("MandolineShutdown", SootClass.BODIES);
         libClasses = Scene.v().getLibraryClasses();
     }
-    
-    public EfficientInstrumenter(MultiMap<SootClass,AndroidCallbackDefinition> cm, Map<Pair<SootMethod,Unit>,String> tc) {
-        for (AndroidCallbackDefinition acd: cm.values()){
-            this.callbackMethods.put(acd.getTargetMethod().getDeclaringClass(), acd.getTargetMethod());
-        }
-        this.threadMethods.addAll(tc.values());
-    }
-   
-    
+
     void runMethodTransformationPack() {
         PackManager.v().getPack("wjpp").add(new Transform("wjpp.classadder", new SceneTransformer(){
             @Override
@@ -108,23 +107,6 @@ public class EfficientInstrumenter {
                 Scene.v().getSootClass("MandolineLogger").setApplicationClass();
                 Scene.v().getSootClass("MandolineWriter").setApplicationClass();
                 Scene.v().getSootClass("MandolineShutdown").setApplicationClass();
-                if (!isAndroidSlicer && !isOriginal) {
-                    for (SootClass cls: Scene.v().getClasses()) {
-                        try {
-                            if (cls.getSuperclass().getName().contains("Activity") || cls.getSuperclass().getName().contains("Service")) {
-                                Set<String> mSet = new HashSet<>();
-                                for (SootMethod m: cls.getMethods()){
-                                    mSet.add(m.getName());
-                                }
-                                if (!mSet.contains("onDestroy")) {
-                                    SootMethod onDestroyMethod = InstrumenterUtils.createDestroyMethod(cls, cls.getSuperclass().getMethodByName("onDestroy"));
-                                    cls.addMethod(onDestroyMethod);
-                                    mSet.add(onDestroyMethod.getName());
-                                }
-                            }
-                        } catch (Exception e) {}
-                    }
-                }
             }
         }));
 
@@ -175,25 +157,8 @@ public class EfficientInstrumenter {
                     if (!(u instanceof IdentityStmt)) {
                         methodSize += 1;
                     }
-                    if (isAndroidSlicer) {
-                        stmtSwitch.setClassAndMethod(cls, mtd);
-                        if (threadMethods.contains(b.getMethod().getSubSignature()) ||
-                            callbackMethods.values().contains(b.getMethod()) || 
-                            b.getMethod().getName().startsWith("on")) {
-                                stmtSwitch.setCallbackOrThread(true);
-                        }
-                        if(b.getMethod().getName().startsWith("on")) {
-                            stmtSwitch.setCallback(true);
-                        }
-                        stmtSwitch.setU(u);
-                        stmtSwitch.setB(b);
-                        stmtSwitch.setUnits(units);
-                        u.apply(stmtSwitch);
-                    } else {
-                        instrumentedFirst = basicBlockInstrument(b, cls, mtd, isOnDestroy, addedLocals, flags, units,
+                    instrumentedFirst = basicBlockInstrument(b, cls, mtd, isOnDestroy, addedLocals, flags, units,
                                                                 instrumentedUnits, instrumentedFirst, unitNumMap, taggedUnits, u);
-                    }
-                    
                 }
                 synchronized (appSize) {
                     appSize += methodSize;
@@ -240,13 +205,9 @@ public class EfficientInstrumenter {
                     boolean instrumentedFirst, LinkedHashMap<Unit, Long> unitNumMap, Map<Unit, Long> taggedUnits,
                     final Unit u) {
                 unitNumMap.put(u, -1L);
-                if (threadMethods.contains(b.getMethod().getSubSignature()) ||
-                    callbackMethods.values().contains(b.getMethod()) || 
-                    b.getMethod().getName().startsWith("on")) {
+                AnalysisLogger.log(true, "Inspecting: {}", u);
+                if (threadMethods.contains(b.getMethod().getSubSignature())) {
                         flags.isCallbackOrThread = true;
-                }
-                if (instrumentedUnits.contains(u)) {
-                    return instrumentedFirst;
                 }
                 if (isOnDestroy && !instrumentedFirst &&!(u instanceof IdentityStmt)) {
                     if (!instrumentedUnits.contains(u)) {
@@ -255,7 +216,9 @@ public class EfficientInstrumenter {
                     }
                     instrumentedFirst = true;
                 }
+                AnalysisLogger.log(true, "Here: {}", u);
                 if (u instanceof IfStmt) {
+                    AnalysisLogger.log(true, "If stmt!: {}", u);
                     if (!instrumentedFirst ) {
                         if (!instrumentedUnits.contains(u)) {
                             InstrumenterUtils.addPrint(u, units, b, addedLocals, cls, mtd, flags, instrumentedUnits, taggedUnits, globalLineCounter);
@@ -397,11 +360,10 @@ public class EfficientInstrumenter {
         if (args[0].contains("original")) {
             this.isOriginal = true;
         }
-        if (args[0].contains("androidslicer")) {
-            this.isAndroidSlicer = true;
-        }
         String staticLogFile = args[1];
+
         initialize(args[2]);
+
         runMethodTransformationPack();
         int argLen = args.length-3;
         String newArgs[] = new String [argLen];
@@ -427,6 +389,42 @@ public class EfficientInstrumenter {
             throw new Error("Failed to write static log file");
         }
         AnalysisLogger.log(true, "Number of Jimple statements (apkSize): {}", appSize.toString());
+        try {
+            if (new File(Slicer.SOOT_OUTPUT_STRING).isDirectory()) {
+                List<String> instrumentedClasses = new ArrayList<>();
+                listDirectory(new File(Slicer.SOOT_OUTPUT_STRING).getAbsolutePath()+1, Slicer.SOOT_OUTPUT_STRING, 0, instrumentedClasses);
+                Process p = Runtime.getRuntime().exec("jar cvf OUTJAR.jar " + String.join(" ", instrumentedClasses), null, new File(Slicer.SOOT_OUTPUT_STRING));
+                p.waitFor();
+                AnalysisLogger.log(true, "Ran command: {}", "jar cvf OUTJAR.jar " + String.join(" ", instrumentedClasses));
+                String [] pathnames = (new File(Slicer.SOOT_OUTPUT_STRING)).list();
+
+                // For each pathname in the pathnames array
+                for (String pathname : pathnames) {
+                    // Print the names of files and directories
+                    System.out.println(pathname);
+                }
+            }
+        } catch (IOException | InterruptedException e) {
+            AnalysisLogger.warn(true, "Couldn't create jar");
+        }
+        
+    }
+
+    public void listDirectory(String base, String dirPath, int level, List<String> files) {
+        File dir = new File(dirPath);
+        File[] firstLevelFiles = dir.listFiles();
+        if (firstLevelFiles != null && firstLevelFiles.length > 0) {
+            for (File aFile : firstLevelFiles) {
+                for (int i = 0; i < level; i++) {
+                    System.out.print("\t");
+                }
+                if (aFile.isDirectory()) {
+                    listDirectory(base, aFile.getAbsolutePath(), level + 1, files);
+                } else {
+                    files.add(aFile.getAbsolutePath().substring(base.length()));
+                }
+            }
+        }
     }
 }
 
@@ -733,6 +731,9 @@ class InstrumenterUtils {
         // for (SootMethod s:  Scene.v().getSootClass("MandolineLogger").getMethods()) {
         //     logger.info("Method: {}", s);
         // }
+
+        AnalysisLogger.log(true, "add print: {}", counter);
+
         SootMethod sbInit = Scene.v().getMethod("<java.lang.StringBuilder: void <init>()>");
         SootMethod sbAppendString = Scene.v().getMethod("<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>");
         SootMethod sbAppendLong = Scene.v().getMethod("<java.lang.StringBuilder: java.lang.StringBuilder append(long)>");
@@ -740,7 +741,6 @@ class InstrumenterUtils {
         SootMethod printerMethod = Scene.v().getSootClass("MandolineLogger").getMethod("void println(java.lang.String)");
         // SootMethod printerMethod = Scene.v().getSootClass("org.tinylog.Logger").getMethod("void info(java.lang.Object)");
         // SootMethod printerMethod = Scene.v().getSootClass("java.io.PrintStream").getMethod("void println(java.lang.String)");
-        // SootMethod printerMethod = Scene.v().getSootClass("android.util.Log").getMethod("int i(java.lang.String,java.lang.String)");
         Unit temp = null;
 
 

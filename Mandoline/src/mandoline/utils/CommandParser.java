@@ -27,6 +27,7 @@ public class CommandParser {
         options.addOption("t", "trace", true, "Execution trace"); // fileToParse
         options.addOption("sp", "slice-position", true, "starting statement for the slice"); // posToSlice
         options.addOption("sv", "slice-variables", true, "dash-joined list of starting variables to slice from"); // variables
+        options.addOption("fw", "forward-slice-position", true, "starting statement for the forward slice (for chopping)"); 
         options.addOption("sl", "static-log", true, "Static-log file path"); // static-log file
         options.addOption("o", "outDir", true, "Output directory"); // staticLogFile
         options.addOption("sd", "stub-droid", true, "Location of the StubDroid summaries"); // stubDroidPath
@@ -48,7 +49,7 @@ public class CommandParser {
                 formatter.printHelp(CMD_LINE_SYNTAX, options);
                 return parsed;
             }
-            String[] optionTags = {"m", "a", "p", "c", "pk", "ml", "t", "sp", "sv", "o", "sd", "tw", "im", "sl"};
+            String[] optionTags = {"m", "a", "p", "c", "pk", "ml", "t", "sp", "sv", "o", "sd", "tw", "im", "sl", "fw"};
             for (String opt: Arrays.asList(optionTags)) {
                 String value = cmd.getOptionValue(opt);
                 if (value != null) {
