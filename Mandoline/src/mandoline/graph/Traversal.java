@@ -479,36 +479,39 @@ public class Traversal {
             return aliasedArgs;
         }
         
+        AnalysisLogger.log(true, "Caller: {}", caller);
+        AnalysisLogger.log(true, "Source: {}", source);
+        AnalysisLogger.log(true, "starting alias set: {}", aliasSet);
         List<Value> args = callerExp.getArgs();
-        // AnalysisLogger.log(true, "Args: {}", args);
+        AnalysisLogger.log(true, "Args: {}", args);
         addReferenceVariableToArgs(callerExp, args);
-        // AnalysisLogger.log(true, "Args: {}", args);
-        int inc = 0;
-        if (icdg.getSetterCallbackMap().containsKey(new Pair<>(caller.getMethod(), caller.getUnit()))) {
-            inc = 1;
-        }
+        AnalysisLogger.log(true, "Args: {}", args);
+        // int inc = 0;
+        // if (icdg.getSetterCallbackMap().containsKey(new Pair<>(caller.getMethod(), caller.getUnit()))) {
+        //     inc = 1;
+        // }
         Map<Integer, AccessPath> argParamMap = getArgParamMap(source, caller, aliasSet);
-        // AnalysisLogger.log(true, "Params: {}", argParamMap);
+        AnalysisLogger.log(true, "Params: {}", argParamMap);
         int argPos = 0;
-        for(Value arg: args) {
-            for (AccessPath ap: aliasSet) {
-                if (ap.getPath().isEmpty()) {
-                    continue;
-                }
-                if (!callerExp.getMethod().isStatic() && !ap.getBase().getO1().startsWith("r")) {
-                    inc = 1;
-                }
-                String start = ap.getBase().getO1().substring(0, 1);
-                // AnalysisLogger.log(true, "Start: {}", start);
-                AccessPath p = new AccessPath(start+String.valueOf(argPos), arg.getType(), ap.getUsedLine(), ap.getDefinedLine(), caller);
-                // AnalysisLogger.log(true, "P: {}", p);
-                p.add(ap.getFields(), ap.getFieldsTypes(), caller);
-                // AnalysisLogger.log(true, "P: {}", p);
-                translateVaribleToCaller(caller, aliasedArgs, args, inc, argPos, ap, p);
-                // AnalysisLogger.log(true, "AliasedArgs: {}", aliasedArgs);
-            }
-            argPos++;
-        }
+        // for(Value arg: args) {
+        //     for (AccessPath ap: aliasSet) {
+        //         if (ap.getPath().isEmpty()) {
+        //             continue;
+        //         }
+        //         if (!callerExp.getMethod().isStatic() && !ap.getBase().getO1().startsWith("r")) {
+        //             inc = 1;
+        //         }
+        //         String start = ap.getBase().getO1().substring(0, 1);
+        //         AnalysisLogger.log(true, "Start: {}", start);
+        //         AccessPath p = new AccessPath(start+String.valueOf(argPos), arg.getType(), ap.getUsedLine(), ap.getDefinedLine(), caller);
+        //         AnalysisLogger.log(true, "P: {}", p);
+        //         p.add(ap.getFields(), ap.getFieldsTypes(), caller);
+        //         AnalysisLogger.log(true, "P: {}", p);
+        //         translateVaribleToCaller(caller, aliasedArgs, args, inc, argPos, ap, p);
+        //         AnalysisLogger.log(true, "AliasedArgs first loop: {}", aliasedArgs);
+        //     }
+        //     argPos++;
+        // }
 
         for (argPos = 0; argPos < args.size(); argPos++) {
             AccessPath param = argParamMap.get(argPos);
@@ -516,21 +519,22 @@ public class Traversal {
                 AccessPath p = new AccessPath(args.get(argPos).toString(), args.get(argPos).getType(), param.getUsedLine(), param.getDefinedLine(), caller);
                 p.add(param.getFields(), param.getFieldsTypes(), caller);
                 aliasedArgs.add(p);
+                AnalysisLogger.log(true, "AliasedArgs second loop: {}", aliasedArgs);
             }
         }
-        // AnalysisLogger.log(true, "AliasedArgs: {}", aliasedArgs);
+        AnalysisLogger.log(true, "AliasedArgs: {}", aliasedArgs);
         // AliasSet removed = new AliasSet();
         // for (AccessPath aliasedArg: aliasedArgs) {
         //     boolean foundMatch = false;
         //     for(Value arg: args) {
-                // AnalysisLogger.log(true, "Comparing: {} to {}", aliasedArg, arg);
+        //         AnalysisLogger.log(true, "Comparing: {} to {}", aliasedArg, arg);
         //         if (aliasedArg.startsWith(arg.toString())) {
         //             foundMatch = true;
         //             break;
         //         }
         //     }
         //     if (!foundMatch) {
-                // AnalysisLogger.log(true, "Will remove: {}", aliasedArg);
+        //         AnalysisLogger.log(true, "Will remove: {}", aliasedArg);
         //         removed.add(aliasedArg);
         //     }
         // }

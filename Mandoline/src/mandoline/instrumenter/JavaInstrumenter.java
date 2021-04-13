@@ -77,10 +77,12 @@ public class JavaInstrumenter extends Instrumenter {
     JSONObject staticLog = new JSONObject();
     GlobalCounter globalLineCounter = new GlobalCounter();
     Chain<SootClass> libClasses = null;
+    String jarName;
 
 
-    public JavaInstrumenter(Map<Pair<SootMethod,Unit>,String> tc) {
+    public JavaInstrumenter(String jarName, Map<Pair<SootMethod,Unit>,String> tc) {
         this.threadMethods.addAll(tc.values());
+        this.jarName = jarName;
     }
 
 
@@ -393,9 +395,9 @@ public class JavaInstrumenter extends Instrumenter {
             if (new File(Slicer.SOOT_OUTPUT_STRING).isDirectory()) {
                 List<String> instrumentedClasses = new ArrayList<>();
                 listDirectory(new File(Slicer.SOOT_OUTPUT_STRING).getAbsolutePath()+1, Slicer.SOOT_OUTPUT_STRING, 0, instrumentedClasses);
-                Process p = Runtime.getRuntime().exec("jar cvf OUTJAR.jar " + String.join(" ", instrumentedClasses), null, new File(Slicer.SOOT_OUTPUT_STRING));
+                Process p = Runtime.getRuntime().exec("jar cvf " + jarName + " " + String.join(" ", instrumentedClasses), null, new File(Slicer.SOOT_OUTPUT_STRING));
                 p.waitFor();
-                AnalysisLogger.log(true, "Ran command: {}", "jar cvf OUTJAR.jar " + String.join(" ", instrumentedClasses));
+                AnalysisLogger.log(true, "Ran command: {}", "jar cvf " + jarName + " " + String.join(" ", instrumentedClasses));
                 String [] pathnames = (new File(Slicer.SOOT_OUTPUT_STRING)).list();
 
                 // For each pathname in the pathnames array

@@ -39,11 +39,11 @@ public class DynamicSlice
 
     public DynamicSlice(){
         super();
-        String s = "";
-        for (StackTraceElement ste: Thread.currentThread().getStackTrace())  {
-            s += ste.toString();
-        }
-        AnalysisLogger.log(true, "Called at {}", s);
+        // String s = "";
+        // for (StackTraceElement ste: Thread.currentThread().getStackTrace())  {
+        //     s += ste.toString();
+        // }
+        // AnalysisLogger.log(true, "Called at {}", s);
     }
 
     @Override
@@ -64,7 +64,7 @@ public class DynamicSlice
         // chopGraph.addVertex(value.getO1().getLineNo());
         
         if (key.getO1().getLineNo() != value.getO1().getLineNo()) {
-            AnalysisLogger.log(true, "Added edge {} --> {}", key.getO1().getLineNo(), value.getO1().getLineNo());
+            // AnalysisLogger.log(true, "Added edge {} --> {}", key.getO1().getLineNo(), value.getO1().getLineNo());
             chopGraph.addEdge(key.getO1().getLineNo(), value.getO1().getLineNo());
         }
         
@@ -78,7 +78,7 @@ public class DynamicSlice
 
     public void addMethod(Integer pos, Integer method){
         methodOfStatement.put(pos, method);
-        AnalysisLogger.log(true, "Added Method {} --> {}", pos, method);
+        // AnalysisLogger.log(true, "Added Method {} --> {}", pos, method);
     }
 
     public Integer getOrder(Pair<StatementInstance, AccessPath> key) {

@@ -314,7 +314,8 @@ public class Slicer {
                 if (pathApk.endsWith(".apk")) {
                     instrumenter = new AndroidInstrumenter(slicer.callbackMethods, slicer.threadCallers);
                 } else if (pathApk.endsWith(".jar")) {
-                    instrumenter = new JavaInstrumenter(slicer.threadCallers);
+                    String jarName = outDir + File.separator + new File(pathApk).getName().replace(".jar", "_" +mode + ".jar");
+                    instrumenter = new JavaInstrumenter(jarName, slicer.threadCallers);
                 } else {
                     throwParseException("Not and apk or jar file!");
                 }
