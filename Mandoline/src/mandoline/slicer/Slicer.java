@@ -2,6 +2,10 @@ package mandoline.slicer;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
+import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -142,7 +146,12 @@ public class Slicer {
             } catch (IOException e) {
                 AnalysisLogger.error("Unable to read trace file {}", e);
             }
-            Slicer slicer = new Slicer(pathApk, platformPath, callbackFile);
+            String sootClassPath = commands.get("scp");
+            if (sootClassPath == null) {
+                sootClassPath = ".";
+            }
+
+            Slicer slicer = new Slicer(pathApk, platformPath, callbackFile, sootClassPath);
             Slicer.instance = slicer;
             ICDG icdg = new ICDG(slicer.setterCallbackMap, slicer.callbackMethods, slicer.threadCallers);
             icdg.createDCFG(trs);
@@ -290,15 +299,20 @@ public class Slicer {
                 throwParseExceptionIfNull(mandolineLoggerJar, "mandoline logger jar path not provided");
             }
             String instrumentOptions = parseInstrumentationMode(instrumenterMode);
+            
+            String sootClassPath = commands.get("scp");
+            if (sootClassPath == null) {
+                sootClassPath = ".";
+            }
 
-
-            Slicer slicer = new Slicer(pathApk, platformPath, callbackFile);
+            Slicer slicer = new Slicer(pathApk, platformPath, callbackFile, sootClassPath);
             String[] instrumenterArgs = new String[0];
             if (pathApk.endsWith(".apk")) {
                 String[] instrumenterArgsTemp = {instrumentOptions, staticLogFile, packageName, "-w", "-allow-phantom-refs", "-process-multiple-dex", "-android-jars", platformPath, "-src-prec", "apk", "-output-format", "dex", "-process-dir", pathApk, "-process-dir", mandolineLoggerJar};
                 instrumenterArgs = instrumenterArgsTemp;
             } else if (pathApk.endsWith(".jar")) {
-                String[] instrumenterArgsTemp = {instrumentOptions, staticLogFile, packageName, "-cp", ".", "-pp", "-process-dir", pathApk, "-process-dir", mandolineLoggerJar};
+
+                String[] instrumenterArgsTemp = {instrumentOptions, staticLogFile, packageName, "-cp", sootClassPath, "-pp", "-process-dir", pathApk, "-process-dir", mandolineLoggerJar};
                 instrumenterArgs = instrumenterArgsTemp;
             } else {
                 throwParseException("Not and apk or jar file!");
@@ -387,25 +401,28 @@ public class Slicer {
         }
     }
 
-    public Slicer(String apkPath, String platFormDir, String callbackFile) {
+    public Slicer(String apkPath, String platFormDir, String callbackFile, String sootClassPath) {
         AnalysisCache.reset();
         if (apkPath.endsWith(".apk")) {
             prepareProcessingApk(apkPath, platFormDir, callbackFile);
         } else if (apkPath.endsWith(".jar")) {
-            prepareProcessingJAR(apkPath);
+            prepareProcessingJAR(apkPath, sootClassPath);
         } else {
             throwParseException("Not and apk or jar file!");
         }
         
     }
 
-    private void prepareProcessingJAR(String apkPath) {
+    private void prepareProcessingJAR(String apkPath, String sootClassPath) {
         AnalysisLogger.log(true, "Processing JAR: {}", apkPath);
+        AnalysisLogger.log(true, "ClassPath: {}", sootClassPath);
         // String[] sootArgs = {"-cp", ".", "-pp", "-process-dir", apkPath};
         // soot.Main.main(sootArgs);
         soot.G.reset();
         Options.v().set_process_dir(Arrays.asList(apkPath));
         Options.v().set_output_format(Options.output_format_jimple);
+        Options.v().set_soot_classpath(sootClassPath);
+        Options.v().set_prepend_classpath(true);
         // Options.v().set_whole_program(true);
         // Options.v().set_allow_phantom_refs(true);
         // Options.v().setPhaseOption("cg.spark", "on");

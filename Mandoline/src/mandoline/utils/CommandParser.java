@@ -33,6 +33,7 @@ public class CommandParser {
         options.addOption("sd", "stub-droid", true, "Location of the StubDroid summaries"); // stubDroidPath
         options.addOption("tw", "taint-wrapper", true, "Location of the FlowDroid's taint-wrapper list"); // taintWrapperPath
         options.addOption("im", "instrumenter-mode", true, "Instrumentation mode, m for mandoline, md for for mandoline-dynamic, append j at the end of the option to print the jimple");
+        options.addOption("scp", "soot-class-path", true, "Soot class path if soot compains about missing dependencies"); // scp
     }
 
 
@@ -49,7 +50,7 @@ public class CommandParser {
                 formatter.printHelp(CMD_LINE_SYNTAX, options);
                 return parsed;
             }
-            String[] optionTags = {"m", "a", "p", "c", "pk", "ml", "t", "sp", "sv", "o", "sd", "tw", "im", "sl", "fw"};
+            String[] optionTags = {"m", "a", "p", "c", "pk", "ml", "t", "sp", "sv", "o", "sd", "tw", "im", "sl", "fw", "scp"};
             for (String opt: Arrays.asList(optionTags)) {
                 String value = cmd.getOptionValue(opt);
                 if (value != null) {
