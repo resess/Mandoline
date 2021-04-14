@@ -20,6 +20,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 
+import com.google.common.base.Optional;
+
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.io.FileUtils;
 import org.jgrapht.Graphs;
@@ -40,6 +42,8 @@ import mandoline.utils.AnalysisCache;
 import mandoline.utils.AnalysisLogger;
 import mandoline.utils.CommandParser;
 import soot.Local;
+import soot.ModulePathSourceLocator;
+import soot.ModuleScene;
 import soot.PackManager;
 import soot.Scene;
 import soot.SootClass;
@@ -312,7 +316,7 @@ public class Slicer {
                 instrumenterArgs = instrumenterArgsTemp;
             } else if (pathApk.endsWith(".jar")) {
 
-                String[] instrumenterArgsTemp = {instrumentOptions, staticLogFile, packageName, "-cp", sootClassPath, "-pp", "-process-dir", pathApk, "-process-dir", mandolineLoggerJar};
+                String[] instrumenterArgsTemp = {instrumentOptions, staticLogFile, packageName, "-cp", "VIRTUAL_FS_FOR_JDK", "-pp", "-process-dir", pathApk, "-process-dir", mandolineLoggerJar};
                 instrumenterArgs = instrumenterArgsTemp;
             } else {
                 throwParseException("Not and apk or jar file!");
@@ -324,16 +328,16 @@ public class Slicer {
                 terminate(outDir, instrumenterMode, startTime);
                 shouldTerminate = true;
             } else {
-                Instrumenter instrumenter = new Instrumenter();
                 if (pathApk.endsWith(".apk")) {
-                    instrumenter = new AndroidInstrumenter(slicer.callbackMethods, slicer.threadCallers);
+                    Instrumenter instrumenter = new AndroidInstrumenter(slicer.callbackMethods, slicer.threadCallers);
+                    instrumenter.start(instrumenterArgs);
                 } else if (pathApk.endsWith(".jar")) {
                     String jarName = outDir + File.separator + new File(pathApk).getName().replace(".jar", "_" +mode + ".jar");
-                    instrumenter = new JavaInstrumenter(jarName, slicer.threadCallers);
+                    Instrumenter instrumenter = new JavaInstrumenter(jarName, slicer.threadCallers);
+                    instrumenter.start(instrumentOptions, staticLogFile, pathApk, mandolineLoggerJar);
                 } else {
                     throwParseException("Not and apk or jar file!");
                 }
-                instrumenter.start(instrumenterArgs);
                 terminate(outDir, instrumenterMode, startTime);
                 shouldTerminate = true;
             }
@@ -414,15 +418,31 @@ public class Slicer {
     }
 
     private void prepareProcessingJAR(String apkPath, String sootClassPath) {
+        
         AnalysisLogger.log(true, "Processing JAR: {}", apkPath);
         AnalysisLogger.log(true, "ClassPath: {}", sootClassPath);
-        // String[] sootArgs = {"-cp", ".", "-pp", "-process-dir", apkPath};
-        // soot.Main.main(sootArgs);
+        
+        
         soot.G.reset();
+        Options.v().set_prepend_classpath(true);
+        Options.v().set_soot_classpath("VIRTUAL_FS_FOR_JDK");
+        // String modulePath = "/Users/khaledea/data/tools/jdk-16.jdk/Contents/Home/lib/jrt-fs.jar";
+        // Map<String, List<String>> map = ModulePathSourceLocator.v().getClassUnderModulePath(modulePath);
+        // for (String module : map.keySet()) {
+        //     for (String klass : map.get(module)) {
+        //         // AnalysisLogger.log(true, "Trying to load: {}", klass);
+        //         loadClassToSoot(klass, module);
+        //     }
+        // }
+        String [] excList = {"org.slf4j.impl.*"};
+        List<String> excludePackagesList = Arrays.asList(excList);
+        Options.v().set_exclude(excludePackagesList);
+        Options.v().set_no_bodies_for_excluded(true);
+        Options.v().set_allow_phantom_refs(true);
         Options.v().set_process_dir(Arrays.asList(apkPath));
         Options.v().set_output_format(Options.output_format_jimple);
-        Options.v().set_soot_classpath(sootClassPath);
-        Options.v().set_prepend_classpath(true);
+        
+        
         // Options.v().set_whole_program(true);
         // Options.v().set_allow_phantom_refs(true);
         // Options.v().setPhaseOption("cg.spark", "on");
@@ -430,6 +450,17 @@ public class Slicer {
         PackManager.v().runPacks();
 
     }
+
+    public static void loadClassToSoot(String name, String module) {
+        try {
+            SootClass c = ModuleScene.v().loadClassAndSupport(name, Optional.of(module));
+            c.setApplicationClass();
+            AnalysisLogger.log(true, "Loaded Class: {}", name);
+        } catch (Exception e) {
+            AnalysisLogger.log(true, "Can't load class: {}", name);
+        }
+        
+   }
 
     private void prepareProcessingApk(String apkPath, String platFormDir, String callbackFile) {
         AnalysisLogger.log(true, "Processing APK: {}", apkPath);

@@ -86,19 +86,21 @@ public class JavaInstrumenter extends Instrumenter {
     }
 
 
-    void initialize(String pkgName2) {
-        String pkgName = pkgName2.replace("'", "");
-        if(pkgName.contains("/"))
-        {
-            String[] pkgNameArray = pkgName.split("/");
-            pkgName = pkgNameArray[pkgNameArray.length-1];
-        }
-        System.out.println ("pkg: "+pkgName);
+    void initialize(String apkPath, String mandolineJar) {
         Scene.v().addBasicClass("java.io.PrintStream",SootClass.SIGNATURES);
         Scene.v().addBasicClass("java.lang.System",SootClass.SIGNATURES);
         Scene.v().addBasicClass("MandolineLogger", SootClass.BODIES);
         Scene.v().addBasicClass("MandolineWriter", SootClass.BODIES);
         Scene.v().addBasicClass("MandolineShutdown", SootClass.BODIES);
+        Options.v().set_prepend_classpath(true);
+        Options.v().set_soot_classpath("VIRTUAL_FS_FOR_JDK");
+        String [] excList = {"org.slf4j.impl.*"};
+        List<String> excludePackagesList = Arrays.asList(excList);
+        Options.v().set_exclude(excludePackagesList);
+        Options.v().set_no_bodies_for_excluded(true);
+        Options.v().set_allow_phantom_refs(true);
+        Options.v().set_process_dir(Arrays.asList(apkPath, mandolineJar));
+        Options.v().set_output_format(Options.output_format_jimple);
         libClasses = Scene.v().getLibraryClasses();
     }
 
@@ -207,7 +209,7 @@ public class JavaInstrumenter extends Instrumenter {
                     boolean instrumentedFirst, LinkedHashMap<Unit, Long> unitNumMap, Map<Unit, Long> taggedUnits,
                     final Unit u) {
                 unitNumMap.put(u, -1L);
-                AnalysisLogger.log(true, "Inspecting: {}", u);
+                // AnalysisLogger.log(true, "Inspecting: {}", u);
                 if (threadMethods.contains(b.getMethod().getSubSignature())) {
                         flags.isCallbackOrThread = true;
                 }
@@ -218,9 +220,9 @@ public class JavaInstrumenter extends Instrumenter {
                     }
                     instrumentedFirst = true;
                 }
-                AnalysisLogger.log(true, "Here: {}", u);
+                // AnalysisLogger.log(true, "Here: {}", u);
                 if (u instanceof IfStmt) {
-                    AnalysisLogger.log(true, "If stmt!: {}", u);
+                    // AnalysisLogger.log(true, "If stmt!: {}", u);
                     if (!instrumentedFirst ) {
                         if (!instrumentedUnits.contains(u)) {
                             InstrumenterUtils.addPrint(u, units, b, addedLocals, cls, mtd, flags, instrumentedUnits, taggedUnits, globalLineCounter);
@@ -347,33 +349,27 @@ public class JavaInstrumenter extends Instrumenter {
         
     }
 
-    public void start (String args[]) {
+    @Override
+    public void start (String options, String staticLogFile, String apkPath, String mandolineJar) {
         soot.G.reset();
-        AnalysisLogger.log(true, "Soot args: {}", Arrays.asList(args));
-        if (args[0].contains("field")) {
+        if (options.contains("field")) {
             this.fieldTracking = true;
         }
-        if (args[0].contains("thread")) {
+        if (options.contains("thread")) {
             this.threadTracking = true;
         }
-        if (args[0].contains("time")) {
+        if (options.contains("time")) {
             this.timeTracking = true;
         }
-        if (args[0].contains("original")) {
+        if (options.contains("original")) {
             this.isOriginal = true;
         }
-        String staticLogFile = args[1];
 
-        initialize(args[2]);
-
+        initialize(apkPath, mandolineJar);
         runMethodTransformationPack();
-        int argLen = args.length-3;
-        String newArgs[] = new String [argLen];
-        for (int ii = 3; ii < args.length; ii++) {
-            newArgs[ii-3]=args[ii];
-        }
-        AnalysisLogger.log(true, "Soot args: {}", Arrays.asList(newArgs));
-        soot.Main.main(newArgs);
+        Scene.v().loadNecessaryClasses();
+        PackManager.v().runPacks();
+        
         File logFile = new File(staticLogFile);
         try {
             logFile.delete();
@@ -734,7 +730,7 @@ class InstrumenterUtils {
         //     logger.info("Method: {}", s);
         // }
 
-        AnalysisLogger.log(true, "add print: {}", counter);
+        // AnalysisLogger.log(true, "add print: {}", counter);
 
         SootMethod sbInit = Scene.v().getMethod("<java.lang.StringBuilder: void <init>()>");
         SootMethod sbAppendString = Scene.v().getMethod("<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>");
