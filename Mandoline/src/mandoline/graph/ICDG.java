@@ -92,13 +92,10 @@ public class ICDG {
         
         ins = new StatementInstance[len];
         Chain<SootClass> chain = Scene.v().getApplicationClasses();
-        AnalysisLogger.log(true, "All classes: {}", chain);
         Map<String, SootMethod> allMethods = createMethodsMap(chain);
-        AnalysisLogger.log(true, "All methods: {}", allMethods);
 
         for (String key: mapTrace.keySet()) {
             SootMethod mt = allMethods.get(key);
-            AnalysisLogger.log(true, "Checking method: {}", mt);
             try {
                 if(mt.getActiveBody()==null) { 
                     continue;
@@ -110,7 +107,6 @@ public class ICDG {
                 continue;
             }
             Body body = mt.getActiveBody();
-            AnalysisLogger.log(true, "Body: {}", body);
             PatchingChain<Unit> units = body.getUnits();
             Map <String, Unit> unitString = new LinkedHashMap<>();
             Map<String, Pair<SootMethod, Unit>> settersInThisMethod = new HashMap<>();
@@ -182,7 +178,7 @@ public class ICDG {
             }
         }
         try {
-            StatementInstance iu = new StatementInstance(mt, closestUnit, key1, mapThreadId.get(key), fieldMap.get(key1));
+            StatementInstance iu = new StatementInstance(mt, closestUnit, key1, mapThreadId.get(key), fieldMap.get(key1), closestUnit.getJavaSourceStartLineNumber(), mt.getDeclaringClass().getFilePath());
             ins[key1] = iu;
         } catch (Exception e) {
             AnalysisLogger.warn(true, "Cannot create instruction {}", temp.get(key1));
@@ -196,7 +192,7 @@ public class ICDG {
         String us = temp.get(key1);
         Unit unit = unitString.get(us);
         try {
-            StatementInstance iu = new StatementInstance(mt, unit, key1, mapThreadId.get(key), fieldMap.get(key1));
+            StatementInstance iu = new StatementInstance(mt, unit, key1, mapThreadId.get(key), fieldMap.get(key1), unit.getJavaSourceStartLineNumber(), mt.getDeclaringClass().getFilePath());
             ins[key1] = iu;
             if (settersInThisMethod.containsKey(us)) {
                 setterLineMap.put(settersInThisMethod.get(us), key1);

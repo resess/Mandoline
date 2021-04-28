@@ -23,9 +23,11 @@ public class StatementInstance {
     private Long fieldId;
     private Type classType = null;
     private String unitString = null;
+    private Integer javaSourceLineNo = -1;
+    private String javaSourceFile = "UNKNOWN";
 
 
-    public StatementInstance(SootMethod sm, Unit u, int lineNo, Long tid, Long fieldId) {
+    public StatementInstance(SootMethod sm, Unit u, int lineNo, Long tid, Long fieldId, Integer javaSourceLineNo, String javaSourceFile) {
         this.sm = sm;
         this.u = u;
         this.lineNo = lineNo;
@@ -40,6 +42,8 @@ public class StatementInstance {
             this.fieldId = fieldId;
         }
         this.classType = this.sm.getDeclaringClass().getType();
+        this.javaSourceLineNo = javaSourceLineNo;
+        this.javaSourceFile = javaSourceFile;
     }
 
     public Type getClassType() {
@@ -78,6 +82,8 @@ public class StatementInstance {
             sb.append(", ");
             sb.append((u==null? "null":u.toString().replace(",", ";")));
             sb.append((fieldId==null? "":":FIELD:"+fieldId.toString()));
+            sb.append((javaSourceLineNo==-1? "":":LINENO:"+javaSourceLineNo.toString()));
+            sb.append((javaSourceFile.equals("")? "":":FILE:"+javaSourceFile));
             stringRepresentation = sb.toString();
         }
         return stringRepresentation;

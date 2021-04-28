@@ -1,6 +1,7 @@
 package mandoline.slicer;
 
 import java.util.ArrayDeque;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -18,15 +19,20 @@ import soot.jimple.Stmt;
 public class SlicingWorkingSet extends ArrayDeque<Pair<StatementInstance, AccessPath>> {
     
     private static final long serialVersionUID = 1L;
+    private boolean stopSlicing;
 
     DynamicSlice dynamicSlice = new DynamicSlice();
 
-    SlicingWorkingSet(){
-
+    SlicingWorkingSet(boolean stopSlicing){
+        this.stopSlicing = stopSlicing;
     }
 
     public DynamicSlice getDynamicSlice() {
         return dynamicSlice;
+    }
+
+    public void setStopSlicing(boolean stopSlicing) {
+        this.stopSlicing = stopSlicing;
     }
 
     void addMultiple(StatementInstance iu, Set<AccessPath> variables){
@@ -37,10 +43,11 @@ public class SlicingWorkingSet extends ArrayDeque<Pair<StatementInstance, Access
     }
 
     void add(StatementInstance iu, AccessPath var, Pair<StatementInstance, AccessPath> source){
-        
         Pair<StatementInstance, AccessPath> frontier = new Pair<>(iu, var);
-        if (!this.dynamicSlice.containsKey(frontier)) {
-            this.add(frontier);
+        if (!this.stopSlicing) {
+            if (!this.dynamicSlice.containsKey(frontier)) {
+                this.add(frontier);
+            }
         }
         dynamicSlice.put(frontier, source);
     }
@@ -105,5 +112,15 @@ public class SlicingWorkingSet extends ArrayDeque<Pair<StatementInstance, Access
         if (var.isEmpty()) {
             this.add(si, var, source);
         }
+    }
+
+    public void removeAllWithStmt(StatementInstance dom) {
+        Set<Pair<StatementInstance, AccessPath>> toRemove = new LinkedHashSet<>();
+        for (Pair<StatementInstance, AccessPath> p : this) {
+            if (p.getO1().equals(dom)) {
+                toRemove.add(p);
+            }
+        }
+        this.removeAll(toRemove);
     }
 }

@@ -34,6 +34,11 @@ public class CommandParser {
         options.addOption("tw", "taint-wrapper", true, "Location of the FlowDroid's taint-wrapper list"); // taintWrapperPath
         options.addOption("im", "instrumenter-mode", true, "Instrumentation mode, m for mandoline, md for for mandoline-dynamic, append j at the end of the option to print the jimple");
         options.addOption("scp", "soot-class-path", true, "Soot class path if soot compains about missing dependencies"); // scp
+        options.addOption("data", "data-only", false, "Track data-flow dependence only"); // data
+        options.addOption("ctrl", "Control-only", false, "Track control dependence only"); // data
+        options.addOption("sfc", "skip-first-control", false, "Skip first control-flow depenence"); // data
+        options.addOption("instr", "instrumentation-packages", true, "Packages to instrument"); // data
+        options.addOption("once", "slice-once", false, "Get immediate dependence only"); // data
     }
 
 
@@ -50,12 +55,24 @@ public class CommandParser {
                 formatter.printHelp(CMD_LINE_SYNTAX, options);
                 return parsed;
             }
-            String[] optionTags = {"m", "a", "p", "c", "pk", "ml", "t", "sp", "sv", "o", "sd", "tw", "im", "sl", "fw", "scp"};
+            String[] optionTags = {"m", "a", "p", "c", "pk", "ml", "t", "sp", "sv", "o", "sd", "tw", "im", "sl", "fw", "scp", "instr"};
             for (String opt: Arrays.asList(optionTags)) {
                 String value = cmd.getOptionValue(opt);
                 if (value != null) {
                     parsed.put(opt, value);
                 }
+            }
+            if (cmd.hasOption("data")) {
+                parsed.put("data", "True");
+            }
+            if (cmd.hasOption("ctrl")) {
+                parsed.put("ctrl", "True");
+            }
+            if (cmd.hasOption("sfc")) {
+                parsed.put("skip-first-ctrl", "True");
+            }
+            if (cmd.hasOption("once")) {
+                parsed.put("slice-once", "True");
             }
         } catch (ParseException e) {
             HelpFormatter formatter = new HelpFormatter();

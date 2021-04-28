@@ -85,6 +85,7 @@ public class AndroidInstrumenter extends Instrumenter{
             pkgName = pkgNameArray[pkgNameArray.length-1];
         }
         System.out.println ("pkg: "+pkgName);
+        createInstrumentationPackagesList();
         Scene.v().addBasicClass("java.io.PrintStream",SootClass.SIGNATURES);
         Scene.v().addBasicClass("java.lang.System",SootClass.SIGNATURES);
         Scene.v().addBasicClass("MandolineLogger", SootClass.BODIES);
@@ -93,11 +94,12 @@ public class AndroidInstrumenter extends Instrumenter{
         libClasses = Scene.v().getLibraryClasses();
     }
     
-    public AndroidInstrumenter(MultiMap<SootClass,AndroidCallbackDefinition> cm, Map<Pair<SootMethod,Unit>,String> tc) {
+    public AndroidInstrumenter(String instrumentationPaths, MultiMap<SootClass,AndroidCallbackDefinition> cm, Map<Pair<SootMethod,Unit>,String> tc) {
         for (AndroidCallbackDefinition acd: cm.values()){
             this.callbackMethods.put(acd.getTargetMethod().getDeclaringClass(), acd.getTargetMethod());
         }
         this.threadMethods.addAll(tc.values());
+        this.instrumentationPaths = instrumentationPaths;
     }
    
     
@@ -140,6 +142,15 @@ public class AndroidInstrumenter extends Instrumenter{
                     return;
                 }
                 if (cls.getName().contains("MandolineShutdown")) {
+                    return;
+                }
+                boolean skip = !AndroidInstrumenter.this.instrumentationPackagesList.isEmpty();
+                for (String includedPkg: AndroidInstrumenter.this.instrumentationPackagesList) {
+                    if (cls.getPackageName().startsWith(includedPkg) ) {
+                        skip = false;
+                    }
+                }
+                if (skip) {
                     return;
                 }
 

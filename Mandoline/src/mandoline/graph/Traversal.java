@@ -67,6 +67,9 @@ public class Traversal {
         StatementMap chunk;
         if (iu.isReturn()) {
             chunk = iu.getReturnChunk();
+            if (chunk == null) {
+                chunk = getChunk(iu.getLineNo());
+            }
         } else {
             chunk = getChunk(iu.getLineNo());
         }
@@ -479,19 +482,13 @@ public class Traversal {
             return aliasedArgs;
         }
         
-        AnalysisLogger.log(true, "Caller: {}", caller);
-        AnalysisLogger.log(true, "Source: {}", source);
-        AnalysisLogger.log(true, "starting alias set: {}", aliasSet);
         List<Value> args = callerExp.getArgs();
-        AnalysisLogger.log(true, "Args: {}", args);
         addReferenceVariableToArgs(callerExp, args);
-        AnalysisLogger.log(true, "Args: {}", args);
         // int inc = 0;
         // if (icdg.getSetterCallbackMap().containsKey(new Pair<>(caller.getMethod(), caller.getUnit()))) {
         //     inc = 1;
         // }
         Map<Integer, AccessPath> argParamMap = getArgParamMap(source, caller, aliasSet);
-        AnalysisLogger.log(true, "Params: {}", argParamMap);
         int argPos = 0;
         // for(Value arg: args) {
         //     for (AccessPath ap: aliasSet) {
@@ -519,10 +516,8 @@ public class Traversal {
                 AccessPath p = new AccessPath(args.get(argPos).toString(), args.get(argPos).getType(), param.getUsedLine(), param.getDefinedLine(), caller);
                 p.add(param.getFields(), param.getFieldsTypes(), caller);
                 aliasedArgs.add(p);
-                AnalysisLogger.log(true, "AliasedArgs second loop: {}", aliasedArgs);
             }
         }
-        AnalysisLogger.log(true, "AliasedArgs: {}", aliasedArgs);
         // AliasSet removed = new AliasSet();
         // for (AccessPath aliasedArg: aliasedArgs) {
         //     boolean foundMatch = false;

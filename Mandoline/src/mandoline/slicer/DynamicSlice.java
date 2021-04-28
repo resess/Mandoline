@@ -139,6 +139,10 @@ public class DynamicSlice
         return super.hashCode();
     }
 
+    public SimpleDirectedWeightedGraph<Integer, DefaultWeightedEdge> getChopGraph() {
+        return chopGraph;
+    }
+
     public DynamicSlice chop(int forwSlicePos, ICDG icdg) {
 
         AnalysisLogger.log(true, "Graph:");

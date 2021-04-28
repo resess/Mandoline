@@ -10,11 +10,14 @@ import soot.toolkits.graph.pdg.EnhancedUnitGraph;
 import soot.toolkits.graph.pdg.HashMutablePDG;
 import soot.toolkits.graph.pdg.PDGNode;
 import soot.toolkits.graph.pdg.PDGRegion;
-
+import soot.SootMethod;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 
 public class ControlDominator{
 
+    static Set<SootMethod> outOfMemMethods = new LinkedHashSet<>();
     private ControlDominator() {
         throw new IllegalStateException("Utility class");
     }
@@ -27,6 +30,9 @@ public class ControlDominator{
 
     public static StatementInstance getControlDominator(StatementInstance stmt, StatementMap chunk){
         StatementInstance candidateIu = null;
+        if (outOfMemMethods.contains(stmt.getMethod())) {
+            return candidateIu;
+        }
         try {
             EnhancedUnitGraph cug = new EnhancedUnitGraph(stmt.getMethod().getActiveBody());
             HashMutablePDG pdg = new HashMutablePDG(cug);
@@ -36,7 +42,10 @@ public class ControlDominator{
                     candidateIu = matchControlDom(stmt, chunk, pdg, candidateIu, p);
                 }
             }
-        } catch (Exception e) {
+        } catch (OutOfMemoryError e1) {
+            AnalysisLogger.warn(true, "Could not compute control dom");
+            outOfMemMethods.add(stmt.getMethod());
+        } catch (Exception e2) {
             AnalysisLogger.warn(true, "Could not compute control dom");
         }
         return candidateIu;

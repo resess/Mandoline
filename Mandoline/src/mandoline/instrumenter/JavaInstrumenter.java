@@ -2,6 +2,8 @@ package mandoline.instrumenter;
 
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -11,9 +13,11 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
 import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import soot.Body;
@@ -59,6 +63,8 @@ import soot.jimple.InvokeExpr;
 import soot.jimple.StaticFieldRef;
 import soot.jimple.Stmt;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -79,29 +85,33 @@ public class JavaInstrumenter extends Instrumenter {
     Chain<SootClass> libClasses = null;
     String jarName;
 
-
-    public JavaInstrumenter(String jarName, Map<Pair<SootMethod,Unit>,String> tc) {
-        this.threadMethods.addAll(tc.values());
-        this.jarName = jarName;
+    public JavaInstrumenter(String jarName, String instrumentationPaths) {
+        // this.threadMethods.addAll(tc.values());
+        this.jarName = new File(jarName).getAbsolutePath();
+        this.instrumentationPaths = instrumentationPaths;
     }
 
 
     void initialize(String apkPath, String mandolineJar) {
+        AnalysisLogger.log(true, "Initializing Instrumenter");
+        createInstrumentationPackagesList();
         Scene.v().addBasicClass("java.io.PrintStream",SootClass.SIGNATURES);
         Scene.v().addBasicClass("java.lang.System",SootClass.SIGNATURES);
         Scene.v().addBasicClass("MandolineLogger", SootClass.BODIES);
         Scene.v().addBasicClass("MandolineWriter", SootClass.BODIES);
         Scene.v().addBasicClass("MandolineShutdown", SootClass.BODIES);
         Options.v().set_prepend_classpath(true);
-        Options.v().set_soot_classpath("VIRTUAL_FS_FOR_JDK");
-        String [] excList = {"org.slf4j.impl.*"};
+        // Options.v().set_soot_classpath("VIRTUAL_FS_FOR_JDK");
+        String [] excList = {"org.slf4j.impl.*", "org.mozilla.*"};
         List<String> excludePackagesList = Arrays.asList(excList);
         Options.v().set_exclude(excludePackagesList);
         Options.v().set_no_bodies_for_excluded(true);
         Options.v().set_allow_phantom_refs(true);
         Options.v().set_process_dir(Arrays.asList(apkPath, mandolineJar));
-        Options.v().set_output_format(Options.output_format_jimple);
+        Options.v().set_output_format(Options.output_format_class);
+        Options.v().set_output_dir(Slicer.SOOT_OUTPUT_STRING);
         libClasses = Scene.v().getLibraryClasses();
+        AnalysisLogger.log(true, "Initialization done");
     }
 
     void runMethodTransformationPack() {
@@ -126,6 +136,16 @@ public class JavaInstrumenter extends Instrumenter {
                     return;
                 }
                 if (cls.getName().contains("MandolineShutdown")) {
+                    return;
+                }
+
+                boolean skip = !JavaInstrumenter.this.instrumentationPackagesList.isEmpty();
+                for (String includedPkg: JavaInstrumenter.this.instrumentationPackagesList) {
+                    if (cls.getPackageName().startsWith(includedPkg) ) {
+                        skip = false;
+                    }
+                }
+                if (skip) {
                     return;
                 }
 
@@ -159,10 +179,11 @@ public class JavaInstrumenter extends Instrumenter {
                 for(Iterator<Unit> iter = units.snapshotIterator(); iter.hasNext();) {
                     final Unit u = (Unit) iter.next();
                     if (!(u instanceof IdentityStmt)) {
+                        instrumentedFirst = basicBlockInstrument(b, cls, mtd, isOnDestroy, addedLocals, flags, units,
+                                                                instrumentedUnits, instrumentedFirst, unitNumMap, taggedUnits, u);
                         methodSize += 1;
                     }
-                    instrumentedFirst = basicBlockInstrument(b, cls, mtd, isOnDestroy, addedLocals, flags, units,
-                                                                instrumentedUnits, instrumentedFirst, unitNumMap, taggedUnits, u);
+                    
                 }
                 synchronized (appSize) {
                     appSize += methodSize;
@@ -209,7 +230,6 @@ public class JavaInstrumenter extends Instrumenter {
                     boolean instrumentedFirst, LinkedHashMap<Unit, Long> unitNumMap, Map<Unit, Long> taggedUnits,
                     final Unit u) {
                 unitNumMap.put(u, -1L);
-                // AnalysisLogger.log(true, "Inspecting: {}", u);
                 if (threadMethods.contains(b.getMethod().getSubSignature())) {
                         flags.isCallbackOrThread = true;
                 }
@@ -220,9 +240,14 @@ public class JavaInstrumenter extends Instrumenter {
                     }
                     instrumentedFirst = true;
                 }
-                // AnalysisLogger.log(true, "Here: {}", u);
+                if (!instrumentedFirst) {
+                    if (!instrumentedUnits.contains(u)) {
+                        InstrumenterUtils.addPrint(u, units, b, addedLocals, cls, mtd, flags, instrumentedUnits, taggedUnits, globalLineCounter);
+                        instrumentedUnits.add(u);
+                    }
+                    instrumentedFirst = true;
+                }
                 if (u instanceof IfStmt) {
-                    // AnalysisLogger.log(true, "If stmt!: {}", u);
                     if (!instrumentedFirst ) {
                         if (!instrumentedUnits.contains(u)) {
                             InstrumenterUtils.addPrint(u, units, b, addedLocals, cls, mtd, flags, instrumentedUnits, taggedUnits, globalLineCounter);
@@ -368,8 +393,13 @@ public class JavaInstrumenter extends Instrumenter {
         initialize(apkPath, mandolineJar);
         runMethodTransformationPack();
         Scene.v().loadNecessaryClasses();
+        AnalysisLogger.log(true, "Running packs ... ");
         PackManager.v().runPacks();
-        
+        AnalysisLogger.log(true, "Writing output ... ");
+        PackManager.v().writeOutput();
+        AnalysisLogger.log(true, "Output written ... ");
+
+        AnalysisLogger.log(true, "Writing log file... ");
         File logFile = new File(staticLogFile);
         try {
             logFile.delete();
@@ -378,6 +408,8 @@ public class JavaInstrumenter extends Instrumenter {
         } catch (IOException e) {
             throw new Error("Failed to write static log file");
         }
+
+        AnalysisLogger.log(true, "Writing size file ... ");
         File sizeFile = new File("apk-size.txt");
         try {
             sizeFile.delete();
@@ -386,40 +418,89 @@ public class JavaInstrumenter extends Instrumenter {
         } catch (IOException e) {
             throw new Error("Failed to write static log file");
         }
+
         AnalysisLogger.log(true, "Number of Jimple statements (apkSize): {}", appSize.toString());
+        AnalysisLogger.log(true, "Writing JAR");
         try {
+            AnalysisLogger.log(true, "Soot file: {}", new File(Slicer.SOOT_OUTPUT_STRING));
+            AnalysisLogger.log(true, "Soot file is directory?: {}", new File(Slicer.SOOT_OUTPUT_STRING).isDirectory());
             if (new File(Slicer.SOOT_OUTPUT_STRING).isDirectory()) {
+                // File unzipDir = new File("unzip_dir");
+                // unzipDir.mkdir();
+                unzipTo(new File(apkPath), new File(Slicer.SOOT_OUTPUT_STRING));
+
+                File dir = new File(jarName).getParentFile();
+                if (!dir.exists()) {
+                    dir.mkdirs();
+                }
                 List<String> instrumentedClasses = new ArrayList<>();
                 listDirectory(new File(Slicer.SOOT_OUTPUT_STRING).getAbsolutePath()+1, Slicer.SOOT_OUTPUT_STRING, 0, instrumentedClasses);
-                Process p = Runtime.getRuntime().exec("jar cvf " + jarName + " " + String.join(" ", instrumentedClasses), null, new File(Slicer.SOOT_OUTPUT_STRING));
-                p.waitFor();
-                AnalysisLogger.log(true, "Ran command: {}", "jar cvf " + jarName + " " + String.join(" ", instrumentedClasses));
-                String [] pathnames = (new File(Slicer.SOOT_OUTPUT_STRING)).list();
 
-                // For each pathname in the pathnames array
-                for (String pathname : pathnames) {
-                    // Print the names of files and directories
-                    System.out.println(pathname);
+                AnalysisLogger.log(true, "Number of classes: {}", instrumentedClasses.size());
+                for (int i = 0; i < instrumentedClasses.size(); i+=10){
+                    // String clazzFile = instrumentedClasses.get(i);
+                    
+                    int minIndex = Math.min(i+10, instrumentedClasses.size());
+                    String clazzFile = String.join(" ", instrumentedClasses.subList(i, minIndex));
+                    String jarOptions;
+                    if (i == 0) {
+                        jarOptions = "cvf";
+                    } else {
+                        jarOptions = "uf";
+                    }
+
+                    Process p = Runtime.getRuntime().exec("jar " + jarOptions + " " + jarName + " " + clazzFile, null, new File(Slicer.SOOT_OUTPUT_STRING));
+                    p.waitFor();
+                    // String output = IOUtils.toString(p.getInputStream());
+                    // String errorOutput = IOUtils.toString(p.getErrorStream());
+                    // AnalysisLogger.log(true, "Process result {}", output + " " + errorOutput);
                 }
+                // Process p = Runtime.getRuntime().exec("jar cvf " + jarName + " " + String.join(" ", instrumentedClasses), null, new File(Slicer.SOOT_OUTPUT_STRING));
+                // p.waitFor();
             }
+
         } catch (IOException | InterruptedException e) {
             AnalysisLogger.warn(true, "Couldn't create jar");
         }
-        
+        AnalysisLogger.log(true, "Instrumentation done: file wrote {}", jarName);
     }
 
-    public void listDirectory(String base, String dirPath, int level, List<String> files) {
+    private void unzipTo(File fileZip, File unzipDir) throws IOException {
+        byte[] buffer = new byte[1024];
+        ZipInputStream zis = new ZipInputStream(new FileInputStream(fileZip));
+        ZipEntry zipEntry = zis.getNextEntry();
+        while (zipEntry != null) {
+            // AnalysisLogger.log(true, "Zip entry: {}", zipEntry);
+            if (!zipEntry.getName().endsWith("/") && !zipEntry.getName().endsWith(".class") && !zipEntry.getName().contains("META-INF")) {
+                AnalysisLogger.log(true, "Copying: {}", zipEntry);
+                File newFile = new File(unzipDir + File.separator + zipEntry);
+                File parent = newFile.getParentFile();
+                parent.mkdirs();
+                // write file content
+                FileOutputStream fos = new FileOutputStream(newFile);
+                int len;
+                while ((len = zis.read(buffer)) > 0) {
+                    fos.write(buffer, 0, len);
+                }
+                fos.close();
+            }
+            zipEntry = zis.getNextEntry();
+        }
+        
+        zis.closeEntry();
+        zis.close();
+	}
+
+
+	public void listDirectory(String base, String dirPath, int level, List<String> files) {
         File dir = new File(dirPath);
         File[] firstLevelFiles = dir.listFiles();
         if (firstLevelFiles != null && firstLevelFiles.length > 0) {
             for (File aFile : firstLevelFiles) {
-                for (int i = 0; i < level; i++) {
-                    System.out.print("\t");
-                }
                 if (aFile.isDirectory()) {
                     listDirectory(base, aFile.getAbsolutePath(), level + 1, files);
                 } else {
-                    files.add(aFile.getAbsolutePath().substring(base.length()));
+                    files.add(aFile.getAbsolutePath().substring(base.length())); // .replace("$", "\\$"));
                 }
             }
         }

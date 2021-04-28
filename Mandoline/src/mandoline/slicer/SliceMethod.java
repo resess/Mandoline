@@ -34,19 +34,34 @@ public class SliceMethod {
     private boolean staticAnalysis = true;
     private boolean dynamicAnalysis = false;
     private boolean frameworkModel = true;
+    private boolean dataFlowsOnly = false;
+    private boolean controlFlowOnly = false;
+    private boolean skipCtrl = false;
+    private boolean sliceFirst = false;
 
-    SliceMethod(ICDG icdg, boolean staticAnalysis, boolean dynamicAnalysis, boolean frameworkModel) {
+    SliceMethod(ICDG icdg, boolean staticAnalysis, boolean dynamicAnalysis, boolean frameworkModel, boolean dataFlowsOnly, boolean controlFlowOnly, boolean skipFirstCtrl, boolean sliceFirst) {
         this.icdg = icdg;
         this.traversal = new Traversal(icdg);
         this.staticAnalysis = staticAnalysis;
         this.dynamicAnalysis = dynamicAnalysis;
         this.frameworkModel = frameworkModel;
+        this.dataFlowsOnly = dataFlowsOnly;
+        this.controlFlowOnly = controlFlowOnly;
+        this.skipCtrl = skipFirstCtrl;
+        this.sliceFirst = sliceFirst;
     }
 
     DynamicSlice slice(StatementInstance start, Set<AccessPath> variables) {
-        SlicingWorkingSet workingSet = new SlicingWorkingSet();
-        workingSet.addMultiple(start, variables);
+        StatementInstance firstDom = null;
+        StatementInstance dom = null;
+        SlicingWorkingSet workingSet = new SlicingWorkingSet(false);
+        if (variables.isEmpty()) {
+            workingSet.addStmt(start, new Pair<>(start, new AccessPath(start.getLineNo(), AccessPath.NOT_DEFINED, start)));
+        } else {
+            workingSet.addMultiple(start, variables);
+        }
         while (!workingSet.isEmpty()) {
+            workingSet.setStopSlicing(sliceFirst);
             Pair<StatementInstance, AccessPath> p = workingSet.pop();
             StatementInstance stmt = p.getO1();
             AccessPath var = p.getO2();
@@ -57,15 +72,24 @@ public class SliceMethod {
             StatementMap chunk = traversal.getChunk(stmt);
             AnalysisLogger.log(true, "Slicing on {}", p);
 
-
-            getControlDependence(workingSet, p, stmt, chunk);
-
+            if (!dataFlowsOnly && !skipCtrl) {
+                dom = getControlDependence(workingSet, p, stmt, chunk);
+                if ((firstDom != null) && firstDom.equals(dom)) {
+                    workingSet.removeAllWithStmt(dom);
+                }
+            }
+            if (skipCtrl) {
+                firstDom = dom;
+                skipCtrl = false;
+            }
 
             StatementSet def = null;
             AliasSet usedVars = new AliasSet();
             
 
-            def = getDataDependence(workingSet, p, stmt, var, chunk, def, usedVars);
+            if (!controlFlowOnly) {
+                def = getDataDependence(workingSet, p, stmt, var, chunk, def, usedVars);
+            }
 
             if (def != null) {
                 addDataDependenceToWorkingSet(workingSet, p, var, def);
@@ -143,7 +167,7 @@ public class SliceMethod {
         return def;
     }
 
-    private void getControlDependence(SlicingWorkingSet workingSet, Pair<StatementInstance, AccessPath> p,
+    private StatementInstance getControlDependence(SlicingWorkingSet workingSet, Pair<StatementInstance, AccessPath> p,
             StatementInstance stmt, StatementMap chunk) {
         StatementInstance dom = ControlDominator.getControlDominator(stmt, chunk);
         if (dom != null) {
@@ -162,6 +186,7 @@ public class SliceMethod {
                 workingSet.addMethodOfStmt(dom, p);
             }
         }
+        return dom;
     }
 
     StatementInstance getCallStmt (StatementMap chunk){
@@ -173,16 +198,19 @@ public class SliceMethod {
     }
 
     StatementSet localReachingDef(StatementInstance iu, AccessPath ap, StatementMap chunk, AliasSet usedVars, boolean frameworkModel){
+        // AnalysisLogger.log(true, "Getting local def for {} with chunk {}", ap, chunk);
         if (ap.isEmpty() || chunk == null) {
             return null;
         }
         StatementSet defSet = new StatementSet();
         chunk = chunk.reverseTraceOrder(iu);
         for (StatementInstance u: chunk.values()) {
+            // AnalysisLogger.log(true, "Inspecting {}", u);
             if (u.getLineNo() >= iu.getLineNo() || u.getUnit()==null) {
                 continue;
             }
             for (ValueBox def: u.getUnit().getDefBoxes()) {
+                // AnalysisLogger.log(true, "Inspecting def {}", def);
                 if(def.getValue() instanceof Local) {
                     if (ap.baseEquals(def.getValue().toString())) {
                         defSet.add(u);
@@ -202,6 +230,7 @@ public class SliceMethod {
                 }
             }
             InvokeExpr invokeExpr = AnalysisUtils.getCallerExp(u);
+            // AnalysisLogger.log(true, "Invoke expr {}", invokeExpr);
             if (invokeExpr != null) {
                 if (!traversal.isFrameworkMethod(u)) {
                     if (! (((Stmt) u.getUnit()) instanceof AssignStmt)) {
@@ -234,7 +263,7 @@ public class SliceMethod {
             return defSet;
         }
         if (taintedParams.size() > 1) {
-            AnalysisLogger.log(true, "TaintedParams: {}", taintedParams);
+            // AnalysisLogger.log(true, "TaintedParams: {}", taintedParams);
             throw new Error("More than one definition of a local variable!");
         }
         StatementInstance nextCaller = null;
