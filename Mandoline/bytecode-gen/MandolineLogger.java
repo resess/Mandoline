@@ -1,42 +1,32 @@
+import java.io.PrintStream;
 import java.util.ArrayList;
 
 public class MandolineLogger{
-    static final int SIZE = 1;
-    static final int DOUBLE_SIZE = 2;
-    static ArrayList<String> queue = new ArrayList<>(DOUBLE_SIZE);
+    static final int SIZE = 1024;
+    static final ArrayList<String> queue = new ArrayList<>(SIZE);
+    // static final MandolineWriter mw = new MandolineWriter(queue);
+    static final PrintStream outStream = System.out;
     static {
         Runtime.getRuntime().addShutdownHook(new MandolineShutdown());
     }
 
-    public static synchronized void println(String e) {
-        // queue.add(e);
-        // if (queue.size() > SIZE) {
-            // MandolineWriter mw = new MandolineWriter(queue);
-            // queue = new ArrayList<>(DOUBLE_SIZE);
-            // mw.start();
-        // }
-        System.out.println("SLICING:"+e);
-        return;
-    }
-    /*
+    // public static synchronized void println(String e) {
+    //     System.out.println("SLICING:"+e);
+    // }
+
     public static synchronized void println(String e) {
         queue.add(e);
         if (queue.size() > SIZE) {
-            MandolineWriter mw = new MandolineWriter(queue);
-            queue = new ArrayList<>(DOUBLE_SIZE);
-            mw.start();
+            flush();
+            // mw.start();
         }
-        return;
     }
-    */
-    public static synchronized void flush(String e) {
-        System.out.println("Flushing queue");
-        StringBuilder sb = new StringBuilder("SLICING:");
+    
+    public static synchronized void flush() {
+        outStream.println("Flushing queue");
         for (String s: queue) {
-            sb.append(s);
-            sb.append("-");
+            outStream.println("SLICING:"+s);
         }
-        System.out.println(sb.toString());
-        queue = new ArrayList<>(DOUBLE_SIZE);
+        queue.clear();
     }
 }

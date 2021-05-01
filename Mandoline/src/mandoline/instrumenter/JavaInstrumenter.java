@@ -149,8 +149,15 @@ public class JavaInstrumenter extends Instrumenter {
                     return;
                 }
 
+                
                 Long methodSize = 0L;
                 SootMethod mtd = b.getMethod();
+
+                if (cls.getName().contains("OutputStream") && mtd.getName().contains("write")) {
+                    return;
+                }
+
+
                 boolean isOnDestroy = false;
                 if (mtd.getName().equals("onDestroy")) {
                     isOnDestroy = true;
@@ -176,6 +183,7 @@ public class JavaInstrumenter extends Instrumenter {
                 boolean instrumentedFirst = false;
                 LinkedHashMap<Unit, Long> unitNumMap = new LinkedHashMap<>();
                 Map<Unit, Long> taggedUnits = new HashMap<>();
+                // AnalysisLogger.log(true, "In method: {}", mtd);
                 for(Iterator<Unit> iter = units.snapshotIterator(); iter.hasNext();) {
                     final Unit u = (Unit) iter.next();
                     if (!(u instanceof IdentityStmt)) {
@@ -240,6 +248,7 @@ public class JavaInstrumenter extends Instrumenter {
                     }
                     instrumentedFirst = true;
                 }
+                // AnalysisLogger.log(true, "Inspecting: {}", u);
                 if (!instrumentedFirst) {
                     if (!instrumentedUnits.contains(u)) {
                         InstrumenterUtils.addPrint(u, units, b, addedLocals, cls, mtd, flags, instrumentedUnits, taggedUnits, globalLineCounter);
@@ -277,6 +286,14 @@ public class JavaInstrumenter extends Instrumenter {
                     if (!instrumentedUnits.contains(target)) {
                         InstrumenterUtils.addPrint(target, units, b, addedLocals, cls, mtd, flags, instrumentedUnits, taggedUnits, globalLineCounter);
                         instrumentedUnits.add(target);
+                    }
+                    Unit after = units.getSuccOf(u);
+                    if (after instanceof IdentityStmt) {
+                        after = units.getSuccOf(after);
+                    }
+                    if (after != null && !instrumentedUnits.contains(after)) {
+                        InstrumenterUtils.addPrint(after, units, b, addedLocals, cls, mtd, flags, instrumentedUnits, taggedUnits, globalLineCounter);
+                        instrumentedUnits.add(after);
                     }
                 } else if (u instanceof InvokeStmt) {
                     if (!instrumentedFirst) {
@@ -898,6 +915,7 @@ class InstrumenterUtils {
                 InstrumenterUtils.insertFieldTracking(u, units, b, stmt, instrumentedUnits, payload);
             }
         }
+        // AnalysisLogger.log(true, "Added print({}) : {}", payload, u);
         b.validate();
     }
 
