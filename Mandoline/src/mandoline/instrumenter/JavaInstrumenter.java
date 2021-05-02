@@ -454,10 +454,11 @@ public class JavaInstrumenter extends Instrumenter {
                 listDirectory(new File(Slicer.SOOT_OUTPUT_STRING).getAbsolutePath()+1, Slicer.SOOT_OUTPUT_STRING, 0, instrumentedClasses);
 
                 AnalysisLogger.log(true, "Number of classes: {}", instrumentedClasses.size());
-                for (int i = 0; i < instrumentedClasses.size(); i+=10){
+                int numFiles = 100;
+                for (int i = 0; i < instrumentedClasses.size(); i+=numFiles){
                     // String clazzFile = instrumentedClasses.get(i);
                     
-                    int minIndex = Math.min(i+10, instrumentedClasses.size());
+                    int minIndex = Math.min(i+numFiles, instrumentedClasses.size());
                     String clazzFile = String.join(" ", instrumentedClasses.subList(i, minIndex));
                     String jarOptions;
                     if (i == 0) {
@@ -489,7 +490,7 @@ public class JavaInstrumenter extends Instrumenter {
         while (zipEntry != null) {
             // AnalysisLogger.log(true, "Zip entry: {}", zipEntry);
             if (!zipEntry.getName().endsWith("/") && !zipEntry.getName().endsWith(".class") && !zipEntry.getName().contains("META-INF")) {
-                AnalysisLogger.log(true, "Copying: {}", zipEntry);
+                // AnalysisLogger.log(true, "Copying: {}", zipEntry);
                 File newFile = new File(unzipDir + File.separator + zipEntry);
                 File parent = newFile.getParentFile();
                 parent.mkdirs();

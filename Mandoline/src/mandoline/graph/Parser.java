@@ -1,15 +1,14 @@
 package mandoline.graph;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.io.FileUtils;
 
 
 import mandoline.utils.AnalysisLogger;
@@ -29,40 +28,27 @@ public class Parser {
       }
 
     public static List <Traces> readFile(String fileName, String staticLogFile) throws IOException {
-        List <String> traces = FileUtils.readLines(new File(fileName), Charset.defaultCharset());
-        List<String> expandedTrace = expandTrace(traces, staticLogFile);
-        List <Traces> listTraces = new ArrayList<>();
-        AnalysisLogger.log(true, "Parsing file {}, trace size is {}", fileName, expandedTrace.size());
-        for(String line : expandedTrace) {
-            String [] tokens = line.split(DELEMITER);
-            Traces tr = new Traces();
-            if(tokens.length < 4) continue;
-            tr._lineNo = Long.valueOf(tokens[0]);
-            tr._class = "";
-            tr._method = tokens[1];
-            tr._type = "__inst__";
-            tr._ins = tokens[2];
-            tr._tid = Long.valueOf(tokens[3]);
-            if(tokens.length > 4) {
-                tr._field = Long.valueOf(tokens[4]);
-            }
-            listTraces.add(tr);
-        }
+        List <Traces> listTraces = expandTrace(staticLogFile, fileName);
         return listTraces;
     }
 
-    public static List<String> expandTrace(List<String> trace, String staticLogFile) {
-        List<String> expandedTrace = new ArrayList<>();
+    public static List <Traces> expandTrace(String staticLogFile, String traceName) {
+        List <Traces> listTraces = new ArrayList<>();
+        Map<Long, List<String>> logMap = new HashMap<>();
         JSONParser parser = new JSONParser();
         try {
             AnalysisLogger.log(true, "Abs path for static-log {}", new File(staticLogFile).getAbsolutePath());
             FileReader reader = new FileReader(staticLogFile);
             Object obj = parser.parse(reader);
             JSONObject jObj = (JSONObject) obj;
-            Map<Long, List<String>> logMap = new HashMap<>();
             buildLogMap(jObj, logMap);
-            String lastSlicingLine = "";
-            for (String t: trace) {
+        } catch (IOException | ParseException e) {
+            AnalysisLogger.warn(true, "Cannot read static-log file! {}", e);
+        }
+        String lastSlicingLine = "";
+        try (BufferedReader br = new BufferedReader(new FileReader(traceName))) {
+            String t;
+            while ((t = br.readLine()) != null) {
                 try {
                     t = t.split("SLICING:")[1];
                     if (lastSlicingLine.equals(t)) {
@@ -91,14 +77,15 @@ public class Parser {
                     } else {
                         threadNum = getThreadNum(threadNum, sSplit);
                     }
-                    addToExpandedTrace(expandedTrace, logMap, lineNum, threadNum, fieldLine);
+                    addToExpandedTrace(listTraces, logMap, lineNum, threadNum, fieldLine);
                 }
             }
-        } catch (IOException | ParseException e) {
-            // Ignored
+        } catch (IOException e) {
+            AnalysisLogger.warn(true, "Cannot read trace file! {}", e);
         }
+        
         AnalysisLogger.log(true, "Done parsing");
-        return expandedTrace;
+        return listTraces;
     }
 
     private static boolean checkIsField(String[] sSplit) {
@@ -137,12 +124,24 @@ public class Parser {
         return threadNum;
     }
 
-    private static void addToExpandedTrace(List<String> expandedTrace, Map<Long, List<String>> logMap, Long lineNum,
+    private static void addToExpandedTrace(List <Traces> listTraces, Map<Long, List<String>> logMap, Long lineNum,
             Long threadNum, String fieldLine) {
         try {
             for (String line : logMap.get(lineNum)) {
                 line = line + DELEMITER + threadNum.toString() + fieldLine;
-                expandedTrace.add(line);
+                String [] tokens = line.split(DELEMITER);
+                Traces tr = new Traces();
+                if(tokens.length < 4) continue;
+                tr._lineNo = Long.valueOf(tokens[0]);
+                tr._class = "";
+                tr._method = tokens[1];
+                tr._type = "__inst__";
+                tr._ins = tokens[2];
+                tr._tid = Long.valueOf(tokens[3]);
+                if(tokens.length > 4) {
+                    tr._field = Long.valueOf(tokens[4]);
+                }
+                listTraces.add(tr);
             }
         } catch (NullPointerException e) {
             // Ignored

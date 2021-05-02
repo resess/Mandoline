@@ -28,6 +28,20 @@ import org.jgrapht.Graphs;
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleDirectedWeightedGraph;
 
+import guru.nidi.graphviz.attribute.Attributes;
+import guru.nidi.graphviz.attribute.Font;
+import guru.nidi.graphviz.attribute.ForNodeLink;
+import guru.nidi.graphviz.attribute.Label;
+import guru.nidi.graphviz.attribute.LinkAttr;
+import guru.nidi.graphviz.attribute.Rank;
+import guru.nidi.graphviz.attribute.Style;
+import guru.nidi.graphviz.attribute.Rank.RankDir;
+import guru.nidi.graphviz.engine.Format;
+import guru.nidi.graphviz.engine.Graphviz;
+import guru.nidi.graphviz.model.Graph;
+import guru.nidi.graphviz.model.LinkSource;
+import guru.nidi.graphviz.model.MutableGraph;
+import guru.nidi.graphviz.model.Node;
 import mandoline.accesspath.AccessPath;
 import mandoline.exceptions.InvalidCommandsException;
 import mandoline.framework.FrameworkModel;
@@ -60,6 +74,8 @@ import soot.util.MultiMap;
 import soot.jimple.infoflow.android.callbacks.AndroidCallbackDefinition;
 import soot.toolkits.scalar.Pair;
 import soot.jimple.toolkits.callgraph.VirtualCallSite;
+
+import static guru.nidi.graphviz.model.Factory.*;
 
 public class Slicer {
     public static final String SOOT_OUTPUT_STRING = System.getProperty("user.dir") + File.separator + "sootOutput/";
@@ -256,12 +272,54 @@ public class Slicer {
             slicer.dynamicPrint = new LinkedHashSet<>();
             printSlices(slicer, dynamicSlice);
             printSliceGraph(dynamicSlice);
+            printDotGraph(outDir, dynamicSlice);
             DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy_MM_dd_HH_mm_ss");
             LocalDateTime now = LocalDateTime.now();
             String resultFileName = outDir + File.separator + "result_" +mode+"_"+ dtf.format(now) + ".csv";
             SlicePrinter.printToCSV(resultFileName, dynamicSlice);
 
         terminate(outDir, mode, startTime);
+    }
+
+    private static void printDotGraph(String outDir, DynamicSlice dynamicSlice) {
+        MutableGraph g = mutGraph("Dynamic Slice").setDirected(true);
+        Map<SootMethod, List<Node>> clusters = new LinkedHashMap<>();
+        for(Map.Entry<Pair<StatementInstance, AccessPath>, Pair<StatementInstance, AccessPath>> entry: dynamicSlice.entrySet()) {
+            StatementInstance sliceNode = entry.getKey().getO1();
+            AccessPath sliceEdge = entry.getKey().getO2();
+            StatementInstance sourceNode = entry.getValue().getO1();
+            Style<ForNodeLink> edgeStyle = Style.SOLID;
+            if (sliceEdge.isEmpty()) {
+                edgeStyle = Style.DASHED;
+            }
+            Node newNode = node(String.valueOf(sourceNode.getJavaSourceLineNo()) +": "+ sourceNode.getUnit().toString());
+            g.add(newNode.link(
+                to(node(String.valueOf(sliceNode.getJavaSourceLineNo()) +": "+ sliceNode.getUnit().toString())).with(edgeStyle, Label.of(sliceEdge.getPathString()))));
+            List<Node> clusterNodes = new ArrayList<>();
+            if (clusters.containsKey(sourceNode.getMethod())) {
+                clusterNodes = clusters.get(sourceNode.getMethod());
+            }
+            clusterNodes.add(newNode);
+            clusters.put(sourceNode.getMethod(), clusterNodes);
+            clusterNodes = new ArrayList<>();
+            if (clusters.containsKey(sliceNode.getMethod())) {
+                clusterNodes = clusters.get(sliceNode.getMethod());
+            }
+            clusterNodes.add(newNode);
+            clusters.put(sliceNode.getMethod(), clusterNodes);
+        }
+        for (Map.Entry<SootMethod, List<Node>> cluster: clusters.entrySet()) {
+            MutableGraph subG = mutGraph(cluster.getKey().getSignature()).setCluster(true);
+            for (Node n: cluster.getValue()) {
+                subG.add(n);
+            }
+            g.add(subG);
+        }
+        try {
+            Graphviz.fromGraph(g).height(100).render(Format.SVG).toFile(new File(outDir + File.separator + "slice-graph.svg"));
+        } catch (IOException e) {
+            AnalysisLogger.warn(true, "IOException when writing slice graph file: {}", e.getMessage());
+        }
     }
 
     private static void printSliceGraph(DynamicSlice dynamicSlice) {
@@ -291,11 +349,11 @@ public class Slicer {
                 staticPrint.add("   from:" + entry.getValue());
             }
         }
-        AnalysisLogger.log(true, "Printing dynamic dependence:");
+        AnalysisLogger.log(true, "Printing dynamic slice:");
         for (String s: slicer.dynamicPrint) {
             AnalysisLogger.log(true, "{}", s);
         }
-        AnalysisLogger.log(true, "Printing static dependence:");
+        AnalysisLogger.log(true, "Printing static slice:");
         for (String s: staticPrint) {
             AnalysisLogger.log(true, "{}", s);
         }

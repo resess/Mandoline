@@ -70,6 +70,10 @@ public class StatementInstance {
         return calledMethod;
     }
 
+    public Integer getJavaSourceLineNo() {
+        return javaSourceLineNo;
+    }
+
 
     public String getUnitId() {
         if (stringRepresentation == null) {
