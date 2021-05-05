@@ -3,15 +3,24 @@ package mandoline.controldependence;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.jgrapht.Graphs;
+
+import org.jgrapht.graph.DefaultWeightedEdge;
+
+import mandoline.graph.ICDG;
 import mandoline.statements.StatementInstance;
 import mandoline.statements.StatementMap;
 import mandoline.utils.AnalysisLogger;
+import mandoline.utils.Constants;
 import soot.toolkits.graph.pdg.EnhancedUnitGraph;
 import soot.toolkits.graph.pdg.HashMutablePDG;
 import soot.toolkits.graph.pdg.PDGNode;
 import soot.toolkits.graph.pdg.PDGRegion;
 import soot.SootMethod;
+import soot.jimple.GotoStmt;
+
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 
 
@@ -28,7 +37,7 @@ public class ControlDominator{
         return Integer.valueOf(matcher.group());
     }
 
-    public static StatementInstance getControlDominator(StatementInstance stmt, StatementMap chunk){
+    public static StatementInstance getControlDominator(StatementInstance stmt, StatementMap chunk, ICDG icdg){
         StatementInstance candidateIu = null;
         if (outOfMemMethods.contains(stmt.getMethod())) {
             return candidateIu;
@@ -39,7 +48,12 @@ public class ControlDominator{
             for(PDGRegion r: pdg.getPDGRegions()) {
                 PDGNode p = r.getCorrespondingPDGNode();
                 if (r.getUnits().contains(stmt.getUnit())) {
-                    candidateIu = matchControlDom(stmt, chunk, pdg, candidateIu, p);
+                    // AnalysisLogger.log(true, "Units here are: {}", r.getUnits());
+                    if (r.getUnits().toString().contains(":= @caughtexception") || r.getUnits().toString().contains("goto [?= throw")) {
+                        candidateIu = previousTraceLine(icdg, stmt.getLineNo());
+                    } else {
+                        candidateIu = matchControlDom(stmt, chunk, pdg, candidateIu, p);
+                    }
                 }
             }
         } catch (OutOfMemoryError e1) {
@@ -77,5 +91,19 @@ public class ControlDominator{
             }
         }
         return candidateIu;
+    }
+
+
+    private static StatementInstance previousTraceLine(ICDG icdg, int pos) {
+        StatementInstance prev = null;
+        int newPos = pos;
+        while (newPos > 0) {
+            newPos--;
+            prev = icdg.mapNoUnits(newPos);
+            if ((prev!=null) && !((prev.getUnit()) instanceof GotoStmt)) {
+                return prev;
+            }
+        }
+        return prev;
     }
 }

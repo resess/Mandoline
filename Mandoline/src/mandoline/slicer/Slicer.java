@@ -38,6 +38,7 @@ import guru.nidi.graphviz.attribute.Style;
 import guru.nidi.graphviz.attribute.Rank.RankDir;
 import guru.nidi.graphviz.engine.Format;
 import guru.nidi.graphviz.engine.Graphviz;
+import guru.nidi.graphviz.engine.Rasterizer;
 import guru.nidi.graphviz.model.Graph;
 import guru.nidi.graphviz.model.LinkSource;
 import guru.nidi.graphviz.model.MutableGraph;
@@ -271,7 +272,7 @@ public class Slicer {
             }
             slicer.dynamicPrint = new LinkedHashSet<>();
             printSlices(slicer, dynamicSlice);
-            printSliceGraph(dynamicSlice);
+            // printSliceGraph(dynamicSlice);
             printDotGraph(outDir, dynamicSlice);
             DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy_MM_dd_HH_mm_ss");
             LocalDateTime now = LocalDateTime.now();
@@ -283,40 +284,55 @@ public class Slicer {
 
     private static void printDotGraph(String outDir, DynamicSlice dynamicSlice) {
         MutableGraph g = mutGraph("Dynamic Slice").setDirected(true);
-        Map<SootMethod, List<Node>> clusters = new LinkedHashMap<>();
+        // Map<SootMethod, List<Node>> clusters = new LinkedHashMap<>();
         for(Map.Entry<Pair<StatementInstance, AccessPath>, Pair<StatementInstance, AccessPath>> entry: dynamicSlice.entrySet()) {
             StatementInstance sliceNode = entry.getKey().getO1();
-            AccessPath sliceEdge = entry.getKey().getO2();
+            AccessPath sliceEdge = entry.getValue().getO2();
             StatementInstance sourceNode = entry.getValue().getO1();
             Style<ForNodeLink> edgeStyle = Style.SOLID;
             if (sliceEdge.isEmpty()) {
                 edgeStyle = Style.DASHED;
             }
-            Node newNode = node(String.valueOf(sourceNode.getJavaSourceLineNo()) +": "+ sourceNode.getUnit().toString());
-            g.add(newNode.link(
-                to(node(String.valueOf(sliceNode.getJavaSourceLineNo()) +": "+ sliceNode.getUnit().toString())).with(edgeStyle, Label.of(sliceEdge.getPathString()))));
-            List<Node> clusterNodes = new ArrayList<>();
-            if (clusters.containsKey(sourceNode.getMethod())) {
-                clusterNodes = clusters.get(sourceNode.getMethod());
+            String sourceStr = sourceNode.getUnit().toString();
+            if (sourceStr.contains("goto")) {
+                sourceStr = sourceStr.split("goto")[0];
             }
-            clusterNodes.add(newNode);
-            clusters.put(sourceNode.getMethod(), clusterNodes);
-            clusterNodes = new ArrayList<>();
-            if (clusters.containsKey(sliceNode.getMethod())) {
-                clusterNodes = clusters.get(sliceNode.getMethod());
+            String destStr = sliceNode.getUnit().toString();
+            if (destStr.contains("goto")) {
+                destStr = destStr.split("goto")[0];
             }
-            clusterNodes.add(newNode);
-            clusters.put(sliceNode.getMethod(), clusterNodes);
+            String edgeStr = "    " + sliceEdge.getPathString();
+
+            Node newNode = node(String.valueOf(sourceNode.getJavaSourceLineNo()) + ": " + sourceStr);
+            if (sourceNode.equals(sliceNode)) {
+                g.add(newNode);
+            } else {
+                g.add(newNode.link(
+                    to(node(String.valueOf(sliceNode.getJavaSourceLineNo()) + ": " + destStr)).with(edgeStyle, Label.of(edgeStr))));
+            }
+            // List<Node> clusterNodes = new ArrayList<>();
+            // if (clusters.containsKey(sourceNode.getMethod())) {
+            //     clusterNodes = clusters.get(sourceNode.getMethod());
+            // }
+            // clusterNodes.add(newNode);
+            // clusters.put(sourceNode.getMethod(), clusterNodes);
+            // clusterNodes = new ArrayList<>();
+            // if (clusters.containsKey(sliceNode.getMethod())) {
+            //     clusterNodes = clusters.get(sliceNode.getMethod());
+            // }
+            // clusterNodes.add(newNode);
+            // clusters.put(sliceNode.getMethod(), clusterNodes);
         }
-        for (Map.Entry<SootMethod, List<Node>> cluster: clusters.entrySet()) {
-            MutableGraph subG = mutGraph(cluster.getKey().getSignature()).setCluster(true);
-            for (Node n: cluster.getValue()) {
-                subG.add(n);
-            }
-            g.add(subG);
-        }
+        // for (Map.Entry<SootMethod, List<Node>> cluster: clusters.entrySet()) {
+        //     MutableGraph subG = mutGraph(cluster.getKey().getSignature()).setCluster(true);
+        //     for (Node n: cluster.getValue()) {
+        //         subG.add(n);
+        //     }
+        //     g.add(subG);
+        // }
         try {
-            Graphviz.fromGraph(g).height(100).render(Format.SVG).toFile(new File(outDir + File.separator + "slice-graph.svg"));
+            // Graphviz.fromGraph(g).render(Format.SVG).toFile(new File(outDir + File.separator + "slice-graph.svg"));
+            Graphviz.fromGraph(g).rasterize(Rasterizer.builtIn("pdf")).toFile(new File(outDir + File.separator + "slice-graph.pdf"));
         } catch (IOException e) {
             AnalysisLogger.warn(true, "IOException when writing slice graph file: {}", e.getMessage());
         }
@@ -346,7 +362,7 @@ public class Slicer {
             if (!staticSlice.contains(toPrint)) {
                 staticSlice.add(toPrint);
                 staticPrint.add(toPrint);
-                staticPrint.add("   from:" + entry.getValue());
+                // staticPrint.add("   from:" + entry.getValue());
             }
         }
         AnalysisLogger.log(true, "Printing dynamic slice:");
@@ -413,7 +429,7 @@ public class Slicer {
             
             if (instrumentOptions.contains("jimple")) {
                 JimpleWriter jimpleWriter = new JimpleWriter(outDir);
-                jimpleWriter.start(instrumenterArgs);
+                jimpleWriter.start(pathApk);
                 terminate(outDir, instrumenterMode, startTime);
                 shouldTerminate = true;
             } else {
@@ -528,6 +544,7 @@ public class Slicer {
         // Options.v().set_whole_program(true);
         // Options.v().set_allow_phantom_refs(true);
         // Options.v().setPhaseOption("cg.spark", "on");
+        Options.v().setPhaseOption("jb", "use-original-names:true");
         Scene.v().loadNecessaryClasses();
         PackManager.v().runPacks();
         AnalysisLogger.log(true, "Done processing the JAR");
