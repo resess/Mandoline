@@ -1,5 +1,6 @@
 package mandoline.slicer;
 
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 import mandoline.accesspath.AccessPath;
@@ -22,6 +23,7 @@ import soot.Value;
 import soot.ValueBox;
 import soot.jimple.ArrayRef;
 import soot.jimple.AssignStmt;
+import soot.jimple.CastExpr;
 import soot.jimple.FieldRef;
 import soot.jimple.InstanceInvokeExpr;
 import soot.jimple.InvokeExpr;
@@ -74,6 +76,7 @@ public class SliceMethod {
 
             if (!dataFlowsOnly && !skipCtrl) {
                 dom = getControlDependence(workingSet, p, stmt, chunk);
+                AnalysisLogger.log(true, "Control-dom is {}", dom);
                 if ((firstDom != null) && firstDom.equals(dom)) {
                     workingSet.removeAllWithStmt(dom);
                 }
@@ -169,19 +172,18 @@ public class SliceMethod {
 
     private StatementInstance getControlDependence(SlicingWorkingSet workingSet, Pair<StatementInstance, AccessPath> p,
             StatementInstance stmt, StatementMap chunk) {
-        StatementInstance dom = ControlDominator.getControlDominator(stmt, chunk);
+        StatementInstance dom = ControlDominator.getControlDominator(stmt, chunk, this.icdg);
         if (dom != null) {
-            AnalysisLogger.log(true, "Control-dom is {}", dom);
             workingSet.addStmt(dom, p);
         } else {
             dom = null;
             try {
                 dom = icdg.mapNoUnits(traversal.getCaller(stmt.getLineNo()));
+                AnalysisLogger.log(true, "Got caller: {}", dom);
             } catch (Exception e) {
                 AnalysisLogger.warn(true, "Exception ignored", e);
             }
             if (dom != null && ((Stmt) dom.getUnit()).containsInvokeExpr() && ((Stmt) dom.getUnit()).getInvokeExpr().getMethod().getName().equals(stmt.getMethod().getName()) ) {
-                AnalysisLogger.log(true, "Control-dom is {}", dom);
                 workingSet.addStmtOnly(dom, p);
                 workingSet.addMethodOfStmt(dom, p);
             }
@@ -202,9 +204,14 @@ public class SliceMethod {
         if (ap.isEmpty() || chunk == null) {
             return null;
         }
+        Set<Pair<StatementInstance, AccessPath>> backwardDefVars = new LinkedHashSet<>();
         StatementSet defSet = new StatementSet();
         chunk = chunk.reverseTraceOrder(iu);
+        boolean localFound = false;
         for (StatementInstance u: chunk.values()) {
+            if (localFound) {
+                break;
+            }
             // AnalysisLogger.log(true, "Inspecting {}", u);
             if (u.getLineNo() >= iu.getLineNo() || u.getUnit()==null) {
                 continue;
@@ -213,18 +220,22 @@ public class SliceMethod {
                 // AnalysisLogger.log(true, "Inspecting def {}", def);
                 if(def.getValue() instanceof Local) {
                     if (ap.baseEquals(def.getValue().toString())) {
+                        backwardDefVars.add(new Pair<>(u, new AccessPath(def.getValue().toString(), def.getValue().getType(), AccessPath.NOT_USED, u.getLineNo(), u)));
                         defSet.add(u);
-                        return defSet;
+                        localFound = true;
+                        break;
                     }
                 } else if (def.getValue() instanceof FieldRef){
                     for (ValueBox vb: ((FieldRef) def.getValue()).getUseBoxes()){
                         if (ap.baseEquals(vb.getValue().toString())) {
+                            backwardDefVars.add(new Pair<>(u, new AccessPath(def.getValue().toString(), def.getValue().getType(), AccessPath.NOT_USED, u.getLineNo(), u)));
                             defSet.add(u);
                         }
                     }
                 } else if (def.getValue() instanceof ArrayRef) {
                     Value v = ((ArrayRef) def.getValue()).getBase();
                     if (ap.baseEquals(v.toString())) {
+                        backwardDefVars.add(new Pair<>(u, new AccessPath(def.getValue().toString(), def.getValue().getType(), AccessPath.NOT_USED, u.getLineNo(), u)));
                         defSet.add(u);
                     }
                 }
@@ -242,7 +253,7 @@ public class SliceMethod {
                     }
                 } else if (frameworkModel) {
                     if (FrameworkModel.localWrapper(u, ap, defSet, usedVars)) {
-                        return defSet;
+                        // pass
                     }
                 }
             }
@@ -250,7 +261,60 @@ public class SliceMethod {
         if (defSet.isEmpty()) {
             defSet.addAll(getReachingInCaller(iu, ap));
         }
+        AnalysisLogger.log(true, "Defs backward are: {}", defSet);
+        // defSet = localReachingDefForward(backwardDefVars, defSet);
+        // AnalysisLogger.log(true, "Defs with forward are: {}", defSet);
         return defSet;
+    }
+
+
+    private StatementSet localReachingDefForward(Set<Pair<StatementInstance, AccessPath>> backwardDefVars, StatementSet defSet) {
+        
+        for (Pair<StatementInstance, AccessPath> p: backwardDefVars) {
+            findDefsForward(p, defSet);
+        }
+        return defSet;
+    }
+
+    private void findDefsForward(Pair<StatementInstance, AccessPath> p, StatementSet defSet){
+        StatementInstance si = p.getO1();
+        AliasSet as = new AliasSet(p.getO2());
+        int pos = si.getLineNo();
+        iterateDefsForward(as, defSet, pos);
+    }
+
+    private void iterateDefsForward(AliasSet as, StatementSet defSet, int pos) {
+        if (as.isEmpty()) {
+            return;
+        }
+        StatementInstance current = icdg.mapNoUnits(pos);
+        Set<StatementInstance> nexts = traversal.nextNodes(current);
+        for (StatementInstance next: nexts) {
+            AliasSet newAs = traversal.changeScope(as, next, current);
+            for (AccessPath ap: newAs) {
+                for (ValueBox def: next.getUnit().getDefBoxes()) {
+                    // AnalysisLogger.log(true, "Inspecting def {}", def);
+                    if (def.getValue() instanceof FieldRef){
+                        for (ValueBox vb: ((FieldRef) def.getValue()).getUseBoxes()){
+                            if (ap.baseEquals(vb.getValue().toString())) {
+                                defSet.add(next);
+                            }
+                        }
+                    } else if (def.getValue() instanceof ArrayRef) {
+                        Value v = ((ArrayRef) def.getValue()).getBase();
+                        if (ap.baseEquals(v.toString())) {
+                            defSet.add(next);
+                        }
+                    } else if ((next.getUnit() instanceof AssignStmt) && (((AssignStmt) next.getUnit()).getRightOp() instanceof CastExpr)) {
+                        Value v = ((AssignStmt) next.getUnit()).getRightOp();
+                        if (ap.getPathString().equals(v.toString())) {
+                            defSet.add(next);
+                        }
+                    }
+                }
+            }
+            iterateDefsForward(newAs, defSet, next.getLineNo());
+        }
     }
 
     private StatementSet getReachingInCaller(StatementInstance iu, AccessPath ap) throws Error {

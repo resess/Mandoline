@@ -147,6 +147,7 @@ public class ICDG {
         Integer leastDistance = Integer.MAX_VALUE;
         Unit closestUnit = null;
         boolean foundUnit = false;
+        // AnalysisLogger.log(true, "Inspecting stmt {}", temp.get(key1));
         if(unitString.containsKey(temp.get(key1))) {
             foundUnit = matchStatementInstanceToTraceLine(key, mt, unitString, settersInThisMethod, threadStartersInThisMethod, temp, key1);
         }
@@ -426,7 +427,6 @@ public class ICDG {
                 fixAccrossThreads(unitsInThread, i);
                 fixConnectToCallers(unitsInThread, i);
                 fixFlowEdges(unitsInThread, i);
-                
             }
         }
     }
@@ -642,9 +642,9 @@ public class ICDG {
         if (stop < 0) {
             stop = 0;
         }
+
         for (int j = i-1; j >= stop; j--) {
             StatementInstance jIu = unitsInThread.get(j);
-
             if (jIu == null) {
                 return;
             }
@@ -672,7 +672,7 @@ public class ICDG {
         SootMethod calledMethod = jIu.getCalledMethod();
         if (calledMethod != null && classInAndroidLibs(jIuMethod)) {
             if (calledMethod.getSubSignature().equals(iIuMethod.getSubSignature())) {
-                callEdgeAdded = addCallEdgeToRegularCaller(iIuLineNo, removed, jIuLineNo, callEdgeAdded, calledMethod);
+                callEdgeAdded = addCallEdgeToRegularCaller(iIuLineNo, removed, jIuLineNo, callEdgeAdded, iIuMethod);
             } else if (iIuMethod.getName().equals("<clinit>") && classNamesMatch(iIuMethod, calledMethod)) {
                 callEdgeAdded = addCallEdgeToClassConstructor(iIuLineNo, removed, jIuLineNo, callEdgeAdded);
             }
@@ -693,8 +693,8 @@ public class ICDG {
     }
 
     private boolean addCallEdgeToRegularCaller(int iIuLineNo, Set<DefaultWeightedEdge> removed, int jIuLineNo,
-            boolean callEdgeAdded, SootMethod calledMethod) {
-        if (Scene.v().getApplicationClasses().contains(calledMethod.getDeclaringClass())) {
+            boolean callEdgeAdded, SootMethod iIuMethod) {
+        if (Scene.v().getApplicationClasses().contains(iIuMethod.getDeclaringClass())) {
             callEdgeAdded = addCallEdgeToClassConstructor(iIuLineNo, removed, jIuLineNo, callEdgeAdded);
         }
         return callEdgeAdded;

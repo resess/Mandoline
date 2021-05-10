@@ -33,6 +33,7 @@ import soot.SceneTransformer;
 import soot.SootClass;
 import soot.SootMethod;
 import soot.Transform;
+import soot.Trap;
 import soot.Type;
 import soot.Unit;
 import soot.jimple.AbstractStmtSwitch;
@@ -110,6 +111,7 @@ public class JavaInstrumenter extends Instrumenter {
         Options.v().set_process_dir(Arrays.asList(apkPath, mandolineJar));
         Options.v().set_output_format(Options.output_format_class);
         Options.v().set_output_dir(Slicer.SOOT_OUTPUT_STRING);
+        Options.v().setPhaseOption("jb", "use-original-names:true");
         libClasses = Scene.v().getLibraryClasses();
         AnalysisLogger.log(true, "Initialization done");
     }
@@ -178,6 +180,15 @@ public class JavaInstrumenter extends Instrumenter {
                     flags.timeTracking = false;
                     flags.threadTracking = false;
                 }
+
+
+                
+                List<String> traps = new ArrayList<>();
+                for (Trap trap: mtd.getActiveBody().getTraps()) {
+                    traps.add(trap.getBeginUnit().toString());
+                }
+                // AnalysisLogger.log(true, "Traps of {} are {}", mtd, traps); 
+
                 final PatchingChain<Unit> units = b.getUnits();
                 Set<Unit> instrumentedUnits = new HashSet<>();
                 boolean instrumentedFirst = false;
@@ -188,7 +199,7 @@ public class JavaInstrumenter extends Instrumenter {
                     final Unit u = (Unit) iter.next();
                     if (!(u instanceof IdentityStmt)) {
                         instrumentedFirst = basicBlockInstrument(b, cls, mtd, isOnDestroy, addedLocals, flags, units,
-                                                                instrumentedUnits, instrumentedFirst, unitNumMap, taggedUnits, u);
+                                                                instrumentedUnits, instrumentedFirst, unitNumMap, taggedUnits, u, traps);
                         methodSize += 1;
                     }
                     
@@ -236,11 +247,12 @@ public class JavaInstrumenter extends Instrumenter {
             private boolean basicBlockInstrument(final Body b, SootClass cls, SootMethod mtd, boolean isOnDestroy,
                     AddedLocals addedLocals, Flags flags, final PatchingChain<Unit> units, Set<Unit> instrumentedUnits,
                     boolean instrumentedFirst, LinkedHashMap<Unit, Long> unitNumMap, Map<Unit, Long> taggedUnits,
-                    final Unit u) {
+                    final Unit u, List<String> traps) {
                 unitNumMap.put(u, -1L);
                 if (threadMethods.contains(b.getMethod().getSubSignature())) {
                         flags.isCallbackOrThread = true;
                 }
+                
                 if (isOnDestroy && !instrumentedFirst &&!(u instanceof IdentityStmt)) {
                     if (!instrumentedUnits.contains(u)) {
                         InstrumenterUtils.addFlush(u, units, b, addedLocals, cls, mtd, flags, instrumentedUnits, taggedUnits, globalLineCounter);
@@ -248,7 +260,7 @@ public class JavaInstrumenter extends Instrumenter {
                     }
                     instrumentedFirst = true;
                 }
-                // AnalysisLogger.log(true, "Inspecting: {}", u);
+                // AnalysisLogger.log(true, "Inspecting: {} whee traps are {}", u, traps);
                 if (!instrumentedFirst) {
                     if (!instrumentedUnits.contains(u)) {
                         InstrumenterUtils.addPrint(u, units, b, addedLocals, cls, mtd, flags, instrumentedUnits, taggedUnits, globalLineCounter);
@@ -274,7 +286,8 @@ public class JavaInstrumenter extends Instrumenter {
                         InstrumenterUtils.addPrint(target, units, b, addedLocals, cls, mtd, flags, instrumentedUnits, taggedUnits, globalLineCounter);
                         instrumentedUnits.add(target);
                     }
-                } else if (u instanceof GotoStmt) {
+                } 
+                if (u instanceof GotoStmt) {
                     if (!instrumentedFirst ) {
                         if (!instrumentedUnits.contains(u)) {
                             InstrumenterUtils.addPrint(u, units, b, addedLocals, cls, mtd, flags, instrumentedUnits, taggedUnits, globalLineCounter);
@@ -295,7 +308,8 @@ public class JavaInstrumenter extends Instrumenter {
                         InstrumenterUtils.addPrint(after, units, b, addedLocals, cls, mtd, flags, instrumentedUnits, taggedUnits, globalLineCounter);
                         instrumentedUnits.add(after);
                     }
-                } else if (u instanceof InvokeStmt) {
+                }
+                if (u instanceof InvokeStmt) {
                     if (!instrumentedFirst) {
                         if (!instrumentedUnits.contains(u)) {
                             InstrumenterUtils.addPrint(u, units, b, addedLocals, cls, mtd, flags, instrumentedUnits, taggedUnits, globalLineCounter);
@@ -325,7 +339,8 @@ public class JavaInstrumenter extends Instrumenter {
                         InstrumenterUtils.addPrint(ret, units, b, addedLocals, cls, mtd, flags, instrumentedUnits, taggedUnits, globalLineCounter);
                         instrumentedUnits.add(ret);
                     }
-                } else if ((u instanceof AssignStmt) && ((AssignStmt) u).containsInvokeExpr()) {
+                } 
+                if ((u instanceof AssignStmt) && ((AssignStmt) u).containsInvokeExpr()) {
                     if (!instrumentedFirst) {
                         if (!instrumentedUnits.contains(u)) {
                             InstrumenterUtils.addPrint(u, units, b, addedLocals, cls, mtd, flags, instrumentedUnits, taggedUnits, globalLineCounter);
@@ -347,25 +362,29 @@ public class JavaInstrumenter extends Instrumenter {
                         InstrumenterUtils.addPrint(ret, units, b, addedLocals, cls, mtd, flags, instrumentedUnits, taggedUnits, globalLineCounter);
                         instrumentedUnits.add(ret);
                     }
-                } else if (u instanceof ReturnVoidStmt) {
+                } 
+                if (u instanceof ReturnVoidStmt) {
                     if (!instrumentedUnits.contains(u)) {
                         InstrumenterUtils.addPrint(u, units, b, addedLocals, cls, mtd, flags, instrumentedUnits, taggedUnits, globalLineCounter);
                         instrumentedUnits.add(u);
                         InstrumenterUtils.insertEndTimeTracking(u, units, b, addedLocals, flags, instrumentedUnits, taggedUnits);
                     }
-                } else if (u instanceof ReturnStmt) {
+                } 
+                if (u instanceof ReturnStmt) {
                     if (!instrumentedUnits.contains(u)) {
                         InstrumenterUtils.addPrint(u, units, b, addedLocals, cls, mtd, flags, instrumentedUnits, taggedUnits, globalLineCounter);
                         instrumentedUnits.add(u);
                         InstrumenterUtils.insertEndTimeTracking(u, units, b, addedLocals, flags, instrumentedUnits, taggedUnits);
                     }
-                } else if (u instanceof ThrowStmt) {
+                }
+                if (u instanceof ThrowStmt) {
                     if (!instrumentedUnits.contains(u)) {
                         InstrumenterUtils.addPrint(u, units, b, addedLocals, cls, mtd, flags, instrumentedUnits, taggedUnits, globalLineCounter);
                         instrumentedUnits.add(u);
                         InstrumenterUtils.insertEndTimeTracking(u, units, b, addedLocals, flags, instrumentedUnits, taggedUnits);
                     }
-                } else if (u instanceof AssignStmt && !(u instanceof IdentityStmt)){
+                }
+                if (u instanceof AssignStmt && !(u instanceof IdentityStmt)){
                     if (((AssignStmt) u).containsFieldRef()) {
                         if(flags.fieldTracking) {
                             if (!instrumentedUnits.contains(u)) {
@@ -374,7 +393,8 @@ public class JavaInstrumenter extends Instrumenter {
                             }
                         }
                     }
-                } else if (u instanceof Stmt && !(u instanceof IdentityStmt)){
+                }
+                if (u instanceof Stmt && !(u instanceof IdentityStmt)){
                     if (!instrumentedFirst ) {
                         if (!instrumentedUnits.contains(u)) {
                             InstrumenterUtils.addPrint(u, units, b, addedLocals, cls, mtd, flags, instrumentedUnits, taggedUnits, globalLineCounter);
@@ -382,8 +402,13 @@ public class JavaInstrumenter extends Instrumenter {
                         }
                         instrumentedFirst = true;
                     }
-                } else {
-                    // pass
+                }
+                if (traps.contains(u.toString())) {
+                    if (!instrumentedUnits.contains(u)) {
+                        InstrumenterUtils.addPrint(u, units, b, addedLocals, cls, mtd, flags, instrumentedUnits, taggedUnits, globalLineCounter);
+                        instrumentedUnits.add(u);
+                    }
+                    instrumentedFirst = true;
                 }
                 return instrumentedFirst;
             }
