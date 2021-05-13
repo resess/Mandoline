@@ -144,7 +144,7 @@ The `id` of each method is the method signature. Each method has flows `from` pa
 
 Each flow is specified with it `sourceSinkType` as `Parameter`, `Field`, or `Return`.
 `Parameter` is used for parameters. `Field` is used for the receiver or fields of the receiver. `Return` is for the method return.
-For parameters, we also need `ParameterIndex` to specify which parameter (first, second, etc.)
+For parameters, we also need `ParameterIndex` to specify which parameter (first, second, etc.).
 For fields, we specify the signature of the field in `AccessPath` and its type in `AccessPathTypes`.
 
 
