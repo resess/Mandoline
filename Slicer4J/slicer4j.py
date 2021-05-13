@@ -38,13 +38,7 @@ def main():
     test_class = options["test_class"]
     test_method = options["test_method"]
     main_class_args = options["main_class_args"]
-
-    forward_criterion = options["forward_criterion"]
-    if forward_criterion and not is_int(forward_criterion):
-        print("Forward criterion is not a number!")
-        return
-    if forward_criterion:
-        forward_criterion = int(forward_criterion)
+    framework_models = options["framework_models"]
 
     extra_options = ""
     if options["data_only"]:
@@ -57,13 +51,17 @@ def main():
     if (not main_class_args) and (not test_class or not test_method):
         print("Must proide either main class name and arguments or test class and test method")
         return
+    if framework_models:
+        extra_options += "-f " + framework_models
 
     instrumented_jar = instrument(jarfile = jarfile, outdir = outdir)
     print(f"Instrumented jar is at: {instrumented_jar}", flush=True)
     run(instrumented_jar, dependencies, outdir, test_class, test_method, main_class_args)
-    log_file, slice_graph = dynamic_slice(jarfile = jarfile, outdir = outdir, backward_criterion = backward_criterion, forward_criterion = forward_criterion, 
+    log_file, slice_graph = dynamic_slice(jarfile = jarfile, outdir = outdir, backward_criterion = backward_criterion, 
                                           extra_options = extra_options)
-    print(f"Slice file: {log_file}")
+    
+    print(f"Slice source code lines: {outdir}/slice.log")
+    print(f"Raw slice: {outdir}/raw-slice.log")
     print(f"Slice graph: {slice_graph}")
 
 
@@ -98,7 +96,7 @@ def run(instrumented_jar, dependencies, outdir, test_class, test_method, main_cl
 
 
 
-def dynamic_slice(jarfile=None, outdir=None, backward_criterion=None, forward_criterion = None, variables = None, extra_options = ""):
+def dynamic_slice(jarfile=None, outdir=None, backward_criterion=None, variables = None, extra_options = ""):
     slice_file = "slice-file.log"
     if variables:
         print(f"Slicing from line {backward_criterion} with variables {variables}", flush=True)
@@ -108,7 +106,7 @@ def dynamic_slice(jarfile=None, outdir=None, backward_criterion=None, forward_cr
     os.system(graph_cmd)
 
     clazz, lineno = backward_criterion.split(":")
-    clazz = clazz.rsplit(".", 1)[0]
+    # clazz = clazz.rsplit(".", 1)[0]
     with open(f"{outdir}/trace.log_icdg.log", 'r') as f:
         for l in f:
             if f":LINENO:{lineno}:FILE:{clazz}" in l:
@@ -116,13 +114,6 @@ def dynamic_slice(jarfile=None, outdir=None, backward_criterion=None, forward_cr
 
     line = sc.split(", ")[0]
 
-    if forward_criterion:
-        with open(f"{outdir}/trace.log_icdg.log", 'r') as f:
-            for l in f:
-                if f":LINENO:{forward_criterion}:" in l:
-                    sc = l.rstrip()
-        forward_criterion = sc.split(", ")[0]
-        extra_options += "-fw " + str(forward_criterion)
     if variables:
         extra_options += "-sv " + str(variables)
 
@@ -146,8 +137,8 @@ def parse():
                         help="Backward criterion (line number)", metavar="line to slice backward from", required=True)
     parser.add_argument("-v", "--variables", dest="variables", 
                         help="Variables to slice from, list of - separated names", metavar="variables to slice from", required=False)
-    parser.add_argument("-f", "--forward-criterion", dest="forward_criterion", 
-                        help="Forward criterion (line number)", metavar="line to slice forward from", required=False)
+    parser.add_argument("-mod", "--models", dest="framework_models",
+                        help="Folder containing user-defined method models", metavar="user defined framework models", required=False)
     parser.add_argument("-d", "--data", dest="data_only", 
                         help="Slice with data-flow dependencies only", action='store_true', required=False)
     parser.add_argument("-c", "--control", dest="ctrl_only", 
@@ -163,8 +154,8 @@ def parse():
     args = parser.parse_args()
     return {
         "jarfile": args.jarfile, "outdir": args.outdir, "backward_criterion": args.backward_criterion, "variables": args.variables,
-        "forward_criterion": args.forward_criterion, "data_only": args.data_only, "ctrl_only": args.ctrl_only, "test_class": args.test_class, 
-        "test_method": args.test_method, "main_class_args": args.main_class_args, "dependencies": args.dependencies
+        "source_map": args.source_map, "data_only": args.data_only, "ctrl_only": args.ctrl_only, "test_class": args.test_class, 
+        "test_method": args.test_method, "main_class_args": args.main_class_args, "dependencies": args.dependencies, "framework_models": args.framework_models
     }
 
 if __name__ == "__main__":
