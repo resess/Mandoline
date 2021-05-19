@@ -88,7 +88,7 @@ You can list Slicer4J options using:  `python3 slicer4j.py -h`
 <br>
 <br>
 
-## User defined-method models: 
+## User-defined method models: 
 
 The following is an example for defining your own  method models. 
 
