@@ -42,6 +42,7 @@ public class FrameworkModel {
 
     private static final String ACCESS_PATH = "AccessPath";
     static String stubDroidPath;
+    static String extraPath;
     static String taintWrapperPath;
     static Map<String, Set<FrameworkAssignment>> stubDroidModel = new HashMap<>();
     static Map<String, Set<FrameworkAssignment>> taintWrapperModel = new HashMap<>();
@@ -161,6 +162,11 @@ public class FrameworkModel {
     public static void setStubDroidPath(String stubDroidPath) {
         FrameworkModel.stubDroidPath = stubDroidPath;
     }
+
+    public static void setExtraPath(String extraPath) {
+        FrameworkModel.extraPath = extraPath;
+    }
+
     public static void setTaintWrapperFile(String taintWrapperPath) {
         FrameworkModel.taintWrapperPath = taintWrapperPath;
         readTaintWrapperFile();
@@ -169,7 +175,8 @@ public class FrameworkModel {
     private static Set<FrameworkAssignment> convertMethod(InvokeExpr expr){
         String methodSignature = expr.getMethod().getSignature();
         if (!taintWrapperType.containsKey(methodSignature)) {
-            loadStubroidModel(expr);
+            loadStubroidModel(expr, FrameworkModel.stubDroidPath);
+            loadStubroidModel(expr, FrameworkModel.extraPath);
         }
         Set<FrameworkAssignment> model = stubDroidModel.get(methodSignature); // stubdroid model
         if (model == null) {
@@ -184,13 +191,13 @@ public class FrameworkModel {
     }
 
 
-    private static void loadStubroidModel(InvokeExpr expr) {
+    private static void loadStubroidModel(InvokeExpr expr, String path) {
         String methodSignature = expr.getMethod().getSignature();
         if (stubDroidModel.containsKey(methodSignature)) {
             return;
         }
         String className = expr.getMethod().getDeclaringClass().getName();
-        String fileName = FrameworkModel.stubDroidPath + File.separator + className + ".xml";
+        String fileName = path + File.separator + className + ".xml";
         try (BufferedReader br = new BufferedReader(new FileReader(fileName))) {
             String line = "";
             String xmlStr = "";

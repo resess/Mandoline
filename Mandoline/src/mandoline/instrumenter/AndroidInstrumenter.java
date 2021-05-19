@@ -76,15 +76,9 @@ public class AndroidInstrumenter extends Instrumenter{
     JSONObject staticLog = new JSONObject();
     GlobalCounter globalLineCounter = new GlobalCounter();
     Chain<SootClass> libClasses = null;
-    void initialize(String pkgName2) {
+
+    void initialize() {
         Options.v().set_src_prec(Options.src_prec_apk);
-        String pkgName = pkgName2.replace("'", "");
-        if(pkgName.contains("/"))
-        {
-            String[] pkgNameArray = pkgName.split("/");
-            pkgName = pkgNameArray[pkgNameArray.length-1];
-        }
-        System.out.println ("pkg: "+pkgName);
         createInstrumentationPackagesList();
         Scene.v().addBasicClass("java.io.PrintStream",SootClass.SIGNATURES);
         Scene.v().addBasicClass("java.lang.System",SootClass.SIGNATURES);
@@ -94,12 +88,11 @@ public class AndroidInstrumenter extends Instrumenter{
         libClasses = Scene.v().getLibraryClasses();
     }
     
-    public AndroidInstrumenter(String instrumentationPaths, MultiMap<SootClass,AndroidCallbackDefinition> cm, Map<Pair<SootMethod,Unit>,String> tc) {
+    public AndroidInstrumenter(MultiMap<SootClass,AndroidCallbackDefinition> cm, Map<Pair<SootMethod,Unit>,String> tc) {
         for (AndroidCallbackDefinition acd: cm.values()){
             this.callbackMethods.put(acd.getTargetMethod().getDeclaringClass(), acd.getTargetMethod());
         }
         this.threadMethods.addAll(tc.values());
-        this.instrumentationPaths = instrumentationPaths;
     }
    
     
@@ -412,12 +405,12 @@ public class AndroidInstrumenter extends Instrumenter{
             this.isAndroidSlicer = true;
         }
         String staticLogFile = args[1];
-        initialize(args[2]);
+        initialize();
         runMethodTransformationPack();
-        int argLen = args.length-3;
+        int argLen = args.length-2;
         String newArgs[] = new String [argLen];
-        for (int ii = 3; ii < args.length; ii++) {
-            newArgs[ii-3]=args[ii];
+        for (int ii = 2; ii < args.length; ii++) {
+            newArgs[ii-2]=args[ii];
         }
         AnalysisLogger.log(true, "Soot args: {}", Arrays.asList(newArgs));
         soot.Main.main(newArgs);

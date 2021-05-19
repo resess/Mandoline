@@ -6,6 +6,7 @@ import mandoline.accesspath.AliasSet;
 import mandoline.utils.AnalysisLogger;
 import mandoline.utils.AnalysisCache;
 import mandoline.utils.AnalysisUtils;
+import mandoline.utils.Constants;
 import mandoline.graph.CalledChunk;
 import mandoline.statements.StatementInstance;
 import mandoline.statements.StatementList;
@@ -197,7 +198,7 @@ public class AliasAnalysis {
                 break;
             }
         }
-        AnalysisLogger.log(true, "Found a def {}", def);
+        AnalysisLogger.log(Constants.DEBUG, "Found a def {}", def);
         return def;
     }
 

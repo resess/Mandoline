@@ -60,7 +60,12 @@ public class ICDG {
     private Map <String, StatementInstance> mapKeyUnits = new LinkedHashMap<>();
     private Map <Integer, String> mapNoKey = new LinkedHashMap<>();
     private Map <String, Integer> mapKeyNo = new LinkedHashMap<>();
+    private List<StatementInstance> traceList = new ArrayList<>();
     private long lastLine;
+
+    public List<StatementInstance> getTraceList() {
+        return traceList;
+    }
 
     public ICDG(Map<Pair<SootMethod, Unit>, SootClass> setterCallbackMap, MultiMap<SootClass, AndroidCallbackDefinition> callbackMethods, Map<Pair<SootMethod, Unit>, String> threadCallers) {
         this.setterCallbackMap = setterCallbackMap;
@@ -129,6 +134,7 @@ public class ICDG {
                 mapKeyNo.put(ins[i].getUnitId(), ins[i].getLineNo());
                 mapKeyUnits.put(ins[i].getUnitId(), ins[i]);
                 mapNoKey.put(ins[i].getLineNo(), ins[i].getUnitId());
+                traceList.add(ins[i]);
             }
             i++;
         }

@@ -25,24 +25,9 @@ import com.google.common.base.Optional;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.io.FileUtils;
 import org.jgrapht.Graphs;
-import org.jgrapht.graph.DefaultWeightedEdge;
-import org.jgrapht.graph.SimpleDirectedWeightedGraph;
 
-import guru.nidi.graphviz.attribute.Attributes;
-import guru.nidi.graphviz.attribute.Font;
-import guru.nidi.graphviz.attribute.ForNodeLink;
-import guru.nidi.graphviz.attribute.Label;
-import guru.nidi.graphviz.attribute.LinkAttr;
-import guru.nidi.graphviz.attribute.Rank;
-import guru.nidi.graphviz.attribute.Style;
-import guru.nidi.graphviz.attribute.Rank.RankDir;
-import guru.nidi.graphviz.engine.Format;
-import guru.nidi.graphviz.engine.Graphviz;
-import guru.nidi.graphviz.engine.Rasterizer;
-import guru.nidi.graphviz.model.Graph;
-import guru.nidi.graphviz.model.LinkSource;
-import guru.nidi.graphviz.model.MutableGraph;
-import guru.nidi.graphviz.model.Node;
+
+
 import mandoline.accesspath.AccessPath;
 import mandoline.exceptions.InvalidCommandsException;
 import mandoline.framework.FrameworkModel;
@@ -58,8 +43,9 @@ import mandoline.statements.StatementInstance;
 import mandoline.utils.AnalysisCache;
 import mandoline.utils.AnalysisLogger;
 import mandoline.utils.CommandParser;
+import mandoline.utils.Constants;
 import soot.Local;
-import soot.ModulePathSourceLocator;
+// import soot.ModulePathSourceLocator;
 import soot.ModuleScene;
 import soot.PackManager;
 import soot.Scene;
@@ -76,7 +62,7 @@ import soot.jimple.infoflow.android.callbacks.AndroidCallbackDefinition;
 import soot.toolkits.scalar.Pair;
 import soot.jimple.toolkits.callgraph.VirtualCallSite;
 
-import static guru.nidi.graphviz.model.Factory.*;
+
 
 public class Slicer {
     public static final String SOOT_OUTPUT_STRING = System.getProperty("user.dir") + File.separator + "sootOutput/";
@@ -88,7 +74,25 @@ public class Slicer {
     Map <String, StatementInstance> mapInvokations = new LinkedHashMap<>();
     Set<String> dynamicPrint = new LinkedHashSet<>();
     static Slicer instance;
+    private String pathApk;
+    private String platformPath;
+    private String callbackFile;
+    private String outDir;
+    private String staticLogFile;
+    private String instrumenterMode;
+    private String mandolineLoggerJar;
+    private String fileToParse;
+    private String outFile;
+    private int backwardSlicePos;
+    private int forwardSlicePos;
+    private String variableString;
+    private List<String> variables = new ArrayList<>();
+    private SlicingWorkingSet workingSet;
 
+
+    public Slicer(){
+
+    }
     public static Slicer getInstance() {
         return instance;
     }
@@ -97,9 +101,83 @@ public class Slicer {
         return dynamicPrint;
     }
 
+    public void setPathApk(String pathApk) {
+        this.pathApk = pathApk;
+    }
+
+
+    public void setPlatformPath(String platformPath) {
+        this.platformPath = platformPath;
+    }
+
+    public void setCallbackFile(String callbackFile) {
+        this.callbackFile = callbackFile;
+    }
+
+    public void setOutDir(String outDir) {
+        this.outDir = outDir;
+        File outDirFile = new File(this.outDir);
+        outDirFile.mkdirs();
+        this.staticLogFile = this.outDir + File.separator + "static-log.log";
+    }
+
+    public void setInstrumenterMode(String instrumenterMode) {
+        this.instrumenterMode = instrumenterMode;
+    }
+
+    public void setMandolineLoggerJar(String mandolineLoggerJar) {
+        this.mandolineLoggerJar = mandolineLoggerJar;
+    }
+
+    public void setFileToParse(String fileToParse) {
+        this.fileToParse = fileToParse;
+        this.outFile = fileToParse+"_icdg.log";
+    }
+
+    public void setBackwardSlicePos(int backwardSlicePos) {
+        this.backwardSlicePos = backwardSlicePos;
+    }
+
+    public void setVariableString(String variableString) {
+        this.variableString = variableString;
+    }
+
+    public void setVariables(List<String> variables) {
+        this.variables = variables;
+    }
+
+    public String getStaticLogFile() {
+        return staticLogFile;
+    }
+
+    public Map<Pair<SootMethod, Unit>, String> getThreadCallers() {
+        return threadCallers;
+    }
+
+    public MultiMap<SootClass, AndroidCallbackDefinition> getCallbackMethods() {
+        return callbackMethods;
+    }
+
+    public Map<Pair<SootMethod, Unit>, SootClass> getSetterCallbackMap() {
+        return setterCallbackMap;
+    }
+
+    public void setDebug(boolean flag) {
+        Constants.DEBUG = flag;
+    }
+
+    public void setWorkingSet(SlicingWorkingSet workingSet) {
+        this.workingSet = workingSet;
+    }
+
+    public SlicingWorkingSet getWorkingSet() {
+        return workingSet;
+    }
+
+
     void printList(List <String> list, String outFile) {
         try {
-            AnalysisLogger.log(true, "Printing to {}", outFile);
+            AnalysisLogger.log(Constants.DEBUG, "Printing to {}", outFile);
         FileUtils.writeLines(new File(outFile), list);
         } catch (IOException e) {
             AnalysisLogger.error("Unable to print file {}, {}", outFile, e);
@@ -121,33 +199,36 @@ public class Slicer {
             if (mode == null || !(mode.equals("i") || mode.equals("g") || mode.equals("m") || mode.equals("md")|| mode.equals("as"))) {
                 throwParseException("Mode not provided / invalid mode");
             }
+            Slicer slicer = new Slicer();
+            slicer.setPathApk(commands.get("a"));
+            throwParseExceptionIfNull(slicer.pathApk, "Apk path not provided");
 
-            String pathApk = commands.get("a");
-            throwParseExceptionIfNull(pathApk, "Apk path not provided");
+            slicer.setPlatformPath(commands.get("p"));
 
-            String platformPath = commands.get("p");
+            slicer.setCallbackFile(commands.get("c"));
+ 
+            slicer.setOutDir(commands.get("o"));
+            throwParseExceptionIfNull(slicer.outDir, "Output directory path not provided");
 
-            String callbackFile = commands.get("c");
-
-            String outDir = commands.get("o");
-            throwParseExceptionIfNull(outDir, "Output directory path not provided");
-
-            File outDirFile = new File(outDir);
-            outDirFile.mkdirs();
-            String staticLogFile = commands.get("sl");
-            throwParseExceptionIfNull(staticLogFile, "Static log file path not provided");
-
-            boolean instrumented = instrument(startTime, commands, mode, pathApk, platformPath, callbackFile, outDir,
-                    staticLogFile);
+            boolean instrumented = false;
+            if(mode.equals("i")) {
+                instrumented = slicer.instrument(mode);
+                slicer.setInstrumenterMode(commands.get("im"));
+                throwParseExceptionIfNull(slicer.instrumenterMode, "instrumenter mode not provided");
+                slicer.setMandolineLoggerJar(commands.get("ml"));
+                if (slicer.mandolineLoggerJar == null) {
+                    throwParseExceptionIfNull(slicer.mandolineLoggerJar, "mandoline logger jar path not provided");
+                }
+            }
 
             if (instrumented) {
+                terminate(slicer.outDir, slicer.instrumenterMode, startTime);
                 return;
             }
 
-            String fileToParse = commands.get("t");
-            throwParseExceptionIfNull(fileToParse, "Trace file path not provided");
+            slicer.setFileToParse(commands.get("t"));
+            throwParseExceptionIfNull(slicer.fileToParse, "Trace file path not provided");
 
-            String outFile = fileToParse+"_icdg.log";
 
             if(mode.equals("g")) {
                 justTrace = true;
@@ -159,39 +240,30 @@ public class Slicer {
                 String tw = commands.get("tw");
                 throwParseExceptionIfNull(tw, "Taint-wrapper path not provided");
             }
-            List <Traces> trs = null;
-            try {
-                trs = Parser.readFile(fileToParse, staticLogFile);
-            } catch (IOException e) {
-                AnalysisLogger.error("Unable to read trace file {}", e);
-            }
-            String sootClassPath = commands.get("scp");
-            if (sootClassPath == null) {
-                sootClassPath = ".";
-            }
+            List <Traces> trs = Parser.readFile(slicer.fileToParse, slicer.staticLogFile);
 
-            Slicer slicer = new Slicer(pathApk, platformPath, callbackFile, sootClassPath);
+            slicer.prepare();
             Slicer.instance = slicer;
             ICDG icdg = new ICDG(slicer.setterCallbackMap, slicer.callbackMethods, slicer.threadCallers);
             icdg.createDCFG(trs);
 
-            printGraph(outFile, slicer, icdg);
+            slicer.printGraph(icdg);
 
             if(justTrace) {
-                terminate(outDir, mode, startTime);
+                terminate(slicer.outDir, mode, startTime);
                 return;
             }
 
-            int posToSlice = Integer.parseInt(commands.get("sp"));
-            String variableString = commands.get("sv");
-            if (variableString == null) {
-                variableString = "*";
+            slicer.setBackwardSlicePos(Integer.parseInt(commands.get("sp")));
+            slicer.setVariableString(commands.get("sv"));
+            if (slicer.variableString == null) {
+                slicer.variableString = "*";
             }
             String stubDroidPath = commands.get("sd");
             String taintWrapperPath = commands.get("tw");
-            int forwSlicePos = -1;
+            int forwardSlicePos = -1;
             if (commands.get("fw") != null) {
-                forwSlicePos = Integer.parseInt(commands.get("fw"));
+                forwardSlicePos = Integer.parseInt(commands.get("fw"));
             }
             
             
@@ -201,182 +273,99 @@ public class Slicer {
             boolean frameworkModel = true;
             boolean dataFlowsOnly = false;
             boolean controlFlowOnly = false;
-            boolean skipFirstCtrl = false;
-            boolean sliceOnce = false;
             if (commands.containsKey("data")) {
                 dataFlowsOnly = true;
             }
             if (commands.containsKey("ctrl")) {
                 controlFlowOnly = true;
             }
-            if (commands.containsKey("skip-first-ctrl")) {
-                skipFirstCtrl = true;
-            }
-            if (commands.containsKey("slice-once")) {
-                sliceOnce = true;
-            }
+            
 
             if (mode.equals("m")) {
                 staticAnalysis = true;
                 dynamicAnalysis = false;
                 frameworkModel = true;
-                AnalysisLogger.log(true, "Analysis type set to Mandoline static");
+                AnalysisLogger.log(Constants.DEBUG, "Analysis type set to Mandoline static");
             } else if (mode.equals("md")){
                 staticAnalysis = false;
                 dynamicAnalysis = true;
                 frameworkModel = true;
-                AnalysisLogger.log(true, "Analysis type set to Mandoline dynamic");
+                AnalysisLogger.log(Constants.DEBUG, "Analysis type set to Mandoline dynamic");
             } else if (mode.equals("mf")){
                 staticAnalysis = false;
                 dynamicAnalysis = false;
                 frameworkModel = true;
-                AnalysisLogger.log(true, "Analysis type set to Mandoline framework");
+                AnalysisLogger.log(Constants.DEBUG, "Analysis type set to Mandoline framework");
             } else if (mode.equals("as")){
                 staticAnalysis = false;
                 dynamicAnalysis = false;
                 frameworkModel = false;
-                AnalysisLogger.log(true, "Analysis type set to AndroidSlicer");
+                AnalysisLogger.log(Constants.DEBUG, "Analysis type set to AndroidSlicer");
             } else {
                 throwParseException("Invalid mode " + mode);
             }
+            String frameworkPath = commands.get("f");
+
+            
             FrameworkModel.setStubDroidPath(stubDroidPath);
             FrameworkModel.setTaintWrapperFile(taintWrapperPath);
+            if (frameworkPath != null) {
+                FrameworkModel.setExtraPath(frameworkPath);
+            }
 
-            StatementInstance stmt = icdg.getMapKeyUnits().get(icdg.getMapNoKey().get(posToSlice));
-            ArrayList<String> variables = new ArrayList<>();
-            if (!variableString.equals("*")) {
-                String[] split = variableString.split("-");
+            StatementInstance stmt = icdg.getMapKeyUnits().get(icdg.getMapNoKey().get(slicer.backwardSlicePos));
+            
+            List<String> variables = new ArrayList<>();
+            if (!slicer.variableString.equals("*")) {
+                String[] split = slicer.variableString.split("-");
                 for (int i = 0; i < split.length; i++) {
                     variables.add("$"+split[i]);
                 }
             }
+            slicer.setVariables(variables);
+
             Set<AccessPath> accessPaths = new HashSet<>();
-            for (String v: variables) {
+            for (String v: slicer.variables) {
                 accessPaths.add(new AccessPath(v, new Type(){
                     private static final long serialVersionUID = 1L;
                     @Override
                     public String toString() {
                         return "SlicingCriterionType";
                     }
-                }, posToSlice, AccessPath.NOT_DEFINED, stmt));
+                }, slicer.backwardSlicePos, AccessPath.NOT_DEFINED, stmt));
             }
 
-            AnalysisLogger.log(true, "Slicing criterion: (" + posToSlice + ", " + variables + ")");
-            AnalysisLogger.log(true, "size of the trace after loading:"+icdg.getMapKeyNo().keySet().size());
-            AnalysisLogger.log(true, "Slicing from statement:"+ icdg.getMapNoKey().get(posToSlice));
+            AnalysisLogger.log(Constants.DEBUG, "Slicing criterion: (" + slicer.backwardSlicePos + ", " + variables + ")");
+            AnalysisLogger.log(Constants.DEBUG, "size of the trace after loading:"+icdg.getMapKeyNo().keySet().size());
+            AnalysisLogger.log(Constants.DEBUG, "Slicing from statement:"+ icdg.getMapNoKey().get(slicer.backwardSlicePos));
 
-            SliceMethod sliceMethod = new SliceMethod(icdg, staticAnalysis, dynamicAnalysis, frameworkModel, dataFlowsOnly, controlFlowOnly, skipFirstCtrl, sliceOnce);
-            DynamicSlice dynamicSlice = sliceMethod.slice(stmt, accessPaths);
-            if (forwSlicePos != -1) {
-                dynamicSlice = dynamicSlice.chop(forwSlicePos, icdg);
+
+            slicer.setWorkingSet(new SlicingWorkingSet(false));
+            DynamicSlice dynamicSlice = slicer.slice(icdg, staticAnalysis, dynamicAnalysis, frameworkModel, dataFlowsOnly, controlFlowOnly, stmt, accessPaths, slicer.getWorkingSet());
+            if (forwardSlicePos != -1) {
+                dynamicSlice = dynamicSlice.chop(forwardSlicePos, icdg);
             }
             slicer.dynamicPrint = new LinkedHashSet<>();
-            printSlices(slicer, dynamicSlice);
-            // printSliceGraph(dynamicSlice);
-            printDotGraph(outDir, dynamicSlice);
+            SlicePrinter.printSlices(dynamicSlice);
+            SlicePrinter.printSliceGraph(dynamicSlice);
+            SlicePrinter.printDotGraph(slicer.outDir, dynamicSlice);
+            SlicePrinter.printSliceLines(slicer.outDir, dynamicSlice);
+            SlicePrinter.printRawSlice(slicer.outDir, dynamicSlice);
             DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy_MM_dd_HH_mm_ss");
             LocalDateTime now = LocalDateTime.now();
-            String resultFileName = outDir + File.separator + "result_" +mode+"_"+ dtf.format(now) + ".csv";
+            String resultFileName = slicer.outDir + File.separator + "result_" +mode+"_"+ dtf.format(now) + ".csv";
             SlicePrinter.printToCSV(resultFileName, dynamicSlice);
 
-        terminate(outDir, mode, startTime);
+        terminate(slicer.outDir, mode, startTime);
+    }
+    public DynamicSlice slice(ICDG icdg, boolean staticAnalysis, boolean dynamicAnalysis,
+            boolean frameworkModel, boolean dataFlowsOnly, boolean controlFlowOnly, StatementInstance start, Set<AccessPath> variables, SlicingWorkingSet workingSet) {
+        return new SliceMethod(icdg, staticAnalysis, dynamicAnalysis, frameworkModel, dataFlowsOnly, controlFlowOnly, workingSet).slice(start, variables);
     }
 
-    private static void printDotGraph(String outDir, DynamicSlice dynamicSlice) {
-        MutableGraph g = mutGraph("Dynamic Slice").setDirected(true);
-        // Map<SootMethod, List<Node>> clusters = new LinkedHashMap<>();
-        for(Map.Entry<Pair<StatementInstance, AccessPath>, Pair<StatementInstance, AccessPath>> entry: dynamicSlice.entrySet()) {
-            StatementInstance sliceNode = entry.getKey().getO1();
-            AccessPath sliceEdge = entry.getValue().getO2();
-            StatementInstance sourceNode = entry.getValue().getO1();
-            Style<ForNodeLink> edgeStyle = Style.SOLID;
-            if (sliceEdge.isEmpty()) {
-                edgeStyle = Style.DASHED;
-            }
-            String sourceStr = sourceNode.getUnit().toString();
-            if (sourceStr.contains("goto")) {
-                sourceStr = sourceStr.split("goto")[0];
-            }
-            String destStr = sliceNode.getUnit().toString();
-            if (destStr.contains("goto")) {
-                destStr = destStr.split("goto")[0];
-            }
-            String edgeStr = "    " + sliceEdge.getPathString();
 
-            Node newNode = node(String.valueOf(sourceNode.getJavaSourceLineNo()) + ": " + sourceStr);
-            if (sourceNode.equals(sliceNode)) {
-                g.add(newNode);
-            } else {
-                g.add(newNode.link(
-                    to(node(String.valueOf(sliceNode.getJavaSourceLineNo()) + ": " + destStr)).with(edgeStyle, Label.of(edgeStr))));
-            }
-            // List<Node> clusterNodes = new ArrayList<>();
-            // if (clusters.containsKey(sourceNode.getMethod())) {
-            //     clusterNodes = clusters.get(sourceNode.getMethod());
-            // }
-            // clusterNodes.add(newNode);
-            // clusters.put(sourceNode.getMethod(), clusterNodes);
-            // clusterNodes = new ArrayList<>();
-            // if (clusters.containsKey(sliceNode.getMethod())) {
-            //     clusterNodes = clusters.get(sliceNode.getMethod());
-            // }
-            // clusterNodes.add(newNode);
-            // clusters.put(sliceNode.getMethod(), clusterNodes);
-        }
-        // for (Map.Entry<SootMethod, List<Node>> cluster: clusters.entrySet()) {
-        //     MutableGraph subG = mutGraph(cluster.getKey().getSignature()).setCluster(true);
-        //     for (Node n: cluster.getValue()) {
-        //         subG.add(n);
-        //     }
-        //     g.add(subG);
-        // }
-        try {
-            // Graphviz.fromGraph(g).render(Format.SVG).toFile(new File(outDir + File.separator + "slice-graph.svg"));
-            Graphviz.fromGraph(g).rasterize(Rasterizer.builtIn("pdf")).toFile(new File(outDir + File.separator + "slice-graph.pdf"));
-        } catch (IOException e) {
-            AnalysisLogger.warn(true, "IOException when writing slice graph file: {}", e.getMessage());
-        }
-    }
-
-    private static void printSliceGraph(DynamicSlice dynamicSlice) {
-        SimpleDirectedWeightedGraph<Integer, DefaultWeightedEdge> graph = dynamicSlice.getChopGraph();
-        AnalysisLogger.log(true, "Graph:");
-        for (Integer v: graph.vertexSet()) {
-            List<Integer> nodes = Graphs.predecessorListOf(graph, v);
-            for (Integer node: nodes) {
-                AnalysisLogger.log(true, "{} --> {}", v, node);
-            }
-        }
-        AnalysisLogger.log(true, "Graph End");
-    }
-
-    private static void printSlices(Slicer slicer, DynamicSlice dynamicSlice) {
-        List<String> staticPrint = new ArrayList<>();
-        Set<String> staticSlice = new LinkedHashSet<>();
-        
-        for(Map.Entry<Pair<StatementInstance, AccessPath>, Pair<StatementInstance, AccessPath>> entry: dynamicSlice.entrySet()) {
-            Pair<StatementInstance, AccessPath> iup = entry.getKey();
-            StatementInstance iu = iup.getO1();
-            slicer.dynamicPrint.add(iu.toString());
-            String toPrint = iu.getMethod().getSignature() + ":" + iu.getUnit().getJavaSourceStartLineNumber() + "-" + iu.getUnit().getJavaSourceStartColumnNumber() + ":" + iu.getUnit().toString(); 
-            if (!staticSlice.contains(toPrint)) {
-                staticSlice.add(toPrint);
-                staticPrint.add(toPrint);
-                // staticPrint.add("   from:" + entry.getValue());
-            }
-        }
-        AnalysisLogger.log(true, "Printing dynamic slice:");
-        for (String s: slicer.dynamicPrint) {
-            AnalysisLogger.log(true, "{}", s);
-        }
-        AnalysisLogger.log(true, "Printing static slice:");
-        for (String s: staticPrint) {
-            AnalysisLogger.log(true, "{}", s);
-        }
-    }
-
-    private static void printGraph(String outFile, Slicer slicer, ICDG icdg) {
-        AnalysisLogger.log(true, "Printing graph...");
+    private void printGraph(ICDG icdg) {
+        AnalysisLogger.log(Constants.DEBUG, "Printing graph...");
         List <String> listTOPrint = new ArrayList<>();
         Iterator<Entry<String, Integer>> entries = icdg.getMapKeyNo().entrySet().iterator();
         while (entries.hasNext()) {
@@ -384,72 +373,49 @@ public class Slicer {
             String key = thisEntry.getKey();
             listTOPrint.add(key + ":PRED:"+Graphs.predecessorListOf(icdg.getGraph(), thisEntry.getValue())+ ":SUCC:"+Graphs.successorListOf(icdg.getGraph(), thisEntry.getValue()) + ":TID:"+icdg.getMapKeyUnits().get(key).getThreadID());
         }
-        slicer.printList(listTOPrint, outFile);
-        AnalysisLogger.log(true, "Printing Complete.");
+        printList(listTOPrint, outFile);
+        AnalysisLogger.log(Constants.DEBUG, "Printing Complete.");
     }
 
-    private static boolean instrument(long startTime, Map<String, String> commands, String mode, String pathApk,
-            String platformPath, String callbackFile, String outDir, String staticLogFile) {
+    private boolean instrument(String mode) {
         boolean shouldTerminate = false;
-        if(mode.equals("i")) {
-            if (new File(SOOT_OUTPUT_STRING).isDirectory()) {
-                deleteFolder(new File(SOOT_OUTPUT_STRING));
-            }
+        
+        if (new File(SOOT_OUTPUT_STRING).isDirectory()) {
+            deleteFolder(new File(SOOT_OUTPUT_STRING));
+        }
 
-            String instrumenterMode = commands.get("im");
-            throwParseExceptionIfNull(instrumenterMode, "instrumenter mode not provided");
-            
-            String packageName = commands.get("pk");
-            
+        String instrumentOptions = parseInstrumentationMode(instrumenterMode);
 
-            String mandolineLoggerJar = commands.get("ml");
-            if (mandolineLoggerJar == null) {
-                throwParseExceptionIfNull(mandolineLoggerJar, "mandoline logger jar path not provided");
-            }
-            String instrumentOptions = parseInstrumentationMode(instrumenterMode);
-            
-            String sootClassPath = commands.get("scp");
-            if (sootClassPath == null) {
-                sootClassPath = ".";
-            }
-
-            
-            String[] instrumenterArgs = new String[0];
+        String[] instrumenterArgs = new String[0];
+        if (pathApk.endsWith(".apk")) {
+            String[] instrumenterArgsTemp = {instrumentOptions, staticLogFile, "-w", "-allow-phantom-refs", "-process-multiple-dex", "-android-jars", platformPath, "-src-prec", "apk", "-output-format", "dex", "-process-dir", pathApk, "-process-dir", mandolineLoggerJar};
+            instrumenterArgs = instrumenterArgsTemp;
+        } else if (pathApk.endsWith(".jar")) {
+            String[] instrumenterArgsTemp = {instrumentOptions, staticLogFile, "-cp", "VIRTUAL_FS_FOR_JDK", "-pp", "-process-dir", pathApk, "-process-dir", mandolineLoggerJar};
+            instrumenterArgs = instrumenterArgsTemp;
+        } else {
+            throwParseException("Not and apk or jar file!");
+        }
+        
+        if (instrumentOptions.contains("jimple")) {
+            JimpleWriter jimpleWriter = new JimpleWriter(outDir);
+            jimpleWriter.start(pathApk);
+            shouldTerminate = true;
+        } else {
             if (pathApk.endsWith(".apk")) {
-                throwParseExceptionIfNull(packageName, "package name not provided");
-                String[] instrumenterArgsTemp = {instrumentOptions, staticLogFile, packageName, "-w", "-allow-phantom-refs", "-process-multiple-dex", "-android-jars", platformPath, "-src-prec", "apk", "-output-format", "dex", "-process-dir", pathApk, "-process-dir", mandolineLoggerJar};
-                instrumenterArgs = instrumenterArgsTemp;
+                throwParseExceptionIfNull(platformPath, "Platforms path not provided");
+                throwParseExceptionIfNull(callbackFile, "Callback file path not provided");
+                prepare();
+                Instrumenter instrumenter = new AndroidInstrumenter(callbackMethods, threadCallers);
+                instrumenter.start(instrumenterArgs);
             } else if (pathApk.endsWith(".jar")) {
-
-                String[] instrumenterArgsTemp = {instrumentOptions, staticLogFile, packageName, "-cp", "VIRTUAL_FS_FOR_JDK", "-pp", "-process-dir", pathApk, "-process-dir", mandolineLoggerJar};
-                instrumenterArgs = instrumenterArgsTemp;
+                String jarName = outDir + File.separator + new File(pathApk).getName().replace(".jar", "_" +mode + ".jar");
+                Instrumenter instrumenter = new JavaInstrumenter(jarName);
+                instrumenter.start(instrumentOptions, staticLogFile, pathApk, mandolineLoggerJar);
             } else {
                 throwParseException("Not and apk or jar file!");
             }
-            
-            if (instrumentOptions.contains("jimple")) {
-                JimpleWriter jimpleWriter = new JimpleWriter(outDir);
-                jimpleWriter.start(pathApk);
-                terminate(outDir, instrumenterMode, startTime);
-                shouldTerminate = true;
-            } else {
-                String instrumentationPath = commands.get("instr");
-                if (pathApk.endsWith(".apk")) {
-                    throwParseExceptionIfNull(platformPath, "Platforms path not provided");
-                    throwParseExceptionIfNull(callbackFile, "Callback file path not provided");
-                    Slicer slicer = new Slicer(pathApk, platformPath, callbackFile, sootClassPath);
-                    Instrumenter instrumenter = new AndroidInstrumenter(instrumentationPath, slicer.callbackMethods, slicer.threadCallers);
-                    instrumenter.start(instrumenterArgs);
-                } else if (pathApk.endsWith(".jar")) {
-                    String jarName = outDir + File.separator + new File(pathApk).getName().replace(".jar", "_" +mode + ".jar");
-                    Instrumenter instrumenter = new JavaInstrumenter(jarName, instrumentationPath);
-                    instrumenter.start(instrumentOptions, staticLogFile, pathApk, mandolineLoggerJar);
-                } else {
-                    throwParseException("Not and apk or jar file!");
-                }
-                terminate(outDir, instrumenterMode, startTime);
-                shouldTerminate = true;
-            }
+            shouldTerminate = true;
         }
         return shouldTerminate;
     }
@@ -470,7 +436,7 @@ public class Slicer {
     }
 
     private static void throwParseException(String message) {
-        AnalysisLogger.log(true, "Invalid command line options: {}", message);
+        AnalysisLogger.log(Constants.DEBUG, "Invalid command line options: {}", message);
         HelpFormatter formatter = new HelpFormatter();
         formatter.printHelp(CommandParser.CMD_LINE_SYNTAX, CommandParser.getOptions());
         throw new InvalidCommandsException();
@@ -503,7 +469,7 @@ public class Slicer {
         
         long endTime = System.nanoTime();
         double totalTime = (endTime-startTime)/1000000000.0;
-        AnalysisLogger.log(true, "Time: {}", totalTime);
+        AnalysisLogger.log(Constants.DEBUG, "Time: {}", totalTime);
     }
 
     private static void deleteFolder(File folder) {
@@ -514,21 +480,21 @@ public class Slicer {
         }
     }
 
-    public Slicer(String apkPath, String platFormDir, String callbackFile, String sootClassPath) {
+    public void prepare() {
         AnalysisCache.reset();
-        if (apkPath.endsWith(".apk")) {
-            prepareProcessingApk(apkPath, platFormDir, callbackFile);
-        } else if (apkPath.endsWith(".jar")) {
-            prepareProcessingJAR(apkPath, sootClassPath);
+        if (pathApk.endsWith(".apk")) {
+            prepareProcessingApk(pathApk, platformPath, callbackFile);
+        } else if (pathApk.endsWith(".jar")) {
+            prepareProcessingJAR(pathApk);
         } else {
             throwParseException("Not and apk or jar file!");
         }
         
     }
 
-    private void prepareProcessingJAR(String apkPath, String sootClassPath) {
+    private void prepareProcessingJAR(String apkPath) {
         
-        AnalysisLogger.log(true, "Processing JAR: {}", apkPath);
+        AnalysisLogger.log(Constants.DEBUG, "Processing JAR: {}", apkPath);
         soot.G.reset();
         Options.v().set_prepend_classpath(true);
         // Options.v().set_soot_classpath("VIRTUAL_FS_FOR_JDK");
@@ -547,22 +513,22 @@ public class Slicer {
         Options.v().setPhaseOption("jb", "use-original-names:true");
         Scene.v().loadNecessaryClasses();
         PackManager.v().runPacks();
-        AnalysisLogger.log(true, "Done processing the JAR");
+        AnalysisLogger.log(Constants.DEBUG, "Done processing the JAR");
     }
 
     public static void loadClassToSoot(String name, String module) {
         try {
             SootClass c = ModuleScene.v().loadClassAndSupport(name, Optional.of(module));
             c.setApplicationClass();
-            AnalysisLogger.log(true, "Loaded Class: {}", name);
+            AnalysisLogger.log(Constants.DEBUG, "Loaded Class: {}", name);
         } catch (Exception e) {
-            AnalysisLogger.log(true, "Can't load class: {}", name);
+            AnalysisLogger.log(Constants.DEBUG, "Can't load class: {}", name);
         }
         
    }
 
     private void prepareProcessingApk(String apkPath, String platFormDir, String callbackFile) {
-        AnalysisLogger.log(true, "Processing APK: {}", apkPath);
+        AnalysisLogger.log(Constants.DEBUG, "Processing APK: {}", apkPath);
         InfoflowAndroidConfiguration config = new InfoflowAndroidConfiguration();
         config.getAnalysisFileConfig().setTargetAPKFile(apkPath);
         config.getAnalysisFileConfig().setAndroidPlatformDir(platFormDir);
@@ -595,7 +561,7 @@ public class Slicer {
                 }
             }
         }
-        AnalysisLogger.log(true, "Thread connections: {}", threadCallers);
-        AnalysisLogger.log(true, "FlowDroid DummyMain: {}", entryPoint.getActiveBody());
+        AnalysisLogger.log(Constants.DEBUG, "Thread connections: {}", threadCallers);
+        AnalysisLogger.log(Constants.DEBUG, "FlowDroid DummyMain: {}", entryPoint.getActiveBody());
     } 
 }

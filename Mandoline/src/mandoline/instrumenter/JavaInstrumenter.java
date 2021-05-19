@@ -86,10 +86,9 @@ public class JavaInstrumenter extends Instrumenter {
     Chain<SootClass> libClasses = null;
     String jarName;
 
-    public JavaInstrumenter(String jarName, String instrumentationPaths) {
+    public JavaInstrumenter(String jarName) {
         // this.threadMethods.addAll(tc.values());
         this.jarName = new File(jarName).getAbsolutePath();
-        this.instrumentationPaths = instrumentationPaths;
     }
 
 

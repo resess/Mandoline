@@ -19,14 +19,17 @@ import soot.toolkits.graph.pdg.PDGRegion;
 import soot.SootMethod;
 import soot.jimple.GotoStmt;
 
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 
 public class ControlDominator{
 
     static Set<SootMethod> outOfMemMethods = new LinkedHashSet<>();
+    static Map<SootMethod, EnhancedUnitGraph> computedGraphs = new LinkedHashMap<>();
     private ControlDominator() {
         throw new IllegalStateException("Utility class");
     }
@@ -42,8 +45,51 @@ public class ControlDominator{
         if (outOfMemMethods.contains(stmt.getMethod())) {
             return candidateIu;
         }
+        ControlDomRunner cdr = new ControlDomRunner(stmt, chunk, icdg, candidateIu);
+        Thread t = new Thread(cdr);
         try {
-            EnhancedUnitGraph cug = new EnhancedUnitGraph(stmt.getMethod().getActiveBody());
+            t.start();
+            t.join(30*1000);
+            t.interrupt();
+        } catch (InterruptedException e) {
+            // pass
+        }
+        candidateIu = cdr.getCandidateIu();
+        // candidateIu = getControlDom(stmt, chunk, icdg, candidateIu);
+        return candidateIu;
+    }
+
+
+    static class ControlDomRunner implements Runnable {
+        StatementInstance stmt; StatementMap chunk; ICDG icdg; StatementInstance candidateIu;
+        ControlDomRunner (StatementInstance stmt, StatementMap chunk, ICDG icdg, StatementInstance candidateIu){
+            this.stmt = stmt;
+            this.chunk = chunk;
+            this.icdg = icdg;
+            this.candidateIu = candidateIu;
+        }
+        @Override
+        public void run() {
+            this.candidateIu = getControlDom(stmt, chunk, icdg, candidateIu);
+        }
+
+        public StatementInstance getCandidateIu() {
+            return candidateIu;
+        }
+    }
+
+
+    private static StatementInstance getControlDom(StatementInstance stmt, StatementMap chunk, ICDG icdg, StatementInstance candidateIu) {
+        try {
+            EnhancedUnitGraph cug;
+            if (computedGraphs.containsKey(stmt.getMethod())) {
+                cug = computedGraphs.get(stmt.getMethod());
+            } else {
+                // AnalysisLogger.log(true, "New method: {}", stmt.getMethod());
+                cug = new EnhancedUnitGraph(stmt.getMethod().getActiveBody());
+                computedGraphs.put(stmt.getMethod(), cug);
+            }
+            
             HashMutablePDG pdg = new HashMutablePDG(cug);
             for(PDGRegion r: pdg.getPDGRegions()) {
                 PDGNode p = r.getCorrespondingPDGNode();

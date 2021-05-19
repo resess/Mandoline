@@ -27,9 +27,8 @@ public class Parser {
         throw new IllegalStateException("Utility class");
       }
 
-    public static List <Traces> readFile(String fileName, String staticLogFile) throws IOException {
-        List <Traces> listTraces = expandTrace(staticLogFile, fileName);
-        return listTraces;
+    public static List <Traces> readFile(String fileName, String staticLogFile) {
+        return expandTrace(staticLogFile, fileName);
     }
 
     public static List <Traces> expandTrace(String staticLogFile, String traceName) {

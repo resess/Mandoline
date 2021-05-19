@@ -221,4 +221,4 @@ Khaled Ahmed, Mieszko Lis, and Julia Rubin. [MANDOLINE: Dynamic Slicing of Andro
 
 # Contact
 
-If you experience any issues, please submit an issue or contact us at khaledea@ece.ub.ca
+If you experience any issues, please submit an issue or contact us at khaledea@ece.ubc.ca

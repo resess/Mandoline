@@ -74,6 +74,9 @@ public class StatementInstance {
         return javaSourceLineNo;
     }
 
+    public String getJavaSourceFile() {
+        return javaSourceFile;
+    }
 
     public String getUnitId() {
         if (stringRepresentation == null) {
@@ -131,6 +134,9 @@ public class StatementInstance {
         this.returnChunk = returnChunk;
     }
 
+    public void setThreadID(Long threadID) {
+        this.threadID = threadID;
+    }
 
     public boolean classEquals(StatementInstance other) {
         return this.sm.getDeclaringClass().equals(other.getMethod().getDeclaringClass());

@@ -154,7 +154,7 @@ def parse():
     args = parser.parse_args()
     return {
         "jarfile": args.jarfile, "outdir": args.outdir, "backward_criterion": args.backward_criterion, "variables": args.variables,
-        "source_map": args.source_map, "data_only": args.data_only, "ctrl_only": args.ctrl_only, "test_class": args.test_class, 
+        "data_only": args.data_only, "ctrl_only": args.ctrl_only, "test_class": args.test_class, 
         "test_method": args.test_method, "main_class_args": args.main_class_args, "dependencies": args.dependencies, "framework_models": args.framework_models
     }
 

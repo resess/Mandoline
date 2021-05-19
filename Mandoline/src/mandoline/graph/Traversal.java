@@ -331,13 +331,8 @@ public class Traversal {
 
 
     public int getCaller (int pos) {
-        boolean debug = false;
-        if (pos == 16606) {
-            debug = true;
-        }
         int startPos = pos;
         Integer cachedPos = AnalysisCache.getFromCallerCache(startPos);
-        AnalysisLogger.log(debug, "Cached caller is {}", icdg.mapNoUnits(cachedPos));
         if (cachedPos != null) {
             return cachedPos;
         }
@@ -346,9 +341,7 @@ public class Traversal {
         int newPos = pos;
         while(pos>=0) {
             iu = icdg.getMapKeyUnits().get(icdg.getMapNoKey().get(pos));
-            AnalysisLogger.log(debug, "Inspecting {}", iu);
             if (iu!=null && !iu.getMethod().getSignature().equals(currentMethod)) {
-                AnalysisLogger.log(debug, "breaking, diff method");
                 break;
             }
             newPos = previousFlowEdge(pos, newPos);
@@ -356,7 +349,6 @@ public class Traversal {
                 pos = newPos;
             } else {
                 pos = checkForCaller(pos);
-                AnalysisLogger.log(debug, "breaking, has caller");
                 break;
             }
         }

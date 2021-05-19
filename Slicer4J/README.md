@@ -95,9 +95,9 @@ The following is an example for defining your own  method models.
 For the methods in this class:
 ```Java
 package com.myproject;
-class Myclass extends MyOtherClass{
+class MyClass extends MyOtherClass{
     String field;
-    public Myclass put(String val) {
+    public MyClass put(String val){
         this.field = val;
     }
     public String get(){
@@ -106,7 +106,7 @@ class Myclass extends MyOtherClass{
 }
 ```
 
-create an XML file named "com.myproject.Myclass.xml" and place it in a folder containing your method models, this is the folder we pass to Slicer4J using the `-mod` option
+create an XML file named "com.myproject.MyClass.xml" and place it in a folder containing your method models, this is the folder we pass to Slicer4J using the `-mod` option
 
 For example, here's the model for the above class
 ```xml
@@ -114,11 +114,11 @@ For example, here's the model for the above class
 <summary fileFormatVersion="101">
 <hierarchy superClass="com.myproject.MyOtherClass" />
   <methods>
-    <method id="com.myproject.Myclass put(java.lang.String)">
+    <method id="com.myproject.MyClass put(java.lang.String)">
       <flows>
         <flow>
           <from sourceSinkType="Parameter" ParameterIndex="0" />
-          <to sourceSinkType="Field" AccessPath="[com.myproject.Myclass: java.lang.String field]"
+          <to sourceSinkType="Field" AccessPath="[com.myproject.MyClass: java.lang.String field]"
           	AccessPathTypes="java.lang.String" />
         </flow>
         <flow>

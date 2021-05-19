@@ -36,9 +36,7 @@ public class CommandParser {
         options.addOption("scp", "soot-class-path", true, "Soot class path if soot compains about missing dependencies"); // scp
         options.addOption("data", "data-only", false, "Track data-flow dependence only"); // data
         options.addOption("ctrl", "Control-only", false, "Track control dependence only"); // data
-        options.addOption("sfc", "skip-first-control", false, "Skip first control-flow depenence"); // data
-        options.addOption("instr", "instrumentation-packages", true, "Packages to instrument"); // data
-        options.addOption("once", "slice-once", false, "Get immediate dependence only"); // data
+        options.addOption("f", "framework", true, "Path to folder with extra framework methods"); // path of extra framework methods
     }
 
 
@@ -55,7 +53,7 @@ public class CommandParser {
                 formatter.printHelp(CMD_LINE_SYNTAX, options);
                 return parsed;
             }
-            String[] optionTags = {"m", "a", "p", "c", "pk", "ml", "t", "sp", "sv", "o", "sd", "tw", "im", "sl", "fw", "scp", "instr"};
+            String[] optionTags = {"m", "a", "p", "c", "pk", "ml", "t", "sp", "sv", "o", "sd", "tw", "im", "sl", "fw", "f"};
             for (String opt: Arrays.asList(optionTags)) {
                 String value = cmd.getOptionValue(opt);
                 if (value != null) {
