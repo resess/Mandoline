@@ -212,13 +212,13 @@ public class Slicer {
 
             boolean instrumented = false;
             if(mode.equals("i")) {
-                instrumented = slicer.instrument(mode);
                 slicer.setInstrumenterMode(commands.get("im"));
                 throwParseExceptionIfNull(slicer.instrumenterMode, "instrumenter mode not provided");
                 slicer.setMandolineLoggerJar(commands.get("ml"));
                 if (slicer.mandolineLoggerJar == null) {
                     throwParseExceptionIfNull(slicer.mandolineLoggerJar, "mandoline logger jar path not provided");
                 }
+                instrumented = slicer.instrument(mode);
             }
 
             if (instrumented) {
