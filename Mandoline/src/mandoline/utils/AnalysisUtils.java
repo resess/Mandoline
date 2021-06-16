@@ -10,7 +10,9 @@ import mandoline.statements.StatementInstance;
 import soot.ArrayType;
 import soot.PrimType;
 import soot.Type;
+import soot.Unit;
 import soot.Value;
+import soot.jimple.IdentityStmt;
 import soot.jimple.IfStmt;
 import soot.jimple.InvokeExpr;
 import soot.jimple.Stmt;
@@ -100,6 +102,24 @@ public class AnalysisUtils {
         if (stmt.getMethod().getDeclaringClass().getName().startsWith(Constants.ANDROID_LIBS) || var.getField().equals("mContext")) {
             return true;
         }
+        return false;
+    }
+
+
+    public static boolean isMethodParameter(StatementInstance si, AccessPath ap) {
+        for (Unit uu: si.getMethod().getActiveBody().getUnits()) {
+            if (uu instanceof IdentityStmt) {
+                if (uu.toString().contains("@this") || uu.toString().contains("@parameter")) {
+                    String base = uu.getDefBoxes().get(0).getValue().toString();
+                    if (ap.getPathString().equals(base)) {
+                        return true;
+                    }
+                }
+            } else {
+                break;
+            }
+        }
+
         return false;
     }
 }

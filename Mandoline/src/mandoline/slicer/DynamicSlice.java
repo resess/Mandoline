@@ -92,7 +92,10 @@ public class DynamicSlice
         
 
         chopGraph.addVertex(key.getO1().getLineNo());
-        // chopGraph.addVertex(value.getO1().getLineNo());
+        if (!chopGraph.containsVertex(value.getO1().getLineNo())) {
+            chopGraph.addVertex(value.getO1().getLineNo());
+        }
+        
         
         if (key.getO1().getLineNo() != value.getO1().getLineNo()) {
             // AnalysisLogger.log(true, "Added edge {} --> {}", key.getO1().getLineNo(), value.getO1().getLineNo());
@@ -179,23 +182,20 @@ public class DynamicSlice
         return chopGraph;
     }
 
-    public DynamicSlice chop(int forwSlicePos, ICDG icdg) {
+    public SimpleDirectedWeightedGraph<Integer, DefaultWeightedEdge> chop(int forwSlicePos, ICDG icdg) {
 
         // AnalysisLogger.log(true, "Graph:");
         // for (Integer v: chopGraph.vertexSet()) {
         //     List<Integer> nodes = Graphs.successorListOf(chopGraph, v);
         //     for (Integer node: nodes) {
-        //         // AnalysisLogger.log(true, "{} --> {}", v, node);
+        //         AnalysisLogger.log(true, "{} --> {}", v, node);
         //     }
         // }
 
-        DynamicSlice chop = new DynamicSlice();
-        chop.chopGraph = chopGraph;
-        chop.methodOfStatement = methodOfStatement;
-        chop.edgeTypes = edgeTypes;
-        // AnalysisLogger.log(true, "Chopping from {}", forwSlicePos);
+        SimpleDirectedWeightedGraph<Integer, DefaultWeightedEdge> chop = new SimpleDirectedWeightedGraph<>(DefaultWeightedEdge.class);
+        AnalysisLogger.log(true, "Chopping from {}", forwSlicePos);
         if (!chopGraph.containsVertex(forwSlicePos)) {
-            // AnalysisLogger.log(true, "No vertix :(");
+            AnalysisLogger.log(true, "No vertix :(");
             return chop;
         }
         
@@ -204,35 +204,45 @@ public class DynamicSlice
                 addToChop(n, chop, icdg);
             }
         }
-        return chop.traceOrder();
+        return chop;
     }
 
-    private void addToChop(Pair<Pair<StatementInstance, AccessPath>, Pair<StatementInstance, AccessPath>>start, DynamicSlice chop, ICDG icdg) {
-        // AnalysisLogger.log(true, "Adding to chop: {}", start);
+    private void addToChop(Pair<Pair<StatementInstance, AccessPath>, Pair<StatementInstance, AccessPath>> start, SimpleDirectedWeightedGraph<Integer, DefaultWeightedEdge> chop, ICDG icdg) {
         Pair<StatementInstance, AccessPath> next = start.getO2();
-        if (!chop.chopGraph.containsEdge(start.getO1().getO1().getLineNo(), next.getO1().getLineNo())) {
-            chop.add(start.getO1(), next);
+        int startPos = start.getO1().getO1().getLineNo();
+        int nextPos = next.getO1().getLineNo();
+        if ((!chop.containsEdge(startPos, nextPos)) && (startPos != nextPos)) {
+            // AnalysisLogger.log(true, "Adding to chop: {} --> {}", startPos, nextPos);
+            chop.addVertex(startPos);
+            chop.addVertex(nextPos);
+            chop.addEdge(startPos, nextPos);
             addCallerToChop(start, chop);
         } else {
             return;
         }
-        int pos = start.getO1().getO1().getLineNo();
-        List<Integer> nodes = Graphs.successorListOf(chopGraph, pos);
+        List<Integer> nodes = Graphs.successorListOf(chopGraph, nextPos);
+        // AnalysisLogger.log(true, "Successors are: {}", nodes);
         for (Integer node: nodes) {
-            for (Pair<Pair<StatementInstance, AccessPath>, Pair<StatementInstance, AccessPath>> n: this) {
-                if (n.getO1().getO1().getLineNo() == node) {
-                    addToChop(n, chop, icdg);
+            if (!chop.containsVertex(node)) {
+                for (Pair<Pair<StatementInstance, AccessPath>, Pair<StatementInstance, AccessPath>> n: this) {
+                    if (n.getO1().getO1().getLineNo() == node) {
+                        // AnalysisLogger.log(true, "Recursive call on: {}", n);
+                        addToChop(n, chop, icdg);
+                    }
                 }
             }
         }
     }
 
-    private void addCallerToChop(Pair<Pair<StatementInstance, AccessPath>, Pair<StatementInstance, AccessPath>> start, DynamicSlice chop) {
+    private void addCallerToChop(Pair<Pair<StatementInstance, AccessPath>, Pair<StatementInstance, AccessPath>> start, SimpleDirectedWeightedGraph<Integer, DefaultWeightedEdge> chop) {
         try {
-            int callerPos = methodOfStatement.get(start.getO1().getO1().getLineNo());
+            int startPos = start.getO1().getO1().getLineNo();
+            int callerPos = methodOfStatement.get(startPos);
             for (Pair<Pair<StatementInstance, AccessPath>, Pair<StatementInstance, AccessPath>> n: this) {
                 if (n.getO1().getO1().getLineNo() == callerPos) {
-                    chop.add(n.getO1(), n.getO2());
+                    chop.addVertex(n.getO1().getO1().getLineNo());
+                    chop.addVertex(n.getO2().getO1().getLineNo());
+                    chop.addEdge(n.getO1().getO1().getLineNo(), n.getO2().getO1().getLineNo());
                     break;
                 }
             }

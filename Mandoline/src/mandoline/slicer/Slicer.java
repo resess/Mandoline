@@ -25,8 +25,8 @@ import com.google.common.base.Optional;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.io.FileUtils;
 import org.jgrapht.Graphs;
-
-
+import org.jgrapht.graph.DefaultWeightedEdge;
+import org.jgrapht.graph.SimpleDirectedWeightedGraph;
 
 import mandoline.accesspath.AccessPath;
 import mandoline.exceptions.InvalidCommandsException;
@@ -343,7 +343,7 @@ public class Slicer {
             slicer.setWorkingSet(new SlicingWorkingSet(false));
             DynamicSlice dynamicSlice = slicer.slice(icdg, staticAnalysis, dynamicAnalysis, frameworkModel, dataFlowsOnly, controlFlowOnly, stmt, accessPaths, slicer.getWorkingSet());
             if (forwardSlicePos != -1) {
-                dynamicSlice = dynamicSlice.chop(forwardSlicePos, icdg);
+                SimpleDirectedWeightedGraph<Integer, DefaultWeightedEdge> chop = dynamicSlice.chop(forwardSlicePos, icdg);
             }
             slicer.dynamicPrint = new LinkedHashSet<>();
             SlicePrinter.printSlices(dynamicSlice);
