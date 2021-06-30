@@ -3,6 +3,7 @@ package ca.ubc.ece.resess.slicer.dynamic.core.slicer;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+<<<<<<< HEAD:core/src/main/java/ca/ubc/ece/resess/slicer/dynamic/core/slicer/SliceMethod.java
 import ca.ubc.ece.resess.slicer.dynamic.core.accesspath.AccessPath;
 import ca.ubc.ece.resess.slicer.dynamic.core.accesspath.AliasSet;
 import ca.ubc.ece.resess.slicer.dynamic.core.controldependence.ControlDominator;
@@ -16,6 +17,25 @@ import ca.ubc.ece.resess.slicer.dynamic.core.statements.StatementSet;
 import ca.ubc.ece.resess.slicer.dynamic.core.utils.AnalysisLogger;
 import ca.ubc.ece.resess.slicer.dynamic.core.utils.AnalysisUtils;
 import ca.ubc.ece.resess.slicer.dynamic.core.utils.Constants;
+=======
+import mandoline.accesspath.AccessPath;
+import mandoline.accesspath.AliasSet;
+import mandoline.controldependence.ControlDominator;
+import mandoline.datadependence.AliasAnalysis;
+import mandoline.datadependence.CallbackDetection;
+import mandoline.datadependence.DynamicHeapAnalysis;
+import mandoline.datadependence.SpecialDependence;
+import mandoline.framework.FrameworkModel;
+import mandoline.graph.CalledChunk;
+import mandoline.graph.ICDG;
+import mandoline.graph.Traversal;
+import mandoline.statements.StatementInstance;
+import mandoline.statements.StatementMap;
+import mandoline.statements.StatementSet;
+import mandoline.utils.AnalysisLogger;
+import mandoline.utils.AnalysisUtils;
+import mandoline.utils.Constants;
+>>>>>>> 67c8bba152e358489e7aa3469125a8c19886d609:Mandoline/src/mandoline/slicer/SliceMethod.java
 import soot.Local;
 import soot.Value;
 import soot.ValueBox;
@@ -25,6 +45,7 @@ import soot.jimple.CastExpr;
 import soot.jimple.FieldRef;
 import soot.jimple.InstanceInvokeExpr;
 import soot.jimple.InvokeExpr;
+import soot.jimple.ReturnStmt;
 import soot.jimple.Stmt;
 import soot.toolkits.scalar.Pair;
 
@@ -35,6 +56,7 @@ public class SliceMethod {
     private boolean dataFlowsOnly = false;
     private boolean controlFlowOnly = false;
     private SlicingWorkingSet workingSet;
+    private SpecialDependence specialDependence;
 
     public SliceMethod(DynamicControlFlowGraph icdg, boolean frameworkModel, boolean dataFlowsOnly, boolean controlFlowOnly, SlicingWorkingSet workingSet) {
         this.icdg = icdg;
@@ -47,6 +69,10 @@ public class SliceMethod {
         } else {
             this.workingSet = new SlicingWorkingSet(false);
         }
+<<<<<<< HEAD:core/src/main/java/ca/ubc/ece/resess/slicer/dynamic/core/slicer/SliceMethod.java
+=======
+        this.specialDependence = new SpecialDependence(icdg);
+>>>>>>> 67c8bba152e358489e7aa3469125a8c19886d609:Mandoline/src/mandoline/slicer/SliceMethod.java
     }
 
     public DynamicSlice slice(StatementInstance start, Set<AccessPath> variables) {
@@ -86,7 +112,7 @@ public class SliceMethod {
                 }
             }
 
-            StatementSet def = null;
+            StatementSet def = new StatementSet();
             AliasSet usedVars = new AliasSet();
             
 
@@ -152,6 +178,10 @@ public class SliceMethod {
                 }
             }
         }
+        StatementInstance specialDef = specialDependence.getSpecialDependence(stmt);
+        if (specialDef != null) {
+            def.add(specialDef);
+        }
         return def;
     }
 
@@ -186,11 +216,11 @@ public class SliceMethod {
 
     public StatementSet localReachingDef(StatementInstance iu, AccessPath ap, StatementMap chunk, AliasSet usedVars, boolean frameworkModel){
         // AnalysisLogger.log(Constants.DEBUG, "Getting local def for {} with chunk {}", ap, chunk);
+        StatementSet defSet = new StatementSet();
         if (ap.isEmpty() || chunk == null) {
-            return null;
+            return defSet;
         }
         Set<Pair<StatementInstance, AccessPath>> backwardDefVars = new LinkedHashSet<>();
-        StatementSet defSet = new StatementSet();
         chunk = chunk.reverseTraceOrder(iu);
         boolean localFound = false;
         for (StatementInstance u: chunk.values()) {
@@ -303,11 +333,23 @@ public class SliceMethod {
     }
 
     private StatementSet getReachingInCaller(StatementInstance iu, AccessPath ap) throws Error {
+
         StatementSet defSet = new StatementSet();
         int callerPos = traversal.getCaller(iu.getLineNo());
         AliasSet apSet = new AliasSet();
         apSet.add(ap);
-        AliasSet taintedParams = traversal.changeScopeToCaller(iu, icdg.getMapKeyUnits().get(icdg.getMapNoKey().get(callerPos)), apSet);
+        AliasSet taintedParams = new AliasSet();
+        if (iu.getMethod().getSubSignature().equals("void onPostExecute(java.lang.Object)") && AnalysisUtils.isMethodParameter(iu, ap)) {
+            StatementInstance doInBackReturn = specialDependence.getDoInBackgroundReturn(iu);
+            callerPos = doInBackReturn.getLineNo();
+            Value retVar = ((ReturnStmt) doInBackReturn.getUnit()).getOp();
+            taintedParams.add(new AccessPath(retVar.toString(), retVar.getType(), ap.getUsedLine(), ap.getDefinedLine(), doInBackReturn));
+        } else {
+            taintedParams = traversal.changeScopeToCaller(iu, icdg.getMapKeyUnits().get(icdg.getMapNoKey().get(callerPos)), apSet);
+        }
+        
+
+        AnalysisLogger.log(true, "for {} and {}, caller pos is {}, taintedParams is ", iu, ap, callerPos, taintedParams);
         if (taintedParams == null || taintedParams.isEmpty()) {
             return defSet;
         }

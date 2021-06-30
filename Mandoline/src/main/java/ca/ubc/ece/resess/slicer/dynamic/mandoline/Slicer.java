@@ -305,7 +305,7 @@ public class Slicer {
             slicer.setWorkingSet(new SlicingWorkingSet(false));
             DynamicSlice dynamicSlice = slicer.slice(icdg, frameworkModel, dataFlowsOnly, controlFlowOnly, stmt, accessPaths, slicer.getWorkingSet());
             if (forwardSlicePos != -1) {
-                dynamicSlice = dynamicSlice.chop(forwardSlicePos, icdg);
+                SimpleDirectedWeightedGraph<Integer, DefaultWeightedEdge> chop = dynamicSlice.chop(forwardSlicePos, icdg);
             }
             slicer.dynamicPrint = new LinkedHashSet<>();
             SlicePrinter.printSlices(dynamicSlice);
