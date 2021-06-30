@@ -182,11 +182,7 @@ public class DynamicSlice
         return chopGraph;
     }
 
-<<<<<<< HEAD:core/src/main/java/ca/ubc/ece/resess/slicer/dynamic/core/slicer/DynamicSlice.java
     public DynamicSlice chop(int forwSlicePos, DynamicControlFlowGraph icdg) {
-=======
-    public SimpleDirectedWeightedGraph<Integer, DefaultWeightedEdge> chop(int forwSlicePos, ICDG icdg) {
->>>>>>> 67c8bba152e358489e7aa3469125a8c19886d609:Mandoline/src/mandoline/slicer/DynamicSlice.java
 
         // AnalysisLogger.log(true, "Graph:");
         // for (Integer v: chopGraph.vertexSet()) {
@@ -211,12 +207,8 @@ public class DynamicSlice
         return chop;
     }
 
-<<<<<<< HEAD:core/src/main/java/ca/ubc/ece/resess/slicer/dynamic/core/slicer/DynamicSlice.java
     private void addToChop(Pair<Pair<StatementInstance, AccessPath>, Pair<StatementInstance, AccessPath>>start, DynamicSlice chop, DynamicControlFlowGraph icdg) {
         // AnalysisLogger.log(true, "Adding to chop: {}", start);
-=======
-    private void addToChop(Pair<Pair<StatementInstance, AccessPath>, Pair<StatementInstance, AccessPath>> start, SimpleDirectedWeightedGraph<Integer, DefaultWeightedEdge> chop, ICDG icdg) {
->>>>>>> 67c8bba152e358489e7aa3469125a8c19886d609:Mandoline/src/mandoline/slicer/DynamicSlice.java
         Pair<StatementInstance, AccessPath> next = start.getO2();
         int startPos = start.getO1().getO1().getLineNo();
         int nextPos = next.getO1().getLineNo();

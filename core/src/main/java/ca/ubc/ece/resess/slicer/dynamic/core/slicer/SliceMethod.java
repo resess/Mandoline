@@ -3,7 +3,6 @@ package ca.ubc.ece.resess.slicer.dynamic.core.slicer;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-<<<<<<< HEAD:core/src/main/java/ca/ubc/ece/resess/slicer/dynamic/core/slicer/SliceMethod.java
 import ca.ubc.ece.resess.slicer.dynamic.core.accesspath.AccessPath;
 import ca.ubc.ece.resess.slicer.dynamic.core.accesspath.AliasSet;
 import ca.ubc.ece.resess.slicer.dynamic.core.controldependence.ControlDominator;
@@ -17,25 +16,6 @@ import ca.ubc.ece.resess.slicer.dynamic.core.statements.StatementSet;
 import ca.ubc.ece.resess.slicer.dynamic.core.utils.AnalysisLogger;
 import ca.ubc.ece.resess.slicer.dynamic.core.utils.AnalysisUtils;
 import ca.ubc.ece.resess.slicer.dynamic.core.utils.Constants;
-=======
-import mandoline.accesspath.AccessPath;
-import mandoline.accesspath.AliasSet;
-import mandoline.controldependence.ControlDominator;
-import mandoline.datadependence.AliasAnalysis;
-import mandoline.datadependence.CallbackDetection;
-import mandoline.datadependence.DynamicHeapAnalysis;
-import mandoline.datadependence.SpecialDependence;
-import mandoline.framework.FrameworkModel;
-import mandoline.graph.CalledChunk;
-import mandoline.graph.ICDG;
-import mandoline.graph.Traversal;
-import mandoline.statements.StatementInstance;
-import mandoline.statements.StatementMap;
-import mandoline.statements.StatementSet;
-import mandoline.utils.AnalysisLogger;
-import mandoline.utils.AnalysisUtils;
-import mandoline.utils.Constants;
->>>>>>> 67c8bba152e358489e7aa3469125a8c19886d609:Mandoline/src/mandoline/slicer/SliceMethod.java
 import soot.Local;
 import soot.Value;
 import soot.ValueBox;
@@ -69,10 +49,6 @@ public class SliceMethod {
         } else {
             this.workingSet = new SlicingWorkingSet(false);
         }
-<<<<<<< HEAD:core/src/main/java/ca/ubc/ece/resess/slicer/dynamic/core/slicer/SliceMethod.java
-=======
-        this.specialDependence = new SpecialDependence(icdg);
->>>>>>> 67c8bba152e358489e7aa3469125a8c19886d609:Mandoline/src/mandoline/slicer/SliceMethod.java
     }
 
     public DynamicSlice slice(StatementInstance start, Set<AccessPath> variables) {
