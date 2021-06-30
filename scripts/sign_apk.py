@@ -12,7 +12,7 @@ os.system(f"zip {apk_name} -d META-INF/*.DSA")
 os.system(f"zip {apk_name} -d META-INF/*.RSA")
 
 
-os.system(f"jarsigner -tsa http://timestamp.digicert.com -sigalg SHA1withRSA -digestalg SHA1 " +
+os.system(f"jarsigner -sigalg SHA1withRSA -digestalg SHA1 " +
         f"-keystore {scripts_dir}/mandoline.keystore {apk_name} mandoline -storepass mandoline")
 
 
