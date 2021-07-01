@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -16,7 +15,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 
-import com.google.common.base.Optional;
 
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.io.FileUtils;
@@ -304,9 +302,6 @@ public class Slicer {
 
             slicer.setWorkingSet(new SlicingWorkingSet(false));
             DynamicSlice dynamicSlice = slicer.slice(icdg, frameworkModel, dataFlowsOnly, controlFlowOnly, stmt, accessPaths, slicer.getWorkingSet());
-            if (forwardSlicePos != -1) {
-                SimpleDirectedWeightedGraph<Integer, DefaultWeightedEdge> chop = dynamicSlice.chop(forwardSlicePos, icdg);
-            }
             slicer.dynamicPrint = new LinkedHashSet<>();
             SlicePrinter.printSlices(dynamicSlice);
             SlicePrinter.printSliceGraph(dynamicSlice);

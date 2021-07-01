@@ -25,18 +25,16 @@ import soot.jimple.CastExpr;
 import soot.jimple.FieldRef;
 import soot.jimple.InstanceInvokeExpr;
 import soot.jimple.InvokeExpr;
-import soot.jimple.ReturnStmt;
 import soot.jimple.Stmt;
 import soot.toolkits.scalar.Pair;
 
 public class SliceMethod {
     protected DynamicControlFlowGraph icdg;
-    private Traversal traversal;
+    protected Traversal traversal;
     protected boolean frameworkModel = true;
     private boolean dataFlowsOnly = false;
     private boolean controlFlowOnly = false;
     private SlicingWorkingSet workingSet;
-    private SpecialDependence specialDependence;
 
     public SliceMethod(DynamicControlFlowGraph icdg, boolean frameworkModel, boolean dataFlowsOnly, boolean controlFlowOnly, SlicingWorkingSet workingSet) {
         this.icdg = icdg;
@@ -154,10 +152,7 @@ public class SliceMethod {
                 }
             }
         }
-        StatementInstance specialDef = specialDependence.getSpecialDependence(stmt);
-        if (specialDef != null) {
-            def.add(specialDef);
-        }
+
         return def;
     }
 
@@ -308,24 +303,12 @@ public class SliceMethod {
         }
     }
 
-    private StatementSet getReachingInCaller(StatementInstance iu, AccessPath ap) throws Error {
-
+    public StatementSet getReachingInCaller(StatementInstance iu, AccessPath ap) throws Error {
         StatementSet defSet = new StatementSet();
         int callerPos = traversal.getCaller(iu.getLineNo());
         AliasSet apSet = new AliasSet();
         apSet.add(ap);
-        AliasSet taintedParams = new AliasSet();
-        if (iu.getMethod().getSubSignature().equals("void onPostExecute(java.lang.Object)") && AnalysisUtils.isMethodParameter(iu, ap)) {
-            StatementInstance doInBackReturn = specialDependence.getDoInBackgroundReturn(iu);
-            callerPos = doInBackReturn.getLineNo();
-            Value retVar = ((ReturnStmt) doInBackReturn.getUnit()).getOp();
-            taintedParams.add(new AccessPath(retVar.toString(), retVar.getType(), ap.getUsedLine(), ap.getDefinedLine(), doInBackReturn));
-        } else {
-            taintedParams = traversal.changeScopeToCaller(iu, icdg.getMapKeyUnits().get(icdg.getMapNoKey().get(callerPos)), apSet);
-        }
-        
-
-        AnalysisLogger.log(true, "for {} and {}, caller pos is {}, taintedParams is ", iu, ap, callerPos, taintedParams);
+        AliasSet taintedParams = traversal.changeScopeToCaller(iu, icdg.getMapKeyUnits().get(icdg.getMapNoKey().get(callerPos)), apSet);
         if (taintedParams == null || taintedParams.isEmpty()) {
             return defSet;
         }
@@ -369,7 +352,7 @@ public class SliceMethod {
         
     }
 
-    private boolean findLocalDefInFrameworkMethod(AccessPath ap, StatementSet defSet, StatementInstance u, boolean foundLocalDef)
+    public boolean findLocalDefInFrameworkMethod(AccessPath ap, StatementSet defSet, StatementInstance u, boolean foundLocalDef)
             throws Error {
         if (frameworkModel) {
             InvokeExpr invokeExpr = AnalysisUtils.getCallerExp(u);
@@ -385,7 +368,7 @@ public class SliceMethod {
         return foundLocalDef;
     }
 
-    private boolean findLocalDefs(AccessPath ap, StatementSet defSet, StatementInstance u) {
+    public boolean findLocalDefs(AccessPath ap, StatementSet defSet, StatementInstance u) {
         boolean foundLocalDef = false;
         for (ValueBox def: u.getUnit().getDefBoxes()) {
             if(def.getValue() instanceof Local) {

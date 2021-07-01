@@ -182,7 +182,7 @@ public class DynamicSlice
         return chopGraph;
     }
 
-    public DynamicSlice chop(int forwSlicePos, DynamicControlFlowGraph icdg) {
+    public SimpleDirectedWeightedGraph<Integer, DefaultWeightedEdge> chop(int forwSlicePos, DynamicControlFlowGraph icdg) {
 
         // AnalysisLogger.log(true, "Graph:");
         // for (Integer v: chopGraph.vertexSet()) {
@@ -207,7 +207,7 @@ public class DynamicSlice
         return chop;
     }
 
-    private void addToChop(Pair<Pair<StatementInstance, AccessPath>, Pair<StatementInstance, AccessPath>>start, DynamicSlice chop, DynamicControlFlowGraph icdg) {
+    private void addToChop(Pair<Pair<StatementInstance, AccessPath>, Pair<StatementInstance, AccessPath>>start, SimpleDirectedWeightedGraph<Integer, DefaultWeightedEdge> chop, DynamicControlFlowGraph icdg) {
         // AnalysisLogger.log(true, "Adding to chop: {}", start);
         Pair<StatementInstance, AccessPath> next = start.getO2();
         int startPos = start.getO1().getO1().getLineNo();

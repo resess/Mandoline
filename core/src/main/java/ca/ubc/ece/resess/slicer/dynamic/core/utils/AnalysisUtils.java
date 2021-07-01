@@ -104,4 +104,20 @@ public class AnalysisUtils {
         return false;
     }
     
+    public static boolean isMethodParameter(StatementInstance si, AccessPath ap) {
+        for (Unit uu: si.getMethod().getActiveBody().getUnits()) {
+            if (uu instanceof IdentityStmt) {
+                if (uu.toString().contains("@this") || uu.toString().contains("@parameter")) {
+                    String base = uu.getDefBoxes().get(0).getValue().toString();
+                    if (ap.getPathString().equals(base)) {
+                        return true;
+                    }
+                }
+            } else {
+                break;
+            }
+        }
+
+        return false;
+    }
 }

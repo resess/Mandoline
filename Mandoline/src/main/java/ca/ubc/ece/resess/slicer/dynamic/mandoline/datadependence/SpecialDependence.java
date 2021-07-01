@@ -1,15 +1,13 @@
-package mandoline.datadependence;
+package ca.ubc.ece.resess.slicer.dynamic.mandoline.datadependence;
 
-import mandoline.accesspath.AccessPath;
-import mandoline.graph.ICDG;
-import mandoline.statements.StatementInstance;
-import mandoline.utils.AnalysisLogger;
-import mandoline.utils.AnalysisUtils;
+import ca.ubc.ece.resess.slicer.dynamic.core.statements.StatementInstance;
+import ca.ubc.ece.resess.slicer.dynamic.core.utils.AnalysisLogger;
+import ca.ubc.ece.resess.slicer.dynamic.core.utils.AnalysisUtils;
 import soot.SootMethod;
 import soot.Value;
 import soot.jimple.Constant;
 import soot.jimple.InvokeExpr;
-
+import ca.ubc.ece.resess.slicer.dynamic.mandoline.graph.ICDG;
 public class SpecialDependence {
     private ICDG icdg;
 
