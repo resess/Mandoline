@@ -39,14 +39,24 @@ Khaled Ahmed, Mieszko Lis, and Julia Rubin. [MANDOLINE: Dynamic Slicing of Andro
 
 * Enable developer options and usb debugging on the Android device: https://developer.android.com/studio/debug/dev-options#enable
 
+* Clone the dynamic slicing core: https://github.com/resess/DynamicSlicingCore
+
 ---
 ## Building The Tool
 
+Build and install the dynamic slicing core, go to the core's repo: (https://github.com/resess/DynamicSlicingCore)
 
-Build Mandoline
+```
+cd core/
+mvn -Dmaven.test.skip=true clean install
+cd -
+```
+
+
+Build Mandoline, go back to Mandoline's repo
 ```
 cd Mandoline/
-mvn -Dmaven.test.skip=true clean package
+mvn -Dmaven.test.skip=true clean install
 cd -
 ```
 
@@ -81,32 +91,25 @@ export PATH=$PATH:<b>path/to/sdk/platform-tools/</b>
 
 Display the command line options using:
 ```
-java -cp "Mandoline/target/mandoline-jar-with-dependencies.jar:Mandoline/target/lib/*" mandoline.slicer.Slicer -h
+java -cp "Mandoline/target/mandoline-jar-with-dependencies.jar:Mandoline/target/lib/*" ca.ubc.ece.resess.slicer.dynamic.mandoline.Slicer -h
 ```
 ---
 
 ### Instrumenting
 
 <pre>
-java -cp "Mandoline/target/mandoline-jar-with-dependencies.jar:Mandoline/target/lib/*" mandoline.slicer.Slicer -m i -a <b>path/to/apk</b> -p $ANDROID_JARS -c FlowDroid/soot-infoflow-android/AndroidCallbacks.txt -im <b>instrument-mode</b> -o <b>path/to/output/directory</b> -pk <b>package-name </b> -ml Mandoline/bytecode-gen/MandolineLogger.jar
+java -cp "Mandoline/target/mandoline-jar-with-dependencies.jar:Mandoline/target/lib/*" ca.ubc.ece.resess.slicer.dynamic.mandoline.Slicer -m i -a <b>path/to/apk</b> -p $ANDROID_JARS -c FlowDroid/soot-infoflow-android/AndroidCallbacks.txt -o <b>path/to/output/directory</b> -lc Mandoline/bytecode-gen/MandolineLogger.jar
 </pre>
 
 <b>path/to/apk: </b> path to the apk file to instrument
 
-
-<b>instrument-mode:</b> Instrumentation mode:
-* m: mandoline, basic block instrumentation, thread id recording, and execution time recording
-* as: AndroidSlicer++, statement level instrumentation, thread id recording, and execution time recording
-
-Add "j" to the end of any mode to print the jimple code instead of producing the instrumented apk. The jimple code is placed in the output directory under "jimple_code".
+The instrumentation also generates the jimple code, placed in the output directory under "jimple_code".
 
 <b>path/to/output/directory: </b> path to directory to store instrumentation output
 
-<b>package-name: </b> package name of the apk
-
 Example on the anki app:
 ```
-java -cp "Mandoline/target/mandoline-jar-with-dependencies.jar:Mandoline/target/lib/*" mandoline.slicer.Slicer -m i -a Dataset/1.anki/1.anki.apk -p $ANDROID_JARS -c FlowDroid/soot-infoflow-android/AndroidCallbacks.txt -im m -o outDir -pk com.ichi2.anki -ml Mandoline/bytecode-gen/MandolineLogger.jar
+java -cp "Mandoline/target/mandoline-jar-with-dependencies.jar:Mandoline/target/lib/*" ca.ubc.ece.resess.slicer.dynamic.mandoline.Slicer -m i -a Dataset/1.anki/1.anki.apk -p $ANDROID_JARS -c FlowDroid/soot-infoflow-android/AndroidCallbacks.txt -o outDir -lc Mandoline/bytecode-gen/MandolineLogger.jar
 ```
 
 Sign the instrumented apk using the sign_apk.py script
@@ -158,7 +161,7 @@ python3 scripts/extract_trace.py 712KPWQ104XXX outDir/trace.log
 ## Generating ICDG
 
 <pre>
-java -cp "Mandoline/target/mandoline-jar-with-dependencies.jar:Mandoline/target/lib/*" mandoline.slicer.Slicer -m d -a <b>path/to/apk</b> -t <b>path/to/trace</b> -p $ANDROID_JARS -c FlowDroid/soot-infoflow-android/AndroidCallbacks.txt -o <b>path/to/output/directory</b> -sd FlowDroid/soot-infoflow-summaries/summariesManual -tw FlowDroid/soot-infoflow/EasyTaintWrapperSource.txt
+java -cp "Mandoline/target/mandoline-jar-with-dependencies.jar:Mandoline/target/lib/*" ca.ubc.ece.resess.slicer.dynamic.mandoline.Slicer -m g -a <b>path/to/apk</b> -t <b>path/to/trace</b> -p $ANDROID_JARS -c FlowDroid/soot-infoflow-android/AndroidCallbacks.txt -o <b>path/to/output/directory</b> -sd FlowDroid/soot-infoflow-summaries/summariesManual -tw FlowDroid/soot-infoflow/EasyTaintWrapperSource.txt
 </pre>
 
 <b>path/to/apk: </b> path to the original apk (not the instrumented one)
@@ -172,7 +175,7 @@ The ICDG is placed in outDir with the name path/to/trace<b>_icdg.log</b>
 Example on the anki app:
 
 ```
-java -cp "Mandoline/target/mandoline-jar-with-dependencies.jar:Mandoline/target/lib/*" mandoline.slicer.Slicer -m d -a Dataset/1.anki/1.anki.apk -t outDir/trace.log -p $ANDROID_JARS -c FlowDroid/soot-infoflow-android/AndroidCallbacks.txt -o outDir/ -sd FlowDroid/soot-infoflow-summaries/summariesManual -tw FlowDroid/soot-infoflow/EasyTaintWrapperSource.txt
+java -cp "Mandoline/target/mandoline-jar-with-dependencies.jar:Mandoline/target/lib/*" ca.ubc.ece.resess.slicer.dynamic.mandoline.Slicer -m g -a Dataset/1.anki/1.anki.apk -t outDir/trace.log -p $ANDROID_JARS -c FlowDroid/soot-infoflow-android/AndroidCallbacks.txt -o outDir/ -sd FlowDroid/soot-infoflow-summaries/summariesManual -tw FlowDroid/soot-infoflow/EasyTaintWrapperSource.txt
 ```
 
 ---
@@ -184,13 +187,8 @@ Select a statement to slice from in the ICDG, the statements numbers are on the 
 
 
 <pre>
-java -cp "Mandoline/target/mandoline-jar-with-dependencies.jar:Mandoline/target/lib/*" mandoline.slicer.Slicer -m <b>mode</b> -a <b>path/to/apk</b> -t <b>path/to/trace</b> -p $ANDROID_JARS -c FlowDroid/soot-infoflow-android/AndroidCallbacks.txt -o <b>path/to/output/directory</b> -sd FlowDroid/soot-infoflow-summaries/summariesManual -tw FlowDroid/soot-infoflow/EasyTaintWrapperSource.txt -sp <b>statement_number</b> -sv <b>used-variables-to-slice-from</b>
+java -cp "Mandoline/target/mandoline-jar-with-dependencies.jar:Mandoline/target/lib/*" ca.ubc.ece.resess.slicer.dynamic.mandoline.Slicer -m s -a <b>path/to/apk</b> -t <b>path/to/trace</b> -p $ANDROID_JARS -c FlowDroid/soot-infoflow-android/AndroidCallbacks.txt -o <b>path/to/output/directory</b> -sd FlowDroid/soot-infoflow-summaries/summariesManual -tw FlowDroid/soot-infoflow/EasyTaintWrapperSource.txt -sp <b>statement_number</b> -sv <b>used-variables-to-slice-from</b>
 </pre>
-
-
-<b>mode:</b> Slicing mode:
-* m: mandoline, slice using field alias analysis
-* as: AndroidSlicer++, slice without field data dependence
 
 <b>path/to/apk: </b> path to the original apk (not the instrumented one)
 
@@ -202,16 +200,16 @@ java -cp "Mandoline/target/mandoline-jar-with-dependencies.jar:Mandoline/target/
 
 <b>used-variables-to-slice-from</b> list of variables used at the statement specified by -sp. The list is "-" separated. Do not include the "$" in the variable name
 
-The slices are placed as a csv file in the output directory with the name `result_{mode}_{date}.csv`
+The slices are placed as a csv file in the output directory with the name `result_s_{date}.csv`
 
 Example: 
 <pre>
-java -cp "Mandoline/target/mandoline-jar-with-dependencies.jar:Mandoline/target/lib/*" mandoline.slicer.Slicer -m m -a Dataset/1.anki/1.anki.apk -t outDir/trace.log -p $ANDROID_JARS -c FlowDroid/soot-infoflow-android/AndroidCallbacks.txt -o outDir/ -sd FlowDroid/soot-infoflow-summaries/summariesManual -tw FlowDroid/soot-infoflow/EasyTaintWrapperSource.txt -sp 450275 -sv r1-r2
+java -cp "Mandoline/target/mandoline-jar-with-dependencies.jar:Mandoline/target/lib/*" ca.ubc.ece.resess.slicer.dynamic.mandoline.Slicer -m s -a Dataset/1.anki/1.anki.apk -t outDir/trace.log -p $ANDROID_JARS -c FlowDroid/soot-infoflow-android/AndroidCallbacks.txt -o outDir/ -sd FlowDroid/soot-infoflow-summaries/summariesManual -tw FlowDroid/soot-infoflow/EasyTaintWrapperSource.txt -sp 450275 -sv r1-r2
 </pre>
 
 
 
-You can also run the script `scripts/run_app.sh*` to run all the steps. Just modify the first fiew lines: the environment variables, the output directory, full path to the APK, APK package name, and tool mode. Run the script for the project's base directory.
+You can also run the script `scripts/run_app.sh` to run all the steps. Just modify the first few lines: the environment variables, the output directory, full path to the APK, APK package name, and tool mode. Run the script for the project's base directory.
 
 ---
 
