@@ -88,9 +88,9 @@ public class AndroidInstrumenter extends Instrumenter{
         createInstrumentationPackagesList();
         Scene.v().addBasicClass("java.io.PrintStream",SootClass.SIGNATURES);
         Scene.v().addBasicClass("java.lang.System",SootClass.SIGNATURES);
-        Scene.v().addBasicClass("MandolineLogger", SootClass.BODIES);
-        Scene.v().addBasicClass("MandolineWriter", SootClass.BODIES);
-        Scene.v().addBasicClass("MandolineShutdown", SootClass.BODIES);
+        Scene.v().addBasicClass("DynamicSlicingLogger", SootClass.BODIES);
+        Scene.v().addBasicClass("DynamicSlicingLoggerWriter", SootClass.BODIES);
+        Scene.v().addBasicClass("DynamicSlicingLoggerShutdown", SootClass.BODIES);
         libClasses = Scene.v().getLibraryClasses();
     }
     
@@ -106,9 +106,9 @@ public class AndroidInstrumenter extends Instrumenter{
         PackManager.v().getPack("wjpp").add(new Transform("wjpp.classadder", new SceneTransformer(){
             @Override
             protected void internalTransform(String phaseName, Map<String, String> options) {
-                Scene.v().getSootClass("MandolineLogger").setApplicationClass();
-                Scene.v().getSootClass("MandolineWriter").setApplicationClass();
-                Scene.v().getSootClass("MandolineShutdown").setApplicationClass();
+                Scene.v().getSootClass("DynamicSlicingLogger").setApplicationClass();
+                Scene.v().getSootClass("DynamicSlicingLoggerWriter").setApplicationClass();
+                Scene.v().getSootClass("DynamicSlicingLoggerShutdown").setApplicationClass();
                 if (!isAndroidSlicer && !isOriginal) {
                     for (SootClass cls: Scene.v().getClasses()) {
                         try {
@@ -134,13 +134,13 @@ public class AndroidInstrumenter extends Instrumenter{
             @Override
             protected void internalTransform(final Body b, String phaseName, @SuppressWarnings("rawtypes") Map options) {
                 SootClass cls = b.getMethod().getDeclaringClass();
-                if (cls.getName().contains("MandolineLogger")) {
+                if (cls.getName().contains("DynamicSlicingLogger")) {
                     return;
                 }
-                if (cls.getName().contains("MandolineWriter")) {
+                if (cls.getName().contains("DynamicSlicingLoggerWriter")) {
                     return;
                 }
-                if (cls.getName().contains("MandolineShutdown")) {
+                if (cls.getName().contains("DynamicSlicingLoggerShutdown")) {
                     return;
                 }
                 boolean skip = !AndroidInstrumenter.this.instrumentationPackagesList.isEmpty();

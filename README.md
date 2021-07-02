@@ -98,7 +98,7 @@ java -cp "Mandoline/target/mandoline-jar-with-dependencies.jar:Mandoline/target/
 ### Instrumenting
 
 <pre>
-java -cp "Mandoline/target/mandoline-jar-with-dependencies.jar:Mandoline/target/lib/*" ca.ubc.ece.resess.slicer.dynamic.mandoline.Slicer -m i -a <b>path/to/apk</b> -p $ANDROID_JARS -c FlowDroid/soot-infoflow-android/AndroidCallbacks.txt -o <b>path/to/output/directory</b> -lc Mandoline/bytecode-gen/MandolineLogger.jar
+java -cp "Mandoline/target/mandoline-jar-with-dependencies.jar:Mandoline/target/lib/*" ca.ubc.ece.resess.slicer.dynamic.mandoline.Slicer -m i -a <b>path/to/apk</b> -p $ANDROID_JARS -c FlowDroid/soot-infoflow-android/AndroidCallbacks.txt -o <b>path/to/output/directory</b> -lc <b>path/to/logger/jar</b>
 </pre>
 
 <b>path/to/apk: </b> path to the apk file to instrument
@@ -107,9 +107,11 @@ The instrumentation also generates the jimple code, placed in the output directo
 
 <b>path/to/output/directory: </b> path to directory to store instrumentation output
 
+<b>ath/to/logger/classes: </b> path to logger JAR from the dynamic slicing core repository.
+
 Example on the anki app:
 ```
-java -cp "Mandoline/target/mandoline-jar-with-dependencies.jar:Mandoline/target/lib/*" ca.ubc.ece.resess.slicer.dynamic.mandoline.Slicer -m i -a Dataset/1.anki/1.anki.apk -p $ANDROID_JARS -c FlowDroid/soot-infoflow-android/AndroidCallbacks.txt -o outDir -lc Mandoline/bytecode-gen/MandolineLogger.jar
+java -cp "Mandoline/target/mandoline-jar-with-dependencies.jar:Mandoline/target/lib/*" ca.ubc.ece.resess.slicer.dynamic.mandoline.Slicer -m i -a Dataset/1.anki/1.anki.apk -p $ANDROID_JARS -c FlowDroid/soot-infoflow-android/AndroidCallbacks.txt -o outDir -lc ../DynamicSlicingCore/DynamicSlicingLoggingClasses/DynamicSlicingLogger.jar
 ```
 
 Sign the instrumented apk using the sign_apk.py script

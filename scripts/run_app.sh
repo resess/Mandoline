@@ -11,7 +11,7 @@ OUT_APK=$(basename $APK)
 OUT_APK=${OUT_APK%.*}
 OUT_APK=${OUT_APK}_i.apk
 
-java -cp "Mandoline/target/mandoline-jar-with-dependencies.jar:Mandoline/target/lib/*" ca.ubc.ece.resess.slicer.dynamic.mandoline.Slicer -m i -a $APK -p $ANDROID_JARS -c FlowDroid/soot-infoflow-android/AndroidCallbacks.txt -o $OUTDIR/ -sl $OUTDIR/static_log.log -lc Mandoline/bytecode-gen/MandolineLogger.jar
+java -cp "Mandoline/target/mandoline-jar-with-dependencies.jar:Mandoline/target/lib/*" ca.ubc.ece.resess.slicer.dynamic.mandoline.Slicer -m i -a $APK -p $ANDROID_JARS -c FlowDroid/soot-infoflow-android/AndroidCallbacks.txt -o $OUTDIR/ -sl $OUTDIR/static_log.log -lc ../DynamicSlicingCore/DynamicSlicingLoggingClasses/DynamicSlicingLogger.jar
 
 python3 scripts/sign_apk.py $OUTDIR/$OUT_APK
 python3 scripts/clean_install.py $DEVICE $OUTDIR/$OUT_APK
