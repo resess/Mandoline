@@ -20,7 +20,9 @@ def get_exec_time(trace):
     with open(trace+"_time.log", "a") as f:
         f.write("Elapsed execution time: " + str(exec_time) + "\n")
 
-
+print("Dumping logcat")
 os.system("adb -s " + device_id + " logcat -d > " + trace+"_full.log")
+print("Extracting slicing trace")
 os.system("adb -s " + device_id + " logcat -d | grep 'SLICING\|Timer:' > " + trace)
+print("Extracting execution time")
 get_exec_time(trace)

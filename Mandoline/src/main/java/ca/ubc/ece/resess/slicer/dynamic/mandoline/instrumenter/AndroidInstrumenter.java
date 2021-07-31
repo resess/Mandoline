@@ -143,6 +143,12 @@ public class AndroidInstrumenter extends Instrumenter{
                 if (cls.getName().contains("DynamicSlicingLoggerShutdown")) {
                     return;
                 }
+                if (cls.getName().startsWith("android.")) {
+                    return;
+                }
+                if (cls.getName().startsWith("androidx.")) {
+                    return;
+                }
                 boolean skip = !AndroidInstrumenter.this.instrumentationPackagesList.isEmpty();
                 for (String includedPkg: AndroidInstrumenter.this.instrumentationPackagesList) {
                     if (cls.getPackageName().startsWith(includedPkg) ) {
