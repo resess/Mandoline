@@ -15,48 +15,24 @@ import java.util.Set;
 import org.apache.commons.io.FileUtils;
 import soot.Body;
 import soot.BodyTransformer;
-import soot.Local;
 import soot.PackManager;
 import soot.PatchingChain;
-import soot.RefType;
-import soot.LongType;
-import soot.Modifier;
 import soot.Scene;
 import soot.SceneTransformer;
 import soot.SootClass;
 import soot.SootMethod;
 import soot.Transform;
-import soot.Type;
+import soot.Trap;
 import soot.Unit;
-import soot.jimple.AbstractStmtSwitch;
-import soot.jimple.AssignStmt;
-import soot.jimple.DefinitionStmt;
-import soot.jimple.IfStmt;
-import soot.jimple.InvokeStmt;
-import soot.jimple.Jimple;
-import soot.jimple.JimpleBody;
-import soot.jimple.LookupSwitchStmt;
 import soot.jimple.ReturnStmt;
 import soot.jimple.ReturnVoidStmt;
-import soot.jimple.SpecialInvokeExpr;
-import soot.jimple.StringConstant;
-import soot.jimple.SwitchStmt;
 import soot.options.Options;
 import soot.toolkits.scalar.Pair;
 import soot.util.Chain;
 import soot.util.MultiMap;
-import soot.jimple.GotoStmt;
 import soot.jimple.IdentityStmt;
-import soot.Value;
-import soot.VoidType;
 import soot.jimple.ThrowStmt;
-import soot.IntType;
-import soot.jimple.InstanceFieldRef;
-import soot.jimple.InvokeExpr;
-import soot.jimple.StaticFieldRef;
-import soot.jimple.Stmt;
 import soot.jimple.infoflow.android.callbacks.AndroidCallbackDefinition;
-import java.util.concurrent.atomic.AtomicLong;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -70,7 +46,10 @@ import ca.ubc.ece.resess.slicer.dynamic.core.instrumenter.Flags;
 import ca.ubc.ece.resess.slicer.dynamic.core.utils.AnalysisLogger;
 
 
-public class AndroidInstrumenter extends Instrumenter{
+public class AndroidInstrumenter extends Instrumenter {
+    private static final String LOGGER_CLASS = "DynamicSlicingLogger";
+    private static final String WRITER_CLASS = "DynamicSlicingLoggerWriter";
+    private static final String SHUTDOWN_CLASS = "DynamicSlicingLoggerShutdown";
     Map<SootClass, SootMethod> callbackMethods = new HashMap<>();
     Set<String> threadMethods = new HashSet<>();
     private boolean fieldTracking = false;
@@ -88,9 +67,9 @@ public class AndroidInstrumenter extends Instrumenter{
         createInstrumentationPackagesList();
         Scene.v().addBasicClass("java.io.PrintStream",SootClass.SIGNATURES);
         Scene.v().addBasicClass("java.lang.System",SootClass.SIGNATURES);
-        Scene.v().addBasicClass("DynamicSlicingLogger", SootClass.BODIES);
-        Scene.v().addBasicClass("DynamicSlicingLoggerWriter", SootClass.BODIES);
-        Scene.v().addBasicClass("DynamicSlicingLoggerShutdown", SootClass.BODIES);
+        Scene.v().addBasicClass(LOGGER_CLASS, SootClass.BODIES);
+        Scene.v().addBasicClass(WRITER_CLASS, SootClass.BODIES);
+        Scene.v().addBasicClass(SHUTDOWN_CLASS, SootClass.BODIES);
         libClasses = Scene.v().getLibraryClasses();
     }
     
@@ -106,9 +85,9 @@ public class AndroidInstrumenter extends Instrumenter{
         PackManager.v().getPack("wjpp").add(new Transform("wjpp.classadder", new SceneTransformer(){
             @Override
             protected void internalTransform(String phaseName, Map<String, String> options) {
-                Scene.v().getSootClass("DynamicSlicingLogger").setApplicationClass();
-                Scene.v().getSootClass("DynamicSlicingLoggerWriter").setApplicationClass();
-                Scene.v().getSootClass("DynamicSlicingLoggerShutdown").setApplicationClass();
+                Scene.v().getSootClass(LOGGER_CLASS).setApplicationClass();
+                Scene.v().getSootClass(WRITER_CLASS).setApplicationClass();
+                Scene.v().getSootClass(SHUTDOWN_CLASS).setApplicationClass();
                 if (!isAndroidSlicer && !isOriginal) {
                     for (SootClass cls: Scene.v().getClasses()) {
                         try {
@@ -134,13 +113,13 @@ public class AndroidInstrumenter extends Instrumenter{
             @Override
             protected void internalTransform(final Body b, String phaseName, @SuppressWarnings("rawtypes") Map options) {
                 SootClass cls = b.getMethod().getDeclaringClass();
-                if (cls.getName().contains("DynamicSlicingLogger")) {
+                if (cls.getName().contains(LOGGER_CLASS)) {
                     return;
                 }
-                if (cls.getName().contains("DynamicSlicingLoggerWriter")) {
+                if (cls.getName().contains(WRITER_CLASS)) {
                     return;
                 }
-                if (cls.getName().contains("DynamicSlicingLoggerShutdown")) {
+                if (cls.getName().contains(SHUTDOWN_CLASS)) {
                     return;
                 }
                 if (cls.getName().startsWith("android.")) {
@@ -181,6 +160,12 @@ public class AndroidInstrumenter extends Instrumenter{
                     flags.timeTracking = false;
                     flags.threadTracking = false;
                 }
+
+                List<String> traps = new ArrayList<>();
+                for (Trap trap: mtd.getActiveBody().getTraps()) {
+                    traps.add(trap.getBeginUnit().toString());
+                }
+
                 final PatchingChain<Unit> units = b.getUnits();
                 Set<Unit> instrumentedUnits = new HashSet<>();
                 boolean instrumentedFirst = false;
@@ -206,8 +191,9 @@ public class AndroidInstrumenter extends Instrumenter{
                         stmtSwitch.setUnits(units);
                         u.apply(stmtSwitch);
                     } else {
-                        instrumentedFirst = basicBlockInstrument(b, cls, mtd, isOnDestroy, addedLocals, flags, units,
-                                                                instrumentedUnits, instrumentedFirst, unitNumMap, taggedUnits, u);
+                        instrumentedFirst = InstrumenterUtils.basicBlockInstrument(b, cls, mtd, isOnDestroy, addedLocals, flags, units,
+                                                                instrumentedUnits, instrumentedFirst, unitNumMap, taggedUnits, u, traps,
+                                                                globalLineCounter, threadMethods, libClasses);
                     }
                     
                 }
@@ -249,150 +235,6 @@ public class AndroidInstrumenter extends Instrumenter{
                 synchronized(staticLog){
                     staticLog.put(b.getMethod().getSignature(), job);
                 }
-            }
-
-            private boolean basicBlockInstrument(final Body b, SootClass cls, SootMethod mtd, boolean isOnDestroy,
-                    AddedLocals addedLocals, Flags flags, final PatchingChain<Unit> units, Set<Unit> instrumentedUnits,
-                    boolean instrumentedFirst, LinkedHashMap<Unit, Long> unitNumMap, Map<Unit, Long> taggedUnits,
-                    final Unit u) {
-                unitNumMap.put(u, -1L);
-                if (threadMethods.contains(b.getMethod().getSubSignature()) ||
-                    callbackMethods.values().contains(b.getMethod()) || 
-                    b.getMethod().getName().startsWith("on")) {
-                        flags.isCallbackOrThread = true;
-                }
-                if (instrumentedUnits.contains(u)) {
-                    return instrumentedFirst;
-                }
-                if (isOnDestroy && !instrumentedFirst &&!(u instanceof IdentityStmt)) {
-                    if (!instrumentedUnits.contains(u)) {
-                        InstrumenterUtils.addFlush(u, units, b, addedLocals, cls, mtd, flags, instrumentedUnits, taggedUnits, globalLineCounter);
-                        instrumentedUnits.add(u);
-                    }
-                    instrumentedFirst = true;
-                }
-                if (u instanceof IfStmt) {
-                    if (!instrumentedFirst ) {
-                        if (!instrumentedUnits.contains(u)) {
-                            InstrumenterUtils.addPrint(u, units, b, addedLocals, cls, mtd, flags, instrumentedUnits, taggedUnits, globalLineCounter);
-                            instrumentedUnits.add(u);
-                        }
-                        instrumentedFirst = true;
-                    }
-                    Unit fallThrough = b.getUnits().getSuccOf(u);
-                    if (!instrumentedUnits.contains(fallThrough)) {
-                        InstrumenterUtils.addPrint(fallThrough, units, b, addedLocals, cls, mtd, flags, instrumentedUnits, taggedUnits, globalLineCounter);
-                        instrumentedUnits.add(fallThrough);
-                    }
-                    Unit target = ((IfStmt) u).getTarget();
-                    if (!instrumentedUnits.contains(target)) {
-                        InstrumenterUtils.addPrint(target, units, b, addedLocals, cls, mtd, flags, instrumentedUnits, taggedUnits, globalLineCounter);
-                        instrumentedUnits.add(target);
-                    }
-                } else if (u instanceof GotoStmt) {
-                    if (!instrumentedFirst ) {
-                        if (!instrumentedUnits.contains(u)) {
-                            InstrumenterUtils.addPrint(u, units, b, addedLocals, cls, mtd, flags, instrumentedUnits, taggedUnits, globalLineCounter);
-                            instrumentedUnits.add(u);
-                        }
-                        instrumentedFirst = true;
-                    }
-                    Unit target = ((GotoStmt) u).getTarget();
-                    if (!instrumentedUnits.contains(target)) {
-                        InstrumenterUtils.addPrint(target, units, b, addedLocals, cls, mtd, flags, instrumentedUnits, taggedUnits, globalLineCounter);
-                        instrumentedUnits.add(target);
-                    }
-                } else if (u instanceof InvokeStmt) {
-                    if (!instrumentedFirst) {
-                        if (!instrumentedUnits.contains(u)) {
-                            InstrumenterUtils.addPrint(u, units, b, addedLocals, cls, mtd, flags, instrumentedUnits, taggedUnits, globalLineCounter);
-                            instrumentedUnits.add(u);
-                        }
-                        instrumentedFirst = true;
-                    }
-                    InvokeStmt invokeStmt = (InvokeStmt) u;
-                    if (invokeStmt.getInvokeExpr() instanceof SpecialInvokeExpr) {
-                        SpecialInvokeExpr specialInvokeExpr = (SpecialInvokeExpr) invokeStmt.getInvokeExpr();
-                        boolean isSuperClass = specialInvokeExpr.getMethod().getDeclaringClass().equals(b.getMethod().getDeclaringClass().getSuperclass());
-                        boolean isConstructor = specialInvokeExpr.getMethod().getName().contains("<init>");
-                        if (isSuperClass && isConstructor) {
-                            flags.superCalled = true;
-                        }
-                    }
-                    if (libClasses.contains(invokeStmt.getInvokeExpr().getMethod().getDeclaringClass())) {
-                        return instrumentedFirst;
-                    }
-                    
-                    if (!instrumentedUnits.contains(u)) {
-                        InstrumenterUtils.addPrint(u, units, b, addedLocals, cls, mtd, flags, instrumentedUnits, taggedUnits, globalLineCounter);
-                        instrumentedUnits.add(u);
-                    }
-                    Unit ret = b.getUnits().getSuccOf(u);
-                    if (!instrumentedUnits.contains(ret)) {
-                        InstrumenterUtils.addPrint(ret, units, b, addedLocals, cls, mtd, flags, instrumentedUnits, taggedUnits, globalLineCounter);
-                        instrumentedUnits.add(ret);
-                    }
-                } else if ((u instanceof AssignStmt) && ((AssignStmt) u).containsInvokeExpr()) {
-                    if (!instrumentedFirst) {
-                        if (!instrumentedUnits.contains(u)) {
-                            InstrumenterUtils.addPrint(u, units, b, addedLocals, cls, mtd, flags, instrumentedUnits, taggedUnits, globalLineCounter);
-                            instrumentedUnits.add(u);
-                        }
-                        instrumentedFirst = true;
-                    }
-                    InvokeExpr invokeExpr = ((AssignStmt) u).getInvokeExpr();
-                    if (libClasses.contains(invokeExpr.getMethod().getDeclaringClass())) {
-                        return instrumentedFirst;
-                    }
-                    
-                    if (!instrumentedUnits.contains(u)) {
-                        InstrumenterUtils.addPrint(u, units, b, addedLocals, cls, mtd, flags, instrumentedUnits, taggedUnits, globalLineCounter);
-                        instrumentedUnits.add(u);
-                    }
-                    Unit ret = b.getUnits().getSuccOf(u);
-                    if (!instrumentedUnits.contains(ret)) {
-                        InstrumenterUtils.addPrint(ret, units, b, addedLocals, cls, mtd, flags, instrumentedUnits, taggedUnits, globalLineCounter);
-                        instrumentedUnits.add(ret);
-                    }
-                } else if (u instanceof ReturnVoidStmt) {
-                    if (!instrumentedUnits.contains(u)) {
-                        InstrumenterUtils.addPrint(u, units, b, addedLocals, cls, mtd, flags, instrumentedUnits, taggedUnits, globalLineCounter);
-                        instrumentedUnits.add(u);
-                        InstrumenterUtils.insertEndTimeTracking(u, units, b, addedLocals, flags, instrumentedUnits, taggedUnits);
-                    }
-                } else if (u instanceof ReturnStmt) {
-                    if (!instrumentedUnits.contains(u)) {
-                        InstrumenterUtils.addPrint(u, units, b, addedLocals, cls, mtd, flags, instrumentedUnits, taggedUnits, globalLineCounter);
-                        instrumentedUnits.add(u);
-                        InstrumenterUtils.insertEndTimeTracking(u, units, b, addedLocals, flags, instrumentedUnits, taggedUnits);
-                    }
-                } else if (u instanceof ThrowStmt) {
-                    if (!instrumentedUnits.contains(u)) {
-                        InstrumenterUtils.addPrint(u, units, b, addedLocals, cls, mtd, flags, instrumentedUnits, taggedUnits, globalLineCounter);
-                        instrumentedUnits.add(u);
-                        InstrumenterUtils.insertEndTimeTracking(u, units, b, addedLocals, flags, instrumentedUnits, taggedUnits);
-                    }
-                } else if (u instanceof AssignStmt && !(u instanceof IdentityStmt)){
-                    if (((AssignStmt) u).containsFieldRef()) {
-                        if(flags.fieldTracking) {
-                            if (!instrumentedUnits.contains(u)) {
-                                InstrumenterUtils.addPrint(u, units, b, addedLocals, cls, mtd, flags, instrumentedUnits, taggedUnits, globalLineCounter);
-                                instrumentedUnits.add(u);
-                            }
-                        }
-                    }
-                } else if (u instanceof Stmt && !(u instanceof IdentityStmt)){
-                    if (!instrumentedFirst ) {
-                        if (!instrumentedUnits.contains(u)) {
-                            InstrumenterUtils.addPrint(u, units, b, addedLocals, cls, mtd, flags, instrumentedUnits, taggedUnits, globalLineCounter);
-                            instrumentedUnits.add(u);
-                        }
-                        instrumentedFirst = true;
-                    }
-                } else {
-                    // pass
-                }
-                return instrumentedFirst;
             }
         }));
         

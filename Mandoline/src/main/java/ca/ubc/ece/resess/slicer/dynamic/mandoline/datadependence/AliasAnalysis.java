@@ -184,6 +184,9 @@ public class AliasAnalysis {
         if (!(iu.getUnit() instanceof AssignStmt)) {
             return null;
         }
+        if (!((((AssignStmt) iu.getUnit()).getRightOp()) instanceof FieldRef)) {
+            return null;
+        }
         SootField sf = ((FieldRef) (((AssignStmt) iu.getUnit()).getRightOp())).getField();
         for (int i = 0; i < orderedPath.size(); i++) {
             StatementInstance instr = orderedPath.get(i);
@@ -390,7 +393,7 @@ public class AliasAnalysis {
         AliasSet backwardAliasSet = initializeBackwardSet(aliasSet);
 
         AliasSet forwardAliasSet = initilizeForwardSet(aliasSet);
-
+        
         Unit u = si.getUnit();
         AssignStmt stmt = (AssignStmt) u;
         Value l = stmt.getLeftOp();

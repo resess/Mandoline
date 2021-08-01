@@ -18,14 +18,13 @@ import java.util.Map.Entry;
 
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.io.FileUtils;
-import org.jgrapht.Graphs;
 
 import ca.ubc.ece.resess.slicer.dynamic.core.accesspath.AccessPath;
 import ca.ubc.ece.resess.slicer.dynamic.core.exceptions.InvalidCommandsException;
 import ca.ubc.ece.resess.slicer.dynamic.core.framework.FrameworkModel;
 
 import ca.ubc.ece.resess.slicer.dynamic.core.graph.Parser;
-import ca.ubc.ece.resess.slicer.dynamic.core.graph.Traces;
+import ca.ubc.ece.resess.slicer.dynamic.core.graph.TraceStatement;
 import ca.ubc.ece.resess.slicer.dynamic.core.instrumenter.Instrumenter;
 import ca.ubc.ece.resess.slicer.dynamic.core.instrumenter.JimpleWriter;
 import ca.ubc.ece.resess.slicer.dynamic.core.slicer.DynamicSlice;
@@ -106,7 +105,11 @@ public class Slicer {
         this.outDir = outDir;
         File outDirFile = new File(this.outDir);
         outDirFile.mkdirs();
-        this.staticLogFile = this.outDir + File.separator + "static-log.log";
+        setStaticLogFile(this.outDir + File.separator + "static-log.log");
+    }
+
+    public void setStaticLogFile(String staticLogFile) {
+        this.staticLogFile = staticLogFile;
     }
 
     public void setLoggerClassesJar(String loggerClassesJar) {
@@ -200,6 +203,10 @@ public class Slicer {
             slicer.setOutDir(commands.get("o"));
             throwParseExceptionIfNull(slicer.outDir, "Output directory path not provided");
 
+            if (commands.get("sl") != null) {
+                slicer.setStaticLogFile(commands.get("sl"));
+            }
+
             boolean instrumented = false;
             if(mode.equals("i")) {
                 slicer.setLoggerClassesJar(commands.get("lc"));
@@ -228,7 +235,7 @@ public class Slicer {
                 String tw = commands.get("tw");
                 throwParseExceptionIfNull(tw, "Taint-wrapper path not provided");
             }
-            List <Traces> trs = Parser.readFile(slicer.fileToParse, slicer.staticLogFile);
+            List<TraceStatement> trs = Parser.readFile(slicer.fileToParse, slicer.staticLogFile);
 
             slicer.prepare();
             Slicer.instance = slicer;
@@ -257,6 +264,7 @@ public class Slicer {
             boolean frameworkModel = true;
             boolean dataFlowsOnly = false;
             boolean controlFlowOnly = false;
+            boolean sliceOnce = false;
             if (commands.containsKey("data")) {
                 dataFlowsOnly = true;
             }
@@ -273,7 +281,7 @@ public class Slicer {
                 FrameworkModel.setExtraPath(frameworkPath);
             }
 
-            StatementInstance stmt = icdg.getMapKeyUnits().get(icdg.getMapNoKey().get(slicer.backwardSlicePos));
+            StatementInstance stmt = icdg.mapNoUnits(slicer.backwardSlicePos);
             
             List<String> variables = new ArrayList<>();
             if (!slicer.variableString.equals("*")) {
@@ -296,12 +304,12 @@ public class Slicer {
             }
 
             AnalysisLogger.log(Constants.DEBUG, "Slicing criterion: (" + slicer.backwardSlicePos + ", " + variables + ")");
-            AnalysisLogger.log(Constants.DEBUG, "size of the trace after loading:"+icdg.getMapKeyNo().keySet().size());
-            AnalysisLogger.log(Constants.DEBUG, "Slicing from statement:"+ icdg.getMapNoKey().get(slicer.backwardSlicePos));
+            AnalysisLogger.log(Constants.DEBUG, "size of the trace after loading:"+icdg.getMapNumberUnits().keySet().size());
+            AnalysisLogger.log(Constants.DEBUG, "Slicing from statement:"+ icdg.mapNoUnits(slicer.backwardSlicePos));
 
 
             slicer.setWorkingSet(new SlicingWorkingSet(false));
-            DynamicSlice dynamicSlice = slicer.slice(icdg, frameworkModel, dataFlowsOnly, controlFlowOnly, stmt, accessPaths, slicer.getWorkingSet());
+            DynamicSlice dynamicSlice = slicer.slice(icdg, frameworkModel, dataFlowsOnly, controlFlowOnly, sliceOnce, stmt, accessPaths, slicer.getWorkingSet());
             slicer.dynamicPrint = new LinkedHashSet<>();
             SlicePrinter.printSlices(dynamicSlice);
             SlicePrinter.printSliceGraph(dynamicSlice);
@@ -316,19 +324,23 @@ public class Slicer {
         terminate(slicer.outDir, mode, startTime);
     }
     public DynamicSlice slice(ICDG icdg,
-            boolean frameworkModel, boolean dataFlowsOnly, boolean controlFlowOnly, StatementInstance start, Set<AccessPath> variables, SlicingWorkingSet workingSet) {
-        return new SliceAndroid(icdg, frameworkModel, dataFlowsOnly, controlFlowOnly, workingSet).slice(start, variables);
+            boolean frameworkModel, boolean dataFlowsOnly, boolean controlFlowOnly, boolean sliceOnce, StatementInstance start, Set<AccessPath> variables, SlicingWorkingSet workingSet) {
+        return new SliceAndroid(icdg, frameworkModel, dataFlowsOnly, controlFlowOnly, sliceOnce, workingSet).slice(start, variables);
     }
 
 
     private void printGraph(ICDG icdg) {
         AnalysisLogger.log(Constants.DEBUG, "Printing graph...");
         List <String> listTOPrint = new ArrayList<>();
-        Iterator<Entry<String, Integer>> entries = icdg.getMapKeyNo().entrySet().iterator();
+        Iterator<Entry<Integer, StatementInstance>> entries = icdg.getMapNumberUnits().entrySet().iterator();
         while (entries.hasNext()) {
-            Entry<String, Integer> thisEntry = entries.next();
-            String key = thisEntry.getKey();
-            listTOPrint.add(key + ":PRED:"+Graphs.predecessorListOf(icdg.getGraph(), thisEntry.getValue())+ ":SUCC:"+Graphs.successorListOf(icdg.getGraph(), thisEntry.getValue()) + ":TID:"+icdg.getMapKeyUnits().get(key).getThreadID());
+            Entry<Integer, StatementInstance> thisEntry = entries.next();
+            Integer lineNumber = thisEntry.getKey();
+            StatementInstance statementInstance = thisEntry.getValue(); 
+            listTOPrint.add(statementInstance.toString() 
+                    + ":PRED:"+icdg.predecessorListOf(lineNumber) 
+                    + ":SUCC:"+icdg.successorListOf(lineNumber) 
+                    + ":TID:"+statementInstance.getThreadID());
         }
         printList(listTOPrint, outFile);
         AnalysisLogger.log(Constants.DEBUG, "Printing Complete.");

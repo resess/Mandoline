@@ -7,7 +7,6 @@ import ca.ubc.ece.resess.slicer.dynamic.mandoline.datadependence.AliasAnalysis;
 import ca.ubc.ece.resess.slicer.dynamic.mandoline.datadependence.CallbackDetection;
 import ca.ubc.ece.resess.slicer.dynamic.mandoline.datadependence.SpecialDependence;
 import ca.ubc.ece.resess.slicer.dynamic.mandoline.graph.ICDG;
-import ca.ubc.ece.resess.slicer.dynamic.core.graph.DynamicControlFlowGraph;
 import ca.ubc.ece.resess.slicer.dynamic.core.slicer.SliceMethod;
 import ca.ubc.ece.resess.slicer.dynamic.core.slicer.SlicingWorkingSet;
 import ca.ubc.ece.resess.slicer.dynamic.core.statements.StatementInstance;
@@ -23,8 +22,8 @@ import soot.toolkits.scalar.Pair;
 
 public class SliceAndroid extends SliceMethod {
     private SpecialDependence specialDependence;
-    public SliceAndroid(ICDG icdg, boolean frameworkModel, boolean dataFlowsOnly, boolean controlFlowOnly, SlicingWorkingSet workingSet) {
-        super(icdg, frameworkModel, dataFlowsOnly, controlFlowOnly, workingSet);
+    public SliceAndroid(ICDG icdg, boolean frameworkModel, boolean dataFlowsOnly, boolean controlFlowOnly, boolean sliceOnce, SlicingWorkingSet workingSet) {
+        super(icdg, frameworkModel, dataFlowsOnly, controlFlowOnly, sliceOnce, workingSet);
         this.specialDependence = new SpecialDependence(icdg);
     }
 
@@ -72,7 +71,7 @@ public class SliceAndroid extends SliceMethod {
             Value retVar = ((ReturnStmt) doInBackReturn.getUnit()).getOp();
             taintedParams.add(new AccessPath(retVar.toString(), retVar.getType(), ap.getUsedLine(), ap.getDefinedLine(), doInBackReturn));
         } else {
-            taintedParams = traversal.changeScopeToCaller(iu, icdg.getMapKeyUnits().get(icdg.getMapNoKey().get(callerPos)), apSet);
+            taintedParams = traversal.changeScopeToCaller(iu, icdg.mapNoUnits(callerPos), apSet);
         }
         
 

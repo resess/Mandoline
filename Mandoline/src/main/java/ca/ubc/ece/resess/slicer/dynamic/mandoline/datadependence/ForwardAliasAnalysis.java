@@ -80,6 +80,9 @@ public class ForwardAliasAnalysis extends AliasAnalysis {
         // Analyze method body
         Set<StatementInstance> nextIus = traversal.nextNodes(this.startNode);
         AliasSet origAliasSet = new AliasSet(aliasSet);
+        if (this.startNode.getMethod().equals(nextIus.iterator().next().getMethod())) {
+            analyzeStatementInstance(ret, origAliasSet, this.startNode, this.startNode, nextIus);
+        }
         for (StatementInstance iu: nextIus) {
             analyzeStatementInstance(ret, origAliasSet, this.startNode, iu, nextIus);
         }

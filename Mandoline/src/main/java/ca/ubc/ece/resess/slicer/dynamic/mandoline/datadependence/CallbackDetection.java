@@ -20,8 +20,6 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import org.jgrapht.Graphs;
-
 
 public class CallbackDetection {
 
@@ -219,7 +217,7 @@ public class CallbackDetection {
             return new LinkedHashSet<>();
         }
         int caller = traversal.getCaller(iu.getLineNo());
-        if (Graphs.predecessorListOf(icdg.getGraph(), caller).isEmpty()){
+        if (icdg.predecessorListOf(caller).isEmpty()){
             for (AccessPath ap: taintSet) {
                 Set<CallerContext> contexts = nextCallback(iu, ap, lowerBound);
                 for (CallerContext callerContext: contexts) {
