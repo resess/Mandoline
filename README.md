@@ -1,7 +1,7 @@
 # Mandoline
 
 [![Build](https://github.com/resess/Mandoline/actions/workflows/maven.yml/badge.svg)](https://github.com/resess/Mandoline/actions/workflows/maven.yml)
-![example workflow](https://github.com/resess/Mandoline/actions/workflows/maven_test.yml/badge.svg)
+[![Tests](https://github.com/resess/Mandoline/actions/workflows/maven_test.yml/badge.svg)](https://github.com/resess/Mandoline/actions/workflows/maven_test.yml)
 <img align="right" src="img/mandoline_Logo.png" alt="drawing" width="250"/>
 
 
