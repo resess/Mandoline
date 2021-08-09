@@ -14,7 +14,7 @@ This repository also hosts the ground truth that Mandoline is evaluated on. The 
 
 <b>If you use this tool, please cite:</b>
 
-Khaled Ahmed, Mieszko Lis, and Julia Rubin. [MANDOLINE: Dynamic Slicing of Android Applications with Trace-Based Alias Analysis](https://www.ece.ubc.ca/~mjulia/publications/Mandoline_2021.pdf). IEEE International Conference on Software Testing, Verification and Validation (ICST), 2021
+Khaled Ahmed, Mieszko Lis, and Julia Rubin. [MANDOLINE: Dynamic Slicing of Android Applications with Trace-Based Alias Analysis](https://www.ece.ubc.ca/~mjulia/publications/Mandoline_2021.pdf). IEEE International Conference on Software Testing, Verification and Validation (ICST), **Distinguished Paper Award**, 2021
 
 ## Table of Contents
 1. [Pre-requisites](#pre-requisites)
