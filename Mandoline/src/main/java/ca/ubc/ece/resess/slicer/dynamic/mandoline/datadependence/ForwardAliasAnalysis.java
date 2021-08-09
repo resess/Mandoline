@@ -43,8 +43,8 @@ public class ForwardAliasAnalysis extends AliasAnalysis {
      */
     // The constructor ForwardAliasAnalysis(InstructionUnits, AliasSet, InstructionSet, Integer, boolean, CallbackDetection) is undefinedJava(134217858)
 
-    ForwardAliasAnalysis(DynamicControlFlowGraph icdg, StatementInstance iu, AliasSet ap, StatementSet aliasPath, Integer lowBound, boolean fromMethodCall, CallbackDetection callbackDetection) {
-        super(icdg);
+    ForwardAliasAnalysis(DynamicControlFlowGraph icdg, StatementInstance iu, AliasSet ap, StatementSet aliasPath, Integer lowBound, boolean fromMethodCall, CallbackDetection callbackDetection, AnalysisCache analysisCache) {
+        super(icdg, analysisCache);
         this.startNode = iu;
         this.startFields = ap;
         this.aliasPath = aliasPath;
@@ -69,7 +69,7 @@ public class ForwardAliasAnalysis extends AliasAnalysis {
         // Create initial alias set, remove elements in the set that were previously analyzed
         AliasSet aliasSet = new AliasSet();
         aliasSet.addAll(this.startFields);
-        aliasSet = AnalysisCache.filterByAnalysisCache(startNode, aliasSet, Constants.FORWARD);
+        aliasSet = analysisCache.filterByAnalysisCache(startNode, aliasSet, Constants.FORWARD);
 
 
         AliasSet newAliasSet = new AliasSet(aliasSet);
@@ -94,7 +94,7 @@ public class ForwardAliasAnalysis extends AliasAnalysis {
         if (ret.isEmpty()) {
             Set<CallerContext> forwardCallbacks = callbackDetection.getForwardCaller(this.startNode, origAliasSet, this.lowBound);
             for (CallerContext cc: forwardCallbacks) {
-                ForwardAliasAnalysis forwardAliasAnalysis = new ForwardAliasAnalysis(this.icdg, cc.getCaller(), cc.getAliasedArgs(), this.aliasPath, this.lowBound, false, this.callbackDetection);
+                ForwardAliasAnalysis forwardAliasAnalysis = new ForwardAliasAnalysis(this.icdg, cc.getCaller(), cc.getAliasedArgs(), this.aliasPath, this.lowBound, false, this.callbackDetection, this.analysisCache);
                 ret.add(forwardAliasAnalysis);
             }
         }
@@ -126,8 +126,8 @@ public class ForwardAliasAnalysis extends AliasAnalysis {
             backwardAliasSet = aliasAnalysisResult.getBackwardAliasSet();
             forwardAliasSet = aliasAnalysisResult.getForwardAliasSet();
         }
-        BackwardAliasAnalysis backwardAliasAnalysis = new BackwardAliasAnalysis(this.icdg, nextStatement, backwardAliasSet, this.aliasPath, this.lowBound, this.callbackDetection);
-        ForwardAliasAnalysis forwardAliasAnalysis = new ForwardAliasAnalysis(this.icdg, nextStatement, forwardAliasSet, this.aliasPath, this.lowBound, false, this.callbackDetection);
+        BackwardAliasAnalysis backwardAliasAnalysis = new BackwardAliasAnalysis(this.icdg, nextStatement, backwardAliasSet, this.aliasPath, this.lowBound, this.callbackDetection, this.analysisCache);
+        ForwardAliasAnalysis forwardAliasAnalysis = new ForwardAliasAnalysis(this.icdg, nextStatement, forwardAliasSet, this.aliasPath, this.lowBound, false, this.callbackDetection, this.analysisCache);
         ret.add(backwardAliasAnalysis);
         ret.add(forwardAliasAnalysis);
         if (nextStatement != null && !nextIus.contains(nextStatement)) {
@@ -140,7 +140,7 @@ public class ForwardAliasAnalysis extends AliasAnalysis {
         Pair<AliasAnalysisResult, AliasAnalysisResult> methodResult = invokeAliasAnalysis(aliasSet, iu);
         AliasAnalysisResult resultInMethod = methodResult.getO1();
         if (resultInMethod != null) {
-            ForwardAliasAnalysis forwardAliasAnalysis = new ForwardAliasAnalysis(this.icdg, resultInMethod.getNextStatement(), resultInMethod.getForwardAliasSet(), this.aliasPath, this.lowBound, false, this.callbackDetection);
+            ForwardAliasAnalysis forwardAliasAnalysis = new ForwardAliasAnalysis(this.icdg, resultInMethod.getNextStatement(), resultInMethod.getForwardAliasSet(), this.aliasPath, this.lowBound, false, this.callbackDetection, this.analysisCache);
             ret.add(forwardAliasAnalysis);
         }
         aliasAnalysisResult = methodResult.getO2();
@@ -152,7 +152,7 @@ public class ForwardAliasAnalysis extends AliasAnalysis {
         Pair<AliasAnalysisResult, AliasAnalysisResult> methodResult = assignmentAliasAnalysis(aliasSet, iu, aliasPath);
         AliasAnalysisResult resultInMethod = methodResult.getO1();
         if (resultInMethod != null) {
-            ForwardAliasAnalysis forwardAliasAnalysis = new ForwardAliasAnalysis(this.icdg, resultInMethod.getNextStatement(), resultInMethod.getForwardAliasSet(), this.aliasPath, this.lowBound, false, this.callbackDetection);
+            ForwardAliasAnalysis forwardAliasAnalysis = new ForwardAliasAnalysis(this.icdg, resultInMethod.getNextStatement(), resultInMethod.getForwardAliasSet(), this.aliasPath, this.lowBound, false, this.callbackDetection, this.analysisCache);
             ret.add(forwardAliasAnalysis);
         }
         aliasAnalysisResult = methodResult.getO2();

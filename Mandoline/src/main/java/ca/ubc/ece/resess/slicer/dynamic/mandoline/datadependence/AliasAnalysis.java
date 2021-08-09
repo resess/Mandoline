@@ -49,11 +49,13 @@ public class AliasAnalysis {
 
     private static int analysisCount;
     private static final boolean SEARCH_SUBFIELDS = false;
-    public DynamicControlFlowGraph icdg;
-    public Traversal traversal;
-    public AliasAnalysis(DynamicControlFlowGraph icdg) {
+    protected DynamicControlFlowGraph icdg;
+    protected Traversal traversal;
+    protected AnalysisCache analysisCache;
+    public AliasAnalysis(DynamicControlFlowGraph icdg, AnalysisCache analysisCache) {
         this.icdg = icdg;
-        this.traversal = new Traversal(icdg);
+        this.analysisCache = analysisCache;
+        this.traversal = new Traversal(icdg, analysisCache);
     }
 
     public static void setAnalysisCount(int analysisCount) {
@@ -154,12 +156,12 @@ public class AliasAnalysis {
     private void startAliasAnalysis(StatementInstance iu, AccessPath ap, StatementSet aliasPath, CallbackDetection callbackDetection) {
         AliasSet aliasedVars = new AliasSet();
         aliasedVars.add(ap);
-        AnalysisCache.reset();
+        analysisCache.reset();
         if (ap.isStaticField()) {
             BackwardStaticFieldAnalysis bw = new BackwardStaticFieldAnalysis(icdg, iu, ap, aliasPath);
             bw.run();
         } else {
-            BackwardAliasAnalysis bw = new BackwardAliasAnalysis(icdg, iu, aliasedVars, aliasPath, iu.getLineNo(), callbackDetection);
+            BackwardAliasAnalysis bw = new BackwardAliasAnalysis(icdg, iu, aliasedVars, aliasPath, iu.getLineNo(), callbackDetection, analysisCache);
             Set<AliasAnalysis> bwContinuation = bw.run();
             callAnalysisContinuation(bwContinuation, aliasPath);
         }

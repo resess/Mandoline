@@ -75,7 +75,8 @@ public class Slicer {
     private int backwardSlicePos;
     private String variableString;
     private List<String> variables = new ArrayList<>();
-    private SlicingWorkingSet workingSet;
+    private SlicingWorkingSet workingSet = new SlicingWorkingSet(false);
+    private AnalysisCache analysisCache = new AnalysisCache();
 
 
     public Slicer(){}
@@ -325,7 +326,7 @@ public class Slicer {
     }
     public DynamicSlice slice(ICDG icdg,
             boolean frameworkModel, boolean dataFlowsOnly, boolean controlFlowOnly, boolean sliceOnce, StatementInstance start, Set<AccessPath> variables, SlicingWorkingSet workingSet) {
-        return new SliceAndroid(icdg, frameworkModel, dataFlowsOnly, controlFlowOnly, sliceOnce, workingSet).slice(start, variables);
+        return new SliceAndroid(icdg, frameworkModel, dataFlowsOnly, controlFlowOnly, sliceOnce, workingSet, analysisCache).slice(start, variables);
     }
 
 
@@ -417,7 +418,6 @@ public class Slicer {
     }
 
     public void prepare() {
-        AnalysisCache.reset();
         if (pathApk.endsWith(".apk")) {
             prepareProcessingApk(pathApk, platformPath, callbackFile);
         } else {

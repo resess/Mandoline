@@ -158,7 +158,6 @@ public class AndroidInstrumenter extends Instrumenter {
                     stmtSwitch.setTimeTracking(timeTracking);
                 } else {
                     flags.timeTracking = false;
-                    flags.threadTracking = false;
                 }
 
                 List<String> traps = new ArrayList<>();

@@ -1,5 +1,6 @@
 package ca.ubc.ece.resess.slicer.dynamic.mandoline.datadependence;
 
+import ca.ubc.ece.resess.slicer.dynamic.core.utils.AnalysisCache;
 import ca.ubc.ece.resess.slicer.dynamic.core.utils.AnalysisLogger;
 import ca.ubc.ece.resess.slicer.dynamic.core.accesspath.AccessPath;
 import ca.ubc.ece.resess.slicer.dynamic.core.accesspath.AliasSet;
@@ -28,9 +29,9 @@ public class CallbackDetection {
     private DynamicControlFlowGraph icdg;
     private Traversal traversal;
 
-    public CallbackDetection(DynamicControlFlowGraph icdg, StatementInstance start, AccessPath field){
+    public CallbackDetection(DynamicControlFlowGraph icdg, StatementInstance start, AccessPath field, AnalysisCache analysisCache){
         this.icdg = icdg;
-        this.traversal = new Traversal(icdg);
+        this.traversal = new Traversal(icdg, analysisCache);
         Set<String> addedMethods = new LinkedHashSet<>();
         for (int i = start.getLineNo(); i >=0; i--) {
             StatementInstance si = icdg.mapNoUnits(i);

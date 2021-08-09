@@ -12,6 +12,7 @@ import ca.ubc.ece.resess.slicer.dynamic.core.slicer.SlicingWorkingSet;
 import ca.ubc.ece.resess.slicer.dynamic.core.statements.StatementInstance;
 import ca.ubc.ece.resess.slicer.dynamic.core.statements.StatementMap;
 import ca.ubc.ece.resess.slicer.dynamic.core.statements.StatementSet;
+import ca.ubc.ece.resess.slicer.dynamic.core.utils.AnalysisCache;
 import ca.ubc.ece.resess.slicer.dynamic.core.utils.AnalysisLogger;
 import ca.ubc.ece.resess.slicer.dynamic.core.utils.AnalysisUtils;
 import ca.ubc.ece.resess.slicer.dynamic.core.utils.Constants;
@@ -22,8 +23,8 @@ import soot.toolkits.scalar.Pair;
 
 public class SliceAndroid extends SliceMethod {
     private SpecialDependence specialDependence;
-    public SliceAndroid(ICDG icdg, boolean frameworkModel, boolean dataFlowsOnly, boolean controlFlowOnly, boolean sliceOnce, SlicingWorkingSet workingSet) {
-        super(icdg, frameworkModel, dataFlowsOnly, controlFlowOnly, sliceOnce, workingSet);
+    public SliceAndroid(ICDG icdg, boolean frameworkModel, boolean dataFlowsOnly, boolean controlFlowOnly, boolean sliceOnce, SlicingWorkingSet workingSet, AnalysisCache analysisCache) {
+        super(icdg, frameworkModel, dataFlowsOnly, controlFlowOnly, sliceOnce, workingSet, analysisCache);
         this.specialDependence = new SpecialDependence(icdg);
     }
 
@@ -35,8 +36,8 @@ public class SliceAndroid extends SliceMethod {
             AnalysisLogger.log(Constants.DEBUG, "Local def {}", def);
         } else {
             AnalysisLogger.log(Constants.DEBUG, "Getting static heap def of {}-{}", var, var.getClassPath());
-            CallbackDetection callbackDetection = new CallbackDetection(icdg, stmt, var);
-            def = (new AliasAnalysis(icdg)).reachingDefinitions(stmt, var, callbackDetection);
+            CallbackDetection callbackDetection = new CallbackDetection(icdg, stmt, var, analysisCache);
+            def = (new AliasAnalysis(icdg, analysisCache)).reachingDefinitions(stmt, var, callbackDetection);
             if (def.isEmpty()) {
                 AnalysisLogger.log(Constants.DEBUG, "Static heap def of {} is None", var);
             } else {
