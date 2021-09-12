@@ -158,7 +158,7 @@ public class AliasAnalysis {
         aliasedVars.add(ap);
         analysisCache.reset();
         if (ap.isStaticField()) {
-            BackwardStaticFieldAnalysis bw = new BackwardStaticFieldAnalysis(icdg, iu, ap, aliasPath);
+            BackwardStaticFieldAnalysis bw = new BackwardStaticFieldAnalysis(icdg, iu, ap, aliasPath, analysisCache);
             bw.run();
         } else {
             BackwardAliasAnalysis bw = new BackwardAliasAnalysis(icdg, iu, aliasedVars, aliasPath, iu.getLineNo(), callbackDetection, analysisCache);

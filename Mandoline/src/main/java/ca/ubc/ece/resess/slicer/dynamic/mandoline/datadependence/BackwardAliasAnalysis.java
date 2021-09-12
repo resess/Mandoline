@@ -143,7 +143,7 @@ public class BackwardAliasAnalysis extends AliasAnalysis {
     private void runSeparateAnalysisForStaticVariables(AliasSet aliasSet, AliasSet newAliasSet) {
         for (AccessPath ap: aliasSet) {
             if (ap.isStaticField()) {
-                BackwardStaticFieldAnalysis bw = new BackwardStaticFieldAnalysis(icdg, startNode, ap, aliasPath);
+                BackwardStaticFieldAnalysis bw = new BackwardStaticFieldAnalysis(icdg, startNode, ap, aliasPath, analysisCache);
                 bw.run();
                 newAliasSet.remove(ap);
             }
