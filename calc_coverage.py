@@ -11,11 +11,20 @@ with open(trace_file, 'r') as f:
     for line in f:
         method, clazz, stmt = line.split(", ")[1:4]
         method = method.replace(";", ",")
-        # print(stmt)
-        stmt, line_no = stmt.split(":LINENO:")[0:2]
-        line_no = line_no.split(":")[0]
+        print(stmt)
+        if ":LINENO:" in stmt:
+            stmt, line_no = stmt.split(":LINENO:")[0:2]
+            line_no = line_no.split(":")[0]
+        else:
+            stmt = stmt.split(":FILE:")[0]
+            line_no = None
+        
         bytecode_stmt = "<" + clazz + ": " + method + ">" + ":" + stmt
-        java_stmt = "<" + clazz + ": " + method + ">" + ":" + line_no
+
+        if line_no:
+            java_stmt = "<" + clazz + ": " + method + ">" + ":" + line_no
+        else:
+            java_stmt = None
 
         # print(java_stmt)
         # print(bytecode_stmt)
@@ -23,10 +32,11 @@ with open(trace_file, 'r') as f:
             all_bytecode_stmts[bytecode_stmt] = 0
         all_bytecode_stmts[bytecode_stmt] = all_bytecode_stmts[bytecode_stmt] + 1
 
-        if java_stmt not in all_java_stmts:
-            all_java_stmts[java_stmt] = 0
-        if old_java_stmt != java_stmt:
-            all_java_stmts[java_stmt] = all_java_stmts[java_stmt] + 1
+        if java_stmt:
+            if java_stmt not in all_java_stmts:
+                all_java_stmts[java_stmt] = 0
+            if old_java_stmt != java_stmt:
+                all_java_stmts[java_stmt] = all_java_stmts[java_stmt] + 1
 
         old_java_stmt = java_stmt
 
