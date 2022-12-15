@@ -19,6 +19,9 @@ with open(trace_file, 'r') as f:
             stmt = stmt.split(":FILE:")[0]
             line_no = None
         
+        if ":FIELD:" in stmt:
+            stmt = stmt.split(":FIELD:")[0]
+
         bytecode_stmt = "<" + clazz + ": " + method + ">" + ":" + stmt
 
         if line_no:
