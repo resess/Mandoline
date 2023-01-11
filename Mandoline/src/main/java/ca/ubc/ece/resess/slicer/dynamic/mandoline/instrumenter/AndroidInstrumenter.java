@@ -39,8 +39,7 @@ import soot.jimple.IdentityStmt;
 import soot.jimple.ThrowStmt;
 import soot.jimple.infoflow.android.callbacks.AndroidCallbackDefinition;
 
-//import org.json.simple.JSONArray;
-//import org.json.simple.JSONObject;
+
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonArray;
