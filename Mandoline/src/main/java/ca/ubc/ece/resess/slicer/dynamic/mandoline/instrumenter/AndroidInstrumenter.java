@@ -1,7 +1,12 @@
 package ca.ubc.ece.resess.slicer.dynamic.mandoline.instrumenter;
 
+
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
+import java.io.BufferedWriter;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -34,8 +39,13 @@ import soot.jimple.IdentityStmt;
 import soot.jimple.ThrowStmt;
 import soot.jimple.infoflow.android.callbacks.AndroidCallbackDefinition;
 
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
+
+
+import com.google.gson.JsonObject;
+import com.google.gson.JsonArray;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.stream.JsonWriter;
 
 import ca.ubc.ece.resess.slicer.dynamic.core.instrumenter.Instrumenter;
 import ca.ubc.ece.resess.slicer.dynamic.core.instrumenter.InstrumenterUtils;
@@ -58,7 +68,7 @@ public class AndroidInstrumenter extends Instrumenter {
     private boolean isAndroidSlicer = false;
     private boolean isOriginal = false;
     private Long appSize = 0L;
-    JSONObject staticLog = new JSONObject();
+    JsonObject staticLog = new JsonObject();
     InstrumentationCounter globalLineCounter = new InstrumentationCounter();
     Chain<SootClass> libClasses = null;
 
@@ -199,9 +209,9 @@ public class AndroidInstrumenter extends Instrumenter {
                 synchronized (appSize) {
                     appSize += methodSize;
                 }
-                JSONObject job = new JSONObject();
+                JsonObject job = new JsonObject();
                 String key = "";
-                JSONArray jArray = new JSONArray();
+                JsonArray jArray = new JsonArray();
                 Unit prevU = null;
                 for (Unit u : unitNumMap.keySet()) {
                     if (u instanceof IdentityStmt) {
@@ -209,14 +219,14 @@ public class AndroidInstrumenter extends Instrumenter {
                     }
                     if (taggedUnits.containsKey(u)) {
                         if (!key.equals("")){
-                            job.put(key, jArray);
-                            jArray = new JSONArray();
+                            job.add(key, jArray);
+                            jArray = new JsonArray();
                         }
                         key = taggedUnits.get(u).toString();
                     } else if (prevU != null && (prevU instanceof ReturnStmt || prevU instanceof ReturnVoidStmt || prevU instanceof ThrowStmt)) {
                         if (!key.equals("")){
-                            job.put(key, jArray);
-                            jArray = new JSONArray();
+                            job.add(key, jArray);
+                            jArray = new JsonArray();
                         }
                         if (taggedUnits.get(u) == null) {
                             key = "";
@@ -228,11 +238,11 @@ public class AndroidInstrumenter extends Instrumenter {
                     prevU = u;
                 }
                 if (!key.equals("")) {
-                    job.put(key, jArray);
+                    job.add(key, jArray);
                 }
                 
                 synchronized(staticLog){
-                    staticLog.put(b.getMethod().getSignature(), job);
+                    staticLog.add(b.getMethod().getSignature(), job);
                 }
             }
         }));
@@ -266,14 +276,21 @@ public class AndroidInstrumenter extends Instrumenter {
             newArgs[ii-2]=args[ii];
         }
         AnalysisLogger.log(true, "Soot args: {}", Arrays.asList(newArgs));
-        soot.Main.main(newArgs);
+        soot.Main.main(newArgs);    
         File logFile = new File(staticLogFile);
+        Gson gson = new GsonBuilder()
+                        .disableHtmlEscaping()
+                        .create();
         try {
             logFile.delete();
-            FileUtils.writeStringToFile(logFile, staticLog.toString(), "UTF-8", true);
+            BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(staticLogFile), StandardCharsets.UTF_8));
+            JsonWriter writer = new JsonWriter(out);
+            gson.toJson(staticLog, writer);
+            writer.close();
             
         } catch (IOException e) {
             throw new Error("Failed to write static log file");
+            
         }
         File sizeFile = new File("apk-size.txt");
         try {
