@@ -16,6 +16,10 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+    - name: Set up Android SDK
+      uses: android-actions/setup-android@v3
+    - name: Install Android platform 25
+      run: sdkmanager "platforms;android-25"
     - name: Set up JDK 8
       uses: actions/setup-java@v4
       with:
@@ -35,3 +39,16 @@ jobs:
         cd ../../Mandoline/Mandoline/
         mvn -DskipTests -B package install --file pom.xml
         mvn test
+    - name: E2E — instrument Dataset/1.anki
+      timeout-minutes: 10
+      run: |
+        java -cp "Mandoline/target/mandoline-jar-with-dependencies.jar:Mandoline/target/lib/*" \
+          ca.ubc.ece.resess.slicer.dynamic.mandoline.Slicer \
+          -m i \
+          -a Dataset/1.anki/1.anki.apk \
+          -p "$ANDROID_SDK_ROOT/platforms" \
+          -c FlowDroid/soot-infoflow-android/AndroidCallbacks.txt \
+          -o /tmp/e2e-out \
+          -lc ../DynamicSlicingCore/DynamicSlicingLoggingClasses/DynamicSlicingLogger.jar
+        test -s /tmp/e2e-out/1.anki_i.apk
+        echo "Instrumented APK produced: $(stat -c%s /tmp/e2e-out/1.anki_i.apk) bytes"
