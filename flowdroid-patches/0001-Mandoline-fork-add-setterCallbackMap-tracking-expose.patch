@@ -1,0 +1,229 @@
+From d4592f4055c7b0ed2e765a1780dbf665eb3d9af1 Mon Sep 17 00:00:00 2001
+From: patch <claude@localhost>
+Date: Fri, 24 Apr 2026 10:41:07 -0400
+Subject: [PATCH] Mandoline fork: add setterCallbackMap tracking, expose
+ callback analyzer
+
+- AbstractCallbackAnalyzer: add public setterCallbackMap field and getter,
+  populated during analyzeMethodForCallbackRegistrations.
+- SetupApplication: add public callbackAnalyzer field, store it after
+  analyzer construction, expose via getCallbackAnalyzer(); add public
+  getCallbackMethods() getter.
+- Bump version to 2.10.0-mandoline across all modules.
+
+These were all present in the vendored Mandoline/libs trunk jars but
+never merged upstream. Porting them forward resolves the runtime
+classpath conflict between modern Soot 4.3.0 and the old vendored
+FlowDroid that blocked the Android instrumentation pipeline.
+---
+ pom.xml                                            |  2 +-
+ soot-infoflow-android/pom.xml                      |  4 ++--
+ .../jimple/infoflow/android/SetupApplication.java  | 12 ++++++++++++
+ .../callbacks/AbstractCallbackAnalyzer.java        | 14 ++++++++++++--
+ soot-infoflow-cmd/pom.xml                          |  6 +++---
+ soot-infoflow-summaries/pom.xml                    |  6 +++---
+ soot-infoflow/pom.xml                              |  2 +-
+ 7 files changed, 34 insertions(+), 12 deletions(-)
+
+diff --git a/pom.xml b/pom.xml
+index ecee9016..43ee624c 100644
+--- a/pom.xml
++++ b/pom.xml
+@@ -3,7 +3,7 @@
+ 	<modelVersion>4.0.0</modelVersion>
+ 	<groupId>de.fraunhofer.sit.sse.flowdroid</groupId>
+ 	<artifactId>parent</artifactId>
+-	<version>2.10.0</version>
++	<version>2.10.0-mandoline</version>
+ 	<name>FlowDroid Parent Module</name>
+ 	<packaging>pom</packaging>
+ 
+diff --git a/soot-infoflow-android/pom.xml b/soot-infoflow-android/pom.xml
+index 4906824f..fe3aaefa 100644
+--- a/soot-infoflow-android/pom.xml
++++ b/soot-infoflow-android/pom.xml
+@@ -5,7 +5,7 @@
+ 	<groupId>de.fraunhofer.sit.sse.flowdroid</groupId>
+ 	<artifactId>soot-infoflow-android</artifactId>
+ 	<name>soot-infoflow-android</name>
+-	<version>2.10.0</version>
++	<version>2.10.0-mandoline</version>
+ 	<description>Android-specific components of FlowDroid</description>
+     <url>https://github.com/secure-software-engineering/FlowDroid</url>
+ 
+@@ -165,7 +165,7 @@
+ 		<dependency>
+ 			<groupId>de.fraunhofer.sit.sse.flowdroid</groupId>
+ 			<artifactId>soot-infoflow</artifactId>
+-			<version>2.10.0</version>
++			<version>2.10.0-mandoline</version>
+ 		</dependency>
+ 		<dependency>
+ 			<groupId>junit</groupId>
+diff --git a/soot-infoflow-android/src/soot/jimple/infoflow/android/SetupApplication.java b/soot-infoflow-android/src/soot/jimple/infoflow/android/SetupApplication.java
+index a09b9623..93c1b2b3 100644
+--- a/soot-infoflow-android/src/soot/jimple/infoflow/android/SetupApplication.java
++++ b/soot-infoflow-android/src/soot/jimple/infoflow/android/SetupApplication.java
+@@ -99,6 +99,8 @@ public class SetupApplication implements ITaintWrapperDataFlowAnalysis {
+ 	protected MultiMap<SootClass, AndroidCallbackDefinition> callbackMethods = new HashMultiMap<>();
+ 	protected MultiMap<SootClass, SootClass> fragmentClasses = new HashMultiMap<>();
+ 
++	public AbstractCallbackAnalyzer callbackAnalyzer;
++
+ 	protected InfoflowAndroidConfiguration config = new InfoflowAndroidConfiguration();
+ 
+ 	protected Set<SootClass> entrypoints = null;
+@@ -378,6 +380,14 @@ public class SetupApplication implements ITaintWrapperDataFlowAnalysis {
+ 		return callbackClasses;
+ 	}
+ 
++	public AbstractCallbackAnalyzer getCallbackAnalyzer() {
++		return this.callbackAnalyzer;
++	}
++
++	public MultiMap<SootClass, AndroidCallbackDefinition> getCallbackMethods() {
++		return this.callbackMethods;
++	}
++
+ 	@Override
+ 	public void setTaintWrapper(ITaintPropagationWrapper taintWrapper) {
+ 		this.taintWrapper = taintWrapper;
+@@ -655,6 +665,7 @@ public class SetupApplication implements ITaintWrapperDataFlowAnalysis {
+ 		AbstractCallbackAnalyzer jimpleClass = callbackClasses == null
+ 				? new DefaultCallbackAnalyzer(config, entryPointClasses, callbackMethods, callbackFile)
+ 				: new DefaultCallbackAnalyzer(config, entryPointClasses, callbackMethods, callbackClasses);
++		this.callbackAnalyzer = jimpleClass;
+ 		if (valueProvider != null)
+ 			jimpleClass.setValueProvider(valueProvider);
+ 		jimpleClass.addCallbackFilter(new AlienHostComponentFilter(entrypoints));
+@@ -1011,6 +1022,7 @@ public class SetupApplication implements ITaintWrapperDataFlowAnalysis {
+ 		AbstractCallbackAnalyzer jimpleClass = callbackClasses == null
+ 				? new FastCallbackAnalyzer(config, entryPointClasses, callbackFile)
+ 				: new FastCallbackAnalyzer(config, entryPointClasses, callbackClasses);
++		this.callbackAnalyzer = jimpleClass;
+ 		if (valueProvider != null)
+ 			jimpleClass.setValueProvider(valueProvider);
+ 		jimpleClass.collectCallbackMethods();
+diff --git a/soot-infoflow-android/src/soot/jimple/infoflow/android/callbacks/AbstractCallbackAnalyzer.java b/soot-infoflow-android/src/soot/jimple/infoflow/android/callbacks/AbstractCallbackAnalyzer.java
+index d996a846..0f4aeb15 100644
+--- a/soot-infoflow-android/src/soot/jimple/infoflow/android/callbacks/AbstractCallbackAnalyzer.java
++++ b/soot-infoflow-android/src/soot/jimple/infoflow/android/callbacks/AbstractCallbackAnalyzer.java
+@@ -130,6 +130,8 @@ public abstract class AbstractCallbackAnalyzer {
+ 	protected final MultiMap<SootClass, SootClass> fragmentClassesRev = new HashMultiMap<>();
+ 	protected final Map<SootClass, Integer> fragmentIDs = new HashMap<>();
+ 
++	public Map<soot.toolkits.scalar.Pair<SootMethod, Unit>, SootClass> setterCallbackMap = new HashMap<>();
++
+ 	protected final List<ICallbackFilter> callbackFilters = new ArrayList<>();
+ 	protected final Set<SootClass> excludedEntryPoints = new HashSet<>();
+ 
+@@ -332,8 +334,10 @@ public abstract class AbstractCallbackAnalyzer {
+ 								}
+ 
+ 								SootClass targetClass = baseType.getSootClass();
+-								if (!SystemClassHandler.v().isClassInSystemPackage(targetClass.getName()))
++								if (!SystemClassHandler.v().isClassInSystemPackage(targetClass.getName())) {
+ 									callbackClasses.add(targetClass);
++									setterCallbackMap.put(new soot.toolkits.scalar.Pair<>(method, stmt), targetClass);
++								}
+ 							}
+ 
+ 							// If we don't have pointsTo information, we take
+@@ -351,8 +355,10 @@ public abstract class AbstractCallbackAnalyzer {
+ 								}
+ 
+ 								SootClass targetClass = baseType.getSootClass();
+-								if (!SystemClassHandler.v().isClassInSystemPackage(targetClass.getName()))
++								if (!SystemClassHandler.v().isClassInSystemPackage(targetClass.getName())) {
+ 									callbackClasses.add(targetClass);
++									setterCallbackMap.put(new soot.toolkits.scalar.Pair<>(method, stmt), targetClass);
++								}
+ 							}
+ 						}
+ 					}
+@@ -992,6 +998,10 @@ public abstract class AbstractCallbackAnalyzer {
+ 		return this.callbackMethods;
+ 	}
+ 
++	public Map<soot.toolkits.scalar.Pair<SootMethod, Unit>, SootClass> getSetterCallbackMap() {
++		return this.setterCallbackMap;
++	}
++
+ 	public MultiMap<SootClass, Integer> getLayoutClasses() {
+ 		return this.layoutClasses;
+ 	}
+diff --git a/soot-infoflow-cmd/pom.xml b/soot-infoflow-cmd/pom.xml
+index 9120163a..bbd4fabb 100644
+--- a/soot-infoflow-cmd/pom.xml
++++ b/soot-infoflow-cmd/pom.xml
+@@ -5,7 +5,7 @@
+ 	<groupId>de.fraunhofer.sit.sse.flowdroid</groupId>
+ 	<artifactId>soot-infoflow-cmd</artifactId>
+ 	<name>FlowDroid Command Line Util</name>
+-	<version>2.10.0</version>
++	<version>2.10.0-mandoline</version>
+ 	<description>Command-line utility for running FlowDroid</description>
+     <url>https://github.com/secure-software-engineering/FlowDroid</url>
+ 	
+@@ -165,12 +165,12 @@
+ 		<dependency>
+ 			<groupId>de.fraunhofer.sit.sse.flowdroid</groupId>
+ 			<artifactId>soot-infoflow-android</artifactId>
+-			<version>2.10.0</version>
++			<version>2.10.0-mandoline</version>
+ 		</dependency>
+ 		<dependency>
+ 			<groupId>de.fraunhofer.sit.sse.flowdroid</groupId>
+ 			<artifactId>soot-infoflow-summaries</artifactId>
+-			<version>2.10.0</version>
++			<version>2.10.0-mandoline</version>
+ 		</dependency>
+ 		<dependency>
+ 			<groupId>commons-cli</groupId>
+diff --git a/soot-infoflow-summaries/pom.xml b/soot-infoflow-summaries/pom.xml
+index db6a26e7..a2bf7b17 100644
+--- a/soot-infoflow-summaries/pom.xml
++++ b/soot-infoflow-summaries/pom.xml
+@@ -5,7 +5,7 @@
+ 	<groupId>de.fraunhofer.sit.sse.flowdroid</groupId>
+ 	<artifactId>soot-infoflow-summaries</artifactId>
+ 	<name>StubDroid</name>
+-	<version>2.10.0</version>
++	<version>2.10.0-mandoline</version>
+ 	<description>Data Flow Summaries for FlowDroid</description>
+     <url>https://github.com/secure-software-engineering/FlowDroid</url>
+ 	
+@@ -178,7 +178,7 @@
+ 		<dependency>
+ 			<groupId>de.fraunhofer.sit.sse.flowdroid</groupId>
+ 			<artifactId>soot-infoflow</artifactId>
+-			<version>2.10.0</version>
++			<version>2.10.0-mandoline</version>
+ 
+ 			<exclusions>
+ 				<exclusion>
+@@ -194,7 +194,7 @@
+ 		<dependency>
+ 			<groupId>de.fraunhofer.sit.sse.flowdroid</groupId>
+ 			<artifactId>soot-infoflow</artifactId>
+-			<version>2.10.0</version>
++			<version>2.10.0-mandoline</version>
+ 			<type>test-jar</type>
+ 			<scope>test</scope>
+ 			
+diff --git a/soot-infoflow/pom.xml b/soot-infoflow/pom.xml
+index 349e4970..0d673249 100644
+--- a/soot-infoflow/pom.xml
++++ b/soot-infoflow/pom.xml
+@@ -6,7 +6,7 @@
+ 	<groupId>de.fraunhofer.sit.sse.flowdroid</groupId>
+ 	<artifactId>soot-infoflow</artifactId>
+ 	<name>soot-infoflow</name>
+-	<version>2.10.0</version>
++	<version>2.10.0-mandoline</version>
+ 	<description>Soot extending data flow tracking components for Java</description>
+ 	<url>https://github.com/secure-software-engineering/FlowDroid</url>
+ 
+-- 
+2.50.1 (Apple Git-155)
+

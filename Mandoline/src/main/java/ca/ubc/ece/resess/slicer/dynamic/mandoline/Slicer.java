@@ -457,7 +457,7 @@ public class Slicer {
             SootMethod sm = it.next();
             for (Local l: threadCalls.getMethodToReceivers().get(sm)) {
                 for (VirtualCallSite vc: threadCalls.getReceiverToSites().get(l)) {
-                    threadCallers.put(new Pair<>(vc.getContainer(), vc.getStmt()), vc.subSig().getString());
+                    threadCallers.put(new Pair<>(vc.getContainer(), vc.getStmt()), vc.subSig().toString());
                 }
             }
         }

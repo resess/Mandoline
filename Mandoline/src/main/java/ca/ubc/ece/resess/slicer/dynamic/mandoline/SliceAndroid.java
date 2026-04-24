@@ -9,6 +9,7 @@ import ca.ubc.ece.resess.slicer.dynamic.mandoline.datadependence.SpecialDependen
 import ca.ubc.ece.resess.slicer.dynamic.mandoline.graph.ICDG;
 import ca.ubc.ece.resess.slicer.dynamic.core.slicer.SliceMethod;
 import ca.ubc.ece.resess.slicer.dynamic.core.slicer.SlicingWorkingSet;
+import ca.ubc.ece.resess.slicer.dynamic.core.statements.LazyStatementMap;
 import ca.ubc.ece.resess.slicer.dynamic.core.statements.StatementInstance;
 import ca.ubc.ece.resess.slicer.dynamic.core.statements.StatementMap;
 import ca.ubc.ece.resess.slicer.dynamic.core.statements.StatementSet;
@@ -30,9 +31,9 @@ public class SliceAndroid extends SliceMethod {
 
     @Override
     public StatementSet getDataDependence(SlicingWorkingSet workingSet, Pair<StatementInstance, AccessPath> p,
-            StatementInstance stmt, AccessPath var, StatementMap chunk, StatementSet def, AliasSet usedVars) {
+            StatementInstance stmt, AccessPath var, LazyStatementMap lazyChunk, StatementSet def, AliasSet usedVars) {
         if (var.getField().equals("")) {
-            def = localReachingDef(stmt, var, chunk, usedVars, frameworkModel);
+            def = localReachingDefLazyCached(stmt, var, lazyChunk, usedVars, frameworkModel);
             AnalysisLogger.log(Constants.DEBUG, "Local def {}", def);
         } else {
             AnalysisLogger.log(Constants.DEBUG, "Getting static heap def of {}-{}", var, var.getClassPath());
